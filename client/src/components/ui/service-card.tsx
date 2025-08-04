@@ -43,11 +43,17 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
   const { user } = useAuth();
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
   const [analysisData, setAnalysisData] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   
   const IconComponent = iconMap[service.icon as keyof typeof iconMap] || User;
 
   const analysisMutation = useMutation({
     mutationFn: async () => {
+      if (isProcessing) {
+        throw new Error("Analysis already in progress");
+      }
+      setIsProcessing(true);
+      
       const response = await apiRequest(
         "POST", 
         `/api/analysis/${athlete.id}/${service.id}`
@@ -57,6 +63,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
     onSuccess: (data) => {
       setAnalysisData(data);
       setShowAnalysisPopup(true);
+      setIsProcessing(false);
       
       toast({
         title: "Analysis Complete",
@@ -69,6 +76,8 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       queryClient.invalidateQueries({ queryKey: ["/api/analysis-logs"] });
     },
     onError: (error) => {
+      setIsProcessing(false);
+      
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
@@ -86,6 +95,10 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         return;
       }
 
+      if (error.message.includes("Analysis already in progress")) {
+        return; // Silent fail for duplicate requests
+      }
+
       toast({
         title: "Analysis Failed",
         description: error.message || "Failed to generate analysis",
@@ -95,6 +108,11 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
   });
 
   const handleServiceClick = () => {
+    // Prevent duplicate clicks while processing
+    if (isProcessing || analysisMutation.isPending) {
+      return;
+    }
+    
     // Check if user has enough tokens
     if (!user || user.tokens < service.cost) {
       onInsufficientTokens();
@@ -105,12 +123,13 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
   };
 
   return (
-    <Card 
-      className={`service-card bg-gradient-to-br from-athlete-gray-800 to-athlete-gray-700 border-gray-700 hover:border-athlete-accent cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-athlete-accent/20 ${
-        analysisMutation.isPending ? 'opacity-75' : ''
-      }`}
-      onClick={handleServiceClick}
-    >
+    <>
+      <Card 
+        className={`service-card bg-gradient-to-br from-athlete-gray-800 to-athlete-gray-700 border-gray-700 hover:border-athlete-accent cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-athlete-accent/20 ${
+          (analysisMutation.isPending || isProcessing) ? 'opacity-75 pointer-events-none' : ''
+        }`}
+        onClick={handleServiceClick}
+      >
       <CardContent className="p-6">
         <div className="flex justify-between items-start mb-4">
           <IconComponent className={`text-2xl ${service.color}`} size={32} />
@@ -125,13 +144,13 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         <Button 
           data-testid={`button-${service.id}`}
           className="w-full bg-athlete-accent hover:bg-blue-600 text-white transition-colors"
-          disabled={analysisMutation.isPending}
+          disabled={analysisMutation.isPending || isProcessing}
           onClick={(e) => {
             e.stopPropagation();
             handleServiceClick();
           }}
         >
-          {analysisMutation.isPending ? (
+          {(analysisMutation.isPending || isProcessing) ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Analyzing...
@@ -141,17 +160,23 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
           )}
         </Button>
       </CardContent>
+      </Card>
       
       {showAnalysisPopup && analysisData && (
         <AnalysisPopup
           open={showAnalysisPopup}
-          onOpenChange={setShowAnalysisPopup}
+          onOpenChange={(open) => {
+            setShowAnalysisPopup(open);
+            if (!open) {
+              setAnalysisData(null);
+            }
+          }}
           type={service.id}
           data={analysisData}
           athleteName={athlete.name}
           createdAt={new Date().toISOString()}
         />
       )}
-    </Card>
+    </>
   );
 }
