@@ -22,15 +22,24 @@ export default function AthleteAnalysis() {
     queryKey: ["/api/transactions"],
   });
 
-  const { data: analysisLogs = [], error: analysisLogsError, isLoading: analysisLogsLoading } = useQuery<AnalysisLog[]>({
+  const { data: analysisLogs, error: analysisLogsError, isLoading: analysisLogsLoading } = useQuery<AnalysisLog[]>({
     queryKey: ["/api/analysis-logs"],
     retry: false,
+    staleTime: 0, // Always fetch fresh data
   });
 
-  console.log('Analysis Logs Query:', { analysisLogs, analysisLogsError, analysisLogsLoading });
+  // Handle null return from authentication failure
+  const safeAnalysisLogs = analysisLogs || [];
+  
+  console.log('Analysis Logs Query:', { 
+    analysisLogs: safeAnalysisLogs, 
+    analysisLogsError, 
+    analysisLogsLoading,
+    isNull: analysisLogs === null
+  });
 
   const athleteTransactions = transactions.filter(t => t.athleteId === athleteId);
-  const athleteAnalysisLogs = analysisLogs.filter(l => l.athleteId === athleteId);
+  const athleteAnalysisLogs = safeAnalysisLogs.filter(l => l.athleteId === athleteId);
 
   if (!athlete) {
     return (
@@ -114,7 +123,7 @@ export default function AthleteAnalysis() {
             </TabsList>
 
             <TabsContent value="results">
-              {analysisLogsError ? (
+              {analysisLogsError || analysisLogs === null ? (
                 <Card className="bg-red-900/20 border-red-500/30">
                   <CardContent className="p-6 text-center">
                     <div className="text-red-400 mb-4">⚠ Authentication Error</div>
