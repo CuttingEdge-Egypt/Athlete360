@@ -506,6 +506,15 @@ export function AnalysisPopup({
         </div>
 
         <div className="space-y-4">
+          {plansArray.length > 0 ? (
+            <div className="mb-4 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+              <p className="text-green-400 text-sm">✓ Found {plansArray.length} development plans</p>
+            </div>
+          ) : (
+            <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+              <p className="text-red-400 text-sm">⚠ No plans found in array</p>
+            </div>
+          )}
           {plansArray.map((plan: any, index: number) => {
             const weekNumber = (index % 12) + 1;
             const phaseColors = [
@@ -714,6 +723,15 @@ export function AnalysisPopup({
           </Card>
         </div>
 
+        {strategiesArray.length > 0 ? (
+          <div className="mb-4 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+            <p className="text-green-400 text-sm">✓ Found {strategiesArray.length} beat strategies</p>
+          </div>
+        ) : (
+          <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+            <p className="text-red-400 text-sm">⚠ No strategies found in array</p>
+          </div>
+        )}
         {strategiesArray.map((strategy: any, index: number) => {
           const effectivenessRates = [88, 92, 85, 90, 87, 94, 89, 91, 86, 93];
           const effectiveness = effectivenessRates[index] || 85;
@@ -858,6 +876,15 @@ export function AnalysisPopup({
         </div>
 
         <div className="space-y-4">
+          {analysisArray.length > 0 ? (
+            <div className="mb-4 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+              <p className="text-green-400 text-sm">✓ Found {analysisArray.length} video analyses</p>
+            </div>
+          ) : (
+            <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+              <p className="text-red-400 text-sm">⚠ No analyses found in array</p>
+            </div>
+          )}
           {analysisArray.map((analysis: any, index: number) => {
             const analysisTypes = ["Technical", "Performance", "Mental", "Tactical", "Physical"];
             const analysisType = analysisTypes[index % analysisTypes.length];
