@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigation } from "@/components/Navigation";
 import { ServiceCard } from "@/components/ui/service-card";
 import { TokenModal } from "@/components/ui/token-modal";
+import { AnalysisPopup } from "@/components/ui/analysis-popup";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Star } from "lucide-react";
 import type { Sport, Athlete } from "@shared/schema";
@@ -19,10 +20,41 @@ export default function Home() {
   const [athleteName, setAthleteName] = useState<string>("");
   const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null);
   const [showTokenModal, setShowTokenModal] = useState(false);
+  const [showBioPopup, setShowBioPopup] = useState(false);
+  const [bioData, setBioData] = useState(null);
 
   const { data: sports = [] } = useQuery<Sport[]>({
     queryKey: ["/api/sports"],
   });
+
+  const handleAthleteCardClick = async () => {
+    if (!selectedAthlete) return;
+    
+    try {
+      const response = await fetch(`/api/analysis/${selectedAthlete.id}/bio`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setBioData(data);
+        setShowBioPopup(true);
+      } else {
+        toast({
+          title: "Analysis Error",
+          description: "Failed to generate athlete biography",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load athlete biography",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleAthleteSearch = async () => {
     if (!athleteName.trim()) {
@@ -235,21 +267,29 @@ export default function Home() {
 
               {/* Current Athlete Display */}
               {selectedAthlete && (
-                <Card className="bg-athlete-gray-700 border-gray-600">
+                <Card 
+                  className="bg-athlete-gray-700 border-gray-600 cursor-pointer hover:border-athlete-accent transition-colors duration-300"
+                  onClick={handleAthleteCardClick}
+                >
                   <CardContent className="p-6">
-                    <div className="flex items-center space-x-4">
-                      <img 
-                        src={selectedAthlete.profileImageUrl || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"}
-                        alt="Athlete profile" 
-                        className="w-16 h-16 rounded-full object-cover"
-                      />
-                      <div>
-                        <h3 className="text-xl font-bold text-white">{selectedAthlete.name}</h3>
-                        <p className="text-gray-400 capitalize">{selectedSport || "Multi-Sport"}</p>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <Star className="text-athlete-warning" size={16} />
-                          <span className="text-sm text-gray-300">Rank #{selectedAthlete.rank || "TBD"}</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <img 
+                          src={selectedAthlete.profileImageUrl || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"}
+                          alt="Athlete profile" 
+                          className="w-16 h-16 rounded-full object-cover"
+                        />
+                        <div>
+                          <h3 className="text-xl font-bold text-white">{selectedAthlete.name}</h3>
+                          <p className="text-gray-400 capitalize">{selectedSport || "Multi-Sport"}</p>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <Star className="text-athlete-warning" size={16} />
+                            <span className="text-sm text-gray-300">Rank #{selectedAthlete.rank || "TBD"}</span>
+                          </div>
                         </div>
+                      </div>
+                      <div className="text-athlete-accent">
+                        <span className="text-sm">Click for Biography →</span>
                       </div>
                     </div>
                   </CardContent>
@@ -292,6 +332,17 @@ export default function Home() {
         open={showTokenModal} 
         onOpenChange={setShowTokenModal}
       />
+
+      {showBioPopup && bioData && selectedAthlete && (
+        <AnalysisPopup
+          open={showBioPopup}
+          onOpenChange={setShowBioPopup}
+          type="bio"
+          data={bioData}
+          athleteName={selectedAthlete.name}
+          createdAt={new Date().toISOString()}
+        />
+      )}
     </div>
   );
 }
