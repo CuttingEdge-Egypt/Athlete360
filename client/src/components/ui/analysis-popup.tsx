@@ -463,8 +463,8 @@ export function AnalysisPopup({
   };
 
   const renderDevelopmentPlan = (data: any) => {
-    // Handle both array and object formats
-    const plansArray = Array.isArray(data) ? data : (data.plans || []);
+    // Handle both array and object formats - data is now directly an array from backend
+    const plansArray = Array.isArray(data) ? data : (data.plan || data.plans || []);
     
     return (
       <div className="space-y-6">
@@ -661,7 +661,7 @@ export function AnalysisPopup({
   );
 
   const renderBeatStrategies = (data: any) => {
-    // Handle both array and object formats
+    // Handle both array and object formats - data is now directly an array from backend
     const strategiesArray = Array.isArray(data) ? data : (data.strategies || []);
     
     return (
@@ -785,8 +785,8 @@ export function AnalysisPopup({
 
 
   const renderVideoAnalysis = (data: any) => {
-    // Handle both array and object formats
-    const analysisArray = Array.isArray(data) ? data : (data.videos || []);
+    // Handle both array and object formats - data is now directly an array from backend
+    const analysisArray = Array.isArray(data) ? data : (data.videos || data.analysis || []);
     
     return (
       <div className="space-y-6">
