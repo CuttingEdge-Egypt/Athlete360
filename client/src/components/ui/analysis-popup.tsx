@@ -466,6 +466,17 @@ export function AnalysisPopup({
     // Handle both array and object formats - data is now directly an array from backend
     const plansArray = Array.isArray(data) ? data : (data.plan || data.plans || []);
     
+    console.log('Development Plan Debug:', { data, plansArray, isArray: Array.isArray(data) });
+    
+    if (!plansArray || plansArray.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <p className="text-gray-400">No development plan data available</p>
+          <p className="text-xs text-gray-500 mt-2">Debug: {JSON.stringify(data)}</p>
+        </div>
+      );
+    }
+    
     return (
       <div className="space-y-6">
         <div className="grid md:grid-cols-3 gap-4 mb-6">
@@ -664,6 +675,17 @@ export function AnalysisPopup({
     // Handle both array and object formats - data is now directly an array from backend
     const strategiesArray = Array.isArray(data) ? data : (data.strategies || []);
     
+    console.log('Beat Strategies Debug:', { data, strategiesArray, isArray: Array.isArray(data) });
+    
+    if (!strategiesArray || strategiesArray.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <p className="text-gray-400">No beat strategies data available</p>
+          <p className="text-xs text-gray-500 mt-2">Debug: {JSON.stringify(data)}</p>
+        </div>
+      );
+    }
+    
     return (
       <div className="space-y-6">
         <div className="grid md:grid-cols-3 gap-4 mb-6">
@@ -787,6 +809,17 @@ export function AnalysisPopup({
   const renderVideoAnalysis = (data: any) => {
     // Handle both array and object formats - data is now directly an array from backend
     const analysisArray = Array.isArray(data) ? data : (data.videos || data.analysis || []);
+    
+    console.log('Video Analysis Debug:', { data, analysisArray, isArray: Array.isArray(data) });
+    
+    if (!analysisArray || analysisArray.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <p className="text-gray-400">No video analysis data available</p>
+          <p className="text-xs text-gray-500 mt-2">Debug: {JSON.stringify(data)}</p>
+        </div>
+      );
+    }
     
     return (
       <div className="space-y-6">
