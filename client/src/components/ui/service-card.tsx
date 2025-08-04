@@ -6,9 +6,10 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { AnalysisPopup } from "./analysis-popup";
 import { 
   User, Trophy, Star, AlertTriangle, Calendar, Apple, 
-  Swords, Video, Loader2 
+  Swords, Video, Loader2, Coins 
 } from "lucide-react";
 import type { Athlete } from "@shared/schema";
 
@@ -40,6 +41,8 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
+  const [analysisData, setAnalysisData] = useState(null);
   
   const IconComponent = iconMap[service.icon as keyof typeof iconMap] || User;
 
@@ -52,6 +55,9 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       return response.json();
     },
     onSuccess: (data) => {
+      setAnalysisData(data);
+      setShowAnalysisPopup(true);
+      
       toast({
         title: "Analysis Complete",
         description: `${service.title} analysis generated successfully!`,
@@ -135,6 +141,17 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
           )}
         </Button>
       </CardContent>
+      
+      {showAnalysisPopup && analysisData && (
+        <AnalysisPopup
+          open={showAnalysisPopup}
+          onOpenChange={setShowAnalysisPopup}
+          type={service.id}
+          data={analysisData}
+          athleteName={athlete.name}
+          createdAt={new Date().toISOString()}
+        />
+      )}
     </Card>
   );
 }
