@@ -310,9 +310,13 @@ export function AnalysisPopup({
     </div>
   );
 
-  const renderStrengthsAnalysis = (data: any) => (
-    <div className="space-y-4">
-      {data.map((strength: any, index: number) => {
+  const renderStrengthsAnalysis = (data: any) => {
+    // Handle both array and object formats
+    const strengthsArray = Array.isArray(data) ? data : (data.strengths || []);
+    
+    return (
+      <div className="space-y-4">
+        {strengthsArray.map((strength: any, index: number) => {
         const performanceValues = [95, 92, 89, 94, 96, 93, 87, 91];
         const performanceValue = performanceValues[index] || 90;
         const impactLevel = performanceValue >= 94 ? "Elite" : performanceValue >= 90 ? "High" : "Moderate";
@@ -370,13 +374,18 @@ export function AnalysisPopup({
             </CardContent>
           </Card>
         );
-      })}
-    </div>
-  );
+        })}
+      </div>
+    );
+  };
 
-  const renderWeaknessesAnalysis = (data: any) => (
-    <div className="space-y-4">
-      {data.map((weakness: any, index: number) => {
+  const renderWeaknessesAnalysis = (data: any) => {
+    // Handle both array and object formats
+    const weaknessesArray = Array.isArray(data) ? data : (data.weaknesses || []);
+    
+    return (
+      <div className="space-y-4">
+        {weaknessesArray.map((weakness: any, index: number) => {
         const impactLevels = ["High", "High", "Medium", "Medium", "Low"];
         const impactLevel = impactLevels[index] || "Medium";
         const impactColor = impactLevel === "High" ? "bg-red-600" : impactLevel === "Medium" ? "bg-orange-500" : "bg-yellow-500";
@@ -448,9 +457,10 @@ export function AnalysisPopup({
             </CardContent>
           </Card>
         );
-      })}
-    </div>
-  );
+        })}
+      </div>
+    );
+  };
 
   const renderDevelopmentPlan = (data: any) => (
     <div className="space-y-6">
