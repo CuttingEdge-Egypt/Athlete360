@@ -342,9 +342,9 @@ export async function seedDatabase() {
       {
         name: "Seif Eissa",
         sportId: taekwondoSport?.id || allSports[0]?.id || "default",
-        bio: "Elite Egyptian Taekwondo athlete and Olympic hopeful. Known for lightning-fast combinations, tactical brilliance, and exceptional mental fortitude. Current national champion with 3 international gold medals and undefeated record in the -80kg weight category this season.",
-        rank: 2,
-        profileImageUrl: "https://images.unsplash.com/photo-1555597673-b21d5c935865?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"
+        bio: "Elite Egyptian Taekwondo athlete and Olympic medalist. Olympic bronze medalist at Tokyo 2020, known for lightning-fast combinations, tactical brilliance, and exceptional mental fortitude. Current top-3 world ranking with multiple international gold medals and dominance in the -80kg weight category.",
+        rank: 3,
+        profileImageUrl: "/attached_assets/IMG_0107_1754340258245.webp"
       },
       {
         name: "Rafael Nadal",

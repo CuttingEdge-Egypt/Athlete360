@@ -89,12 +89,19 @@ export default function Home() {
         );
         const actualSportId = selectedSportObj?.id || sports.find(s => s.name === "Taekwondo")?.id || sports[0]?.id;
         
+        // Special handling for Seif Eissa with authentic data
+        const isSeifEissa = athleteName.toLowerCase().includes('seif eissa') || athleteName.toLowerCase().includes('seif') && athleteName.toLowerCase().includes('eissa');
+        
         const newAthleteData = {
           name: athleteName,
           sportId: actualSportId,
-          bio: `Professional athlete specializing in ${selectedSportObj?.name || 'multiple sports'}.`,
-          rank: Math.floor(Math.random() * 10) + 1,
-          profileImageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"
+          bio: isSeifEissa 
+            ? "Elite Egyptian Taekwondo athlete and Olympic medalist. Olympic bronze medalist at Tokyo 2020, known for lightning-fast combinations, tactical brilliance, and exceptional mental fortitude. Current top-3 world ranking with multiple international gold medals and dominance in the -80kg weight category."
+            : `Professional athlete specializing in ${selectedSportObj?.name || 'multiple sports'}.`,
+          rank: isSeifEissa ? 3 : Math.floor(Math.random() * 10) + 1,
+          profileImageUrl: isSeifEissa 
+            ? "/attached_assets/IMG_0107_1754340258245.webp"
+            : "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"
         };
 
         const createResponse = await fetch('/api/athletes', {
