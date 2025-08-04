@@ -93,10 +93,17 @@ export default function AthleteAnalysis() {
                   <div>
                     <h1 className="text-3xl font-bold text-white mb-2">{athlete.name}</h1>
                     <p className="text-gray-400 mb-2">{athlete.bio}</p>
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-4 mb-4">
                       <span className="text-sm text-athlete-warning">Rank #{athlete.rank || "TBD"}</span>
                       <span className="text-sm text-gray-400">Updated: {new Date(athlete.updatedAt || '').toLocaleDateString()}</span>
                     </div>
+                    <Button 
+                      onClick={() => window.location.href = `/athlete-profile/${athleteId}`}
+                      className="bg-purple-600 hover:bg-purple-700 text-white"
+                      size="sm"
+                    >
+                      View Complete Profile
+                    </Button>
                   </div>
                 </div>
               </CardContent>

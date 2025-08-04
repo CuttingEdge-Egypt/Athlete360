@@ -9,6 +9,7 @@ import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import Subscribe from "@/pages/subscribe";
 import AthleteAnalysis from "@/pages/athlete-analysis";
+import AthleteProfile from "@/pages/athlete-profile";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -22,6 +23,7 @@ function Router() {
           <Route path="/" component={Home} />
           <Route path="/subscribe" component={Subscribe} />
           <Route path="/athlete/:id" component={AthleteAnalysis} />
+          <Route path="/athlete-profile/:id" component={AthleteProfile} />
         </>
       )}
       <Route component={NotFound} />
