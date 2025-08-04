@@ -53,12 +53,19 @@ export interface IStorage {
 
   // Analysis operations
   getAthleteStrengths(athleteId: string): Promise<AthleteStrength[]>;
+  createAthleteStrength(strength: Partial<AthleteStrength>): Promise<AthleteStrength>;
   getAthleteWeaknesses(athleteId: string): Promise<AthleteWeakness[]>;
+  createAthleteWeakness(weakness: Partial<AthleteWeakness>): Promise<AthleteWeakness>;
   getDevelopmentPlans(athleteId: string): Promise<DevelopmentPlan[]>;
+  createDevelopmentPlan(plan: Partial<DevelopmentPlan>): Promise<DevelopmentPlan>;
   getNutritionPlans(athleteId: string): Promise<NutritionPlan[]>;
+  createNutritionPlan(plan: Partial<NutritionPlan>): Promise<NutritionPlan>;
   getBeatStrategies(athleteId: string): Promise<BeatStrategy[]>;
+  createBeatStrategy(strategy: Partial<BeatStrategy>): Promise<BeatStrategy>;
   getDynamicAnalysis(athleteId: string): Promise<DynamicAnalysis[]>;
+  createDynamicAnalysis(analysis: Partial<DynamicAnalysis>): Promise<DynamicAnalysis>;
   getRankHistory(athleteId: string): Promise<RankHistory[]>;
+  createRankHistory(rank: Partial<RankHistory>): Promise<RankHistory>;
 
   // Transaction operations
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
@@ -176,30 +183,65 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(athleteStrengths).where(eq(athleteStrengths.athleteId, athleteId));
   }
 
+  async createAthleteStrength(strength: Partial<AthleteStrength>): Promise<AthleteStrength> {
+    const [newStrength] = await db.insert(athleteStrengths).values(strength as any).returning();
+    return newStrength;
+  }
+
   async getAthleteWeaknesses(athleteId: string): Promise<AthleteWeakness[]> {
     return db.select().from(athleteWeaknesses).where(eq(athleteWeaknesses.athleteId, athleteId));
+  }
+
+  async createAthleteWeakness(weakness: Partial<AthleteWeakness>): Promise<AthleteWeakness> {
+    const [newWeakness] = await db.insert(athleteWeaknesses).values(weakness as any).returning();
+    return newWeakness;
   }
 
   async getDevelopmentPlans(athleteId: string): Promise<DevelopmentPlan[]> {
     return db.select().from(developmentPlans).where(eq(developmentPlans.athleteId, athleteId));
   }
 
+  async createDevelopmentPlan(plan: Partial<DevelopmentPlan>): Promise<DevelopmentPlan> {
+    const [newPlan] = await db.insert(developmentPlans).values(plan as any).returning();
+    return newPlan;
+  }
+
   async getNutritionPlans(athleteId: string): Promise<NutritionPlan[]> {
     return db.select().from(nutritionPlans).where(eq(nutritionPlans.athleteId, athleteId));
+  }
+
+  async createNutritionPlan(plan: Partial<NutritionPlan>): Promise<NutritionPlan> {
+    const [newPlan] = await db.insert(nutritionPlans).values(plan as any).returning();
+    return newPlan;
   }
 
   async getBeatStrategies(athleteId: string): Promise<BeatStrategy[]> {
     return db.select().from(beatStrategies).where(eq(beatStrategies.athleteId, athleteId));
   }
 
+  async createBeatStrategy(strategy: Partial<BeatStrategy>): Promise<BeatStrategy> {
+    const [newStrategy] = await db.insert(beatStrategies).values(strategy as any).returning();
+    return newStrategy;
+  }
+
   async getDynamicAnalysis(athleteId: string): Promise<DynamicAnalysis[]> {
     return db.select().from(dynamicAnalysis).where(eq(dynamicAnalysis.athleteId, athleteId));
+  }
+
+  async createDynamicAnalysis(analysis: Partial<DynamicAnalysis>): Promise<DynamicAnalysis> {
+    const [newAnalysis] = await db.insert(dynamicAnalysis).values(analysis as any).returning();
+    return newAnalysis;
   }
 
   async getRankHistory(athleteId: string): Promise<RankHistory[]> {
     return db.select().from(rankHistory)
       .where(eq(rankHistory.athleteId, athleteId))
       .orderBy(desc(rankHistory.date));
+  }
+
+  async createRankHistory(rank: Partial<RankHistory>): Promise<RankHistory> {
+    const [newRank] = await db.insert(rankHistory).values(rank as any).returning();
+    return newRank;
   }
 
   // Transaction operations

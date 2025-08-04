@@ -51,10 +51,16 @@ export default function Home() {
         });
       } else {
         // Create a new athlete if not found
+        // Find the correct sport ID from the available sports
+        const selectedSportObj = sports.find(s => 
+          s.id === selectedSport || s.name.toLowerCase() === selectedSport.toLowerCase()
+        );
+        const actualSportId = selectedSportObj?.id || sports.find(s => s.name === "Taekwondo")?.id || sports[0]?.id;
+        
         const newAthleteData = {
           name: athleteName,
-          sportId: selectedSport || "default-sport",
-          bio: `Professional athlete specializing in ${selectedSport || 'multiple sports'}.`,
+          sportId: actualSportId,
+          bio: `Professional athlete specializing in ${selectedSportObj?.name || 'multiple sports'}.`,
           rank: Math.floor(Math.random() * 10) + 1,
           profileImageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"
         };
