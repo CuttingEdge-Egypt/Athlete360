@@ -147,15 +147,25 @@ export function AnalysisPopup({
                 />
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">{athleteName}</h3>
-              <Badge className="bg-athlete-accent text-white mb-4">Taekwondo Elite</Badge>
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <Badge className="bg-athlete-accent text-white mb-4">Elite Taekwondo Champion</Badge>
+              <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                 <div className="text-center">
                   <div className="text-athlete-warning font-bold text-xl">#2</div>
                   <div className="text-gray-400">World Rank</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-athlete-success font-bold text-xl">18-2</div>
-                  <div className="text-gray-400">Record (2024)</div>
+                  <div className="text-athlete-success font-bold text-xl">41-6</div>
+                  <div className="text-gray-400">Career Record</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="bg-athlete-gray-700 rounded p-2">
+                  <div className="text-athlete-accent font-bold">87.2%</div>
+                  <div className="text-gray-400">Win Rate</div>
+                </div>
+                <div className="bg-athlete-gray-700 rounded p-2">
+                  <div className="text-athlete-warning font-bold">8.6</div>
+                  <div className="text-gray-400">Avg Points</div>
                 </div>
               </div>
             </CardContent>
@@ -167,7 +177,7 @@ export function AnalysisPopup({
             <CardHeader>
               <CardTitle className="flex items-center text-white">
                 <Award className="mr-2 text-athlete-warning" size={20} />
-                Career Highlights
+                Championship Achievements
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -177,30 +187,53 @@ export function AnalysisPopup({
               </div>
               <div className="flex items-center justify-between py-2 border-b border-gray-700">
                 <span className="text-gray-300">International Gold Medals</span>
-                <Badge className="bg-athlete-success text-white">3</Badge>
+                <Badge className="bg-athlete-success text-white">3 Golds, 5 Silver</Badge>
               </div>
               <div className="flex items-center justify-between py-2 border-b border-gray-700">
                 <span className="text-gray-300">Undefeated Streak (-80kg)</span>
-                <Badge className="bg-athlete-accent text-white">Season</Badge>
+                <Badge className="bg-athlete-accent text-white">Current Season</Badge>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b border-gray-700">
+                <span className="text-gray-300">Olympic Qualification</span>
+                <Badge className="bg-green-600 text-white">Qualified</Badge>
               </div>
               <div className="flex items-center justify-between py-2">
-                <span className="text-gray-300">Olympic Qualification Status</span>
-                <Badge className="bg-green-600 text-white">Qualified</Badge>
+                <span className="text-gray-300">International Competitions</span>
+                <Badge className="bg-purple-600 text-white">47 Tournaments</Badge>
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-athlete-gray-800 border-gray-700">
             <CardHeader>
-              <CardTitle className="text-white">Fighting Profile</CardTitle>
+              <CardTitle className="text-white">Elite Athletic Profile</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-300 leading-relaxed">
-                Elite Egyptian Taekwondo athlete and Olympic hopeful. Known for lightning-fast combinations, 
-                tactical brilliance, and exceptional mental fortitude. Current national champion with 3 
-                international gold medals and undefeated record in the -80kg weight category this season. 
-                Specializes in counter-attack strategies with a 78% success rate in international competition.
+              <p className="text-gray-300 leading-relaxed mb-4">
+                Elite Egyptian Taekwondo athlete and Olympic hopeful with world-class technical precision and tactical intelligence. 
+                Known for lightning-fast combinations (0.8s triple kicks), tactical brilliance (identifies opponent weaknesses in 94 seconds), 
+                and exceptional mental fortitude (15 comeback victories from 5+ point deficits).
               </p>
+              <div className="grid md:grid-cols-2 gap-4 mt-4">
+                <div className="bg-athlete-gray-700 rounded-lg p-3">
+                  <h4 className="text-athlete-accent font-semibold mb-2">Physical Stats</h4>
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between"><span className="text-gray-400">Peak Kick Speed:</span><span className="text-white">186 km/h</span></div>
+                    <div className="flex justify-between"><span className="text-gray-400">Reaction Time:</span><span className="text-white">0.12 seconds</span></div>
+                    <div className="flex justify-between"><span className="text-gray-400">VO2 Max:</span><span className="text-white">64.2 ml/kg/min</span></div>
+                    <div className="flex justify-between"><span className="text-gray-400">Body Fat:</span><span className="text-white">8.1%</span></div>
+                  </div>
+                </div>
+                <div className="bg-athlete-gray-700 rounded-lg p-3">
+                  <h4 className="text-athlete-success font-semibold mb-2">Competition Excellence</h4>
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between"><span className="text-gray-400">Counter-Attack Rate:</span><span className="text-white">78%</span></div>
+                    <div className="flex justify-between"><span className="text-gray-400">Technical Accuracy:</span><span className="text-white">94.2%</span></div>
+                    <div className="flex justify-between"><span className="text-gray-400">Focus Under Pressure:</span><span className="text-white">94%</span></div>
+                    <div className="flex justify-between"><span className="text-gray-400">Countries Competed:</span><span className="text-white">15</span></div>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -278,90 +311,144 @@ export function AnalysisPopup({
   );
 
   const renderStrengthsAnalysis = (data: any) => (
-    <div className="grid md:grid-cols-2 gap-6">
-      {[
-        {
-          title: "Lightning-Fast Combinations",
-          description: "Exceptional ability to execute rapid-fire kick combinations with perfect timing and precision. His signature 3-kick combo (roundhouse-side-hook) has a 92% success rate in competition.",
-          icon: <Zap className="text-athlete-warning" size={24} />,
-          rating: 95
-        },
-        {
-          title: "Mental Fortitude", 
-          description: "Demonstrates extraordinary psychological resilience under pressure. Never lost a match when trailing by 5+ points, with 15 comeback victories in the last 2 years.",
-          icon: <Brain className="text-purple-400" size={24} />,
-          rating: 92
-        },
-        {
-          title: "Counter-Attack Mastery",
-          description: "World-class defensive awareness and counter-attacking skills. Leads international rankings with 78% counter-attack success rate, specializing in cut-kicks and back-kicks.",
-          icon: <Shield className="text-athlete-accent" size={24} />,
-          rating: 88
-        },
-        {
-          title: "Tactical Intelligence",
-          description: "Superior game reading ability and tactical adaptation mid-match. Known for analyzing opponent patterns within the first round and adjusting strategy accordingly.",
-          icon: <Target className="text-athlete-success" size={24} />,
-          rating: 90
-        }
-      ].map((strength, index) => (
-        <Card key={index} className="bg-gradient-to-br from-athlete-gray-800 to-athlete-gray-700 border-athlete-success/30">
-          <CardHeader>
-            <CardTitle className="flex items-center text-white">
-              {strength.icon}
-              <span className="ml-3">{strength.title}</span>
-              <Badge className="ml-auto bg-athlete-success text-white">{strength.rating}%</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-300 leading-relaxed mb-4">{strength.description}</p>
-            <Progress value={strength.rating} className="h-2" />
-          </CardContent>
-        </Card>
-      ))}
+    <div className="space-y-4">
+      {data.map((strength: any, index: number) => {
+        const performanceValues = [95, 92, 89, 94, 96, 93, 87, 91];
+        const performanceValue = performanceValues[index] || 90;
+        const impactLevel = performanceValue >= 94 ? "Elite" : performanceValue >= 90 ? "High" : "Moderate";
+        const impactColor = performanceValue >= 94 ? "text-yellow-400" : performanceValue >= 90 ? "text-green-400" : "text-blue-400";
+        
+        return (
+          <Card key={index} className="bg-athlete-gray-800 border-green-500/20 hover:border-green-500/40 transition-colors">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center">
+                  <div className="bg-green-500/20 rounded-full p-2 mr-3">
+                    <Star className="text-green-500" size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white mb-1">{strength.title}</h3>
+                    <div className="flex items-center space-x-3">
+                      <Badge className="bg-green-600 text-white text-xs">Core Strength</Badge>
+                      <span className={`text-sm font-semibold ${impactColor}`}>{impactLevel} Impact</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-green-400">{performanceValue}%</div>
+                  <div className="text-xs text-gray-400">Performance</div>
+                </div>
+              </div>
+              
+              <p className="text-gray-300 leading-relaxed mb-4">{strength.description}</p>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-gray-400">Competitive Advantage</span>
+                    <span className="text-green-400 font-semibold">{performanceValue}%</span>
+                  </div>
+                  <Progress value={performanceValue} className="h-2 mb-3" />
+                </div>
+                <div className="bg-athlete-gray-700 rounded-lg p-3">
+                  <div className="text-xs text-gray-400 mb-1">Strategic Importance</div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-white font-medium">{impactLevel} Priority</span>
+                    <div className="flex space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <div 
+                          key={i} 
+                          className={`w-2 h-2 rounded-full ${
+                            i < Math.ceil(performanceValue / 20) ? 'bg-green-500' : 'bg-gray-600'
+                          }`} 
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 
   const renderWeaknessesAnalysis = (data: any) => (
-    <div className="space-y-6">
-      {[
-        {
-          title: "Stamina in Extended Matches",
-          description: "Performance tends to decline slightly in overtime rounds. Kick output drops by 15% after the 2nd round in matches lasting over 6 minutes.",
-          impact: "Medium",
-          improvement: "High-intensity interval training focusing on match-specific endurance."
-        },
-        {
-          title: "Aggressive Close-Range Pressure", 
-          description: "Can struggle against opponents who constantly pressure forward and clinch. Success rate drops to 68% when facing clinch-heavy fighting styles.",
-          impact: "High",
-          improvement: "Specialized clinch work and short-range technique development."
-        },
-        {
-          title: "Left-Side Blind Spot",
-          description: "Slightly slower reaction time to attacks from the left side (0.2 seconds slower). This creates vulnerability to left-footed fighters' roundhouse kicks.",
-          impact: "Medium",
-          improvement: "Mirror work and reaction drills targeting left-side attacks."
-        }
-      ].map((weakness, index) => (
-        <Card key={index} className="bg-gradient-to-r from-athlete-danger/20 to-athlete-danger/5 border-athlete-danger/30">
-          <CardContent className="p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <h3 className="text-xl font-bold text-white mb-2">{weakness.title}</h3>
-                <p className="text-gray-300 leading-relaxed">{weakness.description}</p>
+    <div className="space-y-4">
+      {data.map((weakness: any, index: number) => {
+        const impactLevels = ["High", "High", "Medium", "Medium", "Low"];
+        const impactLevel = impactLevels[index] || "Medium";
+        const impactColor = impactLevel === "High" ? "bg-red-600" : impactLevel === "Medium" ? "bg-orange-500" : "bg-yellow-500";
+        const riskScore = impactLevel === "High" ? 85 : impactLevel === "Medium" ? 65 : 45;
+        
+        return (
+          <Card key={index} className="bg-athlete-gray-800 border-red-500/20 hover:border-red-500/40 transition-colors">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center">
+                  <div className="bg-red-500/20 rounded-full p-2 mr-3">
+                    <AlertTriangle className="text-red-500" size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white mb-1">{weakness.title}</h3>
+                    <div className="flex items-center space-x-3">
+                      <Badge className={`${impactColor} text-white text-xs`}>{impactLevel} Impact</Badge>
+                      <span className="text-sm font-semibold text-red-400">Risk Score: {riskScore}%</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-red-400">{riskScore}%</div>
+                  <div className="text-xs text-gray-400">Risk Level</div>
+                </div>
               </div>
-              <Badge className={`ml-4 ${weakness.impact === 'High' ? 'bg-red-600' : 'bg-orange-500'} text-white`}>
-                {weakness.impact} Impact
-              </Badge>
-            </div>
-            <div className="bg-athlete-gray-700 rounded-lg p-4">
-              <h4 className="text-athlete-accent font-semibold mb-2">Improvement Strategy:</h4>
-              <p className="text-gray-300">{weakness.improvement}</p>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+              
+              <p className="text-gray-300 leading-relaxed mb-4">{weakness.description}</p>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-gray-400">Vulnerability Level</span>
+                    <span className="text-red-400 font-semibold">{riskScore}%</span>
+                  </div>
+                  <Progress value={riskScore} className="h-2 mb-3" />
+                </div>
+                <div className="bg-athlete-gray-700 rounded-lg p-3">
+                  <div className="text-xs text-gray-400 mb-1">Improvement Priority</div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-white font-medium">{impactLevel} Priority</span>
+                    <div className="flex space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <div 
+                          key={i} 
+                          className={`w-2 h-2 rounded-full ${
+                            i < Math.ceil(riskScore / 20) ? 'bg-red-500' : 'bg-gray-600'
+                          }`} 
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-4 bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                <h4 className="text-blue-400 font-semibold mb-2 flex items-center">
+                  <Target className="mr-2" size={16} />
+                  Targeted Improvement Strategy
+                </h4>
+                <p className="text-gray-300 text-sm">
+                  {impactLevel === "High" 
+                    ? `Critical area requiring immediate attention. Implement specialized training protocols with daily focus sessions.`
+                    : impactLevel === "Medium" 
+                    ? `Important weakness needing structured improvement plan with 3-4 weekly training sessions.`
+                    : `Minor area for gradual improvement through regular practice and monitoring.`}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 
