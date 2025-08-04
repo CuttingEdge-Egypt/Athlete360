@@ -9,7 +9,7 @@ import { RankChart } from "./rank-chart";
 import { 
   Download, Share2, User, Trophy, Star, AlertTriangle, Calendar, 
   Apple, Swords, Video, Clock, Target, TrendingUp, Award,
-  Heart, Zap, Shield, Brain, Flame, ChevronRight, Eye
+  Heart, Zap, Shield, Brain, Flame, ChevronRight
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from 'jspdf';
@@ -147,25 +147,15 @@ export function AnalysisPopup({
                 />
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">{athleteName}</h3>
-              <Badge className="bg-athlete-accent text-white mb-4">Elite Taekwondo Champion</Badge>
-              <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+              <Badge className="bg-athlete-accent text-white mb-4">Taekwondo Elite</Badge>
+              <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="text-center">
                   <div className="text-athlete-warning font-bold text-xl">#2</div>
                   <div className="text-gray-400">World Rank</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-athlete-success font-bold text-xl">41-6</div>
-                  <div className="text-gray-400">Career Record</div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="bg-athlete-gray-700 rounded p-2">
-                  <div className="text-athlete-accent font-bold">87.2%</div>
-                  <div className="text-gray-400">Win Rate</div>
-                </div>
-                <div className="bg-athlete-gray-700 rounded p-2">
-                  <div className="text-athlete-warning font-bold">8.6</div>
-                  <div className="text-gray-400">Avg Points</div>
+                  <div className="text-athlete-success font-bold text-xl">18-2</div>
+                  <div className="text-gray-400">Record (2024)</div>
                 </div>
               </div>
             </CardContent>
@@ -177,7 +167,7 @@ export function AnalysisPopup({
             <CardHeader>
               <CardTitle className="flex items-center text-white">
                 <Award className="mr-2 text-athlete-warning" size={20} />
-                Championship Achievements
+                Career Highlights
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -187,53 +177,30 @@ export function AnalysisPopup({
               </div>
               <div className="flex items-center justify-between py-2 border-b border-gray-700">
                 <span className="text-gray-300">International Gold Medals</span>
-                <Badge className="bg-athlete-success text-white">3 Golds, 5 Silver</Badge>
+                <Badge className="bg-athlete-success text-white">3</Badge>
               </div>
               <div className="flex items-center justify-between py-2 border-b border-gray-700">
                 <span className="text-gray-300">Undefeated Streak (-80kg)</span>
-                <Badge className="bg-athlete-accent text-white">Current Season</Badge>
-              </div>
-              <div className="flex items-center justify-between py-2 border-b border-gray-700">
-                <span className="text-gray-300">Olympic Qualification</span>
-                <Badge className="bg-green-600 text-white">Qualified</Badge>
+                <Badge className="bg-athlete-accent text-white">Season</Badge>
               </div>
               <div className="flex items-center justify-between py-2">
-                <span className="text-gray-300">International Competitions</span>
-                <Badge className="bg-purple-600 text-white">47 Tournaments</Badge>
+                <span className="text-gray-300">Olympic Qualification Status</span>
+                <Badge className="bg-green-600 text-white">Qualified</Badge>
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-athlete-gray-800 border-gray-700">
             <CardHeader>
-              <CardTitle className="text-white">Elite Athletic Profile</CardTitle>
+              <CardTitle className="text-white">Fighting Profile</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-300 leading-relaxed mb-4">
-                Elite Egyptian Taekwondo athlete and Olympic hopeful with world-class technical precision and tactical intelligence. 
-                Known for lightning-fast combinations (0.8s triple kicks), tactical brilliance (identifies opponent weaknesses in 94 seconds), 
-                and exceptional mental fortitude (15 comeback victories from 5+ point deficits).
+              <p className="text-gray-300 leading-relaxed">
+                Elite Egyptian Taekwondo athlete and Olympic hopeful. Known for lightning-fast combinations, 
+                tactical brilliance, and exceptional mental fortitude. Current national champion with 3 
+                international gold medals and undefeated record in the -80kg weight category this season. 
+                Specializes in counter-attack strategies with a 78% success rate in international competition.
               </p>
-              <div className="grid md:grid-cols-2 gap-4 mt-4">
-                <div className="bg-athlete-gray-700 rounded-lg p-3">
-                  <h4 className="text-athlete-accent font-semibold mb-2">Physical Stats</h4>
-                  <div className="space-y-1 text-sm">
-                    <div className="flex justify-between"><span className="text-gray-400">Peak Kick Speed:</span><span className="text-white">186 km/h</span></div>
-                    <div className="flex justify-between"><span className="text-gray-400">Reaction Time:</span><span className="text-white">0.12 seconds</span></div>
-                    <div className="flex justify-between"><span className="text-gray-400">VO2 Max:</span><span className="text-white">64.2 ml/kg/min</span></div>
-                    <div className="flex justify-between"><span className="text-gray-400">Body Fat:</span><span className="text-white">8.1%</span></div>
-                  </div>
-                </div>
-                <div className="bg-athlete-gray-700 rounded-lg p-3">
-                  <h4 className="text-athlete-success font-semibold mb-2">Competition Excellence</h4>
-                  <div className="space-y-1 text-sm">
-                    <div className="flex justify-between"><span className="text-gray-400">Counter-Attack Rate:</span><span className="text-white">78%</span></div>
-                    <div className="flex justify-between"><span className="text-gray-400">Technical Accuracy:</span><span className="text-white">94.2%</span></div>
-                    <div className="flex justify-between"><span className="text-gray-400">Focus Under Pressure:</span><span className="text-white">94%</span></div>
-                    <div className="flex justify-between"><span className="text-gray-400">Countries Competed:</span><span className="text-white">15</span></div>
-                  </div>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </div>
@@ -310,293 +277,183 @@ export function AnalysisPopup({
     </div>
   );
 
-  const renderStrengthsAnalysis = (data: any) => {
-    // Handle both array and object formats
-    const strengthsArray = Array.isArray(data) ? data : (data.strengths || []);
-    
-    return (
-      <div className="space-y-4">
-        {strengthsArray.map((strength: any, index: number) => {
-        const performanceValues = [95, 92, 89, 94, 96, 93, 87, 91];
-        const performanceValue = performanceValues[index] || 90;
-        const impactLevel = performanceValue >= 94 ? "Elite" : performanceValue >= 90 ? "High" : "Moderate";
-        const impactColor = performanceValue >= 94 ? "text-yellow-400" : performanceValue >= 90 ? "text-green-400" : "text-blue-400";
-        
-        return (
-          <Card key={index} className="bg-athlete-gray-800 border-green-500/20 hover:border-green-500/40 transition-colors">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center">
-                  <div className="bg-green-500/20 rounded-full p-2 mr-3">
-                    <Star className="text-green-500" size={20} />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white mb-1">{strength.title}</h3>
-                    <div className="flex items-center space-x-3">
-                      <Badge className="bg-green-600 text-white text-xs">Core Strength</Badge>
-                      <span className={`text-sm font-semibold ${impactColor}`}>{impactLevel} Impact</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-green-400">{performanceValue}%</div>
-                  <div className="text-xs text-gray-400">Performance</div>
-                </div>
-              </div>
-              
-              <p className="text-gray-300 leading-relaxed mb-4">{strength.description}</p>
-              
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-gray-400">Competitive Advantage</span>
-                    <span className="text-green-400 font-semibold">{performanceValue}%</span>
-                  </div>
-                  <Progress value={performanceValue} className="h-2 mb-3" />
-                </div>
-                <div className="bg-athlete-gray-700 rounded-lg p-3">
-                  <div className="text-xs text-gray-400 mb-1">Strategic Importance</div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-white font-medium">{impactLevel} Priority</span>
-                    <div className="flex space-x-1">
-                      {[...Array(5)].map((_, i) => (
-                        <div 
-                          key={i} 
-                          className={`w-2 h-2 rounded-full ${
-                            i < Math.ceil(performanceValue / 20) ? 'bg-green-500' : 'bg-gray-600'
-                          }`} 
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        );
-        })}
-      </div>
-    );
-  };
+  const renderStrengthsAnalysis = (data: any) => (
+    <div className="grid md:grid-cols-2 gap-6">
+      {[
+        {
+          title: "Lightning-Fast Combinations",
+          description: "Exceptional ability to execute rapid-fire kick combinations with perfect timing and precision. His signature 3-kick combo (roundhouse-side-hook) has a 92% success rate in competition.",
+          icon: <Zap className="text-athlete-warning" size={24} />,
+          rating: 95
+        },
+        {
+          title: "Mental Fortitude", 
+          description: "Demonstrates extraordinary psychological resilience under pressure. Never lost a match when trailing by 5+ points, with 15 comeback victories in the last 2 years.",
+          icon: <Brain className="text-purple-400" size={24} />,
+          rating: 92
+        },
+        {
+          title: "Counter-Attack Mastery",
+          description: "World-class defensive awareness and counter-attacking skills. Leads international rankings with 78% counter-attack success rate, specializing in cut-kicks and back-kicks.",
+          icon: <Shield className="text-athlete-accent" size={24} />,
+          rating: 88
+        },
+        {
+          title: "Tactical Intelligence",
+          description: "Superior game reading ability and tactical adaptation mid-match. Known for analyzing opponent patterns within the first round and adjusting strategy accordingly.",
+          icon: <Target className="text-athlete-success" size={24} />,
+          rating: 90
+        }
+      ].map((strength, index) => (
+        <Card key={index} className="bg-gradient-to-br from-athlete-gray-800 to-athlete-gray-700 border-athlete-success/30">
+          <CardHeader>
+            <CardTitle className="flex items-center text-white">
+              {strength.icon}
+              <span className="ml-3">{strength.title}</span>
+              <Badge className="ml-auto bg-athlete-success text-white">{strength.rating}%</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-300 leading-relaxed mb-4">{strength.description}</p>
+            <Progress value={strength.rating} className="h-2" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
 
-  const renderWeaknessesAnalysis = (data: any) => {
-    // Handle both array and object formats
-    const weaknessesArray = Array.isArray(data) ? data : (data.weaknesses || []);
-    
-    return (
-      <div className="space-y-4">
-        {weaknessesArray.map((weakness: any, index: number) => {
-        const impactLevels = ["High", "High", "Medium", "Medium", "Low"];
-        const impactLevel = impactLevels[index] || "Medium";
-        const impactColor = impactLevel === "High" ? "bg-red-600" : impactLevel === "Medium" ? "bg-orange-500" : "bg-yellow-500";
-        const riskScore = impactLevel === "High" ? 85 : impactLevel === "Medium" ? 65 : 45;
-        
-        return (
-          <Card key={index} className="bg-athlete-gray-800 border-red-500/20 hover:border-red-500/40 transition-colors">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center">
-                  <div className="bg-red-500/20 rounded-full p-2 mr-3">
-                    <AlertTriangle className="text-red-500" size={20} />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white mb-1">{weakness.title}</h3>
-                    <div className="flex items-center space-x-3">
-                      <Badge className={`${impactColor} text-white text-xs`}>{impactLevel} Impact</Badge>
-                      <span className="text-sm font-semibold text-red-400">Risk Score: {riskScore}%</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-red-400">{riskScore}%</div>
-                  <div className="text-xs text-gray-400">Risk Level</div>
-                </div>
+  const renderWeaknessesAnalysis = (data: any) => (
+    <div className="space-y-6">
+      {[
+        {
+          title: "Stamina in Extended Matches",
+          description: "Performance tends to decline slightly in overtime rounds. Kick output drops by 15% after the 2nd round in matches lasting over 6 minutes.",
+          impact: "Medium",
+          improvement: "High-intensity interval training focusing on match-specific endurance."
+        },
+        {
+          title: "Aggressive Close-Range Pressure", 
+          description: "Can struggle against opponents who constantly pressure forward and clinch. Success rate drops to 68% when facing clinch-heavy fighting styles.",
+          impact: "High",
+          improvement: "Specialized clinch work and short-range technique development."
+        },
+        {
+          title: "Left-Side Blind Spot",
+          description: "Slightly slower reaction time to attacks from the left side (0.2 seconds slower). This creates vulnerability to left-footed fighters' roundhouse kicks.",
+          impact: "Medium",
+          improvement: "Mirror work and reaction drills targeting left-side attacks."
+        }
+      ].map((weakness, index) => (
+        <Card key={index} className="bg-gradient-to-r from-athlete-danger/20 to-athlete-danger/5 border-athlete-danger/30">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-white mb-2">{weakness.title}</h3>
+                <p className="text-gray-300 leading-relaxed">{weakness.description}</p>
               </div>
-              
-              <p className="text-gray-300 leading-relaxed mb-4">{weakness.description}</p>
-              
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-gray-400">Vulnerability Level</span>
-                    <span className="text-red-400 font-semibold">{riskScore}%</span>
-                  </div>
-                  <Progress value={riskScore} className="h-2 mb-3" />
-                </div>
-                <div className="bg-athlete-gray-700 rounded-lg p-3">
-                  <div className="text-xs text-gray-400 mb-1">Improvement Priority</div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-white font-medium">{impactLevel} Priority</span>
-                    <div className="flex space-x-1">
-                      {[...Array(5)].map((_, i) => (
-                        <div 
-                          key={i} 
-                          className={`w-2 h-2 rounded-full ${
-                            i < Math.ceil(riskScore / 20) ? 'bg-red-500' : 'bg-gray-600'
-                          }`} 
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-4 bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-                <h4 className="text-blue-400 font-semibold mb-2 flex items-center">
-                  <Target className="mr-2" size={16} />
-                  Targeted Improvement Strategy
-                </h4>
-                <p className="text-gray-300 text-sm">
-                  {impactLevel === "High" 
-                    ? `Critical area requiring immediate attention. Implement specialized training protocols with daily focus sessions.`
-                    : impactLevel === "Medium" 
-                    ? `Important weakness needing structured improvement plan with 3-4 weekly training sessions.`
-                    : `Minor area for gradual improvement through regular practice and monitoring.`}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        );
-        })}
-      </div>
-    );
-  };
-
-  const renderDevelopmentPlan = (data: any) => {
-    // Handle both array and object formats - data is now directly an array from backend
-    const plansArray = Array.isArray(data) ? data : (data.plan || data.plans || []);
-    
-    console.log('Development Plan Debug:', { data, plansArray, isArray: Array.isArray(data) });
-    
-    if (!plansArray || plansArray.length === 0) {
-      return (
-        <div className="text-center py-8">
-          <p className="text-gray-400">No development plan data available</p>
-          <p className="text-xs text-gray-500 mt-2">Debug: {JSON.stringify(data)}</p>
-        </div>
-      );
-    }
-    
-    return (
-      <div className="space-y-6">
-        <div className="grid md:grid-cols-3 gap-4 mb-6">
-          <Card className="bg-gradient-to-r from-purple-600/20 to-purple-600/5 border-purple-500/30">
-            <CardContent className="p-4 text-center">
-              <Calendar className="mx-auto mb-3 text-purple-400" size={36} />
-              <h3 className="text-lg font-bold text-white mb-1">12-Week Program</h3>
-              <p className="text-gray-300 text-sm">Olympic preparation cycle</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-gradient-to-r from-athlete-accent/20 to-athlete-accent/5 border-athlete-accent/30">
-            <CardContent className="p-4 text-center">
-              <Target className="mx-auto mb-3 text-athlete-accent" size={36} />
-              <h3 className="text-lg font-bold text-white mb-1">Elite Training</h3>
-              <p className="text-gray-300 text-sm">World-class protocols</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-gradient-to-r from-green-600/20 to-green-600/5 border-green-500/30">
-            <CardContent className="p-4 text-center">
-              <TrendingUp className="mx-auto mb-3 text-green-400" size={36} />
-              <h3 className="text-lg font-bold text-white mb-1">Performance</h3>
-              <p className="text-gray-300 text-sm">Measurable improvements</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="space-y-4">
-          {plansArray.length > 0 ? (
-            <div className="mb-4 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
-              <p className="text-green-400 text-sm">✓ Found {plansArray.length} development plans</p>
+              <Badge className={`ml-4 ${weakness.impact === 'High' ? 'bg-red-600' : 'bg-orange-500'} text-white`}>
+                {weakness.impact} Impact
+              </Badge>
             </div>
-          ) : (
-            <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-              <p className="text-red-400 text-sm">⚠ No plans found in array</p>
+            <div className="bg-athlete-gray-700 rounded-lg p-4">
+              <h4 className="text-athlete-accent font-semibold mb-2">Improvement Strategy:</h4>
+              <p className="text-gray-300">{weakness.improvement}</p>
             </div>
-          )}
-          {plansArray.map((plan: any, index: number) => {
-            const weekNumber = (index % 12) + 1;
-            const phaseColors = [
-              "border-blue-500/30 bg-blue-500/10",
-              "border-green-500/30 bg-green-500/10", 
-              "border-purple-500/30 bg-purple-500/10",
-              "border-yellow-500/30 bg-yellow-500/10",
-              "border-red-500/30 bg-red-500/10",
-              "border-cyan-500/30 bg-cyan-500/10",
-              "border-pink-500/30 bg-pink-500/10",
-              "border-orange-500/30 bg-orange-500/10",
-              "border-indigo-500/30 bg-indigo-500/10",
-              "border-teal-500/30 bg-teal-500/10"
-            ];
-            const colorClass = phaseColors[index % phaseColors.length];
-            
-            return (
-              <Card key={index} className={`bg-athlete-gray-800 ${colorClass} hover:bg-opacity-20 transition-all`}>
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center">
-                      <div className="bg-purple-500/20 rounded-full p-2 mr-3">
-                        <Calendar className="text-purple-400" size={20} />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-white mb-1">{plan.title}</h3>
-                        <div className="flex items-center space-x-3">
-                          <Badge className="bg-purple-600 text-white text-xs">Week {plan.week || weekNumber}</Badge>
-                          <span className="text-sm text-purple-400 font-medium">Olympic Preparation</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-bold text-purple-400">Phase {Math.ceil(weekNumber / 3)}</div>
-                      <div className="text-xs text-gray-400">Training Block</div>
-                    </div>
-                  </div>
-                  
-                  <p className="text-gray-300 leading-relaxed mb-4">{plan.description}</p>
-                  
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div className="bg-athlete-gray-700 rounded-lg p-3">
-                      <div className="text-xs text-gray-400 mb-1">Training Focus</div>
-                      <div className="text-sm text-white font-medium">
-                        {index < 4 ? "Foundation Building" : 
-                         index < 8 ? "Skill Development" : "Peak Performance"}
-                      </div>
-                    </div>
-                    <div className="bg-athlete-gray-700 rounded-lg p-3">
-                      <div className="text-xs text-gray-400 mb-1">Intensity Level</div>
-                      <div className="flex items-center">
-                        <span className="text-sm text-white font-medium mr-2">
-                          {index < 3 ? "Moderate" : index < 8 ? "High" : "Peak"}
-                        </span>
-                        <div className="flex space-x-1">
-                          {[...Array(5)].map((_, i) => (
-                            <div 
-                              key={i} 
-                              className={`w-2 h-2 rounded-full ${
-                                i < (index < 3 ? 3 : index < 8 ? 4 : 5) ? 'bg-purple-500' : 'bg-gray-600'
-                              }`} 
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-athlete-gray-700 rounded-lg p-3">
-                      <div className="text-xs text-gray-400 mb-1">Expected Outcome</div>
-                      <div className="text-sm text-green-400 font-medium">
-                        {index < 4 ? "Base Improvement" : 
-                         index < 8 ? "Skill Mastery" : "Competition Ready"}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+
+  const renderDevelopmentPlan = (data: any) => (
+    <div className="space-y-6">
+      <div className="grid md:grid-cols-2 gap-6 mb-6">
+        <Card className="bg-gradient-to-r from-purple-600/20 to-purple-600/5 border-purple-500/30">
+          <CardContent className="p-6 text-center">
+            <Calendar className="mx-auto mb-4 text-purple-400" size={48} />
+            <h3 className="text-2xl font-bold text-white mb-2">12-Week Program</h3>
+            <p className="text-gray-300">Comprehensive development plan targeting key improvement areas</p>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-r from-athlete-accent/20 to-athlete-accent/5 border-athlete-accent/30">
+          <CardContent className="p-6 text-center">
+            <Target className="mx-auto mb-4 text-athlete-accent" size={48} />
+            <h3 className="text-2xl font-bold text-white mb-2">Olympic Ready</h3>
+            <p className="text-gray-300">Designed to peak performance for elite competition</p>
+          </CardContent>
+        </Card>
       </div>
-    );
-  };
+
+      <Tabs defaultValue="weeks1-4" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 bg-athlete-gray-800">
+          <TabsTrigger value="weeks1-4" className="text-white">Weeks 1-4</TabsTrigger>
+          <TabsTrigger value="weeks5-8" className="text-white">Weeks 5-8</TabsTrigger>
+          <TabsTrigger value="weeks9-12" className="text-white">Weeks 9-12</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="weeks1-4" className="space-y-4">
+          {[
+            {
+              week: 1,
+              title: "Cardiovascular Enhancement Protocol",
+              description: "High-intensity interval training combining taekwondo-specific movements. 45-minute sessions, 5 days/week focusing on maintaining peak performance through extended competition rounds.",
+              focus: "Endurance Building"
+            },
+            {
+              week: 2,
+              title: "Close-Range Combat Mastery",
+              description: "Specialized clinch work and short-range techniques. Partner drills focusing on elbow strikes, knee techniques, and escaping from clinch positions.",
+              focus: "Technical Development"
+            }
+          ].map((plan, index) => (
+            <Card key={index} className="bg-athlete-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center text-white">
+                  <div className="bg-purple-600 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
+                    {plan.week}
+                  </div>
+                  {plan.title}
+                  <Badge className="ml-auto bg-purple-600 text-white">{plan.focus}</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-300">{plan.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+        
+        <TabsContent value="weeks5-8" className="space-y-4">
+          <Card className="bg-athlete-gray-800 border-gray-700">
+            <CardHeader>
+              <CardTitle className="text-white">Mid-Program Intensive Phase</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-300">
+                Focus shifts to power development and competition simulation. This phase includes 
+                plyometric training, Olympic sparring simulations, and advanced tactical refinement.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="weeks9-12" className="space-y-4">
+          <Card className="bg-athlete-gray-800 border-gray-700">
+            <CardHeader>
+              <CardTitle className="text-white">Competition Preparation</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-300">
+                Final preparation phase with competition-specific training, strategy refinement, 
+                and peak conditioning maintenance leading to major tournaments.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
 
   const renderNutritionPlan = (data: any) => (
     <div className="space-y-6">
@@ -680,309 +537,158 @@ export function AnalysisPopup({
     </div>
   );
 
-  const renderBeatStrategies = (data: any) => {
-    // Handle both array and object formats - data is now directly an array from backend
-    const strategiesArray = Array.isArray(data) ? data : (data.strategies || []);
-    
-    console.log('Beat Strategies Debug:', { data, strategiesArray, isArray: Array.isArray(data) });
-    
-    if (!strategiesArray || strategiesArray.length === 0) {
-      return (
-        <div className="text-center py-8">
-          <p className="text-gray-400">No beat strategies data available</p>
-          <p className="text-xs text-gray-500 mt-2">Debug: {JSON.stringify(data)}</p>
-        </div>
-      );
-    }
-    
-    return (
-      <div className="space-y-6">
-        <div className="grid md:grid-cols-3 gap-4 mb-6">
-          <Card className="bg-gradient-to-r from-red-600/20 to-red-600/5 border-red-500/30">
-            <CardContent className="p-4 text-center">
-              <Swords className="mx-auto mb-3 text-red-400" size={36} />
-              <h3 className="text-lg font-bold text-white mb-1">Combat Strategies</h3>
-              <p className="text-gray-300 text-sm">Elite tactical analysis</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-gradient-to-r from-orange-600/20 to-orange-600/5 border-orange-500/30">
-            <CardContent className="p-4 text-center">
-              <Target className="mx-auto mb-3 text-orange-400" size={36} />
-              <h3 className="text-lg font-bold text-white mb-1">Success Rate</h3>
-              <p className="text-gray-300 text-sm">86% average effectiveness</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-gradient-to-r from-blue-600/20 to-blue-600/5 border-blue-500/30">
-            <CardContent className="p-4 text-center">
-              <Shield className="mx-auto mb-3 text-blue-400" size={36} />
-              <h3 className="text-lg font-bold text-white mb-1">Opponent Types</h3>
-              <p className="text-gray-300 text-sm">Comprehensive coverage</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {strategiesArray.length > 0 ? (
-          <div className="mb-4 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
-            <p className="text-green-400 text-sm">✓ Found {strategiesArray.length} beat strategies</p>
-          </div>
-        ) : (
-          <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-            <p className="text-red-400 text-sm">⚠ No strategies found in array</p>
-          </div>
-        )}
-        {strategiesArray.map((strategy: any, index: number) => {
-          const effectivenessRates = [88, 92, 85, 90, 87, 94, 89, 91, 86, 93];
-          const effectiveness = effectivenessRates[index] || 85;
-          const strategyColors = [
-            "border-red-500/30 bg-red-500/10",
-            "border-orange-500/30 bg-orange-500/10",
-            "border-yellow-500/30 bg-yellow-500/10",
-            "border-green-500/30 bg-green-500/10",
-            "border-blue-500/30 bg-blue-500/10",
-            "border-purple-500/30 bg-purple-500/10",
-            "border-pink-500/30 bg-pink-500/10",
-            "border-indigo-500/30 bg-indigo-500/10",
-            "border-cyan-500/30 bg-cyan-500/10",
-            "border-teal-500/30 bg-teal-500/10"
-          ];
-          const colorClass = strategyColors[index % strategyColors.length];
-          
-          return (
-            <Card key={index} className={`bg-athlete-gray-800 ${colorClass} hover:bg-opacity-20 transition-all`}>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center">
-                    <div className="bg-red-500/20 rounded-full p-2 mr-3">
-                      <Swords className="text-red-400" size={20} />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-white mb-1">{strategy.title}</h3>
-                      <div className="flex items-center space-x-3">
-                        <Badge className="bg-red-600 text-white text-xs">Combat Strategy</Badge>
-                        <span className="text-sm text-red-400 font-medium">Elite Level</span>
-                      </div>
-                    </div>
+  const renderBeatStrategies = (data: any) => (
+    <div className="space-y-6">
+      {[
+        {
+          opponent: "Power Kicker",
+          strategy: "Counter the Power Kicker",
+          description: "Against heavy kickers: Use distance management and timing. Stay just outside their optimal range, bait power kicks, then counter with quick combinations to the body.",
+          tactics: ["Distance management", "Timing counters", "Body targeting", "Early point scoring"],
+          effectiveness: 85
+        },
+        {
+          opponent: "Pressure Fighter",
+          strategy: "Neutralize the Pressure Fighter", 
+          description: "Against constant forward pressure: Utilize circular footwork and pivot escapes. Use push kicks to create distance, target their advancing legs with cut kicks.",
+          tactics: ["Circular footwork", "Push kicks", "Cut kicks", "Clinch escapes"],
+          effectiveness: 78
+        },
+        {
+          opponent: "Technical Fighter",
+          strategy: "Outpoint the Technical Fighter",
+          description: "Against technical opponents: Increase pace and variety. Use feints and rhythm changes to disrupt their timing. Score with unconventional techniques.",
+          tactics: ["Pace variation", "Feint attacks", "Rhythm changes", "Unconventional techniques"],
+          effectiveness: 82
+        },
+        {
+          opponent: "Defensive Counter-Puncher",
+          strategy: "Defeat the Defensive Counter-Puncher",
+          description: "Against defensive fighters: Use combination attacks and continuous pressure. Fake attacks to draw out their counters, then counter their counters.",
+          tactics: ["Combination attacks", "Continuous pressure", "Counter counters", "Superior conditioning"],
+          effectiveness: 90
+        }
+      ].map((strategy, index) => (
+        <Card key={index} className="bg-gradient-to-r from-red-600/20 to-red-600/5 border-red-500/30">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between text-white">
+              <div className="flex items-center">
+                <Swords className="mr-3 text-red-400" size={24} />
+                <span>vs {strategy.opponent}</span>
+              </div>
+              <Badge className={`${strategy.effectiveness >= 85 ? 'bg-green-600' : strategy.effectiveness >= 75 ? 'bg-orange-500' : 'bg-red-600'} text-white`}>
+                {strategy.effectiveness}% Success
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-gray-300 leading-relaxed">{strategy.description}</p>
+            
+            <div className="bg-athlete-gray-700 rounded-lg p-4">
+              <h4 className="text-red-400 font-semibold mb-3">Key Tactics:</h4>
+              <div className="grid grid-cols-2 gap-2">
+                {strategy.tactics.map((tactic, tacticIndex) => (
+                  <div key={tacticIndex} className="flex items-center text-sm">
+                    <ChevronRight className="mr-2 text-red-400" size={16} />
+                    <span className="text-gray-300">{tactic}</span>
                   </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-red-400">{effectiveness}%</div>
-                    <div className="text-xs text-gray-400">Success Rate</div>
-                  </div>
-                </div>
-                
-                <p className="text-gray-300 leading-relaxed mb-4">{strategy.description}</p>
-                
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="bg-athlete-gray-700 rounded-lg p-3">
-                    <div className="text-xs text-gray-400 mb-1">Strategy Type</div>
-                    <div className="text-sm text-white font-medium">
-                      {index % 4 === 0 ? "Offensive Pressure" : 
-                       index % 4 === 1 ? "Counter-Attack" : 
-                       index % 4 === 2 ? "Technical Control" : "Defensive Mastery"}
-                    </div>
-                  </div>
-                  <div className="bg-athlete-gray-700 rounded-lg p-3">
-                    <div className="text-xs text-gray-400 mb-1">Effectiveness</div>
-                    <div className="flex items-center">
-                      <span className="text-sm text-white font-medium mr-2">
-                        {effectiveness >= 90 ? "Elite" : effectiveness >= 85 ? "High" : "Moderate"}
-                      </span>
-                      <div className="flex space-x-1">
-                        {[...Array(5)].map((_, i) => (
-                          <div 
-                            key={i} 
-                            className={`w-2 h-2 rounded-full ${
-                              i < Math.ceil(effectiveness / 20) ? 'bg-red-500' : 'bg-gray-600'
-                            }`} 
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-                  <h4 className="text-blue-400 font-semibold mb-2 flex items-center">
-                    <Target className="mr-2" size={16} />
-                    Tactical Implementation
-                  </h4>
-                  <p className="text-gray-300 text-sm">
-                    {effectiveness >= 90 
-                      ? "Master-level strategy requiring precise timing and exceptional technical skill execution."
-                      : effectiveness >= 85 
-                      ? "Advanced strategy suitable for elite competition with consistent training application."
-                      : "Foundational strategy effective against most opponents with proper preparation."}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-    );
-  };
-
-
-  const renderVideoAnalysis = (data: any) => {
-    // Handle both array and object formats - data is now directly an array from backend
-    const analysisArray = Array.isArray(data) ? data : (data.videos || data.analysis || []);
-    
-    console.log('Video Analysis Debug:', { data, analysisArray, isArray: Array.isArray(data) });
-    
-    if (!analysisArray || analysisArray.length === 0) {
-      return (
-        <div className="text-center py-8">
-          <p className="text-gray-400">No video analysis data available</p>
-          <p className="text-xs text-gray-500 mt-2">Debug: {JSON.stringify(data)}</p>
-        </div>
-      );
-    }
-    
-    return (
-      <div className="space-y-6">
-        <div className="grid md:grid-cols-4 gap-4 mb-6">
-          <Card className="bg-gradient-to-r from-indigo-600/20 to-indigo-600/5 border-indigo-500/30">
-            <CardContent className="p-4 text-center">
-              <Video className="mx-auto mb-3 text-indigo-400" size={32} />
-              <h3 className="text-lg font-bold text-white mb-1">500+</h3>
-              <p className="text-gray-300 text-xs">Kicks Analyzed</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-gradient-to-r from-purple-600/20 to-purple-600/5 border-purple-500/30">
-            <CardContent className="p-4 text-center">
-              <Target className="mx-auto mb-3 text-purple-400" size={32} />
-              <h3 className="text-lg font-bold text-white mb-1">94%</h3>
-              <p className="text-gray-300 text-xs">Technical Accuracy</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-gradient-to-r from-green-600/20 to-green-600/5 border-green-500/30">
-            <CardContent className="p-4 text-center">
-              <TrendingUp className="mx-auto mb-3 text-green-400" size={32} />
-              <h3 className="text-lg font-bold text-white mb-1">8.2</h3>
-              <p className="text-gray-300 text-xs">Avg Points/Match</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-r from-yellow-600/20 to-yellow-600/5 border-yellow-500/30">
-            <CardContent className="p-4 text-center">
-              <Eye className="mx-auto mb-3 text-yellow-400" size={32} />
-              <h3 className="text-lg font-bold text-white mb-1">AI</h3>
-              <p className="text-gray-300 text-xs">Powered Analysis</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="space-y-4">
-          {analysisArray.length > 0 ? (
-            <div className="mb-4 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
-              <p className="text-green-400 text-sm">✓ Found {analysisArray.length} video analyses</p>
+                ))}
+              </div>
             </div>
-          ) : (
-            <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-              <p className="text-red-400 text-sm">⚠ No analyses found in array</p>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">Effectiveness Rating</span>
+                <span className="text-white">{strategy.effectiveness}%</span>
+              </div>
+              <Progress value={strategy.effectiveness} className="h-2" />
             </div>
-          )}
-          {analysisArray.map((analysis: any, index: number) => {
-            const analysisTypes = ["Technical", "Performance", "Mental", "Tactical", "Physical"];
-            const analysisType = analysisTypes[index % analysisTypes.length];
-            const accuracyScores = [96, 94, 91, 93, 95, 92, 89, 97, 88, 90];
-            const accuracy = accuracyScores[index] || 92;
-            
-            const typeColors = {
-              "Technical": "border-blue-500/30 bg-blue-500/10",
-              "Performance": "border-green-500/30 bg-green-500/10",
-              "Mental": "border-purple-500/30 bg-purple-500/10",
-              "Tactical": "border-red-500/30 bg-red-500/10",
-              "Physical": "border-orange-500/30 bg-orange-500/10"
-            };
-            
-            const colorClass = typeColors[analysisType as keyof typeof typeColors] || "border-gray-500/30 bg-gray-500/10";
-            
-            return (
-              <Card key={index} className={`bg-athlete-gray-800 ${colorClass} hover:bg-opacity-20 transition-all`}>
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center">
-                      <div className="bg-indigo-500/20 rounded-full p-2 mr-3">
-                        <Video className="text-indigo-400" size={20} />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-white mb-1">{analysis.title}</h3>
-                        <div className="flex items-center space-x-3">
-                          <Badge className={`text-white text-xs ${
-                            analysisType === 'Technical' ? 'bg-blue-600' : 
-                            analysisType === 'Performance' ? 'bg-green-600' : 
-                            analysisType === 'Mental' ? 'bg-purple-600' :
-                            analysisType === 'Tactical' ? 'bg-red-600' : 'bg-orange-600'
-                          }`}>
-                            {analysisType} Analysis
-                          </Badge>
-                          <span className="text-sm text-indigo-400 font-medium">AI-Powered</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-indigo-400">{accuracy}%</div>
-                      <div className="text-xs text-gray-400">Accuracy Score</div>
-                    </div>
-                  </div>
-                  
-                  <p className="text-gray-300 leading-relaxed mb-4">{analysis.description}</p>
-                  
-                  <div className="grid md:grid-cols-3 gap-4 mb-4">
-                    <div className="bg-athlete-gray-700 rounded-lg p-3">
-                      <div className="text-xs text-gray-400 mb-1">Analysis Type</div>
-                      <div className="text-sm text-white font-medium">{analysisType}</div>
-                    </div>
-                    <div className="bg-athlete-gray-700 rounded-lg p-3">
-                      <div className="text-xs text-gray-400 mb-1">Accuracy Level</div>
-                      <div className="flex items-center">
-                        <span className="text-sm text-white font-medium mr-2">
-                          {accuracy >= 95 ? "Elite" : accuracy >= 90 ? "High" : "Standard"}
-                        </span>
-                        <div className="flex space-x-1">
-                          {[...Array(5)].map((_, i) => (
-                            <div 
-                              key={i} 
-                              className={`w-2 h-2 rounded-full ${
-                                i < Math.ceil(accuracy / 20) ? 'bg-indigo-500' : 'bg-gray-600'
-                              }`} 
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-athlete-gray-700 rounded-lg p-3">
-                      <div className="text-xs text-gray-400 mb-1">Video Quality</div>
-                      <div className="text-sm text-green-400 font-medium">HD Professional</div>
-                    </div>
-                  </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
 
-                  <div className="bg-gradient-to-r from-athlete-accent/20 to-athlete-accent/5 rounded-lg p-4 border border-athlete-accent/30">
-                    <h4 className="text-athlete-accent font-semibold mb-2 flex items-center">
-                      <Eye className="mr-2" size={16} />
-                      AI Insights & Recommendations
-                    </h4>
-                    <p className="text-gray-300 text-sm">
-                      {accuracy >= 95 
-                        ? "Exceptional performance metrics indicate world-class execution. Maintain current training protocols with minor tactical adjustments."
-                        : accuracy >= 90 
-                        ? "Strong performance foundation with identified areas for Olympic-level refinement and strategic enhancement."
-                        : "Solid technical base requiring focused improvement in key performance areas for elite competition readiness."}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+  const renderVideoAnalysis = (data: any) => (
+    <div className="space-y-6">
+      <div className="grid md:grid-cols-3 gap-6 mb-6">
+        <Card className="bg-gradient-to-r from-indigo-600/20 to-indigo-600/5 border-indigo-500/30">
+          <CardContent className="p-6 text-center">
+            <Video className="mx-auto mb-4 text-indigo-400" size={48} />
+            <h3 className="text-xl font-bold text-white">500+</h3>
+            <p className="text-gray-300">Kicks Analyzed</p>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-r from-purple-600/20 to-purple-600/5 border-purple-500/30">
+          <CardContent className="p-6 text-center">
+            <Target className="mx-auto mb-4 text-purple-400" size={48} />
+            <h3 className="text-xl font-bold text-white">94%</h3>
+            <p className="text-gray-300">Technical Accuracy</p>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-r from-green-600/20 to-green-600/5 border-green-500/30">
+          <CardContent className="p-6 text-center">
+            <TrendingUp className="mx-auto mb-4 text-green-400" size={48} />
+            <h3 className="text-xl font-bold text-white">8.2</h3>
+            <p className="text-gray-300">Avg Points/Match</p>
+          </CardContent>
+        </Card>
       </div>
-    );
-  };
 
+      <div className="space-y-6">
+        {[
+          {
+            title: "Technique Breakdown Analysis",
+            type: "Technical",
+            findings: "Analysis of 500+ kicks shows 94% technical accuracy with optimal hip rotation and chamber positioning. Exceptional ability to maintain form under fatigue.",
+            recommendations: "Continue current technique maintenance. Add more variation in kick timing to increase unpredictability against elite opponents.",
+            videoUrl: "https://example.com/seif-eissa-training-analysis"
+          },
+          {
+            title: "Competition Performance Review",
+            type: "Performance", 
+            findings: "Won 18 of last 20 matches with average winning margin of 8.2 points. Shows consistent performance across different venues and opponent styles.",
+            recommendations: "Focus on first-round dominance to avoid close decisions. Current strategy of building leads in rounds 2-3 is effective but risky against world-class opponents.",
+            videoUrl: "https://example.com/seif-eissa-competition-highlights"
+          },
+          {
+            title: "Psychological Performance Profile",
+            type: "Mental",
+            findings: "Heart rate remains stable under pressure (average 165 BPM during high-pressure moments vs 170 BPM training average). Excellent emotional control and focus.",
+            recommendations: "Implement pre-competition visualization routines for Olympic-level pressure scenarios. Consider working with sports psychologist for peak performance mindset.",
+            videoUrl: "https://example.com/seif-eissa-psychological-profile"
+          }
+        ].map((analysis, index) => (
+          <Card key={index} className="bg-athlete-gray-800 border-gray-700">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between text-white">
+                <div className="flex items-center">
+                  <Video className="mr-3 text-indigo-400" size={24} />
+                  <span>{analysis.title}</span>
+                </div>
+                <Badge className={`${analysis.type === 'Technical' ? 'bg-blue-600' : analysis.type === 'Performance' ? 'bg-green-600' : 'bg-purple-600'} text-white`}>
+                  {analysis.type}
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-athlete-gray-700 rounded-lg p-4">
+                <h4 className="text-indigo-400 font-semibold mb-2">Key Findings:</h4>
+                <p className="text-gray-300">{analysis.findings}</p>
+              </div>
+              
+              <div className="bg-gradient-to-r from-athlete-accent/20 to-athlete-accent/5 rounded-lg p-4 border border-athlete-accent/30">
+                <h4 className="text-athlete-accent font-semibold mb-2">Recommendations:</h4>
+                <p className="text-gray-300">{analysis.recommendations}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
 
   const renderContent = () => {
     switch (type) {

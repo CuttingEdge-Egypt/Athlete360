@@ -326,62 +326,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         serviceType: "development"
       });
 
-      // Try to get existing development plan from database
-      let developmentPlan;
-      try {
-        const existingPlans = await storage.getAthleteAnalysis(athleteId, 'development');
-        if (existingPlans.length > 0) {
-          developmentPlan = existingPlans[0].resultData;
-        }
-      } catch (error) {
-        console.log("No existing development plan found, creating new one");
-      }
-
-      // If no existing plan, create comprehensive professional data
-      if (!developmentPlan) {
-        developmentPlan = [
+      const developmentPlan = {
+        duration: "4 weeks",
+        plan: [
           {
-            title: "Elite Technical Mastery Program",
-            description: "Comprehensive 12-week elite-level technical development program designed for Olympic-caliber athletes. Focus on perfecting advanced techniques, tactical awareness, and competitive edge refinement through progressive skill building and performance optimization.",
-            phase: "Technical Excellence",
-            duration: "12 weeks",
-            intensity: "High",
-            priority: "Critical"
+            week: 1,
+            focus: "Foundation Building",
+            activities: [
+              "Basic technique refinement",
+              "Fitness assessment and baseline establishment",
+              "Mental preparation exercises"
+            ]
           },
           {
-            title: "Advanced Physical Conditioning Protocol",
-            description: "Professional athlete conditioning regimen incorporating sport-specific strength training, explosive power development, and endurance optimization. Includes periodization strategies, recovery protocols, and performance monitoring systems.",
-            phase: "Physical Development", 
-            duration: "16 weeks",
-            intensity: "Very High",
-            priority: "Essential"
+            week: 2,
+            focus: "Skill Enhancement",
+            activities: [
+              "Advanced technique training",
+              "Tactical awareness development",
+              "Strength and conditioning focus"
+            ]
           },
           {
-            title: "Mental Performance Enhancement System",
-            description: "Elite psychological training program featuring visualization techniques, pressure management strategies, competitive mindset development, and focus enhancement protocols specifically designed for world-class competition scenarios.",
-            phase: "Psychological Training",
-            duration: "8 weeks", 
-            intensity: "Moderate",
-            priority: "High"
+            week: 3,
+            focus: "Integration and Practice",
+            activities: [
+              "Combining skills in game-like scenarios",
+              "Pressure situation training",
+              "Performance analysis and feedback"
+            ]
           },
           {
-            title: "Tactical Intelligence Development",
-            description: "Strategic game analysis and tactical decision-making enhancement program. Includes opponent analysis methodologies, adaptive strategy formulation, and real-time tactical adjustment training for elite competitive scenarios.",
-            phase: "Strategic Planning",
-            duration: "10 weeks",
-            intensity: "High", 
-            priority: "Critical"
-          },
-          {
-            title: "Competition Readiness Protocol", 
-            description: "Final phase preparation system incorporating simulation training, peak performance timing, competitive environment adaptation, and championship-level mental preparation for major international competitions.",
-            phase: "Peak Performance",
-            duration: "6 weeks",
-            intensity: "Maximum",
-            priority: "Essential"
+            week: 4,
+            focus: "Peak Performance",
+            activities: [
+              "Competition simulation",
+              "Final technique adjustments",
+              "Mental conditioning and confidence building"
+            ]
           }
-        ];
-      }
+        ]
+      };
 
       await storage.createAnalysisLog({
         userId,
@@ -390,14 +375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         resultData: developmentPlan
       });
 
-      res.json({ 
-        duration: "20 weeks",
-        plan: developmentPlan.map((item, index) => ({
-          week: index + 1,
-          focus: item.phase,
-          activities: [item.title, item.description]
-        }))
-      });
+      res.json(developmentPlan);
     } catch (error) {
       console.error("Error generating development plan:", error);
       res.status(500).json({ message: "Failed to generate development plan" });
@@ -491,57 +469,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         serviceType: "beat"
       });
 
-      // Try to get existing beat strategies from database
-      let beatStrategies;
-      try {
-        const existingStrategies = await storage.getAthleteAnalysis(athleteId, 'beat');
-        if (existingStrategies.length > 0) {
-          beatStrategies = existingStrategies[0].resultData;
-        }
-      } catch (error) {
-        console.log("No existing beat strategies found, creating new ones");
-      }
-
-      // If no existing strategies, create comprehensive professional data
-      if (!beatStrategies) {
-        beatStrategies = [
+      const beatStrategies = {
+        strategies: [
           {
-            title: "Elite Counter-Attack Neutralization Strategy",
-            description: "Advanced tactical approach designed to neutralize elite athletes' signature counter-attacking abilities through systematic pressure application, timing disruption, and strategic positioning. Requires exceptional tactical awareness and precise execution timing.",
-            effectiveness: 94,
-            riskLevel: "Moderate",
-            executionComplexity: "High"
+            strategy: "Exploit Weak Side",
+            description: "Target the athlete's non-dominant side where technique may be less refined."
           },
           {
-            title: "Psychological Pressure Campaign",
-            description: "Professional-level mental warfare strategy incorporating crowd manipulation, rhythm disruption, and competitive intimidation techniques. Designed to break opponents' mental fortitude through sustained psychological pressure and strategic mind games.",
-            effectiveness: 87,
-            riskLevel: "Low", 
-            executionComplexity: "Moderate"
+            strategy: "Pressure Early",
+            description: "Apply immediate pressure to disrupt their preferred rhythm and timing."
           },
           {
-            title: "Technical Exploitation Matrix",
-            description: "Systematic identification and exploitation of technical weaknesses through advanced video analysis, pattern recognition, and targeted attack sequences. Focuses on exploiting minor technical flaws that become critical under elite-level pressure.",
-            effectiveness: 91,
-            riskLevel: "High",
-            executionComplexity: "Very High"
+            strategy: "Endurance Challenge",
+            description: "Extend the competition duration to test their stamina and mental fortitude."
           },
           {
-            title: "Endurance Supremacy Protocol", 
-            description: "Strategic approach leveraging superior physical conditioning to outlast opponents through extended high-intensity exchanges, forcing technical degradation and mental fatigue in later competition phases.",
-            effectiveness: 89,
-            riskLevel: "Moderate",
-            executionComplexity: "Moderate"
-          },
-          {
-            title: "Adaptive Tactical Switching System",
-            description: "Dynamic strategy adjustment protocol allowing real-time tactical modifications based on opponent responses, competition phase, and scoring situations. Requires exceptional tactical intelligence and rapid adaptation capabilities.",
-            effectiveness: 96,
-            riskLevel: "Low",
-            executionComplexity: "Expert"
+            strategy: "Tactical Variation",
+            description: "Use unpredictable tactics to prevent them from settling into their comfort zone."
           }
-        ];
-      }
+        ],
+        keyWeaknesses: [
+          "Tends to struggle with rapid changes in pace",
+          "Less effective when forced to play defensively",
+          "May lose focus during extended periods of play"
+        ]
+      };
 
       await storage.createAnalysisLog({
         userId,
@@ -550,18 +502,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         resultData: beatStrategies
       });
 
-      res.json({ 
-        strategies: beatStrategies.map(item => ({
-          strategy: item.title,
-          description: item.description
-        })),
-        keyWeaknesses: [
-          "Weakness in final sprint endurance",
-          "Tactical positioning in crowded fields", 
-          "Recovery time between high-intensity intervals",
-          "Mental pressure handling in championship scenarios"
-        ]
-      });
+      res.json(beatStrategies);
     } catch (error) {
       console.error("Error generating beat strategies:", error);
       res.status(500).json({ message: "Failed to generate beat strategies" });
@@ -588,57 +529,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         serviceType: "video"
       });
 
-      // Try to get existing video analysis from database
-      let videoAnalysis;
-      try {
-        const existingAnalysis = await storage.getAthleteAnalysis(athleteId, 'video');
-        if (existingAnalysis.length > 0) {
-          videoAnalysis = existingAnalysis[0].resultData;
-        }
-      } catch (error) {
-        console.log("No existing video analysis found, creating new one");
-      }
-
-      // If no existing analysis, create comprehensive professional data
-      if (!videoAnalysis) {
-        videoAnalysis = [
-          {
-            title: "Elite Technical Precision Analysis",
-            description: "Comprehensive biomechanical analysis of 500+ technique executions revealing 96% technical accuracy with optimal power transfer efficiency. Advanced motion capture data indicates world-class form consistency with minor optimization opportunities in transition phases.",
-            analysisType: "Technical",
-            accuracy: 96,
-            recommendedFocus: "Elite Competition"
-          },
-          {
-            title: "Championship Performance Evaluation",
-            description: "Professional competition footage analysis covering 18 elite matches with 94% win rate. Performance metrics indicate exceptional competitive consistency with strategic adaptation capabilities and superior mental resilience under pressure.",
-            analysisType: "Performance",
-            accuracy: 94,
-            recommendedFocus: "Strategic Enhancement"
-          },
-          {
-            title: "Psychological Warfare Assessment",
-            description: "Advanced behavioral analysis of competitive mindset, pressure response patterns, and tactical decision-making under elite-level stress. Demonstrates exceptional mental fortitude with opportunities for championship-level psychological optimization.",
-            analysisType: "Mental",
-            accuracy: 91,
-            recommendedFocus: "Mental Conditioning"
-          },
-          {
-            title: "Tactical Intelligence Breakdown",
-            description: "Strategic analysis of adaptive tactical capabilities, opponent exploitation patterns, and real-time strategy adjustment effectiveness. Shows superior tactical awareness with world-class adaptation speed and strategic thinking depth.",
-            analysisType: "Tactical", 
-            accuracy: 93,
-            recommendedFocus: "Tactical Mastery"
-          },
-          {
-            title: "Physical Dominance Profile",
-            description: "Comprehensive athletic performance analysis including power output, speed metrics, endurance capabilities, and recovery patterns. Demonstrates elite-level physical conditioning with championship-caliber athletic attributes.",
-            analysisType: "Physical",
-            accuracy: 95,
-            recommendedFocus: "Peak Conditioning"
-          }
-        ];
-      }
+      const videoAnalysis = {
+        analysisType: "Performance Review",
+        keyFindings: [
+          "Excellent form consistency throughout the performance",
+          "Minor timing adjustments needed in transition phases",
+          "Strong mental focus and concentration maintained"
+        ],
+        technicalInsights: [
+          "Body positioning optimal in 89% of movements",
+          "Speed execution varies by 12% from peak performance",
+          "Recovery time between actions could be improved"
+        ],
+        recommendations: [
+          "Focus on transition timing drills",
+          "Implement specific speed training protocols",
+          "Practice recovery techniques between high-intensity actions"
+        ],
+        overallScore: 8.7,
+        comparedToAverage: "+15% above peer average"
+      };
 
       await storage.createAnalysisLog({
         userId,
@@ -647,13 +557,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         resultData: videoAnalysis
       });
 
-      res.json({ 
-        overallScore: 8.5,
-        comparedToAverage: "15% above elite athlete average",
-        analysisType: "Advanced Motion Analysis",
-        keyFindings: videoAnalysis.map(item => item.title),
-        technicalInsights: videoAnalysis.map(item => item.description)
-      });
+      res.json(videoAnalysis);
     } catch (error) {
       console.error("Error generating video analysis:", error);
       res.status(500).json({ message: "Failed to generate video analysis" });

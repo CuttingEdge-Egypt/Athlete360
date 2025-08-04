@@ -1,60 +1,86 @@
-import { Link, useLocation } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Home, Trophy, LogOut } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/useAuth";
+import { Trophy, Coins, Plus, LogOut, User as UserIcon } from "lucide-react";
+import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import type { User } from "@shared/schema";
 
 export function Navigation() {
-  const [location] = useLocation();
-  const { user } = useAuth();
+  const { user: authUser } = useAuth();
+  
+  const { data: user } = useQuery<User>({
+    queryKey: ["/api/auth/user"],
+    enabled: !!authUser,
+  });
+
+  const handleLogout = () => {
+    window.location.href = "/api/logout";
+  };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-athlete-gray-800/95 backdrop-blur-sm border-b border-gray-700">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/">
-            <div className="flex items-center space-x-2">
-              <Trophy className="text-athlete-accent" size={24} />
-              <span className="text-xl font-bold text-white">Athlete360</span>
-            </div>
+    <nav className="fixed top-0 w-full z-50 bg-athlete-primary/90 backdrop-blur-lg border-b border-gray-800">
+      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+        <Link href="/" className="flex items-center space-x-2 cursor-pointer">
+          <Trophy className="text-athlete-accent text-2xl" />
+          <span className="text-xl font-bold text-white">Athlete360</span>
+        </Link>
+        
+        <div className="hidden md:flex items-center space-x-6">
+          {/* Token Balance Display */}
+          <div 
+            data-testid="token-balance"
+            className="flex items-center space-x-2 bg-athlete-gray-800 px-4 py-2 rounded-full"
+          >
+            <Coins className="text-athlete-warning" size={20} />
+            <span className="font-semibold text-white">{user?.tokens || 0}</span>
+            <span className="text-sm text-gray-400">tokens</span>
+          </div>
+          
+          <Link href="/subscribe">
+            <Button 
+              data-testid="button-buy-tokens"
+              className="bg-athlete-accent hover:bg-blue-600 text-white"
+            >
+              <Plus className="mr-2" size={16} />
+              Buy Tokens
+            </Button>
           </Link>
+        </div>
 
-          {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-6">
-            <Link href="/">
-              <Button 
-                variant={location === "/" ? "default" : "ghost"}
-                className="text-white hover:text-athlete-accent"
-              >
-                <Home size={16} className="mr-2" />
-                Dashboard
-              </Button>
-            </Link>
+        <div className="flex items-center space-x-4">
+          {/* Mobile Token Display */}
+          <div className="md:hidden">
+            <Badge 
+              variant="secondary" 
+              className="bg-athlete-gray-800 text-athlete-warning"
+            >
+              <Coins className="mr-1" size={14} />
+              {user?.tokens || 0}
+            </Badge>
           </div>
 
-          {/* User Info */}
-          <div className="flex items-center space-x-4">
-            {user && (
-              <div className="hidden md:flex items-center space-x-3">
-                <img 
-                  src={(user as any).profileImageUrl || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=32&h=32"}
-                  alt={(user as any).firstName || "User"}
-                  className="w-8 h-8 rounded-full object-cover"
-                />
-                <span className="text-white text-sm">
-                  {(user as any).firstName} {(user as any).lastName}
-                </span>
-              </div>
+          {/* User Menu */}
+          <div className="flex items-center space-x-2">
+            {user?.profileImageUrl ? (
+              <img 
+                src={user.profileImageUrl} 
+                alt="Profile" 
+                className="w-8 h-8 rounded-full object-cover"
+              />
+            ) : (
+              <UserIcon className="text-gray-300 w-8 h-8" />
             )}
             
             <Button 
-              onClick={() => window.location.href = "/api/logout"}
-              variant="outline"
+              onClick={handleLogout}
+              data-testid="button-logout"
+              variant="ghost" 
               size="sm"
-              className="border-gray-600 text-gray-300 hover:text-white hover:border-gray-500"
+              className="text-gray-300 hover:text-white"
             >
-              <LogOut size={16} className="mr-2" />
-              Logout
+              <LogOut size={16} />
+              <span className="hidden sm:inline ml-2">Logout</span>
             </Button>
           </div>
         </div>

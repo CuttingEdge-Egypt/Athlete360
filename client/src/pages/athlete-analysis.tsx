@@ -22,24 +22,12 @@ export default function AthleteAnalysis() {
     queryKey: ["/api/transactions"],
   });
 
-  const { data: analysisLogs, error: analysisLogsError, isLoading: analysisLogsLoading } = useQuery<AnalysisLog[]>({
+  const { data: analysisLogs = [] } = useQuery<AnalysisLog[]>({
     queryKey: ["/api/analysis-logs"],
-    retry: false,
-    staleTime: 0, // Always fetch fresh data
-  });
-
-  // Handle null return from authentication failure
-  const safeAnalysisLogs = analysisLogs || [];
-  
-  console.log('Analysis Logs Query:', { 
-    analysisLogs: safeAnalysisLogs, 
-    analysisLogsError, 
-    analysisLogsLoading,
-    isNull: analysisLogs === null
   });
 
   const athleteTransactions = transactions.filter(t => t.athleteId === athleteId);
-  const athleteAnalysisLogs = safeAnalysisLogs.filter(l => l.athleteId === athleteId);
+  const athleteAnalysisLogs = analysisLogs.filter(l => l.athleteId === athleteId);
 
   if (!athlete) {
     return (
@@ -93,17 +81,10 @@ export default function AthleteAnalysis() {
                   <div>
                     <h1 className="text-3xl font-bold text-white mb-2">{athlete.name}</h1>
                     <p className="text-gray-400 mb-2">{athlete.bio}</p>
-                    <div className="flex items-center space-x-4 mb-4">
+                    <div className="flex items-center space-x-4">
                       <span className="text-sm text-athlete-warning">Rank #{athlete.rank || "TBD"}</span>
                       <span className="text-sm text-gray-400">Updated: {new Date(athlete.updatedAt || '').toLocaleDateString()}</span>
                     </div>
-                    <Button 
-                      onClick={() => window.location.href = `/athlete-profile/${athleteId}`}
-                      className="bg-purple-600 hover:bg-purple-700 text-white"
-                      size="sm"
-                    >
-                      View Complete Profile
-                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -130,31 +111,8 @@ export default function AthleteAnalysis() {
             </TabsList>
 
             <TabsContent value="results">
-              {analysisLogsError || analysisLogs === null ? (
-                <Card className="bg-red-900/20 border-red-500/30">
-                  <CardContent className="p-6 text-center">
-                    <div className="text-red-400 mb-4">⚠ Authentication Error</div>
-                    <p className="text-red-300 mb-4">Unable to fetch analysis results. Please try logging in again.</p>
-                    <Button 
-                      onClick={() => window.location.href = '/api/login'}
-                      className="bg-red-600 hover:bg-red-700"
-                    >
-                      Login Again
-                    </Button>
-                  </CardContent>
-                </Card>
-              ) : analysisLogsLoading ? (
-                <Card className="bg-athlete-gray-800 border-gray-700">
-                  <CardContent className="p-12 text-center">
-                    <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-                    <p className="text-gray-400">Loading analysis results...</p>
-                  </CardContent>
-                </Card>
-              ) : athleteAnalysisLogs.length > 0 ? (
+              {athleteAnalysisLogs.length > 0 ? (
                 <div className="grid gap-6">
-                  <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
-                    <p className="text-green-400 text-sm">✓ Found {athleteAnalysisLogs.length} analysis results</p>
-                  </div>
                   {athleteAnalysisLogs.map((log) => (
                     <AnalysisResult
                       key={log.id}

@@ -162,49 +162,29 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     </div>
   );
 
-  const renderDevelopmentPlan = (data: any) => {
-    console.log('Development Plan Render Data:', data);
-    
-    if (!data) {
-      return <div className="text-center py-8 text-red-400">No development plan data received</div>;
-    }
-    
-    if (!data.plan || data.plan.length === 0) {
-      return (
-        <div className="text-center py-8">
-          <div className="text-red-400 mb-2">Empty plan array</div>
-          <div className="text-xs text-gray-500">Raw data: {JSON.stringify(data)}</div>
-        </div>
-      );
-    }
-
-    return (
-      <div>
-        <div className="mb-6">
-          <Badge variant="secondary" className="bg-athlete-accent text-white">
-            Duration: {data.duration || "20 weeks"}
-          </Badge>
-          <div className="mt-2 p-2 bg-green-500/10 border border-green-500/20 rounded">
-            <div className="text-green-400 text-sm">✓ Found {data.plan.length} weeks of training</div>
-          </div>
-        </div>
-        <div className="grid gap-4">
-          {data.plan.map((week: any, index: number) => (
-            <Card key={index} className="bg-athlete-gray-700 border-gray-600">
-              <CardContent className="p-4">
-                <h5 className="font-semibold text-white mb-2">Week {week.week}: {week.focus}</h5>
-                <ul className="text-sm text-gray-300 space-y-1">
-                  {week.activities?.map((activity: string, idx: number) => (
-                    <li key={idx}>• {activity}</li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+  const renderDevelopmentPlan = (data: any) => (
+    <div>
+      <div className="mb-6">
+        <Badge variant="secondary" className="bg-athlete-accent text-white">
+          Duration: {data.duration}
+        </Badge>
       </div>
-    );
-  };
+      <div className="grid gap-4">
+        {data.plan?.map((week: any, index: number) => (
+          <Card key={index} className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-4">
+              <h5 className="font-semibold text-white mb-2">Week {week.week}: {week.focus}</h5>
+              <ul className="text-sm text-gray-300 space-y-1">
+                {week.activities?.map((activity: string, idx: number) => (
+                  <li key={idx}>• {activity}</li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
 
   const renderNutritionPlan = (data: any) => (
     <div>
@@ -261,100 +241,89 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     </div>
   );
 
-  const renderBeatStrategies = (data: any) => {
-    console.log('Beat Strategies Render Data:', data);
-    
-    if (!data) {
-      return <div className="text-center py-8 text-red-400">No beat strategies data received</div>;
-    }
-    
-    return (
-      <div>
-        <div className="mb-4 p-2 bg-green-500/10 border border-green-500/20 rounded">
-          <div className="text-green-400 text-sm">✓ Found {data.strategies?.length || 0} strategies</div>
-        </div>
-        <div className="grid gap-4 mb-6">
-          {data.strategies?.map((strategy: any, index: number) => (
-            <Card key={index} className="bg-athlete-gray-700 border-gray-600">
-              <CardContent className="p-4">
-                <h5 className="font-semibold text-red-400 mb-2">{strategy.strategy}</h5>
-                <p className="text-sm text-gray-300">{strategy.description}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        {data.keyWeaknesses && (
-          <Card className="bg-athlete-gray-700 border-gray-600">
+  const renderBeatStrategies = (data: any) => (
+    <div>
+      <div className="grid gap-4 mb-6">
+        {data.strategies?.map((strategy: any, index: number) => (
+          <Card key={index} className="bg-athlete-gray-700 border-gray-600">
             <CardContent className="p-4">
-              <h5 className="font-semibold text-athlete-warning mb-2">Key Weaknesses to Exploit</h5>
-              <ul className="text-sm text-gray-300 space-y-1">
-                {data.keyWeaknesses.map((weakness: string, index: number) => (
-                  <li key={index}>• {weakness}</li>
-                ))}
-              </ul>
+              <h5 className="font-semibold text-red-400 mb-2">{strategy.strategy}</h5>
+              <p className="text-sm text-gray-300">{strategy.description}</p>
             </CardContent>
           </Card>
-        )}
+        ))}
       </div>
-    );
-  };
+      {data.keyWeaknesses && (
+        <Card className="bg-athlete-gray-700 border-gray-600">
+          <CardContent className="p-4">
+            <h5 className="font-semibold text-athlete-warning mb-2">Key Weaknesses to Exploit</h5>
+            <ul className="text-sm text-gray-300 space-y-1">
+              {data.keyWeaknesses.map((weakness: string, index: number) => (
+                <li key={index}>• {weakness}</li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
 
-  const renderVideoAnalysis = (data: any) => {
-    console.log('Video Analysis Render Data:', data);
-    
-    if (!data) {
-      return <div className="text-center py-8 text-red-400">No video analysis data received</div>;
-    }
-    
-    return (
-      <div>
-        <div className="mb-4 p-2 bg-green-500/10 border border-green-500/20 rounded">
-          <div className="text-green-400 text-sm">✓ Video Analysis Complete - Score: {data.overallScore}/10</div>
-        </div>
-        <div className="grid md:grid-cols-2 gap-6 mb-6">
-          <Card className="bg-athlete-gray-700 border-gray-600">
-            <CardContent className="p-4">
-              <h5 className="font-semibold text-white mb-2">Overall Performance</h5>
-              <div className="space-y-2">
-                <div className="text-2xl font-bold text-athlete-accent">{data.overallScore}/10</div>
-                <div className="text-sm text-gray-300">{data.comparedToAverage}</div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-athlete-gray-700 border-gray-600">
-            <CardContent className="p-4">
-              <h5 className="font-semibold text-white mb-2">Analysis Type</h5>
-              <div className="text-athlete-accent font-semibold">{data.analysisType}</div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        <div className="grid gap-4">
-          <Card className="bg-athlete-gray-700 border-gray-600">
-            <CardContent className="p-4">
-              <h5 className="font-semibold text-athlete-success mb-2">Key Findings ({data.keyFindings?.length || 0})</h5>
-              <ul className="text-sm text-gray-300 space-y-1">
-                {data.keyFindings?.map((finding: string, index: number) => (
-                  <li key={index}>• {finding}</li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-athlete-gray-700 border-gray-600">
-            <CardContent className="p-4">
-              <h5 className="font-semibold text-athlete-warning mb-2">Technical Insights ({data.technicalInsights?.length || 0})</h5>
-              <ul className="text-sm text-gray-300 space-y-1">
-                {data.technicalInsights?.map((insight: string, index: number) => (
-                  <li key={index}>• {insight}</li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
+  const renderVideoAnalysis = (data: any) => (
+    <div>
+      <div className="grid md:grid-cols-2 gap-6 mb-6">
+        <Card className="bg-athlete-gray-700 border-gray-600">
+          <CardContent className="p-4">
+            <h5 className="font-semibold text-white mb-2">Overall Performance</h5>
+            <div className="space-y-2">
+              <div className="text-2xl font-bold text-athlete-accent">{data.overallScore}/10</div>
+              <div className="text-sm text-gray-300">{data.comparedToAverage}</div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-athlete-gray-700 border-gray-600">
+          <CardContent className="p-4">
+            <h5 className="font-semibold text-white mb-2">Analysis Type</h5>
+            <div className="text-athlete-accent font-semibold">{data.analysisType}</div>
+          </CardContent>
+        </Card>
       </div>
-    );
-  };
+      
+      <div className="grid gap-4">
+        <Card className="bg-athlete-gray-700 border-gray-600">
+          <CardContent className="p-4">
+            <h5 className="font-semibold text-athlete-success mb-2">Key Findings</h5>
+            <ul className="text-sm text-gray-300 space-y-1">
+              {data.keyFindings?.map((finding: string, index: number) => (
+                <li key={index}>• {finding}</li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-athlete-gray-700 border-gray-600">
+          <CardContent className="p-4">
+            <h5 className="font-semibold text-athlete-warning mb-2">Technical Insights</h5>
+            <ul className="text-sm text-gray-300 space-y-1">
+              {data.technicalInsights?.map((insight: string, index: number) => (
+                <li key={index}>• {insight}</li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-athlete-gray-700 border-gray-600">
+          <CardContent className="p-4">
+            <h5 className="font-semibold text-purple-400 mb-2">Recommendations</h5>
+            <ul className="text-sm text-gray-300 space-y-1">
+              {data.recommendations?.map((rec: string, index: number) => (
+                <li key={index}>• {rec}</li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
 
   const renderAnalysisContent = () => {
     if (!data) {
