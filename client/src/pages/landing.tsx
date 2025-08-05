@@ -28,9 +28,89 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* Hero Section with Enhanced Professional Athletes */}
       <section className="pt-20 min-h-screen gradient-bg flex items-center relative">
-        <AthleteBackground />
+        {/* Professional Athlete Background - Highly Visible */}
+        <div className="absolute inset-0 overflow-hidden opacity-25">
+          <svg 
+            className="absolute inset-0 w-full h-full object-cover text-white" 
+            viewBox="0 0 1200 800" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            {/* Elite Marathon Runner */}
+            <g transform="translate(100, 200)">
+              <circle cx="50" cy="40" r="22" fill="currentColor" opacity="0.8" />
+              <ellipse cx="55" cy="80" rx="15" ry="35" fill="currentColor" opacity="0.8" />
+              <path d="M35 65 L15 45 L8 35" stroke="currentColor" strokeWidth="8" fill="none" opacity="0.8" />
+              <path d="M75 70 L95 85 L105 90" stroke="currentColor" strokeWidth="8" fill="none" opacity="0.8" />
+              <path d="M45 115 L40 140 L35 170 L30 200" stroke="currentColor" strokeWidth="10" fill="none" opacity="0.8" />
+              <path d="M65 115 L72 135 L78 155 L85 175" stroke="currentColor" strokeWidth="10" fill="none" opacity="0.8" />
+              {/* Speed lines */}
+              <path d="M20 50 L10 48 M25 55 L15 53 M30 60 L20 58" stroke="currentColor" strokeWidth="2" opacity="0.5" />
+            </g>
+
+            {/* Professional Basketball Player - Dunking */}
+            <g transform="translate(400, 150)">
+              <circle cx="60" cy="35" r="20" fill="currentColor" opacity="0.75" />
+              <rect x="48" y="55" width="24" height="55" rx="12" fill="currentColor" opacity="0.75" />
+              <path d="M35 75 L15 40 L8 25" stroke="currentColor" strokeWidth="9" fill="none" opacity="0.75" />
+              <path d="M85 75 L105 40 L112 25" stroke="currentColor" strokeWidth="9" fill="none" opacity="0.75" />
+              {/* Basketball */}
+              <circle cx="115" cy="20" r="12" fill="none" stroke="currentColor" strokeWidth="3" opacity="0.75" />
+              <path d="M103 20 L127 20 M115 8 L115 32" stroke="currentColor" strokeWidth="1" opacity="0.75" />
+              <path d="M48 110 L45 135 L42 165 L40 195" stroke="currentColor" strokeWidth="10" fill="none" opacity="0.75" />
+              <path d="M72 110 L75 135 L78 165 L80 195" stroke="currentColor" strokeWidth="10" fill="none" opacity="0.75" />
+            </g>
+
+            {/* Elite Soccer Player - Power Kick */}
+            <g transform="translate(700, 180)">
+              <circle cx="55" cy="30" r="18" fill="currentColor" opacity="0.7" />
+              <ellipse cx="60" cy="70" rx="18" ry="32" fill="currentColor" opacity="0.7" />
+              <path d="M40 60 L20 55 L10 52" stroke="currentColor" strokeWidth="7" fill="none" opacity="0.7" />
+              <path d="M80 60 L100 65 L110 68" stroke="currentColor" strokeWidth="7" fill="none" opacity="0.7" />
+              <path d="M50 102 L45 125 L40 150 L35 175" stroke="currentColor" strokeWidth="9" fill="none" opacity="0.7" />
+              <path d="M70 102 L85 120 L100 135 L115 145" stroke="currentColor" strokeWidth="9" fill="none" opacity="0.7" />
+              {/* Soccer ball with motion */}
+              <circle cx="120" cy="142" r="8" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.7" />
+              <path d="M114 142 L126 142 M120 136 L120 148" stroke="currentColor" strokeWidth="1" opacity="0.7" />
+              <path d="M130 140 L135 138 M140 136 L145 134" stroke="currentColor" strokeWidth="2" opacity="0.4" />
+            </g>
+
+            {/* Professional Tennis Player - Serve */}
+            <g transform="translate(950, 160)">
+              <circle cx="45" cy="25" r="16" fill="currentColor" opacity="0.65" />
+              <path d="M38 41 Q45 65 52 89" stroke="currentColor" strokeWidth="25" fill="none" opacity="0.65" />
+              <path d="M52 55 L70 30 L85 15 L95 8" stroke="currentColor" strokeWidth="8" fill="none" opacity="0.65" />
+              {/* Tennis racket */}
+              <ellipse cx="100" cy="3" rx="10" ry="15" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.65" />
+              <path d="M95 -12 L95 18 M85 3 L115 3" stroke="currentColor" strokeWidth="1" opacity="0.4" />
+              <path d="M38 60 L25 65 L18 67" stroke="currentColor" strokeWidth="6" fill="none" opacity="0.65" />
+              <path d="M42 93 L40 115 L38 140 L36 165" stroke="currentColor" strokeWidth="8" fill="none" opacity="0.65" />
+              <path d="M48 93 L52 115 L56 140 L60 165" stroke="currentColor" strokeWidth="8" fill="none" opacity="0.65" />
+              {/* Tennis ball */}
+              <circle cx="75" cy="35" r="4" fill="currentColor" opacity="0.65" />
+            </g>
+
+            {/* Professional Cyclist - Time Trial Position */}
+            <g transform="translate(200, 400)">
+              <circle cx="40" cy="20" r="14" fill="currentColor" opacity="0.6" />
+              <ellipse cx="50" cy="45" rx="20" ry="15" fill="currentColor" opacity="0.6" />
+              <path d="M30 40 L15 35 L8 33" stroke="currentColor" strokeWidth="6" fill="none" opacity="0.6" />
+              <path d="M70 40 L85 35 L92 33" stroke="currentColor" strokeWidth="6" fill="none" opacity="0.6" />
+              {/* Aerodynamic handlebars */}
+              <path d="M5 33 L12 30 L15 33" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.6" />
+              <path d="M45 60 L38 78 L32 95" stroke="currentColor" strokeWidth="7" fill="none" opacity="0.6" />
+              <path d="M55 60 L62 78 L68 95" stroke="currentColor" strokeWidth="7" fill="none" opacity="0.6" />
+              {/* Bike wheels - larger and more detailed */}
+              <circle cx="25" cy="100" r="18" fill="none" stroke="currentColor" strokeWidth="3" opacity="0.6" />
+              <circle cx="75" cy="100" r="18" fill="none" stroke="currentColor" strokeWidth="3" opacity="0.6" />
+              {/* Spokes */}
+              <path d="M25 82 L25 118 M7 100 L43 100 M16 89 L34 111 M34 89 L16 111" stroke="currentColor" strokeWidth="1" opacity="0.4" />
+              <path d="M75 82 L75 118 M57 100 L93 100 M66 89 L84 111 M84 89 L66 111" stroke="currentColor" strokeWidth="1" opacity="0.4" />
+            </g>
+          </svg>
+        </div>
         <div className="container mx-auto px-4 py-20 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-athlete-accent to-athlete-success bg-clip-text text-transparent">
@@ -131,58 +211,97 @@ export default function Landing() {
                 </svg>
 
                 {/* Professional Athlete Silhouettes */}
-                <svg className="absolute inset-0 w-full h-full opacity-15" viewBox="0 0 800 400">
-                  {/* Marathon Runner */}
-                  <g transform="translate(100, 150)">
-                    <path d="M40 80 C42 78 44 76 46 75 C48 74 50 74 52 75 C54 76 56 78 58 80 C56 82 54 84 52 85 C50 86 48 86 46 85 C44 84 42 82 40 80 Z" fill="currentColor" opacity="0.4" />
-                    <rect x="43" y="85" width="12" height="35" rx="6" fill="currentColor" opacity="0.4" />
-                    <path d="M38 95 L32 88 L28 85" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.4" />
-                    <path d="M60 95 L66 88 L70 85" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.4" />
-                    <path d="M46 120 L44 135 L42 150 L40 165" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.4" />
-                    <path d="M52 120 L54 135 L56 150 L58 165" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.4" />
+                <svg className="absolute inset-0 w-full h-full opacity-25 text-white" viewBox="0 0 800 400">
+                  {/* Elite Sprinter */}
+                  <g transform="translate(50, 120)">
+                    {/* Head */}
+                    <circle cx="35" cy="30" r="18" fill="currentColor" opacity="0.6" />
+                    {/* Torso - leaning forward */}
+                    <ellipse cx="40" cy="60" rx="12" ry="28" fill="currentColor" opacity="0.6" />
+                    {/* Arms - sprinting motion */}
+                    <path d="M25 50 L8 35 L2 28" stroke="currentColor" strokeWidth="6" fill="none" opacity="0.6" />
+                    <path d="M55 55 L72 70 L78 75" stroke="currentColor" strokeWidth="6" fill="none" opacity="0.6" />
+                    {/* Legs - mid-stride */}
+                    <path d="M35 88 L30 110 L25 135 L20 160" stroke="currentColor" strokeWidth="8" fill="none" opacity="0.6" />
+                    <path d="M45 88 L52 105 L58 120 L65 135" stroke="currentColor" strokeWidth="8" fill="none" opacity="0.6" />
+                    {/* Motion lines */}
+                    <path d="M5 45 L0 42 M10 48 L5 45 M15 51 L10 48" stroke="currentColor" strokeWidth="2" opacity="0.3" />
                   </g>
 
-                  {/* Basketball Player - Shooting */}
-                  <g transform="translate(250, 120)">
-                    <circle cx="40" cy="25" r="12" fill="currentColor" opacity="0.35" />
-                    <rect x="32" y="37" width="16" height="40" rx="8" fill="currentColor" opacity="0.35" />
-                    <path d="M28 50 L18 35 L12 28" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.35" />
-                    <path d="M52 50 L62 35 L68 28 L72 22" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.35" />
-                    <path d="M36 77 L34 95 L32 113 L30 130" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.35" />
-                    <path d="M44 77 L46 95 L48 113 L50 130" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.35" />
+                  {/* Basketball Dunker */}
+                  <g transform="translate(200, 80)">
+                    {/* Head */}
+                    <circle cx="40" cy="25" r="16" fill="currentColor" opacity="0.65" />
+                    {/* Torso - extended upward */}
+                    <rect x="32" y="41" width="16" height="45" rx="8" fill="currentColor" opacity="0.65" />
+                    {/* Arms - dunking position */}
+                    <path d="M25 55 L10 25 L5 15" stroke="currentColor" strokeWidth="7" fill="none" opacity="0.65" />
+                    <path d="M55 55 L70 25 L75 15" stroke="currentColor" strokeWidth="7" fill="none" opacity="0.65" />
+                    {/* Basketball */}
+                    <circle cx="75" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.65" />
+                    <path d="M67 12 L83 12 M75 4 L75 20" stroke="currentColor" strokeWidth="1" opacity="0.65" />
+                    {/* Legs - jumping */}
+                    <path d="M36 86 L34 105 L32 125 L30 145" stroke="currentColor" strokeWidth="7" fill="none" opacity="0.65" />
+                    <path d="M44 86 L46 105 L48 125 L50 145" stroke="currentColor" strokeWidth="7" fill="none" opacity="0.65" />
                   </g>
 
-                  {/* Soccer Player - Kicking */}
-                  <g transform="translate(400, 140)">
-                    <circle cx="35" cy="20" r="10" fill="currentColor" opacity="0.3" />
-                    <rect x="28" y="30" width="14" height="32" rx="7" fill="currentColor" opacity="0.3" />
-                    <path d="M25 42 L15 38 L8 35" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.3" />
-                    <path d="M45 42 L55 45 L62 48" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.3" />
-                    <path d="M31 62 L25 78 L15 90 L8 98" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.3" />
-                    <path d="M39 62 L41 80 L43 98 L45 115" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.3" />
+                  {/* Soccer Player - Power Kick */}
+                  <g transform="translate(350, 110)">
+                    {/* Head */}
+                    <circle cx="40" cy="25" r="15" fill="currentColor" opacity="0.55" />
+                    {/* Torso - twisted for power */}
+                    <ellipse cx="45" cy="55" rx="14" ry="25" fill="currentColor" opacity="0.55" />
+                    {/* Arms - balance */}
+                    <path d="M28 45 L12 40 L5 38" stroke="currentColor" strokeWidth="6" fill="none" opacity="0.55" />
+                    <path d="M62 45 L78 50 L85 52" stroke="currentColor" strokeWidth="6" fill="none" opacity="0.55" />
+                    {/* Legs - kicking motion */}
+                    <path d="M38 80 L35 100 L32 120 L30 140" stroke="currentColor" strokeWidth="7" fill="none" opacity="0.55" />
+                    <path d="M52 80 L65 95 L78 105 L90 110" stroke="currentColor" strokeWidth="7" fill="none" opacity="0.55" />
+                    {/* Soccer ball */}
+                    <circle cx="95" cy="108" r="6" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.55" />
+                    <path d="M89 108 L101 108 M95 102 L95 114" stroke="currentColor" strokeWidth="1" opacity="0.55" />
                   </g>
 
-                  {/* Tennis Player - Serving */}
-                  <g transform="translate(550, 125)">
-                    <circle cx="38" cy="22" r="11" fill="currentColor" opacity="0.25" />
-                    <rect x="31" y="33" width="14" height="35" rx="7" fill="currentColor" opacity="0.25" />
-                    <path d="M45 45 L58 32 L68 25 L75 20" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.25" />
-                    <ellipse cx="78" cy="16" rx="6" ry="9" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.25" />
-                    <path d="M27 45 L18 48 L12 50" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.25" />
-                    <path d="M34 68 L32 85 L30 102 L28 118" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.25" />
-                    <path d="M42 68 L44 85 L46 102 L48 118" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.25" />
+                  {/* Tennis Serve */}
+                  <g transform="translate(500, 90)">
+                    {/* Head */}
+                    <circle cx="35" cy="20" r="14" fill="currentColor" opacity="0.5" />
+                    {/* Torso - arched for serve */}
+                    <path d="M28 34 Q35 50 42 66" stroke="currentColor" strokeWidth="20" fill="none" opacity="0.5" />
+                    {/* Serving arm - extended up */}
+                    <path d="M42 40 L55 20 L68 8 L78 2" stroke="currentColor" strokeWidth="6" fill="none" opacity="0.5" />
+                    {/* Racket */}
+                    <ellipse cx="82" cy="-2" rx="8" ry="12" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.5" />
+                    <path d="M78 2 L82 -2" stroke="currentColor" strokeWidth="3" opacity="0.5" />
+                    {/* Other arm */}
+                    <path d="M28 45 L18 50 L12 52" stroke="currentColor" strokeWidth="5" fill="none" opacity="0.5" />
+                    {/* Legs - serving stance */}
+                    <path d="M32 70 L30 90 L28 110 L26 130" stroke="currentColor" strokeWidth="6" fill="none" opacity="0.5" />
+                    <path d="M38 70 L42 90 L46 110 L50 130" stroke="currentColor" strokeWidth="6" fill="none" opacity="0.5" />
+                    {/* Tennis ball */}
+                    <circle cx="45" cy="25" r="3" fill="currentColor" opacity="0.5" />
                   </g>
 
-                  {/* Cyclist */}
-                  <g transform="translate(680, 160)">
-                    <circle cx="30" cy="18" r="9" fill="currentColor" opacity="0.2" />
-                    <rect x="24" y="27" width="12" height="25" rx="6" fill="currentColor" opacity="0.2" />
-                    <path d="M20 38 L12 35 L6 33" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.2" />
-                    <path d="M40 38 L48 35 L54 33" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.2" />
-                    <path d="M27 52 L22 65 L18 75" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.2" />
-                    <path d="M33 52 L38 65 L42 75" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.2" />
-                    <circle cx="15" cy="80" r="8" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.2" />
-                    <circle cx="45" cy="80" r="8" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.2" />
+                  {/* Cyclist - Racing Position */}
+                  <g transform="translate(630, 130)">
+                    {/* Head - aerodynamic position */}
+                    <circle cx="25" cy="15" r="12" fill="currentColor" opacity="0.45" />
+                    {/* Torso - low and aerodynamic */}
+                    <ellipse cx="32" cy="35" rx="18" ry="12" fill="currentColor" opacity="0.45" />
+                    {/* Arms - on handlebars */}
+                    <path d="M18 30 L8 28 L2 27" stroke="currentColor" strokeWidth="5" fill="none" opacity="0.45" />
+                    <path d="M46 30 L56 28 L62 27" stroke="currentColor" strokeWidth="5" fill="none" opacity="0.45" />
+                    {/* Handlebars */}
+                    <path d="M0 27 L4 25 L6 27" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.45" />
+                    {/* Legs - pedaling */}
+                    <path d="M28 47 L22 62 L18 75" stroke="currentColor" strokeWidth="6" fill="none" opacity="0.45" />
+                    <path d="M36 47 L42 62 L46 75" stroke="currentColor" strokeWidth="6" fill="none" opacity="0.45" />
+                    {/* Bike wheels */}
+                    <circle cx="12" cy="80" r="15" fill="none" stroke="currentColor" strokeWidth="3" opacity="0.45" />
+                    <circle cx="52" cy="80" r="15" fill="none" stroke="currentColor" strokeWidth="3" opacity="0.45" />
+                    {/* Spokes */}
+                    <path d="M12 65 L12 95 M-3 80 L27 80" stroke="currentColor" strokeWidth="1" opacity="0.3" />
+                    <path d="M52 65 L52 95 M37 80 L67 80" stroke="currentColor" strokeWidth="1" opacity="0.3" />
                   </g>
                 </svg>
 
