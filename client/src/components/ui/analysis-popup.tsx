@@ -401,6 +401,7 @@ export function AnalysisPopup({
         </TabsList>
         
         <TabsContent value="weeks1-4" className="space-y-4">
+          {console.log('Weeks 1-4 plans:', (data.plan || []).filter((plan: any) => plan.week <= 4))}
           {(data.plan || []).filter((plan: any) => plan.week <= 4).map((plan: any, index: number) => (
             <Card key={index} className="bg-athlete-gray-800 border-gray-700">
               <CardHeader>
