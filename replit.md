@@ -12,7 +12,9 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-**OpenAI Model Update (January 5, 2025)**: Updated all OpenAI API calls from gpt-4o to o3-pro model as requested by the user. This affects all AI-powered analysis services including athlete profiling, detailed analysis, comparison features, and specific analysis generation.
+**OpenAI Model Fix (August 5, 2025)**: Reverted OpenAI API calls back to gpt-4o model after o3-pro caused compatibility issues. The gpt-4o model is the current stable model for chat completions. All AI-powered analysis services now properly use gpt-4o including athlete profiling, detailed analysis, comparison features, and specific analysis generation.
+
+**Dynamic Data Implementation (August 5, 2025)**: Updated rank analysis popup to read data dynamically from the database instead of hardcoded values. The popup now displays actual peak ranking, current ranking, and performance metrics from the API response data.
 
 ## System Architecture
 

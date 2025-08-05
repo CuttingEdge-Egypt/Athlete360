@@ -250,7 +250,7 @@ export function AnalysisPopup({
                 {athleteInfo.lastUpdated?.includes('OpenAI') && (
                   <div className="mt-2 p-3 bg-blue-600/20 border border-blue-500/30 rounded-lg">
                     <p className="text-blue-300 text-sm">
-                      ⚡ Enhanced with AI-powered analysis using the latest o3-pro model
+                      ⚡ Enhanced with AI-powered analysis using the latest GPT-4o model
                     </p>
                   </div>
                 )}
@@ -262,38 +262,49 @@ export function AnalysisPopup({
     );
   };
 
-  const renderRankAnalysis = (data: any) => (
-    <div className="space-y-6">
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card className="bg-athlete-gray-800 border-gray-700">
-          <CardHeader>
-            <CardTitle className="flex items-center text-white">
-              <TrendingUp className="mr-2 text-athlete-success" size={20} />
-              Ranking Progression
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64">
-              <RankChart data={[
-                { date: '2023-01', rank: 15 },
-                { date: '2023-07', rank: 6 },
-                { date: '2024-01', rank: 2 },
-                { date: '2024-05', rank: 1 },
-                { date: '2024-12', rank: 2 }
-              ]} />
-            </div>
-          </CardContent>
-        </Card>
+  const renderRankAnalysis = (data: any) => {
+    // Use actual data from the database/API response
+    const chartData = data.history || [
+      { date: '2023-01', rank: 15 },
+      { date: '2023-07', rank: 6 },
+      { date: '2024-01', rank: 2 },
+      { date: '2024-05', rank: 1 },
+      { date: '2024-12', rank: 2 }
+    ];
 
-        <div className="space-y-4">
-          <Card className="bg-gradient-to-r from-athlete-success/20 to-athlete-success/5 border-athlete-success/30">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-bold text-white">Peak Ranking</h3>
-                  <p className="text-gray-400">World #1 (May 2024)</p>
-                </div>
-                <div className="text-4xl font-bold text-athlete-success">#1</div>
+    const currentRank = data.currentRank || data.current_rank || 1;
+    const peakRank = data.peakRank || data.peak_rank || 1;
+    const averageRank = data.averageRank || data.average_rank || 2.4;
+
+    return (
+      <div className="space-y-6">
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card className="bg-athlete-gray-800 border-gray-700">
+            <CardHeader>
+              <CardTitle className="flex items-center text-white">
+                <TrendingUp className="mr-2 text-athlete-success" size={20} />
+                Ranking Progression
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-64">
+                <RankChart data={chartData.map(item => ({
+                  date: item.month || item.date,
+                  rank: item.rank
+                }))} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="space-y-4">
+            <Card className="bg-gradient-to-r from-athlete-success/20 to-athlete-success/5 border-athlete-success/30">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold text-white">Peak Ranking</h3>
+                    <p className="text-gray-400">World #{peakRank} {chartData.length > 0 ? '(Historical Peak)' : '(May 2024)'}</p>
+                  </div>
+                <div className="text-4xl font-bold text-athlete-success">#{peakRank}</div>
               </div>
             </CardContent>
           </Card>
@@ -330,6 +341,7 @@ export function AnalysisPopup({
       </div>
     </div>
   );
+  };
 
   const renderStrengthsAnalysis = (data: any) => (
     <div className="grid md:grid-cols-2 gap-6">
