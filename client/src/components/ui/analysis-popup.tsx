@@ -139,80 +139,128 @@ export function AnalysisPopup({
     }
   };
 
-  const renderBioAnalysis = (data: any) => (
-    <div className="space-y-6">
-      <div className="grid md:grid-cols-3 gap-6">
-        <div className="md:col-span-1">
-          <Card className="bg-gradient-to-br from-athlete-gray-800 to-athlete-gray-700 border-athlete-accent/20">
-            <CardContent className="p-6 text-center">
-              <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-b from-athlete-accent to-blue-600 p-1 mb-4">
-                <img 
-                  src="https://images.unsplash.com/photo-1555597673-b21d5c935865?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"
-                  alt={athleteName}
-                  className="w-full h-full rounded-full object-cover"
-                />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-2">{athleteName}</h3>
-              <Badge className="bg-athlete-accent text-white mb-4">Taekwondo Elite</Badge>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="text-center">
-                  <div className="text-athlete-warning font-bold text-xl">#2</div>
-                  <div className="text-gray-400">World Rank</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-athlete-success font-bold text-xl">18-2</div>
-                  <div className="text-gray-400">Record (2024)</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        <div className="md:col-span-2 space-y-4">
-          <Card className="bg-athlete-gray-800 border-gray-700">
-            <CardHeader>
-              <CardTitle className="flex items-center text-white">
-                <Award className="mr-2 text-athlete-warning" size={20} />
-                Career Highlights
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center justify-between py-2 border-b border-gray-700">
-                <span className="text-gray-300">Egyptian National Champion</span>
-                <Badge className="bg-athlete-warning text-black">2024</Badge>
-              </div>
-              <div className="flex items-center justify-between py-2 border-b border-gray-700">
-                <span className="text-gray-300">International Gold Medals</span>
-                <Badge className="bg-athlete-success text-white">3</Badge>
-              </div>
-              <div className="flex items-center justify-between py-2 border-b border-gray-700">
-                <span className="text-gray-300">Undefeated Streak (-80kg)</span>
-                <Badge className="bg-athlete-accent text-white">Season</Badge>
-              </div>
-              <div className="flex items-center justify-between py-2">
-                <span className="text-gray-300">Olympic Qualification Status</span>
-                <Badge className="bg-green-600 text-white">Qualified</Badge>
-              </div>
-            </CardContent>
-          </Card>
+  const renderBioAnalysis = (data: any) => {
+    console.log('Bio Analysis Data:', data);
+    
+    // Extract athlete info from data with proper fallbacks
+    const athleteInfo = {
+      name: data.name || athleteName,
+      sport: data.personalInfo?.sport || data.sport || "Sport",
+      rank: data.rank || "N/A",
+      bio: data.bio || data.content || "Biography not available",
+      profileImage: data.profileImageUrl || "https://images.unsplash.com/photo-1555597673-b21d5c935865?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500",
+      achievements: data.achievements || [],
+      recentNews: data.personalInfo?.recentNews || data.recentNews || "No recent news available",
+      lastUpdated: data.personalInfo?.lastUpdated || "Recently updated",
+      analysisDate: data.personalInfo?.analysisDate || new Date().toLocaleDateString()
+    };
 
-          <Card className="bg-athlete-gray-800 border-gray-700">
-            <CardHeader>
-              <CardTitle className="text-white">Fighting Profile</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-300 leading-relaxed">
-                Elite Egyptian Taekwondo athlete and Olympic hopeful. Known for lightning-fast combinations, 
-                tactical brilliance, and exceptional mental fortitude. Current national champion with 3 
-                international gold medals and undefeated record in the -80kg weight category this season. 
-                Specializes in counter-attack strategies with a 78% success rate in international competition.
-              </p>
-            </CardContent>
-          </Card>
+    return (
+      <div className="space-y-6">
+        <div className="grid md:grid-cols-3 gap-6">
+          <div className="md:col-span-1">
+            <Card className="bg-gradient-to-br from-athlete-gray-800 to-athlete-gray-700 border-athlete-accent/20">
+              <CardContent className="p-6 text-center">
+                <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-b from-athlete-accent to-blue-600 p-1 mb-4">
+                  <img 
+                    src={athleteInfo.profileImage}
+                    alt={athleteInfo.name}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-2">{athleteInfo.name}</h3>
+                <Badge className="bg-athlete-accent text-white mb-4">{athleteInfo.sport} Elite</Badge>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="text-center">
+                    <div className="text-athlete-warning font-bold text-xl">
+                      {typeof athleteInfo.rank === 'number' ? `#${athleteInfo.rank}` : athleteInfo.rank}
+                    </div>
+                    <div className="text-gray-400">World Rank</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-athlete-success font-bold text-xl">
+                      {data.record || "Record N/A"}
+                    </div>
+                    <div className="text-gray-400">Recent Record</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <div className="md:col-span-2 space-y-4">
+            <Card className="bg-athlete-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center text-white">
+                  <Award className="mr-2 text-athlete-warning" size={20} />
+                  Career Highlights
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {athleteInfo.achievements.length > 0 ? (
+                  athleteInfo.achievements.slice(0, 4).map((achievement: string, index: number) => (
+                    <div key={index} className="flex items-center justify-between py-2 border-b border-gray-700">
+                      <span className="text-gray-300">{achievement}</span>
+                      <Badge className="bg-athlete-success text-white">Achievement</Badge>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between py-2 border-b border-gray-700">
+                      <span className="text-gray-300">Professional Athlete</span>
+                      <Badge className="bg-athlete-warning text-black">Current</Badge>
+                    </div>
+                    <div className="flex items-center justify-between py-2 border-b border-gray-700">
+                      <span className="text-gray-300">Competitive Experience</span>
+                      <Badge className="bg-athlete-success text-white">Active</Badge>
+                    </div>
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-gray-300">Ranking Status</span>
+                      <Badge className="bg-athlete-accent text-white">
+                        {typeof athleteInfo.rank === 'number' ? `#${athleteInfo.rank}` : 'Ranked'}
+                      </Badge>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-athlete-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle className="text-white">Athletic Profile</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-300 leading-relaxed">
+                  {athleteInfo.bio}
+                </p>
+                {athleteInfo.recentNews && athleteInfo.recentNews !== "No recent news available" && (
+                  <div className="mt-4 p-4 bg-athlete-gray-700 rounded-lg">
+                    <h4 className="text-athlete-accent font-semibold mb-2">Recent News:</h4>
+                    <p className="text-gray-300 text-sm">{athleteInfo.recentNews}</p>
+                  </div>
+                )}
+                {athleteInfo.lastUpdated && (
+                  <div className="mt-4 p-3 bg-gray-700/50 border border-gray-600/30 rounded-lg">
+                    <p className="text-gray-300 text-sm">
+                      📊 {athleteInfo.lastUpdated} • Analysis Date: {athleteInfo.analysisDate}
+                    </p>
+                  </div>
+                )}
+                
+                {athleteInfo.lastUpdated?.includes('OpenAI') && (
+                  <div className="mt-2 p-3 bg-blue-600/20 border border-blue-500/30 rounded-lg">
+                    <p className="text-blue-300 text-sm">
+                      ⚡ Enhanced with AI-powered analysis using the latest o3-pro model
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderRankAnalysis = (data: any) => (
     <div className="space-y-6">
