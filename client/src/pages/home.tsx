@@ -19,7 +19,40 @@ export default function Home() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedSport, setSelectedSport] = useState<string>("");
-  const [athleteName, setAthleteName] = useState<string>("");
+
+  
+  // Get athletes for the selected sport with deduplication
+  const { data: allAthletes = [] } = useQuery<Athlete[]>({
+    queryKey: ["/api/athletes/by-sport", selectedSport],
+    enabled: !!selectedSport,
+    queryFn: async () => {
+      const response = await fetch(`/api/athletes/by-sport/${selectedSport}`);
+      return response.json();
+    }
+  });
+
+  // Deduplicate athletes by name, keeping the most recent record
+  const availableAthletes = allAthletes.reduce((acc: Athlete[], current) => {
+    const existingIndex = acc.findIndex(athlete => 
+      athlete.name.toLowerCase().trim() === current.name.toLowerCase().trim()
+    );
+    
+    if (existingIndex === -1) {
+      acc.push(current);
+    } else {
+      // Keep the more recent record (or the one with more complete data)
+      const existing = acc[existingIndex];
+      const currentDate = new Date(current.updatedAt || current.createdAt || 0);
+      const existingDate = new Date(existing.updatedAt || existing.createdAt || 0);
+      
+      if (currentDate > existingDate || 
+          (current.bio && current.bio.length > (existing.bio?.length || 0))) {
+        acc[existingIndex] = current;
+      }
+    }
+    
+    return acc;
+  }, []);
   const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null);
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [showBioPopup, setShowBioPopup] = useState(false);
@@ -58,84 +91,7 @@ export default function Home() {
     }
   };
 
-  const handleAthleteSearch = async () => {
-    if (!athleteName.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter an athlete name",
-        variant: "destructive",
-      });
-      return;
-    }
 
-    try {
-      const params = new URLSearchParams({
-        name: athleteName,
-        ...(selectedSport && { sportId: selectedSport })
-      });
-      
-      const response = await fetch(`/api/athletes/search?${params}`);
-      const athletes = await response.json();
-      
-      if (athletes.length > 0) {
-        setSelectedAthlete(athletes[0]);
-        toast({
-          title: "Athlete Found",
-          description: `Found ${athletes[0].name}`,
-        });
-      } else {
-        // Create a new athlete if not found
-        // Find the correct sport ID from the available sports
-        const selectedSportObj = sports.find(s => 
-          s.id === selectedSport || s.name.toLowerCase() === selectedSport.toLowerCase()
-        );
-        const actualSportId = selectedSportObj?.id || sports.find(s => s.name === "Taekwondo")?.id || sports[0]?.id;
-        
-        // Special handling for Seif Eissa with authentic data
-        const isSeifEissa = athleteName.toLowerCase().includes('seif eissa') || athleteName.toLowerCase().includes('seif') && athleteName.toLowerCase().includes('eissa');
-        
-        const newAthleteData = {
-          name: athleteName,
-          sportId: actualSportId,
-          bio: isSeifEissa 
-            ? "Elite Egyptian Taekwondo athlete and Olympic medalist. Olympic bronze medalist at Tokyo 2020, known for lightning-fast combinations, tactical brilliance, and exceptional mental fortitude. Current top-3 world ranking with multiple international gold medals and dominance in the -80kg weight category."
-            : `Professional athlete specializing in ${selectedSportObj?.name || 'multiple sports'}.`,
-          rank: isSeifEissa ? 3 : Math.floor(Math.random() * 10) + 1,
-          profileImageUrl: isSeifEissa 
-            ? "/attached_assets/IMG_0107_1754340258245.webp"
-            : "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"
-        };
-
-        const createResponse = await fetch('/api/athletes', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newAthleteData),
-          credentials: 'include'
-        });
-
-        if (createResponse.ok) {
-          const newAthlete = await createResponse.json();
-          setSelectedAthlete(newAthlete);
-          toast({
-            title: "Athlete Profile Created",
-            description: `Created profile for ${newAthlete.name}`,
-          });
-        } else {
-          toast({
-            title: "Error",
-            description: "Failed to create athlete profile",
-            variant: "destructive",
-          });
-        }
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to search for athlete",
-        variant: "destructive",
-      });
-    }
-  };
 
   const services = [
     {
@@ -248,7 +204,7 @@ export default function Home() {
               <div className="grid md:grid-cols-2 gap-6 mb-6">
                 <div>
                   <label className="block text-sm font-medium mb-2 text-gray-300">Sport</label>
-                  <Select value={selectedSport} onValueChange={setSelectedSport}>
+                  <Select value={selectedSport} onValueChange={handleSportChange}>
                     <SelectTrigger 
                       data-testid="select-sport"
                       className="bg-athlete-gray-700 border-gray-600 text-white"
@@ -256,6 +212,11 @@ export default function Home() {
                       <SelectValue placeholder="Choose a sport..." />
                     </SelectTrigger>
                     <SelectContent className="bg-athlete-gray-700 border-gray-600">
+                      {sports.map((sport) => (
+                        <SelectItem key={sport.id} value={sport.id}>
+                          {sport.name}
+                        </SelectItem>
+                      ))}
                       <SelectItem value="football">Football</SelectItem>
                       <SelectItem value="soccer">Soccer</SelectItem>
                       <SelectItem value="basketball">Basketball</SelectItem>
@@ -263,34 +224,37 @@ export default function Home() {
                       <SelectItem value="taekwondo">Taekwondo</SelectItem>
                       <SelectItem value="baseball">Baseball</SelectItem>
                       <SelectItem value="swimming">Swimming</SelectItem>
-                      {sports.map((sport) => (
-                        <SelectItem key={sport.id} value={sport.id}>
-                          {sport.name}
-                        </SelectItem>
-                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-300">Athlete Name</label>
-                  <div className="flex gap-2">
-                    <Input
-                      data-testid="input-athlete-name"
-                      value={athleteName}
-                      onChange={(e) => setAthleteName(e.target.value)}
-                      placeholder="e.g., Cristiano Ronaldo"
-                      className="bg-athlete-gray-700 border-gray-600 text-white placeholder-gray-400"
-                      onKeyPress={(e) => e.key === 'Enter' && handleAthleteSearch()}
-                    />
-                    <Button 
-                      onClick={handleAthleteSearch}
-                      data-testid="button-search-athlete"
-                      className="bg-athlete-accent hover:bg-blue-600"
-                    >
-                      <Search size={16} />
-                    </Button>
-                  </div>
+                  <label className="block text-sm font-medium mb-2 text-gray-300">Athlete</label>
+                  <Select
+                    value={selectedAthlete?.id || ""}
+                    onValueChange={(athleteId) => {
+                      const athlete = availableAthletes.find(a => a.id === athleteId);
+                      setSelectedAthlete(athlete || null);
+                    }}
+                    disabled={!selectedSport}
+                    data-testid="select-athlete"
+                  >
+                    <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white">
+                      <SelectValue placeholder={selectedSport ? "Select an athlete..." : "Select sport first"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableAthletes.map((athlete) => (
+                        <SelectItem key={athlete.id} value={athlete.id}>
+                          <div className="flex items-center gap-2">
+                            <span>{athlete.name}</span>
+                            {athlete.rank && (
+                              <span className="text-xs text-gray-400">#{athlete.rank}</span>
+                            )}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
