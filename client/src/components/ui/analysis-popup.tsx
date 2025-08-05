@@ -414,48 +414,57 @@ export function AnalysisPopup({
     );
   };
 
-  const renderWeaknessesAnalysis = (data: any) => (
-    <div className="space-y-6">
-      {[
-        {
-          title: "Stamina in Extended Matches",
-          description: "Performance tends to decline slightly in overtime rounds. Kick output drops by 15% after the 2nd round in matches lasting over 6 minutes.",
-          impact: "Medium",
-          improvement: "High-intensity interval training focusing on match-specific endurance."
-        },
-        {
-          title: "Aggressive Close-Range Pressure", 
-          description: "Can struggle against opponents who constantly pressure forward and clinch. Success rate drops to 68% when facing clinch-heavy fighting styles.",
-          impact: "High",
-          improvement: "Specialized clinch work and short-range technique development."
-        },
-        {
-          title: "Left-Side Blind Spot",
-          description: "Slightly slower reaction time to attacks from the left side (0.2 seconds slower). This creates vulnerability to left-footed fighters' roundhouse kicks.",
-          impact: "Medium",
-          improvement: "Mirror work and reaction drills targeting left-side attacks."
-        }
-      ].map((weakness, index) => (
-        <Card key={index} className="bg-gradient-to-r from-athlete-danger/20 to-athlete-danger/5 border-athlete-danger/30">
-          <CardContent className="p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <h3 className="text-xl font-bold text-white mb-2">{weakness.title}</h3>
-                <p className="text-gray-300 leading-relaxed">{weakness.description}</p>
+  const renderWeaknessesAnalysis = (data: any) => {
+    // Use actual data from the API response, with fallback to sample data
+    const weaknessesData = data.weaknesses || [
+      {
+        title: "Stamina in Extended Matches",
+        description: "Performance tends to decline slightly in overtime rounds. Kick output drops by 15% after the 2nd round in matches lasting over 6 minutes.",
+        impact: "Medium",
+        improvement: "High-intensity interval training focusing on match-specific endurance."
+      },
+      {
+        title: "Aggressive Close-Range Pressure", 
+        description: "Can struggle against opponents who constantly pressure forward and clinch. Success rate drops to 68% when facing clinch-heavy fighting styles.",
+        impact: "High",
+        improvement: "Specialized clinch work and short-range technique development."
+      },
+      {
+        title: "Left-Side Blind Spot",
+        description: "Slightly slower reaction time to attacks from the left side (0.2 seconds slower). This creates vulnerability to left-footed fighters' roundhouse kicks.",
+        impact: "Medium",
+        improvement: "Mirror work and reaction drills targeting left-side attacks."
+      }
+    ];
+
+    return (
+      <div className="space-y-6">
+        {weaknessesData.map((weakness, index) => (
+          <Card key={index} className="bg-gradient-to-r from-athlete-danger/20 to-athlete-danger/5 border-athlete-danger/30">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-white mb-2">{weakness.title}</h3>
+                  <p className="text-gray-300 leading-relaxed">{weakness.description}</p>
+                </div>
+                <Badge className={`ml-4 ${
+                  (weakness.impact === 'High' || weakness.impact === 'high') ? 'bg-red-600' : 
+                  (weakness.impact === 'Medium' || weakness.impact === 'medium') ? 'bg-orange-500' : 
+                  'bg-yellow-500'
+                } text-white`}>
+                  {weakness.impact || 'Medium'} Impact
+                </Badge>
               </div>
-              <Badge className={`ml-4 ${weakness.impact === 'High' ? 'bg-red-600' : 'bg-orange-500'} text-white`}>
-                {weakness.impact} Impact
-              </Badge>
-            </div>
-            <div className="bg-athlete-gray-700 rounded-lg p-4">
-              <h4 className="text-athlete-accent font-semibold mb-2">Improvement Strategy:</h4>
-              <p className="text-gray-300">{weakness.improvement}</p>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
+              <div className="bg-athlete-gray-700 rounded-lg p-4">
+                <h4 className="text-athlete-accent font-semibold mb-2">Improvement Strategy:</h4>
+                <p className="text-gray-300">{weakness.improvement || 'Focus on targeted training to address this weakness area.'}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  };
 
   const renderDevelopmentPlan = (data: any) => {
     console.log('Frontend Development Plan Data:', JSON.stringify(data, null, 2));

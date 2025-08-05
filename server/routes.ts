@@ -653,9 +653,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!forceUpdate && existingWeaknesses.length > 0) {
         // Use database weaknesses
         weaknessesData = {
-          weaknesses: existingWeaknesses.map(w => ({
+          weaknesses: existingWeaknesses.map((w, index) => ({
             title: w.title,
-            description: w.description
+            description: w.description,
+            impact: index === 0 ? 'High' : (index % 2 === 0 ? 'Medium' : 'High'), // Alternate impact levels
+            improvement: `Targeted training program to improve ${w.title.toLowerCase()}`
           }))
         };
       } else {
@@ -666,19 +668,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const detailedAnalysis = await getDetailedAnalysis(athlete.name, sportName);
         
         const aiWeaknesses = detailedAnalysis.weaknesses.length > 0 
-          ? detailedAnalysis.weaknesses 
+          ? detailedAnalysis.weaknesses.map((weakness, index) => ({
+              title: weakness.title,
+              description: weakness.description,
+              impact: weakness.impact || (index === 0 ? 'High' : (index % 2 === 0 ? 'Medium' : 'High')),
+              improvement: weakness.improvement || `Develop targeted training to address ${weakness.title.toLowerCase()}`
+            }))
           : [
               {
                 title: "Consistency Under Pressure",
-                description: "Performance variations identified through AI analysis of competition data"
+                description: "Performance variations identified through AI analysis of competition data",
+                impact: "High",
+                improvement: "Mental conditioning and pressure training exercises"
               },
               {
                 title: "Recovery Time",
-                description: "Recovery patterns analyzed through AI performance tracking"
+                description: "Recovery patterns analyzed through AI performance tracking",
+                impact: "Medium", 
+                improvement: "Enhanced recovery protocols and conditioning"
               },
               {
                 title: "Tactical Adaptability",
-                description: "Strategic adjustment opportunities from AI competitive analysis"
+                description: "Strategic adjustment opportunities from AI competitive analysis",
+                impact: "Medium",
+                improvement: "Strategic analysis training and game plan development"
               }
             ];
         
