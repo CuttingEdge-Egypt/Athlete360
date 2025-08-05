@@ -52,6 +52,7 @@ export const athletes = pgTable("athletes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   sportId: varchar("sport_id").notNull().references(() => sports.id),
   name: varchar("name").notNull(),
+  country: varchar("country"),
   bio: text("bio"),
   rank: integer("rank"),
   profileImageUrl: varchar("profile_image_url"),
@@ -184,6 +185,7 @@ export const insertSportSchema = createInsertSchema(sports).pick({
 export const insertAthleteSchema = createInsertSchema(athletes).pick({
   sportId: true,
   name: true,
+  country: true,
   bio: true,
   rank: true,
   profileImageUrl: true,

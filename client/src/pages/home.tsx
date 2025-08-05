@@ -19,14 +19,23 @@ export default function Home() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedSport, setSelectedSport] = useState<string>("");
+  const [selectedCountry, setSelectedCountry] = useState<string>("");
 
+  // Get all countries
+  const { data: countries = [] } = useQuery<string[]>({
+    queryKey: ["/api/countries"],
+  });
   
   // Get athletes for the selected sport with deduplication
   const { data: allAthletes = [] } = useQuery<Athlete[]>({
-    queryKey: ["/api/athletes/by-sport", selectedSport],
+    queryKey: ["/api/athletes/by-sport", selectedSport, selectedCountry],
     enabled: !!selectedSport,
     queryFn: async () => {
-      const response = await fetch(`/api/athletes/by-sport/${selectedSport}`);
+      const url = new URL(`/api/athletes/by-sport/${selectedSport}`, window.location.origin);
+      if (selectedCountry) {
+        url.searchParams.set('country', selectedCountry);
+      }
+      const response = await fetch(url.toString());
       return response.json();
     }
   });
@@ -65,6 +74,12 @@ export default function Home() {
   // Reset selected athlete when sport changes
   const handleSportChange = (sportId: string) => {
     setSelectedSport(sportId);
+    setSelectedAthlete(null);
+  };
+
+  // Reset selected athlete when country changes
+  const handleCountryChange = (country: string) => {
+    setSelectedCountry(country === "all" ? "" : country);
     setSelectedAthlete(null);
   };
 
@@ -207,7 +222,7 @@ export default function Home() {
                 <CardContent className="p-8">
                   <h2 className="text-2xl font-bold mb-6 text-center text-white">Select Sport & Athlete</h2>
               
-              <div className="grid md:grid-cols-2 gap-6 mb-6">
+              <div className="grid md:grid-cols-3 gap-6 mb-6">
                 <div>
                   <label className="block text-sm font-medium mb-2 text-gray-300">Sport</label>
                   <Select value={selectedSport} onValueChange={handleSportChange}>
@@ -221,6 +236,26 @@ export default function Home() {
                       {sports.map((sport) => (
                         <SelectItem key={sport.id} value={sport.id}>
                           {sport.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-300">Country</label>
+                  <Select value={selectedCountry || "all"} onValueChange={handleCountryChange}>
+                    <SelectTrigger 
+                      data-testid="select-country"
+                      className="bg-athlete-gray-700 border-gray-600 text-white"
+                    >
+                      <SelectValue placeholder="All countries" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-athlete-gray-700 border-gray-600">
+                      <SelectItem value="all">All countries</SelectItem>
+                      {countries.map((country) => (
+                        <SelectItem key={country} value={country}>
+                          {country}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -246,6 +281,9 @@ export default function Home() {
                         <SelectItem key={athlete.id} value={athlete.id}>
                           <div className="flex items-center gap-2">
                             <span>{athlete.name}</span>
+                            {athlete.country && (
+                              <span className="text-xs text-gray-400">({athlete.country})</span>
+                            )}
                             {athlete.rank && (
                               <span className="text-xs text-gray-400">#{athlete.rank}</span>
                             )}

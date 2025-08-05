@@ -52,6 +52,7 @@ interface ComparisonData {
 
 export function AthleteComparison() {
   const [selectedSport, setSelectedSport] = useState<string>("");
+  const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [selectedAthlete1, setSelectedAthlete1] = useState<string>("");
   const [selectedAthlete2, setSelectedAthlete2] = useState<string>("");
   const { toast } = useToast();
@@ -60,11 +61,20 @@ export function AthleteComparison() {
     queryKey: ["/api/sports"],
   });
 
+  // Get all countries
+  const { data: countries = [] } = useQuery<string[]>({
+    queryKey: ["/api/countries"],
+  });
+
   const { data: allAthletes = [] } = useQuery<Athlete[]>({
-    queryKey: ["/api/athletes/by-sport", selectedSport],
+    queryKey: ["/api/athletes/by-sport", selectedSport, selectedCountry],
     enabled: !!selectedSport,
     queryFn: async () => {
-      const response = await fetch(`/api/athletes/by-sport/${selectedSport}`);
+      const url = new URL(`/api/athletes/by-sport/${selectedSport}`, window.location.origin);
+      if (selectedCountry) {
+        url.searchParams.set('country', selectedCountry);
+      }
+      const response = await fetch(url.toString());
       return response.json();
     }
   });
@@ -151,12 +161,16 @@ export function AthleteComparison() {
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Selection Controls */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300">Sport</label>
             <Select
               value={selectedSport}
-              onValueChange={setSelectedSport}
+              onValueChange={(value) => {
+                setSelectedSport(value);
+                setSelectedAthlete1("");
+                setSelectedAthlete2("");
+              }}
               data-testid="select-sport"
             >
               <SelectTrigger className="bg-athlete-gray-700 border-gray-600">
@@ -166,6 +180,31 @@ export function AthleteComparison() {
                 {sports.map((sport) => (
                   <SelectItem key={sport.id} value={sport.id}>
                     {sport.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-300">Country</label>
+            <Select
+              value={selectedCountry || "all"}
+              onValueChange={(value) => {
+                setSelectedCountry(value === "all" ? "" : value);
+                setSelectedAthlete1("");
+                setSelectedAthlete2("");
+              }}
+              data-testid="select-country"
+            >
+              <SelectTrigger className="bg-athlete-gray-700 border-gray-600">
+                <SelectValue placeholder="All countries" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All countries</SelectItem>
+                {countries.map((country) => (
+                  <SelectItem key={country} value={country}>
+                    {country}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -188,6 +227,9 @@ export function AthleteComparison() {
                   <SelectItem key={athlete.id} value={athlete.id}>
                     <div className="flex items-center gap-2">
                       <span>{athlete.name}</span>
+                      {athlete.country && (
+                        <span className="text-xs text-gray-400">({athlete.country})</span>
+                      )}
                       {athlete.rank && (
                         <span className="text-xs text-gray-400">#{athlete.rank}</span>
                       )}
@@ -214,6 +256,9 @@ export function AthleteComparison() {
                   <SelectItem key={athlete.id} value={athlete.id}>
                     <div className="flex items-center gap-2">
                       <span>{athlete.name}</span>
+                      {athlete.country && (
+                        <span className="text-xs text-gray-400">({athlete.country})</span>
+                      )}
                       {athlete.rank && (
                         <span className="text-xs text-gray-400">#{athlete.rank}</span>
                       )}

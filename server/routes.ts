@@ -1279,11 +1279,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/athletes/by-sport/:sportId', async (req, res) => {
     try {
       const sportId = req.params.sportId;
-      const athletes = await storage.getAthletesBySport(sportId);
+      const country = req.query.country as string | undefined;
+      const athletes = await storage.getAthletesBySport(sportId, country);
       res.json(athletes);
     } catch (error) {
       console.error("Error fetching athletes by sport:", error);
       res.status(500).json({ message: "Failed to fetch athletes" });
+    }
+  });
+
+  // Get all unique countries
+  app.get('/api/countries', async (req, res) => {
+    try {
+      const countries = await storage.getAllCountries();
+      res.json(countries);
+    } catch (error) {
+      console.error("Error fetching countries:", error);
+      res.status(500).json({ message: "Failed to fetch countries" });
     }
   });
 

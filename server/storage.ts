@@ -29,7 +29,7 @@ import {
   type InsertTransaction,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, asc } from "drizzle-orm";
+import { eq, desc, and, asc, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -48,7 +48,8 @@ export interface IStorage {
   // Athletes operations
   getAthletesBySearch(name: string, sportId?: string): Promise<Athlete[]>;
   getAthleteById(id: string): Promise<Athlete | undefined>;
-  getAthletesBySport(sportId: string): Promise<Athlete[]>;
+  getAthletesBySport(sportId: string, country?: string): Promise<Athlete[]>;
+  getAllCountries(): Promise<string[]>;
   createAthlete(athlete: InsertAthlete): Promise<Athlete>;
   updateAthlete(id: string, athlete: Partial<Athlete>): Promise<Athlete>;
   deleteAthlete(id: string): Promise<void>;
@@ -163,10 +164,29 @@ export class DatabaseStorage implements IStorage {
     return athlete;
   }
 
-  async getAthletesBySport(sportId: string): Promise<Athlete[]> {
+  async getAthletesBySport(sportId: string, country?: string): Promise<Athlete[]> {
+    const conditions = [eq(athletes.sportId, sportId)];
+    if (country) {
+      conditions.push(eq(athletes.country, country));
+    }
+    
     return await db.select().from(athletes)
-      .where(eq(athletes.sportId, sportId))
+      .where(and(...conditions))
       .orderBy(asc(athletes.name), desc(athletes.updatedAt));
+  }
+
+  async getAllCountries(): Promise<string[]> {
+    const result = await db.select({ country: athletes.country })
+      .from(athletes)
+      .where(and(
+        // Only get non-null countries
+        sql`${athletes.country} IS NOT NULL`,
+        sql`${athletes.country} != ''`
+      ))
+      .groupBy(athletes.country)
+      .orderBy(asc(athletes.country));
+    
+    return result.map((row) => row.country!).filter(Boolean);
   }
 
   async createAthlete(athlete: InsertAthlete): Promise<Athlete> {
