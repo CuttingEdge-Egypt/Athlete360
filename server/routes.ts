@@ -6,7 +6,6 @@ import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
 import { getAthleteProfile, getDetailedAnalysis, generateSpecificAnalysis } from "./openaiService";
-import { sportsApiService, type RealTimeAthleteData } from "./sportsApiService";
 import OpenAI from "openai";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -1429,86 +1428,6 @@ Format as JSON:
     } catch (error) {
       console.error("Error generating athlete comparison:", error);
       res.status(500).json({ message: "Failed to generate comparison" });
-    }
-  });
-
-  // Real-time sports data integration endpoints
-  
-  // Get API status and available sports APIs
-  app.get('/api/sports-apis/status', isAuthenticated, async (req, res) => {
-    try {
-      const apiStatus = sportsApiService.getApiStatus();
-      res.json(apiStatus);
-    } catch (error) {
-      console.error("Error getting API status:", error);
-      res.status(500).json({ message: "Failed to get API status" });
-    }
-  });
-
-  // Fetch real-time data for a specific athlete
-  app.post('/api/athletes/:athleteId/sync-realtime', isAuthenticated, async (req: any, res) => {
-    try {
-      const { athleteId } = req.params;
-      const success = await sportsApiService.updateAthleteWithRealTimeData(athleteId);
-      
-      if (success) {
-        const updatedAthlete = await storage.getAthleteById(athleteId);
-        res.json({ 
-          message: "Athlete updated with real-time data", 
-          athlete: updatedAthlete 
-        });
-      } else {
-        res.status(404).json({ 
-          message: "No real-time data found for this athlete" 
-        });
-      }
-    } catch (error) {
-      console.error("Error syncing real-time data:", error);
-      res.status(500).json({ message: "Failed to sync real-time data" });
-    }
-  });
-
-  // Batch sync multiple athletes with real-time data
-  app.post('/api/athletes/batch-sync-realtime', isAuthenticated, async (req: any, res) => {
-    try {
-      const { athleteIds } = req.body;
-      
-      if (!Array.isArray(athleteIds) || athleteIds.length === 0) {
-        return res.status(400).json({ message: "Athlete IDs array is required" });
-      }
-
-      const result = await sportsApiService.batchUpdateAthletesWithRealTimeData(athleteIds);
-      res.json({
-        message: `Batch sync completed: ${result.updated} updated, ${result.failed} failed`,
-        ...result
-      });
-    } catch (error) {
-      console.error("Error batch syncing real-time data:", error);
-      res.status(500).json({ message: "Failed to batch sync real-time data" });
-    }
-  });
-
-  // Search for athlete in real-time APIs (without updating database)
-  app.post('/api/sports-apis/search-athlete', isAuthenticated, async (req: any, res) => {
-    try {
-      const { athleteName, sport } = req.body;
-      
-      if (!athleteName || !sport) {
-        return res.status(400).json({ message: "Athlete name and sport are required" });
-      }
-
-      const realTimeData = await sportsApiService.fetchRealTimeAthleteData(athleteName, sport);
-      
-      if (realTimeData) {
-        res.json(realTimeData);
-      } else {
-        res.status(404).json({ 
-          message: "No real-time data found for this athlete" 
-        });
-      }
-    } catch (error) {
-      console.error("Error searching athlete in APIs:", error);
-      res.status(500).json({ message: "Failed to search athlete data" });
     }
   });
 

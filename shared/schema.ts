@@ -57,14 +57,6 @@ export const athletes = pgTable("athletes", {
   profileImageUrl: varchar("profile_image_url"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-  // Additional fields for real-time sports API integration
-  nationality: varchar("nationality"),
-  age: integer("age"),
-  height: varchar("height"),
-  weight: varchar("weight"),
-  position: varchar("position"),
-  team: varchar("team"),
-  realTimeLastSync: timestamp("real_time_last_sync"),
 });
 
 // Athlete strengths

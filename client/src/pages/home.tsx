@@ -10,7 +10,6 @@ import { ServiceCard } from "@/components/ui/service-card";
 import { TokenModal } from "@/components/ui/token-modal";
 import { AnalysisPopup } from "@/components/ui/analysis-popup";
 import { AthleteComparison } from "@/components/ui/athlete-comparison";
-import { SportsApiDashboard } from "@/components/ui/sports-api-dashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Star } from "lucide-react";
@@ -185,7 +184,7 @@ export default function Home() {
 
           {/* Main Content Tabs */}
           <Tabs defaultValue="analysis" className="max-w-6xl mx-auto">
-            <TabsList className="grid w-full grid-cols-3 bg-athlete-gray-800 mb-8">
+            <TabsList className="grid w-full grid-cols-2 bg-athlete-gray-800 mb-8">
               <TabsTrigger 
                 value="analysis" 
                 data-testid="tab-analysis"
@@ -199,13 +198,6 @@ export default function Home() {
                 className="data-[state=active]:bg-athlete-accent"
               >
                 Compare Athletes
-              </TabsTrigger>
-              <TabsTrigger 
-                value="api-integration" 
-                data-testid="tab-api-integration"
-                className="data-[state=active]:bg-athlete-accent"
-              >
-                API Integration
               </TabsTrigger>
             </TabsList>
 
@@ -329,10 +321,6 @@ export default function Home() {
 
             <TabsContent value="comparison" className="space-y-8">
               <AthleteComparison />
-            </TabsContent>
-
-            <TabsContent value="api-integration" className="space-y-8">
-              <SportsApiDashboard />
             </TabsContent>
           </Tabs>
         </div>
