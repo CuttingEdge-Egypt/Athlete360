@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus } from "lucide-react";
+import { HeroVisualization } from "@/components/ui/hero-visualization";
 
 export default function Landing() {
   const handleLogin = () => {
@@ -80,6 +81,11 @@ export default function Landing() {
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Hero Visualization */}
+            <div className="mt-16">
+              <HeroVisualization />
+            </div>
           </div>
         </div>
       </section>
