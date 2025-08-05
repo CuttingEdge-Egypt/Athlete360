@@ -223,13 +223,6 @@ export default function Home() {
                           {sport.name}
                         </SelectItem>
                       ))}
-                      <SelectItem value="football">Football</SelectItem>
-                      <SelectItem value="soccer">Soccer</SelectItem>
-                      <SelectItem value="basketball">Basketball</SelectItem>
-                      <SelectItem value="tennis">Tennis</SelectItem>
-                      <SelectItem value="taekwondo">Taekwondo</SelectItem>
-                      <SelectItem value="baseball">Baseball</SelectItem>
-                      <SelectItem value="swimming">Swimming</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
