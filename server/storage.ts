@@ -147,18 +147,14 @@ export class DatabaseStorage implements IStorage {
 
   // Athletes operations
   async getAthletesBySearch(name: string, sportId?: string): Promise<Athlete[]> {
-    let query = db.select().from(athletes);
-    
     if (sportId) {
-      query = query.where(and(
+      return await db.select().from(athletes).where(and(
         eq(athletes.name, name),
         eq(athletes.sportId, sportId)
       ));
     } else {
-      query = query.where(eq(athletes.name, name));
+      return await db.select().from(athletes).where(eq(athletes.name, name));
     }
-    
-    return query;
   }
 
   async getAthleteById(id: string): Promise<Athlete | undefined> {
