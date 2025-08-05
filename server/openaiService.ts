@@ -60,8 +60,7 @@ Format as JSON with these exact keys:
           content: prompt
         }
       ],
-      response_format: { type: "json_object" },
-      temperature: 0.1 // Low temperature for factual accuracy
+      response_format: { type: "json_object" }
     });
 
     const data = JSON.parse(response.choices[0].message.content || "{}");
@@ -124,8 +123,7 @@ Format as JSON with these exact keys:
           content: prompt
         }
       ],
-      response_format: { type: "json_object" },
-      temperature: 0.2
+      response_format: { type: "json_object" }
     });
 
     const data = JSON.parse(response.choices[0].message.content || "{}");
@@ -188,8 +186,7 @@ export async function generateSpecificAnalysis(
           content: prompts[analysisType]
         }
       ],
-      temperature: 0.1,
-      max_tokens: 1500
+      max_completion_tokens: 1500
     });
 
     return {

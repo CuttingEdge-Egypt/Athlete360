@@ -9,6 +9,8 @@ import { Navigation } from "@/components/Navigation";
 import { ServiceCard } from "@/components/ui/service-card";
 import { TokenModal } from "@/components/ui/token-modal";
 import { AnalysisPopup } from "@/components/ui/analysis-popup";
+import { AthleteComparison } from "@/components/ui/athlete-comparison";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Star } from "lucide-react";
 import type { Sport, Athlete } from "@shared/schema";
@@ -218,10 +220,30 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Sport & Athlete Selection */}
-          <Card className="bg-athlete-gray-800 border-gray-700 max-w-4xl mx-auto mb-12">
-            <CardContent className="p-8">
-              <h2 className="text-2xl font-bold mb-6 text-center text-white">Select Sport & Athlete</h2>
+          {/* Main Content Tabs */}
+          <Tabs defaultValue="analysis" className="max-w-6xl mx-auto">
+            <TabsList className="grid w-full grid-cols-2 bg-athlete-gray-800 mb-8">
+              <TabsTrigger 
+                value="analysis" 
+                data-testid="tab-analysis"
+                className="data-[state=active]:bg-athlete-accent"
+              >
+                Athlete Analysis
+              </TabsTrigger>
+              <TabsTrigger 
+                value="comparison" 
+                data-testid="tab-comparison"
+                className="data-[state=active]:bg-athlete-accent"
+              >
+                Compare Athletes
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="analysis" className="space-y-8">
+              {/* Sport & Athlete Selection */}
+              <Card className="bg-athlete-gray-800 border-gray-700">
+                <CardContent className="p-8">
+                  <h2 className="text-2xl font-bold mb-6 text-center text-white">Select Sport & Athlete</h2>
               
               <div className="grid md:grid-cols-2 gap-6 mb-6">
                 <div>
@@ -302,36 +324,42 @@ export default function Home() {
                   </CardContent>
                 </Card>
               )}
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
 
-          {/* Service Boxes Grid */}
-          {selectedAthlete && (
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl font-bold text-center mb-8 text-white">Analysis Services</h2>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {services.map((service) => (
-                  <ServiceCard
-                    key={service.id}
-                    service={service}
-                    athlete={selectedAthlete}
-                    onInsufficientTokens={() => setShowTokenModal(true)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+              {/* Service Boxes Grid */}
+              {selectedAthlete && (
+                <div>
+                  <h2 className="text-3xl font-bold text-center mb-8 text-white">Analysis Services</h2>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {services.map((service) => (
+                      <ServiceCard
+                        key={service.id}
+                        service={service}
+                        athlete={selectedAthlete}
+                        onInsufficientTokens={() => setShowTokenModal(true)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
-          {/* Empty State */}
-          {!selectedAthlete && (
-            <div className="text-center py-20">
-              <div className="text-6xl mb-4">🏆</div>
-              <h3 className="text-2xl font-bold mb-4 text-white">Ready to Analyze?</h3>
-              <p className="text-gray-400 max-w-md mx-auto">
-                Select a sport and enter an athlete's name to begin your comprehensive analysis journey.
-              </p>
-            </div>
-          )}
+              {/* Empty State */}
+              {!selectedAthlete && (
+                <div className="text-center py-20">
+                  <div className="text-6xl mb-4">🏆</div>
+                  <h3 className="text-2xl font-bold mb-4 text-white">Ready to Analyze?</h3>
+                  <p className="text-gray-400 max-w-md mx-auto">
+                    Select a sport and enter an athlete's name to begin your comprehensive analysis journey.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="comparison" className="space-y-8">
+              <AthleteComparison />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 
