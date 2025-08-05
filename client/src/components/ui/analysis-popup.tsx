@@ -371,8 +371,10 @@ export function AnalysisPopup({
         <Card className="bg-gradient-to-r from-purple-600/20 to-purple-600/5 border-purple-500/30">
           <CardContent className="p-6 text-center">
             <Calendar className="mx-auto mb-4 text-purple-400" size={48} />
-            <h3 className="text-2xl font-bold text-white mb-2">12-Week Program</h3>
-            <p className="text-gray-300">Comprehensive development plan targeting key improvement areas</p>
+            <h3 className="text-2xl font-bold text-white mb-2">{data.duration || '12-Week Program'}</h3>
+            <p className="text-gray-300">
+              {data.aiGenerated ? 'AI-powered development plan' : 'Comprehensive development plan'} targeting key improvement areas
+            </p>
           </CardContent>
         </Card>
         
@@ -393,63 +395,90 @@ export function AnalysisPopup({
         </TabsList>
         
         <TabsContent value="weeks1-4" className="space-y-4">
-          {[
-            {
-              week: 1,
-              title: "Cardiovascular Enhancement Protocol",
-              description: "High-intensity interval training combining taekwondo-specific movements. 45-minute sessions, 5 days/week focusing on maintaining peak performance through extended competition rounds.",
-              focus: "Endurance Building"
-            },
-            {
-              week: 2,
-              title: "Close-Range Combat Mastery",
-              description: "Specialized clinch work and short-range techniques. Partner drills focusing on elbow strikes, knee techniques, and escaping from clinch positions.",
-              focus: "Technical Development"
-            }
-          ].map((plan, index) => (
+          {(data.plan || []).filter((plan: any) => plan.week <= 4).map((plan: any, index: number) => (
             <Card key={index} className="bg-athlete-gray-800 border-gray-700">
               <CardHeader>
                 <CardTitle className="flex items-center text-white">
                   <div className="bg-purple-600 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
                     {plan.week}
                   </div>
-                  {plan.title}
-                  <Badge className="ml-auto bg-purple-600 text-white">{plan.focus}</Badge>
+                  {plan.focus}
+                  <Badge className="ml-auto bg-purple-600 text-white">Week {plan.week}</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-300">{plan.description}</p>
+                <div className="text-gray-300">
+                  {plan.activities && plan.activities.length > 0 ? (
+                    <ul className="list-disc list-inside space-y-2">
+                      {plan.activities.map((activity: string, i: number) => (
+                        <li key={i}>{activity}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>{plan.description || plan.focus}</p>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))}
         </TabsContent>
         
         <TabsContent value="weeks5-8" className="space-y-4">
-          <Card className="bg-athlete-gray-800 border-gray-700">
-            <CardHeader>
-              <CardTitle className="text-white">Mid-Program Intensive Phase</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-300">
-                Focus shifts to power development and competition simulation. This phase includes 
-                plyometric training, Olympic sparring simulations, and advanced tactical refinement.
-              </p>
-            </CardContent>
-          </Card>
+          {(data.plan || []).filter((plan: any) => plan.week >= 5 && plan.week <= 8).map((plan: any, index: number) => (
+            <Card key={index} className="bg-athlete-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center text-white">
+                  <div className="bg-purple-600 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
+                    {plan.week}
+                  </div>
+                  {plan.focus}
+                  <Badge className="ml-auto bg-purple-600 text-white">Week {plan.week}</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-gray-300">
+                  {plan.activities && plan.activities.length > 0 ? (
+                    <ul className="list-disc list-inside space-y-2">
+                      {plan.activities.map((activity: string, i: number) => (
+                        <li key={i}>{activity}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>{plan.description || plan.focus}</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </TabsContent>
         
         <TabsContent value="weeks9-12" className="space-y-4">
-          <Card className="bg-athlete-gray-800 border-gray-700">
-            <CardHeader>
-              <CardTitle className="text-white">Competition Preparation</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-300">
-                Final preparation phase with competition-specific training, strategy refinement, 
-                and peak conditioning maintenance leading to major tournaments.
-              </p>
-            </CardContent>
-          </Card>
+          {(data.plan || []).filter((plan: any) => plan.week >= 9 && plan.week <= 12).map((plan: any, index: number) => (
+            <Card key={index} className="bg-athlete-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center text-white">
+                  <div className="bg-purple-600 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
+                    {plan.week}
+                  </div>
+                  {plan.focus}
+                  <Badge className="ml-auto bg-purple-600 text-white">Week {plan.week}</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-gray-300">
+                  {plan.activities && plan.activities.length > 0 ? (
+                    <ul className="list-disc list-inside space-y-2">
+                      {plan.activities.map((activity: string, i: number) => (
+                        <li key={i}>{activity}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>{plan.description || plan.focus}</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </TabsContent>
       </Tabs>
     </div>
