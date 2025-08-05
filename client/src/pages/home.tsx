@@ -62,6 +62,12 @@ export default function Home() {
     queryKey: ["/api/sports"],
   });
 
+  // Reset selected athlete when sport changes
+  const handleSportChange = (sportId: string) => {
+    setSelectedSport(sportId);
+    setSelectedAthlete(null);
+  };
+
   const handleAthleteCardClick = async () => {
     if (!selectedAthlete) return;
     
