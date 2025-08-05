@@ -1,8 +1,8 @@
 export function AthleteBackground() {
   return (
-    <div className="absolute inset-0 overflow-hidden opacity-10">
+    <div className="absolute inset-0 overflow-hidden opacity-20">
       <svg 
-        className="absolute inset-0 w-full h-full object-cover" 
+        className="absolute inset-0 w-full h-full object-cover text-white" 
         viewBox="0 0 1200 800" 
         fill="none" 
         xmlns="http://www.w3.org/2000/svg"

@@ -25,7 +25,7 @@ export function HeroVisualization() {
   ];
 
   return (
-    <div className="relative w-full h-96 bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-gray-900 rounded-2xl overflow-hidden shadow-2xl border border-blue-500/30 backdrop-blur-sm">
+    <div className="relative w-full h-96 bg-gradient-to-br from-blue-900/30 via-purple-900/30 to-gray-900 rounded-2xl overflow-hidden shadow-2xl border border-blue-500/50 backdrop-blur-sm">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="w-full h-full" style={{
