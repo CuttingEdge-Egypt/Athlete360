@@ -49,10 +49,20 @@ Preferred communication style: Simple, everyday language.
 ### Service Architecture
 - **Analysis Services**: Eight distinct analytical services (Bio, Rank, Strengths, Weaknesses, Development Plans, Nutrition, Beat Strategies, Video Analysis)
 - **Athlete Comparison**: AI-powered one-click comparison system with comprehensive analysis across strengths, weaknesses, rankings, and head-to-head predictions
+- **Sports API Integration**: Real-time athlete data synchronization from multiple sports APIs (ESPN, TheSportsDB, SportRadar, API-Football) with fallback mechanisms and rate limiting
 - **Cost Structure**: Each service has predefined token costs (50-120 tokens per analysis, 100 tokens for comparisons)
 - **Data Seeding**: Automatic database seeding with sample sports and famous athletes for demonstration
 - **CRUD Operations**: Full create, read, update, delete capabilities for sports, athletes, and analysis data
 - **Deduplication Logic**: Smart athlete deduplication by name to prevent redundancy while preserving most recent/complete records
+- **Real-Time Data Enhancement**: API-powered athlete profile enrichment with nationality, age, height, weight, position, team, and recent statistics
+
+### Sports API Integration Dashboard
+- **API Management**: Three-tab interface for API search, batch synchronization, and status monitoring
+- **Multi-Provider Support**: Integration with ESPN API (free), TheSportsDB (free/premium), SportRadar (paid), and API-Football (paid)
+- **Real-Time Search**: Search athletes across multiple APIs without database modification
+- **Batch Operations**: Select and sync multiple athletes simultaneously with progress tracking
+- **Status Monitoring**: Real-time API availability checking with configuration guidance
+- **Fallback Strategy**: Automatic failover between APIs when primary sources are unavailable
 
 ## External Dependencies
 
