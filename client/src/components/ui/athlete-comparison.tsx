@@ -94,9 +94,16 @@ export function AthleteComparison() {
 
   const comparisonMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest("POST", "/api/athletes/compare", {
+      const response = await apiRequest("POST", "/api/athletes/compare", {
         athlete1Id: selectedAthlete1,
         athlete2Id: selectedAthlete2
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Comparison Complete",
+        description: "AI-powered athlete comparison generated successfully!",
       });
     },
     onError: (error: any) => {
