@@ -130,74 +130,105 @@ export default function Landing() {
                   ))}
                 </svg>
 
-                {/* Floating Sports Icons */}
-                <div className="absolute inset-0">
-                  <div className="absolute animate-bounce" style={{ left: "15%", top: "30%", animationDelay: "0s", animationDuration: "2s" }}>
-                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center text-xl md:text-2xl shadow-lg bg-blue-500 hover:scale-110 transition-all duration-300">
-                      ⚽
-                    </div>
-                  </div>
-                  <div className="absolute animate-bounce" style={{ left: "35%", top: "20%", animationDelay: "0.5s", animationDuration: "2.3s" }}>
-                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center text-xl md:text-2xl shadow-lg bg-amber-500 hover:scale-110 transition-all duration-300">
-                      🏀
-                    </div>
-                  </div>
-                  <div className="absolute animate-bounce" style={{ left: "55%", top: "40%", animationDelay: "1s", animationDuration: "2.6s" }}>
-                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center text-xl md:text-2xl shadow-lg bg-green-500 hover:scale-110 transition-all duration-300">
-                      🎾
-                    </div>
-                  </div>
-                  <div className="absolute animate-bounce" style={{ left: "75%", top: "25%", animationDelay: "1.5s", animationDuration: "2.9s" }}>
-                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center text-xl md:text-2xl shadow-lg bg-red-500 hover:scale-110 transition-all duration-300">
-                      🥊
-                    </div>
-                  </div>
-                  <div className="absolute animate-bounce" style={{ left: "85%", top: "35%", animationDelay: "2s", animationDuration: "3.2s" }}>
-                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center text-xl md:text-2xl shadow-lg bg-purple-500 hover:scale-110 transition-all duration-300">
-                      🏈
-                    </div>
-                  </div>
-                </div>
+                {/* Professional Athlete Silhouettes */}
+                <svg className="absolute inset-0 w-full h-full opacity-15" viewBox="0 0 800 400">
+                  {/* Marathon Runner */}
+                  <g transform="translate(100, 150)">
+                    <path d="M40 80 C42 78 44 76 46 75 C48 74 50 74 52 75 C54 76 56 78 58 80 C56 82 54 84 52 85 C50 86 48 86 46 85 C44 84 42 82 40 80 Z" fill="currentColor" opacity="0.4" />
+                    <rect x="43" y="85" width="12" height="35" rx="6" fill="currentColor" opacity="0.4" />
+                    <path d="M38 95 L32 88 L28 85" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.4" />
+                    <path d="M60 95 L66 88 L70 85" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.4" />
+                    <path d="M46 120 L44 135 L42 150 L40 165" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.4" />
+                    <path d="M52 120 L54 135 L56 150 L58 165" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.4" />
+                  </g>
 
-                {/* Live Analytics */}
+                  {/* Basketball Player - Shooting */}
+                  <g transform="translate(250, 120)">
+                    <circle cx="40" cy="25" r="12" fill="currentColor" opacity="0.35" />
+                    <rect x="32" y="37" width="16" height="40" rx="8" fill="currentColor" opacity="0.35" />
+                    <path d="M28 50 L18 35 L12 28" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.35" />
+                    <path d="M52 50 L62 35 L68 28 L72 22" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.35" />
+                    <path d="M36 77 L34 95 L32 113 L30 130" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.35" />
+                    <path d="M44 77 L46 95 L48 113 L50 130" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.35" />
+                  </g>
+
+                  {/* Soccer Player - Kicking */}
+                  <g transform="translate(400, 140)">
+                    <circle cx="35" cy="20" r="10" fill="currentColor" opacity="0.3" />
+                    <rect x="28" y="30" width="14" height="32" rx="7" fill="currentColor" opacity="0.3" />
+                    <path d="M25 42 L15 38 L8 35" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.3" />
+                    <path d="M45 42 L55 45 L62 48" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.3" />
+                    <path d="M31 62 L25 78 L15 90 L8 98" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.3" />
+                    <path d="M39 62 L41 80 L43 98 L45 115" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.3" />
+                  </g>
+
+                  {/* Tennis Player - Serving */}
+                  <g transform="translate(550, 125)">
+                    <circle cx="38" cy="22" r="11" fill="currentColor" opacity="0.25" />
+                    <rect x="31" y="33" width="14" height="35" rx="7" fill="currentColor" opacity="0.25" />
+                    <path d="M45 45 L58 32 L68 25 L75 20" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.25" />
+                    <ellipse cx="78" cy="16" rx="6" ry="9" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.25" />
+                    <path d="M27 45 L18 48 L12 50" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.25" />
+                    <path d="M34 68 L32 85 L30 102 L28 118" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.25" />
+                    <path d="M42 68 L44 85 L46 102 L48 118" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.25" />
+                  </g>
+
+                  {/* Cyclist */}
+                  <g transform="translate(680, 160)">
+                    <circle cx="30" cy="18" r="9" fill="currentColor" opacity="0.2" />
+                    <rect x="24" y="27" width="12" height="25" rx="6" fill="currentColor" opacity="0.2" />
+                    <path d="M20 38 L12 35 L6 33" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.2" />
+                    <path d="M40 38 L48 35 L54 33" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.2" />
+                    <path d="M27 52 L22 65 L18 75" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.2" />
+                    <path d="M33 52 L38 65 L42 75" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.2" />
+                    <circle cx="15" cy="80" r="8" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.2" />
+                    <circle cx="45" cy="80" r="8" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.2" />
+                  </g>
+                </svg>
+
+                {/* Performance Metrics */}
                 <div className="absolute top-4 right-4">
-                  <div className="bg-black/50 backdrop-blur-md rounded-lg p-4 text-white border border-blue-500/30">
+                  <div className="bg-black/60 backdrop-blur-md rounded-lg p-4 text-white border border-gray-500/30">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                      <span className="text-sm font-medium">Live Analytics</span>
+                      <span className="text-sm font-medium">Performance Analytics</span>
                     </div>
                     <div className="text-sm space-y-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Athletes Analyzed:</span>
+                        <span className="text-gray-300">Elite Athletes:</span>
                         <span className="font-bold text-blue-400">2,847</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300">Avg Score:</span>
+                        <span className="font-bold text-green-400">94.2%</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Bottom Info Bar */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-black/60 via-black/40 to-transparent backdrop-blur-md p-4 border-t border-blue-500/20">
+                {/* Platform Capabilities */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent backdrop-blur-md p-4 border-t border-gray-500/20">
                   <div className="flex items-center justify-between text-white">
                     <div className="flex items-center gap-4 md:gap-6">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                        <span className="text-xs md:text-sm">8 Sports</span>
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        <span className="text-xs md:text-sm">Multi-Sport Analysis</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        <span className="text-xs md:text-sm">Real-time APIs</span>
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-xs md:text-sm">Real-time Data</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-                        <span className="text-xs md:text-sm">AI Insights</span>
+                        <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                        <span className="text-xs md:text-sm">AI-Powered</span>
                       </div>
                     </div>
                     
                     <div className="text-right">
-                      <div className="text-sm md:text-lg font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                        Athlete360
+                      <div className="text-sm md:text-lg font-bold bg-gradient-to-r from-gray-200 to-gray-400 bg-clip-text text-transparent">
+                        Professional Athletics
                       </div>
-                      <div className="text-xs text-gray-300 hidden md:block">Next-Gen Analytics</div>
+                      <div className="text-xs text-gray-400 hidden md:block">Performance Platform</div>
                     </div>
                   </div>
                 </div>
