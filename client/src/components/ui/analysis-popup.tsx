@@ -343,50 +343,76 @@ export function AnalysisPopup({
   );
   };
 
-  const renderStrengthsAnalysis = (data: any) => (
-    <div className="grid md:grid-cols-2 gap-6">
-      {[
-        {
-          title: "Lightning-Fast Combinations",
-          description: "Exceptional ability to execute rapid-fire kick combinations with perfect timing and precision. His signature 3-kick combo (roundhouse-side-hook) has a 92% success rate in competition.",
-          icon: <Zap className="text-athlete-warning" size={24} />,
-          rating: 95
-        },
-        {
-          title: "Mental Fortitude", 
-          description: "Demonstrates extraordinary psychological resilience under pressure. Never lost a match when trailing by 5+ points, with 15 comeback victories in the last 2 years.",
-          icon: <Brain className="text-purple-400" size={24} />,
-          rating: 92
-        },
-        {
-          title: "Counter-Attack Mastery",
-          description: "World-class defensive awareness and counter-attacking skills. Leads international rankings with 78% counter-attack success rate, specializing in cut-kicks and back-kicks.",
-          icon: <Shield className="text-athlete-accent" size={24} />,
-          rating: 88
-        },
-        {
-          title: "Tactical Intelligence",
-          description: "Superior game reading ability and tactical adaptation mid-match. Known for analyzing opponent patterns within the first round and adjusting strategy accordingly.",
-          icon: <Target className="text-athlete-success" size={24} />,
-          rating: 90
-        }
-      ].map((strength, index) => (
-        <Card key={index} className="bg-gradient-to-br from-athlete-gray-800 to-athlete-gray-700 border-athlete-success/30">
-          <CardHeader>
-            <CardTitle className="flex items-center text-white">
-              {strength.icon}
-              <span className="ml-3">{strength.title}</span>
-              <Badge className="ml-auto bg-athlete-success text-white">{strength.rating}%</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-300 leading-relaxed mb-4">{strength.description}</p>
-            <Progress value={strength.rating} className="h-2" />
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
+  const renderStrengthsAnalysis = (data: any) => {
+    // Use actual data from the API response, with fallback to sample data
+    const strengthsData = data.strengths || [
+      {
+        title: "Lightning-Fast Combinations",
+        description: "Exceptional ability to execute rapid-fire kick combinations with perfect timing and precision. His signature 3-kick combo (roundhouse-side-hook) has a 92% success rate in competition.",
+        rating: 95
+      },
+      {
+        title: "Mental Fortitude", 
+        description: "Demonstrates extraordinary psychological resilience under pressure. Never lost a match when trailing by 5+ points, with 15 comeback victories in the last 2 years.",
+        rating: 92
+      },
+      {
+        title: "Counter-Attack Mastery",
+        description: "World-class defensive awareness and counter-attacking skills. Leads international rankings with 78% counter-attack success rate, specializing in cut-kicks and back-kicks.",
+        rating: 88
+      },
+      {
+        title: "Tactical Intelligence",
+        description: "Superior game reading ability and tactical adaptation mid-match. Known for analyzing opponent patterns within the first round and adjusting strategy accordingly.",
+        rating: 90
+      }
+    ];
+
+    // Icon mapping function
+    const getStrengthIcon = (title: string, index: number) => {
+      const titleLower = title.toLowerCase();
+      if (titleLower.includes('speed') || titleLower.includes('combination') || titleLower.includes('lightning')) {
+        return <Zap className="text-athlete-warning" size={24} />;
+      } else if (titleLower.includes('mental') || titleLower.includes('fortitude') || titleLower.includes('psychological')) {
+        return <Brain className="text-purple-400" size={24} />;
+      } else if (titleLower.includes('counter') || titleLower.includes('defense') || titleLower.includes('mastery')) {
+        return <Shield className="text-athlete-accent" size={24} />;
+      } else if (titleLower.includes('tactical') || titleLower.includes('intelligence') || titleLower.includes('strategy')) {
+        return <Target className="text-athlete-success" size={24} />;
+      } else {
+        // Rotate through icons for dynamic data
+        const icons = [
+          <Zap className="text-athlete-warning" size={24} />,
+          <Brain className="text-purple-400" size={24} />,
+          <Shield className="text-athlete-accent" size={24} />,
+          <Target className="text-athlete-success" size={24} />
+        ];
+        return icons[index % 4];
+      }
+    };
+
+    return (
+      <div className="grid md:grid-cols-2 gap-6">
+        {strengthsData.map((strength, index) => (
+          <Card key={index} className="bg-gradient-to-br from-athlete-gray-800 to-athlete-gray-700 border-athlete-success/30">
+            <CardHeader>
+              <CardTitle className="flex items-center text-white">
+                {getStrengthIcon(strength.title, index)}
+                <span className="ml-3">{strength.title}</span>
+                <Badge className="ml-auto bg-athlete-success text-white">
+                  {strength.rating || (95 - index * 3)}%
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-300 leading-relaxed mb-4">{strength.description}</p>
+              <Progress value={strength.rating || (95 - index * 3)} className="h-2" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  };
 
   const renderWeaknessesAnalysis = (data: any) => (
     <div className="space-y-6">
