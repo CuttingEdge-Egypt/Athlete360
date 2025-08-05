@@ -19,6 +19,7 @@ Preferred communication style: Simple, everyday language.
 - **State Management**: TanStack Query (React Query) for server state management and caching
 - **Routing**: Wouter for lightweight client-side routing
 - **Forms**: React Hook Form with Zod validation for type-safe form handling
+- **Interface Design**: Tab-based navigation with dedicated sections for athlete analysis and comparison features
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js framework
@@ -47,9 +48,11 @@ Preferred communication style: Simple, everyday language.
 
 ### Service Architecture
 - **Analysis Services**: Eight distinct analytical services (Bio, Rank, Strengths, Weaknesses, Development Plans, Nutrition, Beat Strategies, Video Analysis)
-- **Cost Structure**: Each service has predefined token costs displayed to users before consumption
+- **Athlete Comparison**: AI-powered one-click comparison system with comprehensive analysis across strengths, weaknesses, rankings, and head-to-head predictions
+- **Cost Structure**: Each service has predefined token costs (50-120 tokens per analysis, 100 tokens for comparisons)
 - **Data Seeding**: Automatic database seeding with sample sports and famous athletes for demonstration
 - **CRUD Operations**: Full create, read, update, delete capabilities for sports, athletes, and analysis data
+- **Deduplication Logic**: Smart athlete deduplication by name to prevent redundancy while preserving most recent/complete records
 
 ## External Dependencies
 

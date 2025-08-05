@@ -60,14 +60,37 @@ export function AthleteComparison() {
     queryKey: ["/api/sports"],
   });
 
-  const { data: athletes = [] } = useQuery<Athlete[]>({
-    queryKey: ["/api/athletes/all"],
+  const { data: allAthletes = [] } = useQuery<Athlete[]>({
+    queryKey: ["/api/athletes/by-sport", selectedSport],
     enabled: !!selectedSport,
     queryFn: async () => {
       const response = await fetch(`/api/athletes/by-sport/${selectedSport}`);
       return response.json();
     }
   });
+
+  // Deduplicate athletes by name, keeping the most recent record
+  const athletes = allAthletes.reduce((acc: Athlete[], current) => {
+    const existingIndex = acc.findIndex(athlete => 
+      athlete.name.toLowerCase().trim() === current.name.toLowerCase().trim()
+    );
+    
+    if (existingIndex === -1) {
+      acc.push(current);
+    } else {
+      // Keep the more recent record (or the one with more complete data)
+      const existing = acc[existingIndex];
+      const currentDate = new Date(current.updatedAt || current.createdAt || 0);
+      const existingDate = new Date(existing.updatedAt || existing.createdAt || 0);
+      
+      if (currentDate > existingDate || 
+          (current.bio && current.bio.length > (existing.bio?.length || 0))) {
+        acc[existingIndex] = current;
+      }
+    }
+    
+    return acc;
+  }, []);
 
   const comparisonMutation = useMutation({
     mutationFn: async () => {
@@ -107,8 +130,9 @@ export function AthleteComparison() {
     comparisonMutation.mutate();
   };
 
-  const comparisonData = comparisonMutation.data as ComparisonData;
-  const availableAthletes = athletes.filter(a => a.id !== selectedAthlete1 && a.id !== selectedAthlete2);
+  const comparisonData = comparisonMutation.data as ComparisonData | undefined;
+  const availableAthletes1 = athletes.filter(a => a.id !== selectedAthlete2);
+  const availableAthletes2 = athletes.filter(a => a.id !== selectedAthlete1);
 
   return (
     <Card className="bg-athlete-gray-800 border-gray-700">
@@ -153,9 +177,14 @@ export function AthleteComparison() {
                 <SelectValue placeholder="Select first athlete..." />
               </SelectTrigger>
               <SelectContent>
-                {athletes.map((athlete) => (
+                {availableAthletes1.map((athlete) => (
                   <SelectItem key={athlete.id} value={athlete.id}>
-                    {athlete.name}
+                    <div className="flex items-center gap-2">
+                      <span>{athlete.name}</span>
+                      {athlete.rank && (
+                        <span className="text-xs text-gray-400">#{athlete.rank}</span>
+                      )}
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -174,9 +203,14 @@ export function AthleteComparison() {
                 <SelectValue placeholder="Select second athlete..." />
               </SelectTrigger>
               <SelectContent>
-                {availableAthletes.map((athlete) => (
+                {availableAthletes2.map((athlete) => (
                   <SelectItem key={athlete.id} value={athlete.id}>
-                    {athlete.name}
+                    <div className="flex items-center gap-2">
+                      <span>{athlete.name}</span>
+                      {athlete.rank && (
+                        <span className="text-xs text-gray-400">#{athlete.rank}</span>
+                      )}
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>

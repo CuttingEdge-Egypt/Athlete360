@@ -29,7 +29,7 @@ import {
   type InsertTransaction,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, asc } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -164,7 +164,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAthletesBySport(sportId: string): Promise<Athlete[]> {
-    return await db.select().from(athletes).where(eq(athletes.sportId, sportId));
+    return await db.select().from(athletes)
+      .where(eq(athletes.sportId, sportId))
+      .orderBy(asc(athletes.name), desc(athletes.updatedAt));
   }
 
   async createAthlete(athlete: InsertAthlete): Promise<Athlete> {
