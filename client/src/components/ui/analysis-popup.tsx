@@ -48,8 +48,10 @@ export function AnalysisPopup({
       case 'development': 
       case 'development-plan': return <Calendar className="text-purple-400" size={28} />;
       case 'nutrition': return <Apple className="text-green-400" size={28} />;
-      case 'beat': return <Swords className="text-red-400" size={28} />;
-      case 'video': return <Video className="text-indigo-400" size={28} />;
+      case 'beat': 
+      case 'beat-strategies': return <Swords className="text-red-400" size={28} />;
+      case 'video': 
+      case 'video-analysis': return <Video className="text-indigo-400" size={28} />;
       default: return <User className="text-athlete-accent" size={28} />;
     }
   };
@@ -63,8 +65,10 @@ export function AnalysisPopup({
       case 'development': 
       case 'development-plan': return '12-Week Development Program';
       case 'nutrition': return 'Performance Nutrition Plan';
-      case 'beat': return 'Strategic Combat Analysis';
-      case 'video': return 'Dynamic Performance Analysis';
+      case 'beat': 
+      case 'beat-strategies': return 'Strategic Combat Analysis';
+      case 'video': 
+      case 'video-analysis': return 'Dynamic Performance Analysis';
       default: return 'Analysis Results';
     }
   };
@@ -751,8 +755,10 @@ export function AnalysisPopup({
       case 'development': 
       case 'development-plan': return renderDevelopmentPlan(data);
       case 'nutrition': return renderNutritionPlan(data);
-      case 'beat': return renderBeatStrategies(data);
-      case 'video': return renderVideoAnalysis(data);
+      case 'beat': 
+      case 'beat-strategies': return renderBeatStrategies(data);
+      case 'video': 
+      case 'video-analysis': return renderVideoAnalysis(data);
       default: return <div className="text-white">Analysis data not available</div>;
     }
   };
