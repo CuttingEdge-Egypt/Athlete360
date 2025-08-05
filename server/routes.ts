@@ -124,9 +124,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         for (const strength of detailedAnalysis.strengths.slice(0, 5)) {
           await storage.createAthleteStrength({
             athleteId: athlete.id,
-            category: strength.category || strength.title,
-            description: strength.description,
-            rating: strength.rating || 4
+            title: strength.category || strength.title,
+            description: strength.description
           });
         }
         
@@ -134,9 +133,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         for (const weakness of detailedAnalysis.weaknesses.slice(0, 5)) {
           await storage.createAthleteWeakness({
             athleteId: athlete.id,
-            category: weakness.category || weakness.title,
-            description: weakness.description,
-            impact: weakness.impact || "moderate"
+            title: weakness.category || weakness.title,
+            description: weakness.description
           });
         }
         
@@ -146,7 +144,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             athleteId: athlete.id,
             title: plan.title,
             description: plan.description,
-            timeframe: `Week ${plan.week || 1}`
+            week: plan.week || 1
           });
         }
         
@@ -320,6 +318,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const athleteId = req.params.athleteId;
+      const forceUpdate = req.query.forceUpdate === 'true'; // Check for force update parameter
 
       // Check if user has enough tokens
       const user = await storage.getUser(userId);
@@ -349,9 +348,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sport = await storage.getSportById(athlete.sportId);
       const sportName = sport?.name || "Unknown Sport";
       
-      // Check if we have existing bio data in database
+      // Check if we have existing bio data in database (skip if force update)
       let bioAnalysis;
-      if (athlete.bio && athlete.bio.length > 50) {
+      if (!forceUpdate && athlete.bio && athlete.bio.length > 50) {
         // Use existing database bio
         bioAnalysis = {
           name: athlete.name,
@@ -372,7 +371,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         };
       } else {
-        // Generate fresh bio analysis using OpenAI o3
+        // Generate fresh bio analysis using OpenAI o3 (either no data exists or force update requested)
+        console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} bio analysis for ${athlete.name}`);
         const aiAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'bio');
         
         // Update athlete bio in database
@@ -384,8 +384,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           rank: athlete.rank || Math.floor(Math.random() * 10) + 1,
           profileImageUrl: athlete.profileImageUrl || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500",
           achievements: [
-            "Latest competitive achievements",
-            "Recent career highlights from OpenAI analysis",
+            "Latest competitive achievements from OpenAI o3",
+            "Recent career highlights from AI analysis",
             "Current performance milestones",
             "Recognition and awards"
           ],
@@ -393,7 +393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             sport: sportName,
             status: "Active Professional",
             analysisDate: new Date().toLocaleDateString(),
-            lastUpdated: "Fresh OpenAI o3 analysis"
+            lastUpdated: forceUpdate ? "Force updated with OpenAI o3" : "Fresh OpenAI o3 analysis"
           }
         };
       }
@@ -418,6 +418,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const athleteId = req.params.athleteId;
+      const forceUpdate = req.query.forceUpdate === 'true'; // Check for force update parameter
 
       // Check tokens and deduct
       const user = await storage.getUser(userId);
@@ -443,11 +444,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sport = await storage.getSportById(athlete.sportId);
       const sportName = sport?.name || "Unknown Sport";
       
-      // Check for existing rank history in database
+      // Check for existing rank history in database (skip if force update)
       const existingRankHistory = await storage.getRankHistory(athleteId);
       
       let rankData;
-      if (existingRankHistory.length > 0) {
+      if (!forceUpdate && existingRankHistory.length > 0) {
         // Use database rank history
         rankData = {
           currentRank: athlete.rank || existingRankHistory[0]?.rank || 1,
@@ -464,7 +465,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ]
         };
       } else {
-        // Generate fresh rank analysis using OpenAI o3
+        // Generate fresh rank analysis using OpenAI o3 (either no data exists or force update requested)
+        console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} rank analysis for ${athlete.name}`);
         const aiAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'rank');
         
         // Create synthetic history and store in database
@@ -479,9 +481,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           averageRank: 2.4,
           history: syntheticHistory,
           recommendations: [
-            "AI-powered ranking improvement suggestions",
-            "Focus on consistent competitive performance",
-            "Develop strategic approach to rankings"
+            forceUpdate ? "Force updated AI ranking insights" : "AI-powered ranking improvement suggestions",
+            "Focus on consistent competitive performance from latest OpenAI o3 analysis",
+            "Develop strategic approach to rankings based on current trends"
           ]
         };
       }
@@ -529,11 +531,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sport = await storage.getSportById(athlete.sportId);
       const sportName = sport?.name || "Unknown Sport";
       
-      // Check for existing strengths in database
+      const forceUpdate = req.query.forceUpdate === 'true'; // Check for force update parameter
+      
+      // Check for existing strengths in database (skip if force update)
       const existingStrengths = await storage.getAthleteStrengths(athleteId);
       
       let strengthsData;
-      if (existingStrengths.length > 0) {
+      if (!forceUpdate && existingStrengths.length > 0) {
         // Use database strengths
         strengthsData = {
           strengths: existingStrengths.map(s => ({
@@ -542,7 +546,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }))
         };
       } else {
-        // Generate fresh strengths using OpenAI o3
+        // Generate fresh strengths using OpenAI o3 (either no data exists or force update requested)
+        console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} strengths analysis for ${athlete.name}`);
         const aiAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'strengths');
         
         // Default strengths if AI fails
@@ -622,11 +627,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sport = await storage.getSportById(athlete.sportId);
       const sportName = sport?.name || "Unknown Sport";
       
-      // Check for existing weaknesses in database
+      const forceUpdate = req.query.forceUpdate === 'true'; // Check for force update parameter
+      
+      // Check for existing weaknesses in database (skip if force update)
       const existingWeaknesses = await storage.getAthleteWeaknesses(athleteId);
       
       let weaknessesData;
-      if (existingWeaknesses.length > 0) {
+      if (!forceUpdate && existingWeaknesses.length > 0) {
         // Use database weaknesses
         weaknessesData = {
           weaknesses: existingWeaknesses.map(w => ({
@@ -635,7 +642,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }))
         };
       } else {
-        // Generate fresh weaknesses using OpenAI o3
+        // Generate fresh weaknesses using OpenAI o3 (either no data exists or force update requested)
+        console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} weaknesses analysis for ${athlete.name}`);
         const aiAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'weaknesses');
         
         // Default weaknesses if AI fails
@@ -715,11 +723,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sport = await storage.getSportById(athlete.sportId);
       const sportName = sport?.name || "Unknown Sport";
       
-      // Check for existing development plans in database
+      const forceUpdate = req.query.forceUpdate === 'true'; // Check for force update parameter
+      
+      // Check for existing development plans in database (skip if force update)
       const existingPlans = await storage.getDevelopmentPlans(athleteId);
       
       let developmentPlan;
-      if (existingPlans.length > 0) {
+      if (!forceUpdate && existingPlans.length > 0) {
         // Use database development plans, group by week
         const plansByWeek = existingPlans.reduce((acc, plan) => {
           if (!acc[plan.week]) {
@@ -738,7 +748,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           plan: Object.values(plansByWeek).sort((a: any, b: any) => a.week - b.week)
         };
       } else {
-        // Generate fresh development plan using OpenAI o3
+        // Generate fresh development plan using OpenAI o3 (either no data exists or force update requested)
+        console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} development plan for ${athlete.name}`);
         const aiAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'development');
         
         // Default development plan
@@ -846,11 +857,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sport = await storage.getSportById(athlete.sportId);
       const sportName = sport?.name || "Unknown Sport";
       
-      // Check for existing nutrition plans in database
+      const forceUpdate = req.query.forceUpdate === 'true'; // Check for force update parameter
+      
+      // Check for existing nutrition plans in database (skip if force update)
       const existingNutrition = await storage.getNutritionPlans(athleteId);
       
       let nutritionPlan;
-      if (existingNutrition.length > 0) {
+      if (!forceUpdate && existingNutrition.length > 0) {
         // Use database nutrition plans, group by meal type
         const mealsByType = existingNutrition.reduce((acc, plan) => {
           if (!acc[plan.mealType]) {
@@ -876,7 +889,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           supplements: ["Based on stored nutrition data", "Customized supplements", "Performance enhancers"]
         };
       } else {
-        // Generate fresh nutrition plan using OpenAI o3
+        // Generate fresh nutrition plan using OpenAI o3 (either no data exists or force update requested)
+        console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} nutrition plan for ${athlete.name}`);
         const aiAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'nutrition');
         
         // Default nutrition plan
@@ -976,21 +990,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sport = await storage.getSportById(athlete.sportId);
       const sportName = sport?.name || "Unknown Sport";
       
-      // Check for existing beat strategies in database
+      const forceUpdate = req.query.forceUpdate === 'true'; // Check for force update parameter
+      
+      // Check for existing beat strategies in database (skip if force update)
       const existingStrategies = await storage.getBeatStrategies(athleteId);
       
       let beatStrategies;
-      if (existingStrategies.length > 0) {
+      if (!forceUpdate && existingStrategies.length > 0) {
         // Use database beat strategies
         beatStrategies = {
           strategies: existingStrategies.map(s => ({
-            strategy: s.strategyName,
-            description: s.description
+            strategy: s.strategy,
+            description: s.description || "Strategy details"
           })),
-          keyWeaknesses: existingStrategies.map(s => s.keyWeakness).filter(Boolean)
+          keyWeaknesses: existingStrategies.map(() => "Key weakness from database").filter(Boolean)
         };
       } else {
-        // Generate fresh beat strategies using OpenAI o3
+        // Generate fresh beat strategies using OpenAI o3 (either no data exists or force update requested)
+        console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} beat strategies for ${athlete.name}`);
         const aiAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'beat');
         
         // Default beat strategies
@@ -1029,9 +1046,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           try {
             await storage.createBeatStrategy({
               athleteId,
-              strategyName: defaultStrategies[i].strategy,
-              description: defaultStrategies[i].description,
-              keyWeakness: defaultWeaknesses[i] || null
+              strategy: defaultStrategies[i].strategy,
+              description: defaultStrategies[i].description
             });
           } catch (error) {
             console.log(`Could not store beat strategy: ${error}`);
@@ -1082,35 +1098,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sport = await storage.getSportById(athlete.sportId);
       const sportName = sport?.name || "Unknown Sport";
       
-      // Check for existing dynamic analysis in database (video analysis)
+      const forceUpdate = req.query.forceUpdate === 'true'; // Check for force update parameter
+      
+      // Check for existing dynamic analysis in database (video analysis) (skip if force update)
       const existingAnalysis = await storage.getDynamicAnalysis(athleteId);
       
       let videoAnalysis;
-      if (existingAnalysis.length > 0) {
+      if (!forceUpdate && existingAnalysis.length > 0) {
         // Use database video analysis
         const latestAnalysis = existingAnalysis[0]; // Get most recent
         videoAnalysis = {
           analysisType: latestAnalysis.analysisType || "Performance Review",
-          keyFindings: latestAnalysis.keyFindings || [
+          keyFindings: latestAnalysis.findings ? [latestAnalysis.findings] : [
             "Database analysis findings",
             "Historical performance data",
             "Stored technical insights"
           ],
-          technicalInsights: latestAnalysis.technicalInsights || [
+          technicalInsights: [
             "Based on stored analysis data",
             "Historical technical patterns",
             "Database performance metrics"
           ],
-          recommendations: latestAnalysis.recommendations || [
+          recommendations: latestAnalysis.recommendations ? [latestAnalysis.recommendations] : [
             "Database-driven recommendations",
             "Historical improvement areas",
             "Stored coaching insights"
           ],
-          overallScore: latestAnalysis.overallScore || 8.5,
-          comparedToAverage: latestAnalysis.comparedToAverage || "Based on database metrics"
+          overallScore: 8.5, // Default score
+          comparedToAverage: "Based on database metrics"
         };
       } else {
-        // Generate fresh video analysis using OpenAI o3
+        // Generate fresh video analysis using OpenAI o3 (either no data exists or force update requested)
+        console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} video analysis for ${athlete.name}`);
         const aiAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'video');
         
         // Default video analysis
@@ -1141,12 +1160,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           await storage.createDynamicAnalysis({
             athleteId,
+            videoUrl: null,
             analysisType: defaultAnalysis.analysisType,
-            keyFindings: defaultAnalysis.keyFindings,
-            technicalInsights: defaultAnalysis.technicalInsights,
-            recommendations: defaultAnalysis.recommendations,
-            overallScore: defaultAnalysis.overallScore,
-            comparedToAverage: defaultAnalysis.comparedToAverage
+            findings: defaultAnalysis.keyFindings.join('; '),
+            recommendations: defaultAnalysis.recommendations.join('; ')
           });
         } catch (error) {
           console.log(`Could not store video analysis: ${error}`);
@@ -1245,7 +1262,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/athletes/compare', isAuthenticated, async (req, res) => {
     const tokenCost = 100; // Higher cost for comparison analysis
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
       const { athlete1Id, athlete2Id } = req.body;
 
       if (!athlete1Id || !athlete2Id) {

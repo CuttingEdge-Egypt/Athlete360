@@ -168,9 +168,9 @@ export default function AthleteAnalysis() {
                       key={log.id}
                       type={log.serviceType}
                       data={log.resultData}
-                      createdAt={log.createdAt}
-                      shared={log.shared}
-                      shareUrl={log.shareUrl}
+                      createdAt={log.createdAt || new Date().toISOString()}
+                      shared={log.shared || false}
+                      shareUrl={log.shareUrl || undefined}
                     />
                   ))}
                 </div>

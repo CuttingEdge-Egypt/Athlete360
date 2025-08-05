@@ -48,16 +48,17 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
   const IconComponent = iconMap[service.icon as keyof typeof iconMap] || User;
 
   const analysisMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (forceUpdate = false) => {
       if (isProcessing) {
         throw new Error("Analysis already in progress");
       }
       setIsProcessing(true);
       
-      const response = await apiRequest(
-        "POST", 
-        `/api/analysis/${athlete.id}/${service.id}`
-      );
+      const url = forceUpdate 
+        ? `/api/analysis/${athlete.id}/${service.id}?forceUpdate=true`
+        : `/api/analysis/${athlete.id}/${service.id}`;
+      
+      const response = await apiRequest("POST", url);
       return response.json();
     },
     onSuccess: (data) => {
@@ -107,7 +108,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
     },
   });
 
-  const handleServiceClick = () => {
+  const handleServiceClick = (forceUpdate = false) => {
     // Prevent duplicate clicks while processing
     if (isProcessing || analysisMutation.isPending) {
       return;
@@ -119,7 +120,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       return;
     }
 
-    analysisMutation.mutate();
+    analysisMutation.mutate(forceUpdate);
   };
 
   return (
@@ -128,7 +129,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         className={`service-card bg-gradient-to-br from-athlete-gray-800 to-athlete-gray-700 border-gray-700 hover:border-athlete-accent cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-athlete-accent/20 ${
           (analysisMutation.isPending || isProcessing) ? 'opacity-75 pointer-events-none' : ''
         }`}
-        onClick={handleServiceClick}
+        onClick={() => handleServiceClick(false)}
       >
       <CardContent className="p-6">
         <div className="flex justify-between items-start mb-4">
@@ -141,24 +142,40 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         <h3 className="text-lg font-semibold mb-2 text-white">{service.title}</h3>
         <p className="text-gray-400 text-sm mb-4">{service.description}</p>
         
-        <Button 
-          data-testid={`button-${service.id}`}
-          className="w-full bg-athlete-accent hover:bg-blue-600 text-white transition-colors"
-          disabled={analysisMutation.isPending || isProcessing}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleServiceClick();
-          }}
-        >
-          {(analysisMutation.isPending || isProcessing) ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Analyzing...
-            </>
-          ) : (
-            `Generate ${service.title}`
-          )}
-        </Button>
+        <div className="space-y-2">
+          <Button 
+            data-testid={`button-${service.id}`}
+            className="w-full bg-athlete-accent hover:bg-blue-600 text-white transition-colors"
+            disabled={analysisMutation.isPending || isProcessing}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleServiceClick(false);
+            }}
+          >
+            {(analysisMutation.isPending || isProcessing) ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Analyzing...
+              </>
+            ) : (
+              `Generate ${service.title}`
+            )}
+          </Button>
+          
+          <Button 
+            data-testid={`button-${service.id}-refresh`}
+            variant="outline"
+            size="sm"
+            className="w-full text-xs border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white transition-colors"
+            disabled={analysisMutation.isPending || isProcessing}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleServiceClick(true);
+            }}
+          >
+            🔄 Refresh with AI
+          </Button>
+        </div>
       </CardContent>
       </Card>
       
