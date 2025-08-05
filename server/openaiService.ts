@@ -128,6 +128,14 @@ Format as JSON with these exact keys:
 
     const data = JSON.parse(response.choices[0].message.content || "{}");
     
+    // Debug logging to see what OpenAI actually returns
+    console.log(`OpenAI Response for ${name}:`);
+    console.log(`- Response keys: ${Object.keys(data)}`);
+    console.log(`- Development plans: ${data.developmentPlans?.length || 0} items`);
+    if (data.developmentPlans?.length > 0) {
+      console.log(`- First development plan: ${JSON.stringify(data.developmentPlans[0])}`);
+    }
+    
     // Ensure proper structure with defaults
     return {
       strengths: data.strengths || [],
@@ -137,8 +145,11 @@ Format as JSON with these exact keys:
       beatStrategies: data.beatStrategies || [],
       rankHistory: data.rankHistory || []
     };
-  } catch (error) {
-    console.error(`Error fetching detailed analysis for ${name}:`, error);
+  } catch (error: any) {
+    console.error(`❌ Error fetching detailed analysis for ${name}:`, error.message);
+    if (error.status) {
+      console.error(`OpenAI API Status: ${error.status}`);
+    }
     return {
       strengths: [],
       weaknesses: [],

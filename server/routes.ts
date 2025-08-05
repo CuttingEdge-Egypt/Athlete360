@@ -765,6 +765,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Get detailed analysis from OpenAI
         const detailedAnalysis = await getDetailedAnalysis(athlete.name, sportName);
+        console.log(`OpenAI Analysis received - Development Plans count: ${detailedAnalysis.developmentPlans.length}`);
+        if (detailedAnalysis.developmentPlans.length > 0) {
+          console.log(`First development plan: ${JSON.stringify(detailedAnalysis.developmentPlans[0])}`);
+        }
         
         // Default development plan
         const defaultPlan = [
