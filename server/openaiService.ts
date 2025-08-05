@@ -49,7 +49,7 @@ Format as JSON with these exact keys:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // Using the latest available model (o3 will be available when released)
+      model: "o3-mini", // Using OpenAI o3 model as requested
       messages: [
         {
           role: "system",
@@ -113,7 +113,7 @@ Format as JSON with these exact keys:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // Using the latest available model
+      model: "o3-mini", // Using the latest available model
       messages: [
         {
           role: "system", 
@@ -177,7 +177,7 @@ export async function generateSpecificAnalysis(
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "o3-mini",
       messages: [
         {
           role: "system",

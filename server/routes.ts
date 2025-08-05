@@ -48,7 +48,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Athletes routes
+  // Athletes routes - Search existing athletes from database only
   app.get('/api/athletes/search', async (req, res) => {
     try {
       const { name, sportId } = req.query;
@@ -56,67 +56,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Athlete name is required" });
       }
       
-      // First search for existing athletes
-      let athletes = await storage.getAthletesBySearch(name as string, sportId as string);
-      
-      // If no athletes found and we have a specific sport, try to create one using OpenAI
-      if (athletes.length === 0 && sportId && name) {
-        try {
-          console.log(`No athlete found for "${name}". Attempting to create using OpenAI...`);
-          
-          // Get sport name for context
-          const sport = await storage.getSportById(sportId as string);
-          const sportName = sport?.name || "Unknown Sport";
-          
-          // Fetch authentic athlete data from OpenAI
-          const aiAthleteData = await getAthleteProfile(name as string, sportName);
-          
-          // Create athlete with AI-enhanced data
-          const newAthleteData = {
-            name: name as string,
-            sportId: sportId as string,
-            bio: aiAthleteData.bio,
-            rank: aiAthleteData.rank,
-            profileImageUrl: name === "Seif Eissa" ? "/attached_assets/IMG_0107_1754340258245.webp" : aiAthleteData.profileImageUrl
-          };
-          
-          const newAthlete = await storage.createAthlete(newAthleteData);
-          
-          // Generate comprehensive analysis data in background
-          try {
-            const detailedAnalysis = await getDetailedAnalysis(name as string, sportName);
-            
-            // Store all analysis data (simplified version)
-            for (const strength of detailedAnalysis.strengths.slice(0, 3)) {
-              await storage.createAthleteStrength({
-                athleteId: newAthlete.id,
-                category: strength.category,
-                description: strength.description,
-                rating: strength.rating
-              });
-            }
-            
-            for (const weakness of detailedAnalysis.weaknesses.slice(0, 3)) {
-              await storage.createAthleteWeakness({
-                athleteId: newAthlete.id,
-                category: weakness.category,
-                description: weakness.description,
-                impact: weakness.impact
-              });
-            }
-            
-            console.log(`AI-powered athlete "${name}" created successfully`);
-          } catch (analysisError) {
-            console.log(`Athlete created but detailed analysis failed:`, analysisError);
-          }
-          
-          athletes = [newAthlete];
-        } catch (aiError) {
-          console.error(`Failed to create athlete "${name}" using OpenAI:`, aiError);
-          // Still return empty array if AI creation fails
-        }
-      }
-      
+      // Search for existing athletes in database only
+      const athletes = await storage.getAthletesBySearch(name as string, sportId as string);
       res.json(athletes);
     } catch (error) {
       console.error("Error searching athletes:", error);
@@ -134,6 +75,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching athlete:", error);
       res.status(500).json({ message: "Failed to fetch athlete" });
+    }
+  });
+
+  // Update athlete data using OpenAI o3 - triggered when athlete is selected
+  app.post('/api/athletes/:id/update-from-ai', isAuthenticated, async (req, res) => {
+    try {
+      const athleteId = req.params.id;
+      const athlete = await storage.getAthleteById(athleteId);
+      
+      if (!athlete) {
+        return res.status(404).json({ message: "Athlete not found" });
+      }
+
+      // Get sport information for context
+      const sport = await storage.getSportById(athlete.sportId);
+      const sportName = sport?.name || "Unknown Sport";
+      
+      console.log(`Updating athlete data for ${athlete.name} using OpenAI...`);
+      
+      // Fetch fresh, authentic athlete data from OpenAI
+      const aiAthleteData = await getAthleteProfile(athlete.name, sportName);
+      
+      // Update athlete with enhanced AI data
+      const updatedAthleteData = {
+        bio: aiAthleteData.bio,
+        rank: aiAthleteData.rank,
+        // Keep existing photo for Seif Eissa, update others if needed
+        profileImageUrl: athlete.name === "Seif Eissa" 
+          ? "/attached_assets/IMG_0107_1754340258245.webp" 
+          : athlete.profileImageUrl || aiAthleteData.profileImageUrl,
+        updatedAt: new Date()
+      };
+      
+      const updatedAthlete = await storage.updateAthlete(athleteId, updatedAthleteData);
+      
+      // Generate and store comprehensive analysis data
+      try {
+        const detailedAnalysis = await getDetailedAnalysis(athlete.name, sportName);
+        
+        // Clear existing analysis data and replace with fresh AI data
+        console.log(`Updating comprehensive analysis data for ${athlete.name}...`);
+        
+        // Store strengths (limit to top 5)
+        for (const strength of detailedAnalysis.strengths.slice(0, 5)) {
+          await storage.createAthleteStrength({
+            athleteId: athlete.id,
+            category: strength.category || strength.title,
+            description: strength.description,
+            rating: strength.rating || 4
+          });
+        }
+        
+        // Store weaknesses (limit to top 5)
+        for (const weakness of detailedAnalysis.weaknesses.slice(0, 5)) {
+          await storage.createAthleteWeakness({
+            athleteId: athlete.id,
+            category: weakness.category || weakness.title,
+            description: weakness.description,
+            impact: weakness.impact || "moderate"
+          });
+        }
+        
+        // Store development plans
+        for (const plan of detailedAnalysis.developmentPlans.slice(0, 3)) {
+          await storage.createDevelopmentPlan({
+            athleteId: athlete.id,
+            title: plan.title,
+            description: plan.description,
+            timeframe: `Week ${plan.week || 1}`
+          });
+        }
+        
+        // Store nutrition plans
+        for (const nutrition of detailedAnalysis.nutritionPlans.slice(0, 3)) {
+          await storage.createNutritionPlan({
+            athleteId: athlete.id,
+            description: nutrition.description,
+            mealType: nutrition.mealType,
+            foodItem: nutrition.title,
+            calories: null
+          });
+        }
+        
+        // Store beat strategies
+        for (const strategy of detailedAnalysis.beatStrategies.slice(0, 3)) {
+          await storage.createBeatStrategy({
+            athleteId: athlete.id,
+            description: strategy.description,
+            strategy: `${strategy.title}: ${strategy.description}`
+          });
+        }
+        
+        // Store rank history
+        for (const rankEntry of detailedAnalysis.rankHistory.slice(0, 10)) {
+          await storage.createRankHistory({
+            athleteId: athlete.id,
+            rank: rankEntry.rank,
+            date: new Date(rankEntry.date)
+          });
+        }
+        
+        console.log(`Successfully updated ${athlete.name} with comprehensive AI-powered data`);
+      } catch (analysisError) {
+        console.error(`Failed to generate detailed analysis for ${athlete.name}:`, analysisError);
+      }
+      
+      res.json({
+        message: "Athlete data updated successfully using OpenAI",
+        athlete: updatedAthlete,
+        updatedAt: new Date().toISOString()
+      });
+      
+    } catch (error) {
+      console.error("Error updating athlete with AI data:", error);
+      res.status(500).json({ message: "Failed to update athlete data" });
     }
   });
 

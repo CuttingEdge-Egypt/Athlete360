@@ -1,17 +1,21 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute } from "wouter";
 import { Navigation } from "@/components/Navigation";
 import { AnalysisResult } from "@/components/ui/analysis-result";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, RefreshCw, Sparkles } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import type { Athlete, Transaction, AnalysisLog } from "@shared/schema";
 
 export default function AthleteAnalysis() {
   const [, params] = useRoute("/athlete/:id");
   const athleteId = params?.id;
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: athlete } = useQuery<Athlete>({
     queryKey: ["/api/athletes", athleteId],
@@ -24,6 +28,30 @@ export default function AthleteAnalysis() {
 
   const { data: analysisLogs = [] } = useQuery<AnalysisLog[]>({
     queryKey: ["/api/analysis-logs"],
+  });
+
+  // Mutation to update athlete data using OpenAI
+  const updateAthleteDataMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", `/api/athletes/${athleteId}/update-from-ai`);
+    },
+    onSuccess: () => {
+      // Invalidate and refetch athlete data
+      queryClient.invalidateQueries({ queryKey: ["/api/athletes", athleteId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/analysis-logs"] });
+      
+      toast({
+        title: "Athlete Data Updated",
+        description: "Latest information fetched successfully using OpenAI",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update athlete data",
+        variant: "destructive",
+      });
+    },
   });
 
   const athleteTransactions = transactions.filter(t => t.athleteId === athleteId);
@@ -72,20 +100,42 @@ export default function AthleteAnalysis() {
             
             <Card className="bg-athlete-gray-800 border-gray-700">
               <CardContent className="p-6">
-                <div className="flex items-center space-x-6">
-                  <img 
-                    src={athlete.profileImageUrl || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"}
-                    alt={athlete.name}
-                    className="w-24 h-24 rounded-full object-cover"
-                  />
-                  <div>
-                    <h1 className="text-3xl font-bold text-white mb-2">{athlete.name}</h1>
-                    <p className="text-gray-400 mb-2">{athlete.bio}</p>
-                    <div className="flex items-center space-x-4">
-                      <span className="text-sm text-athlete-warning">Rank #{athlete.rank || "TBD"}</span>
-                      <span className="text-sm text-gray-400">Updated: {new Date(athlete.updatedAt || '').toLocaleDateString()}</span>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-6">
+                    <img 
+                      src={athlete.profileImageUrl || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"}
+                      alt={athlete.name}
+                      className="w-24 h-24 rounded-full object-cover"
+                    />
+                    <div>
+                      <h1 className="text-3xl font-bold text-white mb-2">{athlete.name}</h1>
+                      <p className="text-gray-400 mb-2">{athlete.bio}</p>
+                      <div className="flex items-center space-x-4">
+                        <span className="text-sm text-athlete-warning">Rank #{athlete.rank || "TBD"}</span>
+                        <span className="text-sm text-gray-400">Updated: {new Date(athlete.updatedAt || '').toLocaleDateString()}</span>
+                      </div>
                     </div>
                   </div>
+                  
+                  {/* Update Button */}
+                  <Button
+                    onClick={() => updateAthleteDataMutation.mutate()}
+                    disabled={updateAthleteDataMutation.isPending}
+                    data-testid="button-update-athlete"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  >
+                    {updateAthleteDataMutation.isPending ? (
+                      <>
+                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                        Updating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Update with AI
+                      </>
+                    )}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
