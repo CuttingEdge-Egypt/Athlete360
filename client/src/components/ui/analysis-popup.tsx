@@ -45,7 +45,8 @@ export function AnalysisPopup({
       case 'rank': return <Trophy className="text-athlete-warning" size={28} />;
       case 'strengths': return <Star className="text-athlete-success" size={28} />;
       case 'weaknesses': return <AlertTriangle className="text-athlete-danger" size={28} />;
-      case 'development': return <Calendar className="text-purple-400" size={28} />;
+      case 'development': 
+      case 'development-plan': return <Calendar className="text-purple-400" size={28} />;
       case 'nutrition': return <Apple className="text-green-400" size={28} />;
       case 'beat': return <Swords className="text-red-400" size={28} />;
       case 'video': return <Video className="text-indigo-400" size={28} />;
@@ -59,7 +60,8 @@ export function AnalysisPopup({
       case 'rank': return 'Ranking History & Analysis';
       case 'strengths': return 'Competitive Strengths Profile';
       case 'weaknesses': return 'Areas for Improvement';
-      case 'development': return '12-Week Development Program';
+      case 'development': 
+      case 'development-plan': return '12-Week Development Program';
       case 'nutrition': return 'Performance Nutrition Plan';
       case 'beat': return 'Strategic Combat Analysis';
       case 'video': return 'Dynamic Performance Analysis';
@@ -746,7 +748,8 @@ export function AnalysisPopup({
       case 'rank': return renderRankAnalysis(data);
       case 'strengths': return renderStrengthsAnalysis(data);
       case 'weaknesses': return renderWeaknessesAnalysis(data);
-      case 'development': return renderDevelopmentPlan(data);
+      case 'development': 
+      case 'development-plan': return renderDevelopmentPlan(data);
       case 'nutrition': return renderNutritionPlan(data);
       case 'beat': return renderBeatStrategies(data);
       case 'video': return renderVideoAnalysis(data);
