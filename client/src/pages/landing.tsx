@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus } from "lucide-react";
 import { HeroVisualization } from "@/components/ui/hero-visualization";
+import { AthleteBackground } from "@/components/ui/athlete-background";
 
 export default function Landing() {
   const handleLogin = () => {
@@ -28,8 +29,9 @@ export default function Landing() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-20 min-h-screen gradient-bg flex items-center">
-        <div className="container mx-auto px-4 py-20">
+      <section className="pt-20 min-h-screen gradient-bg flex items-center relative">
+        <AthleteBackground />
+        <div className="container mx-auto px-4 py-20 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-athlete-accent to-athlete-success bg-clip-text text-transparent">
               Athlete360
