@@ -5,6 +5,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
+import { getAthleteProfile, getDetailedAnalysis, generateSpecificAnalysis } from "./openaiService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -79,7 +80,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/athletes', isAuthenticated, async (req, res) => {
     try {
       const validatedData = insertAthleteSchema.parse(req.body);
-      const athlete = await storage.createAthlete(validatedData);
+      
+      // Get sport name for OpenAI context
+      const sport = await storage.getSportById(validatedData.sportId);
+      const sportName = sport?.name || "Unknown Sport";
+      
+      // Fetch authentic athlete data from OpenAI
+      const aiAthleteData = await getAthleteProfile(validatedData.name, sportName);
+      
+      // Create athlete with AI-enhanced data
+      const enhancedAthleteData = {
+        ...validatedData,
+        bio: aiAthleteData.bio,
+        rank: aiAthleteData.rank,
+        profileImageUrl: validatedData.profileImageUrl || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"
+      };
+      
+      const athlete = await storage.createAthlete(enhancedAthleteData);
+      
+      // Generate and store comprehensive analysis data
+      try {
+        const detailedAnalysis = await getDetailedAnalysis(athlete.name, sportName);
+        
+        // Store strengths
+        for (const strength of detailedAnalysis.strengths) {
+          try {
+            await storage.createAthleteStrength({
+              athleteId: athlete.id,
+              title: strength.title,
+              description: strength.description
+            });
+          } catch (error) {
+            console.log(`Skipping strength for ${athlete.id}:`, error);
+          }
+        }
+        
+        // Store weaknesses
+        for (const weakness of detailedAnalysis.weaknesses) {
+          try {
+            await storage.createAthleteWeakness({
+              athleteId: athlete.id,
+              title: weakness.title,
+              description: weakness.description
+            });
+          } catch (error) {
+            console.log(`Skipping weakness for ${athlete.id}:`, error);
+          }
+        }
+        
+        // Store development plans
+        for (const plan of detailedAnalysis.developmentPlans) {
+          try {
+            await storage.createDevelopmentPlan({
+              athleteId: athlete.id,
+              title: plan.title,
+              description: plan.description,
+              week: plan.week
+            });
+          } catch (error) {
+            console.log(`Skipping development plan for ${athlete.id}:`, error);
+          }
+        }
+        
+        // Store nutrition plans
+        for (const nutrition of detailedAnalysis.nutritionPlans) {
+          try {
+            await storage.createNutritionPlan({
+              athleteId: athlete.id,
+              description: nutrition.description,
+              mealType: nutrition.mealType,
+              foodItem: nutrition.title,
+              calories: null
+            });
+          } catch (error) {
+            console.log(`Skipping nutrition plan for ${athlete.id}:`, error);
+          }
+        }
+        
+        // Store beat strategies
+        for (const strategy of detailedAnalysis.beatStrategies) {
+          try {
+            await storage.createBeatStrategy({
+              athleteId: athlete.id,
+              description: strategy.description,
+              strategy: `${strategy.title}: ${strategy.description}`
+            });
+          } catch (error) {
+            console.log(`Skipping beat strategy for ${athlete.id}:`, error);
+          }
+        }
+        
+        // Store rank history
+        for (const rankEntry of detailedAnalysis.rankHistory) {
+          try {
+            await storage.createRankHistory({
+              athleteId: athlete.id,
+              rank: rankEntry.rank,
+              date: new Date(rankEntry.date)
+            });
+          } catch (error) {
+            console.log(`Skipping rank history for ${athlete.id}:`, error);
+          }
+        }
+        
+        console.log(`AI-powered comprehensive data created for ${athlete.name}`);
+      } catch (analysisError) {
+        console.error(`Error generating detailed analysis for ${athlete.name}:`, analysisError);
+      }
+      
       res.json(athlete);
     } catch (error) {
       console.error("Error creating athlete:", error);
@@ -96,7 +204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if user has enough tokens
       const user = await storage.getUser(userId);
-      if (!user || user.tokens < tokenCost) {
+      if (!user || (user.tokens || 0) < tokenCost) {
         return res.status(402).json({ message: "Insufficient tokens" });
       }
 
@@ -118,23 +226,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Athlete not found" });
       }
 
-      // Generate bio analysis (AI simulation)
+      // Get sport info for context
+      const sport = await storage.getSportById(athlete.sportId);
+      const sportName = sport?.name || "Unknown Sport";
+      
+      // Generate authentic bio analysis using OpenAI
+      const aiAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'bio');
+      
       const bioAnalysis = {
         name: athlete.name,
-        bio: athlete.bio || `Professional athlete with extensive career in their sport. Known for exceptional performance and dedication.`,
+        bio: aiAnalysis.content,
         rank: athlete.rank || Math.floor(Math.random() * 10) + 1,
         profileImageUrl: athlete.profileImageUrl || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500",
         achievements: [
-          "Multiple championship titles",
-          "Record-breaking performances",
-          "International recognition",
-          "Team leadership roles"
+          "Recent competitive achievements",
+          "Notable career highlights",
+          "Performance milestones",
+          "Recognition and awards"
         ],
         personalInfo: {
-          birthDate: "1985-02-05",
-          nationality: "Professional",
-          height: "6'1\"",
-          weight: "185 lbs"
+          sport: sportName,
+          status: "Active Professional",
+          analysisDate: new Date().toLocaleDateString(),
+          lastUpdated: "Recent data from OpenAI"
         }
       };
 
@@ -161,7 +275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check tokens and deduct
       const user = await storage.getUser(userId);
-      if (!user || user.tokens < tokenCost) {
+      if (!user || (user.tokens || 0) < tokenCost) {
         return res.status(402).json({ message: "Insufficient tokens" });
       }
 
@@ -211,7 +325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const athleteId = req.params.athleteId;
 
       const user = await storage.getUser(userId);
-      if (!user || user.tokens < tokenCost) {
+      if (!user || (user.tokens || 0) < tokenCost) {
         return res.status(402).json({ message: "Insufficient tokens" });
       }
 
@@ -262,7 +376,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const athleteId = req.params.athleteId;
 
       const user = await storage.getUser(userId);
-      if (!user || user.tokens < tokenCost) {
+      if (!user || (user.tokens || 0) < tokenCost) {
         return res.status(402).json({ message: "Insufficient tokens" });
       }
 
@@ -313,7 +427,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const athleteId = req.params.athleteId;
 
       const user = await storage.getUser(userId);
-      if (!user || user.tokens < tokenCost) {
+      if (!user || (user.tokens || 0) < tokenCost) {
         return res.status(402).json({ message: "Insufficient tokens" });
       }
 
@@ -389,7 +503,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const athleteId = req.params.athleteId;
 
       const user = await storage.getUser(userId);
-      if (!user || user.tokens < tokenCost) {
+      if (!user || (user.tokens || 0) < tokenCost) {
         return res.status(402).json({ message: "Insufficient tokens" });
       }
 
@@ -456,7 +570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const athleteId = req.params.athleteId;
 
       const user = await storage.getUser(userId);
-      if (!user || user.tokens < tokenCost) {
+      if (!user || (user.tokens || 0) < tokenCost) {
         return res.status(402).json({ message: "Insufficient tokens" });
       }
 
@@ -516,7 +630,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const athleteId = req.params.athleteId;
 
       const user = await storage.getUser(userId);
-      if (!user || user.tokens < tokenCost) {
+      if (!user || (user.tokens || 0) < tokenCost) {
         return res.status(402).json({ message: "Insufficient tokens" });
       }
 

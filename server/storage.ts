@@ -40,6 +40,7 @@ export interface IStorage {
 
   // Sports operations
   getAllSports(): Promise<Sport[]>;
+  getSportById(id: string): Promise<Sport | undefined>;
   createSport(sport: InsertSport): Promise<Sport>;
   updateSport(id: string, sport: Partial<Sport>): Promise<Sport>;
   deleteSport(id: string): Promise<void>;
@@ -112,13 +113,18 @@ export class DatabaseStorage implements IStorage {
     const currentUser = await this.getUser(userId);
     if (!currentUser) throw new Error("User not found");
     
-    const newTokens = Math.max(0, currentUser.tokens - amount);
+    const newTokens = Math.max(0, (currentUser.tokens || 0) - amount);
     return this.updateUserTokens(userId, newTokens);
   }
 
   // Sports operations
   async getAllSports(): Promise<Sport[]> {
     return db.select().from(sports);
+  }
+  
+  async getSportById(id: string): Promise<Sport | undefined> {
+    const [sport] = await db.select().from(sports).where(eq(sports.id, id));
+    return sport;
   }
 
   async createSport(sport: InsertSport): Promise<Sport> {
