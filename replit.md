@@ -10,6 +10,10 @@ The application follows a token-based economy where users purchase subscriptions
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+**OpenAI Model Update (January 5, 2025)**: Updated all OpenAI API calls from gpt-4o to o3-pro model as requested by the user. This affects all AI-powered analysis services including athlete profiling, detailed analysis, comparison features, and specific analysis generation.
+
 ## System Architecture
 
 ### Frontend Architecture
