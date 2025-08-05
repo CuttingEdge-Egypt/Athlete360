@@ -365,7 +365,13 @@ export function AnalysisPopup({
     </div>
   );
 
-  const renderDevelopmentPlan = (data: any) => (
+  const renderDevelopmentPlan = (data: any) => {
+    console.log('Frontend Development Plan Data:', data);
+    console.log('Plans count:', data.plan?.length || 0);
+    if (data.plan?.length > 0) {
+      console.log('First plan:', data.plan[0]);
+    }
+    return (
     <div className="space-y-6">
       <div className="grid md:grid-cols-2 gap-6 mb-6">
         <Card className="bg-gradient-to-r from-purple-600/20 to-purple-600/5 border-purple-500/30">
@@ -402,7 +408,7 @@ export function AnalysisPopup({
                   <div className="bg-purple-600 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
                     {plan.week}
                   </div>
-                  {plan.focus}
+                  {plan.focus || plan.title}
                   <Badge className="ml-auto bg-purple-600 text-white">Week {plan.week}</Badge>
                 </CardTitle>
               </CardHeader>
@@ -415,7 +421,7 @@ export function AnalysisPopup({
                       ))}
                     </ul>
                   ) : (
-                    <p>{plan.description || plan.focus}</p>
+                    <p>{plan.description || plan.focus || plan.title}</p>
                   )}
                 </div>
               </CardContent>
@@ -431,7 +437,7 @@ export function AnalysisPopup({
                   <div className="bg-purple-600 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
                     {plan.week}
                   </div>
-                  {plan.focus}
+                  {plan.focus || plan.title}
                   <Badge className="ml-auto bg-purple-600 text-white">Week {plan.week}</Badge>
                 </CardTitle>
               </CardHeader>
@@ -444,7 +450,7 @@ export function AnalysisPopup({
                       ))}
                     </ul>
                   ) : (
-                    <p>{plan.description || plan.focus}</p>
+                    <p>{plan.description || plan.focus || plan.title}</p>
                   )}
                 </div>
               </CardContent>
@@ -460,7 +466,7 @@ export function AnalysisPopup({
                   <div className="bg-purple-600 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
                     {plan.week}
                   </div>
-                  {plan.focus}
+                  {plan.focus || plan.title}
                   <Badge className="ml-auto bg-purple-600 text-white">Week {plan.week}</Badge>
                 </CardTitle>
               </CardHeader>
@@ -473,7 +479,7 @@ export function AnalysisPopup({
                       ))}
                     </ul>
                   ) : (
-                    <p>{plan.description || plan.focus}</p>
+                    <p>{plan.description || plan.focus || plan.title}</p>
                   )}
                 </div>
               </CardContent>
@@ -482,7 +488,8 @@ export function AnalysisPopup({
         </TabsContent>
       </Tabs>
     </div>
-  );
+    );
+  };
 
   const renderNutritionPlan = (data: any) => (
     <div className="space-y-6">
