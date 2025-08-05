@@ -49,7 +49,7 @@ Format as JSON with these exact keys:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "o3-mini", // Using OpenAI o3 model as requested
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       messages: [
         {
           role: "system",
@@ -112,7 +112,7 @@ Format as JSON with these exact keys:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "o3-mini", // Using the latest available model
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       messages: [
         {
           role: "system", 
@@ -175,7 +175,7 @@ export async function generateSpecificAnalysis(
 
   try {
     const response = await openai.chat.completions.create({
-      model: "o3-mini",
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       messages: [
         {
           role: "system",

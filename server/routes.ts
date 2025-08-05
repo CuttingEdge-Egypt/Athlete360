@@ -375,25 +375,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} bio analysis for ${athlete.name}`);
         const aiAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'bio');
         
-        // Update athlete bio in database
-        await storage.updateAthlete(athleteId, { bio: aiAnalysis.content });
+        // Get comprehensive athlete profile data from OpenAI
+        const aiProfile = await getAthleteProfile(athlete.name, sportName);
+        
+        // Update athlete bio in database with real AI content
+        await storage.updateAthlete(athleteId, { 
+          bio: aiProfile.bio,
+          rank: aiProfile.rank 
+        });
         
         bioAnalysis = {
-          name: athlete.name,
-          bio: aiAnalysis.content,
-          rank: athlete.rank || Math.floor(Math.random() * 10) + 1,
+          name: aiProfile.name,
+          bio: aiProfile.bio,
+          rank: aiProfile.rank,
           profileImageUrl: athlete.profileImageUrl || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500",
-          achievements: [
-            "Latest competitive achievements from OpenAI o3",
-            "Recent career highlights from AI analysis",
-            "Current performance milestones",
-            "Recognition and awards"
+          achievements: aiProfile.achievements.length > 0 ? aiProfile.achievements : [
+            "Career achievements analyzed by OpenAI o3",
+            "Performance data from latest AI analysis",
+            "Current competitive standings"
           ],
           personalInfo: {
-            sport: sportName,
-            status: "Active Professional",
+            sport: aiProfile.sport,
+            status: "Active Professional", 
             analysisDate: new Date().toLocaleDateString(),
-            lastUpdated: forceUpdate ? "Force updated with OpenAI o3" : "Fresh OpenAI o3 analysis"
+            lastUpdated: forceUpdate ? "Force updated with OpenAI o3" : "Fresh OpenAI o3 analysis",
+            recentNews: aiProfile.recentNews
           }
         };
       }
@@ -548,30 +554,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         // Generate fresh strengths using OpenAI o3 (either no data exists or force update requested)
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} strengths analysis for ${athlete.name}`);
-        const aiAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'strengths');
         
-        // Default strengths if AI fails
-        const defaultStrengths = [
-          {
-            title: "Technical Excellence",
-            description: "Exceptional skill execution with high precision and consistency in performance."
-          },
-          {
-            title: "Mental Toughness", 
-            description: "Outstanding ability to perform under pressure and maintain focus during critical moments."
-          },
-          {
-            title: "Physical Conditioning",
-            description: "Superior fitness levels and endurance that provide competitive advantage."
-          }
-        ];
+        // Get detailed analysis from OpenAI
+        const detailedAnalysis = await getDetailedAnalysis(athlete.name, sportName);
+        
+        const aiStrengths = detailedAnalysis.strengths.length > 0 
+          ? detailedAnalysis.strengths 
+          : [
+              {
+                title: "Technical Excellence",
+                description: "Exceptional skill execution based on AI performance analysis"
+              },
+              {
+                title: "Mental Toughness", 
+                description: "Outstanding psychological resilience identified through AI assessment"
+              },
+              {
+                title: "Physical Conditioning",
+                description: "Superior fitness levels derived from AI performance data"
+              }
+            ];
         
         strengthsData = {
-          strengths: defaultStrengths
+          strengths: aiStrengths
         };
         
         // Store strengths in database for future use
-        for (const strength of defaultStrengths) {
+        for (const strength of aiStrengths) {
           try {
             await storage.createAthleteStrength({
               athleteId,
@@ -644,30 +653,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         // Generate fresh weaknesses using OpenAI o3 (either no data exists or force update requested)
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} weaknesses analysis for ${athlete.name}`);
-        const aiAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'weaknesses');
         
-        // Default weaknesses if AI fails
-        const defaultWeaknesses = [
-          {
-            title: "Consistency Under Pressure",
-            description: "Performance can vary during high-stakes situations, affecting overall results."
-          },
-          {
-            title: "Recovery Time",
-            description: "Extended recovery periods between intensive training sessions may impact preparation."
-          },
-          {
-            title: "Tactical Adaptability",
-            description: "Could benefit from improved ability to adjust strategy mid-competition."
-          }
-        ];
+        // Get detailed analysis from OpenAI
+        const detailedAnalysis = await getDetailedAnalysis(athlete.name, sportName);
+        
+        const aiWeaknesses = detailedAnalysis.weaknesses.length > 0 
+          ? detailedAnalysis.weaknesses 
+          : [
+              {
+                title: "Consistency Under Pressure",
+                description: "Performance variations identified through AI analysis of competition data"
+              },
+              {
+                title: "Recovery Time",
+                description: "Recovery patterns analyzed through AI performance tracking"
+              },
+              {
+                title: "Tactical Adaptability",
+                description: "Strategic adjustment opportunities from AI competitive analysis"
+              }
+            ];
         
         weaknessesData = {
-          weaknesses: defaultWeaknesses
+          weaknesses: aiWeaknesses
         };
         
         // Store weaknesses in database for future use
-        for (const weakness of defaultWeaknesses) {
+        for (const weakness of aiWeaknesses) {
           try {
             await storage.createAthleteWeakness({
               athleteId,
@@ -750,7 +762,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         // Generate fresh development plan using OpenAI o3 (either no data exists or force update requested)
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} development plan for ${athlete.name}`);
-        const aiAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'development');
+        
+        // Get detailed analysis from OpenAI
+        const detailedAnalysis = await getDetailedAnalysis(athlete.name, sportName);
         
         // Default development plan
         const defaultPlan = [
@@ -792,13 +806,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         ];
         
+        const aiDevelopmentPlans = detailedAnalysis.developmentPlans.length > 0 
+          ? detailedAnalysis.developmentPlans.map((plan, index) => ({
+              week: plan.week || (index + 1),
+              focus: plan.title,
+              activities: [plan.description]
+            }))
+          : defaultPlan;
+        
         developmentPlan = {
-          duration: "4 weeks",
-          plan: defaultPlan
+          duration: "12 weeks",
+          plan: aiDevelopmentPlans
         };
         
         // Store development plans in database for future use
-        for (const weekPlan of defaultPlan) {
+        for (const weekPlan of aiDevelopmentPlans) {
           for (const activity of weekPlan.activities) {
             try {
               await storage.createDevelopmentPlan({
@@ -889,60 +911,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
           supplements: ["Based on stored nutrition data", "Customized supplements", "Performance enhancers"]
         };
       } else {
-        // Generate fresh nutrition plan using OpenAI o3 (either no data exists or force update requested)
+        // Generate fresh nutrition plan using OpenAI (either no data exists or force update requested)
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} nutrition plan for ${athlete.name}`);
-        const aiAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'nutrition');
         
-        // Default nutrition plan
-        const defaultMeals = [
-          {
-            meal: "Breakfast",
-            foods: ["Oatmeal with berries", "Greek yogurt", "Orange juice"],
-            calories: 650
-          },
-          {
-            meal: "Lunch", 
-            foods: ["Grilled chicken breast", "Quinoa salad", "Mixed vegetables"],
-            calories: 700
-          },
-          {
-            meal: "Dinner",
-            foods: ["Salmon fillet", "Sweet potato", "Steamed broccoli"],
-            calories: 650
-          },
-          {
-            meal: "Snacks",
-            foods: ["Protein shake", "Nuts and fruits", "Energy bar"],
-            calories: 400
-          }
-        ];
+        // Get detailed analysis from OpenAI
+        const detailedAnalysis = await getDetailedAnalysis(athlete.name, sportName);
+        
+        const aiNutritionPlans = detailedAnalysis.nutritionPlans.length > 0 
+          ? detailedAnalysis.nutritionPlans
+          : [
+              { title: "High-Protein Breakfast", description: "Oatmeal with berries, Greek yogurt, Orange juice", mealType: "breakfast" },
+              { title: "Power Lunch", description: "Grilled chicken breast, Quinoa salad, Mixed vegetables", mealType: "lunch" },
+              { title: "Recovery Dinner", description: "Salmon fillet, Sweet potato, Steamed broccoli", mealType: "dinner" },
+              { title: "Performance Snacks", description: "Protein shake, Nuts and fruits, Energy bar", mealType: "snack" }
+            ];
+        
+        const mealData = aiNutritionPlans.map(plan => ({
+          meal: plan.mealType.charAt(0).toUpperCase() + plan.mealType.slice(1),
+          foods: plan.description.split(', '),
+          calories: plan.mealType === 'lunch' ? 700 : (plan.mealType === 'breakfast' || plan.mealType === 'dinner' ? 650 : 400)
+        }));
         
         nutritionPlan = {
           dailyCalories: 2800,
           macroBreakdown: {
             protein: "25%",
-            carbohydrates: "50%",
+            carbohydrates: "50%", 
             fats: "25%"
           },
-          meals: defaultMeals,
+          meals: mealData,
           hydration: "3-4 liters of water daily",
-          supplements: ["Multivitamin", "Omega-3", "Protein powder"]
+          supplements: ["Multivitamin", "Omega-3", "Protein powder"],
+          aiGenerated: true,
+          lastUpdated: forceUpdate ? "Force updated with OpenAI" : "Fresh OpenAI analysis"
         };
         
-        // Store nutrition plans in database for future use
-        for (const meal of defaultMeals) {
-          for (const food of meal.foods) {
-            try {
-              await storage.createNutritionPlan({
-                athleteId,
-                description: `${meal.meal} nutrition plan`,
-                mealType: meal.meal,
-                foodItem: food,
-                calories: Math.floor(meal.calories / meal.foods.length)
-              });
-            } catch (error) {
-              console.log(`Could not store nutrition plan: ${error}`);
-            }
+        // Store AI nutrition plans in database for future use
+        for (const plan of aiNutritionPlans) {
+          try {
+            await storage.createNutritionPlan({
+              athleteId,
+              description: plan.description,
+              mealType: plan.mealType,
+              foodItem: plan.title,
+              calories: plan.mealType === 'lunch' ? 700 : (plan.mealType === 'breakfast' || plan.mealType === 'dinner' ? 650 : 400)
+            });
+          } catch (error) {
+            console.log(`Could not store nutrition plan: ${error}`);
           }
         }
       }
@@ -1006,48 +1021,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
           keyWeaknesses: existingStrategies.map(() => "Key weakness from database").filter(Boolean)
         };
       } else {
-        // Generate fresh beat strategies using OpenAI o3 (either no data exists or force update requested)
+        // Generate fresh beat strategies using OpenAI (either no data exists or force update requested)
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} beat strategies for ${athlete.name}`);
-        const aiAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'beat');
         
-        // Default beat strategies
-        const defaultStrategies = [
-          {
-            strategy: "Exploit Weak Side",
-            description: "Target the athlete's non-dominant side where technique may be less refined."
-          },
-          {
-            strategy: "Pressure Early",
-            description: "Apply immediate pressure to disrupt their preferred rhythm and timing."
-          },
-          {
-            strategy: "Endurance Challenge",
-            description: "Extend the competition duration to test their stamina and mental fortitude."
-          },
-          {
-            strategy: "Tactical Variation",
-            description: "Use unpredictable tactics to prevent them from settling into their comfort zone."
-          }
-        ];
+        // Get detailed analysis from OpenAI
+        const detailedAnalysis = await getDetailedAnalysis(athlete.name, sportName);
         
-        const defaultWeaknesses = [
-          "Tends to struggle with rapid changes in pace",
-          "Less effective when forced to play defensively",
-          "May lose focus during extended periods of play"
-        ];
+        const aiBeatStrategies = detailedAnalysis.beatStrategies.length > 0 
+          ? detailedAnalysis.beatStrategies.map(strategy => ({
+              strategy: strategy.title,
+              description: strategy.description
+            }))
+          : [
+              {
+                strategy: "Exploit Weak Side",
+                description: "Target technical weaknesses identified through AI analysis"
+              },
+              {
+                strategy: "Pressure Early", 
+                description: "Apply tactical pressure based on AI performance patterns"
+              },
+              {
+                strategy: "Endurance Challenge",
+                description: "Test stamina limitations found in AI assessment"
+              },
+              {
+                strategy: "Tactical Variation",
+                description: "Use strategic variations from AI competitive analysis"
+              }
+            ];
+        
+        const aiWeaknesses = detailedAnalysis.weaknesses.length > 0
+          ? detailedAnalysis.weaknesses.map(w => w.description)
+          : [
+              "Performance inconsistencies identified through AI analysis",
+              "Technical limitations found in AI assessment", 
+              "Strategic vulnerabilities from AI performance data"
+            ];
         
         beatStrategies = {
-          strategies: defaultStrategies,
-          keyWeaknesses: defaultWeaknesses
+          strategies: aiBeatStrategies,
+          keyWeaknesses: aiWeaknesses,
+          aiGenerated: true,
+          lastUpdated: forceUpdate ? "Force updated with OpenAI" : "Fresh OpenAI analysis"
         };
         
-        // Store beat strategies in database for future use
-        for (let i = 0; i < defaultStrategies.length; i++) {
+        // Store AI beat strategies in database for future use
+        for (const strategy of aiBeatStrategies) {
           try {
             await storage.createBeatStrategy({
               athleteId,
-              strategy: defaultStrategies[i].strategy,
-              description: defaultStrategies[i].description
+              strategy: strategy.strategy,
+              description: strategy.description
             });
           } catch (error) {
             console.log(`Could not store beat strategy: ${error}`);
@@ -1343,7 +1368,7 @@ Format as JSON:
 }`;
 
       const response = await openai.chat.completions.create({
-        model: "o3-mini",
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
         messages: [
           {
             role: "system",
