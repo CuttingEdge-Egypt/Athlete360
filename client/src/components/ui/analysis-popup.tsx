@@ -366,10 +366,18 @@ export function AnalysisPopup({
   );
 
   const renderDevelopmentPlan = (data: any) => {
-    console.log('Frontend Development Plan Data:', data);
+    console.log('Frontend Development Plan Data:', JSON.stringify(data, null, 2));
     console.log('Plans count:', data.plan?.length || 0);
+    console.log('All plans:', data.plan);
     if (data.plan?.length > 0) {
       console.log('First plan:', data.plan[0]);
+      console.log('Plan structure check:', {
+        week: data.plan[0].week,
+        focus: data.plan[0].focus,
+        title: data.plan[0].title,
+        activities: data.plan[0].activities,
+        description: data.plan[0].description
+      });
     }
     return (
     <div className="space-y-6">
@@ -401,7 +409,12 @@ export function AnalysisPopup({
         </TabsList>
         
         <TabsContent value="weeks1-4" className="space-y-4">
-          {console.log('Weeks 1-4 plans:', (data.plan || []).filter((plan: any) => plan.week <= 4))}
+          {(() => {
+            const filteredPlans = (data.plan || []).filter((plan: any) => plan.week <= 4);
+            console.log('Weeks 1-4 plans:', filteredPlans);
+            console.log('Filter result count:', filteredPlans.length);
+            return null;
+          })()}
           {(data.plan || []).filter((plan: any) => plan.week <= 4).map((plan: any, index: number) => (
             <Card key={index} className="bg-athlete-gray-800 border-gray-700">
               <CardHeader>
