@@ -279,7 +279,7 @@ export function AnalysisPopup({
                 {athleteInfo.lastUpdated?.includes('OpenAI') && (
                   <div className="mt-2 p-3 bg-blue-600/20 border border-blue-500/30 rounded-lg">
                     <p className="text-blue-300 text-sm">
-                      ⚡ Enhanced with AI-powered analysis using the latest o3-pro model
+                      ⚡ Enhanced with AI-powered analysis using the latest GPT-4o model
                     </p>
                   </div>
                 )}

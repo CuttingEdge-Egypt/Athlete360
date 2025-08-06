@@ -1466,7 +1466,7 @@ Format as JSON:
 }`;
 
       const response = await openai.chat.completions.create({
-        model: "o3-pro", // upgraded to o3-pro model as requested
+        model: "gpt-4o", // using latest available chat model
         messages: [
           {
             role: "system",

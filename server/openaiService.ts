@@ -63,7 +63,7 @@ Format as JSON with these exact keys:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "o3-pro", // upgraded to o3-pro model as requested
+      model: "gpt-4o", // using latest available chat model
       messages: [
         {
           role: "system",
@@ -128,7 +128,7 @@ Format as JSON with these exact keys:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "o3-pro", // upgraded to o3-pro model as requested
+      model: "gpt-4o", // using latest available chat model
       messages: [
         {
           role: "system", 
@@ -204,7 +204,7 @@ export async function generateSpecificAnalysis(
 
   try {
     const response = await openai.chat.completions.create({
-      model: "o3-pro", // upgraded to o3-pro model as requested
+      model: "gpt-4o", // using latest available chat model
       messages: [
         {
           role: "system",
