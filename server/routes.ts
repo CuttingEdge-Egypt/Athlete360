@@ -450,7 +450,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           rank: aiProfile.rank,
           profileImageUrl: athlete.profileImageUrl,
           achievements: aiProfile.achievements.length > 0 ? aiProfile.achievements : [
-            "Career achievements analyzed by OpenAI o3-deep-search",
+            "Career achievements analyzed by OpenAI GPT-4o",
             "Performance data from latest AI analysis",
             "Current competitive standings"
           ],
@@ -458,7 +458,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             sport: aiProfile.sport,
             status: "Active Professional", 
             analysisDate: new Date().toLocaleDateString(),
-            lastUpdated: forceUpdate ? "Force updated with OpenAI o3-deep-search" : "Fresh OpenAI o3-deep-search analysis",
+            lastUpdated: forceUpdate ? "Force updated with OpenAI GPT-4o" : "Fresh OpenAI GPT-4o analysis",
             recentNews: aiProfile.recentNews
           },
           referenceLinks: aiProfile.referenceLinks || []
@@ -1466,7 +1466,7 @@ Format as JSON:
 }`;
 
       const response = await openai.chat.completions.create({
-        model: "o3", // using o3 model for comparison analysis
+        model: "gpt-4o", // using gpt-4o model for comparison analysis (o3 not available)
         messages: [
           {
             role: "system",
