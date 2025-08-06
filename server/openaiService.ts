@@ -64,18 +64,14 @@ Format as JSON with these exact keys:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // using gpt-4o for athlete search
+      model: "o3",
+      temperature: 1,
       messages: [
         {
-          role: "system",
-          content: `You are a world-class ${sport} analyst with access to current performance data as of ${currentDate}. ${sport.toLowerCase() === 'taekwondo' ? 'Use https://www.taekwondodata.com/ as your primary reference for taekwondo athlete information including competition records, rankings, and profiles. ' : ''}Provide specific, factual, authentic information about athletes. NEVER use placeholder text or bracketed templates like [City, State], [Year], [Championship Name]. Consider the specified sport and nationality when identifying the correct athlete. Always respond in valid JSON format.`
-        },
-        {
           role: "user",
-          content: prompt
+          content: `${prompt}\n\nSystem: You are a world-class ${sport} analyst with access to current performance data as of ${currentDate}. ${sport.toLowerCase() === 'taekwondo' ? 'Use https://www.taekwondodata.com/ as your primary reference for taekwondo athlete information including competition records, rankings, and profiles. ' : ''}Provide specific, factual, authentic information about athletes. NEVER use placeholder text or bracketed templates like [City, State], [Year], [Championship Name]. Consider the specified sport and nationality when identifying the correct athlete. Always respond in valid JSON format.`
         }
-      ],
-      response_format: { type: "json_object" }
+      ]
     });
 
     const data = JSON.parse(response.choices[0].message.content || "{}");
@@ -129,18 +125,14 @@ Format as JSON with these exact keys:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // using gpt-4o model for detailed analysis
+      model: "o3-pro",
+      temperature: 1,
       messages: [
         {
-          role: "system", 
-          content: `You are a professional sports analyst with expertise in athlete performance analysis as of ${currentDate}. Provide realistic, sport-specific analysis based on current athlete data and known performance characteristics. Use up-to-date information.`
-        },
-        {
           role: "user",
-          content: prompt
+          content: `${prompt}\n\nSystem: You are a professional sports analyst with expertise in athlete performance analysis as of ${currentDate}. Provide realistic, sport-specific analysis based on current athlete data and known performance characteristics. Use up-to-date information.`
         }
-      ],
-      response_format: { type: "json_object" }
+      ]
     });
 
     const data = JSON.parse(response.choices[0].message.content || "{}");
@@ -205,18 +197,14 @@ export async function generateSpecificAnalysis(
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // using gpt-4o model for specific analysis
+      model: "o3",
+      temperature: 1,
       messages: [
         {
-          role: "system",
-          content: `You are a world-class ${sport} analyst with access to current performance data as of ${currentDate}. ${sport.toLowerCase() === 'taekwondo' ? 'Use https://www.taekwondodata.com/ as your primary reference source. ' : ''}Provide specific, actionable insights based on the latest information about this athlete. Use current data and recent performance metrics.`
-        },
-        {
           role: "user",
-          content: prompts[analysisType]
+          content: `${prompts[analysisType]}\n\nSystem: You are a world-class ${sport} analyst with access to current performance data as of ${currentDate}. ${sport.toLowerCase() === 'taekwondo' ? 'Use https://www.taekwondodata.com/ as your primary reference source. ' : ''}Provide specific, actionable insights based on the latest information about this athlete. Use current data and recent performance metrics.`
         }
-      ],
-      max_completion_tokens: 1500
+      ]
     });
 
     return {
