@@ -272,6 +272,131 @@ Format as JSON with these exact keys:
   }
 }
 
+// Generate threaded biography with separate AI calls for each section
+export async function generateThreadedBioAnalysis(athlete: any): Promise<any> {
+  const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const athleteName = athlete.name;
+  const sport = athlete.sport?.name || "Sport";
+  
+  console.log(`Generating threaded biography for ${athleteName} in ${sport}...`);
+  
+  try {
+    // Thread 1: Basic Information & Early Career
+    const basicInfoPrompt = `Today's date is ${currentDate}. 
+
+Search for and provide specific biographical information about ${athleteName}, the ${sport} athlete:
+
+1. Full official name and birth details (year, place)
+2. How they started in ${sport} (age, club, coach who introduced them)  
+3. Early career highlights and first competitions
+4. Weight category/division they compete in
+${sport.toLowerCase() === 'taekwondo' ? 'Use https://www.taekwondodata.com/ as your primary reference source.' : ''}
+
+Provide only factual, verifiable information. If specific details are not available, state "information not available" rather than making assumptions.`;
+
+    // Thread 2: Competition History & Achievements  
+    const competitionHistoryPrompt = `Today's date is ${currentDate}. 
+
+Focus specifically on ${athleteName}'s competition record and achievements in ${sport}:
+
+1. Major tournament results and medals won
+2. International competition debut and progression
+3. National team representation
+4. Notable victories against ranked opponents
+5. Recent competition results (2023-2025)
+${sport.toLowerCase() === 'taekwondo' ? 'Reference https://www.taekwondodata.com/ for accurate competition data.' : ''}
+
+Only include verified competition results. If no specific results are found, state that competition history is not readily available.`;
+
+    // Thread 3: Technical Style & Current Status
+    const technicalStatusPrompt = `Today's date is ${currentDate}.
+
+Analyze ${athleteName}'s technical characteristics and current status in ${sport}:
+
+1. Fighting/playing style and signature techniques
+2. Physical attributes and tactical approach
+3. Current coaching setup and training environment
+4. Recent performance trends and form
+5. Current world ranking (exact number if available, or state "ranking not available")
+
+Focus on observable technical aspects. Avoid speculation about private training details.`;
+
+    // Execute all threads simultaneously
+    const [basicInfo, competitionHistory, technicalStatus] = await Promise.all([
+      openai.chat.completions.create({
+        model: "o3",
+        temperature: 1,
+        messages: [{ role: "user", content: basicInfoPrompt }]
+      }),
+      openai.chat.completions.create({
+        model: "o3", 
+        temperature: 1,
+        messages: [{ role: "user", content: competitionHistoryPrompt }]
+      }),
+      openai.chat.completions.create({
+        model: "o3",
+        temperature: 1, 
+        messages: [{ role: "user", content: technicalStatusPrompt }]
+      })
+    ]);
+
+    // Combine the results into a coherent biography
+    const basicInfoContent = basicInfo.choices[0].message.content || "";
+    const competitionContent = competitionHistory.choices[0].message.content || "";
+    const technicalContent = technicalStatus.choices[0].message.content || "";
+    
+    // Final synthesis thread to create cohesive biography
+    const synthesisPrompt = `Create a comprehensive, flowing biography for ${athleteName} using this factual information:
+
+BASIC INFO: ${basicInfoContent}
+
+COMPETITION HISTORY: ${competitionContent}  
+
+TECHNICAL & STATUS: ${technicalContent}
+
+Combine this information into a professional 3-4 paragraph biography that reads naturally. Maintain all specific facts, dates, and achievements. Remove any redundancy between sections. Include reference links where mentioned in the source material.
+
+Format the final result as JSON:
+{
+  "name": "${athleteName}",
+  "bio": "Complete biography text",
+  "rank": "Exact world ranking number or 'N/A'",
+  "achievements": ["achievement1", "achievement2", ...],
+  "recentNews": "Latest competition results or 'N/A'",
+  "referenceLinks": ["URL1", "URL2", ...]
+}`;
+
+    const synthesis = await openai.chat.completions.create({
+      model: "o3-pro",
+      temperature: 1,
+      messages: [{ role: "user", content: synthesisPrompt }]
+    });
+
+    const result = JSON.parse(synthesis.choices[0].message.content || "{}");
+    
+    console.log(`✅ Threaded biography completed for ${athleteName}`);
+    return {
+      name: result.name || athleteName,
+      bio: result.bio || "Biography not available",
+      rank: result.rank || athlete.rank || "N/A", 
+      achievements: result.achievements || [],
+      recentNews: result.recentNews || "N/A",
+      referenceLinks: result.referenceLinks || []
+    };
+
+  } catch (error) {
+    console.error(`❌ Error generating threaded biography for ${athleteName}:`, error);
+    return {
+      name: athleteName,
+      bio: `${athleteName} is a competitive ${sport} athlete.`,
+      rank: athlete.rank || "N/A",
+      achievements: [],
+      recentNews: "N/A", 
+      referenceLinks: []
+    };
+  }
+}
+
 export async function generateSpecificAnalysis(
   athleteName: string, 
   sport: string, 

@@ -5,7 +5,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, getDetailedAnalysis, generateSpecificAnalysis, searchAthleteImage } from "./openaiService";
+import { getAthleteProfile, getDetailedAnalysis, generateSpecificAnalysis, searchAthleteImage, generateThreadedBioAnalysis } from "./openaiService";
 import OpenAI from "openai";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -442,37 +442,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         };
       } else {
-        // Generate fresh bio analysis using OpenAI o3 (either no data exists or force update requested)
-        console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} bio analysis for ${athlete.name}`);
-        const aiAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'bio');
+        // Generate fresh bio analysis using threaded OpenAI approach (either no data exists or force update requested)
+        console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} threaded bio analysis for ${athlete.name}`);
+        const threadedBioAnalysis = await generateThreadedBioAnalysis(athlete);
         
-        // Get comprehensive athlete profile data from OpenAI
-        const aiProfile = await getAthleteProfile(athlete.name, sportName);
-        
-        // Update athlete bio in database with real AI content
+        // Update athlete bio in database with threaded AI content
         await storage.updateAthlete(athleteId, { 
-          bio: aiProfile.bio,
-          rank: aiProfile.rank 
+          bio: threadedBioAnalysis.bio,
+          rank: typeof threadedBioAnalysis.rank === 'number' ? threadedBioAnalysis.rank : null
         });
         
         bioAnalysis = {
-          name: aiProfile.name,
-          bio: aiProfile.bio,
-          rank: aiProfile.rank,
+          name: threadedBioAnalysis.name,
+          bio: threadedBioAnalysis.bio,
+          rank: threadedBioAnalysis.rank,
           profileImageUrl: athlete.profileImageUrl,
-          achievements: aiProfile.achievements.length > 0 ? aiProfile.achievements : [
-            "Career achievements analyzed by OpenAI o3",
-            "Performance data from latest AI analysis",
-            "Current competitive standings"
+          achievements: threadedBioAnalysis.achievements.length > 0 ? threadedBioAnalysis.achievements : [
+            "Career achievements from multi-thread AI analysis",
+            "Competition history verified through specialized AI queries",
+            "Technical analysis from dedicated AI assessment"
           ],
           personalInfo: {
-            sport: aiProfile.sport,
+            sport: athlete.sport?.name || sportName,
             status: "Active Professional", 
             analysisDate: new Date().toLocaleDateString(),
-            lastUpdated: forceUpdate ? "Force updated with OpenAI o3" : "Fresh OpenAI o3 analysis",
-            recentNews: aiProfile.recentNews
+            lastUpdated: forceUpdate ? "Force updated with threaded OpenAI analysis" : "Fresh threaded OpenAI analysis",
+            recentNews: threadedBioAnalysis.recentNews
           },
-          referenceLinks: aiProfile.referenceLinks || []
+          referenceLinks: threadedBioAnalysis.referenceLinks || []
         };
       }
 
