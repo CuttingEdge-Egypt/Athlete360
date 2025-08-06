@@ -63,7 +63,7 @@ Format as JSON with these exact keys:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // using latest available chat model
+      model: "o3-deep-search", // using o3-deep-search for athlete search
       messages: [
         {
           role: "system",
@@ -128,7 +128,7 @@ Format as JSON with these exact keys:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // using latest available chat model
+      model: "o3", // using o3 model for detailed analysis
       messages: [
         {
           role: "system", 
@@ -204,7 +204,7 @@ export async function generateSpecificAnalysis(
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // using latest available chat model
+      model: "o3", // using o3 model for specific analysis
       messages: [
         {
           role: "system",
