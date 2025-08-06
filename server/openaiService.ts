@@ -29,12 +29,36 @@ export async function getAthleteProfile(name: string, sport: string, nationality
   const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const nationalityContext = nationality ? ` from ${nationality}` : '';
   
+  // First, perform web search to gather current information about the athlete
+  let webSearchResults = '';
+  try {
+    console.log(`Performing web search for athlete: ${name} ${sport}${nationalityContext}`);
+    const searchQuery = `${name} ${sport} athlete${nationalityContext} competition results ranking 2024 2025`;
+    
+    // Perform web search to get current information
+    const searchResponse = await fetch('http://localhost:5000/api/web-search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: searchQuery })
+    });
+    
+    if (searchResponse.ok) {
+      const searchData = await searchResponse.json();
+      webSearchResults = searchData.results || '';
+      console.log('Web search completed successfully');
+    } else {
+      console.log('Web search endpoint not available, proceeding with AI analysis');
+    }
+  } catch (error) {
+    console.log('Web search not available, proceeding with AI analysis only');
+  }
+  
   // Add sport-specific data source guidance
   const sportSpecificGuidance = sport.toLowerCase() === 'taekwondo' 
     ? ' For taekwondo athletes, reference https://www.taekwondodata.com/ for accurate competition records, rankings, and athlete profiles.'
     : '';
 
-  const prompt = `Today's date is ${currentDate}. Please provide comprehensive, up-to-date information about ${name}${nationalityContext}, the ${sport} athlete. Consider the specified sport and nationality when searching for this athlete.${sportSpecificGuidance} Include:
+  const prompt = `Today's date is ${currentDate}. Please provide comprehensive, up-to-date information about ${name}${nationalityContext}, the ${sport} athlete. Consider the specified sport and nationality when searching for this athlete.${sportSpecificGuidance}${webSearchResults ? `\n\nAdditional context from current web search: ${webSearchResults}` : ''} Include:
 
 1. Full name and current status (active/retired) as of ${currentDate}
 2. Detailed biography (500+ words) including career highlights, major achievements, playing style, and personal background
@@ -65,7 +89,7 @@ Format as JSON with these exact keys:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // using gpt-4o for athlete search
+      model: "o3", // using o3 for athlete search
       messages: [
         {
           role: "system",
