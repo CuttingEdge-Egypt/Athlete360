@@ -111,11 +111,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const profileImageUrl = await searchAthleteImage(name, sport.name);
 
       // Create athlete in database
+      // Handle rank - convert to number if possible, otherwise store as null
+      let rankValue = null;
+      if (typeof aiProfile.rank === 'number') {
+        rankValue = aiProfile.rank;
+      } else if (typeof aiProfile.rank === 'string' && !isNaN(Number(aiProfile.rank)) && aiProfile.rank !== 'N/A') {
+        rankValue = Number(aiProfile.rank);
+      }
+      
       const athleteData = {
         name: name.trim(),
         sportId,
         bio: aiProfile.bio || `Professional ${sport.name} athlete`,
-        rank: aiProfile.rank || null,
+        rank: rankValue,
         country: aiProfile.country || null,
         profileImageUrl: profileImageUrl,
         achievements: aiProfile.achievements || []

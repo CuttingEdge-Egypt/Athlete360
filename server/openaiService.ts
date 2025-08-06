@@ -14,9 +14,10 @@ async function performWebSearch(query: string): Promise<string> {
 - International Ranking: #4,949 globally with 57 points (January 2025)
 - Win Rate: 68.4% (13 wins out of 19 registered fights)
 - Weight Category: Women's -49kg
-- Recent Result: Quarterfinal at 2024 World Taekwondo Junior Championships (lost to Tachiana Keizha Mangin)
+- Recent Competition: 2024 World Taekwondo Junior Championships - Quarterfinal (lost to Tachiana Keizha Mangin, Philippines)
 - Fight Statistics: 61 hitpoints distributed, 27 collected
 - Tournament Participation: 11 international tournaments
+- Status: Active competitor
 - Source: TaekwondoData.com official records`;
     }
     
@@ -102,10 +103,10 @@ Format as JSON with these exact keys:
   "name": "Full official name",
   "sport": "${sport}",
   "bio": "Detailed biography",
-  "rank": number (1-100, estimate if exact rank unknown),
+  "rank": "Actual world ranking number (e.g., 4949) or 'N/A' if not available",
   "country": "Nationality/country they represent",
   "achievements": ["achievement1", "achievement2", ...],
-  "recentNews": "Latest developments or recent competition results as of ${currentDate}",
+  "recentNews": "Latest competition results or 'N/A' if no recent data available",
   "profileImageDescription": "Brief physical description for image context",
   "referenceLinks": ["URL1", "URL2", ...] (include https://www.taekwondodata.com/ for taekwondo athletes if available)
 }`;
@@ -169,13 +170,20 @@ Format as JSON with these exact keys:
     }
 
     const data = JSON.parse(response.choices[0].message.content || "{}");
+    
+    // Parse rank - convert to number if it's a valid number, otherwise keep as string
+    let parsedRank = data.rank;
+    if (typeof data.rank === 'string' && !isNaN(Number(data.rank))) {
+      parsedRank = Number(data.rank);
+    }
+    
     return {
       name: data.name || name,
       sport: data.sport || sport,
       bio: data.bio || `Professional ${sport} athlete with competitive experience.`,
-      rank: data.rank || Math.floor(Math.random() * 50) + 1,
+      rank: parsedRank || 'N/A',
       achievements: data.achievements || [],
-      recentNews: data.recentNews || "Recent competition data not available.",
+      recentNews: data.recentNews === 'N/A' ? 'N/A' : (data.recentNews || "N/A"),
       profileImageDescription: data.profileImageDescription || "Athletic build typical of professional athletes",
       referenceLinks: data.referenceLinks || []
     };
@@ -186,9 +194,9 @@ Format as JSON with these exact keys:
       name,
       sport,
       bio: `Professional ${sport} athlete with competitive experience at national and international levels.`,
-      rank: Math.floor(Math.random() * 50) + 1,
+      rank: 'N/A',
       achievements: [],
-      recentNews: "Recent data unavailable.",
+      recentNews: "N/A",
       profileImageDescription: "Professional athlete"
     };
   }
