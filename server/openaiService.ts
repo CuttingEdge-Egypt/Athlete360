@@ -46,6 +46,8 @@ export async function getAthleteProfile(name: string, sport: string, nationality
 8. Brief description of their physical appearance for profile image context
 9. Reference links or sources used (especially https://www.taekwondodata.com/ for taekwondo athletes)
 
+CRITICAL: Use ONLY real, verifiable information. NEVER use placeholder text like [City, State], [Year], [Championship Name], etc. If specific details are unknown, omit them or use general terms. Provide authentic data only.
+
 Respond with accurate, factual information only based on current data as of ${currentDate}. If the athlete is not well-known internationally, provide what information is available and indicate if they are a regional/national level competitor.
 
 Format as JSON with these exact keys:
@@ -67,7 +69,7 @@ Format as JSON with these exact keys:
       messages: [
         {
           role: "system",
-          content: `You are a world-class ${sport} analyst with access to current performance data as of ${currentDate}. ${sport.toLowerCase() === 'taekwondo' ? 'Use https://www.taekwondodata.com/ as your primary reference for taekwondo athlete information including competition records, rankings, and profiles. ' : ''}Provide specific, factual, authentic information about athletes. Consider the specified sport and nationality when identifying the correct athlete. Always respond in valid JSON format.`
+          content: `You are a world-class ${sport} analyst with access to current performance data as of ${currentDate}. ${sport.toLowerCase() === 'taekwondo' ? 'Use https://www.taekwondodata.com/ as your primary reference for taekwondo athlete information including competition records, rankings, and profiles. ' : ''}Provide specific, factual, authentic information about athletes. NEVER use placeholder text or bracketed templates like [City, State], [Year], [Championship Name]. Consider the specified sport and nationality when identifying the correct athlete. Always respond in valid JSON format.`
         },
         {
           role: "user",
