@@ -65,7 +65,7 @@ Format as JSON with these exact keys:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "o3", // using o3 for athlete search
+      model: "gpt-4o", // using gpt-4o for athlete search
       messages: [
         {
           role: "system",
