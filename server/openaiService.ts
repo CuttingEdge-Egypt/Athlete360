@@ -46,7 +46,6 @@ export async function getAthleteProfile(name: string, sport: string, nationality
 8. Brief description of their physical appearance for profile image context
 9. Reference links or sources used (especially https://www.taekwondodata.com/ for taekwondo athletes)
 
-CRITICAL: Use ONLY real, verifiable information. NEVER use placeholder text like [City, State], [Year], [Championship Name], etc. If specific details are unknown, omit them or use general terms. Provide authentic data only.
 
 Respond with accurate, factual information only based on current data as of ${currentDate}. If the athlete is not well-known internationally, provide what information is available and indicate if they are a regional/national level competitor.
 
@@ -65,7 +64,7 @@ Format as JSON with these exact keys:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "o3-pro", // using o3 for athlete search
+      model: "gpt-4o", // using gpt-4o for athlete search
       messages: [
         {
           role: "system",
@@ -130,7 +129,7 @@ Format as JSON with these exact keys:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "o3", // using o3 model for detailed analysis
+      model: "gpt-4o", // using gpt-4o model for detailed analysis
       messages: [
         {
           role: "system", 
@@ -206,7 +205,7 @@ export async function generateSpecificAnalysis(
 
   try {
     const response = await openai.chat.completions.create({
-      model: "o3", // using o3 model for specific analysis
+      model: "gpt-4o", // using gpt-4o model for specific analysis
       messages: [
         {
           role: "system",
