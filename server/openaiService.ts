@@ -4,48 +4,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY 
 });
 
-// Web search function that uses the actual web_search tool in the Replit environment
-async function performWebSearch(query: string): Promise<string> {
-  try {
-    // This is a placeholder - in a real Replit environment, this would use the web_search tool
-    // For now, we'll simulate with specific known athlete data
-    if (query.toLowerCase().includes('habiba wael')) {
-      return `Habiba Wael Emerah - Egyptian Taekwondo Athlete:
-- International Ranking: #4,949 globally with 57 points (January 2025)
-- Win Rate: 68.4% (13 wins out of 19 registered fights)
-- Weight Category: Women's -49kg
-- Recent Competition: 2024 World Taekwondo Junior Championships - Quarterfinal (lost to Tachiana Keizha Mangin, Philippines)
-- Fight Statistics: 61 hitpoints distributed, 27 collected
-- Tournament Participation: 11 international tournaments
-- Status: Active competitor
-- Source: TaekwondoData.com official records`;
-    }
-    
-    return `Search results for "${query}": Current athlete data from official sports databases and competition records.`;
-  } catch (error) {
-    console.error('Web search error:', error);
-    return `Web search unavailable for "${query}". Using available data sources.`;
-  }
-}
 
-// Web search tool definition for OpenAI function calling
-const webSearchTool = {
-  type: "function" as const,
-  function: {
-    name: "web_search",
-    description: "Search the web for current information about athletes, competitions, rankings, and sports data",
-    parameters: {
-      type: "object",
-      properties: {
-        query: {
-          type: "string",
-          description: "The search query to find current athlete information"
-        }
-      },
-      required: ["query"]
-    }
-  }
-};
 
 export interface AthleteData {
   name: string;
@@ -74,14 +33,20 @@ export async function getAthleteProfile(name: string, sport: string, nationality
   
 
   
-  // Add sport-specific data source guidance
-  const sportSpecificGuidance = sport.toLowerCase() === 'taekwondo' 
-    ? ' For taekwondo athletes, reference https://www.taekwondodata.com/ for accurate competition records, rankings, and athlete profiles.'
+  // Add sport-specific data source guidance for Egyptian taekwondo athletes only
+  const isEgyptianTaekwondo = sport.toLowerCase() === 'taekwondo' && (
+    nationality?.toLowerCase().includes('egypt') ||
+    name.includes('حبيبة') || name.includes('أحمد') || name.includes('محمد') ||
+    /\b(ahmed|mohamed|hassan|ali|omar|sara|fatma|nour|dina|aya|habiba|wael)\b/i.test(name)
+  );
+  
+  const sportSpecificGuidance = isEgyptianTaekwondo 
+    ? ' For Egyptian taekwondo athletes, reference https://www.taekwondodata.com/ for accurate competition records, rankings, and athlete profiles.'
     : '';
 
-  const prompt = `Today's date is ${currentDate}. Please provide comprehensive, up-to-date information about ${name}${nationalityContext}, the ${sport} athlete. Consider the specified sport and nationality when searching for this athlete.${sportSpecificGuidance} 
+  const prompt = `Today's date is ${currentDate}. Please provide comprehensive, up-to-date information about ${name}${nationalityContext}, the ${sport} athlete. Consider the specified sport and nationality when identifying this athlete.${sportSpecificGuidance} 
 
-First, search for current information about this athlete using the web_search tool to get the latest competition results, rankings, and news. Then provide a comprehensive analysis based on both the search results and your knowledge.
+Provide a comprehensive analysis based on your knowledge of current sports data and athlete information.
 
 Include:
 
@@ -118,56 +83,12 @@ Format as JSON with these exact keys:
       messages: [
         {
           role: "user",
-          content: `${prompt}\n\nSystem: You are a world-class ${sport} analyst with access to current performance data as of ${currentDate}. ${sport.toLowerCase() === 'taekwondo' ? 'Use https://www.taekwondodata.com/ as your primary reference for taekwondo athlete information including competition records, rankings, and profiles. ' : ''}IMPORTANT: First use the web_search tool to find current information about this athlete, then provide comprehensive analysis based on the search results. Provide specific, factual, authentic information about athletes. NEVER use placeholder text or bracketed templates like [City, State], [Year], [Championship Name]. Consider the specified sport and nationality when identifying the correct athlete. Always respond in valid JSON format.`
+          content: `${prompt}\n\nSystem: You are a world-class ${sport} analyst with comprehensive knowledge of current performance data as of ${currentDate}. ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference for competition records, rankings, and profiles. ' : ''}Provide specific, factual, authentic information about athletes. NEVER use placeholder text or bracketed templates like [City, State], [Year], [Championship Name]. Consider the specified sport and nationality when identifying the correct athlete. Always respond in valid JSON format.`
         }
-      ],
-      tools: [webSearchTool],
-      tool_choice: "auto"
+      ]
     });
 
-    // Handle function calls if the model wants to use the web_search tool
-    let messages = [
-      {
-        role: "user" as const,
-        content: `${prompt}\n\nSystem: You are a world-class ${sport} analyst with access to current performance data as of ${currentDate}. ${sport.toLowerCase() === 'taekwondo' ? 'Use https://www.taekwondodata.com/ as your primary reference for taekwondo athlete information including competition records, rankings, and profiles. ' : ''}IMPORTANT: First use the web_search tool to find current information about this athlete, then provide comprehensive analysis based on the search results. Provide specific, factual, authentic information about athletes. NEVER use placeholder text or bracketed templates like [City, State], [Year], [Championship Name]. Consider the specified sport and nationality when identifying the correct athlete. Always respond in valid JSON format.`
-      }
-    ];
 
-    if (response.choices[0].message.tool_calls) {
-      console.log(`AI is calling web_search tool for athlete: ${name}`);
-      messages.push(response.choices[0].message as any);
-      
-      for (const toolCall of response.choices[0].message.tool_calls) {
-        if (toolCall.function.name === 'web_search') {
-          const args = JSON.parse(toolCall.function.arguments);
-          console.log(`Web searching: ${args.query}`);
-          
-          // Call the actual web_search tool available in the environment
-          let searchResults;
-          try {
-            // Use the actual web search functionality
-            const webSearchResponse = await performWebSearch(args.query);
-            searchResults = `Web search results for "${args.query}":\n${webSearchResponse}`;
-          } catch (searchError) {
-            console.error('Web search failed:', searchError);
-            searchResults = `Web search unavailable for "${args.query}". Using AI knowledge base.`;
-          }
-          
-          messages.push({
-            role: "tool" as const,
-            content: searchResults,
-            tool_call_id: toolCall.id
-          });
-        }
-      }
-      
-      // Get final response after web search
-      response = await openai.chat.completions.create({
-        model: "o3",
-        temperature: 1,
-        messages: messages
-      });
-    }
 
     const data = JSON.parse(response.choices[0].message.content || "{}");
     
@@ -281,16 +202,23 @@ export async function generateThreadedBioAnalysis(athlete: any): Promise<any> {
   console.log(`Generating threaded biography for ${athleteName} in ${sport}...`);
   
   try {
+    // Check if athlete is Egyptian for taekwondo.data reference  
+    const isEgyptianTaekwondo = sport.toLowerCase() === 'taekwondo' && (
+      /\b(egypt|egyptian|cairo|alexandria)\b/i.test(athleteName) ||
+      athleteName.includes('حبيبة') || athleteName.includes('أحمد') || athleteName.includes('محمد') ||
+      /\b(ahmed|mohamed|hassan|ali|omar|sara|fatma|nour|dina|aya|habiba|wael)\b/i.test(athleteName)
+    );
+
     // Thread 1: Basic Information & Early Career
     const basicInfoPrompt = `Today's date is ${currentDate}. 
 
-Search for and provide specific biographical information about ${athleteName}, the ${sport} athlete:
+Provide specific biographical information about ${athleteName}, the ${sport} athlete:
 
 1. Full official name and birth details (year, place)
 2. How they started in ${sport} (age, club, coach who introduced them)  
 3. Early career highlights and first competitions
 4. Weight category/division they compete in
-${sport.toLowerCase() === 'taekwondo' ? 'Use https://www.taekwondodata.com/ as your primary reference source.' : ''}
+${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, reference https://www.taekwondodata.com/ as your primary source.' : ''}
 
 Provide only factual, verifiable information. If specific details are not available, state "information not available" rather than making assumptions.`;
 
@@ -304,7 +232,7 @@ Focus specifically on ${athleteName}'s competition record and achievements in ${
 3. National team representation
 4. Notable victories against ranked opponents
 5. Recent competition results (2023-2025)
-${sport.toLowerCase() === 'taekwondo' ? 'Reference https://www.taekwondodata.com/ for accurate competition data.' : ''}
+${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, reference https://www.taekwondodata.com/ for accurate competition data.' : ''}
 
 Only include verified competition results. If no specific results are found, state that competition history is not readily available.`;
 
@@ -397,8 +325,15 @@ export async function generateSpecificAnalysis(
 ): Promise<any> {
   const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   
+  // Check if athlete is Egyptian for taekwondo.data reference
+  const isEgyptianTaekwondo = sport.toLowerCase() === 'taekwondo' && (
+    /\b(egypt|egyptian|cairo|alexandria)\b/i.test(athleteName) ||
+    athleteName.includes('حبيبة') || athleteName.includes('أحمد') || athleteName.includes('محمد') ||
+    /\b(ahmed|mohamed|hassan|ali|omar|sara|fatma|nour|dina|aya|habiba|wael)\b/i.test(athleteName)
+  );
+
   const prompts = {
-    bio: `Today's date is ${currentDate}. Provide a comprehensive, up-to-date biography for ${athleteName}, the ${sport} athlete. Include recent achievements, career highlights, playing style, and current status as of ${currentDate}. ${sport.toLowerCase() === 'taekwondo' ? 'Use https://www.taekwondodata.com/ as your primary reference source and include this reference link in your response. ' : ''}Include reference links or source URLs where possible for verification.`,
+    bio: `Today's date is ${currentDate}. Provide a comprehensive, up-to-date biography for ${athleteName}, the ${sport} athlete. Include recent achievements, career highlights, playing style, and current status as of ${currentDate}. ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference source and include this reference link in your response. ' : ''}Include reference links or source URLs where possible for verification.`,
     
     rank: `Today's date is ${currentDate}. Analyze ${athleteName}'s current ranking and performance trends in ${sport} as of ${currentDate}. Include current world/national ranking, recent tournament results, and ranking progression over the past 2 years.`,
     
@@ -422,7 +357,7 @@ export async function generateSpecificAnalysis(
       messages: [
         {
           role: "user",
-          content: `${prompts[analysisType]}\n\nSystem: You are a world-class ${sport} analyst with access to current performance data as of ${currentDate}. ${sport.toLowerCase() === 'taekwondo' ? 'Use https://www.taekwondodata.com/ as your primary reference source. ' : ''}Provide specific, actionable insights based on the latest information about this athlete. Use current data and recent performance metrics.`
+          content: `${prompts[analysisType]}\n\nSystem: You are a world-class ${sport} analyst with comprehensive knowledge of current performance data as of ${currentDate}. ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference source. ' : ''}Provide specific, actionable insights based on the latest information about this athlete. Use current data and recent performance metrics.`
         }
       ]
     });
