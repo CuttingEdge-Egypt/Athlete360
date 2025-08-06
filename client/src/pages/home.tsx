@@ -365,14 +365,14 @@ export default function Home() {
                   
                   {searchName.trim() && !isSearchLoading && availableAthletes.length === 0 && (
                     <div className="mt-2 bg-athlete-gray-700 border border-gray-600 rounded-md p-4 text-center">
-                      <p className="text-gray-300 mb-2">No athletes found in our database</p>
+                      <p className="text-gray-300 mb-2">Athlete not found</p>
                       <Button
                         data-testid="create-athlete-ai"
                         onClick={() => handleCreateAthleteWithAI(searchName.trim())}
                         className="bg-athlete-accent hover:bg-athlete-accent/80 text-white"
                         disabled={!selectedSport || isSearching}
                       >
-                        {isSearching ? 'Creating...' : 'Create with AI'}
+                        {isSearching ? 'Searching...' : 'Search with AI'}
                       </Button>
                     </div>
                   )}
