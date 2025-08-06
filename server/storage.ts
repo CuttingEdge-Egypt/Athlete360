@@ -29,7 +29,7 @@ import {
   type InsertTransaction,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, asc, sql } from "drizzle-orm";
+import { eq, desc, and, asc, sql, ilike } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -47,6 +47,7 @@ export interface IStorage {
 
   // Athletes operations
   getAthletesBySearch(name: string, sportId?: string): Promise<Athlete[]>;
+  searchAthletesByName(name: string, sportId?: string): Promise<Athlete[]>;
   getAthleteById(id: string): Promise<Athlete | undefined>;
   getAthletesBySport(sportId: string, country?: string): Promise<Athlete[]>;
   getAllCountries(): Promise<string[]>;
@@ -157,6 +158,18 @@ export class DatabaseStorage implements IStorage {
     } else {
       return await db.select().from(athletes).where(eq(athletes.name, name));
     }
+  }
+
+  async searchAthletesByName(name: string, sportId?: string): Promise<Athlete[]> {
+    const conditions = [ilike(athletes.name, `%${name}%`)];
+    if (sportId) {
+      conditions.push(eq(athletes.sportId, sportId));
+    }
+    
+    return await db.select().from(athletes)
+      .where(and(...conditions))
+      .orderBy(asc(athletes.name))
+      .limit(10);
   }
 
   async getAthleteById(id: string): Promise<Athlete | undefined> {

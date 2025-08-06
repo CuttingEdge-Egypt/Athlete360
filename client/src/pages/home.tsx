@@ -20,16 +20,18 @@ export default function Home() {
   const { toast } = useToast();
   const [selectedSport, setSelectedSport] = useState<string>("");
   const [selectedCountry, setSelectedCountry] = useState<string>("");
+  const [searchName, setSearchName] = useState<string>("");
+  const [isSearching, setIsSearching] = useState(false);
 
   // Get all countries
   const { data: countries = [] } = useQuery<string[]>({
     queryKey: ["/api/countries"],
   });
   
-  // Get athletes for the selected sport with deduplication
+  // Get athletes for the selected sport with deduplication (only if no search is active)
   const { data: allAthletes = [] } = useQuery<Athlete[]>({
     queryKey: ["/api/athletes/by-sport", selectedSport, selectedCountry],
-    enabled: !!selectedSport,
+    enabled: !!selectedSport && !searchName.trim(),
     queryFn: async () => {
       const url = new URL(`/api/athletes/by-sport/${selectedSport}`, window.location.origin);
       if (selectedCountry) {
@@ -40,8 +42,21 @@ export default function Home() {
     }
   });
 
+  // Search athletes by name with AI fallback
+  const { data: searchResults = [], isLoading: isSearchLoading } = useQuery<Athlete[]>({
+    queryKey: ["/api/athletes/search-by-name", searchName.trim(), selectedSport],
+    enabled: !!searchName.trim() && searchName.trim().length >= 2,
+    queryFn: async () => {
+      const response = await fetch(`/api/athletes/search-by-name?name=${encodeURIComponent(searchName.trim())}&sport=${encodeURIComponent(selectedSport)}`);
+      return response.json();
+    }
+  });
+
+  // Determine which athletes to display: search results or sport-filtered athletes
+  const displayAthletes = searchName.trim() ? searchResults : allAthletes;
+
   // Deduplicate athletes by name, keeping the most recent record
-  const availableAthletes = allAthletes.reduce((acc: Athlete[], current) => {
+  const availableAthletes = displayAthletes.reduce((acc: Athlete[], current) => {
     const existingIndex = acc.findIndex(athlete => 
       athlete.name.toLowerCase().trim() === current.name.toLowerCase().trim()
     );
@@ -71,10 +86,56 @@ export default function Home() {
     queryKey: ["/api/sports"],
   });
 
+  // Handle creating athlete with AI
+  const handleCreateAthleteWithAI = async (athleteName: string) => {
+    if (!selectedSport || !athleteName.trim()) return;
+    
+    setIsSearching(true);
+    try {
+      const response = await fetch('/api/athletes/create-with-ai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: athleteName.trim(),
+          sportId: selectedSport
+        }),
+      });
+      
+      if (response.ok) {
+        const newAthlete = await response.json();
+        setSelectedAthlete(newAthlete);
+        setSearchName(newAthlete.name);
+        toast({
+          title: "Athlete Created",
+          description: `${newAthlete.name} has been added to our database with AI-powered insights.`,
+        });
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Creation Failed",
+          description: error.message || "Failed to create athlete with AI",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error creating athlete:', error);
+      toast({
+        title: "Error",
+        description: "Something went wrong while creating the athlete",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   // Reset selected athlete when sport changes
   const handleSportChange = (sportId: string) => {
     setSelectedSport(sportId);
     setSelectedAthlete(null);
+    setSearchName("");
   };
 
   // Reset selected athlete when country changes
@@ -263,35 +324,58 @@ export default function Home() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-300">Athlete</label>
-                  <Select
-                    value={selectedAthlete?.id || ""}
-                    onValueChange={(athleteId) => {
-                      const athlete = availableAthletes.find(a => a.id === athleteId);
-                      setSelectedAthlete(athlete || null);
-                    }}
-                    disabled={!selectedSport}
-                    data-testid="select-athlete"
-                  >
-                    <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white">
-                      <SelectValue placeholder={selectedSport ? "Select an athlete..." : "Select sport first"} />
-                    </SelectTrigger>
-                    <SelectContent>
+                  <label className="block text-sm font-medium mb-2 text-gray-300">Athlete Name</label>
+                  <div className="relative">
+                    <Input
+                      data-testid="search-athlete-name"
+                      placeholder="Search athlete by name..."
+                      value={searchName}
+                      onChange={(e) => setSearchName(e.target.value)}
+                      className="bg-athlete-gray-700 border-gray-600 text-white pl-10"
+                    />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    {isSearchLoading && (
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <div className="animate-spin w-4 h-4 border-2 border-athlete-accent border-t-transparent rounded-full"></div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Dropdown for search results */}
+                  {searchName.trim() && availableAthletes.length > 0 && (
+                    <div className="mt-2 bg-athlete-gray-700 border border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
                       {availableAthletes.map((athlete) => (
-                        <SelectItem key={athlete.id} value={athlete.id}>
-                          <div className="flex items-center gap-2">
-                            <span>{athlete.name}</span>
-                            {athlete.country && (
-                              <span className="text-xs text-gray-400">({athlete.country})</span>
-                            )}
-                            {athlete.rank && (
-                              <span className="text-xs text-gray-400">#{athlete.rank}</span>
-                            )}
-                          </div>
-                        </SelectItem>
+                        <button
+                          key={athlete.id}
+                          data-testid={`athlete-option-${athlete.id}`}
+                          onClick={() => {
+                            setSelectedAthlete(athlete);
+                            setSearchName(athlete.name);
+                          }}
+                          className="w-full text-left px-4 py-2 hover:bg-athlete-gray-600 text-white border-b border-gray-600 last:border-b-0"
+                        >
+                          <div className="font-medium">{athlete.name}</div>
+                          {athlete.country && (
+                            <div className="text-sm text-gray-400">{athlete.country}</div>
+                          )}
+                        </button>
                       ))}
-                    </SelectContent>
-                  </Select>
+                    </div>
+                  )}
+                  
+                  {searchName.trim() && !isSearchLoading && availableAthletes.length === 0 && (
+                    <div className="mt-2 bg-athlete-gray-700 border border-gray-600 rounded-md p-4 text-center">
+                      <p className="text-gray-300 mb-2">No athletes found in our database</p>
+                      <Button
+                        data-testid="create-athlete-ai"
+                        onClick={() => handleCreateAthleteWithAI(searchName.trim())}
+                        className="bg-athlete-accent hover:bg-athlete-accent/80 text-white"
+                        disabled={!selectedSport || isSearching}
+                      >
+                        {isSearching ? 'Creating...' : 'Create with AI'}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
 

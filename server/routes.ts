@@ -68,6 +68,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Search athletes by name with AI fallback
+  app.get('/api/athletes/search-by-name', async (req, res) => {
+    try {
+      const { name, sport } = req.query;
+      if (!name) {
+        return res.status(400).json({ message: "Athlete name is required" });
+      }
+      
+      // Search for existing athletes in database by name
+      const athletes = await storage.searchAthletesByName(name as string, sport as string);
+      res.json(athletes);
+    } catch (error) {
+      console.error("Error searching athletes by name:", error);
+      res.status(500).json({ message: "Failed to search athletes" });
+    }
+  });
+
+  // Create athlete with AI
+  app.post('/api/athletes/create-with-ai', isAuthenticated, async (req: any, res) => {
+    try {
+      const { name, sportId } = req.body;
+      if (!name || !sportId) {
+        return res.status(400).json({ message: "Athlete name and sport are required" });
+      }
+
+      // Get sport information
+      const sport = await storage.getSportById(sportId);
+      if (!sport) {
+        return res.status(404).json({ message: "Sport not found" });
+      }
+
+      // Use OpenAI to get athlete profile
+      console.log(`Creating athlete ${name} for sport ${sport.name} using AI...`);
+      const aiProfile = await getAthleteProfile(name, sport.name);
+
+      // Create athlete in database
+      const athleteData = {
+        name: name.trim(),
+        sportId,
+        bio: aiProfile.bio || `Professional ${sport.name} athlete`,
+        rank: aiProfile.rank || null,
+        country: aiProfile.country || null,
+        profileImageUrl: aiProfile.profileImageUrl || null,
+        achievements: aiProfile.achievements || [],
+        stats: aiProfile.stats || {}
+      };
+
+      const newAthlete = await storage.createAthlete(athleteData);
+      
+      console.log(`Successfully created athlete: ${newAthlete.name}`);
+      res.json(newAthlete);
+    } catch (error) {
+      console.error("Error creating athlete with AI:", error);
+      res.status(500).json({ message: "Failed to create athlete with AI" });
+    }
+  });
+
   app.get('/api/athletes/:id', async (req, res) => {
     try {
       const athlete = await storage.getAthleteById(req.params.id);
