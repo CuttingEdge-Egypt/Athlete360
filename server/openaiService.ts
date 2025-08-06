@@ -386,14 +386,7 @@ Format the final result as JSON:
 
   } catch (error) {
     console.error(`❌ Error generating threaded biography for ${athleteName}:`, error);
-    return {
-      name: athleteName,
-      bio: `${athleteName} is a competitive ${sport} athlete.`,
-      rank: athlete.rank || "N/A",
-      achievements: [],
-      recentNews: "N/A", 
-      referenceLinks: []
-    };
+    throw new Error(`Failed to generate threaded biography for ${athleteName}: ${error.message}`);
   }
 }
 

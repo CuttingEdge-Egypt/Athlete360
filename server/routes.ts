@@ -444,33 +444,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         // Generate fresh bio analysis using threaded OpenAI approach (either no data exists or force update requested)
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} threaded bio analysis for ${athlete.name}`);
-        const threadedBioAnalysis = await generateThreadedBioAnalysis(athlete);
         
-        // Update athlete bio in database with threaded AI content
-        await storage.updateAthlete(athleteId, { 
-          bio: threadedBioAnalysis.bio,
-          rank: typeof threadedBioAnalysis.rank === 'number' ? threadedBioAnalysis.rank : null
-        });
-        
-        bioAnalysis = {
-          name: threadedBioAnalysis.name,
-          bio: threadedBioAnalysis.bio,
-          rank: threadedBioAnalysis.rank,
-          profileImageUrl: athlete.profileImageUrl,
-          achievements: threadedBioAnalysis.achievements.length > 0 ? threadedBioAnalysis.achievements : [
-            "Career achievements from multi-thread AI analysis",
-            "Competition history verified through specialized AI queries",
-            "Technical analysis from dedicated AI assessment"
-          ],
-          personalInfo: {
-            sport: athlete.sport?.name || sportName,
-            status: "Active Professional", 
-            analysisDate: new Date().toLocaleDateString(),
-            lastUpdated: forceUpdate ? "Force updated with threaded OpenAI analysis" : "Fresh threaded OpenAI analysis",
-            recentNews: threadedBioAnalysis.recentNews
-          },
-          referenceLinks: threadedBioAnalysis.referenceLinks || []
-        };
+        try {
+          const threadedBioAnalysis = await generateThreadedBioAnalysis(athlete);
+          
+          // Update athlete bio in database with threaded AI content
+          await storage.updateAthlete(athleteId, { 
+            bio: threadedBioAnalysis.bio,
+            rank: typeof threadedBioAnalysis.rank === 'number' ? threadedBioAnalysis.rank : null
+          });
+          
+          bioAnalysis = {
+            name: threadedBioAnalysis.name,
+            bio: threadedBioAnalysis.bio,
+            rank: threadedBioAnalysis.rank,
+            profileImageUrl: athlete.profileImageUrl,
+            achievements: threadedBioAnalysis.achievements.length > 0 ? threadedBioAnalysis.achievements : [
+              "Career achievements from multi-thread AI analysis",
+              "Competition history verified through specialized AI queries",
+              "Technical analysis from dedicated AI assessment"
+            ],
+            personalInfo: {
+              sport: athlete.sport?.name || sportName,
+              status: "Active Professional", 
+              analysisDate: new Date().toLocaleDateString(),
+              lastUpdated: forceUpdate ? "Force updated with threaded OpenAI analysis" : "Fresh threaded OpenAI analysis",
+              recentNews: threadedBioAnalysis.recentNews
+            },
+            referenceLinks: threadedBioAnalysis.referenceLinks || []
+          };
+        } catch (threadedError) {
+          console.error(`Threaded biography failed for ${athlete.name}:`, threadedError);
+          return res.status(500).json({ 
+            message: "Failed to generate threaded biography analysis",
+            error: threadedError.message 
+          });
+        }
       }
 
       // Save analysis log
