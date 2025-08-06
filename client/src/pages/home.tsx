@@ -47,7 +47,7 @@ export default function Home() {
     queryKey: ["/api/athletes/search-by-name", searchName.trim(), selectedSport],
     enabled: !!searchName.trim() && searchName.trim().length >= 2,
     queryFn: async () => {
-      const response = await fetch(`/api/athletes/search-by-name?name=${encodeURIComponent(searchName.trim())}&sport=${encodeURIComponent(selectedSport)}`);
+      const response = await fetch(`/api/athletes/search-by-name?name=${encodeURIComponent(searchName.trim())}&sportId=${encodeURIComponent(selectedSport)}`);
       return response.json();
     }
   });
