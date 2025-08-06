@@ -44,6 +44,7 @@ export async function getAthleteProfile(name: string, sport: string, nationality
 6. Notable career statistics and records
 7. Recent news or developments in their career as of ${currentDate}
 8. Brief description of their physical appearance for profile image context
+9. Reference links or sources used (especially https://www.taekwondodata.com/ for taekwondo athletes)
 
 Respond with accurate, factual information only based on current data as of ${currentDate}. If the athlete is not well-known internationally, provide what information is available and indicate if they are a regional/national level competitor.
 
@@ -56,12 +57,13 @@ Format as JSON with these exact keys:
   "country": "Nationality/country they represent",
   "achievements": ["achievement1", "achievement2", ...],
   "recentNews": "Latest developments or recent competition results as of ${currentDate}",
-  "profileImageDescription": "Brief physical description for image context"
+  "profileImageDescription": "Brief physical description for image context",
+  "referenceLinks": ["URL1", "URL2", ...] (include https://www.taekwondodata.com/ for taekwondo athletes if available)
 }`;
 
   try {
     const response = await openai.chat.completions.create({
-      model: "o3", // upgraded to o3 model as requested
+      model: "o3-pro", // upgraded to o3-pro model as requested
       messages: [
         {
           role: "system",
@@ -83,7 +85,8 @@ Format as JSON with these exact keys:
       rank: data.rank || Math.floor(Math.random() * 50) + 1,
       achievements: data.achievements || [],
       recentNews: data.recentNews || "Recent competition data not available.",
-      profileImageDescription: data.profileImageDescription || "Athletic build typical of professional athletes"
+      profileImageDescription: data.profileImageDescription || "Athletic build typical of professional athletes",
+      referenceLinks: data.referenceLinks || []
     };
   } catch (error) {
     console.error(`Error fetching athlete profile for ${name}:`, error);
@@ -125,7 +128,7 @@ Format as JSON with these exact keys:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "o3", // upgraded to o3 model as requested
+      model: "o3-pro", // upgraded to o3-pro model as requested
       messages: [
         {
           role: "system", 
@@ -182,7 +185,7 @@ export async function generateSpecificAnalysis(
   const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   
   const prompts = {
-    bio: `Today's date is ${currentDate}. Provide a comprehensive, up-to-date biography for ${athleteName}, the ${sport} athlete. Include recent achievements, career highlights, playing style, and current status as of ${currentDate}.`,
+    bio: `Today's date is ${currentDate}. Provide a comprehensive, up-to-date biography for ${athleteName}, the ${sport} athlete. Include recent achievements, career highlights, playing style, and current status as of ${currentDate}. ${sport.toLowerCase() === 'taekwondo' ? 'Use https://www.taekwondodata.com/ as your primary reference source and include this reference link in your response. ' : ''}Include reference links or source URLs where possible for verification.`,
     
     rank: `Today's date is ${currentDate}. Analyze ${athleteName}'s current ranking and performance trends in ${sport} as of ${currentDate}. Include current world/national ranking, recent tournament results, and ranking progression over the past 2 years.`,
     
@@ -201,11 +204,11 @@ export async function generateSpecificAnalysis(
 
   try {
     const response = await openai.chat.completions.create({
-      model: "o3", // upgraded to o3 model as requested
+      model: "o3-pro", // upgraded to o3-pro model as requested
       messages: [
         {
           role: "system",
-          content: `You are a world-class ${sport} analyst with access to current performance data as of ${currentDate}. Provide specific, actionable insights based on the latest information about this athlete. Use current data and recent performance metrics.`
+          content: `You are a world-class ${sport} analyst with access to current performance data as of ${currentDate}. ${sport.toLowerCase() === 'taekwondo' ? 'Use https://www.taekwondodata.com/ as your primary reference source. ' : ''}Provide specific, actionable insights based on the latest information about this athlete. Use current data and recent performance metrics.`
         },
         {
           role: "user",
@@ -252,7 +255,22 @@ export async function searchAthleteImage(athleteName: string, sport: string): Pr
       
       const player = exactMatch || data.player[0];
       
-      // Return the player image if available
+      // Validate that the sport matches or is related (skip if completely different sport)
+      const playerSport = player.strSport?.toLowerCase() || '';
+      const requestedSport = sport.toLowerCase();
+      
+      // Reject if the player is clearly from a different sport (especially basketball/football when we want other sports)
+      const incompatibleSports = ['basketball', 'football', 'soccer', 'american football', 'baseball'];
+      const isIncompatibleSport = incompatibleSports.some(incompatible => 
+        playerSport.includes(incompatible) && !requestedSport.includes(incompatible)
+      );
+      
+      if (isIncompatibleSport) {
+        console.log(`Rejecting ${player.strPlayer} image - sport mismatch: ${playerSport} vs ${requestedSport}`);
+        return null;
+      }
+      
+      // Return the player image if available and sport-appropriate
       if (player.strThumb) {
         console.log(`Found profile image for ${athleteName}: ${player.strThumb}`);
         return player.strThumb;

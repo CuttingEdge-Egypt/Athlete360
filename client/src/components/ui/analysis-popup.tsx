@@ -239,6 +239,29 @@ export function AnalysisPopup({
                 <p className="text-gray-300 leading-relaxed">
                   {athleteInfo.bio}
                 </p>
+                
+                {/* Reference Links Section */}
+                {data.referenceLinks && data.referenceLinks.length > 0 && (
+                  <div className="mt-4 p-4 bg-green-600/20 border border-green-500/30 rounded-lg">
+                    <h4 className="text-green-300 font-semibold mb-2 flex items-center">
+                      📋 Reference Sources:
+                    </h4>
+                    <div className="space-y-1">
+                      {data.referenceLinks.map((link: string, index: number) => (
+                        <a
+                          key={index}
+                          href={link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block text-green-400 hover:text-green-300 text-sm underline break-all"
+                        >
+                          {link}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
                 {athleteInfo.recentNews && athleteInfo.recentNews !== "No recent news available" && (
                   <div className="mt-4 p-4 bg-athlete-gray-700 rounded-lg">
                     <h4 className="text-athlete-accent font-semibold mb-2">Recent News:</h4>
@@ -256,7 +279,7 @@ export function AnalysisPopup({
                 {athleteInfo.lastUpdated?.includes('OpenAI') && (
                   <div className="mt-2 p-3 bg-blue-600/20 border border-blue-500/30 rounded-lg">
                     <p className="text-blue-300 text-sm">
-                      ⚡ Enhanced with AI-powered analysis using the latest GPT-4o model
+                      ⚡ Enhanced with AI-powered analysis using the latest o3-pro model
                     </p>
                   </div>
                 )}
