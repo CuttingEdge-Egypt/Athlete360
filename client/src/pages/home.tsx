@@ -12,7 +12,7 @@ import { AnalysisPopup } from "@/components/ui/analysis-popup";
 import { AthleteComparison } from "@/components/ui/athlete-comparison";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Star } from "lucide-react";
+import { Search, Star, User } from "lucide-react";
 import type { Sport, Athlete } from "@shared/schema";
 
 export default function Home() {
@@ -388,11 +388,28 @@ export default function Home() {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
-                        <img 
-                          src={selectedAthlete.profileImageUrl || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"}
-                          alt="Athlete profile" 
-                          className="w-16 h-16 rounded-full object-cover"
-                        />
+                        <div className="relative w-16 h-16">
+                          {selectedAthlete.profileImageUrl ? (
+                            <img 
+                              src={selectedAthlete.profileImageUrl}
+                              alt="Athlete profile" 
+                              className="w-16 h-16 rounded-full object-cover"
+                              onError={(e) => {
+                                const img = e.currentTarget;
+                                const fallback = img.parentElement?.querySelector('.profile-fallback') as HTMLElement;
+                                if (fallback) {
+                                  img.style.display = 'none';
+                                  fallback.style.display = 'flex';
+                                }
+                              }}
+                            />
+                          ) : null}
+                          <div 
+                            className={`profile-fallback w-16 h-16 rounded-full bg-athlete-gray-600 flex items-center justify-center absolute top-0 left-0 ${selectedAthlete.profileImageUrl ? 'hidden' : 'flex'}`}
+                          >
+                            <User className="text-gray-400" size={24} />
+                          </div>
+                        </div>
                         <div>
                           <h3 className="text-xl font-bold text-white">{selectedAthlete.name}</h3>
                           <p className="text-gray-400 capitalize">{selectedSport || "Multi-Sport"}</p>

@@ -5,7 +5,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, getDetailedAnalysis, generateSpecificAnalysis } from "./openaiService";
+import { getAthleteProfile, getDetailedAnalysis, generateSpecificAnalysis, searchAthleteImage } from "./openaiService";
 import OpenAI from "openai";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -103,6 +103,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Creating athlete ${name} for sport ${sport.name} using AI...`);
       const aiProfile = await getAthleteProfile(name, sport.name);
 
+      // Search for athlete profile image
+      console.log(`Searching for profile image for ${name}...`);
+      const profileImageUrl = await searchAthleteImage(name, sport.name);
+
       // Create athlete in database
       const athleteData = {
         name: name.trim(),
@@ -110,9 +114,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bio: aiProfile.bio || `Professional ${sport.name} athlete`,
         rank: aiProfile.rank || null,
         country: aiProfile.country || null,
-        profileImageUrl: aiProfile.profileImageUrl || null,
-        achievements: aiProfile.achievements || [],
-        stats: aiProfile.stats || {}
+        profileImageUrl: profileImageUrl,
+        achievements: aiProfile.achievements || []
       };
 
       const newAthlete = await storage.createAthlete(athleteData);

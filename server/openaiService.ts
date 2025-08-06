@@ -9,9 +9,11 @@ export interface AthleteData {
   sport: string;
   bio: string;
   rank: number;
+  country?: string;
   achievements: string[];
   recentNews: string;
   profileImageDescription: string;
+  stats?: any;
 }
 
 export interface AnalysisData {
@@ -212,5 +214,52 @@ export async function generateSpecificAnalysis(
       timestamp: new Date().toISOString(),
       analysisType
     };
+  }
+}
+
+// Search for athlete profile image using TheSportsDB API
+export async function searchAthleteImage(athleteName: string, sport: string): Promise<string | null> {
+  try {
+    // First try searching by athlete name in TheSportsDB
+    const searchUrl = `https://www.thesportsdb.com/api/v1/json/3/searchplayers.php?p=${encodeURIComponent(athleteName)}`;
+    const response = await fetch(searchUrl);
+    
+    if (!response.ok) {
+      console.log(`TheSportsDB search failed for ${athleteName}`);
+      return null;
+    }
+    
+    const data = await response.json();
+    
+    if (data.player && data.player.length > 0) {
+      // Find the best match - exact name match preferred
+      const exactMatch = data.player.find((player: any) => 
+        player.strPlayer?.toLowerCase() === athleteName.toLowerCase()
+      );
+      
+      const player = exactMatch || data.player[0];
+      
+      // Return the player image if available
+      if (player.strThumb) {
+        console.log(`Found profile image for ${athleteName}: ${player.strThumb}`);
+        return player.strThumb;
+      }
+      
+      if (player.strCutout) {
+        console.log(`Found cutout image for ${athleteName}: ${player.strCutout}`);
+        return player.strCutout;
+      }
+      
+      if (player.strRender) {
+        console.log(`Found render image for ${athleteName}: ${player.strRender}`);
+        return player.strRender;
+      }
+    }
+    
+    console.log(`No profile image found for ${athleteName} in TheSportsDB`);
+    return null;
+  } catch (error) {
+    console.error(`Error searching for ${athleteName} image:`, error);
+    return null;
   }
 }
