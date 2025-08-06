@@ -72,11 +72,17 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
   const renderBioAnalysis = (data: any) => (
     <div className="grid md:grid-cols-3 gap-6">
       <div className="md:col-span-1">
-        <img 
-          src={data.profileImageUrl || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"} 
-          alt="Athlete" 
-          className="w-full h-64 object-cover rounded-xl"
-        />
+        {data.profileImageUrl ? (
+          <img 
+            src={data.profileImageUrl} 
+            alt="Athlete" 
+            className="w-full h-64 object-cover rounded-xl"
+          />
+        ) : (
+          <div className="w-full h-64 bg-athlete-gray-600 rounded-xl flex items-center justify-center">
+            <User className="w-24 h-24 text-gray-400" />
+          </div>
+        )}
       </div>
       <div className="md:col-span-2">
         <h4 className="text-xl font-semibold mb-4 text-white">{data.name}</h4>

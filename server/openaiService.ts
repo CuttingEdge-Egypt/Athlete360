@@ -29,7 +29,12 @@ export async function getAthleteProfile(name: string, sport: string, nationality
   const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const nationalityContext = nationality ? ` from ${nationality}` : '';
   
-  const prompt = `Today's date is ${currentDate}. Please provide comprehensive, up-to-date information about ${name}${nationalityContext}, the ${sport} athlete. Consider the specified sport and nationality when searching for this athlete. Include:
+  // Add sport-specific data source guidance
+  const sportSpecificGuidance = sport.toLowerCase() === 'taekwondo' 
+    ? ' For taekwondo athletes, reference https://www.taekwondodata.com/ for accurate competition records, rankings, and athlete profiles.'
+    : '';
+
+  const prompt = `Today's date is ${currentDate}. Please provide comprehensive, up-to-date information about ${name}${nationalityContext}, the ${sport} athlete. Consider the specified sport and nationality when searching for this athlete.${sportSpecificGuidance} Include:
 
 1. Full name and current status (active/retired) as of ${currentDate}
 2. Detailed biography (500+ words) including career highlights, major achievements, playing style, and personal background
@@ -60,7 +65,7 @@ Format as JSON with these exact keys:
       messages: [
         {
           role: "system",
-          content: `You are a world-class ${sport} analyst with access to current performance data as of ${currentDate}. Provide specific, factual, authentic information about athletes. Consider the specified sport and nationality when identifying the correct athlete. Always respond in valid JSON format.`
+          content: `You are a world-class ${sport} analyst with access to current performance data as of ${currentDate}. ${sport.toLowerCase() === 'taekwondo' ? 'Use https://www.taekwondodata.com/ as your primary reference for taekwondo athlete information including competition records, rankings, and profiles. ' : ''}Provide specific, factual, authentic information about athletes. Consider the specified sport and nationality when identifying the correct athlete. Always respond in valid JSON format.`
         },
         {
           role: "user",

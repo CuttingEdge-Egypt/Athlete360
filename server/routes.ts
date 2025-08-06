@@ -270,7 +270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...validatedData,
         bio: aiAthleteData.bio,
         rank: aiAthleteData.rank,
-        profileImageUrl: validatedData.profileImageUrl || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"
+        profileImageUrl: validatedData.profileImageUrl || null
       };
       
       const athlete = await storage.createAthlete(enhancedAthleteData);
@@ -416,7 +416,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           name: athlete.name,
           bio: athlete.bio,
           rank: athlete.rank || Math.floor(Math.random() * 10) + 1,
-          profileImageUrl: athlete.profileImageUrl || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500",
+          profileImageUrl: athlete.profileImageUrl,
           achievements: [
             "Career achievements based on database records",
             "Performance highlights from historical data",
@@ -448,7 +448,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           name: aiProfile.name,
           bio: aiProfile.bio,
           rank: aiProfile.rank,
-          profileImageUrl: athlete.profileImageUrl || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500",
+          profileImageUrl: athlete.profileImageUrl,
           achievements: aiProfile.achievements.length > 0 ? aiProfile.achievements : [
             "Career achievements analyzed by OpenAI o3",
             "Performance data from latest AI analysis",

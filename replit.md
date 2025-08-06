@@ -12,6 +12,8 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**Image Fallback Removal & Taekwondo Search Enhancement (August 6, 2025)**: Removed all basketball player placeholder images - the system now shows user icons when actual athlete images aren't found instead of misleading placeholders. Added taekwondo-specific search enhancement directing AI to use https://www.taekwondodata.com/ as reference source for accurate taekwondo athlete data.
+
 **OpenAI Model Upgrade to o3 (August 6, 2025)**: Upgraded all OpenAI API calls from gpt-4o to o3 model across the entire platform. Updated athlete search prompts to consider selected sport and nationality for improved accuracy. Added current date requirement to all AI prompts to ensure up-to-date player information. All AI-powered analysis services now use o3 including athlete profiling, detailed analysis, comparison features, and specific analysis generation.
 
 **Dynamic Data Implementation (August 5, 2025)**: Updated analysis popups to read data dynamically from the database instead of hardcoded values. All major analysis views now display actual data:

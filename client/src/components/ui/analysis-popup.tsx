@@ -148,7 +148,7 @@ export function AnalysisPopup({
       sport: data.personalInfo?.sport || data.sport || "Sport",
       rank: data.rank || "N/A",
       bio: data.bio || data.content || "Biography not available",
-      profileImage: data.profileImageUrl || "https://images.unsplash.com/photo-1555597673-b21d5c935865?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500",
+      profileImage: data.profileImageUrl,
       achievements: data.achievements || [],
       recentNews: data.personalInfo?.recentNews || data.recentNews || "No recent news available",
       lastUpdated: data.personalInfo?.lastUpdated || "Recently updated",
@@ -162,11 +162,17 @@ export function AnalysisPopup({
             <Card className="bg-gradient-to-br from-athlete-gray-800 to-athlete-gray-700 border-athlete-accent/20">
               <CardContent className="p-6 text-center">
                 <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-b from-athlete-accent to-blue-600 p-1 mb-4">
-                  <img 
-                    src={athleteInfo.profileImage}
-                    alt={athleteInfo.name}
-                    className="w-full h-full rounded-full object-cover"
-                  />
+                  {athleteInfo.profileImage ? (
+                    <img 
+                      src={athleteInfo.profileImage}
+                      alt={athleteInfo.name}
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full rounded-full bg-athlete-gray-600 flex items-center justify-center">
+                      <User className="w-16 h-16 text-gray-400" />
+                    </div>
+                  )}
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-2">{athleteInfo.name}</h3>
                 <Badge className="bg-athlete-accent text-white mb-4">{athleteInfo.sport} Elite</Badge>

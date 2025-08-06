@@ -16,7 +16,8 @@ import {
   Target,
   Activity,
   Brain,
-  Heart
+  Heart,
+  User
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -297,11 +298,17 @@ export function AthleteComparison() {
             {/* Athlete Headers */}
             <div className="grid grid-cols-2 gap-6">
               <div className="text-center">
-                <img
-                  src={comparisonData.athlete1.profileImageUrl || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b"}
-                  alt={comparisonData.athlete1.name}
-                  className="w-20 h-20 rounded-full object-cover mx-auto mb-3"
-                />
+                {comparisonData.athlete1.profileImageUrl ? (
+                  <img
+                    src={comparisonData.athlete1.profileImageUrl}
+                    alt={comparisonData.athlete1.name}
+                    className="w-20 h-20 rounded-full object-cover mx-auto mb-3"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-athlete-gray-600 flex items-center justify-center mx-auto mb-3">
+                    <User className="w-10 h-10 text-gray-400" />
+                  </div>
+                )}
                 <h3 className="text-xl font-bold text-white">{comparisonData.athlete1.name}</h3>
                 <Badge variant="outline" className="mt-2">
                   Rank #{comparisonData.athlete1.rank || "TBD"}
@@ -309,11 +316,17 @@ export function AthleteComparison() {
               </div>
               
               <div className="text-center">
-                <img
-                  src={comparisonData.athlete2.profileImageUrl || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b"}
-                  alt={comparisonData.athlete2.name}
-                  className="w-20 h-20 rounded-full object-cover mx-auto mb-3"
-                />
+                {comparisonData.athlete2.profileImageUrl ? (
+                  <img
+                    src={comparisonData.athlete2.profileImageUrl}
+                    alt={comparisonData.athlete2.name}
+                    className="w-20 h-20 rounded-full object-cover mx-auto mb-3"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-athlete-gray-600 flex items-center justify-center mx-auto mb-3">
+                    <User className="w-10 h-10 text-gray-400" />
+                  </div>
+                )}
                 <h3 className="text-xl font-bold text-white">{comparisonData.athlete2.name}</h3>
                 <Badge variant="outline" className="mt-2">
                   Rank #{comparisonData.athlete2.rank || "TBD"}
