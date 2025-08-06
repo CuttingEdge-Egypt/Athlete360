@@ -10,11 +10,12 @@ export interface AthleteData {
   name: string;
   sport: string;
   bio: string;
-  rank: number;
+  rank: number | string;
   country?: string;
   achievements: string[];
   recentNews: string;
   profileImageDescription: string;
+  referenceLinks?: string[];
   stats?: any;
 }
 
@@ -115,7 +116,7 @@ Format as JSON with these exact keys:
       name,
       sport,
       bio: `Professional ${sport} athlete with competitive experience at national and international levels.`,
-      rank: 'N/A',
+      rank: 'N/A' as string,
       achievements: [],
       recentNews: "N/A",
       profileImageDescription: "Professional athlete"
@@ -318,7 +319,7 @@ Format the final result as JSON:
 
   } catch (error) {
     console.error(`❌ Error generating threaded biography for ${athleteName}:`, error);
-    throw new Error(`Failed to generate threaded biography for ${athleteName}: ${error.message}`);
+    throw new Error(`Failed to generate threaded biography for ${athleteName}: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
