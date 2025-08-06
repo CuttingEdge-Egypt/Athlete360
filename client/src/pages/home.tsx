@@ -99,7 +99,8 @@ export default function Home() {
         },
         body: JSON.stringify({
           name: athleteName.trim(),
-          sportId: selectedSport
+          sportId: selectedSport,
+          nationality: selectedCountry // Pass selected nationality to improve AI search accuracy
         }),
       });
       

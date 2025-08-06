@@ -25,18 +25,22 @@ export interface AnalysisData {
   rankHistory: Array<{ rank: number; date: string; tournament?: string }>;
 }
 
-export async function getAthleteProfile(name: string, sport: string): Promise<AthleteData> {
-  const prompt = `Please provide comprehensive, up-to-date information about ${name}, the ${sport} athlete. Include:
+export async function getAthleteProfile(name: string, sport: string, nationality?: string): Promise<AthleteData> {
+  const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const nationalityContext = nationality ? ` from ${nationality}` : '';
+  
+  const prompt = `Today's date is ${currentDate}. Please provide comprehensive, up-to-date information about ${name}${nationalityContext}, the ${sport} athlete. Consider the specified sport and nationality when searching for this athlete. Include:
 
-1. Full name and current status (active/retired)
+1. Full name and current status (active/retired) as of ${currentDate}
 2. Detailed biography (500+ words) including career highlights, major achievements, playing style, and personal background
-3. Current world ranking (if applicable) or historical peak ranking
+3. Current world ranking (if applicable) or historical peak ranking as of ${currentDate}
 4. Recent achievements and competitions (2024-2025)
-5. Notable career statistics and records
-6. Recent news or developments in their career
-7. Brief description of their physical appearance for profile image context
+5. Current nationality and country they represent
+6. Notable career statistics and records
+7. Recent news or developments in their career as of ${currentDate}
+8. Brief description of their physical appearance for profile image context
 
-Respond with accurate, factual information only. If the athlete is not well-known internationally, provide what information is available and indicate if they are a regional/national level competitor.
+Respond with accurate, factual information only based on current data as of ${currentDate}. If the athlete is not well-known internationally, provide what information is available and indicate if they are a regional/national level competitor.
 
 Format as JSON with these exact keys:
 {
@@ -44,18 +48,19 @@ Format as JSON with these exact keys:
   "sport": "${sport}",
   "bio": "Detailed biography",
   "rank": number (1-100, estimate if exact rank unknown),
+  "country": "Nationality/country they represent",
   "achievements": ["achievement1", "achievement2", ...],
-  "recentNews": "Latest developments or recent competition results",
+  "recentNews": "Latest developments or recent competition results as of ${currentDate}",
   "profileImageDescription": "Brief physical description for image context"
 }`;
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "o3", // upgraded to o3 model as requested
       messages: [
         {
           role: "system",
-          content: "You are a sports analytics expert with access to the most current athlete information. Provide accurate, factual data only. If information is uncertain, indicate that clearly."
+          content: `You are a world-class ${sport} analyst with access to current performance data as of ${currentDate}. Provide specific, factual, authentic information about athletes. Consider the specified sport and nationality when identifying the correct athlete. Always respond in valid JSON format.`
         },
         {
           role: "user",
@@ -91,7 +96,8 @@ Format as JSON with these exact keys:
 }
 
 export async function getDetailedAnalysis(name: string, sport: string): Promise<AnalysisData> {
-  const prompt = `Provide detailed performance analysis for ${name}, the ${sport} athlete. Include:
+  const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const prompt = `Today's date is ${currentDate}. Provide detailed performance analysis for ${name}, the ${sport} athlete based on current information as of ${currentDate}. Include:
 
 1. STRENGTHS: 5 specific technical/physical/mental strengths with detailed descriptions
 2. WEAKNESSES: 3-4 areas for improvement with specific examples
@@ -114,11 +120,11 @@ Format as JSON with these exact keys:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "o3", // upgraded to o3 model as requested
       messages: [
         {
           role: "system", 
-          content: "You are a professional sports analyst with expertise in athlete performance analysis. Provide realistic, sport-specific analysis based on known athlete characteristics and general sport science principles."
+          content: `You are a professional sports analyst with expertise in athlete performance analysis as of ${currentDate}. Provide realistic, sport-specific analysis based on current athlete data and known performance characteristics. Use up-to-date information.`
         },
         {
           role: "user",
@@ -168,31 +174,33 @@ export async function generateSpecificAnalysis(
   sport: string, 
   analysisType: 'bio' | 'rank' | 'strengths' | 'weaknesses' | 'development' | 'nutrition' | 'beat' | 'video'
 ): Promise<any> {
+  const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  
   const prompts = {
-    bio: `Provide a comprehensive, up-to-date biography for ${athleteName}, the ${sport} athlete. Include recent achievements, career highlights, playing style, and current status (2024-2025 season).`,
+    bio: `Today's date is ${currentDate}. Provide a comprehensive, up-to-date biography for ${athleteName}, the ${sport} athlete. Include recent achievements, career highlights, playing style, and current status as of ${currentDate}.`,
     
-    rank: `Analyze ${athleteName}'s current ranking and performance trends in ${sport}. Include current world/national ranking, recent tournament results, and ranking progression over the past 2 years.`,
+    rank: `Today's date is ${currentDate}. Analyze ${athleteName}'s current ranking and performance trends in ${sport} as of ${currentDate}. Include current world/national ranking, recent tournament results, and ranking progression over the past 2 years.`,
     
-    strengths: `Identify and analyze the top 5 competitive strengths of ${athleteName} in ${sport}. Focus on technical skills, physical attributes, mental qualities, and tactical abilities that give them advantages.`,
+    strengths: `Today's date is ${currentDate}. Identify and analyze the top 5 competitive strengths of ${athleteName} in ${sport} based on current performance data. Focus on technical skills, physical attributes, mental qualities, and tactical abilities that give them advantages.`,
     
-    weaknesses: `Analyze areas for improvement in ${athleteName}'s ${sport} performance. Identify 3-4 specific weaknesses or challenges they face against top competition.`,
+    weaknesses: `Today's date is ${currentDate}. Analyze areas for improvement in ${athleteName}'s ${sport} performance based on recent competition data. Identify 3-4 specific weaknesses or challenges they face against top competition.`,
     
-    development: `Create a comprehensive 12-week development plan for ${athleteName} in ${sport}. Include specific training phases, skill development focuses, and performance targets.`,
+    development: `Today's date is ${currentDate}. Create a comprehensive 12-week development plan for ${athleteName} in ${sport} based on current performance level. Include specific training phases, skill development focuses, and performance targets.`,
     
-    nutrition: `Design a sport-specific nutrition plan for ${athleteName} as a ${sport} athlete. Include meal timing, macronutrient distribution, hydration strategies, and competition-day nutrition.`,
+    nutrition: `Today's date is ${currentDate}. Design a sport-specific nutrition plan for ${athleteName} as a ${sport} athlete based on current sports science. Include meal timing, macronutrient distribution, hydration strategies, and competition-day nutrition.`,
     
-    beat: `Analyze tactical strategies ${athleteName} uses to defeat different types of opponents in ${sport}. Include specific game plans, technical approaches, and psychological tactics.`,
+    beat: `Today's date is ${currentDate}. Analyze tactical strategies ${athleteName} uses to defeat different types of opponents in ${sport} based on recent matches. Include specific game plans, technical approaches, and psychological tactics.`,
     
-    video: `Provide detailed technical analysis of ${athleteName}'s ${sport} performance based on competition footage and biomechanical analysis. Focus on technique, efficiency, and areas for improvement.`
+    video: `Today's date is ${currentDate}. Provide detailed technical analysis of ${athleteName}'s ${sport} performance based on recent competition footage and biomechanical analysis. Focus on technique, efficiency, and areas for improvement.`
   };
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "o3", // upgraded to o3 model as requested
       messages: [
         {
           role: "system",
-          content: `You are a world-class ${sport} analyst with access to current performance data. Provide specific, actionable insights based on the latest information about this athlete.`
+          content: `You are a world-class ${sport} analyst with access to current performance data as of ${currentDate}. Provide specific, actionable insights based on the latest information about this athlete. Use current data and recent performance metrics.`
         },
         {
           role: "user",

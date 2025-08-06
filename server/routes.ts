@@ -101,7 +101,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Use OpenAI to get athlete profile
       console.log(`Creating athlete ${name} for sport ${sport.name} using AI...`);
-      const aiProfile = await getAthleteProfile(name, sport.name);
+      const aiProfile = await getAthleteProfile(name, sport.name, req.body.nationality);
 
       // Search for athlete profile image
       console.log(`Searching for profile image for ${name}...`);
@@ -1465,11 +1465,11 @@ Format as JSON:
 }`;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        model: "o3", // upgraded to o3 model as requested
         messages: [
           {
             role: "system",
-            content: "You are a professional sports analyst specializing in athlete comparisons. Provide objective, data-driven analysis based on known athlete characteristics and performance metrics."
+            content: `You are a professional sports analyst specializing in athlete comparisons with access to current data as of ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}. Provide objective, data-driven analysis based on current athlete characteristics and performance metrics.`
           },
           {
             role: "user", 
