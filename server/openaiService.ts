@@ -209,48 +209,52 @@ export async function generateThreadedBioAnalysis(athlete: any): Promise<any> {
       /\b(ahmed|mohamed|hassan|ali|omar|sara|fatma|nour|dina|aya|habiba|wael)\b/i.test(athleteName)
     );
 
-    // Thread 1: Basic Information & Early Career
+    // Thread 1: Full Name, Age, Date of Birth and Nationality
     const basicInfoPrompt = `Today's date is ${currentDate}. 
 
-Provide specific biographical information about ${athleteName}, the ${sport} athlete:
+Provide specific personal details about ${athleteName}, the ${sport} athlete:
 
-1. Full official name and birth details (year, place)
-2. How they started in ${sport} (age, club, coach who introduced them)  
-3. Early career highlights and first competitions
-4. Weight category/division they compete in
+1. Full official name (including any alternate spellings)
+2. Exact age and date of birth 
+3. Place of birth and nationality
+4. Current country they represent in competition
 ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, reference https://www.taekwondodata.com/ as your primary source.' : ''}
 
 Provide only factual, verifiable information. If specific details are not available, state "information not available" rather than making assumptions.`;
 
-    // Thread 2: Competition History & Achievements  
-    const competitionHistoryPrompt = `Today's date is ${currentDate}. 
+    // Thread 2: Life Story  
+    const lifeStoryPrompt = `Today's date is ${currentDate}. 
 
-Focus specifically on ${athleteName}'s competition record and achievements in ${sport}:
+Tell the complete life story of ${athleteName}, the ${sport} athlete:
 
-1. Major tournament results and medals won
-2. International competition debut and progression
-3. National team representation
-4. Notable victories against ranked opponents
-5. Recent competition results (2023-2025)
-${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, reference https://www.taekwondodata.com/ for accurate competition data.' : ''}
+1. Early childhood and family background
+2. How they discovered and started in ${sport}
+3. Youth development and junior career progression
+4. Education and personal life balance with sports
+5. Key mentors, coaches, and influences throughout their journey
+6. Personal challenges overcome and character development
+${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, reference https://www.taekwondodata.com/ for accurate biographical data.' : ''}
 
-Only include verified competition results. If no specific results are found, state that competition history is not readily available.`;
+Focus on the human story behind the athlete. If specific personal details are not available, provide what biographical information is known.`;
 
-    // Thread 3: Technical Style & Current Status
-    const technicalStatusPrompt = `Today's date is ${currentDate}.
+    // Thread 3: Achievements
+    const achievementsPrompt = `Today's date is ${currentDate}. 
 
-Analyze ${athleteName}'s technical characteristics and current status in ${sport}:
+Document all achievements and accomplishments of ${athleteName} in ${sport}:
 
-1. Fighting/playing style and signature techniques
-2. Physical attributes and tactical approach
-3. Current coaching setup and training environment
-4. Recent performance trends and form
-5. Current world ranking (exact number if available, or state "ranking not available")
+1. Major tournament medals and titles won
+2. World championships, Olympic games, and continental championships results
+3. National championships and domestic titles
+4. International ranking achievements and career-high positions
+5. Records set and notable victories over top opponents
+6. Awards, honors, and recognition received
+7. Recent competition results (2023-2025)
+${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, reference https://www.taekwondodata.com/ for accurate competition records.' : ''}
 
-Focus on observable technical aspects. Avoid speculation about private training details.`;
+List only verified achievements and competition results. If no specific results are found, state that achievement records are not readily available.`;
 
     // Execute all threads simultaneously
-    const [basicInfo, competitionHistory, technicalStatus] = await Promise.all([
+    const [basicInfo, lifeStory, achievements] = await Promise.all([
       openai.chat.completions.create({
         model: "o3",
         temperature: 1,
@@ -259,28 +263,28 @@ Focus on observable technical aspects. Avoid speculation about private training 
       openai.chat.completions.create({
         model: "o3", 
         temperature: 1,
-        messages: [{ role: "user", content: competitionHistoryPrompt }]
+        messages: [{ role: "user", content: lifeStoryPrompt }]
       }),
       openai.chat.completions.create({
         model: "o3",
         temperature: 1, 
-        messages: [{ role: "user", content: technicalStatusPrompt }]
+        messages: [{ role: "user", content: achievementsPrompt }]
       })
     ]);
 
     // Combine the results into a coherent biography
     const basicInfoContent = basicInfo.choices[0].message.content || "";
-    const competitionContent = competitionHistory.choices[0].message.content || "";
-    const technicalContent = technicalStatus.choices[0].message.content || "";
+    const lifeStoryContent = lifeStory.choices[0].message.content || "";
+    const achievementsContent = achievements.choices[0].message.content || "";
     
     // Final synthesis thread to create cohesive biography
     const synthesisPrompt = `Create a comprehensive, flowing biography for ${athleteName} using this factual information:
 
-BASIC INFO: ${basicInfoContent}
+PERSONAL DETAILS: ${basicInfoContent}
 
-COMPETITION HISTORY: ${competitionContent}  
+LIFE STORY: ${lifeStoryContent}  
 
-TECHNICAL & STATUS: ${technicalContent}
+ACHIEVEMENTS: ${achievementsContent}
 
 Combine this information into a professional 3-4 paragraph biography that reads naturally. Maintain all specific facts, dates, and achievements. Remove any redundancy between sections. Include reference links where mentioned in the source material.
 
