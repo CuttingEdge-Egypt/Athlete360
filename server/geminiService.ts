@@ -4,11 +4,6 @@ const genAI = new GoogleGenAI({
   apiKey: process.env.GOOGLE_API_KEY || "" 
 });
 
-// Create Grounding with Google Search tool for enhanced real-time data retrieval
-const groundingTool = {
-  googleSearchRetrieval: {}
-};
-
 export interface AthleteData {
   name: string;
   sport: string;
@@ -59,17 +54,16 @@ Format as JSON with these exact keys:
   "recentNews": "Latest competition results or 'N/A' if no recent data available",
   "profileImageDescription": "Brief physical description for image context",
   "referenceLinks": ["URL1", "URL2", ...] (include https://www.taekwondodata.com/ for taekwondo athletes if available)
-}`;
+}${sportSpecificGuidance}`;
 
   try {
-    // Use Gemini with Google Search grounding for real-time data
+    // Use Gemini 2.5 Pro for comprehensive athlete analysis
     const response = await genAI.models.generateContent({
       model: "gemini-2.5-pro",
       contents: [{ 
         role: "user", 
         parts: [{ text: `${prompt}\n\nSystem: You are a world-class ${sport} analyst with comprehensive knowledge of current performance data as of ${currentDate}. ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference for competition records, rankings, and profiles. ' : ''}Provide specific, factual, authentic information about athletes. NEVER use placeholder text or bracketed templates like [City, State], [Year], [Championship Name]. Consider the specified sport and nationality when identifying the correct athlete. Always respond in valid JSON format.` }]
       }],
-      tools: [groundingTool],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -105,124 +99,76 @@ Format as JSON with these exact keys:
       rank: parsedRank || 'N/A',
       achievements: data.achievements || [],
       recentNews: data.recentNews === 'N/A' ? 'N/A' : (data.recentNews || "N/A"),
-      profileImageDescription: data.profileImageDescription || "Athletic build typical of professional athletes",
-      referenceLinks: data.referenceLinks || []
+      profileImageDescription: data.profileImageDescription || `${sport} athlete`,
+      referenceLinks: data.referenceLinks || [],
+      country: data.country || nationality || 'Unknown'
     };
   } catch (error) {
-    console.error(`Error fetching athlete profile for ${name}:`, error);
-    // Fallback with minimal data
-    return {
-      name,
-      sport,
-      bio: `Professional ${sport} athlete with competitive experience at national and international levels.`,
-      rank: 'N/A' as string,
-      achievements: [],
-      recentNews: "N/A",
-      profileImageDescription: "Professional athlete"
-    };
+    console.error(`❌ Error generating profile for ${name}:`, error);
+    throw new Error(`Failed to generate profile for ${name}: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
-export async function getDetailedAnalysis(name: string, sport: string): Promise<AnalysisData> {
+export async function compareAthletes(athlete1: any, athlete2: any, analysisType?: string): Promise<any> {
   const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  const prompt = `Today's date is ${currentDate}. Provide detailed performance analysis for ${name}, the ${sport} athlete based on current information as of ${currentDate}. Include:
+  
+  // Check if athletes are Egyptian taekwondo for data source guidance
+  const isEgyptianTaekwondo1 = athlete1.sport?.toLowerCase() === 'taekwondo' && (
+    athlete1.country?.toLowerCase().includes('egypt') ||
+    /\b(ahmed|mohamed|hassan|ali|omar|sara|fatma|nour|dina|aya|habiba|wael)\b/i.test(athlete1.name)
+  );
+  const isEgyptianTaekwondo2 = athlete2.sport?.toLowerCase() === 'taekwondo' && (
+    athlete2.country?.toLowerCase().includes('egypt') ||
+    /\b(ahmed|mohamed|hassan|ali|omar|sara|fatma|nour|dina|aya|habiba|wael)\b/i.test(athlete2.name)
+  );
 
-1. STRENGTHS: 5 specific technical/physical/mental strengths with detailed descriptions
-2. WEAKNESSES: 3-4 areas for improvement with specific examples
-3. DEVELOPMENT PLANS: 6 weekly training focuses (12-week program split into phases)
-4. NUTRITION PLANS: 6 meal-specific nutrition recommendations
-5. BEAT STRATEGIES: 4 tactical approaches against different opponent types
-6. RANK HISTORY: 8-10 historical ranking points over the past 2 years with dates
+  const prompt = `Today's date is ${currentDate}. 
 
-Base this on real performance data, competition results, and known athletic characteristics. Be specific to the sport and athlete's known style.
+Compare these two ${athlete1.sport || 'sport'} athletes:
 
-Format as JSON with these exact keys:
+**${athlete1.name}** (Rank: ${athlete1.rank || 'N/A'})
+Bio: ${athlete1.bio || 'No bio available'}
+
+**${athlete2.name}** (Rank: ${athlete2.rank || 'N/A'})  
+Bio: ${athlete2.bio || 'No bio available'}
+
+Provide a comprehensive comparison as of ${currentDate} including:
+1. Current rankings and career trajectories
+2. Strengths and weaknesses analysis 
+3. Head-to-head prediction and key factors
+4. Technical and tactical differences
+5. Recent performance trends
+${(isEgyptianTaekwondo1 || isEgyptianTaekwondo2) ? '\nFor Egyptian taekwondo athletes, reference https://www.taekwondodata.com/ for accurate competition data.' : ''}
+
+Format as JSON:
 {
-  "strengths": [{"title": "Strength Name", "description": "Detailed description"}],
-  "weaknesses": [{"title": "Weakness Name", "description": "Detailed description with examples"}],
-  "developmentPlans": [{"title": "Phase Name", "description": "Training focus", "week": 1}],
-  "nutritionPlans": [{"title": "Meal Name", "description": "Nutrition details", "mealType": "breakfast/lunch/dinner/snack"}],
-  "beatStrategies": [{"title": "Strategy Name", "description": "Tactical approach", "opponent": "Opponent type"}],
-  "rankHistory": [{"rank": number, "date": "YYYY-MM-DD", "tournament": "Tournament name if applicable"}]
+  "summary": "Overall comparison summary",
+  "athlete1Analysis": "Detailed analysis of athlete 1",
+  "athlete2Analysis": "Detailed analysis of athlete 2", 
+  "headToHead": "Who would likely win and why",
+  "keyFactors": ["factor1", "factor2", "factor3"]
 }`;
 
   try {
-    // Use Gemini with Google Search grounding for real-time analysis data
+    // Use Gemini 2.5 Pro for comprehensive comparison analysis
     const response = await genAI.models.generateContent({
       model: "gemini-2.5-pro",
       contents: [{ 
         role: "user", 
         parts: [{ text: `${prompt}\n\nSystem: You are a professional sports analyst with expertise in athlete performance analysis as of ${currentDate}. Provide realistic, sport-specific analysis based on current athlete data and known performance characteristics. Use up-to-date information.` }]
       }],
-      tools: [groundingTool],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
           type: "object",
           properties: {
-            strengths: {
+            summary: { type: "string" },
+            athlete1Analysis: { type: "string" },
+            athlete2Analysis: { type: "string" },
+            headToHead: { type: "string" },
+            keyFactors: { 
               type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  title: { type: "string" },
-                  description: { type: "string" }
-                }
-              }
-            },
-            weaknesses: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  title: { type: "string" },
-                  description: { type: "string" }
-                }
-              }
-            },
-            developmentPlans: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  title: { type: "string" },
-                  description: { type: "string" },
-                  week: { type: "number" }
-                }
-              }
-            },
-            nutritionPlans: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  title: { type: "string" },
-                  description: { type: "string" },
-                  mealType: { type: "string" }
-                }
-              }
-            },
-            beatStrategies: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  title: { type: "string" },
-                  description: { type: "string" },
-                  opponent: { type: "string" }
-                }
-              }
-            },
-            rankHistory: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  rank: { type: "number" },
-                  date: { type: "string" },
-                  tournament: { type: "string" }
-                }
-              }
+              items: { type: "string" }
             }
           }
         }
@@ -231,67 +177,51 @@ Format as JSON with these exact keys:
 
     const data = JSON.parse(response.text || "{}");
     
-    // Debug logging to see what Gemini actually returns
-    console.log(`Gemini Response for ${name}:`);
-    console.log(`- Response keys: ${Object.keys(data)}`);
-    console.log(`- Development plans: ${data.developmentPlans?.length || 0} items`);
-    if (data.developmentPlans?.length > 0) {
-      console.log(`- First development plan: ${JSON.stringify(data.developmentPlans[0])}`);
-    }
-    
-    // Ensure proper structure with defaults
+    console.log(`✅ Comparison completed for ${athlete1.name} vs ${athlete2.name}`);
     return {
-      strengths: data.strengths || [],
-      weaknesses: data.weaknesses || [],
-      developmentPlans: data.developmentPlans || [],
-      nutritionPlans: data.nutritionPlans || [],
-      beatStrategies: data.beatStrategies || [],
-      rankHistory: data.rankHistory || []
+      summary: data.summary || "Comprehensive comparison analysis",
+      athlete1Analysis: data.athlete1Analysis || "Analysis not available",
+      athlete2Analysis: data.athlete2Analysis || "Analysis not available", 
+      headToHead: data.headToHead || "Close competition expected",
+      keyFactors: data.keyFactors || ["Technical skills", "Physical conditioning", "Mental toughness"]
     };
-  } catch (error: any) {
-    console.error(`❌ Error fetching detailed analysis for ${name}:`, error.message);
-    return {
-      strengths: [],
-      weaknesses: [],
-      developmentPlans: [],
-      nutritionPlans: [],
-      beatStrategies: [],
-      rankHistory: []
-    };
+
+  } catch (error) {
+    console.error(`❌ Error comparing ${athlete1.name} vs ${athlete2.name}:`, error);
+    throw new Error(`Failed to compare athletes: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
-// Generate threaded biography with separate AI calls for each section
-export async function generateThreadedBioAnalysis(athlete: any): Promise<any> {
+// Enhanced threaded biography generation with 3-thread approach
+export async function generateThreadedBiography(athlete: any): Promise<any> {
   const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const athleteName = athlete.name;
-  const sport = athlete.sport?.name || "Sport";
+  const sport = athlete.sport || 'sport';
   
-  console.log(`Generating threaded biography for ${athleteName} in ${sport}...`);
-  
-  try {
-    // Check if athlete is Egyptian for taekwondo.data reference  
-    const isEgyptianTaekwondo = sport.toLowerCase() === 'taekwondo' && (
-      /\b(egypt|egyptian|cairo|alexandria)\b/i.test(athleteName) ||
-      athleteName.includes('حبيبة') || athleteName.includes('أحمد') || athleteName.includes('محمد') ||
-      /\b(ahmed|mohamed|hassan|ali|omar|sara|fatma|nour|dina|aya|habiba|wael)\b/i.test(athleteName)
-    );
+  // Check if athlete is Egyptian for taekwondo.data reference
+  const isEgyptianTaekwondo = sport.toLowerCase() === 'taekwondo' && (
+    athlete.country?.toLowerCase().includes('egypt') ||
+    athleteName.includes('حبيبة') || athleteName.includes('أحمد') || athleteName.includes('محمد') ||
+    /\b(ahmed|mohamed|hassan|ali|omar|sara|fatma|nour|dina|aya|habiba|wael)\b/i.test(athleteName)
+  );
 
-    // Thread 1: Full Name, Age, Date of Birth and Nationality
+  try {
+    // Thread 1: Personal Details
     const basicInfoPrompt = `Today's date is ${currentDate}. 
 
-Provide specific personal details about ${athleteName}, the ${sport} athlete:
+Provide basic personal information for ${athleteName}, the ${sport} athlete:
 
-1. Full official name (including any alternate spellings)
-2. Exact age and date of birth 
-3. Place of birth and nationality
-4. Current country they represent in competition
-${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, reference https://www.taekwondodata.com/ as your primary source.' : ''}
+1. Full official name and any common nicknames
+2. Date of birth and current age
+3. Nationality and place of birth
+4. Physical attributes relevant to their sport (height, weight, etc.)
+5. Current residence and training location
+${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, reference https://www.taekwondodata.com/ for accurate personal data.' : ''}
 
-Provide only factual, verifiable information. If specific details are not available, state "information not available" rather than making assumptions.
+Focus on factual personal details. If specific information is not available, indicate so rather than making assumptions.
 Use: https://www.worldtaekwondo.org/ for the main Taekwondo Reference.`;
 
-    // Thread 2: Life Story  
+    // Thread 2: Life Story
     const lifeStoryPrompt = `Today's date is ${currentDate}. 
 
 Tell the complete life story of ${athleteName}, the ${sport} athlete:
@@ -324,22 +254,19 @@ ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, reference https://www.
 List only verified achievements and competition results. If no specific results are found, state that achievement records are not readily available.
 Use: https://www.worldtaekwondo.org/ for the main Taekwondo Reference.`;
 
-    // Execute all threads simultaneously with Google Search grounding
+    // Execute all threads simultaneously
     const [basicInfo, lifeStory, achievements] = await Promise.all([
       genAI.models.generateContent({
         model: "gemini-2.5-pro",
-        contents: [{ role: "user", parts: [{ text: basicInfoPrompt }] }],
-        tools: [groundingTool]
+        contents: [{ role: "user", parts: [{ text: basicInfoPrompt }] }]
       }),
       genAI.models.generateContent({
         model: "gemini-2.5-pro", 
-        contents: [{ role: "user", parts: [{ text: lifeStoryPrompt }] }],
-        tools: [groundingTool]
+        contents: [{ role: "user", parts: [{ text: lifeStoryPrompt }] }]
       }),
       genAI.models.generateContent({
         model: "gemini-2.5-pro",
-        contents: [{ role: "user", parts: [{ text: achievementsPrompt }] }],
-        tools: [groundingTool]
+        contents: [{ role: "user", parts: [{ text: achievementsPrompt }] }]
       })
     ]);
 
@@ -372,7 +299,6 @@ Format the final result as JSON:
     const synthesis = await genAI.models.generateContent({
       model: "gemini-2.5-pro",
       contents: [{ role: "user", parts: [{ text: synthesisPrompt }] }],
-      tools: [groundingTool],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -440,7 +366,7 @@ export async function generateSpecificAnalysis(
   };
 
   try {
-    // Use Gemini with Google Search grounding for real-time specific analysis
+    // Use Gemini 2.5 Pro for real-time specific analysis
     const response = await genAI.models.generateContent({
       model: "gemini-2.5-pro",
       contents: [
@@ -448,8 +374,7 @@ export async function generateSpecificAnalysis(
           role: "user",
           parts: [{ text: `${prompts[analysisType]}\n\nSystem: You are a professional ${sport} analyst with expertise in current athlete performance as of ${currentDate}. ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference. ' : ''}Provide specific, actionable insights based on current data and known performance characteristics. Avoid generic advice and focus on sport-specific, athlete-specific analysis.` }]
         }
-      ],
-      tools: [groundingTool]
+      ]
     });
 
     return response.text || "Analysis not available";
@@ -459,7 +384,7 @@ export async function generateSpecificAnalysis(
   }
 }
 
-// Search for athlete images (re-exported from previous implementation)
+// Updated athlete image search to prevent placeholder issues
 export async function searchAthleteImage(athleteName: string): Promise<string | null> {
   try {
     // Search TheSportsDB for athlete images
@@ -471,13 +396,18 @@ export async function searchAthleteImage(athleteName: string): Promise<string | 
     
     if (data.player && data.player.length > 0) {
       const player = data.player[0];
-      if (player.strThumb) {
+      // Strict validation to ensure we have a real image URL, not a placeholder
+      if (player.strThumb && 
+          player.strThumb.startsWith('http') && 
+          !player.strThumb.includes('placeholder') &&
+          !player.strThumb.includes('default') &&
+          player.strThumb.length > 20) {
         console.log(`Found profile image for ${athleteName}: ${player.strThumb}`);
         return player.strThumb;
       }
     }
     
-    console.log(`No profile image found for ${athleteName} in TheSportsDB`);
+    console.log(`No valid profile image found for ${athleteName} in TheSportsDB`);
     return null;
   } catch (error) {
     console.error(`Error searching for athlete image:`, error);
