@@ -12,7 +12,7 @@ import { AnalysisPopup } from "@/components/ui/analysis-popup";
 import { AthleteComparison } from "@/components/ui/athlete-comparison";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Star, User } from "lucide-react";
+import { Search, Star, User, Loader2 } from "lucide-react";
 import type { Sport, Athlete } from "@shared/schema";
 
 export default function Home() {
@@ -388,7 +388,17 @@ export default function Home() {
                         className="bg-athlete-accent hover:bg-athlete-accent/80 text-white"
                         disabled={!selectedSport || isSearching}
                       >
-                        {isSearching ? 'Searching...' : 'Search with AI'}
+                        {isSearching ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Searching with AI...
+                          </>
+                        ) : (
+                          <>
+                            <Search className="mr-2 h-4 w-4" />
+                            Search with AI
+                          </>
+                        )}
                       </Button>
                     </div>
                   )}
