@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,6 +18,7 @@ import type { Sport, Athlete } from "@shared/schema";
 export default function Home() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [selectedSport, setSelectedSport] = useState<string>("");
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [searchName, setSearchName] = useState<string>("");
@@ -158,6 +159,20 @@ export default function Home() {
         const data = await response.json();
         setBioData(data);
         setShowBioPopup(true);
+        
+        // Invalidate queries to refresh token balance immediately
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/analysis-logs"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/user-history"] });
+        
+        // Force refetch user data immediately
+        queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+        
+        toast({
+          title: "Analysis Complete",
+          description: "Biography analysis generated successfully!",
+        });
       } else {
         toast({
           title: "Analysis Error",
