@@ -4,6 +4,11 @@ const genAI = new GoogleGenAI({
   apiKey: process.env.GOOGLE_API_KEY || "" 
 });
 
+// Create Grounding with Google Search tool for enhanced real-time data retrieval
+const groundingTool = {
+  googleSearchRetrieval: {}
+};
+
 export interface AthleteData {
   name: string;
   sport: string;
@@ -41,24 +46,8 @@ export async function getAthleteProfile(name: string, sport: string, nationality
     ? ' For Egyptian taekwondo athletes, reference https://www.taekwondodata.com/ for accurate competition records, rankings, and athlete profiles.'
     : '';
 
-  const prompt = `Today's date is ${currentDate}. Please provide comprehensive, up-to-date information about ${name}${nationalityContext}, the ${sport} athlete. Consider the specified sport and nationality when identifying this athlete.${sportSpecificGuidance} 
-
-Provide a comprehensive analysis based on your knowledge of current sports data and athlete information.
-
-Include:
-
-1. Full name and current status (active/retired) as of ${currentDate}
-2. Detailed biography (500+ words) including career highlights, major achievements, playing style, and personal background
-3. Current world ranking (if applicable) or historical peak ranking as of ${currentDate}
-4. Recent achievements and competitions (2024-2025)
-5. Current nationality and country they represent
-6. Notable career statistics and records
-7. Recent news or developments in their career as of ${currentDate}
-8. Brief description of their physical appearance for profile image context
-9. Reference links or sources used (especially https://www.taekwondodata.com/ for taekwondo athletes)
-
-Respond with accurate, factual information only based on current data as of ${currentDate}. If the athlete is not well-known internationally, provide what information is available and indicate if they are a regional/national level competitor.
-
+  const prompt = `Today's date is ${currentDate}. Tell me who is ${name} the ${nationalityContext}athlete, that plays ${sport}.
+Give me a full biography about the athlete, their achievements, and their current ranking. Also include the most recent competition they participated in. 
 Format as JSON with these exact keys:
 {
   "name": "Full official name",
@@ -73,8 +62,14 @@ Format as JSON with these exact keys:
 }`;
 
   try {
+    // Use Gemini with Google Search grounding for real-time data
     const response = await genAI.models.generateContent({
       model: "gemini-2.5-pro",
+      contents: [{ 
+        role: "user", 
+        parts: [{ text: `${prompt}\n\nSystem: You are a world-class ${sport} analyst with comprehensive knowledge of current performance data as of ${currentDate}. ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference for competition records, rankings, and profiles. ' : ''}Provide specific, factual, authentic information about athletes. NEVER use placeholder text or bracketed templates like [City, State], [Year], [Championship Name]. Consider the specified sport and nationality when identifying the correct athlete. Always respond in valid JSON format.` }]
+      }],
+      tools: [groundingTool],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -92,13 +87,7 @@ Format as JSON with these exact keys:
           },
           required: ["name", "sport", "bio", "rank", "country", "achievements", "recentNews", "profileImageDescription"]
         }
-      },
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: `${prompt}\n\nSystem: You are a world-class ${sport} analyst with comprehensive knowledge of current performance data as of ${currentDate}. ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference for competition records, rankings, and profiles. ' : ''}Provide specific, factual, authentic information about athletes. NEVER use placeholder text or bracketed templates like [City, State], [Year], [Championship Name]. Consider the specified sport and nationality when identifying the correct athlete. Always respond in valid JSON format.` }]
-        }
-      ]
+      }
     });
 
     const data = JSON.parse(response.text || "{}");
@@ -158,8 +147,14 @@ Format as JSON with these exact keys:
 }`;
 
   try {
+    // Use Gemini with Google Search grounding for real-time analysis data
     const response = await genAI.models.generateContent({
       model: "gemini-2.5-pro",
+      contents: [{ 
+        role: "user", 
+        parts: [{ text: `${prompt}\n\nSystem: You are a professional sports analyst with expertise in athlete performance analysis as of ${currentDate}. Provide realistic, sport-specific analysis based on current athlete data and known performance characteristics. Use up-to-date information.` }]
+      }],
+      tools: [groundingTool],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -231,13 +226,7 @@ Format as JSON with these exact keys:
             }
           }
         }
-      },
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: `${prompt}\n\nSystem: You are a professional sports analyst with expertise in athlete performance analysis as of ${currentDate}. Provide realistic, sport-specific analysis based on current athlete data and known performance characteristics. Use up-to-date information.` }]
-        }
-      ]
+      }
     });
 
     const data = JSON.parse(response.text || "{}");
@@ -335,19 +324,22 @@ ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, reference https://www.
 List only verified achievements and competition results. If no specific results are found, state that achievement records are not readily available.
 Use: https://www.worldtaekwondo.org/ for the main Taekwondo Reference.`;
 
-    // Execute all threads simultaneously
+    // Execute all threads simultaneously with Google Search grounding
     const [basicInfo, lifeStory, achievements] = await Promise.all([
       genAI.models.generateContent({
         model: "gemini-2.5-pro",
-        contents: [{ role: "user", parts: [{ text: basicInfoPrompt }] }]
+        contents: [{ role: "user", parts: [{ text: basicInfoPrompt }] }],
+        tools: [groundingTool]
       }),
       genAI.models.generateContent({
         model: "gemini-2.5-pro", 
-        contents: [{ role: "user", parts: [{ text: lifeStoryPrompt }] }]
+        contents: [{ role: "user", parts: [{ text: lifeStoryPrompt }] }],
+        tools: [groundingTool]
       }),
       genAI.models.generateContent({
         model: "gemini-2.5-pro",
-        contents: [{ role: "user", parts: [{ text: achievementsPrompt }] }]
+        contents: [{ role: "user", parts: [{ text: achievementsPrompt }] }],
+        tools: [groundingTool]
       })
     ]);
 
@@ -379,6 +371,8 @@ Format the final result as JSON:
 
     const synthesis = await genAI.models.generateContent({
       model: "gemini-2.5-pro",
+      contents: [{ role: "user", parts: [{ text: synthesisPrompt }] }],
+      tools: [groundingTool],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -392,8 +386,7 @@ Format the final result as JSON:
             referenceLinks: { type: "array", items: { type: "string" } }
           }
         }
-      },
-      contents: [{ role: "user", parts: [{ text: synthesisPrompt }] }]
+      }
     });
 
     const result = JSON.parse(synthesis.text || "{}");
@@ -447,6 +440,7 @@ export async function generateSpecificAnalysis(
   };
 
   try {
+    // Use Gemini with Google Search grounding for real-time specific analysis
     const response = await genAI.models.generateContent({
       model: "gemini-2.5-pro",
       contents: [
@@ -454,7 +448,8 @@ export async function generateSpecificAnalysis(
           role: "user",
           parts: [{ text: `${prompts[analysisType]}\n\nSystem: You are a professional ${sport} analyst with expertise in current athlete performance as of ${currentDate}. ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference. ' : ''}Provide specific, actionable insights based on current data and known performance characteristics. Avoid generic advice and focus on sport-specific, athlete-specific analysis.` }]
         }
-      ]
+      ],
+      tools: [groundingTool]
     });
 
     return response.text || "Analysis not available";
