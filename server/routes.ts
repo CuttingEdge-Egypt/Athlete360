@@ -5,10 +5,10 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, getDetailedAnalysis, generateSpecificAnalysis, searchAthleteImage, generateThreadedBioAnalysis } from "./openaiService";
-import OpenAI from "openai";
+import { getAthleteProfile, getDetailedAnalysis, generateSpecificAnalysis, searchAthleteImage, generateThreadedBioAnalysis } from "./geminiService";
+import { GoogleGenAI } from "@google/genai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const genAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY || "" });
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -1506,22 +1506,60 @@ Format as JSON:
   "overallAnalysis": "Comprehensive comparison summary"
 }`;
 
-      const response = await openai.chat.completions.create({
-        model: "o3", // using o3 model for comparison analysis
-        messages: [
-          {
-            role: "system",
-            content: `You are a professional sports analyst specializing in athlete comparisons with access to current data as of ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}. Provide objective, data-driven analysis based on current athlete characteristics and performance metrics.`
-          },
-          {
-            role: "user", 
-            content: comparisonPrompt
+      const response = await genAI.models.generateContent({
+        model: "gemini-2.5-pro",
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "object",
+            properties: {
+              strengths: {
+                type: "object",
+                properties: {
+                  athlete1: { type: "array", items: { type: "string" } },
+                  athlete2: { type: "array", items: { type: "string" } },
+                  advantage: { type: "string" }
+                }
+              },
+              weaknesses: {
+                type: "object",
+                properties: {
+                  athlete1: { type: "array", items: { type: "string" } },
+                  athlete2: { type: "array", items: { type: "string" } },
+                  advantage: { type: "string" }
+                }
+              },
+              ranking: {
+                type: "object",
+                properties: {
+                  athlete1Rank: { type: "number" },
+                  athlete2Rank: { type: "number" },
+                  advantage: { type: "string" }
+                }
+              },
+              headToHead: {
+                type: "object",
+                properties: {
+                  prediction: { type: "string" },
+                  confidence: { type: "number" },
+                  reasoning: { type: "string" }
+                }
+              },
+              overallAnalysis: { type: "string" }
+            }
           }
-        ],
-        response_format: { type: "json_object" }
+        },
+        contents: [
+          {
+            role: "user",
+            parts: [{
+              text: `${comparisonPrompt}\n\nSystem: You are a professional sports analyst specializing in athlete comparisons with access to current data as of ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}. Provide objective, data-driven analysis based on current athlete characteristics and performance metrics.`
+            }]
+          }
+        ]
       });
 
-      const comparisonData = JSON.parse(response.choices[0].message.content || "{}");
+      const comparisonData = JSON.parse(response.text || "{}");
 
       const result = {
         athlete1,

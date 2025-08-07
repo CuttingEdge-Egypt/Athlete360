@@ -12,11 +12,11 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**Complete LLM Migration to Gemini 2.5 Pro (August 7, 2025)**: Successfully migrated the entire AI infrastructure from OpenAI (o3/o3-pro models) to Google's Gemini 2.5 Pro using GOOGLE_API_KEY. All athlete analysis functionality now powered by Gemini including: biographical analysis with 3-thread approach (Personal Details, Life Story, Achievements + Final Synthesis), athlete comparisons, ranking analysis, strengths/weaknesses evaluation, development plans, nutrition guidance, and strategic analysis. Updated server/geminiService.ts with comprehensive Gemini integration while maintaining Egyptian taekwondo data reference system and authentic data requirements.
+
 **Image Fallback Removal & Taekwondo Search Enhancement (August 6, 2025)**: Removed all basketball player placeholder images - the system now shows user icons when actual athlete images aren't found instead of misleading placeholders. Added taekwondo-specific search enhancement directing AI to use https://www.taekwondodata.com/ as reference source for accurate taekwondo athlete data.
 
-**Streamlined 3-Thread Biography Analysis Implementation (August 6, 2025)**: Updated multi-threaded AI biography generation to use a focused 3-thread structure for improved clarity and organization. System now uses 3 specialized AI threads: Personal Details - Full Name/Age/DOB/Nationality (o3), Life Story - childhood/development/journey (o3), Achievements - competition results/medals/records (o3), followed by Final Synthesis (o3-pro). This streamlined approach provides clearer separation of biographical elements while maintaining comprehensive coverage and factual accuracy.
-
-**Pure o3 Model Implementation with Egyptian Taekwondo Data Reference (August 6, 2025)**: Removed all web search tool integration and updated system to rely purely on o3 and o3-pro model knowledge for athlete analysis. Modified taekwondo.data reference to be exclusive to Egyptian athletes only - system now intelligently detects Egyptian names (Arabic names, common Egyptian patterns) and only references https://www.taekwondodata.com/ for Egyptian taekwondo competitors. This ensures more focused and accurate data sourcing while maintaining authentication through o3's comprehensive sports knowledge base. All placeholder fallback content removed to ensure only authentic AI-generated biographical data.
+**Streamlined 3-Thread Biography Analysis Implementation (August 6, 2025)**: Updated multi-threaded AI biography generation to use a focused 3-thread structure for improved clarity and organization. System now uses 3 specialized AI threads: Personal Details - Full Name/Age/DOB/Nationality, Life Story - childhood/development/journey, Achievements - competition results/medals/records, followed by Final Synthesis. This streamlined approach provides clearer separation of biographical elements while maintaining comprehensive coverage and factual accuracy.
 
 **Dynamic Data Implementation (August 5, 2025)**: Updated analysis popups to read data dynamically from the database instead of hardcoded values. All major analysis views now display actual data:
 - Rank analysis: Peak ranking, current ranking, and performance metrics from API responses
@@ -68,6 +68,10 @@ Preferred communication style: Simple, everyday language.
 - **Deduplication Logic**: Smart athlete deduplication by name to prevent redundancy while preserving most recent/complete records
 
 ## External Dependencies
+
+### AI and Language Models
+- **Google Gemini 2.5 Pro**: Primary LLM provider for all athlete analysis, biography generation, comparison analysis, and sports insights via GOOGLE_API_KEY
+- **@google/genai**: Official Google Generative AI SDK for Node.js integration with JSON schema validation and structured responses
 
 ### Database and Storage
 - **Neon PostgreSQL**: Serverless PostgreSQL database with WebSocket support for real-time connections

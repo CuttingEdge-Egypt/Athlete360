@@ -1,10 +1,8 @@
-import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
 
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY 
+const genAI = new GoogleGenAI({ 
+  apiKey: process.env.GOOGLE_API_KEY || "" 
 });
-
-
 
 export interface AthleteData {
   name: string;
@@ -31,8 +29,6 @@ export interface AnalysisData {
 export async function getAthleteProfile(name: string, sport: string, nationality?: string): Promise<AthleteData> {
   const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const nationalityContext = nationality ? ` from ${nationality}` : '';
-  
-
   
   // Add sport-specific data source guidance for Egyptian taekwondo athletes only
   const isEgyptianTaekwondo = sport.toLowerCase() === 'taekwondo' && (
@@ -61,7 +57,6 @@ Include:
 8. Brief description of their physical appearance for profile image context
 9. Reference links or sources used (especially https://www.taekwondodata.com/ for taekwondo athletes)
 
-
 Respond with accurate, factual information only based on current data as of ${currentDate}. If the athlete is not well-known internationally, provide what information is available and indicate if they are a regional/national level competitor.
 
 Format as JSON with these exact keys:
@@ -78,20 +73,35 @@ Format as JSON with these exact keys:
 }`;
 
   try {
-    let response = await openai.chat.completions.create({
-      model: "o3",
-      temperature: 1,
-      messages: [
+    const response = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "object",
+          properties: {
+            name: { type: "string" },
+            sport: { type: "string" },
+            bio: { type: "string" },
+            rank: { type: "string" },
+            country: { type: "string" },
+            achievements: { type: "array", items: { type: "string" } },
+            recentNews: { type: "string" },
+            profileImageDescription: { type: "string" },
+            referenceLinks: { type: "array", items: { type: "string" } }
+          },
+          required: ["name", "sport", "bio", "rank", "country", "achievements", "recentNews", "profileImageDescription"]
+        }
+      },
+      contents: [
         {
           role: "user",
-          content: `${prompt}\n\nSystem: You are a world-class ${sport} analyst with comprehensive knowledge of current performance data as of ${currentDate}. ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference for competition records, rankings, and profiles. ' : ''}Provide specific, factual, authentic information about athletes. NEVER use placeholder text or bracketed templates like [City, State], [Year], [Championship Name]. Consider the specified sport and nationality when identifying the correct athlete. Always respond in valid JSON format.`
+          parts: [{ text: `${prompt}\n\nSystem: You are a world-class ${sport} analyst with comprehensive knowledge of current performance data as of ${currentDate}. ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference for competition records, rankings, and profiles. ' : ''}Provide specific, factual, authentic information about athletes. NEVER use placeholder text or bracketed templates like [City, State], [Year], [Championship Name]. Consider the specified sport and nationality when identifying the correct athlete. Always respond in valid JSON format.` }]
         }
       ]
     });
 
-
-
-    const data = JSON.parse(response.choices[0].message.content || "{}");
+    const data = JSON.parse(response.text || "{}");
     
     // Parse rank - convert to number if it's a valid number, otherwise keep as string
     let parsedRank = data.rank;
@@ -148,21 +158,92 @@ Format as JSON with these exact keys:
 }`;
 
   try {
-    const response = await openai.chat.completions.create({
-      model: "o3-pro",
-      temperature: 1,
-      messages: [
+    const response = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "object",
+          properties: {
+            strengths: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  title: { type: "string" },
+                  description: { type: "string" }
+                }
+              }
+            },
+            weaknesses: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  title: { type: "string" },
+                  description: { type: "string" }
+                }
+              }
+            },
+            developmentPlans: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  title: { type: "string" },
+                  description: { type: "string" },
+                  week: { type: "number" }
+                }
+              }
+            },
+            nutritionPlans: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  title: { type: "string" },
+                  description: { type: "string" },
+                  mealType: { type: "string" }
+                }
+              }
+            },
+            beatStrategies: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  title: { type: "string" },
+                  description: { type: "string" },
+                  opponent: { type: "string" }
+                }
+              }
+            },
+            rankHistory: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  rank: { type: "number" },
+                  date: { type: "string" },
+                  tournament: { type: "string" }
+                }
+              }
+            }
+          }
+        }
+      },
+      contents: [
         {
           role: "user",
-          content: `${prompt}\n\nSystem: You are a professional sports analyst with expertise in athlete performance analysis as of ${currentDate}. Provide realistic, sport-specific analysis based on current athlete data and known performance characteristics. Use up-to-date information.`
+          parts: [{ text: `${prompt}\n\nSystem: You are a professional sports analyst with expertise in athlete performance analysis as of ${currentDate}. Provide realistic, sport-specific analysis based on current athlete data and known performance characteristics. Use up-to-date information.` }]
         }
       ]
     });
 
-    const data = JSON.parse(response.choices[0].message.content || "{}");
+    const data = JSON.parse(response.text || "{}");
     
-    // Debug logging to see what OpenAI actually returns
-    console.log(`OpenAI Response for ${name}:`);
+    // Debug logging to see what Gemini actually returns
+    console.log(`Gemini Response for ${name}:`);
     console.log(`- Response keys: ${Object.keys(data)}`);
     console.log(`- Development plans: ${data.developmentPlans?.length || 0} items`);
     if (data.developmentPlans?.length > 0) {
@@ -180,9 +261,6 @@ Format as JSON with these exact keys:
     };
   } catch (error: any) {
     console.error(`❌ Error fetching detailed analysis for ${name}:`, error.message);
-    if (error.status) {
-      console.error(`OpenAI API Status: ${error.status}`);
-    }
     return {
       strengths: [],
       weaknesses: [],
@@ -259,27 +337,24 @@ Use: https://www.worldtaekwondo.org/ for the main Taekwondo Reference.`;
 
     // Execute all threads simultaneously
     const [basicInfo, lifeStory, achievements] = await Promise.all([
-      openai.chat.completions.create({
-        model: "o3-pro",
-        temperature: 1,
-        messages: [{ role: "user", content: basicInfoPrompt }]
+      genAI.models.generateContent({
+        model: "gemini-2.5-pro",
+        contents: [{ role: "user", parts: [{ text: basicInfoPrompt }] }]
       }),
-      openai.chat.completions.create({
-        model: "o3-pro", 
-        temperature: 1,
-        messages: [{ role: "user", content: lifeStoryPrompt }]
+      genAI.models.generateContent({
+        model: "gemini-2.5-pro", 
+        contents: [{ role: "user", parts: [{ text: lifeStoryPrompt }] }]
       }),
-      openai.chat.completions.create({
-        model: "o3-pro",
-        temperature: 1, 
-        messages: [{ role: "user", content: achievementsPrompt }]
+      genAI.models.generateContent({
+        model: "gemini-2.5-pro",
+        contents: [{ role: "user", parts: [{ text: achievementsPrompt }] }]
       })
     ]);
 
     // Combine the results into a coherent biography
-    const basicInfoContent = basicInfo.choices[0].message.content || "";
-    const lifeStoryContent = lifeStory.choices[0].message.content || "";
-    const achievementsContent = achievements.choices[0].message.content || "";
+    const basicInfoContent = basicInfo.text || "";
+    const lifeStoryContent = lifeStory.text || "";
+    const achievementsContent = achievements.text || "";
     
     // Final synthesis thread to create cohesive biography
     const synthesisPrompt = `Create a comprehensive, flowing biography for ${athleteName} using this factual information:
@@ -302,13 +377,26 @@ Format the final result as JSON:
   "referenceLinks": ["URL1", "URL2", ...]
 }`;
 
-    const synthesis = await openai.chat.completions.create({
-      model: "o3-pro",
-      temperature: 1,
-      messages: [{ role: "user", content: synthesisPrompt }]
+    const synthesis = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "object",
+          properties: {
+            name: { type: "string" },
+            bio: { type: "string" },
+            rank: { type: "string" },
+            achievements: { type: "array", items: { type: "string" } },
+            recentNews: { type: "string" },
+            referenceLinks: { type: "array", items: { type: "string" } }
+          }
+        }
+      },
+      contents: [{ role: "user", parts: [{ text: synthesisPrompt }] }]
     });
 
-    const result = JSON.parse(synthesis.choices[0].message.content || "{}");
+    const result = JSON.parse(synthesis.text || "{}");
     
     console.log(`✅ Threaded biography completed for ${athleteName}`);
     return {
@@ -341,108 +429,63 @@ export async function generateSpecificAnalysis(
   );
 
   const prompts = {
-    bio: `Today's date is ${currentDate}. Provide a comprehensive, up-to-date biography for ${athleteName}, the ${sport} athlete. Include recent achievements, career highlights, playing style, and current status as of ${currentDate}. ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference source and include this reference link in your response. ' : ''}Include reference links or source URLs where possible for verification.`,
+    bio: `Today's date is ${currentDate}. Provide a comprehensive, up-to-date biography for ${athleteName}, the ${sport} athlete. Include recent achievements, career highlights, playing style, and current status as of ${currentDate}. ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, reference https://www.taekwondodata.com/.' : ''}`,
     
-    rank: `Today's date is ${currentDate}. Analyze ${athleteName}'s current ranking and performance trends in ${sport} as of ${currentDate}. Include current world/national ranking, recent tournament results, and ranking progression over the past 2 years.`,
+    rank: `Today's date is ${currentDate}. Analyze the ranking performance and trajectory of ${athleteName} in ${sport}. Include current world ranking, peak ranking achieved, ranking trends over the past 2 years, and factors affecting their ranking position as of ${currentDate}. ${isEgyptianTaekwondo ? 'Reference https://www.taekwondodata.com/ for accurate ranking data.' : ''}`,
     
-    strengths: `Today's date is ${currentDate}. Identify and analyze the top 5 competitive strengths of ${athleteName} in ${sport} based on current performance data. Focus on technical skills, physical attributes, mental qualities, and tactical abilities that give them advantages.`,
+    strengths: `Today's date is ${currentDate}. Identify and analyze the key competitive strengths of ${athleteName} in ${sport}. Focus on technical skills, physical attributes, mental toughness, tactical awareness, and any sport-specific advantages they possess as of ${currentDate}. ${isEgyptianTaekwondo ? 'Use https://www.taekwondodata.com/ for performance data analysis.' : ''}`,
     
-    weaknesses: `Today's date is ${currentDate}. Analyze areas for improvement in ${athleteName}'s ${sport} performance based on recent competition data. Identify 3-4 specific weaknesses or challenges they face against top competition.`,
+    weaknesses: `Today's date is ${currentDate}. Analyze areas for improvement for ${athleteName} in ${sport}. Identify technical gaps, physical limitations, tactical weaknesses, or mental aspects that could be developed further based on recent performance as of ${currentDate}. ${isEgyptianTaekwondo ? 'Reference recent competition data from https://www.taekwondodata.com/.' : ''}`,
     
-    development: `Today's date is ${currentDate}. Create a comprehensive 12-week development plan for ${athleteName} in ${sport} based on current performance level. Include specific training phases, skill development focuses, and performance targets.`,
+    development: `Today's date is ${currentDate}. Create a comprehensive development plan for ${athleteName} in ${sport}. Include periodized training phases, skill development priorities, physical conditioning goals, and competition preparation strategies relevant to current performance level as of ${currentDate}. ${isEgyptianTaekwondo ? 'Consider competition calendar from https://www.taekwondodata.com/.' : ''}`,
     
-    nutrition: `Today's date is ${currentDate}. Design a sport-specific nutrition plan for ${athleteName} as a ${sport} athlete based on current sports science. Include meal timing, macronutrient distribution, hydration strategies, and competition-day nutrition.`,
+    nutrition: `Today's date is ${currentDate}. Develop a sport-specific nutrition plan for ${athleteName} in ${sport}. Consider the energy demands, competition schedule, training intensity, and recovery needs specific to their sport and competition level as of ${currentDate}. Include meal timing, macronutrient distribution, and hydration strategies.`,
     
-    beat: `Today's date is ${currentDate}. Analyze tactical strategies ${athleteName} uses to defeat different types of opponents in ${sport} based on recent matches. Include specific game plans, technical approaches, and psychological tactics.`,
+    beat: `Today's date is ${currentDate}. Analyze tactical strategies for competing against ${athleteName} in ${sport}. Identify their patterns, preferred techniques, tactical tendencies, and potential vulnerabilities that opponents could exploit based on recent competition performance as of ${currentDate}. ${isEgyptianTaekwondo ? 'Reference competition footage and results from https://www.taekwondodata.com/.' : ''}`,
     
-    video: `Today's date is ${currentDate}. Provide detailed technical analysis of ${athleteName}'s ${sport} performance based on recent competition footage and biomechanical analysis. Focus on technique, efficiency, and areas for improvement.`
+    video: `Today's date is ${currentDate}. Provide a comprehensive technical analysis of ${athleteName}'s performance in ${sport}. Analyze their technique, movement patterns, decision-making, and tactical execution based on available competition footage and performance data as of ${currentDate}. ${isEgyptianTaekwondo ? 'Use competition records from https://www.taekwondodata.com/ for context.' : ''}`
   };
 
   try {
-    const response = await openai.chat.completions.create({
-      model: "o3",
-      temperature: 1,
-      messages: [
+    const response = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      contents: [
         {
           role: "user",
-          content: `${prompts[analysisType]}\n\nSystem: You are a world-class ${sport} analyst with comprehensive knowledge of current performance data as of ${currentDate}. ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference source. ' : ''}Provide specific, actionable insights based on the latest information about this athlete. Use current data and recent performance metrics.`
+          parts: [{ text: `${prompts[analysisType]}\n\nSystem: You are a professional ${sport} analyst with expertise in current athlete performance as of ${currentDate}. ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference. ' : ''}Provide specific, actionable insights based on current data and known performance characteristics. Avoid generic advice and focus on sport-specific, athlete-specific analysis.` }]
         }
       ]
     });
 
-    return {
-      content: response.choices[0].message.content || "Analysis unavailable.",
-      timestamp: new Date().toISOString(),
-      analysisType
-    };
+    return response.text || "Analysis not available";
   } catch (error) {
-    console.error(`Error generating ${analysisType} analysis for ${athleteName}:`, error);
-    return {
-      content: `Unable to generate ${analysisType} analysis at this time.`,
-      timestamp: new Date().toISOString(),
-      analysisType
-    };
+    console.error(`❌ Error generating ${analysisType} analysis for ${athleteName}:`, error);
+    return "Analysis temporarily unavailable";
   }
 }
 
-// Search for athlete profile image using TheSportsDB API
-export async function searchAthleteImage(athleteName: string, sport: string): Promise<string | null> {
+// Search for athlete images (re-exported from previous implementation)
+export async function searchAthleteImage(athleteName: string): Promise<string | null> {
   try {
-    // First try searching by athlete name in TheSportsDB
+    // Search TheSportsDB for athlete images
     const searchUrl = `https://www.thesportsdb.com/api/v1/json/3/searchplayers.php?p=${encodeURIComponent(athleteName)}`;
+    console.log(`Searching for profile image for ${athleteName}...`);
+    
     const response = await fetch(searchUrl);
-    
-    if (!response.ok) {
-      console.log(`TheSportsDB search failed for ${athleteName}`);
-      return null;
-    }
-    
     const data = await response.json();
     
     if (data.player && data.player.length > 0) {
-      // Find the best match - exact name match preferred
-      const exactMatch = data.player.find((player: any) => 
-        player.strPlayer?.toLowerCase() === athleteName.toLowerCase()
-      );
-      
-      const player = exactMatch || data.player[0];
-      
-      // Validate that the sport matches or is related (skip if completely different sport)
-      const playerSport = player.strSport?.toLowerCase() || '';
-      const requestedSport = sport.toLowerCase();
-      
-      // Reject if the player is clearly from a different sport (especially basketball/football when we want other sports)
-      const incompatibleSports = ['basketball', 'football', 'soccer', 'american football', 'baseball'];
-      const isIncompatibleSport = incompatibleSports.some(incompatible => 
-        playerSport.includes(incompatible) && !requestedSport.includes(incompatible)
-      );
-      
-      if (isIncompatibleSport) {
-        console.log(`Rejecting ${player.strPlayer} image - sport mismatch: ${playerSport} vs ${requestedSport}`);
-        return null;
-      }
-      
-      // Return the player image if available and sport-appropriate
+      const player = data.player[0];
       if (player.strThumb) {
         console.log(`Found profile image for ${athleteName}: ${player.strThumb}`);
         return player.strThumb;
-      }
-      
-      if (player.strCutout) {
-        console.log(`Found cutout image for ${athleteName}: ${player.strCutout}`);
-        return player.strCutout;
-      }
-      
-      if (player.strRender) {
-        console.log(`Found render image for ${athleteName}: ${player.strRender}`);
-        return player.strRender;
       }
     }
     
     console.log(`No profile image found for ${athleteName} in TheSportsDB`);
     return null;
   } catch (error) {
-    console.error(`Error searching for ${athleteName} image:`, error);
+    console.error(`Error searching for athlete image:`, error);
     return null;
   }
 }
