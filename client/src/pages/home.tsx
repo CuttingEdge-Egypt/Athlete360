@@ -503,6 +503,7 @@ export default function Home() {
           type="bio"
           data={bioData}
           athleteName={selectedAthlete.name}
+          athleteId={selectedAthlete.id}
           createdAt={new Date().toISOString()}
         />
       )}

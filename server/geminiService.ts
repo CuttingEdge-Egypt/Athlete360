@@ -400,14 +400,24 @@ export async function searchAthleteImage(athleteName: string): Promise<string | 
     
     if (data.player && data.player.length > 0) {
       const player = data.player[0];
-      // Strict validation to ensure we have a real image URL, not a placeholder
+      // Very strict validation to ensure we have the actual athlete's image
+      const playerNameMatch = player.strPlayer && 
+        athleteName.toLowerCase().split(' ').some(namePart => 
+          namePart.length > 2 && player.strPlayer.toLowerCase().includes(namePart)
+        );
+      
       if (player.strThumb && 
           player.strThumb.startsWith('http') && 
           !player.strThumb.includes('placeholder') &&
           !player.strThumb.includes('default') &&
-          player.strThumb.length > 20) {
-        console.log(`Found profile image for ${athleteName}: ${player.strThumb}`);
+          !player.strThumb.includes('generic') &&
+          !player.strThumb.includes('anonymous') &&
+          player.strThumb.length > 20 &&
+          playerNameMatch) {
+        console.log(`Found verified profile image for ${athleteName}: ${player.strThumb}`);
         return player.strThumb;
+      } else {
+        console.log(`Image found but failed validation for ${athleteName} - Name: ${player.strPlayer}, Image: ${player.strThumb}`);
       }
     }
     
