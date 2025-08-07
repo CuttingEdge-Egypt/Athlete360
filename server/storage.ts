@@ -120,7 +120,6 @@ export class DatabaseStorage implements IStorage {
     if (!currentUser) throw new Error("User not found");
     
     const newTokens = Math.max(0, (currentUser.tokens || 0) - amount);
-    console.log(`Deducting ${amount} tokens from user ${userId}: ${currentUser.tokens} → ${newTokens}`);
     return this.updateUserTokens(userId, newTokens);
   }
 
@@ -128,18 +127,8 @@ export class DatabaseStorage implements IStorage {
     const user = await this.getUser(userId);
     if (!user) throw new Error("User not found");
     
-    const currentTokens = user.tokens || 0;
-    let currentTotalPurchased = user.totalTokensPurchased || 0;
-    
-    // If this is the first time setting totalTokensPurchased, include existing tokens
-    if (currentTotalPurchased === 0 && currentTokens > 0) {
-      currentTotalPurchased = currentTokens;
-    }
-    
-    // Add new tokens to current balance
-    const newTokens = currentTokens + tokensToAdd;
-    // Add new tokens to total purchased (existing tokens + new purchase)
-    const newTotalPurchased = currentTotalPurchased + tokensToAdd;
+    const newTokens = (user.tokens || 0) + tokensToAdd;
+    const newTotalPurchased = (user.totalTokensPurchased || 0) + tokensToAdd;
     
     const [updatedUser] = await db
       .update(users)
