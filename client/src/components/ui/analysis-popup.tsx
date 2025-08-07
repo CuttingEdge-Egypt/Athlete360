@@ -266,17 +266,22 @@ export function AnalysisPopup({
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-white">Athletic Profile</CardTitle>
-                  {type === 'bio' && athleteId && (
+                  {(type === 'bio' || type === 'biography') && athleteId ? (
                     <Button
                       onClick={() => refreshBioMutation.mutate()}
                       disabled={refreshBioMutation.isPending}
                       size="sm"
                       variant="outline"
-                      className="bg-athlete-accent hover:bg-athlete-accent/80 text-white border-athlete-accent"
+                      className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600 flex items-center gap-2"
+                      data-testid="refresh-bio-button"
                     >
-                      <RefreshCw className={`w-4 h-4 mr-2 ${refreshBioMutation.isPending ? 'animate-spin' : ''}`} />
-                      Refresh Bio (20 tokens)
+                      <RefreshCw className={`w-4 h-4 ${refreshBioMutation.isPending ? 'animate-spin' : ''}`} />
+                      {refreshBioMutation.isPending ? 'Refreshing...' : 'Refresh Bio (20 tokens)'}
                     </Button>
+                  ) : (
+                    <div className="text-xs text-gray-500">
+                      Debug: type={type}, athleteId={athleteId}
+                    </div>
                   )}
                 </div>
               </CardHeader>
