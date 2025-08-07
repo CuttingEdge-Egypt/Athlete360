@@ -9,9 +9,11 @@ import { RankChart } from "./rank-chart";
 import { 
   Download, Share2, User, Trophy, Star, AlertTriangle, Calendar, 
   Apple, Swords, Video, Clock, Target, TrendingUp, Award,
-  Heart, Zap, Shield, Brain, Flame, ChevronRight
+  Heart, Zap, Shield, Brain, Flame, ChevronRight, RefreshCw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -21,9 +23,11 @@ interface AnalysisPopupProps {
   type: string;
   data: any;
   athleteName: string;
+  athleteId?: string;
   createdAt?: string;
   shared?: boolean;
   shareUrl?: string;
+  onRefresh?: () => void;
 }
 
 export function AnalysisPopup({ 
@@ -32,12 +36,39 @@ export function AnalysisPopup({
   type, 
   data, 
   athleteName,
+  athleteId,
   createdAt, 
   shared, 
-  shareUrl 
+  shareUrl,
+  onRefresh 
 }: AnalysisPopupProps) {
   const { toast } = useToast();
   const [isExporting, setIsExporting] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Refresh bio mutation
+  const refreshBioMutation = useMutation({
+    mutationFn: async () => {
+      if (!athleteId) throw new Error("Athlete ID is required");
+      return apiRequest("POST", `/api/athletes/${athleteId}/refresh-bio`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Biography Refreshed",
+        description: "Latest athlete information has been updated successfully.",
+      });
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/athletes"] });
+      if (onRefresh) onRefresh();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Refresh Failed",
+        description: error.message || "Failed to refresh biography. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -233,7 +264,21 @@ export function AnalysisPopup({
 
             <Card className="bg-athlete-gray-800 border-gray-700">
               <CardHeader>
-                <CardTitle className="text-white">Athletic Profile</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-white">Athletic Profile</CardTitle>
+                  {type === 'bio' && athleteId && (
+                    <Button
+                      onClick={() => refreshBioMutation.mutate()}
+                      disabled={refreshBioMutation.isPending}
+                      size="sm"
+                      variant="outline"
+                      className="bg-athlete-accent hover:bg-athlete-accent/80 text-white border-athlete-accent"
+                    >
+                      <RefreshCw className={`w-4 h-4 mr-2 ${refreshBioMutation.isPending ? 'animate-spin' : ''}`} />
+                      Refresh Bio (20 tokens)
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-300 leading-relaxed">

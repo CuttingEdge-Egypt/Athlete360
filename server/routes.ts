@@ -383,6 +383,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Refresh bio endpoint with 20 token cost
+  app.post('/api/athletes/:athleteId/refresh-bio', isAuthenticated, async (req: any, res) => {
+    const tokenCost = 20;
+    try {
+      const userId = req.user.claims.sub;
+      const athleteId = req.params.athleteId;
+
+      // Check if user has enough tokens
+      const user = await storage.getUser(userId);
+      if (!user || (user.tokens || 0) < tokenCost) {
+        return res.status(402).json({ message: "Insufficient tokens" });
+      }
+
+      // Deduct tokens
+      console.log(`DEDUCTING ${tokenCost} tokens from user ${userId}: ${user.tokens} → ${user.tokens - tokenCost}`);
+      console.log(`UPDATING user ${userId} tokens to ${user.tokens - tokenCost}`);
+      await storage.deductTokens(userId, tokenCost);
+      console.log(`UPDATE COMPLETE: User tokens are now ${user.tokens - tokenCost}`);
+      console.log(`DEDUCTION RESULT: User now has ${user.tokens - tokenCost} tokens`);
+
+      // Create transaction
+      await storage.createTransaction({
+        userId,
+        action: "Refresh Biography",
+        tokensDeducted: tokenCost,
+        athleteId,
+        serviceType: "refresh-bio"
+      });
+
+      // Get athlete data
+      const athlete = await storage.getAthleteById(athleteId);
+      if (!athlete) {
+        return res.status(404).json({ message: "Athlete not found" });
+      }
+
+      // Get sport info for context
+      const sport = await storage.getSportById(athlete.sportId);
+      const sportName = sport?.name || "Unknown Sport";
+      
+      // Force refresh bio using enhanced Gemini with Google Search-aware prompting
+      console.log(`Refreshing bio for ${athlete.name} using enhanced Gemini 2.5 Pro`);
+      
+      try {
+        const refreshedBioData = await getAthleteProfile(athlete.name, sportName, athlete.country || "Unknown");
+        
+        // Update athlete bio in database with fresh AI content
+        await storage.updateAthlete(athleteId, { 
+          bio: refreshedBioData.bio,
+          rank: typeof refreshedBioData.rank === 'number' ? refreshedBioData.rank : athlete.rank,
+          updatedAt: new Date()
+        });
+        
+        const refreshedAnalysis = {
+          name: refreshedBioData.name,
+          bio: refreshedBioData.bio,
+          rank: refreshedBioData.rank,
+          profileImageUrl: athlete.profileImageUrl,
+          achievements: refreshedBioData.achievements || [],
+          personalInfo: {
+            sport: sportName,
+            status: "Active Professional", 
+            analysisDate: new Date().toLocaleDateString(),
+            lastUpdated: "Refreshed with enhanced Gemini 2.5 Pro analysis",
+            recentNews: refreshedBioData.recentNews
+          },
+          referenceLinks: refreshedBioData.referenceLinks || []
+        };
+
+        await storage.createAnalysisLog({
+          userId,
+          athleteId,
+          serviceType: "refresh-bio",
+          resultData: refreshedAnalysis
+        });
+
+        res.json({
+          success: true,
+          message: "Biography refreshed successfully",
+          data: refreshedAnalysis
+        });
+        
+      } catch (aiError) {
+        console.error(`Error refreshing bio for ${athlete.name}:`, aiError);
+        res.status(500).json({ message: "Failed to refresh biography using AI" });
+      }
+      
+    } catch (error) {
+      console.error("Error refreshing athlete bio:", error);
+      res.status(500).json({ message: "Failed to refresh athlete biography" });
+    }
+  });
+
   // Analysis service routes
   app.post('/api/analysis/:athleteId/bio', isAuthenticated, async (req: any, res) => {
     const tokenCost = 50;

@@ -227,6 +227,7 @@ export function HistoryDropdown() {
           type={selectedHistoryItem.serviceType}
           data={selectedHistoryItem.resultData}
           athleteName={selectedHistoryItem.athleteName || "Unknown Athlete"}
+          athleteId={selectedHistoryItem.athleteId}
           createdAt={selectedHistoryItem.createdAt}
         />
       )}
