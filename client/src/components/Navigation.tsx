@@ -35,10 +35,10 @@ export function Navigation() {
           >
             <Coins className="text-athlete-warning" size={20} />
             <div className="flex flex-col items-center">
-              <span className="font-semibold text-white">{user?.tokens || 0} tokens</span>
+              <span className="font-semibold text-white">{user?.tokens || 0}</span>
               {user?.totalTokensPurchased && (
                 <span className="text-xs text-gray-400">
-                  {((user.totalTokensPurchased - (user?.tokens || 0)))}/{user.totalTokensPurchased} used
+                  /{user.totalTokensPurchased} tokens
                 </span>
               )}
             </div>
@@ -68,7 +68,7 @@ export function Navigation() {
               </div>
               {user?.totalTokensPurchased && (
                 <span className="text-xs text-gray-400">
-                  {((user.totalTokensPurchased - (user?.tokens || 0)))}/{user.totalTokensPurchased}
+                  /{user.totalTokensPurchased}
                 </span>
               )}
             </Badge>
