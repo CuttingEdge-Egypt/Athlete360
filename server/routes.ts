@@ -5,7 +5,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, getDetailedAnalysis, generateSpecificAnalysis, searchAthleteImage, generateThreadedBioAnalysis } from "./geminiService";
+import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage } from "./geminiService";
 import { GoogleGenAI } from "@google/genai";
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY || "" });
@@ -108,7 +108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Search for athlete profile image
       console.log(`Searching for profile image for ${name}...`);
-      const profileImageUrl = await searchAthleteImage(name, sport.name);
+      const profileImageUrl = await searchAthleteImage(name);
 
       // Create athlete in database
       // Handle rank - convert to number if possible, otherwise store as null
@@ -125,7 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bio: aiProfile.bio || `Professional ${sport.name} athlete`,
         rank: rankValue,
         country: aiProfile.country || null,
-        profileImageUrl: profileImageUrl,
+        profileImageUrl: profileImageUrl || null,
         achievements: aiProfile.achievements || []
       };
 

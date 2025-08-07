@@ -42,7 +42,9 @@ export async function getAthleteProfile(name: string, sport: string, nationality
     : '';
 
   const prompt = `Today's date is ${currentDate}. Tell me who is ${name} the ${nationalityContext}athlete, that plays ${sport}.
-Give me a full biography about the athlete, their achievements, and their current ranking. Also include the most recent competition they participated in. 
+Give me a full biography about the athlete, their achievements, and their current ranking. Also include the most recent competition they participated in.
+
+Make sure you give a full long bio about the athlete.
 Format as JSON with these exact keys:
 {
   "name": "Full official name",
