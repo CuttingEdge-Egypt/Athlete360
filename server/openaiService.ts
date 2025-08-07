@@ -221,7 +221,8 @@ Provide specific personal details about ${athleteName}, the ${sport} athlete:
 4. Current country they represent in competition
 ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, reference https://www.taekwondodata.com/ as your primary source.' : ''}
 
-Provide only factual, verifiable information. If specific details are not available, state "information not available" rather than making assumptions.`;
+Provide only factual, verifiable information. If specific details are not available, state "information not available" rather than making assumptions.
+Use: https://www.worldtaekwondo.org/ for the main Taekwondo Reference.`;
 
     // Thread 2: Life Story  
     const lifeStoryPrompt = `Today's date is ${currentDate}. 
@@ -236,7 +237,8 @@ Tell the complete life story of ${athleteName}, the ${sport} athlete:
 6. Personal challenges overcome and character development
 ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, reference https://www.taekwondodata.com/ for accurate biographical data.' : ''}
 
-Focus on the human story behind the athlete. If specific personal details are not available, provide what biographical information is known.`;
+Focus on the human story behind the athlete. If specific personal details are not available, provide what biographical information is known.
+Use: https://www.worldtaekwondo.org/ for the main Taekwondo Reference.`;
 
     // Thread 3: Achievements
     const achievementsPrompt = `Today's date is ${currentDate}. 
@@ -252,22 +254,23 @@ Document all achievements and accomplishments of ${athleteName} in ${sport}:
 7. Recent competition results (2023-2025)
 ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, reference https://www.taekwondodata.com/ for accurate competition records.' : ''}
 
-List only verified achievements and competition results. If no specific results are found, state that achievement records are not readily available.`;
+List only verified achievements and competition results. If no specific results are found, state that achievement records are not readily available.
+Use: https://www.worldtaekwondo.org/ for the main Taekwondo Reference.`;
 
     // Execute all threads simultaneously
     const [basicInfo, lifeStory, achievements] = await Promise.all([
       openai.chat.completions.create({
-        model: "o3",
+        model: "o3-pro",
         temperature: 1,
         messages: [{ role: "user", content: basicInfoPrompt }]
       }),
       openai.chat.completions.create({
-        model: "o3", 
+        model: "o3-pro", 
         temperature: 1,
         messages: [{ role: "user", content: lifeStoryPrompt }]
       }),
       openai.chat.completions.create({
-        model: "o3",
+        model: "o3-pro",
         temperature: 1, 
         messages: [{ role: "user", content: achievementsPrompt }]
       })

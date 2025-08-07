@@ -73,6 +73,9 @@ export interface IStorage {
 
   // Transaction operations
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
+  
+  // History operations
+  getUserHistory(userId: string): Promise<any[]>;
   getUserTransactions(userId: string): Promise<Transaction[]>;
 
   // Analysis logs
@@ -313,6 +316,58 @@ export class DatabaseStorage implements IStorage {
   async getAnalysisLogById(id: string): Promise<AnalysisLog | undefined> {
     const [log] = await db.select().from(analysisLogs).where(eq(analysisLogs.id, id));
     return log;
+  }
+
+  async getUserHistory(userId: string): Promise<any[]> {
+    const [transactionResults, logResults] = await Promise.all([
+      // Get transactions with athlete info
+      db
+        .select({
+          id: transactions.id,
+          action: transactions.action,
+          serviceType: transactions.serviceType,
+          tokensDeducted: transactions.tokensDeducted,
+          athleteId: transactions.athleteId,
+          athleteName: athletes.name,
+          athleteSport: sports.name,
+          createdAt: transactions.createdAt,
+          resultData: sql`NULL`.as("resultData")
+        })
+        .from(transactions)
+        .leftJoin(athletes, eq(transactions.athleteId, athletes.id))
+        .leftJoin(sports, eq(athletes.sportId, sports.id))
+        .where(eq(transactions.userId, userId))
+        .orderBy(desc(transactions.createdAt))
+        .limit(50),
+        
+      // Get analysis logs with athlete info
+      db
+        .select({
+          id: analysisLogs.id,
+          action: sql`'analysis'`.as("action"),
+          serviceType: analysisLogs.serviceType,
+          tokensDeducted: sql`50`.as("tokensDeducted"), // Default token cost
+          athleteId: analysisLogs.athleteId,
+          athleteName: athletes.name,
+          athleteSport: sports.name,
+          createdAt: analysisLogs.createdAt,
+          resultData: analysisLogs.resultData
+        })
+        .from(analysisLogs)
+        .leftJoin(athletes, eq(analysisLogs.athleteId, athletes.id))
+        .leftJoin(sports, eq(athletes.sportId, sports.id))
+        .where(eq(analysisLogs.userId, userId))
+        .orderBy(desc(analysisLogs.createdAt))
+        .limit(50)
+    ]);
+
+    // Combine and sort by date
+    const combined = [...transactionResults, ...logResults];
+    return combined.sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA;
+    }).slice(0, 50);
   }
 }
 
