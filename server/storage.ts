@@ -128,11 +128,16 @@ export class DatabaseStorage implements IStorage {
     if (!user) throw new Error("User not found");
     
     const currentTokens = user.tokens || 0;
-    const currentTotalPurchased = user.totalTokensPurchased || 0;
+    let currentTotalPurchased = user.totalTokensPurchased || 0;
+    
+    // If this is the first time setting totalTokensPurchased, include existing tokens
+    if (currentTotalPurchased === 0 && currentTokens > 0) {
+      currentTotalPurchased = currentTokens;
+    }
     
     // Add new tokens to current balance
     const newTokens = currentTokens + tokensToAdd;
-    // Add new tokens to total purchased (this grows with every purchase)
+    // Add new tokens to total purchased (existing tokens + new purchase)
     const newTotalPurchased = currentTotalPurchased + tokensToAdd;
     
     const [updatedUser] = await db
