@@ -33,6 +33,7 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   tokens: integer("tokens").default(0),
+  totalTokensPurchased: integer("total_tokens_purchased").default(1000), // Track total tokens ever purchased
   subscriptionStatus: varchar("subscription_status").default("inactive"),
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),

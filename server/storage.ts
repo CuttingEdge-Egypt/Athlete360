@@ -123,6 +123,26 @@ export class DatabaseStorage implements IStorage {
     return this.updateUserTokens(userId, newTokens);
   }
 
+  async addTokensPurchase(userId: string, tokensToAdd: number): Promise<User> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error("User not found");
+    
+    const newTokens = (user.tokens || 0) + tokensToAdd;
+    const newTotalPurchased = (user.totalTokensPurchased || 1000) + tokensToAdd;
+    
+    const [updatedUser] = await db
+      .update(users)
+      .set({ 
+        tokens: newTokens,
+        totalTokensPurchased: newTotalPurchased,
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    return updatedUser;
+  }
+
   // Sports operations
   async getAllSports(): Promise<Sport[]> {
     return db.select().from(sports);

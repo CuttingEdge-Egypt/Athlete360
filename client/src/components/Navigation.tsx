@@ -34,8 +34,14 @@ export function Navigation() {
             className="flex items-center space-x-2 bg-athlete-gray-800 px-4 py-2 rounded-full"
           >
             <Coins className="text-athlete-warning" size={20} />
-            <span className="font-semibold text-white">{user?.tokens || 0}</span>
-            <span className="text-sm text-gray-400">tokens</span>
+            <div className="flex flex-col items-center">
+              <span className="font-semibold text-white">{user?.tokens || 0} tokens</span>
+              {user?.totalTokensPurchased && (
+                <span className="text-xs text-gray-400">
+                  {((user.totalTokensPurchased - (user?.tokens || 0)))}/{user.totalTokensPurchased} used
+                </span>
+              )}
+            </div>
           </div>
           
           <Link href="/subscribe">
@@ -54,10 +60,17 @@ export function Navigation() {
           <div className="md:hidden">
             <Badge 
               variant="secondary" 
-              className="bg-athlete-gray-800 text-athlete-warning"
+              className="bg-athlete-gray-800 text-athlete-warning flex flex-col py-2"
             >
-              <Coins className="mr-1" size={14} />
-              {user?.tokens || 0}
+              <div className="flex items-center">
+                <Coins className="mr-1" size={14} />
+                {user?.tokens || 0}
+              </div>
+              {user?.totalTokensPurchased && (
+                <span className="text-xs text-gray-400">
+                  {((user.totalTokensPurchased - (user?.tokens || 0)))}/{user.totalTokensPurchased}
+                </span>
+              )}
             </Badge>
           </div>
 

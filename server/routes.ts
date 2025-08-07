@@ -1364,8 +1364,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      const newTokens = (user.tokens || 0) + tokensToAdd;
-      await storage.updateUserTokens(userId, newTokens);
+      await storage.addTokensPurchase(userId, tokensToAdd);
 
       // Create transaction record
       await storage.createTransaction({
@@ -1375,9 +1374,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         serviceType: "purchase"
       });
 
+      const updatedUser = await storage.getUser(userId);
       res.json({ 
         message: "Tokens purchased successfully", 
-        tokens: newTokens,
+        tokens: updatedUser?.tokens || 0,
+        totalPurchased: updatedUser?.totalTokensPurchased || 0,
         purchased: tokensToAdd 
       });
     } catch (error) {
