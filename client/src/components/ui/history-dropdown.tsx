@@ -115,11 +115,54 @@ export function HistoryDropdown() {
           className="w-96 max-h-96"
           data-testid="dropdown-history"
         >
-          <DropdownMenuLabel className="flex items-center gap-2">
-            <History className="h-4 w-4" />
-            Analysis History
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
+          <div className="flex items-center justify-between px-3 py-2 border-b">
+            <div className="flex items-center gap-2 font-semibold text-sm">
+              <History className="h-4 w-4" />
+              Analysis History
+            </div>
+            {historyItems.length > 0 && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    data-testid="button-clear-history"
+                  >
+                    <Trash2 className="h-3 w-3 mr-1" />
+                    Clear
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Clear All History?</AlertDialogTitle>
+                    <AlertDialogDescription className="space-y-2">
+                      <p>This will permanently delete all your analysis history, including:</p>
+                      <ul className="list-disc list-inside space-y-1 text-sm">
+                        <li>All athlete analysis records</li>
+                        <li>Token transaction history</li>
+                        <li>Service usage logs</li>
+                      </ul>
+                      <p className="font-medium text-destructive">
+                        This action cannot be undone.
+                      </p>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={() => clearHistoryMutation.mutate()}
+                      disabled={clearHistoryMutation.isPending}
+                      className="bg-destructive hover:bg-destructive/90"
+                      data-testid="button-confirm-clear-history"
+                    >
+                      {clearHistoryMutation.isPending ? "Clearing..." : "Clear History"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
           
           {isLoading ? (
             <div className="p-4 text-center text-muted-foreground">
@@ -167,55 +210,6 @@ export function HistoryDropdown() {
                 );
               })}
             </ScrollArea>
-          )}
-          
-          {/* Clear History Button */}
-          {historyItems.length > 0 && (
-            <>
-              <DropdownMenuSeparator />
-              <div className="p-2">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button 
-                      variant="destructive" 
-                      size="sm" 
-                      className="w-full"
-                      data-testid="button-clear-history"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Clear History
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Clear All History?</AlertDialogTitle>
-                      <AlertDialogDescription className="space-y-2">
-                        <p>This will permanently delete all your analysis history, including:</p>
-                        <ul className="list-disc list-inside space-y-1 text-sm">
-                          <li>All athlete analysis records</li>
-                          <li>Token transaction history</li>
-                          <li>Service usage logs</li>
-                        </ul>
-                        <p className="font-medium text-destructive">
-                          This action cannot be undone.
-                        </p>
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction 
-                        onClick={() => clearHistoryMutation.mutate()}
-                        disabled={clearHistoryMutation.isPending}
-                        className="bg-destructive hover:bg-destructive/90"
-                        data-testid="button-confirm-clear-history"
-                      >
-                        {clearHistoryMutation.isPending ? "Clearing..." : "Clear History"}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            </>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
