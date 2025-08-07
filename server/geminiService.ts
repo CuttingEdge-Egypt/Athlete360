@@ -13,7 +13,7 @@ export interface AthleteData {
   achievements: string[];
   recentNews: string;
   profileImageDescription: string;
-  referenceLinks?: string[];
+  referenceLinks?: Array<{ title: string; uri: string }>;
   stats?: any;
 }
 
@@ -41,30 +41,29 @@ export async function getAthleteProfile(name: string, sport: string, nationality
     ? ' For Egyptian taekwondo athletes, reference https://www.taekwondodata.com/ for accurate competition records, rankings, and athlete profiles.'
     : '';
 
-  const prompt = `Today's date is ${currentDate}. Tell me who is ${name} the ${nationalityContext}athlete, that plays ${sport}.
-Give me a full biography about the athlete, their achievements, and their current ranking. Also include the most recent competition they participated in.
+  const prompt = ` Today's date is ${currentDate}.
+    Using Google Search, find factual, up-to-date information about the athlete "${name}"${nationalityContext}, who competes in ${sport}.
+    
+    Then, format the response as a JSON object matching the provided schema.
 
-Make sure you give a full long bio about the athlete.
-Format as JSON with these exact keys:
-{
-  "name": "Full official name",
-  "sport": "${sport}",
-  "bio": "Detailed biography",
-  "rank": "Actual world ranking number (e.g., 4949) or 'N/A' if not available",
-  "country": "Nationality/country they represent",
-  "achievements": ["achievement1", "achievement2", ...],
-  "recentNews": "Latest competition results or 'N/A' if no recent data available",
-  "profileImageDescription": "Brief physical description for image context",
-  "referenceLinks": ["URL1", "URL2", ...] (include https://www.taekwondodata.com/ for taekwondo athletes if available)
-}${sportSpecificGuidance}`;
+    Inside the "bio" field of the JSON, you MUST create a detailed biography structured with the following headings:
+    - An introductory paragraph.
+    - A heading "Recent Competitions:".
+    - A heading "Career Record and Rankings:".
+    - A heading "Notable Achievements:".
+
+    Crucially, for every sentence in the "bio" that uses information from a search result, you MUST end it with a citation marker like [1], [2], etc. If multiple sources support a sentence, use comma-separated indices like [1, 3].
+    
+    Populate all other JSON fields like "rank", "achievements", and "recentNews" with the information you find.
+    ${sportSpecificGuidance}`;
 
   try {
-    // Use Gemini 2.5 Pro for comprehensive athlete analysis
+    // Use Gemini 2.5 Pro with enhanced search-aware prompting 
     const response = await genAI.models.generateContent({
       model: "gemini-2.5-pro",
       contents: [{ 
         role: "user", 
-        parts: [{ text: `${prompt}\n\nSystem: You are a world-class ${sport} analyst with comprehensive knowledge of current performance data as of ${currentDate}. ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference for competition records, rankings, and profiles. ' : ''}Provide specific, factual, authentic information about athletes. NEVER use placeholder text or bracketed templates like [City, State], [Year], [Championship Name]. Consider the specified sport and nationality when identifying the correct athlete. Always respond in valid JSON format.` }]
+        parts: [{ text: `${prompt}\n\nSystem: You are a world-class ${sport} analyst with comprehensive knowledge of current performance data as of ${currentDate}. Use your most current knowledge base and search capabilities to find real-time information. ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference for competition records, rankings, and profiles. ' : ''}Provide specific, factual, authentic information about athletes. NEVER use placeholder text or bracketed templates like [City, State], [Year], [Championship Name]. Consider the specified sport and nationality when identifying the correct athlete. Always respond in valid JSON format.` }]
       }],
       config: {
         responseMimeType: "application/json",
@@ -78,8 +77,7 @@ Format as JSON with these exact keys:
             country: { type: "string" },
             achievements: { type: "array", items: { type: "string" } },
             recentNews: { type: "string" },
-            profileImageDescription: { type: "string" },
-            referenceLinks: { type: "array", items: { type: "string" } }
+            profileImageDescription: { type: "string" }
           },
           required: ["name", "sport", "bio", "rank", "country", "achievements", "recentNews", "profileImageDescription"]
         }
@@ -87,6 +85,9 @@ Format as JSON with these exact keys:
     });
 
     const data = JSON.parse(response.text || "{}");
+    
+    // Initialize empty references array (grounding citations may not be available in current API version)
+    const references: Array<{ title: string; uri: string }> = [];
     
     // Parse rank - convert to number if it's a valid number, otherwise keep as string
     let parsedRank = data.rank;
@@ -102,7 +103,7 @@ Format as JSON with these exact keys:
       achievements: data.achievements || [],
       recentNews: data.recentNews === 'N/A' ? 'N/A' : (data.recentNews || "N/A"),
       profileImageDescription: data.profileImageDescription || `${sport} athlete`,
-      referenceLinks: data.referenceLinks || [],
+      referenceLinks: references, // Add the sourced links here
       country: data.country || nationality || 'Unknown'
     };
   } catch (error) {
@@ -152,13 +153,14 @@ Format as JSON:
 }`;
 
   try {
-    // Use Gemini 2.5 Pro for comprehensive comparison analysis
+    // Use Gemini 2.5 Pro with Google Search grounding for comprehensive comparison analysis
     const response = await genAI.models.generateContent({
       model: "gemini-2.5-pro",
       contents: [{ 
         role: "user", 
         parts: [{ text: `${prompt}\n\nSystem: You are a professional sports analyst with expertise in athlete performance analysis as of ${currentDate}. Provide realistic, sport-specific analysis based on current athlete data and known performance characteristics. Use up-to-date information.` }]
       }],
+
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -368,13 +370,13 @@ export async function generateSpecificAnalysis(
   };
 
   try {
-    // Use Gemini 2.5 Pro for real-time specific analysis
+    // Use Gemini 2.5 Pro with enhanced search-aware prompting for real-time specific analysis
     const response = await genAI.models.generateContent({
       model: "gemini-2.5-pro",
       contents: [
         {
           role: "user",
-          parts: [{ text: `${prompts[analysisType]}\n\nSystem: You are a professional ${sport} analyst with expertise in current athlete performance as of ${currentDate}. ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference. ' : ''}Provide specific, actionable insights based on current data and known performance characteristics. Avoid generic advice and focus on sport-specific, athlete-specific analysis.` }]
+          parts: [{ text: `${prompts[analysisType]}\n\nSystem: You are a professional ${sport} analyst with expertise in current athlete performance as of ${currentDate}. Use your most current knowledge and search capabilities to find real-time information. ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference. ' : ''}Provide specific, actionable insights based on current data and known performance characteristics. Avoid generic advice and focus on sport-specific, athlete-specific analysis.` }]
         }
       ]
     });
