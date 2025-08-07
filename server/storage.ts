@@ -120,6 +120,7 @@ export class DatabaseStorage implements IStorage {
     if (!currentUser) throw new Error("User not found");
     
     const newTokens = Math.max(0, (currentUser.tokens || 0) - amount);
+    console.log(`Deducting ${amount} tokens from user ${userId}: ${currentUser.tokens} → ${newTokens}`);
     return this.updateUserTokens(userId, newTokens);
   }
 
