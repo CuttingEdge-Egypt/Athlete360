@@ -107,11 +107,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUserTokens(userId: string, tokens: number): Promise<User> {
+    console.log(`UPDATING user ${userId} tokens to ${tokens}`);
     const [user] = await db
       .update(users)
       .set({ tokens, updatedAt: new Date() })
       .where(eq(users.id, userId))
       .returning();
+    console.log(`UPDATE COMPLETE: User tokens are now ${user?.tokens}`);
+    if (!user) {
+      throw new Error(`Failed to update tokens for user ${userId}`);
+    }
     return user;
   }
 
