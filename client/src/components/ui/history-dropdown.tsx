@@ -1,13 +1,16 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AnalysisPopup } from "@/components/ui/analysis-popup";
 import { AthleteComparison } from "@/components/ui/athlete-comparison";
-import { History, Clock, User, TrendingUp, Target, Utensils, Zap, Video, GitCompare, Coins } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { History, Clock, User, TrendingUp, Target, Utensils, Zap, Video, GitCompare, Coins, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface HistoryItem {
   id: string;
@@ -49,9 +52,31 @@ export function HistoryDropdown() {
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<HistoryItem | null>(null);
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
   const [showComparisonPopup, setShowComparisonPopup] = useState(false);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: historyItems = [], isLoading } = useQuery<HistoryItem[]>({
     queryKey: ["/api/user-history"],
+  });
+
+  const clearHistoryMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("DELETE", "/api/user-history");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user-history"] });
+      toast({
+        title: "History Cleared",
+        description: "All your analysis history has been permanently deleted",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to clear history. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   const handleHistoryItemClick = (item: HistoryItem) => {
@@ -142,6 +167,55 @@ export function HistoryDropdown() {
                 );
               })}
             </ScrollArea>
+          )}
+          
+          {/* Clear History Button */}
+          {historyItems.length > 0 && (
+            <>
+              <DropdownMenuSeparator />
+              <div className="p-2">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="destructive" 
+                      size="sm" 
+                      className="w-full"
+                      data-testid="button-clear-history"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Clear History
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Clear All History?</AlertDialogTitle>
+                      <AlertDialogDescription className="space-y-2">
+                        <p>This will permanently delete all your analysis history, including:</p>
+                        <ul className="list-disc list-inside space-y-1 text-sm">
+                          <li>All athlete analysis records</li>
+                          <li>Token transaction history</li>
+                          <li>Service usage logs</li>
+                        </ul>
+                        <p className="font-medium text-destructive">
+                          This action cannot be undone.
+                        </p>
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={() => clearHistoryMutation.mutate()}
+                        disabled={clearHistoryMutation.isPending}
+                        className="bg-destructive hover:bg-destructive/90"
+                        data-testid="button-confirm-clear-history"
+                      >
+                        {clearHistoryMutation.isPending ? "Clearing..." : "Clear History"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </>
           )}
         </DropdownMenuContent>
       </DropdownMenu>

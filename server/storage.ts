@@ -400,6 +400,15 @@ export class DatabaseStorage implements IStorage {
       return dateB - dateA;
     }).slice(0, 50);
   }
+
+  async clearUserHistory(userId: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      // Clear transactions
+      await tx.delete(transactions).where(eq(transactions.userId, userId));
+      // Clear analysis logs
+      await tx.delete(analysisLogs).where(eq(analysisLogs.userId, userId));
+    });
+  }
 }
 
 export const storage = new DatabaseStorage();

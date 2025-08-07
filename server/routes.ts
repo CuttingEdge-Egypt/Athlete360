@@ -1348,6 +1348,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete('/api/user-history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      await storage.clearUserHistory(userId);
+      res.json({ message: "History cleared successfully" });
+    } catch (error) {
+      console.error("Error clearing user history:", error);
+      res.status(500).json({ message: "Failed to clear user history" });
+    }
+  });
+
   // Token purchase simulation
   app.post('/api/purchase-tokens', isAuthenticated, async (req: any, res) => {
     try {
