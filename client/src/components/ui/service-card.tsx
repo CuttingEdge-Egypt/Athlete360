@@ -71,10 +71,14 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         description: `${service.title} analysis generated successfully!`,
       });
       
-      // Invalidate queries to refresh data
+      // Invalidate queries to refresh data immediately
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/analysis-logs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user-history"] });
+      
+      // Force refetch user data immediately
+      queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
     },
     onError: (error) => {
       setIsProcessing(false);
