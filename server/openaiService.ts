@@ -36,7 +36,7 @@ export async function generateAthleteBiography(name: string, sport: string, nati
     - A heading "Career Record and Rankings:"
     - A heading "Notable Achievements:"
 
-    For every sentence that uses information from a search result, end it with a citation marker like [1], [2], etc. If multiple sources support a sentence, use comma-separated indices like [1, 3].
+Only mention information that is 100% accurate and verifiable.
     
     Provide the response as a JSON object with these fields:
     - name: athlete's full name
@@ -46,8 +46,7 @@ export async function generateAthleteBiography(name: string, sport: string, nati
     - recentNews: array of recent news or competition results
     
     ${sportSpecificGuidance}
-    
-    Focus on authentic, factual information. Never use placeholder text or bracketed templates like [City, State], [Year], [Championship Name].`;
+    `;
 
   try {
     // Use GPT-5 with web search capabilities
@@ -140,8 +139,8 @@ export async function refreshAthleteBiographyWithSearch(name: string, sport: str
     - "Recent Competitions:" (2024-2025 results)
     - "Career Record and Rankings:" (current rankings and record)
     - "Notable Achievements:" (career highlights)
-    
-    Cite all information with [1], [2], etc. markers.
+
+    Only mention information that is 100% accurate and verifiable.
     
     Return as JSON with name, bio, rank, achievements, and recentNews fields.`;
 
