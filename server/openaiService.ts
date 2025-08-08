@@ -49,9 +49,9 @@ Only mention information that is 100% accurate and verifiable.
     `;
 
   try {
-    // Use GPT-4o with web search capabilities
+    // Use GPT-5 with web search capabilities
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "gpt-5", // Using GPT-5 as requested by the user
       messages: [
         {
           role: "system",
@@ -145,7 +145,7 @@ export async function refreshAthleteBiographyWithSearch(name: string, sport: str
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "gpt-5", // Using GPT-5 as requested by the user
       messages: [
         {
           role: "system",
