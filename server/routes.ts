@@ -477,6 +477,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           name: refreshedBioData.name,
           bio: refreshedBioData.bio,
           rank: refreshedBioData.rank,
+          worldRank: refreshedBioData.worldRank,
+          currentRecord: refreshedBioData.currentRecord,
           profileImageUrl: athlete.profileImageUrl,
           achievements: refreshedBioData.achievements || [],
           personalInfo: {

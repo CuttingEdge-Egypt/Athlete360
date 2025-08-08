@@ -17,6 +17,8 @@ import { apiRequest } from "@/lib/queryClient";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
+
+
 interface AnalysisPopupProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -45,6 +47,75 @@ export function AnalysisPopup({
   const { toast } = useToast();
   const [isExporting, setIsExporting] = useState(false);
   const queryClient = useQueryClient();
+
+  // Helper function to format biography with proper headings and structure
+  const formatBiography = (bio: string) => {
+    if (!bio) return <p>Biography not available</p>;
+    
+    // Split the biography into sections based on common patterns
+    const sections = bio.split(/\n\n|\n(?=[A-Z][^:]*:)/).filter(section => section.trim());
+    
+    return sections.map((section, index) => {
+      const trimmedSection = section.trim();
+      
+      // Check if this is a heading (ends with colon)
+      if (trimmedSection.includes(':') && trimmedSection.split('\n')[0].endsWith(':')) {
+        const lines = trimmedSection.split('\n');
+        const heading = lines[0].replace(':', '');
+        const content = lines.slice(1).join('\n').trim();
+        
+        return (
+          <div key={index} className="space-y-2">
+            <h4 className="text-athlete-accent font-bold text-lg border-b border-athlete-accent/30 pb-1">
+              {heading}
+            </h4>
+            {content && (
+              <div className="pl-2 space-y-1">
+                {content.split('\n').map((line, lineIndex) => {
+                  const trimmedLine = line.trim();
+                  if (!trimmedLine) return null;
+                  
+                  // Format list items with bullet points
+                  if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('• ')) {
+                    return (
+                      <div key={lineIndex} className="flex items-start space-x-2">
+                        <span className="text-athlete-accent mt-1">•</span>
+                        <span>{trimmedLine.replace(/^[-•]\s*/, '')}</span>
+                      </div>
+                    );
+                  }
+                  
+                  return <p key={lineIndex} className="text-gray-300">{trimmedLine}</p>;
+                })}
+              </div>
+            )}
+          </div>
+        );
+      }
+      
+      // Regular paragraph content
+      return (
+        <div key={index} className="space-y-2">
+          {trimmedSection.split('\n').map((line, lineIndex) => {
+            const trimmedLine = line.trim();
+            if (!trimmedLine) return null;
+            
+            // Format list items with bullet points
+            if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('• ')) {
+              return (
+                <div key={lineIndex} className="flex items-start space-x-2">
+                  <span className="text-athlete-accent mt-1">•</span>
+                  <span>{trimmedLine.replace(/^[-•]\s*/, '')}</span>
+                </div>
+              );
+            }
+            
+            return <p key={lineIndex} className="text-gray-300">{trimmedLine}</p>;
+          })}
+        </div>
+      );
+    });
+  };
 
   // Refresh bio mutation
   const refreshBioMutation = useMutation({
@@ -210,15 +281,15 @@ export function AnalysisPopup({
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="text-center">
                     <div className="text-athlete-warning font-bold text-xl">
-                      {typeof athleteInfo.rank === 'number' ? `#${athleteInfo.rank}` : athleteInfo.rank}
+                      {data.worldRank || (typeof athleteInfo.rank === 'number' ? `#${athleteInfo.rank}` : athleteInfo.rank)}
                     </div>
                     <div className="text-gray-400">World Rank</div>
                   </div>
                   <div className="text-center">
                     <div className="text-athlete-success font-bold text-xl">
-                      {data.record || "Record N/A"}
+                      {data.currentRecord || data.record || "Record N/A"}
                     </div>
-                    <div className="text-gray-400">Recent Record</div>
+                    <div className="text-gray-400">Current Record</div>
                   </div>
                 </div>
               </CardContent>
@@ -282,9 +353,9 @@ export function AnalysisPopup({
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-300 leading-relaxed">
-                  {athleteInfo.bio}
-                </p>
+                <div className="text-gray-300 leading-relaxed space-y-4">
+                  {formatBiography(athleteInfo.bio)}
+                </div>
                 
                 {/* Reference Links Section */}
                 {data.referenceLinks && data.referenceLinks.length > 0 && (
@@ -363,7 +434,7 @@ export function AnalysisPopup({
             </CardHeader>
             <CardContent>
               <div className="h-64">
-                <RankChart data={chartData.map(item => ({
+                <RankChart data={chartData.map((item: any) => ({
                   date: item.month || item.date,
                   rank: item.rank
                 }))} />
@@ -468,7 +539,7 @@ export function AnalysisPopup({
 
     return (
       <div className="grid md:grid-cols-2 gap-6">
-        {strengthsData.map((strength, index) => (
+        {strengthsData.map((strength: any, index: number) => (
           <Card key={index} className="bg-gradient-to-br from-athlete-gray-800 to-athlete-gray-700 border-athlete-success/30">
             <CardHeader>
               <CardTitle className="flex items-center text-white">
@@ -514,7 +585,7 @@ export function AnalysisPopup({
 
     return (
       <div className="space-y-6">
-        {weaknessesData.map((weakness, index) => (
+        {weaknessesData.map((weakness: any, index: number) => (
           <Card key={index} className="bg-gradient-to-r from-athlete-danger/20 to-athlete-danger/5 border-athlete-danger/30">
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">
