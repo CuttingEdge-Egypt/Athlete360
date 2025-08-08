@@ -11,7 +11,7 @@ import {
   User, Trophy, Star, AlertTriangle, Calendar, Apple, 
   Swords, Video, Loader2, Coins 
 } from "lucide-react";
-import type { Athlete } from "@shared/schema";
+import type { Athlete, User as UserType } from "@shared/schema";
 
 interface ServiceCardProps {
   service: {
@@ -40,7 +40,7 @@ const iconMap = {
 export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceCardProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user } = useAuth() as { user: UserType | null };
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
   const [analysisData, setAnalysisData] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -80,10 +80,12 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       queryClient.invalidateQueries({ queryKey: ["/api/analysis-logs"] });
       queryClient.invalidateQueries({ queryKey: ["/api/user-history"] });
       
-      // For bio service, also invalidate athlete data to show updated bio
+      // For bio service, also invalidate and force refetch athlete data to show updated bio
       if (service.id === "bio") {
         queryClient.invalidateQueries({ queryKey: ["/api/athletes", athlete.id] });
         queryClient.invalidateQueries({ queryKey: ["/api/athletes"] });
+        // Force immediate refetch of the specific athlete
+        queryClient.refetchQueries({ queryKey: ["/api/athletes", athlete.id] });
       }
       
       // Force refetch user data immediately
