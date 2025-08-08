@@ -63,26 +63,6 @@ Only mention information that is 100% accurate and verifiable.
         }
       ],
       response_format: { type: "json_object" },
-      tools: [
-        {
-          type: "function",
-          function: {
-            name: "web_search",
-            description: "Search the web for current information about athletes, competitions, and sports data",
-            parameters: {
-              type: "object",
-              properties: {
-                query: {
-                  type: "string",
-                  description: "Search query for finding athlete information"
-                }
-              },
-              required: ["query"]
-            }
-          }
-        }
-      ],
-      tool_choice: "auto",
       max_completion_tokens: 2000
     });
 
@@ -157,26 +137,6 @@ export async function refreshAthleteBiographyWithSearch(name: string, sport: str
         }
       ],
       response_format: { type: "json_object" },
-      tools: [
-        {
-          type: "function",
-          function: {
-            name: "web_search",
-            description: "Search for current athlete information and competition results",
-            parameters: {
-              type: "object",
-              properties: {
-                query: {
-                  type: "string",
-                  description: "Search query for current athlete data"
-                }
-              },
-              required: ["query"]
-            }
-          }
-        }
-      ],
-      tool_choice: "auto",
       max_completion_tokens: 2000
     });
 
