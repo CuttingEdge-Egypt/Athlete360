@@ -63,7 +63,7 @@ Only mention information that is 100% accurate and verifiable.
         }
       ],
       response_format: { type: "json_object" },
-      max_completion_tokens: 2000
+      max_completion_tokens: 8000
     });
 
     console.log("Full OpenAI Response:", JSON.stringify(response, null, 2));
@@ -144,7 +144,7 @@ export async function refreshAthleteBiographyWithSearch(name: string, sport: str
         }
       ],
       response_format: { type: "json_object" },
-      max_completion_tokens: 2000
+      max_completion_tokens: 8000
     });
 
     console.log("Full OpenAI Refresh Response:", JSON.stringify(response, null, 2));
