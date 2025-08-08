@@ -83,8 +83,7 @@ Only mention information that is 100% accurate and verifiable.
         }
       ],
       tool_choice: "auto",
-      max_completion_tokens: 2000,
-      temperature: 0.3
+      max_completion_tokens: 2000
     });
 
     const content = response.choices[0].message.content;
@@ -178,8 +177,7 @@ export async function refreshAthleteBiographyWithSearch(name: string, sport: str
         }
       ],
       tool_choice: "auto",
-      max_completion_tokens: 2000,
-      temperature: 0.2
+      max_completion_tokens: 2000
     });
 
     const content = response.choices[0].message.content;
