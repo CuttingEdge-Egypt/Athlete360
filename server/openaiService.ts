@@ -49,31 +49,32 @@ Only mention information that is 100% accurate and verifiable.
     `;
 
   try {
-    // Use GPT-5 with web search capabilities
-    const response = await openai.chat.completions.create({
+    // Use GPT-5 with web search capabilities using responses.create()
+    const response = await openai.responses.create({
       model: "gpt-5", // Using GPT-5 as requested by the user
-      messages: [
-        {
-          role: "system",
-          content: `You are a world-class ${sport} analyst with comprehensive knowledge of current performance data as of ${currentDate}. Use web search to find real-time information about athletes. ${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference for competition records, rankings, and profiles. ' : ''}Provide specific, factual, authentic information about athletes. NEVER use placeholder text or bracketed templates. Always respond in valid JSON format.`
-        },
-        {
-          role: "user",
-          content: prompt
-        }
+      input: `${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference for competition records, rankings, and profiles. ' : ''}${prompt}
+
+Please respond in valid JSON format with these exact fields:
+{
+  "name": "athlete's full name",
+  "bio": "detailed biography with proper headings and citations",
+  "rank": "current world ranking or N/A",
+  "achievements": ["array of key achievements"],
+  "recentNews": ["array of recent news or competition results"]
+}`,
+      tools: [
+        { type: "web_search_preview" }
       ],
-      response_format: { type: "json_object" },
       max_completion_tokens: 8000
     });
 
     console.log("Full OpenAI Response:", JSON.stringify(response, null, 2));
     
-    const content = response.choices[0].message.content;
+    const content = response.output_text;
     if (!content) {
       console.log("OpenAI Response Details:", {
-        choices: response.choices,
-        usage: response.usage,
-        finish_reason: response.choices[0]?.finish_reason
+        output_text: response.output_text,
+        usage: response.usage
       });
       throw new Error("No content received from OpenAI");
     }
@@ -131,30 +132,31 @@ export async function refreshAthleteBiographyWithSearch(name: string, sport: str
     Return as JSON with name, bio, rank, achievements, and recentNews fields.`;
 
   try {
-    const response = await openai.chat.completions.create({
+    const response = await openai.responses.create({
       model: "gpt-5", // Using GPT-5 as requested by the user
-      messages: [
-        {
-          role: "system",
-          content: "You are an expert sports analyst. Use web search to find the most current athlete information. Provide factual, up-to-date data with proper citations. Respond in valid JSON format only."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
+      input: `${prompt}
+
+Please respond in valid JSON format with these exact fields:
+{
+  "name": "athlete's full name",
+  "bio": "updated biography with fresh information",
+  "rank": "current world ranking or N/A", 
+  "achievements": ["array of key achievements"],
+  "recentNews": ["array of recent news or competition results"]
+}`,
+      tools: [
+        { type: "web_search_preview" }
       ],
-      response_format: { type: "json_object" },
       max_completion_tokens: 8000
     });
 
     console.log("Full OpenAI Refresh Response:", JSON.stringify(response, null, 2));
     
-    const content = response.choices[0].message.content;
+    const content = response.output_text;
     if (!content) {
       console.log("OpenAI Refresh Response Details:", {
-        choices: response.choices,
-        usage: response.usage,
-        finish_reason: response.choices[0]?.finish_reason
+        output_text: response.output_text,
+        usage: response.usage
       });
       throw new Error("No content received from OpenAI refresh");
     }
