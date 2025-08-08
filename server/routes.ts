@@ -6,7 +6,7 @@ import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
 import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography } from "./geminiService";
-import { generateAthleteBiography, refreshAthleteBiographyWithSearch } from "./openaiService";
+import { generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture } from "./openaiService";
 import { GoogleGenAI } from "@google/genai";
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY || "" });
@@ -109,7 +109,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Search for athlete profile image
       console.log(`Searching for profile image for ${name}...`);
-      const profileImageUrl = await searchAthleteImage(name);
+      let profileImageUrl = null;
+      
+      // For taekwondo athletes, try TaekwondoData.com first
+      if (sport.name.toLowerCase() === 'taekwondo') {
+        console.log(`Trying TaekwondoData.com for ${name}...`);
+        profileImageUrl = await searchTaekwondoDataProfilePicture(name, req.body.nationality);
+      }
+      
+      // Fallback to general search if no image found
+      if (!profileImageUrl) {
+        console.log(`Searching general sources for ${name}...`);
+        profileImageUrl = await searchAthleteImage(name);
+      }
 
       // Create athlete in database
       // Handle rank - convert to number if possible, otherwise store as null
@@ -125,7 +137,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportId,
         bio: aiProfile.bio || `Professional ${sport.name} athlete`,
         rank: rankValue,
-        country: aiProfile.country || null,
+        country: null,
         profileImageUrl: profileImageUrl || null,
         achievements: aiProfile.achievements || []
       };
@@ -187,7 +199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Keep existing photo for Seif Eissa, update others if needed
         profileImageUrl: athlete.name === "Seif Eissa" 
           ? "/attached_assets/IMG_0107_1754340258245.webp" 
-          : athlete.profileImageUrl || aiAthleteData.profileImageUrl,
+          : athlete.profileImageUrl,
         updatedAt: new Date()
       };
       
@@ -474,7 +486,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             lastUpdated: "Refreshed with OpenAI GPT-5 web search analysis",
             recentNews: refreshedBioData.recentNews
           },
-          referenceLinks: refreshedBioData.referenceLinks || []
+          referenceLinks: []
         };
 
         await storage.createAnalysisLog({
