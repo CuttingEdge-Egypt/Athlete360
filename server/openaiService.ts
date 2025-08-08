@@ -90,95 +90,278 @@ export interface AthleteData {
   currentRecord?: string;
 }
 
-// Enhanced function to get taekwondo-specific data from TaekwondoData.com
+// Enhanced function to get taekwondo-specific data using AI web search
+async function getEnhancedTaekwondoData(athleteName: string, nationality?: string): Promise<{worldRank: string, currentRecord: string}> {
+  try {
+    console.log(`Fetching enhanced taekwondo data for ${athleteName} using AI web search...`);
+    
+    const nationalityContext = nationality ? ` from ${nationality}` : '';
+    
+    // Use GPT-5 with web search to get specific ranking and record data
+    const response = await openai.responses.create({
+      model: "gpt-5",
+      input: `Search the web for current World Taekwondo (WT) ranking and competition record information for the athlete "${athleteName}"${nationalityContext}.
+
+Focus specifically on finding:
+1. Current World Taekwondo (WT) world ranking position
+2. Career competition record (wins-losses or bout statistics)
+
+Sources to prioritize:
+- https://www.taekwondodata.com/ 
+- World Taekwondo official rankings
+- Recent competition results and databases
+
+Provide ONLY factual data found through web search. If no specific ranking or record data is found, respond with "N/A".
+
+Response format:
+{
+  "worldRank": "#X" (where X is the ranking number, or "N/A" if not found),
+  "currentRecord": "W-L (percentage)" (format like "15-3 (83%)" or "N/A" if not found)
+}`,
+      tools: [{ type: "web_search_preview" }],
+      max_output_tokens: 1000
+    });
+
+    console.log("AI Ranking Search Response:", response.output_text);
+    
+    try {
+      const rankingData = JSON.parse(response.output_text);
+      return {
+        worldRank: rankingData.worldRank || "N/A",
+        currentRecord: rankingData.currentRecord || "N/A"
+      };
+    } catch (parseError) {
+      console.log("Failed to parse AI ranking response, using fallback extraction...");
+      
+      // Fallback: Extract from raw text
+      const text = response.output_text;
+      let worldRank = "N/A";
+      let currentRecord = "N/A";
+      
+      // Extract ranking
+      const rankMatch = text.match(/#(\d+)|rank(?:ing)?\s*:?\s*#?(\d+)|position\s*:?\s*#?(\d+)/i);
+      if (rankMatch) {
+        const rankNumber = rankMatch[1] || rankMatch[2] || rankMatch[3];
+        worldRank = `#${rankNumber}`;
+      }
+      
+      // Extract record
+      const recordMatch = text.match(/(\d+)[-\s]*(\d+)\s*\((\d+)%\)|(\d+)\s*wins?\s*[-,]\s*(\d+)\s*loss(?:es)?/i);
+      if (recordMatch) {
+        if (recordMatch[1] && recordMatch[2] && recordMatch[3]) {
+          currentRecord = `${recordMatch[1]}-${recordMatch[2]} (${recordMatch[3]}%)`;
+        } else if (recordMatch[4] && recordMatch[5]) {
+          const wins = parseInt(recordMatch[4]);
+          const losses = parseInt(recordMatch[5]);
+          const percentage = Math.round((wins / (wins + losses)) * 100);
+          currentRecord = `${wins}-${losses} (${percentage}%)`;
+        }
+      }
+      
+      return { worldRank, currentRecord };
+    }
+    
+  } catch (error) {
+    console.error(`Error getting enhanced taekwondo data for ${athleteName}:`, error);
+    // Fallback to basic TaekwondoData extraction
+    return await getTaekwondoDataInfo(athleteName, nationality);
+  }
+}
+
+// Fallback function to get taekwondo-specific data from TaekwondoData.com
 async function getTaekwondoDataInfo(athleteName: string, nationality?: string): Promise<{worldRank: string, currentRecord: string}> {
   try {
-    console.log(`Fetching TaekwondoData info for ${athleteName}...`);
+    console.log(`Fetching enhanced TaekwondoData info for ${athleteName}...`);
     
-    // Create search parameters
+    // Create search parameters with multiple variations
     const nameParts = athleteName.toLowerCase().split(' ');
     const firstName = nameParts[0] || '';
     const surname = nameParts.slice(1).join(' ') || '';
     
-    // Prepare nation parameter for Egypt
-    const nationParam = nationality?.toLowerCase().includes('egypt') ? 'Egypt' : '';
+    // Prepare nation parameter 
+    const nationParam = nationality?.toLowerCase().includes('egypt') ? 'Egypt' : 
+                       nationality?.toLowerCase().includes('korea') ? 'Korea' :
+                       nationality?.toLowerCase().includes('iran') ? 'Iran' :
+                       nationality?.toLowerCase().includes('turkey') ? 'Turkey' : '';
     
-    // Make search request to taekwondodata.com
-    const searchParams = new URLSearchParams({
-      'surename': surname,
-      'firstname': firstName,
-      ...(nationParam && { 'nation': nationParam })
-    });
+    // Try multiple search variations
+    const searchVariations = [
+      { 'surename': surname, 'firstname': firstName, ...(nationParam && { 'nation': nationParam }) },
+      { 'surename': surname, 'firstname': firstName }, // Without nation
+      { 'search_name': athleteName }, // Full name search
+    ];
     
-    const searchUrl = `https://www.taekwondodata.com/person_searchresult.html?${searchParams}`;
-    console.log(`Searching TaekwondoData for ranking: ${searchUrl}`);
-    
-    const response = await fetch(searchUrl);
-    const searchHtml = await response.text();
-    
-    // Extract athlete profile links from search results
-    const linkRegex = /href="([^"]*\.html)"/g;
-    let match;
-    const profileLinks = [];
-    
-    while ((match = linkRegex.exec(searchHtml)) !== null) {
-      const link = match[1];
-      if (link.includes(firstName.toLowerCase()) || link.includes(surname.toLowerCase().replace(' ', '-'))) {
-        profileLinks.push(link.startsWith('http') ? link : `https://www.taekwondodata.com${link}`);
-      }
-    }
-    
-    // Try to extract ranking and record data from the first matching profile
-    for (const profileUrl of profileLinks.slice(0, 2)) { // Check up to 2 profiles
+    for (const searchParams of searchVariations) {
       try {
-        console.log(`Checking profile for data: ${profileUrl}`);
-        const profileResponse = await fetch(profileUrl);
-        const profileHtml = await profileResponse.text();
+        const searchUrl = `https://www.taekwondodata.com/person_searchresult.html?${new URLSearchParams(searchParams)}`;
+        console.log(`Trying TaekwondoData search: ${searchUrl}`);
         
-        let worldRank = "N/A";
-        let currentRecord = "N/A";
+        const response = await fetch(searchUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          }
+        });
+        const searchHtml = await response.text();
         
-        // Extract world ranking information
-        const rankingMatch = profileHtml.match(/(?:world\s*ranking|ranking)\s*[:\-]?\s*(?:#\s*)?(\d+|N\/A)/i);
-        if (rankingMatch) {
-          worldRank = rankingMatch[1] === 'N/A' ? 'N/A' : `#${rankingMatch[1]}`;
-        }
+        // Enhanced profile link extraction
+        const profileLinkPatterns = [
+          /href="([^"]*person[^"]*\.html[^"]*)"/gi,
+          /href="([^"]*athlete[^"]*\.html[^"]*)"/gi,
+          /href="([^"]*player[^"]*\.html[^"]*)"/gi,
+          /href="([^"]*\.html)"/gi
+        ];
         
-        // Extract career record from bouts statistics
-        const boutsMatch = profileHtml.match(/(\d+)\s*bouts?\s*(?:with|,)\s*(\d+)\s*wins?\s*(?:\((\d+(?:\.\d+)?)%[^)]*\))?/i);
-        if (boutsMatch) {
-          const totalBouts = boutsMatch[1];
-          const wins = boutsMatch[2];
-          const winPercentage = boutsMatch[3] ? `${boutsMatch[3]}%` : Math.round((parseInt(wins) / parseInt(totalBouts)) * 100) + '%';
-          currentRecord = `${wins}-${parseInt(totalBouts) - parseInt(wins)} (${winPercentage})`;
-        }
+        const profileLinks = new Set<string>();
         
-        // Alternative: Look for win/loss record in different format
-        if (currentRecord === "N/A") {
-          const recordMatch = profileHtml.match(/(\d+)\s*wins?\s*(?:and|,)\s*(\d+)\s*losses?/i);
-          if (recordMatch) {
-            const wins = recordMatch[1];
-            const losses = recordMatch[2];
-            const totalBouts = parseInt(wins) + parseInt(losses);
-            const winPercentage = Math.round((parseInt(wins) / totalBouts) * 100);
-            currentRecord = `${wins}-${losses} (${winPercentage}%)`;
+        for (const pattern of profileLinkPatterns) {
+          let match;
+          while ((match = pattern.exec(searchHtml)) !== null) {
+            const link = match[1];
+            // More flexible name matching
+            if (link.includes(firstName.toLowerCase()) || 
+                link.includes(surname.toLowerCase().replace(' ', '-')) ||
+                link.includes(surname.toLowerCase().replace(' ', '_')) ||
+                searchHtml.toLowerCase().includes(athleteName.toLowerCase().replace(' ', '-'))) {
+              const fullUrl = link.startsWith('http') ? link : `https://www.taekwondodata.com/${link.replace(/^\/+/, '')}`;
+              profileLinks.add(fullUrl);
+            }
           }
         }
         
-        console.log(`Extracted TaekwondoData info: Rank=${worldRank}, Record=${currentRecord}`);
-        return { worldRank, currentRecord };
+        // Try to extract data from found profiles
+        for (const profileUrl of Array.from(profileLinks).slice(0, 3)) { // Check up to 3 profiles
+          try {
+            console.log(`Analyzing profile for ranking data: ${profileUrl}`);
+            const profileResponse = await fetch(profileUrl, {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+              }
+            });
+            const profileHtml = await profileResponse.text();
+            
+            let worldRank = "N/A";
+            let currentRecord = "N/A";
+            
+            // Debug: Log a sample of the HTML to understand structure
+            const htmlSample = profileHtml.substring(0, 2000);
+            console.log(`HTML sample from ${profileUrl}: ${htmlSample}`);
+            
+            // Enhanced ranking extraction patterns with more variations
+            const rankingPatterns = [
+              // Table-based patterns
+              /<td[^>]*>.*?world.*?ranking.*?<\/td>\s*<td[^>]*>.*?#?(\d+).*?<\/td>/i,
+              /<td[^>]*>.*?ranking.*?<\/td>\s*<td[^>]*>.*?#?(\d+).*?<\/td>/i,
+              /<td[^>]*>.*?rank.*?<\/td>\s*<td[^>]*>.*?#?(\d+).*?<\/td>/i,
+              // Text-based patterns
+              /world\s*ranking[:\s]*#?(\d+)/i,
+              /ranking[:\s]*#?(\d+)/i,
+              /rank[:\s]*#?(\d+)/i,
+              /position[:\s]*#?(\d+)/i,
+              /current\s*rank[:\s]*#?(\d+)/i,
+              /#(\d+)\s*world/i,
+              /#(\d+)\s*ranking/i,
+              // WT ranking patterns
+              /WT\s*ranking[:\s]*#?(\d+)/i,
+              /world\s*taekwondo\s*ranking[:\s]*#?(\d+)/i
+            ];
+            
+            for (const pattern of rankingPatterns) {
+              const match = profileHtml.match(pattern);
+              if (match && match[1]) {
+                worldRank = `#${match[1]}`;
+                console.log(`Found ranking with pattern "${pattern}": ${worldRank}`);
+                break;
+              }
+            }
+            
+            // Enhanced record extraction patterns with table and text variations
+            const recordPatterns = [
+              // Table-based record patterns
+              /<td[^>]*>.*?wins?.*?<\/td>\s*<td[^>]*>.*?(\d+).*?<\/td>/i,
+              /<td[^>]*>.*?losses?.*?<\/td>\s*<td[^>]*>.*?(\d+).*?<\/td>/i,
+              /<td[^>]*>.*?record.*?<\/td>\s*<td[^>]*>.*?(\d+)[-:](\d+).*?<\/td>/i,
+              // Text-based record patterns
+              /(\d+)\s*wins?\s*[,-]\s*(\d+)\s*loss(?:es)?/i,
+              /(\d+)\s*w\s*[,-]\s*(\d+)\s*l/i,
+              /record[:\s]*(\d+)[-:](\d+)/i,
+              /(\d+)\s*victories?\s*[,-]\s*(\d+)\s*defeats?/i,
+              /(\d+)\s*bouts?\s*[,-]\s*(\d+)\s*wins?/i,
+              /wins?[:\s]*(\d+)[^0-9]*loss(?:es)?[:\s]*(\d+)/i,
+              // International format
+              /(\d+)\s*W\s*[,-]\s*(\d+)\s*L/i,
+              /W:\s*(\d+)\s*L:\s*(\d+)/i
+            ];
+            
+            // Try to extract wins and losses separately
+            let wins = 0;
+            let losses = 0;
+            let foundRecord = false;
+            
+            for (const pattern of recordPatterns) {
+              const match = profileHtml.match(pattern);
+              if (match && match[1] && match[2]) {
+                wins = parseInt(match[1]);
+                losses = parseInt(match[2]);
+                foundRecord = true;
+                console.log(`Found record with pattern "${pattern}": ${wins}W-${losses}L`);
+                break;
+              }
+            }
+            
+            // Alternative: Look for separate wins/losses entries
+            if (!foundRecord) {
+              const winsMatch = profileHtml.match(/wins?[:\s]*(\d+)/i);
+              const lossesMatch = profileHtml.match(/loss(?:es)?[:\s]*(\d+)/i);
+              
+              if (winsMatch && lossesMatch) {
+                wins = parseInt(winsMatch[1]);
+                losses = parseInt(lossesMatch[1]);
+                foundRecord = true;
+                console.log(`Found separate wins/losses: ${wins}W-${losses}L`);
+              }
+            }
+            
+            // Try bouts/total matches format
+            if (!foundRecord) {
+              const boutsPattern = /(\d+)\s*(?:bouts?|matches?)[^0-9]*(\d+)\s*wins?/i;
+              const boutsMatch = profileHtml.match(boutsPattern);
+              if (boutsMatch) {
+                const totalBouts = parseInt(boutsMatch[1]);
+                wins = parseInt(boutsMatch[2]);
+                losses = totalBouts - wins;
+                foundRecord = true;
+                console.log(`Found bout record: ${wins}W-${losses}L from ${totalBouts} total`);
+              }
+            }
+            
+            if (foundRecord) {
+              const totalBouts = wins + losses;
+              const winPercentage = totalBouts > 0 ? Math.round((wins / totalBouts) * 100) : 0;
+              currentRecord = `${wins}-${losses} (${winPercentage}%)`;
+            }
+            
+            if (worldRank !== "N/A" || currentRecord !== "N/A") {
+              console.log(`Successfully extracted TaekwondoData info: Rank=${worldRank}, Record=${currentRecord}`);
+              return { worldRank, currentRecord };
+            }
+            
+          } catch (error) {
+            console.log(`Error analyzing profile ${profileUrl}:`, error);
+            continue;
+          }
+        }
         
       } catch (error) {
-        console.log(`Error checking profile ${profileUrl} for data:`, error);
+        console.log(`Error with search variation:`, error);
         continue;
       }
     }
     
-    console.log(`No ranking/record data found for ${athleteName} on TaekwondoData.com`);
+    console.log(`No specific ranking/record data found for ${athleteName} on TaekwondoData.com`);
     return { worldRank: "N/A", currentRecord: "N/A" };
     
   } catch (error) {
-    console.error(`Error fetching TaekwondoData info for ${athleteName}:`, error);
+    console.error(`Error fetching enhanced TaekwondoData info for ${athleteName}:`, error);
     return { worldRank: "N/A", currentRecord: "N/A" };
   }
 }
@@ -268,12 +451,12 @@ Please respond in valid JSON format with these exact fields:
         athleteData.rank = Number(athleteData.rank);
       }
 
-      // For taekwondo athletes, enhance with TaekwondoData.com specific ranking and record data
+      // For taekwondo athletes, enhance with specific ranking and record data
       if (isTaekwondo) {
         console.log(`Enhancing taekwondo data for ${name}...`);
-        const taekwondoData = await getTaekwondoDataInfo(name, nationality);
-        athleteData.worldRank = taekwondoData.worldRank;
-        athleteData.currentRecord = taekwondoData.currentRecord;
+        const enhancedData = await getEnhancedTaekwondoData(name, nationality);
+        athleteData.worldRank = enhancedData.worldRank;
+        athleteData.currentRecord = enhancedData.currentRecord;
       }
 
       return athleteData;
