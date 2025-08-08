@@ -6,7 +6,7 @@ import { AnalysisResult } from "@/components/ui/analysis-result";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, RefreshCw, Sparkles } from "lucide-react";
+import { ArrowLeft, RefreshCw, Sparkles, User } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Athlete, Transaction, AnalysisLog } from "@shared/schema";
@@ -174,7 +174,7 @@ export default function AthleteAnalysis() {
                       key={log.id}
                       type={log.serviceType}
                       data={log.resultData}
-                      createdAt={log.createdAt || new Date().toISOString()}
+                      createdAt={typeof log.createdAt === 'string' ? log.createdAt : (log.createdAt || new Date()).toISOString()}
                       shared={log.shared || false}
                       shareUrl={log.shareUrl || undefined}
                     />

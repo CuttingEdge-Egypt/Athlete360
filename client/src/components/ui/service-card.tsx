@@ -48,13 +48,16 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
   const IconComponent = iconMap[service.icon as keyof typeof iconMap] || User;
 
   const analysisMutation = useMutation({
-    mutationFn: async (forceUpdate = false) => {
+    mutationFn: async (forceUpdate?: boolean) => {
       if (isProcessing) {
         throw new Error("Analysis already in progress");
       }
       setIsProcessing(true);
       
-      const url = forceUpdate 
+      // For bio service refresh, use the specific bio refresh endpoint
+      const url = service.id === "bio" && forceUpdate 
+        ? `/api/athletes/${athlete.id}/refresh-bio`
+        : forceUpdate 
         ? `/api/analysis/${athlete.id}/${service.id}?forceUpdate=true`
         : `/api/analysis/${athlete.id}/${service.id}`;
       
@@ -76,6 +79,12 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/analysis-logs"] });
       queryClient.invalidateQueries({ queryKey: ["/api/user-history"] });
+      
+      // For bio service, also invalidate athlete data to show updated bio
+      if (service.id === "bio") {
+        queryClient.invalidateQueries({ queryKey: ["/api/athletes", athlete.id] });
+        queryClient.invalidateQueries({ queryKey: ["/api/athletes"] });
+      }
       
       // Force refetch user data immediately
       queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
@@ -119,7 +128,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
     }
     
     // Check if user has enough tokens
-    if (!user || user.tokens < service.cost) {
+    if (!user || (user.tokens || 0) < service.cost) {
       onInsufficientTokens();
       return;
     }
