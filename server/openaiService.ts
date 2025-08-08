@@ -66,8 +66,15 @@ Only mention information that is 100% accurate and verifiable.
       max_completion_tokens: 2000
     });
 
+    console.log("Full OpenAI Response:", JSON.stringify(response, null, 2));
+    
     const content = response.choices[0].message.content;
     if (!content) {
+      console.log("OpenAI Response Details:", {
+        choices: response.choices,
+        usage: response.usage,
+        finish_reason: response.choices[0]?.finish_reason
+      });
       throw new Error("No content received from OpenAI");
     }
 
@@ -140,8 +147,15 @@ export async function refreshAthleteBiographyWithSearch(name: string, sport: str
       max_completion_tokens: 2000
     });
 
+    console.log("Full OpenAI Refresh Response:", JSON.stringify(response, null, 2));
+    
     const content = response.choices[0].message.content;
     if (!content) {
+      console.log("OpenAI Refresh Response Details:", {
+        choices: response.choices,
+        usage: response.usage,
+        finish_reason: response.choices[0]?.finish_reason
+      });
       throw new Error("No content received from OpenAI refresh");
     }
 
