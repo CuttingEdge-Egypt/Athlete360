@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+// GPT-5 is now available and is the latest OpenAI model
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export interface AthleteData {
@@ -50,9 +50,9 @@ export async function generateAthleteBiography(name: string, sport: string, nati
     Focus on authentic, factual information. Never use placeholder text or bracketed templates like [City, State], [Year], [Championship Name].`;
 
   try {
-    // Use GPT-4o with web search capabilities
+    // Use GPT-5 with web search capabilities
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "gpt-5", // Using the latest GPT-5 model
       messages: [
         {
           role: "system",
@@ -147,7 +147,7 @@ export async function refreshAthleteBiographyWithSearch(name: string, sport: str
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "gpt-5", // Using the latest GPT-5 model
       messages: [
         {
           role: "system",

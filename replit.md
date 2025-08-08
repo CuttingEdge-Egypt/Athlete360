@@ -12,6 +12,8 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**OpenAI GPT-5 Service Integration (August 8, 2025)**: Created dedicated OpenAI service file (server/openaiService.ts) using the latest GPT-5 model with web search capabilities for athlete biography generation. Features include: GPT-5 powered biography analysis with structured output, web search integration for real-time athlete data, specialized Egyptian taekwondo athlete handling via taekwondodata.com, JSON schema validation, and comprehensive error handling. This provides an alternative AI service alongside the existing Gemini 2.5 Pro implementation for enhanced redundancy and comparison capabilities.
+
 **Enhanced Gemini 2.5 Pro with Google Search Grounding (August 7, 2025)**: Successfully implemented "Grounding with Google Search" tool throughout the entire AI infrastructure. All athlete analysis functions now use real-time Google Search data for enhanced accuracy and up-to-date information. Enhanced features include: Google Search-powered biographical analysis with 3-thread approach, real-time athlete comparisons, current ranking analysis, live competition data integration, and dynamic sports insights. Updated server/geminiService.ts with comprehensive Google Search grounding while maintaining Egyptian taekwondo data reference system and authentic data requirements from live sources.
 
 **Image Fallback Removal & Taekwondo Search Enhancement (August 6, 2025)**: Removed all basketball player placeholder images - the system now shows user icons when actual athlete images aren't found instead of misleading placeholders. Added taekwondo-specific search enhancement directing AI to use https://www.taekwondodata.com/ as reference source for accurate taekwondo athlete data.
@@ -70,8 +72,10 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### AI and Language Models
+- **OpenAI GPT-5**: Latest OpenAI model with web search capabilities for athlete biography generation and analysis via OPENAI_API_KEY
 - **Google Gemini 2.5 Pro**: Primary LLM provider for all athlete analysis, biography generation, comparison analysis, and sports insights via GOOGLE_API_KEY
 - **@google/genai**: Official Google Generative AI SDK for Node.js integration with JSON schema validation and structured responses
+- **OpenAI SDK**: Official OpenAI JavaScript SDK for GPT-5 integration with function calling and web search tools
 
 ### Database and Storage
 - **Neon PostgreSQL**: Serverless PostgreSQL database with WebSocket support for real-time connections
