@@ -755,7 +755,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const detailedAnalysis = await getDetailedAnalysis(athlete.name, sportName);
         
         const aiStrengths = detailedAnalysis.strengths.length > 0 
-          ? detailedAnalysis.strengths.map((strength, index) => ({
+          ? detailedAnalysis.strengths.map((strength: any, index) => ({
               title: strength.title,
               description: strength.description,
               rating: strength.rating || Math.max(85, 97 - index * 3) // Add ratings from AI or generate reasonable ones
@@ -863,7 +863,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const detailedAnalysis = await getDetailedAnalysis(athlete.name, sportName);
         
         const aiWeaknesses = detailedAnalysis.weaknesses.length > 0 
-          ? detailedAnalysis.weaknesses.map((weakness, index) => ({
+          ? detailedAnalysis.weaknesses.map((weakness: any, index) => ({
               title: weakness.title,
               description: weakness.description,
               impact: weakness.impact || (index === 0 ? 'High' : (index % 2 === 0 ? 'Medium' : 'High')),
@@ -1543,7 +1543,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/athletes/compare', isAuthenticated, async (req, res) => {
     const tokenCost = 100; // Higher cost for comparison analysis
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.claims?.sub;
       const { athlete1Id, athlete2Id } = req.body;
 
       if (!athlete1Id || !athlete2Id) {
