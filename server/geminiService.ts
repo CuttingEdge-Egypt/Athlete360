@@ -390,7 +390,8 @@ export async function generateSpecificAnalysis(
 }
 
 // Updated athlete image search to prevent placeholder issues
-export async function searchAthleteImage(athleteName: string): Promise<string | null> {
+// NO PLACEHOLDER IMAGES - For taekwondo athletes, use TaekwondoData.com only
+export async function searchAthleteImage(athleteName: string, sport?: string): Promise<string | null> {
   try {
     // Search TheSportsDB for athlete images
     const searchUrl = `https://www.thesportsdb.com/api/v1/json/3/searchplayers.php?p=${encodeURIComponent(athleteName)}`;
@@ -400,25 +401,68 @@ export async function searchAthleteImage(athleteName: string): Promise<string | 
     const data = await response.json();
     
     if (data.player && data.player.length > 0) {
-      const player = data.player[0];
-      // Very strict validation to ensure we have the actual athlete's image
-      const playerNameMatch = player.strPlayer && 
-        athleteName.toLowerCase().split(' ').some(namePart => 
-          namePart.length > 2 && player.strPlayer.toLowerCase().includes(namePart)
+      // Check all players to find the best match, not just the first one
+      for (const player of data.player) {
+        // Enhanced name matching - require more precise match
+        const athleteNameParts = athleteName.toLowerCase().split(' ');
+        const playerNameParts = player.strPlayer ? player.strPlayer.toLowerCase().split(' ') : [];
+        
+        // Require at least 2 name parts to match (first name + last name)
+        const matchingParts = athleteNameParts.filter(part => 
+          part.length > 2 && playerNameParts.some(playerPart => 
+            playerPart.includes(part) || part.includes(playerPart)
+          )
         );
-      
-      if (player.strThumb && 
-          player.strThumb.startsWith('http') && 
-          !player.strThumb.includes('placeholder') &&
-          !player.strThumb.includes('default') &&
-          !player.strThumb.includes('generic') &&
-          !player.strThumb.includes('anonymous') &&
-          player.strThumb.length > 20 &&
-          playerNameMatch) {
-        console.log(`Found verified profile image for ${athleteName}: ${player.strThumb}`);
-        return player.strThumb;
-      } else {
-        console.log(`Image found but failed validation for ${athleteName} - Name: ${player.strPlayer}, Image: ${player.strThumb}`);
+        
+        const isNameMatch = matchingParts.length >= Math.min(2, athleteNameParts.length);
+        
+        // Enhanced sport validation - completely avoid cross-sport matches
+        let isSportConflict = false;
+        if (sport && player.strSport) {
+          const playerSport = player.strSport.toLowerCase();
+          const requestedSport = sport.toLowerCase();
+          
+          // For taekwondo, reject any non-combat sport
+          if (requestedSport === 'taekwondo') {
+            const nonCombatSports = [
+              'basketball', 'football', 'soccer', 'tennis', 'baseball', 
+              'volleyball', 'golf', 'hockey', 'cricket', 'rugby',
+              'swimming', 'track', 'field', 'cycling', 'motorsport'
+            ];
+            isSportConflict = nonCombatSports.some(nonCombat => 
+              playerSport.includes(nonCombat)
+            );
+          }
+          
+          // General rule: must be exact sport match or martial arts related
+          if (!isSportConflict && requestedSport === 'taekwondo') {
+            const isCombatSport = playerSport.includes('taekwondo') || 
+                                 playerSport.includes('martial') || 
+                                 playerSport.includes('karate') ||
+                                 playerSport.includes('judo') ||
+                                 playerSport.includes('combat');
+            if (!isCombatSport && playerSport !== 'unknown') {
+              isSportConflict = true;
+            }
+          }
+        }
+        
+        if (player.strThumb && 
+            player.strThumb.startsWith('http') && 
+            !player.strThumb.includes('placeholder') &&
+            !player.strThumb.includes('default') &&
+            !player.strThumb.includes('generic') &&
+            !player.strThumb.includes('anonymous') &&
+            player.strThumb.length > 20 &&
+            isNameMatch &&
+            !isSportConflict) {
+          
+          console.log(`Found verified profile image for ${athleteName}: ${player.strThumb}`);
+          console.log(`Player details: Name: ${player.strPlayer}, Sport: ${player.strSport}`);
+          return player.strThumb;
+        } else {
+          console.log(`Image found but failed validation for ${athleteName} - Name: ${player.strPlayer}, Sport: ${player.strSport}, Image: ${player.strThumb}, Conflict: ${isSportConflict}`);
+        }
       }
     }
     

@@ -117,10 +117,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         profileImageUrl = await searchTaekwondoDataProfilePicture(name, req.body.nationality);
       }
       
-      // Fallback to general search if no image found
-      if (!profileImageUrl) {
-        console.log(`Searching general sources for ${name}...`);
-        profileImageUrl = await searchAthleteImage(name);
+      // For taekwondo, ONLY use TaekwondoData.com - NO fallback to prevent basketball player images
+      if (!profileImageUrl && sport.name.toLowerCase() !== 'taekwondo') {
+        console.log(`Searching general sources for ${name} (non-taekwondo)...`);
+        profileImageUrl = await searchAthleteImage(name, sport.name);
+      } else if (!profileImageUrl && sport.name.toLowerCase() === 'taekwondo') {
+        console.log(`No image found for taekwondo athlete ${name} - TaekwondoData.com search complete, no fallback used to prevent wrong sport images`);
       }
 
       // Create athlete in database
