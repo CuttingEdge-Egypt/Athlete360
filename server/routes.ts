@@ -5,7 +5,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage } from "./geminiService";
+import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography } from "./geminiService";
 import { GoogleGenAI } from "@google/genai";
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY || "" });
@@ -171,10 +171,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Fetch fresh, authentic athlete data from OpenAI
       const aiAthleteData = await getAthleteProfile(athlete.name, sportName);
       
+      // Handle rank - convert to number if possible, otherwise store as null
+      let rankValue = null;
+      if (typeof aiAthleteData.rank === 'number') {
+        rankValue = aiAthleteData.rank;
+      } else if (typeof aiAthleteData.rank === 'string' && !isNaN(Number(aiAthleteData.rank)) && aiAthleteData.rank !== 'N/A') {
+        rankValue = Number(aiAthleteData.rank);
+      }
+
       // Update athlete with enhanced AI data
       const updatedAthleteData = {
         bio: aiAthleteData.bio,
-        rank: aiAthleteData.rank,
+        rank: rankValue,
         // Keep existing photo for Seif Eissa, update others if needed
         profileImageUrl: athlete.name === "Seif Eissa" 
           ? "/attached_assets/IMG_0107_1754340258245.webp" 
@@ -195,7 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         for (const strength of detailedAnalysis.strengths.slice(0, 5)) {
           await storage.createAthleteStrength({
             athleteId: athlete.id,
-            title: strength.category || strength.title,
+            title: strength.title,
             description: strength.description
           });
         }
@@ -204,7 +212,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         for (const weakness of detailedAnalysis.weaknesses.slice(0, 5)) {
           await storage.createAthleteWeakness({
             athleteId: athlete.id,
-            title: weakness.category || weakness.title,
+            title: weakness.title,
             description: weakness.description
           });
         }
@@ -276,11 +284,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Fetch authentic athlete data from OpenAI
       const aiAthleteData = await getAthleteProfile(validatedData.name, sportName);
       
+      // Handle rank - convert to number if possible, otherwise store as null
+      let rankValue = null;
+      if (typeof aiAthleteData.rank === 'number') {
+        rankValue = aiAthleteData.rank;
+      } else if (typeof aiAthleteData.rank === 'string' && !isNaN(Number(aiAthleteData.rank)) && aiAthleteData.rank !== 'N/A') {
+        rankValue = Number(aiAthleteData.rank);
+      }
+
       // Create athlete with AI-enhanced data
       const enhancedAthleteData = {
         ...validatedData,
         bio: aiAthleteData.bio,
-        rank: aiAthleteData.rank,
+        rank: rankValue,
         profileImageUrl: validatedData.profileImageUrl || null
       };
       
@@ -396,12 +412,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(402).json({ message: "Insufficient tokens" });
       }
 
+      const userTokens = user.tokens || 0;
       // Deduct tokens
-      console.log(`DEDUCTING ${tokenCost} tokens from user ${userId}: ${user.tokens} → ${user.tokens - tokenCost}`);
-      console.log(`UPDATING user ${userId} tokens to ${user.tokens - tokenCost}`);
+      console.log(`DEDUCTING ${tokenCost} tokens from user ${userId}: ${userTokens} → ${userTokens - tokenCost}`);
+      console.log(`UPDATING user ${userId} tokens to ${userTokens - tokenCost}`);
       await storage.deductTokens(userId, tokenCost);
-      console.log(`UPDATE COMPLETE: User tokens are now ${user.tokens - tokenCost}`);
-      console.log(`DEDUCTION RESULT: User now has ${user.tokens - tokenCost} tokens`);
+      console.log(`UPDATE COMPLETE: User tokens are now ${userTokens - tokenCost}`);
+      console.log(`DEDUCTION RESULT: User now has ${userTokens - tokenCost} tokens`);
 
       // Create transaction
       await storage.createTransaction({
@@ -428,10 +445,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const refreshedBioData = await getAthleteProfile(athlete.name, sportName, athlete.country || "Unknown");
         
+        // Handle rank - convert to number if possible, otherwise keep existing
+        let rankValue = athlete.rank;
+        if (typeof refreshedBioData.rank === 'number') {
+          rankValue = refreshedBioData.rank;
+        } else if (typeof refreshedBioData.rank === 'string' && !isNaN(Number(refreshedBioData.rank)) && refreshedBioData.rank !== 'N/A') {
+          rankValue = Number(refreshedBioData.rank);
+        }
+        
         // Update athlete bio in database with fresh AI content
         await storage.updateAthlete(athleteId, { 
           bio: refreshedBioData.bio,
-          rank: typeof refreshedBioData.rank === 'number' ? refreshedBioData.rank : athlete.rank,
+          rank: rankValue,
           updatedAt: new Date()
         });
         
@@ -538,7 +563,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} threaded bio analysis for ${athlete.name}`);
         
         try {
-          const threadedBioAnalysis = await generateThreadedBioAnalysis(athlete);
+          const threadedBioAnalysis = await generateThreadedBiography(athlete);
           
           // Update athlete bio in database with threaded AI content
           await storage.updateAthlete(athleteId, { 
@@ -557,7 +582,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               "Technical analysis from dedicated AI assessment"
             ],
             personalInfo: {
-              sport: athlete.sport?.name || sportName,
+              sport: sportName,
               status: "Active Professional", 
               analysisDate: new Date().toLocaleDateString(),
               lastUpdated: forceUpdate ? "Force updated with threaded OpenAI analysis" : "Fresh threaded OpenAI analysis",
@@ -569,7 +594,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error(`Threaded biography failed for ${athlete.name}:`, threadedError);
           return res.status(500).json({ 
             message: "Failed to generate threaded biography analysis",
-            error: threadedError.message 
+            error: threadedError instanceof Error ? threadedError.message : String(threadedError)
           });
         }
       }

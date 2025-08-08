@@ -13,6 +13,7 @@ export interface AthleteData {
   achievements: string[];
   recentNews: string;
   profileImageDescription: string;
+  profileImageUrl?: string;
   referenceLinks?: Array<{ title: string; uri: string }>;
   stats?: any;
 }
@@ -426,5 +427,148 @@ export async function searchAthleteImage(athleteName: string): Promise<string | 
   } catch (error) {
     console.error(`Error searching for athlete image:`, error);
     return null;
+  }
+}
+
+// Add the missing getDetailedAnalysis function
+export async function getDetailedAnalysis(athleteName: string, sport: string): Promise<AnalysisData> {
+  const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  
+  // Check if athlete is Egyptian for taekwondo.data reference
+  const isEgyptianTaekwondo = sport.toLowerCase() === 'taekwondo' && (
+    /\b(egypt|egyptian|cairo|alexandria)\b/i.test(athleteName) ||
+    athleteName.includes('حبيبة') || athleteName.includes('أحمد') || athleteName.includes('محمد') ||
+    /\b(ahmed|mohamed|hassan|ali|omar|sara|fatma|nour|dina|aya|habiba|wael)\b/i.test(athleteName)
+  );
+
+  const prompt = `Today's date is ${currentDate}. 
+
+Provide a comprehensive analysis for ${athleteName}, the ${sport} athlete.
+
+Generate detailed information in these categories:
+
+1. STRENGTHS (5 key strengths with titles and descriptions)
+2. WEAKNESSES (5 areas for improvement with titles and descriptions)
+3. DEVELOPMENT PLANS (3 structured training plans with titles, descriptions, and week numbers)
+4. NUTRITION PLANS (3 meal plans with descriptions, meal types, and food items)
+5. BEAT STRATEGIES (3 strategic approaches with titles and descriptions)
+6. RANK HISTORY (Recent ranking progression with ranks and dates)
+
+${isEgyptianTaekwondo ? 'For Egyptian taekwondo athletes, reference https://www.taekwondodata.com/ for accurate data.' : ''}
+
+Format as JSON matching this exact schema:
+{
+  "strengths": [{"title": "string", "description": "string"}],
+  "weaknesses": [{"title": "string", "description": "string"}],
+  "developmentPlans": [{"title": "string", "description": "string", "week": number}],
+  "nutritionPlans": [{"title": "string", "description": "string", "mealType": "breakfast|lunch|dinner|snack"}],
+  "beatStrategies": [{"title": "string", "description": "string", "opponent": "string"}],
+  "rankHistory": [{"rank": number, "date": "YYYY-MM-DD", "tournament": "string"}]
+}`;
+
+  try {
+    const response = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      contents: [{ 
+        role: "user", 
+        parts: [{ text: `${prompt}\n\nSystem: You are a professional sports analyst with expertise in ${sport}. Provide realistic, sport-specific analysis based on current athlete data as of ${currentDate}. Use authentic, factual information.` }]
+      }],
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "object",
+          properties: {
+            strengths: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  title: { type: "string" },
+                  description: { type: "string" }
+                }
+              }
+            },
+            weaknesses: {
+              type: "array", 
+              items: {
+                type: "object",
+                properties: {
+                  title: { type: "string" },
+                  description: { type: "string" }
+                }
+              }
+            },
+            developmentPlans: {
+              type: "array",
+              items: {
+                type: "object", 
+                properties: {
+                  title: { type: "string" },
+                  description: { type: "string" },
+                  week: { type: "number" }
+                }
+              }
+            },
+            nutritionPlans: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  title: { type: "string" },
+                  description: { type: "string" },
+                  mealType: { type: "string" }
+                }
+              }
+            },
+            beatStrategies: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  title: { type: "string" },
+                  description: { type: "string" },
+                  opponent: { type: "string" }
+                }
+              }
+            },
+            rankHistory: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  rank: { type: "number" },
+                  date: { type: "string" },
+                  tournament: { type: "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    const data = JSON.parse(response.text || "{}");
+    
+    console.log(`✅ Detailed analysis completed for ${athleteName}`);
+    return {
+      strengths: data.strengths || [],
+      weaknesses: data.weaknesses || [],
+      developmentPlans: data.developmentPlans || [],
+      nutritionPlans: data.nutritionPlans || [],
+      beatStrategies: data.beatStrategies || [],
+      rankHistory: data.rankHistory || []
+    };
+
+  } catch (error) {
+    console.error(`❌ Error generating detailed analysis for ${athleteName}:`, error);
+    // Return default structure to prevent app crashes
+    return {
+      strengths: [],
+      weaknesses: [],
+      developmentPlans: [],
+      nutritionPlans: [],
+      beatStrategies: [],
+      rankHistory: []
+    };
   }
 }
