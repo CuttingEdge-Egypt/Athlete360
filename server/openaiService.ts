@@ -65,7 +65,7 @@ Please respond in valid JSON format with these exact fields:
       tools: [
         { type: "web_search_preview" }
       ],
-      max_completion_tokens: 8000
+      max_output_tokens: 8000
     });
 
     console.log("Full OpenAI Response:", JSON.stringify(response, null, 2));
@@ -147,7 +147,7 @@ Please respond in valid JSON format with these exact fields:
       tools: [
         { type: "web_search_preview" }
       ],
-      max_completion_tokens: 8000
+      max_output_tokens: 8000
     });
 
     console.log("Full OpenAI Refresh Response:", JSON.stringify(response, null, 2));
