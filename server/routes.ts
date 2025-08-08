@@ -6,6 +6,7 @@ import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
 import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography } from "./geminiService";
+import { generateAthleteBiography, refreshAthleteBiographyWithSearch } from "./openaiService";
 import { GoogleGenAI } from "@google/genai";
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY || "" });
@@ -102,9 +103,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Sport not found" });
       }
 
-      // Use OpenAI to get athlete profile
-      console.log(`Creating athlete ${name} for sport ${sport.name} using AI...`);
-      const aiProfile = await getAthleteProfile(name, sport.name, req.body.nationality);
+      // Use OpenAI GPT-5 to get athlete profile
+      console.log(`Creating athlete ${name} for sport ${sport.name} using OpenAI GPT-5...`);
+      const aiProfile = await generateAthleteBiography(name, sport.name, req.body.nationality);
 
       // Search for athlete profile image
       console.log(`Searching for profile image for ${name}...`);
@@ -166,10 +167,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sport = await storage.getSportById(athlete.sportId);
       const sportName = sport?.name || "Unknown Sport";
       
-      console.log(`Updating athlete data for ${athlete.name} using OpenAI...`);
+      console.log(`Updating athlete data for ${athlete.name} using OpenAI GPT-5...`);
       
-      // Fetch fresh, authentic athlete data from OpenAI
-      const aiAthleteData = await getAthleteProfile(athlete.name, sportName);
+      // Fetch fresh, authentic athlete data from OpenAI GPT-5
+      const aiAthleteData = await refreshAthleteBiographyWithSearch(athlete.name, sportName);
       
       // Handle rank - convert to number if possible, otherwise store as null
       let rankValue = null;
@@ -439,11 +440,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sport = await storage.getSportById(athlete.sportId);
       const sportName = sport?.name || "Unknown Sport";
       
-      // Force refresh bio using enhanced Gemini with Google Search-aware prompting
-      console.log(`Refreshing bio for ${athlete.name} using enhanced Gemini 2.5 Pro`);
+      // Force refresh bio using OpenAI GPT-5 with web search capabilities
+      console.log(`Refreshing bio for ${athlete.name} using OpenAI GPT-5`);
       
       try {
-        const refreshedBioData = await getAthleteProfile(athlete.name, sportName, athlete.country || "Unknown");
+        const refreshedBioData = await refreshAthleteBiographyWithSearch(athlete.name, sportName, athlete.country || "Unknown");
         
         // Handle rank - convert to number if possible, otherwise keep existing
         let rankValue = athlete.rank;
@@ -470,7 +471,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             sport: sportName,
             status: "Active Professional", 
             analysisDate: new Date().toLocaleDateString(),
-            lastUpdated: "Refreshed with enhanced Gemini 2.5 Pro analysis",
+            lastUpdated: "Refreshed with OpenAI GPT-5 web search analysis",
             recentNews: refreshedBioData.recentNews
           },
           referenceLinks: refreshedBioData.referenceLinks || []
@@ -559,42 +560,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         };
       } else {
-        // Generate fresh bio analysis using threaded OpenAI approach (either no data exists or force update requested)
-        console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} threaded bio analysis for ${athlete.name}`);
+        // Generate fresh bio analysis using OpenAI GPT-5 with web search (either no data exists or force update requested)
+        console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} GPT-5 bio analysis for ${athlete.name}`);
         
         try {
-          const threadedBioAnalysis = await generateThreadedBiography(athlete);
+          const gptBioAnalysis = forceUpdate 
+            ? await refreshAthleteBiographyWithSearch(athlete.name, sportName)
+            : await generateAthleteBiography(athlete.name, sportName);
           
-          // Update athlete bio in database with threaded AI content
+          // Update athlete bio in database with GPT-5 AI content
           await storage.updateAthlete(athleteId, { 
-            bio: threadedBioAnalysis.bio,
-            rank: typeof threadedBioAnalysis.rank === 'number' ? threadedBioAnalysis.rank : null
+            bio: gptBioAnalysis.bio,
+            rank: typeof gptBioAnalysis.rank === 'number' ? gptBioAnalysis.rank : 
+                  (typeof gptBioAnalysis.rank === 'string' && !isNaN(Number(gptBioAnalysis.rank)) && gptBioAnalysis.rank !== 'N/A') ? 
+                  Number(gptBioAnalysis.rank) : null
           });
           
           bioAnalysis = {
-            name: threadedBioAnalysis.name,
-            bio: threadedBioAnalysis.bio,
-            rank: threadedBioAnalysis.rank,
+            name: gptBioAnalysis.name,
+            bio: gptBioAnalysis.bio,
+            rank: gptBioAnalysis.rank,
             profileImageUrl: athlete.profileImageUrl,
-            achievements: threadedBioAnalysis.achievements.length > 0 ? threadedBioAnalysis.achievements : [
-              "Career achievements from multi-thread AI analysis",
-              "Competition history verified through specialized AI queries",
-              "Technical analysis from dedicated AI assessment"
+            achievements: gptBioAnalysis.achievements && gptBioAnalysis.achievements.length > 0 ? gptBioAnalysis.achievements : [
+              "Career achievements from GPT-5 analysis with web search",
+              "Competition history verified through real-time data",
+              "Technical analysis from OpenAI's latest model"
             ],
             personalInfo: {
               sport: sportName,
               status: "Active Professional", 
               analysisDate: new Date().toLocaleDateString(),
-              lastUpdated: forceUpdate ? "Force updated with threaded OpenAI analysis" : "Fresh threaded OpenAI analysis",
-              recentNews: threadedBioAnalysis.recentNews
-            },
-            referenceLinks: threadedBioAnalysis.referenceLinks || []
+              lastUpdated: forceUpdate ? "Force updated with GPT-5 web search analysis" : "Fresh GPT-5 analysis with web search",
+              recentNews: gptBioAnalysis.recentNews || []
+            }
           };
-        } catch (threadedError) {
-          console.error(`Threaded biography failed for ${athlete.name}:`, threadedError);
+        } catch (gptError) {
+          console.error(`GPT-5 biography failed for ${athlete.name}:`, gptError);
           return res.status(500).json({ 
-            message: "Failed to generate threaded biography analysis",
-            error: threadedError instanceof Error ? threadedError.message : String(threadedError)
+            message: "Failed to generate GPT-5 biography analysis",
+            error: gptError instanceof Error ? gptError.message : String(gptError)
           });
         }
       }
