@@ -103,7 +103,7 @@ async function getEnhancedTaekwondoData(athleteName: string, nationality?: strin
     // Use GPT-4o with web search to get specific ranking and record data
     // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       messages: [
         {
           role: "system",
@@ -426,7 +426,7 @@ IMPORTANT: Do not include any links, URLs, citations, or references in your resp
     // Use GPT-4o with web search capabilities (GPT-5 is not available yet via standard API)
     // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       messages: [
         {
           role: "system",
@@ -545,7 +545,7 @@ IMPORTANT: Do not include any links, URLs, citations, or references in your resp
   try {
     // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       messages: [
         {
           role: "system",
@@ -649,7 +649,7 @@ export async function getAthleteProfile(name: string, sport: string, nationality
   try {
     // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       messages: [
         {
           role: "system",
@@ -774,7 +774,7 @@ export async function getDetailedAnalysis(athleteName: string, sport: string): P
   try {
     // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       messages: [
         {
           role: "system",
@@ -862,7 +862,7 @@ export async function generateSpecificAnalysis(athleteName: string, sport: strin
   try {
     // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       messages: [
         {
           role: "system",
