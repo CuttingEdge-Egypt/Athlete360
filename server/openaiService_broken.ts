@@ -51,21 +51,29 @@ export async function generateAthleteBiography(name: string, sport: string, nati
     IMPORTANT: Only use information that is 100% accurate and verifiable from your web search. Do not include any links, URLs, citations, or references.`;
 
   try {
-    // First make a web search call using GPT-4o which has reliable web search
     console.log("🔍 Searching web for athlete information...");
-    const searchResponse = await openai.chat.completions.create({
-      model: "gpt-4o", // Use GPT-4o for web search as it has more reliable web search capabilities
-      messages: [
+
+    const searchResponse = await openai.responses.create({
+      model: "gpt-5", // Replace with the exact GPT-5 variant you have access to
+      input: [
         {
           role: "user",
           content: webSearchPrompt
         }
       ],
+      tools: [
+        { name: "web_search", type: "web_search" }
+      ],
       temperature: 1.0,
-      max_tokens: 4000
+      max_output_tokens: 4000
     });
 
-    const searchResults = searchResponse.choices[0].message.content;
+    console.log(searchResponse.output_text);
+  } catch (error) {
+    console.error("❌ Error while searching web:", error);
+  }
+
+  const searchResults = searchResponse.choices[0].message.content;
     console.log("🔍 Web search completed, generating biography...");
 
     // Then use the search results to generate the biography with GPT-5
