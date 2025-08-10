@@ -100,10 +100,18 @@ async function getEnhancedTaekwondoData(athleteName: string, nationality?: strin
     
     const nationalityContext = nationality ? ` from ${nationality}` : '';
     
-    // Use GPT-5 with web search to get specific ranking and record data
-    const response = await openai.responses.create({
-      model: "gpt-5",
-      input: `Search the web for current World Taekwondo (WT) ranking and competition record information for the athlete "${athleteName}"${nationalityContext}.
+    // Use GPT-4o with web search to get specific ranking and record data
+    // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are a sports data analyst. Search the web for accurate athlete ranking and record information. Respond only in valid JSON format."
+        },
+        {
+          role: "user",
+          content: `Search the web for current World Taekwondo (WT) ranking and competition record information for the athlete "${athleteName}"${nationalityContext}.
 
 Focus specifically on finding:
 1. Current World Taekwondo (WT) world ranking position
@@ -120,15 +128,18 @@ Response format:
 {
   "worldRank": "#X" (where X is the ranking number, or "N/A" if not found),
   "currentRecord": "W-L (percentage)" (format like "15-3 (83%)" or "N/A" if not found)
-}`,
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 1000
+}`
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 1.0,
+      max_tokens: 1000
     });
 
-    console.log("AI Ranking Search Response:", response.output_text);
+    console.log("AI Ranking Search Response:", response.choices[0].message.content);
     
     try {
-      const rankingData = JSON.parse(response.output_text);
+      const rankingData = JSON.parse(response.choices[0].message.content || '{}');
       return {
         worldRank: rankingData.worldRank || "N/A",
         currentRecord: rankingData.currentRecord || "N/A"
@@ -137,7 +148,7 @@ Response format:
       console.log("Failed to parse AI ranking response, using fallback extraction...");
       
       // Fallback: Extract from raw text
-      const text = response.output_text;
+      const text = response.choices[0].message.content || '';
       let worldRank = "N/A";
       let currentRecord = "N/A";
       
@@ -407,31 +418,40 @@ IMPORTANT: Do not include any links, URLs, citations, or references in your resp
     `;
 
   try {
-    // Use GPT-5 with web search capabilities using responses.create()
-    const response = await openai.responses.create({
-      model: "gpt-5", // Using GPT-5 as requested by the user
-      input: `${isTaekwondo ? 'For taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference for competition records, rankings, and profiles. ' : ''}${prompt}
+    // Use GPT-4o with web search capabilities (GPT-5 is not available yet via standard API)
+    // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert sports analyst with access to web search. Use web search to find accurate, up-to-date information about athletes. Always respond in valid JSON format without any markdown formatting."
+        },
+        {
+          role: "user", 
+          content: `${isTaekwondo ? 'For taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference for competition records, rankings, and profiles. ' : ''}${prompt}
 
 Please respond in valid JSON format with these exact fields:
 {
   "name": "athlete's full name",
   "bio": "detailed biography without any links or citations",
-  "rank": "current world ranking or N/A",
+  "rank": "current world ranking or N/A", 
   "achievements": ["array of key achievements"],
   "recentNews": ["array of recent news or competition results"]
-}`,
-      tools: [
-        { type: "web_search_preview" }
+}`
+        }
       ],
-      max_output_tokens: 8000
+      response_format: { type: "json_object" },
+      temperature: 1.0,
+      max_tokens: 8000
     });
 
     console.log("Full OpenAI Response:", JSON.stringify(response, null, 2));
     
-    const content = response.output_text;
+    const content = response.choices[0].message.content;
     if (!content) {
       console.log("OpenAI Response Details:", {
-        output_text: response.output_text,
+        choices: response.choices.length,
         usage: response.usage
       });
       throw new Error("No content received from OpenAI");
@@ -502,9 +522,17 @@ Don't include the references in the biography.
     Return as JSON with name, bio, rank, achievements, and recentNews fields.`;
 
   try {
-    const response = await openai.responses.create({
-      model: "gpt-5", // Using GPT-5 as requested by the user
-      input: `${prompt}
+    // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert sports analyst with web search access. Search for the most current athlete information and respond in valid JSON format without markdown formatting."
+        },
+        {
+          role: "user",
+          content: `${prompt}
 
 Please respond in valid JSON format with these exact fields:
 {
@@ -513,19 +541,20 @@ Please respond in valid JSON format with these exact fields:
   "rank": "current world ranking or N/A", 
   "achievements": ["array of key achievements"],
   "recentNews": ["array of recent news or competition results"]
-}`,
-      tools: [
-        { type: "web_search_preview" }
+}`
+        }
       ],
-      max_output_tokens: 8000
+      response_format: { type: "json_object" },
+      temperature: 1.0,
+      max_tokens: 8000
     });
 
     console.log("Full OpenAI Refresh Response:", JSON.stringify(response, null, 2));
     
-    const content = response.output_text;
+    const content = response.choices[0].message.content;
     if (!content) {
       console.log("OpenAI Refresh Response Details:", {
-        output_text: response.output_text,
+        choices: response.choices.length,
         usage: response.usage
       });
       throw new Error("No content received from OpenAI refresh");
@@ -597,16 +626,26 @@ export async function getAthleteProfile(name: string, sport: string, nationality
     }`;
 
   try {
-    const response = await openai.responses.create({
-      model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after gpt-4o. do not change this unless explicitly requested by the user
-      input: prompt,
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 2000, // Reduced for faster response
-      // temperature: 1.0 is default and minimum for GPT-5
+    // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert sports data analyst. Search the web for factual athlete information and respond only in valid JSON format without any explanatory text."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 1.0,
+      max_tokens: 2000
     });
 
     // Clean the response to extract JSON
-    let jsonText = response.output_text.trim();
+    let jsonText = response.choices[0].message.content?.trim() || '{}';
     
     // Extract JSON from response if it contains extra text
     const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
@@ -712,16 +751,26 @@ export async function getDetailedAnalysis(athleteName: string, sport: string): P
   5. Reference specific matches, opponents, or achievements when possible`;
 
   try {
-    const response = await openai.responses.create({
-      model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after gpt-4o. do not change this unless explicitly requested by the user
-      input: prompt,
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 3000,
-      // temperature: 1.0 is default and minimum for GPT-5
+    // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are a professional sports analyst. Search the web for accurate athlete information and provide detailed analysis in valid JSON format only."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 1.0,
+      max_tokens: 3000
     });
 
     // Clean and extract JSON from response
-    let jsonText = response.output_text.trim();
+    let jsonText = response.choices[0].message.content?.trim() || '{}';
     
     // Remove any markdown formatting
     jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
@@ -790,16 +839,26 @@ export async function generateSpecificAnalysis(athleteName: string, sport: strin
   Focus on ${athleteName}'s actual career data, playing style, recent performances, and authentic achievements.`;
 
   try {
-    const response = await openai.responses.create({
-      model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after gpt-4o. do not change this unless explicitly requested by the user
-      input: prompt,
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 2000,
-      // temperature: 1.0 is default and minimum for GPT-5
+    // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are a professional sports analyst. Search the web for accurate athlete information and provide specific analysis in valid JSON format only."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 1.0,
+      max_tokens: 2000
     });
 
     // Clean and extract JSON from response
-    let jsonText = response.output_text.trim();
+    let jsonText = response.choices[0].message.content?.trim() || '{}';
     
     // Remove markdown formatting
     jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
