@@ -52,34 +52,40 @@ export function AnalysisPopup({
   const formatBiography = (bio: string) => {
     if (!bio) return <p>Biography not available</p>;
     
-    // Split the biography based on markdown-style headings (**Title**)
-    const sections = bio.split(/(?=\*\*[^*]+\*\*)/g).filter(section => section.trim());
+    // Split the biography into sections based on common patterns
+    const sections = bio.split(/\n\n|\n(?=[A-Z][^:]*:)/).filter(section => section.trim());
     
     return sections.map((section, index) => {
       const trimmedSection = section.trim();
       
-      // Check if this section starts with a markdown heading
-      const headingMatch = trimmedSection.match(/^\*\*([^*]+)\*\*/);
-      if (headingMatch) {
-        const heading = headingMatch[1];
-        const content = trimmedSection.replace(/^\*\*[^*]+\*\*\s*/, '').trim();
+      // Check if this is a heading (ends with colon)
+      if (trimmedSection.includes(':') && trimmedSection.split('\n')[0].endsWith(':')) {
+        const lines = trimmedSection.split('\n');
+        const heading = lines[0].replace(':', '');
+        const content = lines.slice(1).join('\n').trim();
         
         return (
-          <div key={index} className="space-y-4 mb-6">
-            <h3 className="text-2xl font-bold text-blue-600 dark:text-blue-400 border-b-2 border-blue-600/30 dark:border-blue-400/30 pb-2 mb-4 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+          <div key={index} className="space-y-2">
+            <h4 className="text-athlete-accent font-bold text-lg border-b border-athlete-accent/30 pb-1">
               {heading}
-            </h3>
+            </h4>
             {content && (
-              <div className="text-gray-700 dark:text-gray-300 leading-relaxed space-y-3">
-                {content.split('\n\n').map((paragraph, paragraphIndex) => {
-                  const trimmedParagraph = paragraph.trim();
-                  if (!trimmedParagraph) return null;
+              <div className="pl-2 space-y-1">
+                {content.split('\n').map((line, lineIndex) => {
+                  const trimmedLine = line.trim();
+                  if (!trimmedLine) return null;
                   
-                  return (
-                    <p key={paragraphIndex} className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
-                      {trimmedParagraph}
-                    </p>
-                  );
+                  // Format list items with bullet points
+                  if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('• ')) {
+                    return (
+                      <div key={lineIndex} className="flex items-start space-x-2">
+                        <span className="text-athlete-accent mt-1">•</span>
+                        <span>{trimmedLine.replace(/^[-•]\s*/, '')}</span>
+                      </div>
+                    );
+                  }
+                  
+                  return <p key={lineIndex} className="text-gray-300">{trimmedLine}</p>;
                 })}
               </div>
             )}
@@ -122,6 +128,7 @@ export function AnalysisPopup({
         title: "Biography Refreshed",
         description: "Latest athlete information has been updated successfully.",
       });
+      // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["/api/athletes"] });
       if (onRefresh) onRefresh();
     },
@@ -147,40 +154,24 @@ export function AnalysisPopup({
       case 'beat-strategies': return <Swords className="text-red-400" size={28} />;
       case 'video': 
       case 'video-analysis': return <Video className="text-indigo-400" size={28} />;
-      default: return <User className="text-white" size={28} />;
+      default: return <User className="text-athlete-accent" size={28} />;
     }
   };
 
   const getTitle = (type: string) => {
-    // If data has titles property with emoji equivalents from GPT, use that
-    if (data?.title) {
-      return data.title;
-    }
-    
-    // Fallback titles with emojis
     switch (type) {
-      case 'bio': return '🏆 Athletic Biography';
-      case 'rank': return '📊 Ranking Analysis';
-      case 'strengths': return '💪 Competitive Strengths';
-      case 'weaknesses': return '🎯 Areas for Improvement';
+      case 'bio': return 'Complete Athlete Biography';
+      case 'rank': return 'Ranking History & Analysis';
+      case 'strengths': return 'Competitive Strengths Profile';
+      case 'weaknesses': return 'Areas for Improvement';
       case 'development': 
-      case 'development-plan': return '📈 Development Plan';
-      case 'nutrition': return '🥗 Nutrition Strategy';
+      case 'development-plan': return '12-Week Development Program';
+      case 'nutrition': return 'Performance Nutrition Plan';
       case 'beat': 
-      case 'beat-strategies': return '🎯 How to Beat Analysis';
+      case 'beat-strategies': return 'Strategic Combat Analysis';
       case 'video': 
-      case 'video-analysis': return '🎬 Video Analysis';
-      default: return 'Athletic Analysis';
-    }
-  };
-
-  const handleShare = async () => {
-    if (shareUrl) {
-      await navigator.clipboard.writeText(shareUrl);
-      toast({
-        title: "Link Copied",
-        description: "Analysis link copied to clipboard",
-      });
+      case 'video-analysis': return 'Dynamic Performance Analysis';
+      default: return 'Analysis Results';
     }
   };
 
@@ -193,39 +184,39 @@ export function AnalysisPopup({
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        backgroundColor: '#1a1a1a'
+        backgroundColor: '#0f172a'
       });
 
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
       
-      const imgWidth = 190;
-      const pageHeight = pdf.internal.pageSize.height;
+      const imgWidth = 210;
+      const pageHeight = 295;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
 
-      let position = 20;
+      let position = 0;
 
-      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
 
       while (heightLeft >= 0) {
-        position = heightLeft - imgHeight + 20;
+        position = heightLeft - imgHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
       }
 
-      pdf.save(`${athleteName}-${type}-analysis.pdf`);
+      pdf.save(`${athleteName}_${getTitle(type)}.pdf`);
       
       toast({
-        title: "Export Successful",
-        description: "Analysis has been exported to PDF",
+        title: "PDF Generated Successfully",
+        description: `${athleteName}'s ${getTitle(type)} has been exported`,
       });
     } catch (error) {
       toast({
         title: "Export Failed",
-        description: "Failed to export PDF. Please try again.",
+        description: "Unable to generate PDF. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -233,402 +224,609 @@ export function AnalysisPopup({
     }
   };
 
-  const renderBioAnalysis = (data: any) => (
-    <div className="space-y-6">
-      <div className="flex justify-between items-start mb-6">
-        <div className="space-y-2">
-          <h3 className="text-2xl font-bold text-white">{athleteName}</h3>
-          <div className="flex items-center space-x-4 text-sm text-gray-400">
-            <span>Generated from latest web data</span>
-            {athleteId && (
-              <Button
-                onClick={() => refreshBioMutation.mutate()}
-                disabled={refreshBioMutation.isPending}
-                variant="ghost"
-                size="sm"
-                className="h-6 px-2 text-xs text-athlete-accent hover:bg-athlete-accent/10"
-              >
-                <RefreshCw size={12} className={`mr-1 ${refreshBioMutation.isPending ? 'animate-spin' : ''}`} />
-                {refreshBioMutation.isPending ? 'Updating...' : 'Refresh'}
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
+  const handleShare = () => {
+    if (shareUrl) {
+      navigator.clipboard.writeText(shareUrl);
+      toast({
+        title: "Link Copied",
+        description: "Share link has been copied to clipboard",
+      });
+    } else {
+      const generatedUrl = `${window.location.origin}/shared/${Date.now()}`;
+      navigator.clipboard.writeText(generatedUrl);
+      toast({
+        title: "Share Link Generated",
+        description: "Your analysis share link has been copied to clipboard",
+      });
+    }
+  };
 
-      <div className="bg-athlete-gray-800 rounded-lg p-6 border border-gray-700">
-        <div className="prose prose-invert max-w-none">
-          {data?.bio ? formatBiography(data.bio) : <p>Biography not available</p>}
-        </div>
-      </div>
-
-      {data?.keyStats && (
-        <div className="grid md:grid-cols-3 gap-4">
-          {data.keyStats.map((stat: any, index: number) => (
-            <Card key={index} className="bg-gradient-to-br from-athlete-accent/20 to-athlete-accent/5 border-athlete-accent/30">
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
-                <div className="text-sm text-gray-300">{stat.label}</div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-
-  const renderRankAnalysis = (data: any) => (
-    <div className="space-y-6">
-      <div className="grid md:grid-cols-3 gap-6 mb-6">
-        <Card className="bg-gradient-to-r from-athlete-warning/20 to-athlete-warning/5 border-athlete-warning/30">
-          <CardContent className="p-6 text-center">
-            <Trophy className="mx-auto mb-4 text-athlete-warning" size={48} />
-            <h3 className="text-xl font-bold text-white">
-              {data?.currentRank || data?.peak_ranking || '#5'}
-            </h3>
-            <p className="text-gray-300">Current World Ranking</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-gradient-to-r from-athlete-accent/20 to-athlete-accent/5 border-athlete-accent/30">
-          <CardContent className="p-6 text-center">
-            <Award className="mx-auto mb-4 text-athlete-accent" size={48} />
-            <h3 className="text-xl font-bold text-white">
-              {data?.peakRank || data?.current_ranking || '#2'}
-            </h3>
-            <p className="text-gray-300">Peak Ranking</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-gradient-to-r from-athlete-success/20 to-athlete-success/5 border-athlete-success/30">
-          <CardContent className="p-6 text-center">
-            <TrendingUp className="mx-auto mb-4 text-athlete-success" size={48} />
-            <h3 className="text-xl font-bold text-white">
-              {data?.yearEndRank || data?.performance_trend || '+12'}
-            </h3>
-            <p className="text-gray-300">Positions This Year</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="bg-athlete-gray-800 rounded-lg p-6 border border-gray-700">
-        <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
-          <Trophy className="mr-2 text-athlete-warning" size={24} />
-          Ranking Performance Analysis
-        </h3>
-        <div className="text-gray-300 space-y-3">
-          {data?.analysis ? (
-            <div className="space-y-3">
-              {data.analysis.split('\n').filter(Boolean).map((paragraph: string, index: number) => (
-                <p key={index}>{paragraph}</p>
-              ))}
-            </div>
-          ) : (
-            <p>Detailed ranking analysis based on recent performance metrics, tournament results, and competitive achievements.</p>
-          )}
-        </div>
-      </div>
-
-      {data?.recentResults && (
-        <Card className="bg-athlete-gray-800 border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-white">Recent Tournament Results</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {data.recentResults.map((result: any, index: number) => (
-                <div key={index} className="flex justify-between items-center p-3 bg-athlete-gray-700 rounded-lg">
-                  <div>
-                    <p className="text-white font-medium">{result.tournament || `Tournament ${index + 1}`}</p>
-                    <p className="text-gray-400 text-sm">{result.date || 'Recent'}</p>
-                  </div>
-                  <Badge className={result.result?.includes('Gold') || result.position === 1 ? 'bg-yellow-600' : result.result?.includes('Silver') || result.position === 2 ? 'bg-gray-400' : result.result?.includes('Bronze') || result.position === 3 ? 'bg-orange-600' : 'bg-blue-600'}>
-                    {result.result || result.position || 'Top 8'}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
-
-  const renderStrengthsAnalysis = (data: any) => (
-    <div className="space-y-6">
-      <div className="bg-gradient-to-r from-athlete-success/20 to-athlete-success/5 rounded-lg p-6 border border-athlete-success/30">
-        <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
-          <Star className="mr-2 text-athlete-success" size={24} />
-          Key Competitive Strengths
-        </h3>
-        <div className="text-gray-300">
-          {data?.overview ? (
-            <p>{data.overview}</p>
-          ) : (
-            <p>Comprehensive analysis of athletic strengths and competitive advantages based on performance data and expert evaluation.</p>
-          )}
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        {data?.strengths?.map((strength: any, index: number) => (
-          <Card key={index} className="bg-athlete-gray-800 border-gray-700">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between text-white">
-                <div className="flex items-center">
-                  <Zap className="mr-3 text-athlete-success" size={24} />
-                  <span>{strength.name || strength.title || `Strength ${index + 1}`}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Progress 
-                    value={strength.rating || strength.score || Math.floor(Math.random() * 13) + 85} 
-                    className="w-24" 
-                  />
-                  <span className="text-athlete-success font-bold">
-                    {strength.rating || strength.score || Math.floor(Math.random() * 13) + 85}%
-                  </span>
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-athlete-success/10 rounded-lg p-4 border border-athlete-success/20">
-                <h4 className="text-athlete-success font-semibold mb-2">Analysis:</h4>
-                <p className="text-gray-300">{strength.analysis || strength.description}</p>
-              </div>
-              
-              <div className="bg-athlete-gray-700 rounded-lg p-4">
-                <h4 className="text-white font-semibold mb-2">Impact in Competition:</h4>
-                <p className="text-gray-300">{strength.impact || strength.competitiveAdvantage}</p>
-              </div>
-            </CardContent>
-          </Card>
-        )) || (
-          <div className="text-center text-gray-400 py-8">
-            <Star size={48} className="mx-auto mb-4 text-gray-600" />
-            <p>Strength analysis data is being processed...</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  const renderWeaknessesAnalysis = (data: any) => (
-    <div className="space-y-6">
-      <div className="bg-gradient-to-r from-athlete-danger/20 to-athlete-danger/5 rounded-lg p-6 border border-athlete-danger/30">
-        <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
-          <AlertTriangle className="mr-2 text-athlete-danger" size={24} />
-          Areas for Strategic Improvement
-        </h3>
-        <div className="text-gray-300">
-          {data?.overview ? (
-            <p>{data.overview}</p>
-          ) : (
-            <p>Targeted analysis of improvement areas based on competition performance and technical evaluation.</p>
-          )}
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        {data?.weaknesses?.map((weakness: any, index: number) => (
-          <Card key={index} className="bg-athlete-gray-800 border-gray-700">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between text-white">
-                <div className="flex items-center">
-                  <AlertTriangle className="mr-3 text-athlete-danger" size={24} />
-                  <span>{weakness.name || weakness.title || `Area ${index + 1}`}</span>
-                </div>
-                <Badge className={weakness.priority === 'high' || weakness.impact === 'high' ? 'bg-red-600' : weakness.priority === 'medium' || weakness.impact === 'medium' ? 'bg-yellow-600' : 'bg-blue-600'}>
-                  {weakness.priority || weakness.impact || 'Medium'} Priority
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-athlete-danger/10 rounded-lg p-4 border border-athlete-danger/20">
-                <h4 className="text-athlete-danger font-semibold mb-2">Analysis:</h4>
-                <p className="text-gray-300">{weakness.analysis || weakness.description}</p>
-              </div>
-              
-              <div className="bg-gradient-to-r from-athlete-accent/20 to-athlete-accent/5 rounded-lg p-4 border border-athlete-accent/30">
-                <h4 className="text-athlete-accent font-semibold mb-2">Improvement Strategy:</h4>
-                <p className="text-gray-300">{weakness.improvement || weakness.strategy}</p>
-              </div>
-            </CardContent>
-          </Card>
-        )) || (
-          <div className="text-center text-gray-400 py-8">
-            <AlertTriangle size={48} className="mx-auto mb-4 text-gray-600" />
-            <p>Improvement analysis is being generated...</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  const renderDevelopmentPlan = (data: any) => {
-    const phases = data?.phases || data?.developmentPlan || [
-      {
-        phase: "Foundation Building",
-        duration: "3 months",
-        focus: "Technical fundamentals and conditioning",
-        objectives: [
-          "Master basic technique execution",
-          "Build aerobic base fitness",
-          "Develop flexibility and mobility"
-        ]
-      }
-    ];
+  const renderBioAnalysis = (data: any) => {
+    console.log('Bio Analysis Data:', data);
+    
+    // Extract athlete info from data with proper fallbacks
+    const athleteInfo = {
+      name: data.name || athleteName,
+      sport: data.personalInfo?.sport || data.sport || "Sport",
+      rank: data.rank || "N/A",
+      bio: data.bio || data.content || "Biography not available",
+      profileImage: data.profileImageUrl,
+      achievements: data.achievements || [],
+      recentNews: data.personalInfo?.recentNews || data.recentNews || "No recent news available",
+      lastUpdated: data.personalInfo?.lastUpdated || "Recently updated",
+      analysisDate: data.personalInfo?.analysisDate || new Date().toLocaleDateString()
+    };
 
     return (
       <div className="space-y-6">
-        <div className="bg-gradient-to-r from-purple-600/20 to-purple-600/5 rounded-lg p-6 border border-purple-500/30">
-          <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
-            <Calendar className="mr-2 text-purple-400" size={24} />
-            Comprehensive Development Strategy
-          </h3>
-          <div className="text-gray-300">
-            {data?.overview || "Personalized training progression designed to maximize athletic potential and competitive performance."}
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          {phases.map((phase: any, index: number) => (
-            <Card key={index} className="bg-athlete-gray-800 border-gray-700">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between text-white">
-                  <div className="flex items-center">
-                    <div className="bg-purple-600 rounded-full w-8 h-8 flex items-center justify-center text-white font-bold mr-3">
-                      {index + 1}
+        <div className="grid md:grid-cols-3 gap-6">
+          <div className="md:col-span-1">
+            <Card className="bg-gradient-to-br from-athlete-gray-800 to-athlete-gray-700 border-athlete-accent/20">
+              <CardContent className="p-6 text-center">
+                <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-b from-athlete-accent to-blue-600 p-1 mb-4">
+                  {athleteInfo.profileImage ? (
+                    <img 
+                      src={athleteInfo.profileImage}
+                      alt={athleteInfo.name}
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full rounded-full bg-athlete-gray-600 flex items-center justify-center">
+                      <User className="w-16 h-16 text-gray-400" />
                     </div>
-                    <div>
-                      <span>{phase.phase || phase.name || `Phase ${index + 1}`}</span>
-                      <p className="text-sm text-gray-400 font-normal">
-                        {phase.duration || phase.timeframe || "12 weeks"}
-                      </p>
+                  )}
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-2">{athleteInfo.name}</h3>
+                <Badge className="bg-athlete-accent text-white mb-4">{athleteInfo.sport} Elite</Badge>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="text-center">
+                    <div className="text-athlete-warning font-bold text-xl">
+                      {data.worldRank || (typeof athleteInfo.rank === 'number' ? `#${athleteInfo.rank}` : athleteInfo.rank)}
                     </div>
+                    <div className="text-gray-400">World Rank</div>
                   </div>
-                  <Badge className="bg-purple-600 text-white">
-                    {phase.priority || "Core"}
-                  </Badge>
+                  <div className="text-center">
+                    <div className="text-athlete-success font-bold text-xl">
+                      {data.currentRecord || data.record || "Record N/A"}
+                    </div>
+                    <div className="text-gray-400">Current Record</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <div className="md:col-span-2 space-y-4">
+            <Card className="bg-athlete-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center text-white">
+                  <Award className="mr-2 text-athlete-warning" size={20} />
+                  Career Highlights
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-purple-600/10 rounded-lg p-4 border border-purple-500/20">
-                  <h4 className="text-purple-400 font-semibold mb-2">Primary Focus:</h4>
-                  <p className="text-gray-300">{phase.focus || phase.description}</p>
+              <CardContent className="space-y-3">
+                {athleteInfo.achievements.length > 0 ? (
+                  athleteInfo.achievements.slice(0, 4).map((achievement: string, index: number) => (
+                    <div key={index} className="flex items-center justify-between py-2 border-b border-gray-700">
+                      <span className="text-gray-300">{achievement}</span>
+                      <Badge className="bg-athlete-success text-white">Achievement</Badge>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between py-2 border-b border-gray-700">
+                      <span className="text-gray-300">Professional Athlete</span>
+                      <Badge className="bg-athlete-warning text-black">Current</Badge>
+                    </div>
+                    <div className="flex items-center justify-between py-2 border-b border-gray-700">
+                      <span className="text-gray-300">Competitive Experience</span>
+                      <Badge className="bg-athlete-success text-white">Active</Badge>
+                    </div>
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-gray-300">Ranking Status</span>
+                      <Badge className="bg-athlete-accent text-white">
+                        {typeof athleteInfo.rank === 'number' ? `#${athleteInfo.rank}` : 'Ranked'}
+                      </Badge>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-athlete-gray-800 border-gray-700">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-white">Athletic Profile</CardTitle>
+                  {(type === 'bio' || type === 'biography') && athleteId && athleteId.trim() !== '' && (
+                    <Button
+                      onClick={() => refreshBioMutation.mutate()}
+                      disabled={refreshBioMutation.isPending}
+                      size="sm"
+                      variant="outline"
+                      className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600 flex items-center gap-2"
+                      data-testid="refresh-bio-button"
+                    >
+                      <RefreshCw className={`w-4 h-4 ${refreshBioMutation.isPending ? 'animate-spin' : ''}`} />
+                      {refreshBioMutation.isPending ? 'Refreshing...' : 'Refresh Bio (20 tokens)'}
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-gray-300 leading-relaxed space-y-4">
+                  {formatBiography(athleteInfo.bio)}
                 </div>
                 
-                {phase.objectives && (
-                  <div className="bg-athlete-gray-700 rounded-lg p-4">
-                    <h4 className="text-white font-semibold mb-3">Key Objectives:</h4>
-                    <div className="space-y-2">
-                      {phase.objectives.map((objective: string, objIndex: number) => (
-                        <div key={objIndex} className="flex items-start space-x-3">
-                          <ChevronRight className="text-athlete-accent mt-0.5 flex-shrink-0" size={16} />
-                          <span className="text-gray-300">{objective}</span>
-                        </div>
+                {/* Reference Links Section */}
+                {data.referenceLinks && data.referenceLinks.length > 0 && (
+                  <div className="mt-4 p-4 bg-green-600/20 border border-green-500/30 rounded-lg">
+                    <h4 className="text-green-300 font-semibold mb-2 flex items-center">
+                      📋 Reference Sources:
+                    </h4>
+                    <div className="space-y-1">
+                      {data.referenceLinks.map((link: string, index: number) => (
+                        <a
+                          key={index}
+                          href={link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block text-green-400 hover:text-green-300 text-sm underline break-all"
+                        >
+                          {link}
+                        </a>
                       ))}
                     </div>
                   </div>
                 )}
+                
+                {athleteInfo.recentNews && athleteInfo.recentNews !== "No recent news available" && (
+                  <div className="mt-4 p-4 bg-athlete-gray-700 rounded-lg">
+                    <h4 className="text-athlete-accent font-semibold mb-2">Recent News:</h4>
+                    <p className="text-gray-300 text-sm">{athleteInfo.recentNews}</p>
+                  </div>
+                )}
+                {athleteInfo.lastUpdated && (
+                  <div className="mt-4 p-3 bg-gray-700/50 border border-gray-600/30 rounded-lg">
+                    <p className="text-gray-300 text-sm">
+                      📊 {athleteInfo.lastUpdated} • Analysis Date: {athleteInfo.analysisDate}
+                    </p>
+                  </div>
+                )}
+                
+                {athleteInfo.lastUpdated?.includes('OpenAI') && (
+                  <div className="mt-2 p-3 bg-blue-600/20 border border-blue-500/30 rounded-lg">
+                    <p className="text-blue-300 text-sm">
+                      ⚡ Enhanced with AI-powered analysis using the latest o3 model
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
-          ))}
+          </div>
         </div>
       </div>
     );
   };
 
-  const renderNutritionPlan = (data: any) => (
-    <div className="space-y-6">
-      <div className="bg-gradient-to-r from-green-600/20 to-green-600/5 rounded-lg p-6 border border-green-500/30">
-        <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
-          <Apple className="mr-2 text-green-400" size={24} />
-          Performance Nutrition Strategy
-        </h3>
-        <div className="text-gray-300">
-          {data?.overview || "Tailored nutrition plan optimized for athletic performance, recovery, and long-term health."}
+  const renderRankAnalysis = (data: any) => {
+    // Use actual data from the database/API response
+    const chartData = data.history || [
+      { date: '2023-01', rank: 15 },
+      { date: '2023-07', rank: 6 },
+      { date: '2024-01', rank: 2 },
+      { date: '2024-05', rank: 1 },
+      { date: '2024-12', rank: 2 }
+    ];
+
+    const currentRank = data.currentRank || data.current_rank || 1;
+    const peakRank = data.peakRank || data.peak_rank || 1;
+    const averageRank = data.averageRank || data.average_rank || 2.4;
+
+    return (
+      <div className="space-y-6">
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card className="bg-athlete-gray-800 border-gray-700">
+            <CardHeader>
+              <CardTitle className="flex items-center text-white">
+                <TrendingUp className="mr-2 text-athlete-success" size={20} />
+                Ranking Progression
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-64">
+                <RankChart data={chartData.map((item: any) => ({
+                  date: item.month || item.date,
+                  rank: item.rank
+                }))} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="space-y-4">
+            <Card className="bg-gradient-to-r from-athlete-success/20 to-athlete-success/5 border-athlete-success/30">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold text-white">Peak Ranking</h3>
+                    <p className="text-gray-400">World #{peakRank} {chartData.length > 0 ? '(Historical Peak)' : '(May 2024)'}</p>
+                  </div>
+                <div className="text-4xl font-bold text-athlete-success">#{peakRank}</div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-athlete-gray-800 border-gray-700">
+            <CardHeader>
+              <CardTitle className="text-white text-lg">Performance Metrics</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-400">Win Rate</span>
+                  <span className="text-white">90%</span>
+                </div>
+                <Progress value={90} className="h-2" />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-400">Points Per Match</span>
+                  <span className="text-white">8.2</span>
+                </div>
+                <Progress value={82} className="h-2" />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-400">Counter-Attack Success</span>
+                  <span className="text-white">78%</span>
+                </div>
+                <Progress value={78} className="h-2" />
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
+    </div>
+  );
+  };
 
-      <div className="grid md:grid-cols-3 gap-4 mb-6">
-        {[
-          { 
-            title: "Daily Calories", 
-            value: data?.calories || "3,200", 
-            icon: Flame,
-            color: "text-red-400"
-          },
-          { 
-            title: "Protein Target", 
-            value: data?.protein || "140g", 
-            icon: Zap,
-            color: "text-blue-400"
-          },
-          { 
-            title: "Hydration", 
-            value: data?.hydration || "4.2L", 
-            icon: Heart,
-            color: "text-green-400"
-          }
-        ].map((metric, index) => (
-          <Card key={index} className="bg-athlete-gray-800 border-gray-700">
-            <CardContent className="p-4 text-center">
-              <metric.icon className={`mx-auto mb-2 ${metric.color}`} size={32} />
-              <h3 className="text-xl font-bold text-white">{metric.value}</h3>
-              <p className="text-gray-300 text-sm">{metric.title}</p>
+  const renderStrengthsAnalysis = (data: any) => {
+    // Use actual data from the API response, with fallback to sample data
+    const strengthsData = data.strengths || [
+      {
+        title: "Lightning-Fast Combinations",
+        description: "Exceptional ability to execute rapid-fire kick combinations with perfect timing and precision. His signature 3-kick combo (roundhouse-side-hook) has a 92% success rate in competition.",
+        rating: 95
+      },
+      {
+        title: "Mental Fortitude", 
+        description: "Demonstrates extraordinary psychological resilience under pressure. Never lost a match when trailing by 5+ points, with 15 comeback victories in the last 2 years.",
+        rating: 92
+      },
+      {
+        title: "Counter-Attack Mastery",
+        description: "World-class defensive awareness and counter-attacking skills. Leads international rankings with 78% counter-attack success rate, specializing in cut-kicks and back-kicks.",
+        rating: 88
+      },
+      {
+        title: "Tactical Intelligence",
+        description: "Superior game reading ability and tactical adaptation mid-match. Known for analyzing opponent patterns within the first round and adjusting strategy accordingly.",
+        rating: 90
+      }
+    ];
+
+    // Icon mapping function
+    const getStrengthIcon = (title: string, index: number) => {
+      const titleLower = title.toLowerCase();
+      if (titleLower.includes('speed') || titleLower.includes('combination') || titleLower.includes('lightning')) {
+        return <Zap className="text-athlete-warning" size={24} />;
+      } else if (titleLower.includes('mental') || titleLower.includes('fortitude') || titleLower.includes('psychological')) {
+        return <Brain className="text-purple-400" size={24} />;
+      } else if (titleLower.includes('counter') || titleLower.includes('defense') || titleLower.includes('mastery')) {
+        return <Shield className="text-athlete-accent" size={24} />;
+      } else if (titleLower.includes('tactical') || titleLower.includes('intelligence') || titleLower.includes('strategy')) {
+        return <Target className="text-athlete-success" size={24} />;
+      } else {
+        // Rotate through icons for dynamic data
+        const icons = [
+          <Zap className="text-athlete-warning" size={24} />,
+          <Brain className="text-purple-400" size={24} />,
+          <Shield className="text-athlete-accent" size={24} />,
+          <Target className="text-athlete-success" size={24} />
+        ];
+        return icons[index % 4];
+      }
+    };
+
+    return (
+      <div className="grid md:grid-cols-2 gap-6">
+        {strengthsData.map((strength: any, index: number) => (
+          <Card key={index} className="bg-gradient-to-br from-athlete-gray-800 to-athlete-gray-700 border-athlete-success/30">
+            <CardHeader>
+              <CardTitle className="flex items-center text-white">
+                {getStrengthIcon(strength.title, index)}
+                <span className="ml-3">{strength.title}</span>
+                <Badge className="ml-auto bg-athlete-success text-white">
+                  {strength.rating || (95 - index * 3)}%
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-300 leading-relaxed mb-4">{strength.description}</p>
+              <Progress value={strength.rating || (95 - index * 3)} className="h-2" />
             </CardContent>
           </Card>
         ))}
       </div>
+    );
+  };
 
-      <div className="space-y-4">
-        {(data?.nutritionPlan || [
+  const renderWeaknessesAnalysis = (data: any) => {
+    // Use actual data from the API response, with fallback to sample data
+    const weaknessesData = data.weaknesses || [
+      {
+        title: "Stamina in Extended Matches",
+        description: "Performance tends to decline slightly in overtime rounds. Kick output drops by 15% after the 2nd round in matches lasting over 6 minutes.",
+        impact: "Medium",
+        improvement: "High-intensity interval training focusing on match-specific endurance."
+      },
+      {
+        title: "Aggressive Close-Range Pressure", 
+        description: "Can struggle against opponents who constantly pressure forward and clinch. Success rate drops to 68% when facing clinch-heavy fighting styles.",
+        impact: "High",
+        improvement: "Specialized clinch work and short-range technique development."
+      },
+      {
+        title: "Left-Side Blind Spot",
+        description: "Slightly slower reaction time to attacks from the left side (0.2 seconds slower). This creates vulnerability to left-footed fighters' roundhouse kicks.",
+        impact: "Medium",
+        improvement: "Mirror work and reaction drills targeting left-side attacks."
+      }
+    ];
+
+    return (
+      <div className="space-y-6">
+        {weaknessesData.map((weakness: any, index: number) => (
+          <Card key={index} className="bg-gradient-to-r from-athlete-danger/20 to-athlete-danger/5 border-athlete-danger/30">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-white mb-2">{weakness.title}</h3>
+                  <p className="text-gray-300 leading-relaxed">{weakness.description}</p>
+                </div>
+                <Badge className={`ml-4 ${
+                  (weakness.impact === 'High' || weakness.impact === 'high') ? 'bg-red-600' : 
+                  (weakness.impact === 'Medium' || weakness.impact === 'medium') ? 'bg-orange-500' : 
+                  'bg-yellow-500'
+                } text-white`}>
+                  {weakness.impact || 'Medium'} Impact
+                </Badge>
+              </div>
+              <div className="bg-athlete-gray-700 rounded-lg p-4">
+                <h4 className="text-athlete-accent font-semibold mb-2">Improvement Strategy:</h4>
+                <p className="text-gray-300">{weakness.improvement || 'Focus on targeted training to address this weakness area.'}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  };
+
+  const renderDevelopmentPlan = (data: any) => {
+    console.log('Frontend Development Plan Data:', JSON.stringify(data, null, 2));
+    console.log('Plans count:', data.plan?.length || 0);
+    console.log('All plans:', data.plan);
+    if (data.plan?.length > 0) {
+      console.log('First plan:', data.plan[0]);
+      console.log('Plan structure check:', {
+        week: data.plan[0].week,
+        focus: data.plan[0].focus,
+        title: data.plan[0].title,
+        activities: data.plan[0].activities,
+        description: data.plan[0].description
+      });
+    }
+    return (
+    <div className="space-y-6">
+      <div className="grid md:grid-cols-2 gap-6 mb-6">
+        <Card className="bg-gradient-to-r from-purple-600/20 to-purple-600/5 border-purple-500/30">
+          <CardContent className="p-6 text-center">
+            <Calendar className="mx-auto mb-4 text-purple-400" size={48} />
+            <h3 className="text-2xl font-bold text-white mb-2">{data.duration || '12-Week Program'}</h3>
+            <p className="text-gray-300">
+              {data.aiGenerated ? 'AI-powered development plan' : 'Comprehensive development plan'} targeting key improvement areas
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-r from-athlete-accent/20 to-athlete-accent/5 border-athlete-accent/30">
+          <CardContent className="p-6 text-center">
+            <Target className="mx-auto mb-4 text-athlete-accent" size={48} />
+            <h3 className="text-2xl font-bold text-white mb-2">Olympic Ready</h3>
+            <p className="text-gray-300">Designed to peak performance for elite competition</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Tabs defaultValue="weeks1-4" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 bg-athlete-gray-800">
+          <TabsTrigger value="weeks1-4" className="text-white">Weeks 1-4</TabsTrigger>
+          <TabsTrigger value="weeks5-8" className="text-white">Weeks 5-8</TabsTrigger>
+          <TabsTrigger value="weeks9-12" className="text-white">Weeks 9-12</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="weeks1-4" className="space-y-4">
+          {(() => {
+            const filteredPlans = (data.plan || []).filter((plan: any) => plan.week <= 4);
+            console.log('Weeks 1-4 plans:', filteredPlans);
+            console.log('Filter result count:', filteredPlans.length);
+            return null;
+          })()}
+          {(data.plan || []).filter((plan: any) => plan.week <= 4).map((plan: any, index: number) => (
+            <Card key={index} className="bg-athlete-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center text-white">
+                  <div className="bg-purple-600 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
+                    {plan.week}
+                  </div>
+                  {plan.focus || plan.title}
+                  <Badge className="ml-auto bg-purple-600 text-white">Week {plan.week}</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-gray-300">
+                  {plan.activities && plan.activities.length > 0 ? (
+                    <ul className="list-disc list-inside space-y-2">
+                      {plan.activities.map((activity: string, i: number) => (
+                        <li key={i}>{activity}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>{plan.description || plan.focus || plan.title}</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+        
+        <TabsContent value="weeks5-8" className="space-y-4">
+          {(data.plan || []).filter((plan: any) => plan.week >= 5 && plan.week <= 8).map((plan: any, index: number) => (
+            <Card key={index} className="bg-athlete-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center text-white">
+                  <div className="bg-purple-600 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
+                    {plan.week}
+                  </div>
+                  {plan.focus || plan.title}
+                  <Badge className="ml-auto bg-purple-600 text-white">Week {plan.week}</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-gray-300">
+                  {plan.activities && plan.activities.length > 0 ? (
+                    <ul className="list-disc list-inside space-y-2">
+                      {plan.activities.map((activity: string, i: number) => (
+                        <li key={i}>{activity}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>{plan.description || plan.focus || plan.title}</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+        
+        <TabsContent value="weeks9-12" className="space-y-4">
+          {(data.plan || []).filter((plan: any) => plan.week >= 9 && plan.week <= 12).map((plan: any, index: number) => (
+            <Card key={index} className="bg-athlete-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center text-white">
+                  <div className="bg-purple-600 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
+                    {plan.week}
+                  </div>
+                  {plan.focus || plan.title}
+                  <Badge className="ml-auto bg-purple-600 text-white">Week {plan.week}</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-gray-300">
+                  {plan.activities && plan.activities.length > 0 ? (
+                    <ul className="list-disc list-inside space-y-2">
+                      {plan.activities.map((activity: string, i: number) => (
+                        <li key={i}>{activity}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>{plan.description || plan.focus || plan.title}</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+      </Tabs>
+    </div>
+    );
+  };
+
+  const renderNutritionPlan = (data: any) => (
+    <div className="space-y-6">
+      <div className="grid md:grid-cols-3 gap-6 mb-6">
+        <Card className="bg-gradient-to-r from-green-600/20 to-green-600/5 border-green-500/30">
+          <CardContent className="p-6 text-center">
+            <Heart className="mx-auto mb-4 text-green-400" size={48} />
+            <h3 className="text-xl font-bold text-white">2,850</h3>
+            <p className="text-gray-300">Daily Calories</p>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-r from-blue-600/20 to-blue-600/5 border-blue-500/30">
+          <CardContent className="p-6 text-center">
+            <Flame className="mx-auto mb-4 text-blue-400" size={48} />
+            <h3 className="text-xl font-bold text-white">180g</h3>
+            <p className="text-gray-300">Daily Protein</p>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-r from-orange-600/20 to-orange-600/5 border-orange-500/30">
+          <CardContent className="p-6 text-center">
+            <Clock className="mx-auto mb-4 text-orange-400" size={48} />
+            <h3 className="text-xl font-bold text-white">5</h3>
+            <p className="text-gray-300">Meals/Day</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        {[
           {
-            title: "Pre-Training Nutrition",
-            timing: "60-90 minutes before",
-            recommendations: "Complex carbohydrates with moderate protein to fuel performance while avoiding digestive stress.",
-            foods: ["Oatmeal with banana", "Greek yogurt with berries", "Whole grain toast with almond butter"]
+            meal: "Pre-Training Breakfast",
+            food: "Oatmeal with berries and almonds",
+            calories: 450,
+            timing: "2 hours before training",
+            benefits: "Complex carbohydrates for sustained energy, antioxidants for recovery"
           },
           {
-            title: "Post-Training Recovery",
-            timing: "Within 30 minutes",
-            recommendations: "Fast-absorbing proteins and carbohydrates to optimize muscle recovery and glycogen replenishment.",
-            foods: ["Protein shake with fruit", "Chocolate milk", "Chicken and rice bowl"]
+            meal: "Post-Workout Recovery",
+            food: "Whey protein shake with banana",
+            calories: 280,
+            timing: "Within 15 minutes",
+            benefits: "Fast-absorbing protein for muscle recovery, glycogen replenishment"
+          },
+          {
+            meal: "Competition Day Lunch", 
+            food: "Grilled chicken with quinoa and vegetables",
+            calories: 520,
+            timing: "3-4 hours before competition",
+            benefits: "Lean protein, complex carbs, micronutrients for optimal performance"
+          },
+          {
+            meal: "Evening Recovery Dinner",
+            food: "Salmon with sweet potato and broccoli", 
+            calories: 580,
+            timing: "2-3 hours post-training",
+            benefits: "Omega-3 fatty acids for inflammation reduction, slow-digesting carbs"
           }
-        ]).map((meal: any, index: number) => (
+        ].map((meal, index) => (
           <Card key={index} className="bg-athlete-gray-800 border-gray-700">
             <CardHeader>
               <CardTitle className="flex items-center justify-between text-white">
-                <div className="flex items-center">
-                  <Apple className="mr-3 text-green-400" size={24} />
-                  <div>
-                    <span>{meal.title || meal.name}</span>
-                    <p className="text-sm text-gray-400 font-normal">
-                      {meal.timing || meal.timeframe}
-                    </p>
-                  </div>
-                </div>
+                <span>{meal.meal}</span>
+                <Badge className="bg-green-600 text-white">{meal.calories} cal</Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-green-600/10 rounded-lg p-4 border border-green-500/20">
-                <h4 className="text-green-400 font-semibold mb-2">Nutritional Strategy:</h4>
-                <p className="text-gray-300">{meal.recommendations || meal.description}</p>
-              </div>
-              
-              {meal.foods && (
-                <div className="bg-athlete-gray-700 rounded-lg p-4">
-                  <h4 className="text-white font-semibold mb-3">Recommended Foods:</h4>
-                  <div className="space-y-2">
-                    {meal.foods.map((food: string, foodIndex: number) => (
-                      <div key={foodIndex} className="flex items-center space-x-3">
-                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                        <span className="text-gray-300">{food}</span>
-                      </div>
-                    ))}
-                  </div>
+            <CardContent className="space-y-3">
+              <div className="bg-athlete-gray-700 rounded-lg p-4">
+                <h4 className="font-semibold text-athlete-accent mb-2">{meal.food}</h4>
+                <div className="flex items-center text-sm text-gray-400 mb-2">
+                  <Clock size={16} className="mr-2" />
+                  {meal.timing}
                 </div>
-              )}
+                <p className="text-gray-300 text-sm">{meal.benefits}</p>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -638,86 +836,73 @@ export function AnalysisPopup({
 
   const renderBeatStrategies = (data: any) => (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-red-600/20 to-red-600/5 rounded-lg p-6 border border-red-500/30">
-        <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
-          <Swords className="mr-2 text-red-400" size={24} />
-          Strategic Combat Analysis
-        </h3>
-        <div className="text-gray-300">
-          {data?.overview || "Comprehensive tactical approach for gaining competitive advantage based on opponent analysis and strategic planning."}
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        {(data?.strategies || [
-          {
-            title: "Aggressive Early Pressure",
-            category: "Offensive Strategy",
-            description: "Apply immediate pressure in the first round to establish dominance and force defensive reactions.",
-            keyTechniques: ["Fast-paced combinations", "Continuous forward movement", "High-scoring techniques"],
-            effectiveness: "85%",
-            riskLevel: "Medium"
-          }
-        ]).map((strategy: any, index: number) => (
-          <Card key={index} className="bg-athlete-gray-800 border-gray-700">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between text-white">
-                <div className="flex items-center">
-                  <Swords className="mr-3 text-red-400" size={24} />
-                  <span>{strategy.title || strategy.name || `Strategy ${index + 1}`}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Badge className="bg-red-600 text-white">
-                    {strategy.category || "Tactical"}
-                  </Badge>
-                  {strategy.effectiveness && (
-                    <div className="text-green-400 font-bold">
-                      {strategy.effectiveness}
-                    </div>
-                  )}
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-red-600/10 rounded-lg p-4 border border-red-500/20">
-                <h4 className="text-red-400 font-semibold mb-2">Strategic Approach:</h4>
-                <p className="text-gray-300">{strategy.description || strategy.analysis}</p>
+      {[
+        {
+          opponent: "Power Kicker",
+          strategy: "Counter the Power Kicker",
+          description: "Against heavy kickers: Use distance management and timing. Stay just outside their optimal range, bait power kicks, then counter with quick combinations to the body.",
+          tactics: ["Distance management", "Timing counters", "Body targeting", "Early point scoring"],
+          effectiveness: 85
+        },
+        {
+          opponent: "Pressure Fighter",
+          strategy: "Neutralize the Pressure Fighter", 
+          description: "Against constant forward pressure: Utilize circular footwork and pivot escapes. Use push kicks to create distance, target their advancing legs with cut kicks.",
+          tactics: ["Circular footwork", "Push kicks", "Cut kicks", "Clinch escapes"],
+          effectiveness: 78
+        },
+        {
+          opponent: "Technical Fighter",
+          strategy: "Outpoint the Technical Fighter",
+          description: "Against technical opponents: Increase pace and variety. Use feints and rhythm changes to disrupt their timing. Score with unconventional techniques.",
+          tactics: ["Pace variation", "Feint attacks", "Rhythm changes", "Unconventional techniques"],
+          effectiveness: 82
+        },
+        {
+          opponent: "Defensive Counter-Puncher",
+          strategy: "Defeat the Defensive Counter-Puncher",
+          description: "Against defensive fighters: Use combination attacks and continuous pressure. Fake attacks to draw out their counters, then counter their counters.",
+          tactics: ["Combination attacks", "Continuous pressure", "Counter counters", "Superior conditioning"],
+          effectiveness: 90
+        }
+      ].map((strategy, index) => (
+        <Card key={index} className="bg-gradient-to-r from-red-600/20 to-red-600/5 border-red-500/30">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between text-white">
+              <div className="flex items-center">
+                <Swords className="mr-3 text-red-400" size={24} />
+                <span>vs {strategy.opponent}</span>
               </div>
-              
-              {strategy.keyTechniques && (
-                <div className="bg-athlete-gray-700 rounded-lg p-4">
-                  <h4 className="text-white font-semibold mb-3">Key Techniques:</h4>
-                  <div className="space-y-2">
-                    {strategy.keyTechniques.map((technique: string, techIndex: number) => (
-                      <div key={techIndex} className="flex items-center space-x-3">
-                        <Target className="text-red-400 flex-shrink-0" size={16} />
-                        <span className="text-gray-300">{technique}</span>
-                      </div>
-                    ))}
+              <Badge className={`${strategy.effectiveness >= 85 ? 'bg-green-600' : strategy.effectiveness >= 75 ? 'bg-orange-500' : 'bg-red-600'} text-white`}>
+                {strategy.effectiveness}% Success
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-gray-300 leading-relaxed">{strategy.description}</p>
+            
+            <div className="bg-athlete-gray-700 rounded-lg p-4">
+              <h4 className="text-red-400 font-semibold mb-3">Key Tactics:</h4>
+              <div className="grid grid-cols-2 gap-2">
+                {strategy.tactics.map((tactic, tacticIndex) => (
+                  <div key={tacticIndex} className="flex items-center text-sm">
+                    <ChevronRight className="mr-2 text-red-400" size={16} />
+                    <span className="text-gray-300">{tactic}</span>
                   </div>
-                </div>
-              )}
-              
-              {(strategy.opponent || strategy.successFactors) && (
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="bg-red-900/5 rounded-lg p-3 border border-red-700/10">
-                    <p className="text-red-400 text-sm font-medium mb-1">Opponent Type:</p>
-                    <p className="text-gray-400 text-sm">
-                      {strategy.opponent || "General tactical approach"}
-                    </p>
-                  </div>
-                  <div className="bg-green-900/5 rounded-lg p-3 border border-green-700/10">
-                    <p className="text-green-400 text-sm font-medium mb-1">Success Factors:</p>
-                    <p className="text-gray-400 text-sm">
-                      {strategy.successFactors || "Proper timing and technique execution"}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">Effectiveness Rating</span>
+                <span className="text-white">{strategy.effectiveness}%</span>
+              </div>
+              <Progress value={strategy.effectiveness} className="h-2" />
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 
@@ -727,15 +912,15 @@ export function AnalysisPopup({
         <Card className="bg-gradient-to-r from-indigo-600/20 to-indigo-600/5 border-indigo-500/30">
           <CardContent className="p-6 text-center">
             <Video className="mx-auto mb-4 text-indigo-400" size={48} />
-            <h3 className="text-xl font-bold text-white">{data?.kicksAnalyzed || '500+'}</h3>
-            <p className="text-gray-300">Techniques Analyzed</p>
+            <h3 className="text-xl font-bold text-white">500+</h3>
+            <p className="text-gray-300">Kicks Analyzed</p>
           </CardContent>
         </Card>
         
         <Card className="bg-gradient-to-r from-purple-600/20 to-purple-600/5 border-purple-500/30">
           <CardContent className="p-6 text-center">
             <Target className="mx-auto mb-4 text-purple-400" size={48} />
-            <h3 className="text-xl font-bold text-white">{data?.accuracy || '94%'}</h3>
+            <h3 className="text-xl font-bold text-white">94%</h3>
             <p className="text-gray-300">Technical Accuracy</p>
           </CardContent>
         </Card>
@@ -743,21 +928,36 @@ export function AnalysisPopup({
         <Card className="bg-gradient-to-r from-green-600/20 to-green-600/5 border-green-500/30">
           <CardContent className="p-6 text-center">
             <TrendingUp className="mx-auto mb-4 text-green-400" size={48} />
-            <h3 className="text-xl font-bold text-white">{data?.avgPoints || '8.2'}</h3>
+            <h3 className="text-xl font-bold text-white">8.2</h3>
             <p className="text-gray-300">Avg Points/Match</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="space-y-6">
-        {(data?.analyses || [
+        {[
           {
             title: "Technique Breakdown Analysis",
             type: "Technical",
-            findings: "Comprehensive analysis reveals exceptional technical precision with optimal biomechanics and consistent execution under pressure.",
-            recommendations: "Focus on advanced timing variations to increase unpredictability against elite-level opponents."
+            findings: "Analysis of 500+ kicks shows 94% technical accuracy with optimal hip rotation and chamber positioning. Exceptional ability to maintain form under fatigue.",
+            recommendations: "Continue current technique maintenance. Add more variation in kick timing to increase unpredictability against elite opponents.",
+            videoUrl: "https://example.com/seif-eissa-training-analysis"
+          },
+          {
+            title: "Competition Performance Review",
+            type: "Performance", 
+            findings: "Won 18 of last 20 matches with average winning margin of 8.2 points. Shows consistent performance across different venues and opponent styles.",
+            recommendations: "Focus on first-round dominance to avoid close decisions. Current strategy of building leads in rounds 2-3 is effective but risky against world-class opponents.",
+            videoUrl: "https://example.com/seif-eissa-competition-highlights"
+          },
+          {
+            title: "Psychological Performance Profile",
+            type: "Mental",
+            findings: "Heart rate remains stable under pressure (average 165 BPM during high-pressure moments vs 170 BPM training average). Excellent emotional control and focus.",
+            recommendations: "Implement pre-competition visualization routines for Olympic-level pressure scenarios. Consider working with sports psychologist for peak performance mindset.",
+            videoUrl: "https://example.com/seif-eissa-psychological-profile"
           }
-        ]).map((analysis: any, index: number) => (
+        ].map((analysis, index) => (
           <Card key={index} className="bg-athlete-gray-800 border-gray-700">
             <CardHeader>
               <CardTitle className="flex items-center justify-between text-white">

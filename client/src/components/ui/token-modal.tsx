@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Coins, Zap, Trophy, Loader2, CreditCard } from "lucide-react";
+import { Coins, Zap, Trophy, Loader2 } from "lucide-react";
 
 interface TokenModalProps {
   open: boolean;
@@ -21,30 +21,7 @@ export function TokenModal({ open, onOpenChange }: TokenModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const paymobMutation = useMutation({
-    mutationFn: async (amount: number) => {
-      const response = await apiRequest("POST", "/api/paymob/initiate-payment", { amount, currency: 'EGP' });
-      return response.json();
-    },
-    onSuccess: (data) => {
-      // Redirect to Paymob payment page
-      window.open(data.paymentUrl, '_blank');
-      toast({
-        title: "Payment Initiated",
-        description: `Redirecting to payment gateway for ${data.tokens} tokens.`,
-      });
-      onOpenChange(false);
-    },
-    onError: (error) => {
-      toast({
-        title: "Payment Failed",
-        description: error.message || "Failed to initiate payment",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const legacyPurchaseMutation = useMutation({
+  const purchaseMutation = useMutation({
     mutationFn: async (amount: number) => {
       const response = await apiRequest("POST", "/api/purchase-tokens", { amount });
       return response.json();
@@ -70,12 +47,8 @@ export function TokenModal({ open, onOpenChange }: TokenModalProps) {
     },
   });
 
-  const handlePaymobPurchase = (amount: number) => {
-    paymobMutation.mutate(amount);
-  };
-
-  const handleLegacyPurchase = (amount: number) => {
-    legacyPurchaseMutation.mutate(amount);
+  const handlePurchase = (amount: number) => {
+    purchaseMutation.mutate(amount);
   };
 
   return (
@@ -113,45 +86,21 @@ export function TokenModal({ open, onOpenChange }: TokenModalProps) {
                   <div className="text-xs text-athlete-accent">Best Value</div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Button 
-                  onClick={() => handlePaymobPurchase(25)}
-                  data-testid="button-paymob-purchase-1000"
-                  disabled={paymobMutation.isPending}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white"
-                >
-                  {paymobMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="mr-2 h-4 w-4" />
-                      Pay with Paymob - $25
-                    </>
-                  )}
-                </Button>
-                <Button 
-                  onClick={() => handleLegacyPurchase(25)}
-                  data-testid="button-legacy-purchase-1000"
-                  disabled={legacyPurchaseMutation.isPending}
-                  variant="outline"
-                  className="w-full border-gray-600 text-white hover:bg-athlete-gray-600"
-                >
-                  {legacyPurchaseMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <Coins className="mr-2 h-4 w-4" />
-                      Simulate Purchase
-                    </>
-                  )}
-                </Button>
-              </div>
+              <Button 
+                onClick={() => handlePurchase(25)}
+                data-testid="button-purchase-1000"
+                disabled={purchaseMutation.isPending}
+                className="w-full bg-gradient-to-r from-athlete-accent to-athlete-success hover:from-blue-600 hover:to-green-600 text-white"
+              >
+                {purchaseMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  "Buy 1,000 Tokens - $25"
+                )}
+              </Button>
             </CardContent>
           </Card>
 
@@ -170,45 +119,22 @@ export function TokenModal({ open, onOpenChange }: TokenModalProps) {
                   <div className="font-bold text-white">$15</div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Button 
-                  onClick={() => handlePaymobPurchase(15)}
-                  data-testid="button-paymob-purchase-500"
-                  disabled={paymobMutation.isPending}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white"
-                >
-                  {paymobMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="mr-2 h-4 w-4" />
-                      Pay with Paymob - $15
-                    </>
-                  )}
-                </Button>
-                <Button 
-                  onClick={() => handleLegacyPurchase(15)}
-                  data-testid="button-legacy-purchase-500"
-                  disabled={legacyPurchaseMutation.isPending}
-                  variant="outline"
-                  className="w-full border-gray-600 text-white hover:bg-athlete-gray-600"
-                >
-                  {legacyPurchaseMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <Coins className="mr-2 h-4 w-4" />
-                      Simulate Purchase
-                    </>
-                  )}
-                </Button>
-              </div>
+              <Button 
+                onClick={() => handlePurchase(15)}
+                data-testid="button-purchase-500"
+                disabled={purchaseMutation.isPending}
+                variant="outline"
+                className="w-full border-gray-600 text-white hover:bg-athlete-gray-600"
+              >
+                {purchaseMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  "Buy 500 Tokens - $15"
+                )}
+              </Button>
             </CardContent>
           </Card>
 
@@ -228,45 +154,22 @@ export function TokenModal({ open, onOpenChange }: TokenModalProps) {
                   <div className="text-xs text-gray-400">Bulk Savings</div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Button 
-                  onClick={() => handlePaymobPurchase(50)}
-                  data-testid="button-paymob-purchase-2500"
-                  disabled={paymobMutation.isPending}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white"
-                >
-                  {paymobMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="mr-2 h-4 w-4" />
-                      Pay with Paymob - $50
-                    </>
-                  )}
-                </Button>
-                <Button 
-                  onClick={() => handleLegacyPurchase(50)}
-                  data-testid="button-legacy-purchase-2500"
-                  disabled={legacyPurchaseMutation.isPending}
-                  variant="outline"
-                  className="w-full border-gray-600 text-white hover:bg-athlete-gray-600"
-                >
-                  {legacyPurchaseMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <Coins className="mr-2 h-4 w-4" />
-                      Simulate Purchase
-                    </>
-                  )}
-                </Button>
-              </div>
+              <Button 
+                onClick={() => handlePurchase(50)}
+                data-testid="button-purchase-2500"
+                disabled={purchaseMutation.isPending}
+                variant="outline"
+                className="w-full border-gray-600 text-white hover:bg-athlete-gray-600"
+              >
+                {purchaseMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  "Buy 2,500 Tokens - $50"
+                )}
+              </Button>
             </CardContent>
           </Card>
 
@@ -275,7 +178,7 @@ export function TokenModal({ open, onOpenChange }: TokenModalProps) {
             data-testid="button-maybe-later"
             variant="ghost"
             className="w-full text-gray-400 hover:text-white"
-            disabled={paymobMutation.isPending || legacyPurchaseMutation.isPending}
+            disabled={purchaseMutation.isPending}
           >
             Maybe Later
           </Button>

@@ -12,10 +12,6 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-**Paymob Payment Integration with Testing Features (August 10, 2025)**: Successfully integrated Paymob payment gateway alongside existing legacy payment system for dual payment method support. Implemented comprehensive payment infrastructure with order tracking, callback handling, and transaction management. Added development testing feature for easy token addition during testing phase (easily removable for production). Features include: Paymob payment initiation with PAYMOB_API_KEY, PAYMOB_INTEGRATION_ID, and IFRAME_URL environment variables, dual payment buttons in token purchase modal (Paymob and legacy simulation), test token modal with custom amounts and quick-add buttons, Paymob webhook callback system for payment verification, and transaction logging for both payment methods.
-
-**GPT-5 Web Search Implementation with Correct API Format (August 10, 2025)**: Successfully implemented proper GPT-5 web search functionality using the correct `openai.responses.create()` API format instead of `chat.completions.create()`. Updated both `generateAthleteBiography` and `refreshAthleteBiographyWithSearch` functions to use `input` parameter with `tools: [{ name: "web_search", type: "web_search" }]` and parse responses via `response.output`. System now performs actual web searches to find current athlete information, competition results, rankings, and biographical details. Enhanced biography styling with large blue-purple gradient headings and improved markdown parsing for **Title** format sections.
-
 **Complete GPT-5 Migration with Temperature 1.0 (August 10, 2025)**: Successfully migrated all LLM implementations from Gemini to GPT-5 with mandatory temperature 1.0 (cannot go below). Completely removed server/geminiService.ts file and replaced all analysis functions with GPT-5 equivalents. All athlete profile generation, detailed analysis, specific analysis, threaded biography generation, and athlete comparisons now use GPT-5 with web search capabilities. Enhanced athlete image search with strict sport-based validation to prevent basketball player images for taekwondo athletes. System maintains taekwondo-only image policy using TaekwondoData.com exclusively for taekwondo athletes.
 
 **OpenAI GPT-5 Web Search Integration (August 8, 2025)**: Successfully implemented GPT-5 with web search capabilities using responses.create() API instead of chat.completions.create(). Fixed token allocation issue where GPT-5 reasoning model was using all 2000 tokens for internal reasoning, leaving none for response output. Increased max_completion_tokens to 8000 and implemented proper web_search_preview tool integration. System now uses authentic web search data for athlete biography generation, replacing Gemini service entirely. Features include: Real-time web search for athlete data, Egyptian taekwondo athlete specialization via taekwondodata.com, structured JSON output validation, and comprehensive error handling with detailed logging.
@@ -90,9 +86,7 @@ Preferred communication style: Simple, everyday language.
 - **Passport.js**: Authentication middleware for Node.js with OpenID Connect strategy
 
 ### Payment Processing
-- **Paymob**: Primary payment gateway for Egyptian market with API integration, order management, and webhook handling
 - **Stripe**: Payment processing integration for token purchases and subscription management (frontend components implemented)
-- **Legacy System**: Fallback payment simulation for testing and development purposes
 
 ### UI and Styling
 - **Radix UI**: Headless UI primitives for accessible component foundation

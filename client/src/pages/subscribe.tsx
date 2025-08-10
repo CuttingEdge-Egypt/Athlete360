@@ -1,62 +1,28 @@
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Navigation } from "@/components/Navigation";
-import { TokenModal } from "@/components/ui/token-modal";
-import { TestTokenModal } from "@/components/ui/test-token-modal";
-import { Check, Coins, Star, Trophy, Zap, CreditCard, Loader2 } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { Check, Coins, Star, Trophy, Zap } from "lucide-react";
 
 export default function Subscribe() {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [tokenModalOpen, setTokenModalOpen] = useState(false);
-  const [testTokenModalOpen, setTestTokenModalOpen] = useState(false);
+  const handlePurchase = async (amount: number) => {
+    try {
+      const response = await fetch('/api/purchase-tokens', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount }),
+        credentials: 'include'
+      });
 
-  const paymobMutation = useMutation({
-    mutationFn: async (amount: number) => {
-      const response = await apiRequest("POST", "/api/paymob/initiate-payment", { amount, currency: 'EGP' });
-      return response.json();
-    },
-    onSuccess: (data) => {
-      window.open(data.paymentUrl, '_blank');
-      toast({
-        title: "Payment Initiated",
-        description: `Redirecting to payment gateway for ${data.tokens} tokens.`,
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Payment Failed",
-        description: error.message || "Failed to initiate payment",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const legacyPurchaseMutation = useMutation({
-    mutationFn: async (amount: number) => {
-      const response = await apiRequest("POST", "/api/purchase-tokens", { amount });
-      return response.json();
-    },
-    onSuccess: (data) => {
-      toast({
-        title: "Tokens Purchased!",
-        description: `Successfully added ${data.purchased} tokens to your account.`,
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-    },
-    onError: (error) => {
-      toast({
-        title: "Purchase Failed",
-        description: error.message || "Failed to purchase tokens",
-        variant: "destructive",
-      });
-    },
-  });
+      if (response.ok) {
+        const result = await response.json();
+        window.location.href = '/';
+      } else {
+        console.error('Purchase failed');
+      }
+    } catch (error) {
+      console.error('Purchase error:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-athlete-primary text-white">
@@ -106,35 +72,13 @@ export default function Subscribe() {
                     <span className="text-gray-300">30-day validity</span>
                   </li>
                 </ul>
-                <div className="space-y-2">
-                  <Button 
-                    onClick={() => paymobMutation.mutate(15)}
-                    data-testid="button-paymob-purchase-starter"
-                    disabled={paymobMutation.isPending}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    {paymobMutation.isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <CreditCard className="mr-2 h-4 w-4" />
-                    )}
-                    Pay with Paymob
-                  </Button>
-                  <Button 
-                    onClick={() => legacyPurchaseMutation.mutate(15)}
-                    data-testid="button-legacy-purchase-starter"
-                    disabled={legacyPurchaseMutation.isPending}
-                    variant="outline"
-                    className="w-full border-gray-600 text-white hover:bg-gray-700"
-                  >
-                    {legacyPurchaseMutation.isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Coins className="mr-2 h-4 w-4" />
-                    )}
-                    Simulate Purchase
-                  </Button>
-                </div>
+                <Button 
+                  onClick={() => handlePurchase(15)}
+                  data-testid="button-purchase-starter"
+                  className="w-full bg-athlete-gray-700 hover:bg-athlete-gray-600 text-white"
+                >
+                  Get Started
+                </Button>
               </CardContent>
             </Card>
 
@@ -176,35 +120,13 @@ export default function Subscribe() {
                     <span className="text-gray-300">Share & collaborate</span>
                   </li>
                 </ul>
-                <div className="space-y-2">
-                  <Button 
-                    onClick={() => paymobMutation.mutate(25)}
-                    data-testid="button-paymob-purchase-professional"
-                    disabled={paymobMutation.isPending}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    {paymobMutation.isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <CreditCard className="mr-2 h-4 w-4" />
-                    )}
-                    Pay with Paymob
-                  </Button>
-                  <Button 
-                    onClick={() => legacyPurchaseMutation.mutate(25)}
-                    data-testid="button-legacy-purchase-professional"
-                    disabled={legacyPurchaseMutation.isPending}
-                    variant="outline"
-                    className="w-full border-gray-600 text-white hover:bg-gray-700"
-                  >
-                    {legacyPurchaseMutation.isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Coins className="mr-2 h-4 w-4" />
-                    )}
-                    Simulate Purchase
-                  </Button>
-                </div>
+                <Button 
+                  onClick={() => handlePurchase(25)}
+                  data-testid="button-purchase-professional"
+                  className="w-full bg-athlete-accent hover:bg-blue-600 text-white"
+                >
+                  Get Professional
+                </Button>
               </CardContent>
             </Card>
 
@@ -241,35 +163,13 @@ export default function Subscribe() {
                     <span className="text-gray-300">API access</span>
                   </li>
                 </ul>
-                <div className="space-y-2">
-                  <Button 
-                    onClick={() => paymobMutation.mutate(50)}
-                    data-testid="button-paymob-purchase-enterprise"
-                    disabled={paymobMutation.isPending}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    {paymobMutation.isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <CreditCard className="mr-2 h-4 w-4" />
-                    )}
-                    Pay with Paymob
-                  </Button>
-                  <Button 
-                    onClick={() => legacyPurchaseMutation.mutate(50)}
-                    data-testid="button-legacy-purchase-enterprise"
-                    disabled={legacyPurchaseMutation.isPending}
-                    variant="outline"
-                    className="w-full border-gray-600 text-white hover:bg-gray-700"
-                  >
-                    {legacyPurchaseMutation.isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Coins className="mr-2 h-4 w-4" />
-                    )}
-                    Simulate Purchase
-                  </Button>
-                </div>
+                <Button 
+                  onClick={() => handlePurchase(50)}
+                  data-testid="button-purchase-enterprise"
+                  className="w-full bg-athlete-gray-700 hover:bg-athlete-gray-600 text-white"
+                >
+                  Get Enterprise
+                </Button>
               </CardContent>
             </Card>
           </div>

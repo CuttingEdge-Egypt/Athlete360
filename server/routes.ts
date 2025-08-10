@@ -5,8 +5,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, getSpecificAnalysis, getDetailedAnalysis, generateAthleteBiography, refreshAthleteBiographyWithSearch, compareAthletes, searchTaekwondoDataProfilePicture, searchAthleteImage, generateSpecificAnalysis } from "./openaiService";
-import { paymobService } from "./paymobService";
+import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture } from "./openaiService";
 import OpenAI from "openai";
 
 // All LLM implementations now use GPT-5 with temperature 1.0 (default minimum)
@@ -104,9 +103,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Sport not found" });
       }
 
-      // Use OpenAI GPT-4o to get athlete profile
-      console.log(`Creating athlete ${name} for sport ${sport.name} using OpenAI GPT-4o...`);
-      const aiProfile = await refreshAthleteBiographyWithSearch(name, sport.name, req.body.nationality);
+      // Use OpenAI GPT-5 to get athlete profile
+      console.log(`Creating athlete ${name} for sport ${sport.name} using OpenAI GPT-5...`);
+      const aiProfile = await generateAthleteBiography(name, sport.name, req.body.nationality);
 
       // Search for athlete profile image
       console.log(`Searching for profile image for ${name}...`);
@@ -297,8 +296,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sport = await storage.getSportById(validatedData.sportId);
       const sportName = sport?.name || "Unknown Sport";
       
-      // Fetch authentic athlete data from OpenAI (biography only)
-      const aiAthleteData = await getAthleteProfile(validatedData.name, sportName, validatedData.country || undefined);
+      // Fetch authentic athlete data from OpenAI
+      const aiAthleteData = await getAthleteProfile(validatedData.name, sportName);
       
       // Handle rank - convert to number if possible, otherwise store as null
       let rankValue = null;
@@ -308,42 +307,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rankValue = Number(aiAthleteData.rank);
       }
 
-      // Separate image search for taekwondo athletes
-      let profileImageUrl = validatedData.profileImageUrl || null;
-      if (sportName.toLowerCase() === 'taekwondo' && !profileImageUrl) {
-        try {
-          // Only search TaekwondoData.com for taekwondo athletes
-          const foundImageUrl = await searchTaekwondoDataProfilePicture(validatedData.name, validatedData.country || undefined);
-          if (foundImageUrl) {
-            profileImageUrl = foundImageUrl;
-            console.log(`Found taekwondo profile image: ${foundImageUrl}`);
-          }
-        } catch (imageError) {
-          console.log(`Image search failed for ${validatedData.name}:`, imageError);
-        }
-      }
-
       // Create athlete with AI-enhanced data
       const enhancedAthleteData = {
         ...validatedData,
         bio: aiAthleteData.bio,
         rank: rankValue,
-        profileImageUrl
+        profileImageUrl: validatedData.profileImageUrl || null
       };
       
       const athlete = await storage.createAthlete(enhancedAthleteData);
       
-      // Respond immediately with the athlete, then generate detailed analysis in background
-      res.json(athlete);
-      
-      // Generate detailed analysis asynchronously without blocking the response
-      console.log(`Starting background analysis for ${athlete.name}...`);
-      setTimeout(async () => {
-        try {
-          const detailedAnalysis = await getDetailedAnalysis(athlete.name, sportName);
-          
-          // Store strengths
-          for (const strength of detailedAnalysis.strengths) {
+      // Generate and store comprehensive analysis data
+      try {
+        const detailedAnalysis = await getDetailedAnalysis(athlete.name, sportName);
+        
+        // Store strengths
+        for (const strength of detailedAnalysis.strengths) {
           try {
             await storage.createAthleteStrength({
               athleteId: athlete.id,
@@ -423,11 +402,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
         
-          console.log(`Background analysis completed for ${athlete.name}`);
-        } catch (analysisError) {
-          console.error(`Background analysis failed for ${athlete.name}:`, analysisError);
-        }
-      }, 100); // Start background processing after 100ms
+        console.log(`AI-powered comprehensive data created for ${athlete.name}`);
+      } catch (analysisError) {
+        console.error(`Error generating detailed analysis for ${athlete.name}:`, analysisError);
+      }
+      
+      res.json(athlete);
     } catch (error) {
       console.error("Error creating athlete:", error);
       res.status(500).json({ message: "Failed to create athlete" });
@@ -600,7 +580,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} GPT-5 bio analysis for ${athlete.name}`);
         
         try {
-          const gptBioAnalysis = await refreshAthleteBiographyWithSearch(athlete.name, sportName);
+          const gptBioAnalysis = forceUpdate 
+            ? await refreshAthleteBiographyWithSearch(athlete.name, sportName)
+            : await generateAthleteBiography(athlete.name, sportName);
           
           // Update athlete bio in database with GPT-5 AI content
           await storage.updateAthlete(athleteId, { 
@@ -1514,155 +1496,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // TESTING FEATURE: Add tokens without payment (EASILY REMOVABLE)
-  app.post('/api/test/add-tokens', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { tokens } = req.body;
-      
-      if (!tokens || tokens <= 0 || tokens > 10000) {
-        return res.status(400).json({ message: "Invalid token amount (1-10000)" });
-      }
-
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      // Add tokens directly (TESTING ONLY)
-      await storage.addTokensPurchase(userId, tokens);
-
-      // Create transaction record for testing
-      await storage.createTransaction({
-        userId,
-        action: "Test Token Addition",
-        tokensDeducted: -tokens,
-        serviceType: "test"
-      });
-
-      const updatedUser = await storage.getUser(userId);
-      res.json({ 
-        message: "Test tokens added successfully", 
-        tokens: updatedUser?.tokens || 0,
-        totalPurchased: updatedUser?.totalTokensPurchased || 0,
-        added: tokens 
-      });
-    } catch (error) {
-      console.error("Error adding test tokens:", error);
-      res.status(500).json({ message: "Failed to add test tokens" });
-    }
-  });
-
-  // Paymob payment initiation endpoint
-  app.post('/api/paymob/initiate-payment', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { amount, currency = 'EGP' } = req.body;
-      
-      // Calculate tokens based on amount
-      const tokensToAdd = amount === 25 ? 1000 : amount === 15 ? 500 : amount === 50 ? 2500 : 0;
-      if (tokensToAdd === 0) {
-        return res.status(400).json({ message: "Invalid purchase amount" });
-      }
-
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      // Check if Paymob is configured
-      if (!paymobService.isConfigured()) {
-        return res.status(503).json({ message: "Payment service not configured" });
-      }
-
-      // Generate unique order ID
-      const orderId = `ATH360_${Date.now()}_${userId.slice(0, 8)}`;
-
-      // Create pending transaction record
-      const transaction = await storage.createTransaction({
-        userId,
-        action: "Token Purchase (Pending)",
-        tokensDeducted: -tokensToAdd,
-        serviceType: "purchase"
-      });
-
-      // Initiate payment with Paymob
-      const paymentResult = await paymobService.initiatePayment({
-        amount,
-        currency,
-        orderId,
-        userId,
-        tokens: tokensToAdd,
-      });
-
-      res.json({
-        paymentUrl: paymentResult.paymentUrl,
-        orderId: paymentResult.orderId,
-        transactionId: transaction.id,
-        amount,
-        tokens: tokensToAdd,
-      });
-    } catch (error) {
-      console.error("Error initiating Paymob payment:", error);
-      res.status(500).json({ message: "Failed to initiate payment" });
-    }
-  });
-
-  // Paymob payment callback/webhook endpoint
-  app.post('/api/paymob/callback', async (req, res) => {
-    try {
-      const { 
-        success, 
-        txn_response_code, 
-        merchant_order_id, 
-        order, 
-        id: transactionId 
-      } = req.body;
-
-      console.log('Paymob callback received:', { success, txn_response_code, merchant_order_id, transactionId });
-
-      if (success === "true" || success === true) {
-        // Extract user ID from merchant_order_id
-        const orderParts = merchant_order_id.split('_');
-        if (orderParts.length >= 3) {
-          const userId = orderParts[2];
-          
-          // Find the pending transaction
-          const transactions = await storage.getUserTransactions(userId);
-          const pendingTransaction = transactions.find(t => 
-            t.action === "Token Purchase (Pending)" && 
-            t.tokensDeducted < 0
-          );
-
-          if (pendingTransaction) {
-            const tokensToAdd = Math.abs(pendingTransaction.tokensDeducted);
-            
-            // Add tokens to user account
-            await storage.addTokensPurchase(userId, tokensToAdd);
-
-            // Update transaction status
-            await storage.createTransaction({
-              userId,
-              action: "Token Purchase (Completed)",
-              tokensDeducted: -tokensToAdd,
-              serviceType: "purchase"
-            });
-
-            console.log(`Payment successful: Added ${tokensToAdd} tokens to user ${userId}`);
-          }
-        }
-      } else {
-        console.log('Payment failed or cancelled:', { txn_response_code, merchant_order_id });
-      }
-
-      res.status(200).json({ status: 'received' });
-    } catch (error) {
-      console.error("Error processing Paymob callback:", error);
-      res.status(500).json({ message: "Callback processing failed" });
-    }
-  });
-
-  // Token purchase simulation (Legacy endpoint)
+  // Token purchase simulation
   app.post('/api/purchase-tokens', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
