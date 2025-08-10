@@ -448,14 +448,23 @@ Please respond in valid JSON format with these exact fields:
     console.log("Full OpenAI Response:", JSON.stringify(response, null, 2));
     
     let content;
-    if (Array.isArray(response.output)) {
-      content = response.output[0]?.text || response.output[0];
+    let rawResponse = response.output;
+    
+    console.log("Raw response type:", typeof rawResponse);
+    console.log("Raw response:", rawResponse);
+    
+    // Extract text content from GPT-5 response structure
+    if (Array.isArray(rawResponse)) {
+      // Find the text content in the response array
+      content = rawResponse.find(item => item.type === 'text')?.text || rawResponse[0]?.text || rawResponse[0];
+    } else if (typeof rawResponse === 'object' && rawResponse.text) {
+      content = rawResponse.text;
     } else {
-      content = response.output;
+      content = rawResponse;
     }
     
-    console.log("Content type:", typeof content);
-    console.log("Content value:", content);
+    console.log("Extracted content type:", typeof content);
+    console.log("Extracted content:", content);
     
     if (!content) {
       console.log("OpenAI Response Details:", response);
@@ -463,14 +472,20 @@ Please respond in valid JSON format with these exact fields:
     }
 
     try {
-      // Handle case where content is already an object
+      // Handle case where content is already an object or needs JSON parsing
       let athleteData;
       if (typeof content === 'string') {
-        athleteData = JSON.parse(content) as AthleteData;
-      } else if (typeof content === 'object') {
+        // Try to extract JSON if it's embedded in text
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          athleteData = JSON.parse(jsonMatch[0]) as AthleteData;
+        } else {
+          athleteData = JSON.parse(content) as AthleteData;
+        }
+      } else if (typeof content === 'object' && content.name && content.bio) {
         athleteData = content as AthleteData;
       } else {
-        throw new Error(`Unexpected content type: ${typeof content}`);
+        throw new Error(`Content does not contain valid athlete data: ${JSON.stringify(content)}`);
       }
       
       // Validate required fields
@@ -576,29 +591,44 @@ Please respond in valid JSON format with these exact fields:
     console.log("Full OpenAI Refresh Response:", JSON.stringify(response, null, 2));
     
     let content;
-    if (Array.isArray(response.output)) {
-      content = response.output[0]?.text || response.output[0];
+    let rawResponse = response.output;
+    
+    console.log("Refresh raw response type:", typeof rawResponse);
+    console.log("Refresh raw response:", rawResponse);
+    
+    // Extract text content from GPT-5 response structure
+    if (Array.isArray(rawResponse)) {
+      // Find the text content in the response array
+      content = rawResponse.find(item => item.type === 'text')?.text || rawResponse[0]?.text || rawResponse[0];
+    } else if (typeof rawResponse === 'object' && rawResponse.text) {
+      content = rawResponse.text;
     } else {
-      content = response.output;
+      content = rawResponse;
     }
     
-    console.log("Refresh Content type:", typeof content);
-    console.log("Refresh Content value:", content);
+    console.log("Refresh extracted content type:", typeof content);
+    console.log("Refresh extracted content:", content);
     
     if (!content) {
       console.log("OpenAI Refresh Response Details:", response);
       throw new Error("No content received from OpenAI refresh");
     }
 
-    // Handle case where content is already an object
+    // Handle case where content is already an object or needs JSON parsing
     let athleteData;
     try {
       if (typeof content === 'string') {
-        athleteData = JSON.parse(content) as AthleteData;
-      } else if (typeof content === 'object') {
+        // Try to extract JSON if it's embedded in text
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          athleteData = JSON.parse(jsonMatch[0]) as AthleteData;
+        } else {
+          athleteData = JSON.parse(content) as AthleteData;
+        }
+      } else if (typeof content === 'object' && content.name && content.bio) {
         athleteData = content as AthleteData;
       } else {
-        throw new Error(`Unexpected content type: ${typeof content}`);
+        throw new Error(`Content does not contain valid athlete data: ${JSON.stringify(content)}`);
       }
     } catch (parseError) {
       console.error("JSON Parse Error:", parseError);
