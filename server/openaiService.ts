@@ -88,6 +88,9 @@ export interface AthleteData {
   recentNews?: string[];
   worldRank?: string;
   currentRecord?: string;
+  country?: string;
+  profileImageDescription?: string;
+  referenceLinks?: string[];
 }
 
 // Enhanced function to get taekwondo-specific data using AI web search
@@ -185,8 +188,8 @@ async function getTaekwondoDataInfo(athleteName: string, nationality?: string): 
                        nationality?.toLowerCase().includes('turkey') ? 'Turkey' : '';
     
     // Try multiple search variations
-    const searchVariations = [
-      { 'surename': surname, 'firstname': firstName, ...(nationParam && { 'nation': nationParam }) },
+    const searchVariations: Record<string, string>[] = [
+      nationParam ? { 'surename': surname, 'firstname': firstName, 'nation': nationParam } : { 'surename': surname, 'firstname': firstName },
       { 'surename': surname, 'firstname': firstName }, // Without nation
       { 'search_name': athleteName }, // Full name search
     ];
@@ -609,7 +612,6 @@ export async function getAthleteProfile(name: string, sport: string, nationality
       name: result.name || name,
       bio: result.bio || "Professional athlete biography not available.",
       rank: result.rank || Math.floor(Math.random() * 50) + 1,
-      country: result.country || nationality || "Unknown",
       achievements: result.achievements || [],
       recentNews: Array.isArray(result.recentNews) ? result.recentNews : [result.recentNews || "No recent news available."],
       profileImageDescription: result.profileImageDescription || `${name} ${sport} athlete profile picture`,
@@ -622,7 +624,6 @@ export async function getAthleteProfile(name: string, sport: string, nationality
       name,
       bio: `${name} is a professional ${sport} athlete${nationalityContext}. Detailed biography requires web search capabilities.`,
       rank: Math.floor(Math.random() * 50) + 1,
-      country: nationality || "Unknown",
       achievements: [`Professional ${sport} athlete`, "International competitor"],
       recentNews: ["Recent news not available."],
       profileImageDescription: `${name} ${sport} athlete profile picture`,
