@@ -5,7 +5,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture } from "./openaiService";
+import { getAthleteProfile, getSpecificAnalysis, getDetailedAnalysis, generateAthleteBiography, refreshAthleteBiographyWithSearch, compareAthletes, searchTaekwondoDataProfilePicture, searchAthleteImage, generateSpecificAnalysis } from "./openaiService";
 import { paymobService } from "./paymobService";
 import OpenAI from "openai";
 
