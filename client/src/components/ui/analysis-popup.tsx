@@ -264,7 +264,7 @@ export function AnalysisPopup({
 
       <div className="bg-athlete-gray-800 rounded-lg p-6 border border-gray-700">
         <div className="prose prose-invert max-w-none">
-          {data?.biography ? formatBiography(data.biography) : <p>Biography not available</p>}
+          {data?.bio ? formatBiography(data.bio) : <p>Biography not available</p>}
         </div>
       </div>
 
