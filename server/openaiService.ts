@@ -394,7 +394,7 @@ export async function generateAthleteBiography(name: string, sport: string, nati
 
   const prompt = `Today's date is ${currentDate}.
     
-    Using web search capabilities, find factual, up-to-date information about the athlete "${name}"${nationalityContext}, who competes in ${sport}.
+    IMPORTANT: Use web search to find current, accurate information about the athlete "${name}"${nationalityContext}, who competes in ${sport}. Search for recent competition results, rankings, achievements, and biographical details.
     
     Create a detailed biography with the following structure. Use actual headings in the text:
 
@@ -412,7 +412,7 @@ export async function generateAthleteBiography(name: string, sport: string, nati
 
     Make the biography comprehensive and detailed (4-6 paragraphs minimum) with each section clearly marked by its heading. Include specific competition names, years, achievements, and performance details where available.
 
-Only mention information that is 100% accurate and verifiable. If specific details aren't available, use general but accurate descriptions of their style and approach.
+Only mention information that is 100% accurate and verifiable from your web search. If specific details aren't available, use general but accurate descriptions of their style and approach.
 
 IMPORTANT: Do not include any links, URLs, citations, or references in your response. Provide clean text without any reference links or citations.
 
@@ -427,22 +427,22 @@ IMPORTANT: Do not include any links, URLs, citations, or references in your resp
     `;
 
   try {
-    // Using GPT-5 which is now available
+    // Using GPT-5 with explicit web search instructions
     const response = await openai.chat.completions.create({
       model: "gpt-5",
       messages: [
         {
           role: "system",
-          content: "You are an expert sports biographer with web search access. Create detailed, comprehensive athlete biographies with multiple structured sections. Search for current athlete information and respond in valid JSON format without markdown formatting."
+          content: "You are an expert sports biographer. IMPORTANT: You must use web search to find current, accurate information about the athlete. Search for recent competition results, rankings, achievements, and biographical details. Create detailed, comprehensive athlete biographies with multiple structured sections based on real data found through web search."
         },
         {
           role: "user", 
-          content: `${isTaekwondo ? 'For taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference for competition records, rankings, and profiles. ' : ''}${prompt}
+          content: `${isTaekwondo ? 'For taekwondo athletes, search https://www.taekwondodata.com/ for accurate competition records, rankings, and profiles. ' : ''}${prompt}
 
 Please respond in valid JSON format with these exact fields:
 {
   "name": "athlete's full name",
-  "bio": "detailed biography without any links or citations",
+  "bio": "detailed biography with web search data, no links or citations",
   "rank": "current world ranking or N/A", 
   "achievements": ["array of key achievements"],
   "recentNews": ["array of recent news or competition results"]
@@ -550,13 +550,13 @@ IMPORTANT: Do not include any links, URLs, citations, or references in your resp
     `;
 
   try {
-    // Using GPT-5 which is now available  
+    // Using GPT-5 with web search capabilities
     const response = await openai.chat.completions.create({
       model: "gpt-5",
       messages: [
         {
           role: "system",
-          content: "You are an expert sports biographer with web search access. Create detailed, comprehensive athlete biographies with multiple structured sections. Search for current athlete information and respond in valid JSON format without markdown formatting."
+          content: "You are an expert sports biographer with web search access. Create detailed, comprehensive athlete biographies with multiple structured sections. Use web search to find current athlete information and respond in valid JSON format without markdown formatting."
         },
         {
           role: "user", 
@@ -572,6 +572,7 @@ Please respond in valid JSON format with these exact fields:
 }`
         }
       ],
+
       response_format: { type: "json_object" },
       temperature: 1.0,
       max_completion_tokens: 8000

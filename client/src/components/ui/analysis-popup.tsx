@@ -52,40 +52,34 @@ export function AnalysisPopup({
   const formatBiography = (bio: string) => {
     if (!bio) return <p>Biography not available</p>;
     
-    // Split the biography into sections based on common patterns
-    const sections = bio.split(/\n\n|\n(?=[A-Z][^:]*:)/).filter(section => section.trim());
+    // Split the biography based on markdown-style headings (**Title**)
+    const sections = bio.split(/(?=\*\*[^*]+\*\*)/g).filter(section => section.trim());
     
     return sections.map((section, index) => {
       const trimmedSection = section.trim();
       
-      // Check if this is a heading (ends with colon)
-      if (trimmedSection.includes(':') && trimmedSection.split('\n')[0].endsWith(':')) {
-        const lines = trimmedSection.split('\n');
-        const heading = lines[0].replace(':', '');
-        const content = lines.slice(1).join('\n').trim();
+      // Check if this section starts with a markdown heading
+      const headingMatch = trimmedSection.match(/^\*\*([^*]+)\*\*/);
+      if (headingMatch) {
+        const heading = headingMatch[1];
+        const content = trimmedSection.replace(/^\*\*[^*]+\*\*\s*/, '').trim();
         
         return (
-          <div key={index} className="space-y-2">
-            <h4 className="text-athlete-accent font-bold text-lg border-b border-athlete-accent/30 pb-1">
+          <div key={index} className="space-y-4 mb-6">
+            <h3 className="text-2xl font-bold text-blue-600 dark:text-blue-400 border-b-2 border-blue-600/30 dark:border-blue-400/30 pb-2 mb-4 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
               {heading}
-            </h4>
+            </h3>
             {content && (
-              <div className="pl-2 space-y-1">
-                {content.split('\n').map((line, lineIndex) => {
-                  const trimmedLine = line.trim();
-                  if (!trimmedLine) return null;
+              <div className="text-gray-700 dark:text-gray-300 leading-relaxed space-y-3">
+                {content.split('\n\n').map((paragraph, paragraphIndex) => {
+                  const trimmedParagraph = paragraph.trim();
+                  if (!trimmedParagraph) return null;
                   
-                  // Format list items with bullet points
-                  if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('• ')) {
-                    return (
-                      <div key={lineIndex} className="flex items-start space-x-2">
-                        <span className="text-athlete-accent mt-1">•</span>
-                        <span>{trimmedLine.replace(/^[-•]\s*/, '')}</span>
-                      </div>
-                    );
-                  }
-                  
-                  return <p key={lineIndex} className="text-gray-300">{trimmedLine}</p>;
+                  return (
+                    <p key={paragraphIndex} className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
+                      {trimmedParagraph}
+                    </p>
+                  );
                 })}
               </div>
             )}
