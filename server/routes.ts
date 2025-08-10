@@ -298,7 +298,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sportName = sport?.name || "Unknown Sport";
       
       // Fetch authentic athlete data from OpenAI (biography only)
-      const aiAthleteData = await getAthleteProfile(validatedData.name, sportName, validatedData.nationality);
+      const aiAthleteData = await getAthleteProfile(validatedData.name, sportName, validatedData.country || undefined);
       
       // Handle rank - convert to number if possible, otherwise store as null
       let rankValue = null;
@@ -313,7 +313,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (sportName.toLowerCase() === 'taekwondo' && !profileImageUrl) {
         try {
           // Only search TaekwondoData.com for taekwondo athletes
-          const foundImageUrl = await searchTaekwondoDataProfilePicture(validatedData.name, validatedData.nationality);
+          const foundImageUrl = await searchTaekwondoDataProfilePicture(validatedData.name, validatedData.country || undefined);
           if (foundImageUrl) {
             profileImageUrl = foundImageUrl;
             console.log(`Found taekwondo profile image: ${foundImageUrl}`);
