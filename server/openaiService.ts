@@ -427,8 +427,7 @@ IMPORTANT: Do not include any links, URLs, citations, or references in your resp
     `;
 
   try {
-    // Use GPT-4o with web search capabilities (GPT-5 is not available yet via standard API)
-    // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+    // Using GPT-5 which is now available
     const response = await openai.chat.completions.create({
       model: "gpt-5",
       messages: [
@@ -452,7 +451,7 @@ Please respond in valid JSON format with these exact fields:
       ],
       response_format: { type: "json_object" },
       temperature: 1.0,
-      max_tokens: 8000
+      max_completion_tokens: 8000
     });
 
     console.log("Full OpenAI Response:", JSON.stringify(response, null, 2));
@@ -551,7 +550,7 @@ IMPORTANT: Do not include any links, URLs, citations, or references in your resp
     `;
 
   try {
-    // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+    // Using GPT-5 which is now available  
     const response = await openai.chat.completions.create({
       model: "gpt-5",
       messages: [
@@ -575,7 +574,7 @@ Please respond in valid JSON format with these exact fields:
       ],
       response_format: { type: "json_object" },
       temperature: 1.0,
-      max_tokens: 8000
+      max_completion_tokens: 8000
     });
 
     console.log("Full OpenAI Refresh Response:", JSON.stringify(response, null, 2));
