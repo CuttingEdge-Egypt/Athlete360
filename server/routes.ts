@@ -297,8 +297,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sport = await storage.getSportById(validatedData.sportId);
       const sportName = sport?.name || "Unknown Sport";
       
-      // Fetch authentic athlete data from OpenAI
-      const aiAthleteData = await getAthleteProfile(validatedData.name, sportName);
+      // Fetch authentic athlete data from OpenAI (biography only)
+      const aiAthleteData = await getAthleteProfile(validatedData.name, sportName, validatedData.nationality);
       
       // Handle rank - convert to number if possible, otherwise store as null
       let rankValue = null;
@@ -308,12 +308,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rankValue = Number(aiAthleteData.rank);
       }
 
+      // Separate image search for taekwondo athletes
+      let profileImageUrl = validatedData.profileImageUrl || null;
+      if (sportName.toLowerCase() === 'taekwondo' && !profileImageUrl) {
+        try {
+          // Only search TaekwondoData.com for taekwondo athletes
+          const foundImageUrl = await searchTaekwondoDataProfilePicture(validatedData.name, validatedData.nationality);
+          if (foundImageUrl) {
+            profileImageUrl = foundImageUrl;
+            console.log(`Found taekwondo profile image: ${foundImageUrl}`);
+          }
+        } catch (imageError) {
+          console.log(`Image search failed for ${validatedData.name}:`, imageError);
+        }
+      }
+
       // Create athlete with AI-enhanced data
       const enhancedAthleteData = {
         ...validatedData,
         bio: aiAthleteData.bio,
         rank: rankValue,
-        profileImageUrl: validatedData.profileImageUrl || null
+        profileImageUrl
       };
       
       const athlete = await storage.createAthlete(enhancedAthleteData);

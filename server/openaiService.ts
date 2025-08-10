@@ -575,27 +575,26 @@ export async function getAthleteProfile(name: string, sport: string, nationality
     ? ' For taekwondo athletes, reference https://www.taekwondodata.com/ for accurate competition records, rankings, and athlete profiles.'
     : '';
 
-  const prompt = `Today's date is ${currentDate}.
-    Search the web for factual, up-to-date information about the athlete "${name}"${nationalityContext}, who competes in ${sport}.
+  const prompt = `You are an expert sports data analyst. Today's date is ${currentDate}.
     
-    Create a detailed biography structured with the following headings:
-    - An introductory paragraph
-    - A heading "Recent Competitions:"
-    - A heading "Career Record and Rankings:"
-    - A heading "Notable Achievements:"
-
-    Provide specific, factual, authentic information about athletes. NEVER use placeholder text or bracketed templates like [City, State], [Year], [Championship Name]. Consider the specified sport and nationality when identifying the correct athlete.
+    Search the web for factual information about an athlete named "${name}"${nationalityContext} who competes in ${sport}.
+    
+    IMPORTANT INSTRUCTIONS:
+    1. If multiple athletes exist with this name, select the most prominent/well-known one in the specified sport
+    2. Always respond with valid JSON only - no explanatory text before or after the JSON
+    3. Create a detailed biography with structured sections
+    4. Use only factual, verifiable information from web search
     ${sportSpecificGuidance}
 
-    Format the response as a JSON object with these fields:
-    - name: string (athlete's full name)
-    - sport: string (the sport they compete in)
-    - bio: string (detailed biography with the headings mentioned above)
-    - rank: number (current world ranking if available, otherwise estimate)
-    - country: string (athlete's country)
-    - achievements: array of strings (notable achievements)
-    - recentNews: string (recent news or updates)
-    - profileImageDescription: string (description for finding profile images)`;
+    Required JSON format (respond with JSON only):
+    {
+      "name": "Full athlete name",
+      "sport": "${sport}",
+      "bio": "Detailed biography with sections: Introduction, Recent Competitions, Career Record and Rankings, Notable Achievements",
+      "rank": number_or_null,
+      "achievements": ["achievement1", "achievement2"],
+      "recentNews": "Recent news summary"
+    }`;
 
   try {
     const response = await openai.responses.create({
@@ -606,15 +605,24 @@ export async function getAthleteProfile(name: string, sport: string, nationality
       // temperature: 1.0 is default and minimum for GPT-5
     });
 
-    const result = JSON.parse(response.output_text);
+    // Clean the response to extract JSON
+    let jsonText = response.output_text.trim();
+    
+    // Extract JSON from response if it contains extra text
+    const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      jsonText = jsonMatch[0];
+    }
+    
+    const result = JSON.parse(jsonText);
     
     return {
       name: result.name || name,
       bio: result.bio || "Professional athlete biography not available.",
-      rank: result.rank || Math.floor(Math.random() * 50) + 1,
-      achievements: result.achievements || [],
+      rank: typeof result.rank === 'number' ? result.rank : null,
+      achievements: Array.isArray(result.achievements) ? result.achievements : [],
       recentNews: Array.isArray(result.recentNews) ? result.recentNews : [result.recentNews || "No recent news available."],
-      profileImageDescription: result.profileImageDescription || `${name} ${sport} athlete profile picture`,
+      profileImageDescription: `${name} ${sport} athlete profile picture`,
       referenceLinks: []
     };
   } catch (error) {
