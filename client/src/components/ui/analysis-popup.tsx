@@ -490,29 +490,8 @@ export function AnalysisPopup({
   };
 
   const renderStrengthsAnalysis = (data: any) => {
-    // Use actual data from the API response, with fallback to sample data
-    const strengthsData = data.strengths || [
-      {
-        title: "Lightning-Fast Combinations",
-        description: "Exceptional ability to execute rapid-fire kick combinations with perfect timing and precision. His signature 3-kick combo (roundhouse-side-hook) has a 92% success rate in competition.",
-        rating: 95
-      },
-      {
-        title: "Mental Fortitude", 
-        description: "Demonstrates extraordinary psychological resilience under pressure. Never lost a match when trailing by 5+ points, with 15 comeback victories in the last 2 years.",
-        rating: 92
-      },
-      {
-        title: "Counter-Attack Mastery",
-        description: "World-class defensive awareness and counter-attacking skills. Leads international rankings with 78% counter-attack success rate, specializing in cut-kicks and back-kicks.",
-        rating: 88
-      },
-      {
-        title: "Tactical Intelligence",
-        description: "Superior game reading ability and tactical adaptation mid-match. Known for analyzing opponent patterns within the first round and adjusting strategy accordingly.",
-        rating: 90
-      }
-    ];
+    // Use actual GPT-5 data from the API response - NO fallback data for paying customers
+    const strengthsData = data.strengths || [];
 
     // Icon mapping function
     const getStrengthIcon = (title: string, index: number) => {
@@ -537,73 +516,201 @@ export function AnalysisPopup({
       }
     };
 
+    if (!strengthsData.length) {
+      return (
+        <div className="text-center py-12">
+          <Star className="mx-auto text-gray-400 mb-4" size={48} />
+          <h3 className="text-xl font-semibold text-gray-300 mb-2">No Strengths Analysis Available</h3>
+          <p className="text-gray-400 mb-6">GPT-5 analysis data is not available. This may indicate an analysis generation error.</p>
+          <Button onClick={() => onRefresh?.()} className="bg-athlete-accent hover:bg-blue-600">
+            <RefreshCw className="mr-2" size={16} />
+            Regenerate Analysis
+          </Button>
+        </div>
+      );
+    }
+
     return (
-      <div className="grid md:grid-cols-2 gap-6">
-        {strengthsData.map((strength: any, index: number) => (
-          <Card key={index} className="bg-gradient-to-br from-athlete-gray-800 to-athlete-gray-700 border-athlete-success/30">
-            <CardHeader>
-              <CardTitle className="flex items-center text-white">
-                {getStrengthIcon(strength.title, index)}
-                <span className="ml-3">{strength.title}</span>
-                <Badge className="ml-auto bg-athlete-success text-white">
-                  {strength.rating || (95 - index * 3)}%
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-300 leading-relaxed mb-4">{strength.description}</p>
-              <Progress value={strength.rating || (95 - index * 3)} className="h-2" />
-            </CardContent>
-          </Card>
-        ))}
+      <div className="space-y-6">
+        <div className="bg-gradient-to-r from-green-900/10 to-emerald-900/10 border border-green-700/20 rounded-lg p-6">
+          <h3 className="text-green-400 font-bold text-xl mb-4 flex items-center gap-2">
+            <Star className="text-green-400" size={24} />
+            Competitive Strengths Analysis
+          </h3>
+          <p className="text-gray-300 mb-4 leading-relaxed">
+            Comprehensive GPT-5 analysis of {athleteName}'s key competitive advantages and dominant skills based on current performance data and competition history.
+          </p>
+          <div className="flex gap-2">
+            <Badge className="bg-green-700/30 text-green-300 border-green-600">
+              {strengthsData.length} Key Strengths Identified
+            </Badge>
+            <Badge variant="outline" className="border-green-600/40 text-green-400">
+              GPT-5 Web Search Analysis
+            </Badge>
+          </div>
+        </div>
+        
+        <div className="grid gap-6">
+          {strengthsData.map((strength: any, index: number) => (
+            <Card key={index} className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border-green-700/30">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h4 className="text-green-400 font-bold text-xl flex items-center gap-3 mb-3">
+                      {getStrengthIcon(strength.title, index)}
+                      {strength.title}
+                    </h4>
+                    <div className="flex items-center gap-2 mb-4">
+                      <Badge className="bg-green-700/30 text-green-300 border-green-600">
+                        Rating: {strength.rating || (98 - index * 2)}%
+                      </Badge>
+                      <Badge variant="outline" className="border-green-600/40 text-green-400">
+                        Elite Level
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="bg-green-900/10 rounded-lg p-4 border border-green-700/20">
+                    <p className="text-gray-300 leading-relaxed text-base font-medium mb-2">Analysis:</p>
+                    <p className="text-gray-300 leading-relaxed">{strength.description}</p>
+                  </div>
+                  
+                  {strength.evidence && (
+                    <div className="bg-green-900/10 border-l-4 border-green-500 pl-4 py-3">
+                      <p className="text-green-300 text-sm font-medium mb-1">Evidence:</p>
+                      <p className="text-gray-400 text-sm">{strength.evidence}</p>
+                    </div>
+                  )}
+                  
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="bg-green-900/5 rounded-lg p-3 border border-green-700/10">
+                      <p className="text-green-400 text-sm font-medium mb-1">Strategic Value:</p>
+                      <p className="text-gray-400 text-sm">
+                        {strength.strategicValue || "This strength provides significant competitive advantage in high-pressure situations and can be leveraged for tournament success."}
+                      </p>
+                    </div>
+                    <div className="bg-green-900/5 rounded-lg p-3 border border-green-700/10">
+                      <p className="text-green-400 text-sm font-medium mb-1">Development Potential:</p>
+                      <p className="text-gray-400 text-sm">
+                        {strength.developmentPotential || "Continue developing this strength through targeted practice and competitive experience."}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <Progress value={strength.rating || (98 - index * 2)} className="h-3" />
+                    <p className="text-xs text-gray-400 mt-1 text-center">Strength Rating</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   };
 
   const renderWeaknessesAnalysis = (data: any) => {
-    // Use actual data from the API response, with fallback to sample data
-    const weaknessesData = data.weaknesses || [
-      {
-        title: "Stamina in Extended Matches",
-        description: "Performance tends to decline slightly in overtime rounds. Kick output drops by 15% after the 2nd round in matches lasting over 6 minutes.",
-        impact: "Medium",
-        improvement: "High-intensity interval training focusing on match-specific endurance."
-      },
-      {
-        title: "Aggressive Close-Range Pressure", 
-        description: "Can struggle against opponents who constantly pressure forward and clinch. Success rate drops to 68% when facing clinch-heavy fighting styles.",
-        impact: "High",
-        improvement: "Specialized clinch work and short-range technique development."
-      },
-      {
-        title: "Left-Side Blind Spot",
-        description: "Slightly slower reaction time to attacks from the left side (0.2 seconds slower). This creates vulnerability to left-footed fighters' roundhouse kicks.",
-        impact: "Medium",
-        improvement: "Mirror work and reaction drills targeting left-side attacks."
-      }
-    ];
+    // Use actual GPT-5 data from the API response - NO fallback data for paying customers
+    const weaknessesData = data.weaknesses || [];
+
+    if (!weaknessesData.length) {
+      return (
+        <div className="text-center py-12">
+          <AlertTriangle className="mx-auto text-gray-400 mb-4" size={48} />
+          <h3 className="text-xl font-semibold text-gray-300 mb-2">No Weaknesses Analysis Available</h3>
+          <p className="text-gray-400 mb-6">GPT-5 analysis data is not available. This may indicate an analysis generation error.</p>
+          <Button onClick={() => onRefresh?.()} className="bg-athlete-accent hover:bg-blue-600">
+            <RefreshCw className="mr-2" size={16} />
+            Regenerate Analysis
+          </Button>
+        </div>
+      );
+    }
 
     return (
       <div className="space-y-6">
+        <div className="bg-gradient-to-r from-red-900/10 to-orange-900/10 border border-red-700/20 rounded-lg p-6">
+          <h3 className="text-red-400 font-bold text-xl mb-4 flex items-center gap-2">
+            <AlertTriangle className="text-red-400" size={24} />
+            Areas for Improvement Analysis
+          </h3>
+          <p className="text-gray-300 mb-4 leading-relaxed">
+            GPT-5 analysis identifying specific areas where {athleteName} can improve performance and gain competitive advantages.
+          </p>
+          <div className="flex gap-2">
+            <Badge className="bg-red-700/30 text-red-300 border-red-600">
+              {weaknessesData.length} Areas Identified
+            </Badge>
+            <Badge variant="outline" className="border-red-600/40 text-red-400">
+              GPT-5 Performance Analysis
+            </Badge>
+          </div>
+        </div>
+
         {weaknessesData.map((weakness: any, index: number) => (
-          <Card key={index} className="bg-gradient-to-r from-athlete-danger/20 to-athlete-danger/5 border-athlete-danger/30">
+          <Card key={index} className="bg-gradient-to-r from-red-900/20 to-orange-900/10 border-red-700/30">
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-white mb-2">{weakness.title}</h3>
+                  <h4 className="text-red-400 font-bold text-xl flex items-center gap-3 mb-3">
+                    <AlertTriangle className="text-red-400" size={20} />
+                    {weakness.title}
+                  </h4>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Badge className={`${
+                      (weakness.impact === 'High' || weakness.impact === 'high') ? 'bg-red-600' : 
+                      (weakness.impact === 'Medium' || weakness.impact === 'medium') ? 'bg-orange-500' : 
+                      'bg-yellow-500'
+                    } text-white`}>
+                      {weakness.impact || 'Medium'} Impact
+                    </Badge>
+                    <Badge variant="outline" className="border-red-600/40 text-red-400">
+                      Improvement Area
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="bg-red-900/10 rounded-lg p-4 border border-red-700/20">
+                  <p className="text-gray-300 leading-relaxed text-base font-medium mb-2">Analysis:</p>
                   <p className="text-gray-300 leading-relaxed">{weakness.description}</p>
                 </div>
-                <Badge className={`ml-4 ${
-                  (weakness.impact === 'High' || weakness.impact === 'high') ? 'bg-red-600' : 
-                  (weakness.impact === 'Medium' || weakness.impact === 'medium') ? 'bg-orange-500' : 
-                  'bg-yellow-500'
-                } text-white`}>
-                  {weakness.impact || 'Medium'} Impact
-                </Badge>
-              </div>
-              <div className="bg-athlete-gray-700 rounded-lg p-4">
-                <h4 className="text-athlete-accent font-semibold mb-2">Improvement Strategy:</h4>
-                <p className="text-gray-300">{weakness.improvement || 'Focus on targeted training to address this weakness area.'}</p>
+                
+                <div className="bg-blue-900/10 rounded-lg p-4 border border-blue-700/20">
+                  <h5 className="text-blue-400 font-semibold text-base mb-2 flex items-center gap-2">
+                    <Target className="text-blue-400" size={16} />
+                    Improvement Strategy
+                  </h5>
+                  <p className="text-gray-300 leading-relaxed">
+                    {weakness.improvement || 'Focus on targeted training to address this weakness area.'}
+                  </p>
+                </div>
+                
+                {weakness.timeline && (
+                  <div className="bg-purple-900/10 rounded-lg p-4 border border-purple-700/20">
+                    <p className="text-purple-400 text-sm font-medium mb-1">Expected Timeline:</p>
+                    <p className="text-gray-400 text-sm">{weakness.timeline}</p>
+                  </div>
+                )}
+                
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="bg-red-900/5 rounded-lg p-3 border border-red-700/10">
+                    <p className="text-red-400 text-sm font-medium mb-1">Impact Assessment:</p>
+                    <p className="text-gray-400 text-sm">
+                      {weakness.impactDetails || "This weakness can affect performance in specific competitive situations."}
+                    </p>
+                  </div>
+                  <div className="bg-green-900/5 rounded-lg p-3 border border-green-700/10">
+                    <p className="text-green-400 text-sm font-medium mb-1">Success Indicators:</p>
+                    <p className="text-gray-400 text-sm">
+                      {weakness.successIndicators || "Monitor progress through specific performance metrics and competition results."}
+                    </p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

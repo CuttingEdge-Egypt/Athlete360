@@ -669,7 +669,25 @@ export async function getDetailedAnalysis(athleteName: string, sport: string): P
       // temperature: 1.0 is default and minimum for GPT-5
     });
 
-    return JSON.parse(response.output_text);
+    // Clean and extract JSON from response
+    let jsonText = response.output_text.trim();
+    
+    // Remove any markdown formatting
+    jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+    
+    // Extract JSON object if response contains extra text
+    const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      jsonText = jsonMatch[0];
+    }
+    
+    // Fix common JSON issues
+    jsonText = jsonText
+      .replace(/,\s*}/g, '}')  // Remove trailing commas
+      .replace(/,\s*]/g, ']')  // Remove trailing commas in arrays
+      .replace(/[\u0000-\u001F\u007F-\u009F]/g, ''); // Remove control characters
+    
+    return JSON.parse(jsonText);
   } catch (error) {
     console.error(`Error getting detailed analysis for ${athleteName}:`, error);
     // Fallback with structured data
@@ -708,11 +726,24 @@ export async function getDetailedAnalysis(athleteName: string, sport: string): P
 
 // GPT-5 implementation of specific analysis generation
 export async function generateSpecificAnalysis(athleteName: string, sport: string, analysisType: string): Promise<any> {
-  const prompt = `Generate ${analysisType} analysis for ${athleteName}, a ${sport} athlete.
+  const prompt = `You are a professional ${sport} analyst. Search the web for current information about athlete "${athleteName}" and provide detailed ${analysisType} analysis.
+
+  IMPORTANT: Respond with valid JSON only - no explanatory text before or after.
   
-  Provide detailed, professional analysis specific to ${analysisType}.
-  Format the response as a JSON object appropriate for ${analysisType} analysis.
-  Include practical, actionable insights based on ${sport} expertise.`;
+  For ${analysisType} analysis, provide comprehensive details with specific data and insights.
+  
+  Required JSON format for ${analysisType}:
+  ${analysisType === 'rank' ? `{
+    "currentRank": number,
+    "peakRank": number,
+    "rankingHistory": [{"date": "YYYY-MM", "rank": number, "tournament": "event name"}],
+    "analysis": "detailed ranking analysis",
+    "recommendations": ["specific improvement suggestion 1", "suggestion 2"]
+  }` : `{
+    "analysis": "detailed analysis content",
+    "insights": ["key insight 1", "insight 2", "insight 3"],
+    "recommendations": ["actionable recommendation 1", "recommendation 2"]
+  }`}`;
 
   try {
     const response = await openai.responses.create({
@@ -723,7 +754,25 @@ export async function generateSpecificAnalysis(athleteName: string, sport: strin
       // temperature: 1.0 is default and minimum for GPT-5
     });
 
-    return JSON.parse(response.output_text);
+    // Clean and extract JSON from response
+    let jsonText = response.output_text.trim();
+    
+    // Remove markdown formatting
+    jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+    
+    // Extract JSON object if response contains extra text
+    const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      jsonText = jsonMatch[0];
+    }
+    
+    // Fix common JSON issues
+    jsonText = jsonText
+      .replace(/,\s*}/g, '}')
+      .replace(/,\s*]/g, ']')
+      .replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
+    
+    return JSON.parse(jsonText);
   } catch (error) {
     console.error(`Error generating ${analysisType} analysis for ${athleteName}:`, error);
     return {
