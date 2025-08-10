@@ -642,23 +642,74 @@ export async function getAthleteProfile(name: string, sport: string, nationality
 
 // GPT-5 implementation of detailed analysis generation
 export async function getDetailedAnalysis(athleteName: string, sport: string): Promise<AnalysisData> {
-  const prompt = `As a professional ${sport} analyst, provide detailed analysis for athlete "${athleteName}".
+  const prompt = `You are a world-class ${sport} analyst with access to current data. Search the web for specific information about "${athleteName}" and provide PERSONALIZED analysis based on their actual playing style, career history, and current performance.
 
-  Create comprehensive analysis including:
-  1. Strengths (3-4 main competitive advantages)
-  2. Weaknesses (2-3 areas for improvement)
-  3. Development plans (4-week structured improvement plan)
-  4. Nutrition recommendations (meal-specific guidance)
-  5. Strategic approaches (competitive strategies)
-  6. Ranking history (estimated progression)
+  CRITICAL: This analysis MUST be specific to ${athleteName} - not generic advice. Use real data about their career, style, achievements, and current form.
 
-  Format as JSON with these exact fields:
-  - strengths: array of {title, description}
-  - weaknesses: array of {title, description}
-  - developmentPlans: array of {title, description, week}
-  - nutritionPlans: array of {title, description, mealType}
-  - beatStrategies: array of {title, description, opponent}
-  - rankHistory: array of {rank, date, tournament}`;
+  IMPORTANT: Respond with valid JSON only - no explanatory text before or after.
+
+  Required JSON format:
+  {
+    "strengths": [
+      {
+        "title": "specific strength name with emoji", 
+        "description": "detailed analysis specific to ${athleteName}'s actual playing style and career achievements", 
+        "rating": number_between_85_and_98,
+        "evidence": "specific examples from their career/matches",
+        "strategicValue": "how this strength helps them win"
+      }
+    ],
+    "weaknesses": [
+      {
+        "title": "specific weakness name with emoji", 
+        "description": "detailed analysis of ${athleteName}'s actual weaknesses based on match data", 
+        "impact": "High/Medium/Low",
+        "improvement": "specific training recommendations for ${athleteName}",
+        "timeline": "realistic improvement timeframe"
+      }
+    ],
+    "developmentPlans": [
+      {
+        "title": "plan name with emoji", 
+        "description": "specific development plan tailored to ${athleteName}'s current level and goals", 
+        "week": number,
+        "focus": "specific skill area",
+        "methods": "training methods specific to their position/style"
+      }
+    ],
+    "nutritionPlans": [
+      {
+        "title": "meal name with emoji", 
+        "description": "nutrition plan considering ${athleteName}'s training demands and body type", 
+        "mealType": "Breakfast/Lunch/Dinner",
+        "calories": "estimated calorie count",
+        "purpose": "why this meal supports their performance"
+      }
+    ],
+    "beatStrategies": [
+      {
+        "title": "strategy name with emoji", 
+        "description": "specific tactical approach based on ${athleteName}'s actual playing style", 
+        "opponent": "specific opponent types they face",
+        "execution": "step-by-step tactical execution"
+      }
+    ],
+    "rankHistory": [
+      {
+        "rank": actual_rank_number, 
+        "date": "YYYY-MM", 
+        "tournament": "real tournament name",
+        "performance": "brief performance summary"
+      }
+    ]
+  }
+
+  REQUIREMENTS:
+  1. Every field MUST be specific to ${athleteName} - use their real career data
+  2. Include emojis in titles (⚡ for speed, 🧠 for mental, 🛡️ for defense, etc.)
+  3. Ratings must vary realistically based on their actual skill level
+  4. Use authentic tournament names, dates, and performance data
+  5. Reference specific matches, opponents, or achievements when possible`;
 
   try {
     const response = await openai.responses.create({
@@ -690,60 +741,53 @@ export async function getDetailedAnalysis(athleteName: string, sport: string): P
     return JSON.parse(jsonText);
   } catch (error) {
     console.error(`Error getting detailed analysis for ${athleteName}:`, error);
-    // Fallback with structured data
-    return {
-      strengths: [
-        { title: "Technical Excellence", description: `Advanced technical skills in ${sport}` },
-        { title: "Mental Toughness", description: "Strong competitive mindset and resilience" },
-        { title: "Physical Conditioning", description: "Excellent fitness and conditioning levels" }
-      ],
-      weaknesses: [
-        { title: "Strategic Awareness", description: "Could improve tactical decision-making" },
-        { title: "Consistency", description: "Maintaining peak performance across competitions" }
-      ],
-      developmentPlans: [
-        { title: "Technical Refinement", description: "Focus on advanced technique development", week: 1 },
-        { title: "Tactical Training", description: "Strategic gameplay improvement", week: 2 },
-        { title: "Mental Conditioning", description: "Psychological preparation enhancement", week: 3 },
-        { title: "Competition Simulation", description: "High-pressure training scenarios", week: 4 }
-      ],
-      nutritionPlans: [
-        { title: "Pre-Competition Meal", description: "High-energy breakfast with complex carbs", mealType: "Breakfast" },
-        { title: "Recovery Nutrition", description: "Protein-rich post-training meal", mealType: "Lunch" },
-        { title: "Evening Nutrition", description: "Balanced dinner for muscle recovery", mealType: "Dinner" }
-      ],
-      beatStrategies: [
-        { title: "Aggressive Approach", description: "High-pressure offensive strategy", opponent: "Defensive players" },
-        { title: "Counter Strategy", description: "Reactive gameplay with quick counters", opponent: "Aggressive opponents" }
-      ],
-      rankHistory: [
-        { rank: Math.floor(Math.random() * 10) + 1, date: "2024-12", tournament: "Recent Competition" },
-        { rank: Math.floor(Math.random() * 15) + 5, date: "2024-10", tournament: "Previous Event" }
-      ]
-    };
+    // Return empty structure for paying customers - no fallback data
+    throw new Error(`Failed to generate analysis for ${athleteName}. GPT-5 analysis service is currently unavailable.`);
   }
 }
 
 // GPT-5 implementation of specific analysis generation
 export async function generateSpecificAnalysis(athleteName: string, sport: string, analysisType: string): Promise<any> {
-  const prompt = `You are a professional ${sport} analyst. Search the web for current information about athlete "${athleteName}" and provide detailed ${analysisType} analysis.
+  const prompt = `You are a professional ${sport} analyst. Search the web for current information about "${athleteName}" and provide PERSONALIZED ${analysisType} analysis.
+
+  CRITICAL: This must be specific to ${athleteName} - use their real career data, playing style, and achievements.
 
   IMPORTANT: Respond with valid JSON only - no explanatory text before or after.
   
-  For ${analysisType} analysis, provide comprehensive details with specific data and insights.
-  
   Required JSON format for ${analysisType}:
   ${analysisType === 'rank' ? `{
-    "currentRank": number,
-    "peakRank": number,
-    "rankingHistory": [{"date": "YYYY-MM", "rank": number, "tournament": "event name"}],
-    "analysis": "detailed ranking analysis",
-    "recommendations": ["specific improvement suggestion 1", "suggestion 2"]
+    "currentRank": actual_current_rank,
+    "peakRank": actual_peak_rank,
+    "rankingHistory": [{"date": "YYYY-MM", "rank": real_rank, "tournament": "actual_tournament_name", "performance": "match_result"}],
+    "analysis": "detailed ranking analysis specific to ${athleteName}'s career progression",
+    "recommendations": ["specific improvement suggestions based on ${athleteName}'s current level"]
+  }` : analysisType === 'strengths' ? `{
+    "strengths": [
+      {
+        "title": "strength name with emoji (⚡🧠🛡️⚽🎯)",
+        "description": "detailed analysis of ${athleteName}'s specific strength based on real performances",
+        "rating": number_between_85_and_98_varying_by_player,
+        "evidence": "specific examples from ${athleteName}'s matches/career",
+        "strategicValue": "how this helps ${athleteName} win matches"
+      }
+    ]
+  }` : analysisType === 'weaknesses' ? `{
+    "weaknesses": [
+      {
+        "title": "weakness name with emoji",
+        "description": "specific weakness analysis based on ${athleteName}'s actual performances",
+        "impact": "High/Medium/Low based on real impact on ${athleteName}'s results",
+        "improvement": "specific training recommendations for ${athleteName}",
+        "timeline": "realistic improvement timeframe for ${athleteName}"
+      }
+    ]
   }` : `{
-    "analysis": "detailed analysis content",
-    "insights": ["key insight 1", "insight 2", "insight 3"],
-    "recommendations": ["actionable recommendation 1", "recommendation 2"]
-  }`}`;
+    "analysis": "detailed analysis content specific to ${athleteName}",
+    "insights": ["player-specific insight 1", "insight 2", "insight 3"],
+    "recommendations": ["actionable recommendation 1 for ${athleteName}", "recommendation 2"]
+  }`}
+
+  Focus on ${athleteName}'s actual career data, playing style, recent performances, and authentic achievements.`;
 
   try {
     const response = await openai.responses.create({
