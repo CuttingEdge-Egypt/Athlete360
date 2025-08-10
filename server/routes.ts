@@ -104,9 +104,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Sport not found" });
       }
 
-      // Use OpenAI GPT-5 to get athlete profile
-      console.log(`Creating athlete ${name} for sport ${sport.name} using OpenAI GPT-5...`);
-      const aiProfile = await generateAthleteBiography(name, sport.name, req.body.nationality);
+      // Use OpenAI GPT-4o to get athlete profile
+      console.log(`Creating athlete ${name} for sport ${sport.name} using OpenAI GPT-4o...`);
+      const aiProfile = await refreshAthleteBiographyWithSearch(name, sport.name, req.body.nationality);
 
       // Search for athlete profile image
       console.log(`Searching for profile image for ${name}...`);
@@ -600,9 +600,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} GPT-5 bio analysis for ${athlete.name}`);
         
         try {
-          const gptBioAnalysis = forceUpdate 
-            ? await refreshAthleteBiographyWithSearch(athlete.name, sportName)
-            : await generateAthleteBiography(athlete.name, sportName);
+          const gptBioAnalysis = await refreshAthleteBiographyWithSearch(athlete.name, sportName);
           
           // Update athlete bio in database with GPT-5 AI content
           await storage.updateAthlete(athleteId, { 
