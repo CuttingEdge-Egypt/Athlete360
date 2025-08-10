@@ -499,27 +499,38 @@ export async function refreshAthleteBiographyWithSearch(name: string, sport: str
   const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const nationalityContext = nationality ? ` from ${nationality}` : '';
   
+  // Check if this is a taekwondo athlete for enhanced data extraction
+  const isTaekwondo = sport.toLowerCase() === 'taekwondo';
+  
+  // Add sport-specific data source guidance for taekwondo athletes
+  const sportSpecificGuidance = isTaekwondo 
+    ? ' For taekwondo athletes, reference https://www.taekwondodata.com/ for accurate competition records, rankings, and athlete profiles.'
+    : '';
+
   const prompt = `Today's date is ${currentDate}.
     
-    Search the web for the most current information about athlete "${name}"${nationalityContext} in ${sport}. Focus on:
-    - Recent competition results and rankings
-    - Latest news and achievements
-    - Current world ranking status
-    - 2024-2025 season performance
-
-Don't include the references in the biography. 
+    Using web search capabilities, find factual, up-to-date information about the athlete "${name}"${nationalityContext}, who competes in ${sport}.
     
-    Create an updated biography with fresh information, structured as:
-    - Introduction with current status
-    - Players' overall story and what they're known for in Taekwondo.
-    - "Recent Competitions:" (2024-2025 results)
-    - "Career Record and Rankings:" (current rankings and record)
-    - "Notable Achievements:" (career highlights)
+    Create a detailed biography structured with the following headings:
+    - An introductory paragraph
+    - Players' overall story and what they're known for in ${sport}.
+    - A heading "Recent Competitions:"
+    - A heading "Career Record and Rankings:"
+    - A heading "Notable Achievements:"
 
-    Only mention information that is 100% accurate and verifiable.
-    IMPORTANT: Do not include any links, URLs, citations, or references in your response. Provide clean text without any reference links or citations.
+Only mention information that is 100% accurate and verifiable.
+
+IMPORTANT: Do not include any links, URLs, citations, or references in your response. Provide clean text without any reference links or citations.
+
+    Provide the response as a JSON object with these fields:
+    - name: athlete's full name
+    - bio: the detailed biography without any links or citations
+    - rank: current world ranking if available (as number or "N/A")
+    - achievements: array of key achievements
+    - recentNews: array of recent news or competition results
     
-    Return as JSON with name, bio, rank, achievements, and recentNews fields.`;
+    ${sportSpecificGuidance}
+    `;
 
   try {
     // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
@@ -531,13 +542,13 @@ Don't include the references in the biography.
           content: "You are an expert sports analyst with web search access. Search for the most current athlete information and respond in valid JSON format without markdown formatting."
         },
         {
-          role: "user",
-          content: `${prompt}
+          role: "user", 
+          content: `${isTaekwondo ? 'For taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference for competition records, rankings, and profiles. ' : ''}${prompt}
 
 Please respond in valid JSON format with these exact fields:
 {
   "name": "athlete's full name",
-  "bio": "updated biography without any links or citations",
+  "bio": "detailed biography without any links or citations",
   "rank": "current world ranking or N/A", 
   "achievements": ["array of key achievements"],
   "recentNews": ["array of recent news or competition results"]
