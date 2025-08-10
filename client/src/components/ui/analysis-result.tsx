@@ -101,7 +101,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
             <div>
               <p className="text-white font-semibold">Career Highlights:</p>
               <ul className="list-disc list-inside space-y-1 text-sm mt-2">
-                {data.achievements.map((achievement: string, index: number) => (
+                {data.achievements.slice(0, 4).map((achievement: string, index: number) => (
                   <li key={index}>{achievement}</li>
                 ))}
               </ul>

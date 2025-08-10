@@ -119,7 +119,7 @@ Response format:
   "currentRecord": "W-L (percentage)" (format like "15-3 (83%)" or "N/A" if not found)
 }`,
       tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 1000
+      max_output_tokens: 8000
     });
 
     console.log("AI Ranking Search Response:", response.output_text);
@@ -599,7 +599,7 @@ export async function getAthleteProfile(name: string, sport: string, nationality
       model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after gpt-4o. do not change this unless explicitly requested by the user
       input: prompt,
       tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 4000,
+      max_output_tokens: 8000,
       // temperature: 1.0 is default and minimum for GPT-5
     });
 
@@ -656,7 +656,7 @@ export async function getDetailedAnalysis(athleteName: string, sport: string): P
       model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after gpt-4o. do not change this unless explicitly requested by the user
       input: prompt,
       tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 3000,
+      max_output_tokens: 8000,
       // temperature: 1.0 is default and minimum for GPT-5
     });
 
@@ -710,7 +710,7 @@ export async function generateSpecificAnalysis(athleteName: string, sport: strin
       model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after gpt-4o. do not change this unless explicitly requested by the user
       input: prompt,
       tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 2000,
+      max_output_tokens: 8000,
       // temperature: 1.0 is default and minimum for GPT-5
     });
 
