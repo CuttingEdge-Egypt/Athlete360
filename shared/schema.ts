@@ -137,6 +137,9 @@ export const transactions = pgTable("transactions", {
   tokensDeducted: integer("tokens_deducted").notNull(),
   athleteId: varchar("athlete_id").references(() => athletes.id),
   serviceType: varchar("service_type"),
+  paymobOrderId: varchar("paymob_order_id"), // For Paymob integration
+  paymobTransactionId: varchar("paymob_transaction_id"), // For Paymob integration
+  paymentStatus: varchar("payment_status").default("pending"), // pending, completed, failed
   createdAt: timestamp("created_at").defaultNow(),
 });
 

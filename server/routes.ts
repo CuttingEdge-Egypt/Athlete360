@@ -6,6 +6,7 @@ import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
 import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture } from "./openaiService";
+import { paymobService } from "./paymobService";
 import OpenAI from "openai";
 
 // All LLM implementations now use GPT-5 with temperature 1.0 (default minimum)
@@ -1496,7 +1497,155 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Token purchase simulation
+  // TESTING FEATURE: Add tokens without payment (EASILY REMOVABLE)
+  app.post('/api/test/add-tokens', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { tokens } = req.body;
+      
+      if (!tokens || tokens <= 0 || tokens > 10000) {
+        return res.status(400).json({ message: "Invalid token amount (1-10000)" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Add tokens directly (TESTING ONLY)
+      await storage.addTokensPurchase(userId, tokens);
+
+      // Create transaction record for testing
+      await storage.createTransaction({
+        userId,
+        action: "Test Token Addition",
+        tokensDeducted: -tokens,
+        serviceType: "test"
+      });
+
+      const updatedUser = await storage.getUser(userId);
+      res.json({ 
+        message: "Test tokens added successfully", 
+        tokens: updatedUser?.tokens || 0,
+        totalPurchased: updatedUser?.totalTokensPurchased || 0,
+        added: tokens 
+      });
+    } catch (error) {
+      console.error("Error adding test tokens:", error);
+      res.status(500).json({ message: "Failed to add test tokens" });
+    }
+  });
+
+  // Paymob payment initiation endpoint
+  app.post('/api/paymob/initiate-payment', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { amount, currency = 'EGP' } = req.body;
+      
+      // Calculate tokens based on amount
+      const tokensToAdd = amount === 25 ? 1000 : amount === 15 ? 500 : amount === 50 ? 2500 : 0;
+      if (tokensToAdd === 0) {
+        return res.status(400).json({ message: "Invalid purchase amount" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check if Paymob is configured
+      if (!paymobService.isConfigured()) {
+        return res.status(503).json({ message: "Payment service not configured" });
+      }
+
+      // Generate unique order ID
+      const orderId = `ATH360_${Date.now()}_${userId.slice(0, 8)}`;
+
+      // Create pending transaction record
+      const transaction = await storage.createTransaction({
+        userId,
+        action: "Token Purchase (Pending)",
+        tokensDeducted: -tokensToAdd,
+        serviceType: "purchase"
+      });
+
+      // Initiate payment with Paymob
+      const paymentResult = await paymobService.initiatePayment({
+        amount,
+        currency,
+        orderId,
+        userId,
+        tokens: tokensToAdd,
+      });
+
+      res.json({
+        paymentUrl: paymentResult.paymentUrl,
+        orderId: paymentResult.orderId,
+        transactionId: transaction.id,
+        amount,
+        tokens: tokensToAdd,
+      });
+    } catch (error) {
+      console.error("Error initiating Paymob payment:", error);
+      res.status(500).json({ message: "Failed to initiate payment" });
+    }
+  });
+
+  // Paymob payment callback/webhook endpoint
+  app.post('/api/paymob/callback', async (req, res) => {
+    try {
+      const { 
+        success, 
+        txn_response_code, 
+        merchant_order_id, 
+        order, 
+        id: transactionId 
+      } = req.body;
+
+      console.log('Paymob callback received:', { success, txn_response_code, merchant_order_id, transactionId });
+
+      if (success === "true" || success === true) {
+        // Extract user ID from merchant_order_id
+        const orderParts = merchant_order_id.split('_');
+        if (orderParts.length >= 3) {
+          const userId = orderParts[2];
+          
+          // Find the pending transaction
+          const transactions = await storage.getUserTransactions(userId);
+          const pendingTransaction = transactions.find(t => 
+            t.action === "Token Purchase (Pending)" && 
+            t.tokensDeducted < 0
+          );
+
+          if (pendingTransaction) {
+            const tokensToAdd = Math.abs(pendingTransaction.tokensDeducted);
+            
+            // Add tokens to user account
+            await storage.addTokensPurchase(userId, tokensToAdd);
+
+            // Update transaction status
+            await storage.createTransaction({
+              userId,
+              action: "Token Purchase (Completed)",
+              tokensDeducted: -tokensToAdd,
+              serviceType: "purchase"
+            });
+
+            console.log(`Payment successful: Added ${tokensToAdd} tokens to user ${userId}`);
+          }
+        }
+      } else {
+        console.log('Payment failed or cancelled:', { txn_response_code, merchant_order_id });
+      }
+
+      res.status(200).json({ status: 'received' });
+    } catch (error) {
+      console.error("Error processing Paymob callback:", error);
+      res.status(500).json({ message: "Callback processing failed" });
+    }
+  });
+
+  // Token purchase simulation (Legacy endpoint)
   app.post('/api/purchase-tokens', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;

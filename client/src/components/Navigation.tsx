@@ -1,14 +1,17 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { HistoryDropdown } from "@/components/ui/history-dropdown";
-import { Trophy, Coins, Plus, LogOut, User as UserIcon } from "lucide-react";
+import { TestTokenModal } from "@/components/ui/test-token-modal";
+import { Trophy, Coins, Plus, LogOut, User as UserIcon, Zap } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { User } from "@shared/schema";
 
 export function Navigation() {
   const { user: authUser } = useAuth();
+  const [testTokenModalOpen, setTestTokenModalOpen] = useState(false);
   
   const { data: user } = useQuery<User>({
     queryKey: ["/api/auth/user"],
@@ -53,6 +56,17 @@ export function Navigation() {
               Buy Tokens
             </Button>
           </Link>
+
+          {/* TESTING FEATURE: Add tokens button (EASILY REMOVABLE) */}
+          <Button 
+            onClick={() => setTestTokenModalOpen(true)}
+            data-testid="button-test-tokens"
+            className="bg-yellow-500 hover:bg-yellow-600 text-black"
+            size="sm"
+          >
+            <Zap className="mr-2" size={16} />
+            Test Tokens
+          </Button>
         </div>
 
         <div className="flex items-center space-x-4">
@@ -101,6 +115,12 @@ export function Navigation() {
           </div>
         </div>
       </div>
+      
+      {/* Test Token Modal (TESTING FEATURE - EASILY REMOVABLE) */}
+      <TestTokenModal 
+        open={testTokenModalOpen} 
+        onOpenChange={setTestTokenModalOpen} 
+      />
     </nav>
   );
 }
