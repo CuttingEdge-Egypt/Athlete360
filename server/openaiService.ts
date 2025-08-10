@@ -447,17 +447,31 @@ Please respond in valid JSON format with these exact fields:
 
     console.log("Full OpenAI Response:", JSON.stringify(response, null, 2));
     
-    const content = response.output?.[0]?.text || response.output;
+    let content;
+    if (Array.isArray(response.output)) {
+      content = response.output[0]?.text || response.output[0];
+    } else {
+      content = response.output;
+    }
+    
+    console.log("Content type:", typeof content);
+    console.log("Content value:", content);
+    
     if (!content) {
-      console.log("OpenAI Response Details:", {
-        choices: response.choices.length,
-        usage: response.usage
-      });
+      console.log("OpenAI Response Details:", response);
       throw new Error("No content received from OpenAI");
     }
 
     try {
-      const athleteData = JSON.parse(content) as AthleteData;
+      // Handle case where content is already an object
+      let athleteData;
+      if (typeof content === 'string') {
+        athleteData = JSON.parse(content) as AthleteData;
+      } else if (typeof content === 'object') {
+        athleteData = content as AthleteData;
+      } else {
+        throw new Error(`Unexpected content type: ${typeof content}`);
+      }
       
       // Validate required fields
       if (!athleteData.name || !athleteData.bio) {
@@ -561,16 +575,36 @@ Please respond in valid JSON format with these exact fields:
 
     console.log("Full OpenAI Refresh Response:", JSON.stringify(response, null, 2));
     
-    const content = response.output?.[0]?.text || response.output;
+    let content;
+    if (Array.isArray(response.output)) {
+      content = response.output[0]?.text || response.output[0];
+    } else {
+      content = response.output;
+    }
+    
+    console.log("Refresh Content type:", typeof content);
+    console.log("Refresh Content value:", content);
+    
     if (!content) {
-      console.log("OpenAI Refresh Response Details:", {
-        choices: response.choices.length,
-        usage: response.usage
-      });
+      console.log("OpenAI Refresh Response Details:", response);
       throw new Error("No content received from OpenAI refresh");
     }
 
-    const athleteData = JSON.parse(content) as AthleteData;
+    // Handle case where content is already an object
+    let athleteData;
+    try {
+      if (typeof content === 'string') {
+        athleteData = JSON.parse(content) as AthleteData;
+      } else if (typeof content === 'object') {
+        athleteData = content as AthleteData;
+      } else {
+        throw new Error(`Unexpected content type: ${typeof content}`);
+      }
+    } catch (parseError) {
+      console.error("JSON Parse Error:", parseError);
+      console.error("Raw content:", content);
+      throw new Error(`Failed to parse OpenAI refresh response: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+    }
     
     // Validate and format response
     if (!athleteData.name || !athleteData.bio) {
