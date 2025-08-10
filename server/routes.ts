@@ -5,11 +5,11 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography } from "./geminiService";
-import { generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture } from "./openaiService";
-import { GoogleGenAI } from "@google/genai";
+import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture } from "./openaiService";
+import OpenAI from "openai";
 
-const genAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY || "" });
+// All LLM implementations now use GPT-5 with temperature 1.0 (default minimum)
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -1643,60 +1643,17 @@ Format as JSON:
   "overallAnalysis": "Comprehensive comparison summary"
 }`;
 
-      const response = await genAI.models.generateContent({
-        model: "gemini-2.5-pro",
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: "object",
-            properties: {
-              strengths: {
-                type: "object",
-                properties: {
-                  athlete1: { type: "array", items: { type: "string" } },
-                  athlete2: { type: "array", items: { type: "string" } },
-                  advantage: { type: "string" }
-                }
-              },
-              weaknesses: {
-                type: "object",
-                properties: {
-                  athlete1: { type: "array", items: { type: "string" } },
-                  athlete2: { type: "array", items: { type: "string" } },
-                  advantage: { type: "string" }
-                }
-              },
-              ranking: {
-                type: "object",
-                properties: {
-                  athlete1Rank: { type: "number" },
-                  athlete2Rank: { type: "number" },
-                  advantage: { type: "string" }
-                }
-              },
-              headToHead: {
-                type: "object",
-                properties: {
-                  prediction: { type: "string" },
-                  confidence: { type: "number" },
-                  reasoning: { type: "string" }
-                }
-              },
-              overallAnalysis: { type: "string" }
-            }
-          }
-        },
-        contents: [
-          {
-            role: "user",
-            parts: [{
-              text: `${comparisonPrompt}\n\nSystem: You are a professional sports analyst specializing in athlete comparisons with access to current data as of ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}. Provide objective, data-driven analysis based on current athlete characteristics and performance metrics.`
-            }]
-          }
-        ]
+      // GPT-5 comparison analysis with temperature 1.0 (default minimum)
+      
+      const response = await openai.responses.create({
+        model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after gpt-4o. do not change this unless explicitly requested by the user
+        input: comparisonPrompt,
+        max_output_tokens: 3000,
+        tools: [{ type: "web_search_preview" }],
+        // temperature: 1.0 is default and minimum for GPT-5
       });
 
-      const comparisonData = JSON.parse(response.text || "{}");
+      const comparisonData = JSON.parse(response.output_text);
 
       const result = {
         athlete1,

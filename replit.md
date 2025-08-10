@@ -12,6 +12,8 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**Complete GPT-5 Migration with Temperature 1.0 (August 10, 2025)**: Successfully migrated all LLM implementations from Gemini to GPT-5 with mandatory temperature 1.0 (cannot go below). Completely removed server/geminiService.ts file and replaced all analysis functions with GPT-5 equivalents. All athlete profile generation, detailed analysis, specific analysis, threaded biography generation, and athlete comparisons now use GPT-5 with web search capabilities. Enhanced athlete image search with strict sport-based validation to prevent basketball player images for taekwondo athletes. System maintains taekwondo-only image policy using TaekwondoData.com exclusively for taekwondo athletes.
+
 **OpenAI GPT-5 Web Search Integration (August 8, 2025)**: Successfully implemented GPT-5 with web search capabilities using responses.create() API instead of chat.completions.create(). Fixed token allocation issue where GPT-5 reasoning model was using all 2000 tokens for internal reasoning, leaving none for response output. Increased max_completion_tokens to 8000 and implemented proper web_search_preview tool integration. System now uses authentic web search data for athlete biography generation, replacing Gemini service entirely. Features include: Real-time web search for athlete data, Egyptian taekwondo athlete specialization via taekwondodata.com, structured JSON output validation, and comprehensive error handling with detailed logging.
 
 **Enhanced Gemini 2.5 Pro with Google Search Grounding (August 7, 2025)**: Successfully implemented "Grounding with Google Search" tool throughout the entire AI infrastructure. All athlete analysis functions now use real-time Google Search data for enhanced accuracy and up-to-date information. Enhanced features include: Google Search-powered biographical analysis with 3-thread approach, real-time athlete comparisons, current ranking analysis, live competition data integration, and dynamic sports insights. Updated server/geminiService.ts with comprehensive Google Search grounding while maintaining Egyptian taekwondo data reference system and authentic data requirements from live sources.
@@ -72,9 +74,7 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### AI and Language Models
-- **OpenAI GPT-5**: Latest OpenAI model with web search capabilities for athlete biography generation and analysis via OPENAI_API_KEY
-- **Google Gemini 2.5 Pro**: Primary LLM provider for all athlete analysis, biography generation, comparison analysis, and sports insights via GOOGLE_API_KEY
-- **@google/genai**: Official Google Generative AI SDK for Node.js integration with JSON schema validation and structured responses
+- **OpenAI GPT-5**: Exclusive LLM provider with mandatory temperature 1.0 for all athlete analysis, biography generation, comparison analysis, detailed analysis, and sports insights via OPENAI_API_KEY. Uses web search capabilities through responses.create() API with web_search_preview tool integration.
 - **OpenAI SDK**: Official OpenAI JavaScript SDK for GPT-5 integration with function calling and web search tools
 
 ### Database and Storage

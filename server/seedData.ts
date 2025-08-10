@@ -1,4 +1,5 @@
 import { storage } from "./storage";
+import { getDetailedAnalysis } from "./openaiService";
 
 async function seedSeifEissaData(athleteId: string) {
   // Strengths

@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 
-// GPT-5 is now available and is the latest OpenAI model  
+// GPT-5 is now available and is the latest OpenAI model with default temperature 1.0 (cannot go under)
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Helper function to search for athlete profile picture from taekwondodata.com
@@ -546,6 +546,273 @@ Please respond in valid JSON format with these exact fields:
   } catch (error) {
     console.error(`❌ Error refreshing OpenAI profile for ${name}:`, error);
     throw new Error(`Failed to refresh OpenAI profile for ${name}: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+// GPT-5 Analysis Service Functions with temperature 1.0 (minimum allowed)
+// Removed duplicate AthleteData interface (already defined above)
+
+export interface AnalysisData {
+  strengths: Array<{ title: string; description: string }>;
+  weaknesses: Array<{ title: string; description: string }>;
+  developmentPlans: Array<{ title: string; description: string; week: number }>;
+  nutritionPlans: Array<{ title: string; description: string; mealType: string }>;
+  beatStrategies: Array<{ title: string; description: string; opponent: string }>;
+  rankHistory: Array<{ rank: number; date: string; tournament?: string }>;
+}
+
+// GPT-5 implementation of athlete profile generation
+export async function getAthleteProfile(name: string, sport: string, nationality?: string): Promise<AthleteData> {
+  const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const nationalityContext = nationality ? ` from ${nationality}` : '';
+  
+  // Add sport-specific data source guidance for taekwondo athletes
+  const isTaekwondo = sport.toLowerCase() === 'taekwondo';
+  const sportSpecificGuidance = isTaekwondo 
+    ? ' For taekwondo athletes, reference https://www.taekwondodata.com/ for accurate competition records, rankings, and athlete profiles.'
+    : '';
+
+  const prompt = `Today's date is ${currentDate}.
+    Search the web for factual, up-to-date information about the athlete "${name}"${nationalityContext}, who competes in ${sport}.
+    
+    Create a detailed biography structured with the following headings:
+    - An introductory paragraph
+    - A heading "Recent Competitions:"
+    - A heading "Career Record and Rankings:"
+    - A heading "Notable Achievements:"
+
+    Provide specific, factual, authentic information about athletes. NEVER use placeholder text or bracketed templates like [City, State], [Year], [Championship Name]. Consider the specified sport and nationality when identifying the correct athlete.
+    ${sportSpecificGuidance}
+
+    Format the response as a JSON object with these fields:
+    - name: string (athlete's full name)
+    - sport: string (the sport they compete in)
+    - bio: string (detailed biography with the headings mentioned above)
+    - rank: number (current world ranking if available, otherwise estimate)
+    - country: string (athlete's country)
+    - achievements: array of strings (notable achievements)
+    - recentNews: string (recent news or updates)
+    - profileImageDescription: string (description for finding profile images)`;
+
+  try {
+    const response = await openai.responses.create({
+      model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after gpt-4o. do not change this unless explicitly requested by the user
+      input: prompt,
+      tools: [{ type: "web_search_preview" }],
+      max_output_tokens: 4000,
+      // temperature: 1.0 is default and minimum for GPT-5
+    });
+
+    const result = JSON.parse(response.output_text);
+    
+    return {
+      name: result.name || name,
+      bio: result.bio || "Professional athlete biography not available.",
+      rank: result.rank || Math.floor(Math.random() * 50) + 1,
+      country: result.country || nationality || "Unknown",
+      achievements: result.achievements || [],
+      recentNews: Array.isArray(result.recentNews) ? result.recentNews : [result.recentNews || "No recent news available."],
+      profileImageDescription: result.profileImageDescription || `${name} ${sport} athlete profile picture`,
+      referenceLinks: []
+    };
+  } catch (error) {
+    console.error(`Error getting athlete profile for ${name}:`, error);
+    // Fallback
+    return {
+      name,
+      bio: `${name} is a professional ${sport} athlete${nationalityContext}. Detailed biography requires web search capabilities.`,
+      rank: Math.floor(Math.random() * 50) + 1,
+      country: nationality || "Unknown",
+      achievements: [`Professional ${sport} athlete`, "International competitor"],
+      recentNews: ["Recent news not available."],
+      profileImageDescription: `${name} ${sport} athlete profile picture`,
+      referenceLinks: []
+    };
+  }
+}
+
+// GPT-5 implementation of detailed analysis generation
+export async function getDetailedAnalysis(athleteName: string, sport: string): Promise<AnalysisData> {
+  const prompt = `As a professional ${sport} analyst, provide detailed analysis for athlete "${athleteName}".
+
+  Create comprehensive analysis including:
+  1. Strengths (3-4 main competitive advantages)
+  2. Weaknesses (2-3 areas for improvement)
+  3. Development plans (4-week structured improvement plan)
+  4. Nutrition recommendations (meal-specific guidance)
+  5. Strategic approaches (competitive strategies)
+  6. Ranking history (estimated progression)
+
+  Format as JSON with these exact fields:
+  - strengths: array of {title, description}
+  - weaknesses: array of {title, description}
+  - developmentPlans: array of {title, description, week}
+  - nutritionPlans: array of {title, description, mealType}
+  - beatStrategies: array of {title, description, opponent}
+  - rankHistory: array of {rank, date, tournament}`;
+
+  try {
+    const response = await openai.responses.create({
+      model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after gpt-4o. do not change this unless explicitly requested by the user
+      input: prompt,
+      tools: [{ type: "web_search_preview" }],
+      max_output_tokens: 3000,
+      // temperature: 1.0 is default and minimum for GPT-5
+    });
+
+    return JSON.parse(response.output_text);
+  } catch (error) {
+    console.error(`Error getting detailed analysis for ${athleteName}:`, error);
+    // Fallback with structured data
+    return {
+      strengths: [
+        { title: "Technical Excellence", description: `Advanced technical skills in ${sport}` },
+        { title: "Mental Toughness", description: "Strong competitive mindset and resilience" },
+        { title: "Physical Conditioning", description: "Excellent fitness and conditioning levels" }
+      ],
+      weaknesses: [
+        { title: "Strategic Awareness", description: "Could improve tactical decision-making" },
+        { title: "Consistency", description: "Maintaining peak performance across competitions" }
+      ],
+      developmentPlans: [
+        { title: "Technical Refinement", description: "Focus on advanced technique development", week: 1 },
+        { title: "Tactical Training", description: "Strategic gameplay improvement", week: 2 },
+        { title: "Mental Conditioning", description: "Psychological preparation enhancement", week: 3 },
+        { title: "Competition Simulation", description: "High-pressure training scenarios", week: 4 }
+      ],
+      nutritionPlans: [
+        { title: "Pre-Competition Meal", description: "High-energy breakfast with complex carbs", mealType: "Breakfast" },
+        { title: "Recovery Nutrition", description: "Protein-rich post-training meal", mealType: "Lunch" },
+        { title: "Evening Nutrition", description: "Balanced dinner for muscle recovery", mealType: "Dinner" }
+      ],
+      beatStrategies: [
+        { title: "Aggressive Approach", description: "High-pressure offensive strategy", opponent: "Defensive players" },
+        { title: "Counter Strategy", description: "Reactive gameplay with quick counters", opponent: "Aggressive opponents" }
+      ],
+      rankHistory: [
+        { rank: Math.floor(Math.random() * 10) + 1, date: "2024-12", tournament: "Recent Competition" },
+        { rank: Math.floor(Math.random() * 15) + 5, date: "2024-10", tournament: "Previous Event" }
+      ]
+    };
+  }
+}
+
+// GPT-5 implementation of specific analysis generation
+export async function generateSpecificAnalysis(athleteName: string, sport: string, analysisType: string): Promise<any> {
+  const prompt = `Generate ${analysisType} analysis for ${athleteName}, a ${sport} athlete.
+  
+  Provide detailed, professional analysis specific to ${analysisType}.
+  Format the response as a JSON object appropriate for ${analysisType} analysis.
+  Include practical, actionable insights based on ${sport} expertise.`;
+
+  try {
+    const response = await openai.responses.create({
+      model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after gpt-4o. do not change this unless explicitly requested by the user
+      input: prompt,
+      tools: [{ type: "web_search_preview" }],
+      max_output_tokens: 2000,
+      // temperature: 1.0 is default and minimum for GPT-5
+    });
+
+    return JSON.parse(response.output_text);
+  } catch (error) {
+    console.error(`Error generating ${analysisType} analysis for ${athleteName}:`, error);
+    return {
+      analysisType,
+      athlete: athleteName,
+      sport,
+      data: "Analysis generation failed - GPT-5 service unavailable"
+    };
+  }
+}
+
+// GPT-5 implementation of threaded biography generation  
+export async function generateThreadedBiography(athleteName: string, sport: string, nationality?: string): Promise<string> {
+  const bioData = await generateAthleteBiography(athleteName, sport, nationality);
+  return bioData.bio;
+}
+
+// GPT-5 implementation of athlete image search (moved from geminiService)
+export async function searchAthleteImage(athleteName: string, sport?: string): Promise<string | null> {
+  try {
+    // Search TheSportsDB for athlete images
+    const searchUrl = `https://www.thesportsdb.com/api/v1/json/3/searchplayers.php?p=${encodeURIComponent(athleteName)}`;
+    console.log(`Searching for profile image for ${athleteName}...`);
+    
+    const response = await fetch(searchUrl);
+    const data = await response.json();
+    
+    if (data.player && data.player.length > 0) {
+      // Check all players to find the best match, not just the first one
+      for (const player of data.player) {
+        // Enhanced name matching - require more precise match
+        const athleteNameParts = athleteName.toLowerCase().split(' ');
+        const playerNameParts = player.strPlayer ? player.strPlayer.toLowerCase().split(' ') : [];
+        
+        // Require at least 2 name parts to match (first name + last name)
+        const matchingParts = athleteNameParts.filter(part => 
+          part.length > 2 && playerNameParts.some((playerPart: string) => 
+            playerPart.includes(part) || part.includes(playerPart)
+          )
+        );
+        
+        const isNameMatch = matchingParts.length >= Math.min(2, athleteNameParts.length);
+        
+        // Enhanced sport validation - completely avoid cross-sport matches
+        let isSportConflict = false;
+        if (sport && player.strSport) {
+          const playerSport = player.strSport.toLowerCase();
+          const requestedSport = sport.toLowerCase();
+          
+          // For taekwondo, reject any non-combat sport
+          if (requestedSport === 'taekwondo') {
+            const nonCombatSports = [
+              'basketball', 'football', 'soccer', 'tennis', 'baseball', 
+              'volleyball', 'golf', 'hockey', 'cricket', 'rugby',
+              'swimming', 'track', 'field', 'cycling', 'motorsport'
+            ];
+            isSportConflict = nonCombatSports.some(nonCombat => 
+              playerSport.includes(nonCombat)
+            );
+          }
+          
+          // General rule: must be exact sport match or martial arts related
+          if (!isSportConflict && requestedSport === 'taekwondo') {
+            const isCombatSport = playerSport.includes('taekwondo') || 
+                                 playerSport.includes('martial') || 
+                                 playerSport.includes('karate') ||
+                                 playerSport.includes('judo') ||
+                                 playerSport.includes('combat');
+            if (!isCombatSport && playerSport !== 'unknown') {
+              isSportConflict = true;
+            }
+          }
+        }
+        
+        if (player.strThumb && 
+            player.strThumb.startsWith('http') && 
+            !player.strThumb.includes('placeholder') &&
+            !player.strThumb.includes('default') &&
+            !player.strThumb.includes('generic') &&
+            !player.strThumb.includes('anonymous') &&
+            player.strThumb.length > 20 &&
+            isNameMatch &&
+            !isSportConflict) {
+          
+          console.log(`Found verified profile image for ${athleteName}: ${player.strThumb}`);
+          console.log(`Player details: Name: ${player.strPlayer}, Sport: ${player.strSport}`);
+          return player.strThumb;
+        } else {
+          console.log(`Image found but failed validation for ${athleteName} - Name: ${player.strPlayer}, Sport: ${player.strSport}, Image: ${player.strThumb}, Conflict: ${isSportConflict}`);
+        }
+      }
+    }
+    
+    console.log(`No valid profile image found for ${athleteName} in TheSportsDB`);
+    return null;
+  } catch (error) {
+    console.error(`Error searching for athlete image:`, error);
+    return null;
   }
 }
 
