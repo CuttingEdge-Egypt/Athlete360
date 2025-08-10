@@ -275,7 +275,7 @@ export function TokenModal({ open, onOpenChange }: TokenModalProps) {
             data-testid="button-maybe-later"
             variant="ghost"
             className="w-full text-gray-400 hover:text-white"
-            disabled={purchaseMutation.isPending}
+            disabled={paymobMutation.isPending || legacyPurchaseMutation.isPending}
           >
             Maybe Later
           </Button>
