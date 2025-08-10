@@ -427,17 +427,10 @@ IMPORTANT: Do not include any links, URLs, citations, or references in your resp
     `;
 
   try {
-    // Using GPT-5 with explicit web search instructions
-    const response = await openai.chat.completions.create({
+    // Using GPT-5 with web search capabilities (correct API format)
+    const response = await openai.responses.create({
       model: "gpt-5",
-      messages: [
-        {
-          role: "system",
-          content: "You are an expert sports biographer. IMPORTANT: You must use web search to find current, accurate information about the athlete. Search for recent competition results, rankings, achievements, and biographical details. Create detailed, comprehensive athlete biographies with multiple structured sections based on real data found through web search."
-        },
-        {
-          role: "user", 
-          content: `${isTaekwondo ? 'For taekwondo athletes, search https://www.taekwondodata.com/ for accurate competition records, rankings, and profiles. ' : ''}${prompt}
+      input: `${isTaekwondo ? 'For taekwondo athletes, search https://www.taekwondodata.com/ for accurate competition records, rankings, and profiles. ' : ''}${prompt}
 
 Please respond in valid JSON format with these exact fields:
 {
@@ -446,17 +439,15 @@ Please respond in valid JSON format with these exact fields:
   "rank": "current world ranking or N/A", 
   "achievements": ["array of key achievements"],
   "recentNews": ["array of recent news or competition results"]
-}`
-        }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 1.0,
-      max_completion_tokens: 8000
+}`,
+      tools: [
+        { type: "web_search_preview" }
+      ]
     });
 
     console.log("Full OpenAI Response:", JSON.stringify(response, null, 2));
     
-    const content = response.choices[0].message.content;
+    const content = response.output?.[0]?.text || response.output;
     if (!content) {
       console.log("OpenAI Response Details:", {
         choices: response.choices.length,
@@ -550,37 +541,27 @@ IMPORTANT: Do not include any links, URLs, citations, or references in your resp
     `;
 
   try {
-    // Using GPT-5 with web search capabilities
-    const response = await openai.chat.completions.create({
+    // Using GPT-5 with web search capabilities (correct API format)
+    const response = await openai.responses.create({
       model: "gpt-5",
-      messages: [
-        {
-          role: "system",
-          content: "You are an expert sports biographer with web search access. Create detailed, comprehensive athlete biographies with multiple structured sections. Use web search to find current athlete information and respond in valid JSON format without markdown formatting."
-        },
-        {
-          role: "user", 
-          content: `${isTaekwondo ? 'For taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference for competition records, rankings, and profiles. ' : ''}${prompt}
+      input: `${isTaekwondo ? 'For taekwondo athletes, search https://www.taekwondodata.com/ for accurate competition records, rankings, and profiles. ' : ''}${prompt}
 
 Please respond in valid JSON format with these exact fields:
 {
   "name": "athlete's full name",
-  "bio": "detailed biography without any links or citations",
+  "bio": "detailed biography with web search data, no links or citations",
   "rank": "current world ranking or N/A", 
   "achievements": ["array of key achievements"],
   "recentNews": ["array of recent news or competition results"]
-}`
-        }
-      ],
-
-      response_format: { type: "json_object" },
-      temperature: 1.0,
-      max_completion_tokens: 8000
+}`,
+      tools: [
+        { type: "web_search_preview" }
+      ]
     });
 
     console.log("Full OpenAI Refresh Response:", JSON.stringify(response, null, 2));
     
-    const content = response.choices[0].message.content;
+    const content = response.output?.[0]?.text || response.output;
     if (!content) {
       console.log("OpenAI Refresh Response Details:", {
         choices: response.choices.length,
