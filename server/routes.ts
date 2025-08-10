@@ -318,12 +318,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const athlete = await storage.createAthlete(enhancedAthleteData);
       
-      // Generate and store comprehensive analysis data
-      try {
-        const detailedAnalysis = await getDetailedAnalysis(athlete.name, sportName);
-        
-        // Store strengths
-        for (const strength of detailedAnalysis.strengths) {
+      // Respond immediately with the athlete, then generate detailed analysis in background
+      res.json(athlete);
+      
+      // Generate detailed analysis asynchronously without blocking the response
+      console.log(`Starting background analysis for ${athlete.name}...`);
+      setTimeout(async () => {
+        try {
+          const detailedAnalysis = await getDetailedAnalysis(athlete.name, sportName);
+          
+          // Store strengths
+          for (const strength of detailedAnalysis.strengths) {
           try {
             await storage.createAthleteStrength({
               athleteId: athlete.id,
@@ -403,12 +408,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
         
-        console.log(`AI-powered comprehensive data created for ${athlete.name}`);
-      } catch (analysisError) {
-        console.error(`Error generating detailed analysis for ${athlete.name}:`, analysisError);
-      }
-      
-      res.json(athlete);
+          console.log(`Background analysis completed for ${athlete.name}`);
+        } catch (analysisError) {
+          console.error(`Background analysis failed for ${athlete.name}:`, analysisError);
+        }
+      }, 100); // Start background processing after 100ms
     } catch (error) {
       console.error("Error creating athlete:", error);
       res.status(500).json({ message: "Failed to create athlete" });

@@ -602,7 +602,7 @@ export async function getAthleteProfile(name: string, sport: string, nationality
       model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after gpt-4o. do not change this unless explicitly requested by the user
       input: prompt,
       tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 4000,
+      max_output_tokens: 2000, // Reduced for faster response
       // temperature: 1.0 is default and minimum for GPT-5
     });
 
