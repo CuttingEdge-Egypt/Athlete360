@@ -30,9 +30,11 @@ export async function generateAthleteBiography(name: string, sport: string, nati
   const nationalityContext = nationality ? ` from ${nationality}` : '';
   const isTaekwondo = sport.toLowerCase() === 'taekwondo';
   
-  const webSearchPrompt = `Search the web for current information about the athlete "${name}"${nationalityContext} who competes in ${sport}. ${isTaekwondo ? 'For taekwondo athletes, search https://www.taekwondodata.com/ for accurate competition records, rankings, and profiles. ' : ''}Find recent competition results, rankings, achievements, and biographical details.`;
-  
-  const biographyPrompt = `Today's date is ${currentDate}. Based on your web search results about "${name}"${nationalityContext}, create a detailed biography with the following structure:
+  const prompt = `Today's date is ${currentDate}.
+    
+    Search the web for current, accurate information about the athlete "${name}"${nationalityContext} who competes in ${sport}. ${isTaekwondo ? 'For taekwondo athletes, search https://www.taekwondodata.com/ for accurate competition records, rankings, and profiles. ' : ''}
+    
+    Create a detailed biography with the following structure:
 
     **Player's Overall Intro**
     A comprehensive introductory section about who they are, their background, and their standing in ${sport}.
@@ -48,40 +50,19 @@ export async function generateAthleteBiography(name: string, sport: string, nati
 
     Make the biography comprehensive and detailed with each section clearly marked. Include specific competition names, years, achievements, and performance details where available.
 
-    IMPORTANT: Only use information that is 100% accurate and verifiable from your web search. Do not include any links, URLs, citations, or references.`;
+    IMPORTANT: Only mention information that is 100% accurate and verifiable from web search. Do not include any links, URLs, citations, or references.`;
 
   try {
-    // First make a web search call
-    console.log("🔍 Searching web for athlete information...");
-    const searchResponse = await openai.chat.completions.create({
-      model: "gpt-4o", // Use GPT-4o for web search as it has more reliable web search capabilities
-      messages: [
-        {
-          role: "user",
-          content: webSearchPrompt
-        }
-      ],
-      temperature: 1.0,
-      max_tokens: 4000
-    });
-
-    const searchResults = searchResponse.choices[0].message.content;
-    console.log("🔍 Web search completed, generating biography...");
-
-    // Then use the search results to generate the biography with GPT-5
     const response = await openai.chat.completions.create({
       model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after your knowledge cutoff. do not change this unless explicitly requested by the user
       messages: [
         {
           role: "system",
-          content: "You are an expert sports biographer. Use the provided web search results to create accurate, detailed athlete biographies. Always respond in valid JSON format."
+          content: "You are an expert sports biographer. You must search the web for current, accurate information about athletes. Focus on finding real competition results, rankings, and biographical details. Always respond in valid JSON format."
         },
         {
           role: "user",
-          content: `Web search results about ${name}:
-${searchResults}
-
-${biographyPrompt}
+          content: `${prompt}
 
 Respond in this exact JSON format:
 {
@@ -133,8 +114,84 @@ Respond in this exact JSON format:
 }
 
 export async function refreshAthleteBiographyWithSearch(name: string, sport: string, nationality?: string): Promise<AthleteData> {
-  // Use the same web search approach for consistency
-  return generateAthleteBiography(name, sport, nationality);
+  const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const nationalityContext = nationality ? ` from ${nationality}` : '';
+  const isTaekwondo = sport.toLowerCase() === 'taekwondo';
+  
+  const prompt = `Today's date is ${currentDate}.
+    
+    Search the web for current, accurate information about the athlete "${name}"${nationalityContext} who competes in ${sport}. ${isTaekwondo ? 'For taekwondo athletes, search https://www.taekwondodata.com/ for accurate competition records, rankings, and profiles. ' : ''}
+    
+    Create a detailed biography with the following structure:
+
+    **Player's Overall Intro**
+    A comprehensive introductory section about who they are, their background, and their standing in ${sport}.
+
+    **Achievements**  
+    A detailed section describing their major career achievements, medals, titles, and accolades with specific years and competitions.
+
+    **Recent Competitions**
+    Detailed information about their recent competition results, 2024-2025 season performance, and current form.
+
+    **Impact on the Sport and Competitions**
+    A section about their influence on ${sport}, their competitive style, what they're known for, and their contributions to the sport.
+
+    Make the biography comprehensive and detailed with each section clearly marked. Include specific competition names, years, achievements, and performance details where available.
+
+    IMPORTANT: Only mention information that is 100% accurate and verifiable from web search. Do not include any links, URLs, citations, or references.`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after your knowledge cutoff. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert sports biographer. You must search the web for current, accurate information about athletes. Focus on finding real competition results, rankings, and biographical details. Always respond in valid JSON format."
+        },
+        {
+          role: "user",
+          content: `${prompt}
+
+Respond in this exact JSON format:
+{
+  "name": "athlete's full name",
+  "bio": "detailed biography with web search data, no links or citations",
+  "rank": "current world ranking or N/A", 
+  "achievements": ["array of key achievements"],
+  "recentNews": ["array of recent news or competition results"]
+}`
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 1.0,
+      max_completion_tokens: 8000
+    });
+
+    console.log("Full OpenAI Refresh Response:", JSON.stringify(response, null, 2));
+    
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error("No content received from OpenAI refresh");
+    }
+
+    const athleteData = JSON.parse(content) as AthleteData;
+    
+    if (!athleteData.name || !athleteData.bio) {
+      throw new Error("Missing required fields in OpenAI refresh response");
+    }
+
+    athleteData.achievements = athleteData.achievements || [];
+    athleteData.recentNews = athleteData.recentNews || [];
+
+    if (typeof athleteData.rank === 'string' && !isNaN(Number(athleteData.rank)) && athleteData.rank !== 'N/A') {
+      athleteData.rank = Number(athleteData.rank);
+    }
+
+    return athleteData;
+  } catch (error) {
+    console.error(`❌ Error refreshing OpenAI profile for ${name}:`, error);
+    throw new Error(`Failed to refresh OpenAI profile for ${name}: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
 // Analysis service functions with GPT-5 and temperature 1.0
