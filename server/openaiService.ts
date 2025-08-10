@@ -396,20 +396,25 @@ export async function generateAthleteBiography(name: string, sport: string, nati
     
     Using web search capabilities, find factual, up-to-date information about the athlete "${name}"${nationalityContext}, who competes in ${sport}.
     
-    Create a detailed biography structured with the following headings:
-    - An introductory paragraph
-    - Players' overall story and what they're known for in ${sport}.
-    - A heading "Recent Competitions:"
-    - A heading "Career Record and Rankings:"
-    - A heading "Notable Achievements:"
+    Create a comprehensive, detailed biography that must be structured EXACTLY as follows with these specific headings and content:
 
-Only mention information that is 100% accurate and verifiable.
+    1. PLAYER'S OVERALL INTRO: A detailed introductory paragraph about who they are, their background, and their standing in ${sport}.
+
+    2. ACHIEVEMENTS: A comprehensive section describing their major career achievements, medals, titles, and accolades.
+
+    3. RECENT COMPETITIONS: Detailed information about their recent competition results, 2024-2025 season performance, and current form.
+
+    4. IMPACT ON THE SPORT: A section about their influence on ${sport}, their style, what they're known for, and their contributions to the sport.
+
+    The biography must be detailed (minimum 4-5 paragraphs) with each section clearly separated and comprehensive. Include specific competition names, years, and achievements where available.
+
+Only mention information that is 100% accurate and verifiable. If specific details aren't available, use general but accurate descriptions of their style and approach.
 
 IMPORTANT: Do not include any links, URLs, citations, or references in your response. Provide clean text without any reference links or citations.
 
     Provide the response as a JSON object with these fields:
     - name: athlete's full name
-    - bio: the detailed biography without any links or citations
+    - bio: the detailed, structured biography (minimum 4-5 paragraphs) without any links or citations
     - rank: current world ranking if available (as number or "N/A")
     - achievements: array of key achievements
     - recentNews: array of recent news or competition results
@@ -425,7 +430,7 @@ IMPORTANT: Do not include any links, URLs, citations, or references in your resp
       messages: [
         {
           role: "system",
-          content: "You are an expert sports analyst with access to web search. Use web search to find accurate, up-to-date information about athletes. Always respond in valid JSON format without any markdown formatting."
+          content: "You are an expert sports biographer with web search access. Create detailed, comprehensive athlete biographies with multiple structured sections. Search for current athlete information and respond in valid JSON format without markdown formatting."
         },
         {
           role: "user", 
@@ -511,20 +516,25 @@ export async function refreshAthleteBiographyWithSearch(name: string, sport: str
     
     Using web search capabilities, find factual, up-to-date information about the athlete "${name}"${nationalityContext}, who competes in ${sport}.
     
-    Create a detailed biography structured with the following headings:
-    - An introductory paragraph
-    - Players' overall story and what they're known for in ${sport}.
-    - A heading "Recent Competitions:"
-    - A heading "Career Record and Rankings:"
-    - A heading "Notable Achievements:"
+    Create a comprehensive, detailed biography that must be structured EXACTLY as follows with these specific headings and content:
 
-Only mention information that is 100% accurate and verifiable.
+    1. PLAYER'S OVERALL INTRO: A detailed introductory paragraph about who they are, their background, and their standing in ${sport}.
+
+    2. ACHIEVEMENTS: A comprehensive section describing their major career achievements, medals, titles, and accolades.
+
+    3. RECENT COMPETITIONS: Detailed information about their recent competition results, 2024-2025 season performance, and current form.
+
+    4. IMPACT ON THE SPORT: A section about their influence on ${sport}, their style, what they're known for, and their contributions to the sport.
+
+    The biography must be detailed (minimum 4-5 paragraphs) with each section clearly separated and comprehensive. Include specific competition names, years, and achievements where available.
+
+Only mention information that is 100% accurate and verifiable. If specific details aren't available, use general but accurate descriptions of their style and approach.
 
 IMPORTANT: Do not include any links, URLs, citations, or references in your response. Provide clean text without any reference links or citations.
 
     Provide the response as a JSON object with these fields:
     - name: athlete's full name
-    - bio: the detailed biography without any links or citations
+    - bio: the detailed, structured biography (minimum 4-5 paragraphs) without any links or citations
     - rank: current world ranking if available (as number or "N/A")
     - achievements: array of key achievements
     - recentNews: array of recent news or competition results
@@ -539,7 +549,7 @@ IMPORTANT: Do not include any links, URLs, citations, or references in your resp
       messages: [
         {
           role: "system",
-          content: "You are an expert sports analyst with web search access. Search for the most current athlete information and respond in valid JSON format without markdown formatting."
+          content: "You are an expert sports biographer with web search access. Create detailed, comprehensive athlete biographies with multiple structured sections. Search for current athlete information and respond in valid JSON format without markdown formatting."
         },
         {
           role: "user", 
