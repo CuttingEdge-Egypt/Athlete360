@@ -29,9 +29,9 @@ export async function generateAthleteBiography(name: string, sport: string, nati
   const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const nationalityContext = nationality ? ` from ${nationality}` : '';
   const isTaekwondo = sport.toLowerCase() === 'taekwondo';
-  
+
   const webSearchPrompt = `Search the web for current information about the athlete "${name}"${nationalityContext} who competes in ${sport}. ${isTaekwondo ? 'For taekwondo athletes, search https://www.taekwondodata.com/ for accurate competition records, rankings, and profiles. ' : ''}Find recent competition results, rankings, achievements, and biographical details.`;
-  
+
   const biographyPrompt = `Today's date is ${currentDate}. Based on your web search results about "${name}"${nationalityContext}, create a detailed biography with the following structure:
 
     **Player's Overall Intro**
@@ -51,27 +51,30 @@ export async function generateAthleteBiography(name: string, sport: string, nati
     IMPORTANT: Only use information that is 100% accurate and verifiable from your web search. Do not include any links, URLs, citations, or references.`;
 
   try {
-    // First make a web search call using GPT-4o which has reliable web search
+    // ✅ First: Make a GPT-5 web search call
     console.log("🔍 Searching web for athlete information...");
-    const searchResponse = await openai.chat.completions.create({
-      model: "gpt-4o", // Use GPT-4o for web search as it has more reliable web search capabilities
-      messages: [
+    const searchResponse = await openai.responses.create({
+      model: "gpt-5",
+      input: [
         {
           role: "user",
           content: webSearchPrompt
         }
       ],
+      tools: [
+        { name: "web_search", type: "web_search" }
+      ],
       temperature: 1.0,
-      max_tokens: 4000
+      max_output_tokens: 8000
     });
 
-    const searchResults = searchResponse.choices[0].message.content;
+    const searchResults = searchResponse.output_text;
     console.log("🔍 Web search completed, generating biography...");
 
-    // Then use the search results to generate the biography with GPT-5
-    const response = await openai.chat.completions.create({
-      model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after your knowledge cutoff. do not change this unless explicitly requested by the user
-      messages: [
+    // ✅ Then: Use the search results to generate the biography
+    const response = await openai.responses.create({
+      model: "gpt-5",
+      input: [
         {
           role: "system",
           content: "You are an expert sports biographer. Use the provided web search results to create accurate, detailed athlete biographies. Always respond in valid JSON format."
@@ -93,20 +96,19 @@ Respond in this exact JSON format:
 }`
         }
       ],
-      response_format: { type: "json_object" },
       temperature: 1.0,
-      max_completion_tokens: 8000
+      max_output_tokens: 8000
     });
 
     console.log("Full OpenAI Response:", JSON.stringify(response, null, 2));
-    
-    const content = response.choices[0].message.content;
+
+    const content = response.output_text;
     if (!content) {
       throw new Error("No content received from OpenAI");
     }
 
     const athleteData = JSON.parse(content) as AthleteData;
-    
+
     if (!athleteData.name || !athleteData.bio) {
       throw new Error("Missing required fields in OpenAI response");
     }
@@ -133,7 +135,6 @@ Respond in this exact JSON format:
 }
 
 export async function refreshAthleteBiographyWithSearch(name: string, sport: string, nationality?: string): Promise<AthleteData> {
-  // Use the same web search approach for consistency
   return generateAthleteBiography(name, sport, nationality);
 }
 
@@ -155,9 +156,9 @@ export async function getDetailedAnalysis(name: string, sport: string, analysisT
   const prompt = `Create detailed ${analysisType} analysis for athlete "${name}" who competes in ${sport}. Provide comprehensive insights based on typical performance patterns in ${sport}.`;
 
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after your knowledge cutoff. do not change this unless explicitly requested by the user
-      messages: [
+    const response = await openai.responses.create({
+      model: "gpt-5",
+      input: [
         {
           role: "system",
           content: `You are a professional sports analyst specializing in ${sport}. Provide detailed, actionable analysis.`
@@ -167,12 +168,11 @@ export async function getDetailedAnalysis(name: string, sport: string, analysisT
           content: prompt
         }
       ],
-      response_format: { type: "json_object" },
       temperature: 1.0,
-      max_completion_tokens: 4000
+      max_output_tokens: 8000
     });
 
-    const content = response.choices[0].message.content;
+    const content = response.output_text;
     if (!content) {
       throw new Error("No content received from OpenAI");
     }
@@ -197,9 +197,9 @@ export async function getSpecificAnalysis(name: string, sport: string, analysisT
   const prompt = analysisPrompts[analysisType as keyof typeof analysisPrompts] || `Provide detailed analysis for ${name} in ${sport}.`;
 
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after your knowledge cutoff. do not change this unless explicitly requested by the user
-      messages: [
+    const response = await openai.responses.create({
+      model: "gpt-5",
+      input: [
         {
           role: "system",
           content: `You are a professional sports analyst specializing in ${sport}. Provide detailed, actionable analysis in JSON format.`
@@ -211,12 +211,11 @@ export async function getSpecificAnalysis(name: string, sport: string, analysisT
 Respond in JSON format with relevant fields for ${analysisType} analysis.`
         }
       ],
-      response_format: { type: "json_object" },
       temperature: 1.0,
-      max_completion_tokens: 4000
+      max_output_tokens: 8000
     });
 
-    const content = response.choices[0].message.content;
+    const content = response.output_text;
     if (!content) {
       throw new Error("No content received from OpenAI");
     }
@@ -232,9 +231,9 @@ export async function compareAthletes(athlete1: string, athlete2: string, sport:
   const prompt = `Compare athletes "${athlete1}" and "${athlete2}" who both compete in ${sport}. Provide comprehensive comparison including strengths, weaknesses, head-to-head predictions, and competitive analysis.`;
 
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after your knowledge cutoff. do not change this unless explicitly requested by the user
-      messages: [
+    const response = await openai.responses.create({
+      model: "gpt-5",
+      input: [
         {
           role: "system",
           content: `You are a professional sports analyst specializing in ${sport}. Provide detailed comparative analysis between athletes.`
@@ -246,12 +245,11 @@ export async function compareAthletes(athlete1: string, athlete2: string, sport:
 Respond in JSON format with comparison data, predictions, and analysis.`
         }
       ],
-      response_format: { type: "json_object" },
       temperature: 1.0,
-      max_completion_tokens: 4000
+      max_output_tokens: 8000
     });
 
-    const content = response.choices[0].message.content;
+    const content = response.output_text;
     if (!content) {
       throw new Error("No content received from OpenAI");
     }
@@ -265,14 +263,11 @@ Respond in JSON format with comparison data, predictions, and analysis.`
 
 // Image search functions - simplified versions
 export async function searchTaekwondoDataProfilePicture(name: string, nationality?: string): Promise<string | null> {
-  // For taekwondo athletes, return null to use default avatar
-  // This maintains the policy of not using misleading placeholder images
   console.log(`Searching for taekwondo image for ${name} from ${nationality || 'unknown country'}`);
   return null;
 }
 
 export async function searchAthleteImage(name: string, sport: string): Promise<string | null> {
-  // Return null to use default avatar - maintains authentic data policy
   console.log(`Searching for ${sport} athlete image for ${name}`);
   return null;
 }
