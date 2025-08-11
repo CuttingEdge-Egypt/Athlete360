@@ -123,15 +123,22 @@ export function AnalysisPopup({
       if (!athleteId) throw new Error("Athlete ID is required");
       return apiRequest("POST", `/api/athletes/${athleteId}/refresh-bio`);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({
         title: "Biography Refreshed",
         description: "Latest athlete information has been updated successfully.",
       });
-      // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ["/api/athletes"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/analysis"] });
-      queryClient.invalidateQueries({ queryKey: [`/api/analysis/${athleteId}/bio`] });
+      
+      // Invalidate and refetch all relevant data
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["/api/athletes"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/analysis"] }),
+        queryClient.invalidateQueries({ queryKey: [`/api/analysis/${athleteId}/bio`] }),
+        queryClient.refetchQueries({ queryKey: [`/api/analysis/${athleteId}/bio`] })
+      ]);
+      
+      // Close the popup and trigger parent refresh
+      onOpenChange(false);
       if (onRefresh) onRefresh();
     },
     onError: (error: any) => {
