@@ -5,7 +5,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture } from "./openaiService";
+import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData } from "./openaiService";
 import OpenAI from "openai";
 
 // All LLM implementations now use GPT-5 with temperature 1.0 (default minimum)
@@ -687,8 +687,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ]
         };
       } else {
-        // Generate fresh rank analysis using OpenAI o3 (either no data exists or force update requested)
+        // Generate fresh rank analysis using OpenAI GPT-5 (either no data exists or force update requested)
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} rank analysis for ${athlete.name}`);
+        
+        // Get enhanced taekwondo data for authentic competition record and ranking
+        let enhancedData = null;
+        if (sportName.toLowerCase() === 'taekwondo') {
+          try {
+            enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country);
+            console.log(`Enhanced taekwondo data for ${athlete.name}:`, enhancedData);
+          } catch (error) {
+            console.error(`Failed to get enhanced taekwondo data for ${athlete.name}:`, error);
+          }
+        }
+        
         const aiAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'rank');
         
         // Create synthetic history and store in database
@@ -704,9 +716,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           history: syntheticHistory,
           recommendations: [
             forceUpdate ? "Force updated AI ranking insights" : "AI-powered ranking improvement suggestions",
-            "Focus on consistent competitive performance from latest OpenAI o3 analysis",
+            "Focus on consistent competitive performance from latest GPT-5 analysis",
             "Develop strategic approach to rankings based on current trends"
-          ]
+          ],
+          // Add authentic competition data from enhanced web search
+          competitionRecord: enhancedData?.currentRecord || "Data not available",
+          bestWorldRanking: enhancedData?.worldRank || "Data not available",
+          analysisDate: new Date().toISOString()
         };
       }
 

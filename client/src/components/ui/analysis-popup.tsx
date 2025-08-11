@@ -592,6 +592,22 @@ export function AnalysisPopup({
                       </Badge>
                     </div>
                     <div className="flex justify-between items-center">
+                      <span className="text-gray-300 text-sm">Competition Record</span>
+                      <span className="text-white font-medium">
+                        {athleteData.competitionRecord && athleteData.competitionRecord !== "Data not available" 
+                          ? athleteData.competitionRecord 
+                          : "Data not available"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300 text-sm">Best World Ranking Achieved</span>
+                      <Badge className="bg-athlete-success text-white">
+                        {athleteData.bestWorldRanking && athleteData.bestWorldRanking !== "Data not available" 
+                          ? athleteData.bestWorldRanking 
+                          : "Data not available"}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
                       <span className="text-gray-300 text-sm">Analysis Date</span>
                       <span className="text-gray-400 text-sm">{athleteData.analysisDate}</span>
                     </div>

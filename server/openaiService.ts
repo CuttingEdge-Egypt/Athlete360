@@ -88,10 +88,13 @@ export interface AthleteData {
   recentNews?: string[];
   worldRank?: string;
   currentRecord?: string;
+  country?: string;
+  profileImageDescription?: string;
+  referenceLinks?: string[];
 }
 
 // Enhanced function to get taekwondo-specific data using AI web search
-async function getEnhancedTaekwondoData(athleteName: string, nationality?: string): Promise<{worldRank: string, currentRecord: string}> {
+export async function getEnhancedTaekwondoData(athleteName: string, nationality?: string): Promise<{worldRank: string, currentRecord: string}> {
   try {
     console.log(`Fetching enhanced taekwondo data for ${athleteName} using AI web search...`);
     
@@ -609,7 +612,7 @@ export async function getAthleteProfile(name: string, sport: string, nationality
       name: result.name || name,
       bio: result.bio || "Professional athlete biography not available.",
       rank: result.rank || Math.floor(Math.random() * 50) + 1,
-      nationality: result.country || nationality || "Unknown",
+      country: result.country || nationality || "Unknown",
       achievements: result.achievements || [],
       recentNews: Array.isArray(result.recentNews) ? result.recentNews : [result.recentNews || "No recent news available."],
       profileImageDescription: result.profileImageDescription || `${name} ${sport} athlete profile picture`,
@@ -622,7 +625,7 @@ export async function getAthleteProfile(name: string, sport: string, nationality
       name,
       bio: `${name} is a professional ${sport} athlete${nationalityContext}. Detailed biography requires web search capabilities.`,
       rank: Math.floor(Math.random() * 50) + 1,
-      nationality: nationality || "Unknown",
+      country: nationality || "Unknown",
       achievements: [`Professional ${sport} athlete`, "International competitor"],
       recentNews: ["Recent news not available."],
       profileImageDescription: `${name} ${sport} athlete profile picture`,
