@@ -193,7 +193,7 @@ async function getTaekwondoDataInfo(athleteName: string, nationality?: string): 
     
     for (const searchParams of searchVariations) {
       try {
-        const searchUrl = `https://www.taekwondodata.com/person_searchresult.html?${new URLSearchParams(searchParams)}`;
+        const searchUrl = `https://www.taekwondodata.com/person_searchresult.html?${new URLSearchParams(searchParams as Record<string, string>)}`;
         console.log(`Trying TaekwondoData search: ${searchUrl}`);
         
         const response = await fetch(searchUrl, {
@@ -609,7 +609,7 @@ export async function getAthleteProfile(name: string, sport: string, nationality
       name: result.name || name,
       bio: result.bio || "Professional athlete biography not available.",
       rank: result.rank || Math.floor(Math.random() * 50) + 1,
-      country: result.country || nationality || "Unknown",
+      nationality: result.country || nationality || "Unknown",
       achievements: result.achievements || [],
       recentNews: Array.isArray(result.recentNews) ? result.recentNews : [result.recentNews || "No recent news available."],
       profileImageDescription: result.profileImageDescription || `${name} ${sport} athlete profile picture`,
@@ -622,7 +622,7 @@ export async function getAthleteProfile(name: string, sport: string, nationality
       name,
       bio: `${name} is a professional ${sport} athlete${nationalityContext}. Detailed biography requires web search capabilities.`,
       rank: Math.floor(Math.random() * 50) + 1,
-      country: nationality || "Unknown",
+      nationality: nationality || "Unknown",
       achievements: [`Professional ${sport} athlete`, "International competitor"],
       recentNews: ["Recent news not available."],
       profileImageDescription: `${name} ${sport} athlete profile picture`,
@@ -714,7 +714,25 @@ export async function generateSpecificAnalysis(athleteName: string, sport: strin
       // temperature: 1.0 is default and minimum for GPT-5
     });
 
-    return JSON.parse(response.output_text);
+    // Clean and validate the JSON response
+    let cleanedText = response.output_text.trim();
+    
+    // Remove any markdown formatting that might wrap the JSON
+    cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    
+    // Try to find the JSON object within the response
+    const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleanedText = jsonMatch[0];
+    }
+    
+    try {
+      return JSON.parse(cleanedText);
+    } catch (parseError) {
+      console.error('JSON parsing failed, raw response:', response.output_text.substring(0, 500));
+      throw parseError;
+    }
   } catch (error) {
     console.error(`Error generating ${analysisType} analysis for ${athleteName}:`, error);
     return {

@@ -544,7 +544,12 @@ export function AnalysisPopup({
                 athleteData.currentRank && athleteData.currentRank !== "Unranked" ? (
                   <div className="flex items-center space-x-3 p-3 bg-athlete-gray-700 rounded-lg">
                     <div className="w-8 h-8 bg-athlete-accent rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white text-xs font-bold">{athleteData.currentRank.replace('#', '').substring(0, 2)}</span>
+                      <span className="text-white text-xs font-bold">
+                        {typeof athleteData.currentRank === 'string' 
+                          ? athleteData.currentRank.replace('#', '').substring(0, 2)
+                          : String(athleteData.currentRank).substring(0, 2)
+                        }
+                      </span>
                     </div>
                     <div className="flex-1">
                       <p className="text-white font-medium text-sm">{athleteData.currentRank}</p>
