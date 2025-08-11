@@ -207,6 +207,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
           data={analysisData}
           athleteName={athlete.name}
           athleteId={athlete.id || ""}
+          athlete={athlete}
           onRefresh={() => {
             // Refresh the athlete data
             queryClient.invalidateQueries({ queryKey: ["/api/athletes"] });
