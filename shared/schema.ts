@@ -57,6 +57,7 @@ export const athletes = pgTable("athletes", {
   bio: text("bio"),
   rank: integer("rank"),
   profileImageUrl: varchar("profile_image_url"),
+  achievements: jsonb("achievements").$type<string[]>(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

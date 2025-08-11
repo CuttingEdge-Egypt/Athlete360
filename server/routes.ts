@@ -562,7 +562,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           bio: athlete.bio,
           rank: athlete.rank || Math.floor(Math.random() * 10) + 1,
           profileImageUrl: athlete.profileImageUrl,
-          achievements: [
+          achievements: athlete.achievements && Array.isArray(athlete.achievements) && athlete.achievements.length > 0 ? athlete.achievements.slice(0, 4) : [
             "Career achievements based on database records",
             "Performance highlights from historical data",
             "Notable competitive milestones",
@@ -589,7 +589,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             bio: gptBioAnalysis.bio,
             rank: typeof gptBioAnalysis.rank === 'number' ? gptBioAnalysis.rank : 
                   (typeof gptBioAnalysis.rank === 'string' && !isNaN(Number(gptBioAnalysis.rank)) && gptBioAnalysis.rank !== 'N/A') ? 
-                  Number(gptBioAnalysis.rank) : null
+                  Number(gptBioAnalysis.rank) : null,
+            achievements: gptBioAnalysis.achievements || []
           });
           
           bioAnalysis = {
@@ -597,7 +598,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             bio: gptBioAnalysis.bio,
             rank: gptBioAnalysis.rank,
             profileImageUrl: athlete.profileImageUrl,
-            achievements: gptBioAnalysis.achievements && gptBioAnalysis.achievements.length > 0 ? gptBioAnalysis.achievements : [
+            achievements: gptBioAnalysis.achievements && Array.isArray(gptBioAnalysis.achievements) && gptBioAnalysis.achievements.length > 0 ? gptBioAnalysis.achievements.slice(0, 4) : [
               "Career achievements from GPT-5 analysis with web search",
               "Competition history verified through real-time data",
               "Technical analysis from OpenAI's latest model"

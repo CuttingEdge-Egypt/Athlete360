@@ -130,6 +130,8 @@ export function AnalysisPopup({
       });
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["/api/athletes"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/analysis"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/analysis/${athleteId}/bio`] });
       if (onRefresh) onRefresh();
     },
     onError: (error: any) => {
