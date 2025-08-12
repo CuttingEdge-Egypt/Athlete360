@@ -1968,6 +1968,28 @@ Format as JSON:
     res.send(html);
   });
 
+  // Paymob callbacks
+  app.post('/api/payments/paymob-processed', async (req, res) => {
+    try {
+      console.log('Paymob transaction processed callback:', req.body);
+      res.json({ message: 'Processed callback received' });
+    } catch (error) {
+      console.error('Paymob processed callback error:', error);
+      res.status(500).json({ message: 'Callback failed' });
+    }
+  });
+
+  app.post('/api/payments/paymob-response', async (req, res) => {
+    try {
+      console.log('Paymob response callback:', req.body);
+      const html = `<script>if(window.parent && window.parent !== window){window.parent.postMessage(${JSON.stringify(req.body)}, '*');}window.close();</script>`;
+      res.send(html);
+    } catch (error) {
+      console.error('Paymob response callback error:', error);
+      res.status(500).send('Callback error');
+    }
+  });
+
   // Manual payment completion for testing specific transaction
   app.post('/api/payments/complete-manual/:transactionId', isAuthenticated, async (req: any, res) => {
     try {
