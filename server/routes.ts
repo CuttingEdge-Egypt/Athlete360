@@ -107,6 +107,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/user/cards', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const cards = await storage.getUserPaymentCards(userId);
+      res.json(cards || []);
+    } catch (error) {
+      console.error("Error fetching user cards:", error);
+      res.status(500).json({ message: "Failed to fetch payment cards" });
+    }
+  });
+
   app.delete('/api/user/cards/:cardId', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -216,8 +227,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Create athlete in database
-      // Handle rank - convert to number if possible, otherwise store as null
-      let rankValue = null;
+      // Handle rank - convert to number if possible, otherwise store as undefined
+      let rankValue = undefined;
       if (typeof aiProfile.rank === 'number') {
         rankValue = aiProfile.rank;
       } else if (typeof aiProfile.rank === 'string' && !isNaN(Number(aiProfile.rank)) && aiProfile.rank !== 'N/A') {
@@ -229,8 +240,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportId,
         bio: aiProfile.bio || `Professional ${sport.name} athlete`,
         rank: rankValue,
-        country: null,
-        profileImageUrl: profileImageUrl || null,
+        country: undefined,
+        profileImageUrl: profileImageUrl || undefined,
         achievements: aiProfile.achievements || []
       };
 
@@ -276,8 +287,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Fetch fresh, authentic athlete data from OpenAI GPT-5
       const aiAthleteData = await refreshAthleteBiographyWithSearch(athlete.name, sportName);
       
-      // Handle rank - convert to number if possible, otherwise store as null
-      let rankValue = null;
+      // Handle rank - convert to number if possible, otherwise store as undefined
+      let rankValue = undefined;
       if (typeof aiAthleteData.rank === 'number') {
         rankValue = aiAthleteData.rank;
       } else if (typeof aiAthleteData.rank === 'string' && !isNaN(Number(aiAthleteData.rank)) && aiAthleteData.rank !== 'N/A') {
@@ -389,8 +400,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Fetch authentic athlete data from OpenAI
       const aiAthleteData = await getAthleteProfile(validatedData.name, sportName);
       
-      // Handle rank - convert to number if possible, otherwise store as null
-      let rankValue = null;
+      // Handle rank - convert to number if possible, otherwise store as undefined
+      let rankValue = undefined;
       if (typeof aiAthleteData.rank === 'number') {
         rankValue = aiAthleteData.rank;
       } else if (typeof aiAthleteData.rank === 'string' && !isNaN(Number(aiAthleteData.rank)) && aiAthleteData.rank !== 'N/A') {
@@ -402,7 +413,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...validatedData,
         bio: aiAthleteData.bio,
         rank: rankValue,
-        profileImageUrl: validatedData.profileImageUrl || null
+        profileImageUrl: validatedData.profileImageUrl || undefined
       };
       
       const athlete = await storage.createAthlete(enhancedAthleteData);
@@ -679,7 +690,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             bio: gptBioAnalysis.bio,
             rank: typeof gptBioAnalysis.rank === 'number' ? gptBioAnalysis.rank : 
                   (typeof gptBioAnalysis.rank === 'string' && !isNaN(Number(gptBioAnalysis.rank)) && gptBioAnalysis.rank !== 'N/A') ? 
-                  Number(gptBioAnalysis.rank) : null,
+                  Number(gptBioAnalysis.rank) : undefined,
             achievements: gptBioAnalysis.achievements || []
           });
           
@@ -1557,7 +1568,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Token purchase simulation
+  // Token purchase endpoint (for testing)
+  app.post('/api/user/purchase-tokens', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { transactionId, amount, tokensAmount, paymentMethod, cardLast4, cardBrand } = req.body;
+
+      if (!transactionId || !amount || !tokensAmount) {
+        return res.status(400).json({ message: "Transaction ID, amount, and tokens amount are required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Add tokens to user
+      await storage.addTokensPurchase(userId, tokensAmount);
+
+      // Create transaction record
+      await storage.createTransaction({
+        userId,
+        action: "Token Purchase",
+        tokensDeducted: -tokensAmount,
+        serviceType: "purchase"
+      });
+
+      const updatedUser = await storage.getUser(userId);
+      res.json({ 
+        success: true,
+        message: "Tokens purchased successfully", 
+        tokens: updatedUser?.tokens || 0,
+        totalPurchased: updatedUser?.totalTokensPurchased || 0,
+        purchased: tokensAmount,
+        transactionId
+      });
+    } catch (error) {
+      console.error("Error purchasing tokens:", error);
+      res.status(500).json({ message: "Failed to purchase tokens" });
+    }
+  });
+
+  // Token purchase simulation (legacy endpoint)
   app.post('/api/purchase-tokens', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
