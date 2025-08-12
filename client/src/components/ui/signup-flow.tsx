@@ -132,13 +132,13 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] lg:max-w-[800px] max-h-[75vh] overflow-hidden flex flex-col" data-testid="signup-flow-dialog">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-blue-500" />
+      <DialogContent className="sm:max-w-[700px] lg:max-w-[800px] h-[70vh] max-h-[70vh] overflow-hidden flex flex-col" data-testid="signup-flow-dialog">
+        <DialogHeader className="flex-shrink-0 pb-4">
+          <DialogTitle className="flex items-center gap-2 text-lg">
+            <Zap className="h-4 w-4 text-blue-500" />
             Join Athlete360
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-sm">
             Create your account and start analyzing athletes with AI-powered insights
           </DialogDescription>
         </DialogHeader>
