@@ -1971,22 +1971,66 @@ Format as JSON:
   // Paymob callbacks
   app.post('/api/payments/paymob-processed', async (req, res) => {
     try {
-      console.log('Paymob transaction processed callback:', req.body);
-      res.json({ message: 'Processed callback received' });
+      console.log('🔔 Paymob transaction processed callback received:', req.body);
+      
+      const transactionData = req.body;
+      
+      // Check if transaction was successful
+      if (transactionData.success === 'true' || transactionData.success === true) {
+        console.log('✅ Successful transaction processed:', transactionData.id);
+        
+        // Extract transaction details
+        const amount = transactionData.amount_cents ? transactionData.amount_cents / 100 : 0;
+        const orderId = transactionData.order?.id || transactionData.order_id;
+        
+        console.log(`💰 Processing payment: $${amount} for order ${orderId}`);
+      } else {
+        console.log('❌ Failed transaction processed:', transactionData.id);
+      }
+      
+      res.json({ message: 'Transaction processed callback received successfully' });
     } catch (error) {
-      console.error('Paymob processed callback error:', error);
-      res.status(500).json({ message: 'Callback failed' });
+      console.error('❌ Paymob processed callback error:', error);
+      res.status(500).json({ message: 'Callback processing failed' });
     }
   });
 
   app.post('/api/payments/paymob-response', async (req, res) => {
     try {
-      console.log('Paymob response callback:', req.body);
-      const html = `<script>if(window.parent && window.parent !== window){window.parent.postMessage(${JSON.stringify(req.body)}, '*');}window.close();</script>`;
+      console.log('🔔 Paymob transaction response callback received:', req.body);
+      
+      const transactionData = req.body;
+      
+      // Send transaction data to frontend for processing
+      const html = `
+        <!DOCTYPE html>
+        <html>
+        <head><title>Payment Response</title></head>
+        <body>
+          <script>
+            console.log('Paymob response data:', ${JSON.stringify(transactionData)});
+            
+            if (window.parent && window.parent !== window) {
+              window.parent.postMessage({
+                type: 'PAYMOB_RESPONSE',
+                data: ${JSON.stringify(transactionData)}
+              }, '*');
+            }
+            
+            // Close window after sending data
+            setTimeout(() => {
+              window.close();
+            }, 1000);
+          </script>
+          <p>Processing payment response...</p>
+        </body>
+        </html>
+      `;
+      
       res.send(html);
     } catch (error) {
-      console.error('Paymob response callback error:', error);
-      res.status(500).send('Callback error');
+      console.error('❌ Paymob response callback error:', error);
+      res.status(500).send('Callback processing error');
     }
   });
 

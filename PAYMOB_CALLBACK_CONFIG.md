@@ -17,19 +17,19 @@ https://accept.paymobsolutions.com/portal2/en/PaymentIntegrations
 
 ### 2. Find Integration ID: 3036500
 
-### 3. Set Callback URLs
-**Transaction Processed Callback:**
+### 3. Replace Current URLs With These:
+
+**CHANGE FROM (Current Wrong URLs):**
 ```
-[YOUR_REPLIT_URL]/api/payments/paymob-processed
+Transaction processed callback: https://accept.paymobsolutions.com/api/acceptance/post_pay
+Transaction response callback: https://accept.paymobsolutions.com/api/acceptance/post_pay
 ```
 
-**Transaction Response Callback:**  
+**CHANGE TO (Correct URLs):**
 ```
-[YOUR_REPLIT_URL]/api/payments/paymob-response
+Transaction processed callback: https://workspace--CuttingMo.replit.app/api/payments/paymob-processed
+Transaction response callback: https://workspace--CuttingMo.replit.app/api/payments/paymob-response
 ```
-
-### Current Wrong URLs (Remove These):
-- https://accept.paymobsolutions.com/api/acceptance/post_pay
 
 ## Testing After Fix
 Once callbacks are updated, payments will complete successfully and tokens will be added to user accounts.
