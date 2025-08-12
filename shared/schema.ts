@@ -36,6 +36,10 @@ export const users = pgTable("users", {
   totalTokensPurchased: integer("total_tokens_purchased").default(1000), // Track total tokens ever purchased
   subscriptionStatus: varchar("subscription_status").default("active"), // Active with free tokens
   paymobCustomerId: varchar("paymob_customer_id"), // Paymob customer ID
+  cardToken: varchar("card_token"), // Card token from payment processor
+  cardLast4: varchar("card_last_4"), // Last 4 digits of payment card
+  cardBrand: varchar("card_brand"), // Card brand (Visa, Mastercard, etc.)
+  paymentCardExpiry: varchar("payment_card_expiry"), // Card expiry in MM/YY format
   referralCode: varchar("referral_code").unique(), // User's unique referral code
   referredBy: varchar("referred_by"), // Who referred this user
   createdAt: timestamp("created_at").defaultNow(),

@@ -221,14 +221,14 @@ export class DatabaseStorage implements IStorage {
     // For now, return the user's stored card info from the user table
     // In a real app, this would query a separate payment_cards table
     const user = await this.getUser(userId);
-    if (!user || !user.paymentCardLast4) {
+    if (!user || !user.cardLast4) {
       return [];
     }
 
     return [{
       id: 'default',
-      cardLast4: user.paymentCardLast4,
-      cardBrand: user.paymentCardBrand || 'Unknown',
+      cardLast4: user.cardLast4,
+      cardBrand: user.cardBrand || 'Unknown',
       expiryMonth: user.paymentCardExpiry?.split('/')[0] || '',
       expiryYear: user.paymentCardExpiry?.split('/')[1] || '',
       isDefault: true,
@@ -249,8 +249,8 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db
       .update(users)
       .set({
-        paymentCardLast4: cardData.cardLast4,
-        paymentCardBrand: cardData.cardBrand,
+        cardLast4: cardData.cardLast4,
+        cardBrand: cardData.cardBrand,
         paymentCardExpiry: `${cardData.expiryMonth}/${cardData.expiryYear}`,
         updatedAt: new Date(),
       })
