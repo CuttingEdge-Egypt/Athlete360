@@ -834,9 +834,14 @@ Create a plan for the full duration specified. Use authentic data and personaliz
 export async function generateNutritionPlan(athleteName: string, sport: string, currentWeight: string, target: string, cuisine: string, age: string, athleteData?: any): Promise<any> {
   const athleteCountry = athleteData?.country || 'Unknown';
   
-  const prompt = `You are an expert sports nutritionist specializing in ${sport}. Create a comprehensive nutrition plan for athlete "${athleteName}" from ${athleteCountry}.
+  const timestamp = new Date().toISOString();
+  const sessionId = Math.random().toString(36).substring(7);
+  
+  const prompt = `You are an expert sports nutritionist specializing in ${sport}. Create a UNIQUE comprehensive nutrition plan for athlete "${athleteName}" from ${athleteCountry}.
 
-CRITICAL: Return only valid JSON. No extra text or explanations.
+Session ID: ${sessionId} - Generation Time: ${timestamp}
+
+CRITICAL: Return only valid JSON. No extra text or explanations. Each generation must be completely unique and specific to this athlete.
 
 Athlete Profile:
 - Name: ${athleteName}
@@ -870,11 +875,13 @@ IMPORTANT: Create authentic, nationality-specific meal recommendations:
 - Incorporate local ingredients and cooking styles
 - Adapt portion sizes to cultural norms while meeting athletic needs
 
-For example:
-- If Egyptian: Include ful medames, koshari, grilled fish, dates, Egyptian bread
-- If Korean: Include kimchi, bulgogi, bibimbap, rice dishes, traditional soups
-- If Mexican: Include quinoa, beans, corn tortillas, fresh vegetables, traditional proteins
-- If Italian: Include pasta, olive oil, fresh vegetables, lean meats, regional specialties
+Search the web for specific traditional foods from ${athleteCountry} and create AUTHENTIC meal plans:
+- If Egyptian: Include specific dishes like ful medames, koshari, bamia, molokhia, grilled tilapia, basbousa, baladi bread, traditional mezze
+- If Korean: Include kimchi varieties, bulgogi, japchae, bibimbap, galbi, Korean soups, banchan side dishes, traditional rice cakes
+- If Mexican: Include mole dishes, pozole, tamales, quinoa, black beans, corn tortillas, chiles, traditional salsas
+- If Italian: Include specific pasta types, risotto, polenta, prosciutto, fresh mozzarella, regional specialties by region
+
+IMPORTANT: Search for REAL traditional recipes and cooking methods from ${athleteCountry}. Include specific ingredient names, cooking techniques, and cultural meal timing.
 
 Return this exact JSON structure with authentic ${athleteCountry} foods:
 {
@@ -930,11 +937,13 @@ Return this exact JSON structure with authentic ${athleteCountry} foods:
 
   try {
     // Use GPT-5 with web search capabilities for authentic nutrition data
+    console.log(`Generating UNIQUE nutrition plan for ${athleteName} from ${athleteCountry} - Session: ${sessionId}`);
     const response = await openai.responses.create({
       model: "gpt-5",
       input: prompt,
       tools: [{ type: "web_search_preview" }],
       max_output_tokens: 8000,
+      temperature: 1.0, // Force maximum creativity
     });
 
     // Apply robust JSON cleanup
@@ -987,8 +996,10 @@ Return this exact JSON structure with authentic ${athleteCountry} foods:
 
     const nutritionData = JSON.parse(cleanedText);
     
+    console.log(`GPT-5 Nutrition Response for ${athleteName}:`, JSON.stringify(nutritionData, null, 2));
+    
     // Return structured data with nationality-specific content
-    return {
+    const finalData = {
       currentWeight,
       age,
       target,
@@ -996,6 +1007,8 @@ Return this exact JSON structure with authentic ${athleteCountry} foods:
       nationality: athleteCountry,
       athleteName,
       sport,
+      sessionId,
+      generatedAt: timestamp,
       dailyCalories: nutritionData.dailyCalories || calculateCaloriesForAthlete(age, currentWeight, target),
       macros: nutritionData.macros || getOptimalMacros(sport, target),
       meals: nutritionData.meals || generateFallbackMeals(athleteCountry, cuisine, athleteName),
@@ -1003,6 +1016,9 @@ Return this exact JSON structure with authentic ${athleteCountry} foods:
       supplements: nutritionData.supplements || getRegionalSupplements(athleteCountry),
       culturalNotes: nutritionData.culturalNotes || `Nutrition plan adapted for ${athleteCountry} food culture and ${sport} requirements`
     };
+    
+    console.log(`Final nutrition data being returned:`, JSON.stringify(finalData, null, 2));
+    return finalData;
     
   } catch (error) {
     console.error(`Error generating nutrition plan for ${athleteName}:`, error);
