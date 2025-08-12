@@ -9,7 +9,7 @@ import { RankChart } from "./rank-chart";
 import { 
   Download, Share2, User, Trophy, Star, AlertTriangle, Calendar, 
   Apple, Swords, Video, Clock, Target, TrendingUp, Award,
-  Heart, Zap, Shield, Brain, Flame, ChevronRight, RefreshCw
+  Heart, Zap, Shield, Brain, Flame, ChevronRight, RefreshCw, Utensils
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
