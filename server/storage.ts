@@ -170,10 +170,10 @@ export class DatabaseStorage implements IStorage {
     
     const currentTokens = user.tokens || 0;
     const newTokens = currentTokens + tokensToAdd;
-    // totalTokensPurchased should be the new current balance after purchase
+    // totalTokensPurchased should be the new current balance after purchase (high-water mark)
     const newTotalPurchased = newTokens;
     
-    console.log(`ADDING ${tokensToAdd} tokens to user ${userId}: ${currentTokens} → ${newTokens}, total purchased: ${newTotalPurchased}`);
+    console.log(`ADDING ${tokensToAdd} tokens to user ${userId}: ${currentTokens} → ${newTokens}, total: ${newTotalPurchased}`);
     
     const [updatedUser] = await db
       .update(users)
