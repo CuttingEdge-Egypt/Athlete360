@@ -2,6 +2,24 @@ import { storage } from './storage';
 import type { InsertTransaction, UpsertUser, InsertReferral } from '@shared/schema';
 
 export class TestingService {
+  // Get test scenarios for frontend
+  static getTestScenarios() {
+    return {
+      tokenPackages: [
+        { tokens: 100, price: 5 },
+        { tokens: 500, price: 20 },
+        { tokens: 1000, price: 35 },
+        { tokens: 2500, price: 80 }
+      ],
+      referralEmails: [
+        'friend1@test.com',
+        'friend2@test.com', 
+        'friend3@test.com',
+        'colleague@example.com'
+      ]
+    };
+  }
+
   // Simulate payment completion for testing
   static async simulatePaymentCompletion(userId: string, amount: number, tokens: number) {
     // Create a mock payment record
@@ -16,8 +34,8 @@ export class TestingService {
       updatedAt: new Date()
     };
 
-    // Add tokens to user balance
-    await storage.updateUserTokens(userId, tokens);
+    // Add tokens to user balance (additive purchase)
+    await storage.addTokensPurchase(userId, tokens);
 
     // Record the transaction
     await storage.createTransaction({
@@ -27,7 +45,13 @@ export class TestingService {
       serviceType: 'payment'
     });
 
-    return mockTransaction;
+    const updatedUser = await storage.getUser(userId);
+    
+    return {
+      ...mockTransaction,
+      newBalance: updatedUser?.tokens || 0,
+      totalPurchased: updatedUser?.totalTokensPurchased || 0
+    };
   }
 
   // Simulate successful referral signup
@@ -40,8 +64,8 @@ export class TestingService {
       lastName: 'User'
     });
 
-    // Process referral bonus for referrer
-    await storage.updateUserTokens(referrerUserId, 100);
+    // Process referral bonus for referrer (additive bonus)
+    await storage.addTokensPurchase(referrerUserId, 100);
 
     // Create referral record
     await storage.createTransaction({
@@ -59,10 +83,13 @@ export class TestingService {
       status: 'completed'
     });
 
+    const updatedReferrer = await storage.getUser(referrerUserId);
+    
     return {
       newUser: testUser,
       referralBonus: 100,
-      referrerNewBalance: (await storage.getUser(referrerUserId))?.tokens || 0
+      referrerNewBalance: updatedReferrer?.tokens || 0,
+      referrerTotalPurchased: updatedReferrer?.totalTokensPurchased || 0
     };
   }
 
