@@ -192,60 +192,134 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     </div>
   );
 
-  const renderNutritionPlan = (data: any) => (
-    <div>
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
-        <Card className="bg-athlete-gray-700 border-gray-600">
-          <CardContent className="p-4">
-            <h5 className="font-semibold text-white mb-2">Daily Overview</h5>
-            <div className="space-y-2 text-sm">
-              <div>Calories: <span className="text-athlete-warning font-semibold">{data.dailyCalories}</span></div>
-              <div>Hydration: <span className="text-white">{data.hydration}</span></div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-athlete-gray-700 border-gray-600">
-          <CardContent className="p-4">
-            <h5 className="font-semibold text-white mb-2">Macro Breakdown</h5>
-            <div className="space-y-2 text-sm">
-              {data.macroBreakdown && Object.entries(data.macroBreakdown).map(([key, value]) => (
-                <div key={key} className="capitalize">
-                  {key}: <span className="text-athlete-accent font-semibold">{value as string}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      <div className="grid gap-4">
-        {data.meals?.map((meal: any, index: number) => (
-          <Card key={index} className="bg-athlete-gray-700 border-gray-600">
+  const renderNutritionPlan = (data: any) => {
+    console.log('Frontend Nutrition Data:', JSON.stringify(data, null, 2));
+    
+    // Enhanced data structure support - check both old and new formats
+    const meals = data.meals?.breakfast ? [
+      ...(data.meals.breakfast || []).map((meal: any) => ({ ...meal, mealType: 'Breakfast' })),
+      ...(data.meals.lunch || []).map((meal: any) => ({ ...meal, mealType: 'Lunch' })),
+      ...(data.meals.dinner || []).map((meal: any) => ({ ...meal, mealType: 'Dinner' })),
+      ...(data.meals.snacks || []).map((meal: any) => ({ ...meal, mealType: 'Snacks' }))
+    ] : data.meals || [];
+
+    console.log('Processed meals:', meals);
+
+    return (
+      <div>
+        {/* Enhanced overview with nationality and gender info */}
+        <div className="grid md:grid-cols-3 gap-6 mb-6">
+          <Card className="bg-athlete-gray-700 border-gray-600">
             <CardContent className="p-4">
-              <div className="flex justify-between items-center mb-2">
-                <h5 className="font-semibold text-white">{meal.meal}</h5>
-                <Badge variant="outline" className="border-athlete-warning text-athlete-warning">
-                  {meal.calories} cal
-                </Badge>
-              </div>
-              <div className="text-sm text-gray-300">
-                {meal.foods?.join(", ")}
+              <h5 className="font-semibold text-white mb-2">Daily Overview</h5>
+              <div className="space-y-2 text-sm">
+                <div>Calories: <span className="text-athlete-warning font-semibold">{data.dailyCalories}</span></div>
+                <div>Hydration: <span className="text-white">{data.hydration}</span></div>
+                {data.nationality && (
+                  <div>Cuisine: <span className="text-athlete-accent font-semibold">{data.nationality}</span></div>
+                )}
               </div>
             </CardContent>
           </Card>
-        ))}
+          
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-4">
+              <h5 className="font-semibold text-white mb-2">Macro Breakdown</h5>
+              <div className="space-y-2 text-sm">
+                {(data.macros || data.macroBreakdown) && Object.entries(data.macros || data.macroBreakdown).map(([key, value]) => (
+                  <div key={key} className="capitalize">
+                    {key}: <span className="text-athlete-accent font-semibold">{value as string}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {data.culturalNotes && (
+            <Card className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-4">
+                <h5 className="font-semibold text-white mb-2">Cultural Adaptation</h5>
+                <div className="text-sm text-gray-300">
+                  {data.culturalNotes}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Enhanced meal display */}
+        <div className="grid gap-4">
+          {meals.map((meal: any, index: number) => (
+            <Card key={index} className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-4">
+                <div className="flex justify-between items-center mb-3">
+                  <h5 className="font-semibold text-white">
+                    {meal.mealType || meal.meal || meal.name || `Meal ${index + 1}`}
+                  </h5>
+                  <div className="flex gap-2">
+                    <Badge variant="outline" className="border-athlete-warning text-athlete-warning">
+                      {meal.calories}
+                    </Badge>
+                    {meal.timing && (
+                      <Badge variant="outline" className="border-blue-400 text-blue-400">
+                        {meal.timing}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                
+                {meal.description && (
+                  <p className="text-sm text-gray-300 mb-3 italic">
+                    {meal.description}
+                  </p>
+                )}
+                
+                <div className="space-y-2">
+                  <div className="text-sm">
+                    <span className="text-gray-400">Foods: </span>
+                    <span className="text-white">
+                      {meal.foods ? meal.foods.join(", ") : "Traditional cuisine items"}
+                    </span>
+                  </div>
+                  
+                  {meal.benefits && (
+                    <div className="text-sm">
+                      <span className="text-gray-400">Benefits: </span>
+                      <span className="text-athlete-accent">{meal.benefits}</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Enhanced supplements section */}
+        {data.supplements && (
+          <Card className="bg-athlete-gray-700 border-gray-600 mt-4">
+            <CardContent className="p-4">
+              <h5 className="font-semibold text-white mb-2">Recommended Supplements</h5>
+              <div className="text-sm text-gray-300">
+                {Array.isArray(data.supplements) ? data.supplements.join(", ") : data.supplements}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Additional notes */}
+        {data.notes && (
+          <Card className="bg-athlete-gray-700 border-gray-600 mt-4">
+            <CardContent className="p-4">
+              <h5 className="font-semibold text-white mb-2">Additional Notes</h5>
+              <div className="text-sm text-gray-300">
+                {data.notes}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
-      {data.supplements && (
-        <Card className="bg-athlete-gray-700 border-gray-600 mt-4">
-          <CardContent className="p-4">
-            <h5 className="font-semibold text-white mb-2">Supplements</h5>
-            <div className="text-sm text-gray-300">
-              {data.supplements.join(", ")}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
+    );
+  };
 
   const renderBeatStrategies = (data: any) => (
     <div>
