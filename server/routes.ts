@@ -1699,12 +1699,14 @@ Format as JSON:
       // Generate unique referral code for the user
       const userReferralCode = await storage.generateReferralCode(userId);
 
-      // Process referral bonus if user was referred
+      // Process referral bonus if user came from referral link (bonus goes to link owner)
       if (referralCode) {
         const referrer = await storage.getUserByReferralCode(referralCode);
         if (referrer) {
-          // Add 100 bonus tokens to referrer
-          await storage.updateUserTokens(referrer.id, (referrer.tokens || 0) + 100);
+          console.log(`Processing referral bonus: ${referrer.firstName} referred a new user, giving 100 tokens`);
+          
+          // Add 100 bonus tokens to the referrer (link owner)
+          await storage.addTokensPurchase(referrer.id, 100);
           
           // Create referral record
           await storage.createReferral({
@@ -1725,10 +1727,14 @@ Format as JSON:
       }
 
       const updatedUser = await storage.getUser(userId);
+      
+      console.log(`Signup completed for user ${userId}. Card registered: ${cardBrand} ****${cardLast4}`);
+      
       res.json({
         message: "Signup completed successfully",
         user: updatedUser,
-        referralCode: userReferralCode
+        referralCode: userReferralCode,
+        success: true
       });
     } catch (error) {
       console.error("Error completing signup:", error);
@@ -1910,6 +1916,70 @@ Format as JSON:
     } catch (error) {
       console.error("Error deleting card:", error);
       res.status(500).json({ message: "Failed to delete card" });
+    }
+  });
+
+  // ==== TESTING ENDPOINTS ====
+
+  // Simulate payment completion for testing
+  app.post('/api/test/simulate-payment', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { amount, tokens, cardLast4, cardBrand, scenario } = req.body;
+
+      if (scenario === 'failure') {
+        return res.status(400).json({ message: "Simulated payment failure" });
+      }
+
+      if (scenario === 'timeout') {
+        await new Promise(resolve => setTimeout(resolve, 8000)); // 8 second delay
+        return res.status(408).json({ message: "Payment timeout" });
+      }
+
+      // Simulate successful payment
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Add tokens to user account
+      await storage.addTokensPurchase(userId, tokens);
+
+      // Create test receipt
+      const receiptNumber = `TEST_${Date.now()}`;
+      await storage.createPaymentReceipt({
+        userId,
+        paymobTransactionId: `test_${Date.now()}`,
+        amount: amount.toString(),
+        currency: 'EGP',
+        tokensAmount: tokens,
+        paymentMethod: `Test ${cardBrand}`,
+        cardLast4,
+        cardBrand,
+        receiptNumber,
+        status: 'completed'
+      });
+
+      // Create transaction record
+      await storage.createTransaction({
+        userId,
+        action: "Token Purchase (Test)",
+        tokensDeducted: -tokens,
+        serviceType: "token_purchase"
+      });
+
+      const updatedUser = await storage.getUser(userId);
+
+      res.json({
+        success: true,
+        message: "Test payment completed",
+        tokensAdded: tokens,
+        newBalance: updatedUser?.tokens || 0,
+        totalTokensPurchased: updatedUser?.totalTokensPurchased || 0
+      });
+    } catch (error) {
+      console.error("Error simulating payment:", error);
+      res.status(500).json({ message: "Failed to simulate payment" });
     }
   });
 

@@ -87,8 +87,10 @@ export function SignupWithCard({ isOpen, onClose, onComplete }: SignupWithCardPr
     try {
       // Simulate card tokenization (in real implementation, this would use Paymob's frontend SDK)
       const cardToken = `card_token_${Date.now()}`;
-      const cardLast4 = cardDetails.number.slice(-4);
-      const cardBrand = getCardBrand(cardDetails.number);
+      const cardLast4 = cardDetails.number.replace(/\s/g, '').slice(-4);
+      const cardBrand = getCardBrand(cardDetails.number.replace(/\s/g, ''));
+
+      console.log('Submitting signup completion...', { cardLast4, cardBrand });
 
       // Complete signup with card info
       const response = await apiRequest('POST', '/api/auth/complete-signup', {
@@ -99,18 +101,34 @@ export function SignupWithCard({ isOpen, onClose, onComplete }: SignupWithCardPr
         referralCode: referralCode.trim() || undefined
       });
 
-      toast({
-        title: "Welcome to Athlete360!",
-        description: "Your account is ready with 1000 free tokens",
-      });
+      // Parse the response properly
+      const responseData = await response.json();
+      console.log('Signup completion response:', responseData);
 
-      onComplete(response);
-      onClose();
-    } catch (error) {
+      if (responseData.success) {
+        toast({
+          title: "Welcome to Athlete360!",
+          description: "Your account is ready with 1000 free tokens",
+        });
+
+        // Pass the user data to parent component
+        onComplete(responseData.user);
+        onClose();
+      } else {
+        throw new Error(responseData.message || 'Signup failed');
+      }
+    } catch (error: any) {
       console.error('Signup error:', error);
+      
+      // Prevent page refresh by stopping event propagation
+      if (error?.name === 'AbortError' || error?.message?.includes('aborted')) {
+        console.log('Request was aborted, likely due to page refresh');
+        return;
+      }
+      
       toast({
         title: "Signup failed",
-        description: "Please try again or contact support",
+        description: error?.message || "Please try again or contact support",
         variant: "destructive",
       });
       setStep('payment');
@@ -278,12 +296,17 @@ export function SignupWithCard({ isOpen, onClose, onComplete }: SignupWithCardPr
                 </span>
               </div>
               <Button 
-                onClick={handlePaymentSubmit} 
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handlePaymentSubmit();
+                }}
                 disabled={isProcessing}
                 className="w-full"
                 data-testid="button-complete-signup"
+                type="button"
               >
-                Complete Signup
+                {isProcessing ? "Processing..." : "Complete Signup"}
               </Button>
             </CardContent>
           </Card>
