@@ -785,17 +785,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }))
         };
       } else {
-        // Generate fresh strengths using OpenAI o3 (either no data exists or force update requested)
+        // Generate fresh athlete-specific strengths using GPT-5 (either no data exists or force update requested)
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} strengths analysis for ${athlete.name}`);
         
-        // Get detailed analysis from OpenAI
-        const detailedAnalysis = await getDetailedAnalysis(athlete.name, sportName);
+        // Get enhanced data for taekwondo athletes
+        let enhancedData = null;
+        if (sportName.toLowerCase() === 'taekwondo') {
+          try {
+            enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country);
+          } catch (error) {
+            console.error(`Failed to get enhanced taekwondo data: ${error}`);
+          }
+        }
         
-        const aiStrengths = detailedAnalysis.strengths.length > 0 
-          ? detailedAnalysis.strengths.map((strength: any, index) => ({
+        // Prepare athlete data for personalized analysis
+        const athleteDataForAnalysis = {
+          bio: athlete.bio,
+          rank: athlete.rank,
+          country: athlete.country,
+          achievements: athlete.achievements,
+          competitionRecord: enhancedData?.currentRecord || "N/A"
+        };
+        
+        // Generate athlete-specific strengths analysis
+        const strengthsAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'strengths', athleteDataForAnalysis);
+        
+        const aiStrengths = strengthsAnalysis.strengths?.length > 0 
+          ? strengthsAnalysis.strengths.map((strength: any, index: number) => ({
               title: strength.title,
               description: strength.description,
-              rating: strength.rating || Math.max(85, 97 - index * 3) // Add ratings from AI or generate reasonable ones
+              rating: strength.rating || Math.max(85, 97 - index * 3), // Add ratings from AI or generate reasonable ones
+              category: strength.category || "Technical",
+              evidence: strength.evidence || "Based on AI performance analysis"
             }))
           : [
               {
@@ -816,7 +837,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ];
         
         strengthsData = {
-          strengths: aiStrengths
+          strengths: aiStrengths,
+          aiGenerated: true,
+          lastUpdated: forceUpdate ? "Force updated with GPT-5" : "Fresh GPT-5 analysis"
         };
         
         // Store strengths in database for future use
@@ -919,7 +942,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const weaknessesAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'weaknesses', athleteDataForAnalysis);
         
         const aiWeaknesses = weaknessesAnalysis.weaknesses?.length > 0 
-          ? weaknessesAnalysis.weaknesses.map((weakness: any, index) => ({
+          ? weaknessesAnalysis.weaknesses.map((weakness: any, index: number) => ({
               title: weakness.title,
               description: weakness.description,
               impact: weakness.impact || (index === 0 ? 'High' : (index % 2 === 0 ? 'Medium' : 'High')),
@@ -1216,7 +1239,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const strategiesAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'beat-strategies', athleteDataForAnalysis);
         
         const aiBeatStrategies = strategiesAnalysis.strategies?.length > 0 
-          ? strategiesAnalysis.strategies.map(strategy => ({
+          ? strategiesAnalysis.strategies.map((strategy: any) => ({
               strategy: strategy.title,
               description: strategy.description,
               execution: strategy.execution || "Apply systematically during competition",
