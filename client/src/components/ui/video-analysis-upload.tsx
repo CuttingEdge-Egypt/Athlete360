@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Video, Upload, Loader2, Play, FileVideo } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AnalysisResult } from "./analysis-result";
+import { VideoPlayerAnalysis } from "./video-player-analysis";
 
 interface VideoAnalysisUploadProps {
   onClose?: () => void;
@@ -120,7 +121,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
     }
   };
 
-  if (analysisResult) {
+  if (analysisResult && uploadedFile) {
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
@@ -144,10 +145,9 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
             )}
           </div>
         </div>
-        <AnalysisResult 
-          type="video" 
-          data={analysisResult} 
-          createdAt={new Date().toISOString()}
+        <VideoPlayerAnalysis 
+          videoFile={uploadedFile}
+          analysisData={analysisResult}
         />
       </div>
     );
