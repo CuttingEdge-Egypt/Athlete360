@@ -23,32 +23,65 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Athlete, Sport } from "@shared/schema";
 
+interface StrengthItem {
+  title: string;
+  description?: string;
+  rating?: number;
+  evidence?: string;
+}
+
+interface WeaknessItem {
+  title: string;
+  description?: string;
+  impact?: string;
+  exploitation?: string;
+}
+
 interface ComparisonData {
-  athlete1: Athlete;
-  athlete2: Athlete;
-  comparison: {
-    strengths: {
-      athlete1: string[];
-      athlete2: string[];
-      advantage: 'athlete1' | 'athlete2' | 'even';
-    };
-    weaknesses: {
-      athlete1: string[];
-      athlete2: string[];
-      advantage: 'athlete1' | 'athlete2' | 'even';
-    };
-    ranking: {
-      athlete1Rank: number;
-      athlete2Rank: number;
-      advantage: 'athlete1' | 'athlete2' | 'even';
-    };
-    headToHead: {
-      prediction: 'athlete1' | 'athlete2' | 'even';
-      confidence: number;
-      reasoning: string;
-    };
-    overallAnalysis: string;
+  athlete1: {
+    name: string;
+    country: string;
+    rank: string;
+    profileImageUrl?: string;
   };
+  athlete2: {
+    name: string;
+    country: string;
+    rank: string;
+    profileImageUrl?: string;
+  };
+  strengths?: {
+    athlete1: (string | StrengthItem)[];
+    athlete2: (string | StrengthItem)[];
+    advantage: 'athlete1' | 'athlete2' | 'even';
+  };
+  weaknesses?: {
+    athlete1: (string | WeaknessItem)[];
+    athlete2: (string | WeaknessItem)[];
+    advantage: 'athlete1' | 'athlete2' | 'even';
+  };
+  ranking?: {
+    comparison: string;
+    athlete1Trajectory: string;
+    athlete2Trajectory: string;
+    competitiveEdge: 'athlete1' | 'athlete2' | 'even';
+  };
+  headToHead?: {
+    prediction: 'athlete1' | 'athlete2';
+    confidence: number;
+    reasoning: string;
+    keyFactors: string[];
+    scenario: string;
+  };
+  overallAnalysis?: {
+    summary: string;
+    betterAthlete: 'athlete1' | 'athlete2' | 'even';
+    reasonsWhy: string[];
+    closeness: string;
+    recommendation: string;
+  };
+  error?: boolean;
+  message?: string;
 }
 
 export function AthleteComparison() {
@@ -351,7 +384,9 @@ export function AthleteComparison() {
                       <h4 className="font-semibold text-white">Overall Analysis</h4>
                     </div>
                     <p className="text-gray-300 leading-relaxed">
-                      {comparisonData.comparison.overallAnalysis}
+                      {comparisonData.error ? 
+                        comparisonData.message : 
+                        comparisonData.overallAnalysis?.summary || "Analysis not available"}
                     </p>
                   </CardContent>
                 </Card>
@@ -362,8 +397,8 @@ export function AthleteComparison() {
                       <Trophy className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
                       <div className="text-sm text-gray-400">Ranking Advantage</div>
                       <div className="text-lg font-bold text-white">
-                        {comparisonData.comparison.ranking.advantage === 'athlete1' ? comparisonData.athlete1.name :
-                         comparisonData.comparison.ranking.advantage === 'athlete2' ? comparisonData.athlete2.name : 'Even'}
+                        {comparisonData.ranking?.competitiveEdge === 'athlete1' ? comparisonData.athlete1.name :
+                         comparisonData.ranking?.competitiveEdge === 'athlete2' ? comparisonData.athlete2.name : 'Even'}
                       </div>
                     </CardContent>
                   </Card>
@@ -373,8 +408,8 @@ export function AthleteComparison() {
                       <TrendingUp className="h-8 w-8 text-green-500 mx-auto mb-2" />
                       <div className="text-sm text-gray-400">Strength Advantage</div>
                       <div className="text-lg font-bold text-white">
-                        {comparisonData.comparison.strengths.advantage === 'athlete1' ? comparisonData.athlete1.name :
-                         comparisonData.comparison.strengths.advantage === 'athlete2' ? comparisonData.athlete2.name : 'Even'}
+                        {comparisonData.strengths?.advantage === 'athlete1' ? comparisonData.athlete1.name :
+                         comparisonData.strengths?.advantage === 'athlete2' ? comparisonData.athlete2.name : 'Even'}
                       </div>
                     </CardContent>
                   </Card>
@@ -384,8 +419,8 @@ export function AthleteComparison() {
                       <Target className="h-8 w-8 text-purple-500 mx-auto mb-2" />
                       <div className="text-sm text-gray-400">Predicted Winner</div>
                       <div className="text-lg font-bold text-white">
-                        {comparisonData.comparison.headToHead.prediction === 'athlete1' ? comparisonData.athlete1.name :
-                         comparisonData.comparison.headToHead.prediction === 'athlete2' ? comparisonData.athlete2.name : 'Even Match'}
+                        {comparisonData.headToHead?.prediction === 'athlete1' ? comparisonData.athlete1.name :
+                         comparisonData.headToHead?.prediction === 'athlete2' ? comparisonData.athlete2.name : 'Even Match'}
                       </div>
                     </CardContent>
                   </Card>
@@ -399,12 +434,29 @@ export function AthleteComparison() {
                       <CardTitle className="text-lg text-white">{comparisonData.athlete1.name} Strengths</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      {comparisonData.comparison.strengths.athlete1.map((strength, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <Star className="h-4 w-4 text-green-500" />
-                          <span className="text-gray-300">{strength}</span>
+                      {(comparisonData.strengths?.athlete1 || []).map((strength: any, index: number) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <Star className="h-4 w-4 text-green-500 mt-1" />
+                          <div className="flex-1">
+                            <div className="font-medium text-white">
+                              {typeof strength === 'string' ? strength : strength.title}
+                            </div>
+                            {typeof strength === 'object' && strength.description && (
+                              <div className="text-sm text-gray-400 mt-1">
+                                {strength.description}
+                              </div>
+                            )}
+                            {typeof strength === 'object' && strength.rating && (
+                              <div className="text-xs text-green-400 mt-1">
+                                Rating: {strength.rating}%
+                              </div>
+                            )}
+                          </div>
                         </div>
                       ))}
+                      {(!comparisonData.strengths?.athlete1 || comparisonData.strengths.athlete1.length === 0) && (
+                        <div className="text-gray-400 text-center py-4">No strengths data available</div>
+                      )}
                     </CardContent>
                   </Card>
 
@@ -413,12 +465,29 @@ export function AthleteComparison() {
                       <CardTitle className="text-lg text-white">{comparisonData.athlete2.name} Strengths</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      {comparisonData.comparison.strengths.athlete2.map((strength, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <Star className="h-4 w-4 text-green-500" />
-                          <span className="text-gray-300">{strength}</span>
+                      {(comparisonData.strengths?.athlete2 || []).map((strength: any, index: number) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <Star className="h-4 w-4 text-green-500 mt-1" />
+                          <div className="flex-1">
+                            <div className="font-medium text-white">
+                              {typeof strength === 'string' ? strength : strength.title}
+                            </div>
+                            {typeof strength === 'object' && strength.description && (
+                              <div className="text-sm text-gray-400 mt-1">
+                                {strength.description}
+                              </div>
+                            )}
+                            {typeof strength === 'object' && strength.rating && (
+                              <div className="text-xs text-green-400 mt-1">
+                                Rating: {strength.rating}%
+                              </div>
+                            )}
+                          </div>
                         </div>
                       ))}
+                      {(!comparisonData.strengths?.athlete2 || comparisonData.strengths.athlete2.length === 0) && (
+                        <div className="text-gray-400 text-center py-4">No strengths data available</div>
+                      )}
                     </CardContent>
                   </Card>
                 </div>
@@ -431,12 +500,29 @@ export function AthleteComparison() {
                       <CardTitle className="text-lg text-white">{comparisonData.athlete1.name} Areas to Improve</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      {comparisonData.comparison.weaknesses.athlete1.map((weakness, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <TrendingDown className="h-4 w-4 text-orange-500" />
-                          <span className="text-gray-300">{weakness}</span>
+                      {(comparisonData.weaknesses?.athlete1 || []).map((weakness: any, index: number) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <TrendingDown className="h-4 w-4 text-orange-500 mt-1" />
+                          <div className="flex-1">
+                            <div className="font-medium text-white">
+                              {typeof weakness === 'string' ? weakness : weakness.title}
+                            </div>
+                            {typeof weakness === 'object' && weakness.description && (
+                              <div className="text-sm text-gray-400 mt-1">
+                                {weakness.description}
+                              </div>
+                            )}
+                            {typeof weakness === 'object' && weakness.impact && (
+                              <div className="text-xs text-orange-400 mt-1">
+                                Impact: {weakness.impact}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       ))}
+                      {(!comparisonData.weaknesses?.athlete1 || comparisonData.weaknesses.athlete1.length === 0) && (
+                        <div className="text-gray-400 text-center py-4">No weaknesses data available</div>
+                      )}
                     </CardContent>
                   </Card>
 
@@ -445,12 +531,29 @@ export function AthleteComparison() {
                       <CardTitle className="text-lg text-white">{comparisonData.athlete2.name} Areas to Improve</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      {comparisonData.comparison.weaknesses.athlete2.map((weakness, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <TrendingDown className="h-4 w-4 text-orange-500" />
-                          <span className="text-gray-300">{weakness}</span>
+                      {(comparisonData.weaknesses?.athlete2 || []).map((weakness: any, index: number) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <TrendingDown className="h-4 w-4 text-orange-500 mt-1" />
+                          <div className="flex-1">
+                            <div className="font-medium text-white">
+                              {typeof weakness === 'string' ? weakness : weakness.title}
+                            </div>
+                            {typeof weakness === 'object' && weakness.description && (
+                              <div className="text-sm text-gray-400 mt-1">
+                                {weakness.description}
+                              </div>
+                            )}
+                            {typeof weakness === 'object' && weakness.impact && (
+                              <div className="text-xs text-orange-400 mt-1">
+                                Impact: {weakness.impact}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       ))}
+                      {(!comparisonData.weaknesses?.athlete2 || comparisonData.weaknesses.athlete2.length === 0) && (
+                        <div className="text-gray-400 text-center py-4">No weaknesses data available</div>
+                      )}
                     </CardContent>
                   </Card>
                 </div>
@@ -467,11 +570,11 @@ export function AthleteComparison() {
                   <CardContent className="space-y-4">
                     <div className="text-center">
                       <div className="text-3xl font-bold text-white mb-2">
-                        {comparisonData.comparison.headToHead.prediction === 'athlete1' ? comparisonData.athlete1.name :
-                         comparisonData.comparison.headToHead.prediction === 'athlete2' ? comparisonData.athlete2.name : 'Even Match'}
+                        {comparisonData.headToHead?.prediction === 'athlete1' ? comparisonData.athlete1.name :
+                         comparisonData.headToHead?.prediction === 'athlete2' ? comparisonData.athlete2.name : 'Even Match'}
                       </div>
                       <Badge variant="outline" className="text-lg px-4 py-1">
-                        {comparisonData.comparison.headToHead.confidence}% Confidence
+                        {comparisonData.headToHead?.confidence || 50}% Confidence
                       </Badge>
                     </div>
                     
@@ -480,8 +583,31 @@ export function AthleteComparison() {
                     <div>
                       <h4 className="font-semibold text-white mb-2">Analysis Reasoning</h4>
                       <p className="text-gray-300 leading-relaxed">
-                        {comparisonData.comparison.headToHead.reasoning}
+                        {comparisonData.headToHead?.reasoning || "Analysis reasoning not available"}
                       </p>
+                      
+                      {comparisonData.headToHead?.keyFactors && comparisonData.headToHead.keyFactors.length > 0 && (
+                        <div className="mt-4">
+                          <h5 className="font-medium text-white mb-2">Key Factors</h5>
+                          <ul className="space-y-1">
+                            {comparisonData.headToHead.keyFactors.map((factor: string, index: number) => (
+                              <li key={index} className="flex items-center gap-2 text-gray-300">
+                                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
+                                {factor}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      
+                      {comparisonData.headToHead?.scenario && (
+                        <div className="mt-4">
+                          <h5 className="font-medium text-white mb-2">Competition Scenario</h5>
+                          <p className="text-gray-300 text-sm">
+                            {comparisonData.headToHead.scenario}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

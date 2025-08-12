@@ -5,7 +5,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, generateNutritionPlan } from "./openaiService";
+import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, generateNutritionPlan, compareAthletes } from "./openaiService";
 import { paymobService } from "./paymobService";
 import { TestingService } from "./testingService";
 import OpenAI from "openai";
@@ -1692,93 +1692,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sport = await storage.getSportById(athlete1.sportId);
       const sportName = sport?.name || "Unknown Sport";
 
-      console.log(`Generating AI-powered comparison between ${athlete1.name} and ${athlete2.name}...`);
+      console.log(`Generating GPT-5 powered comparison between ${athlete1.name} and ${athlete2.name}...`);
 
-      // Generate comparison using OpenAI
-      const comparisonPrompt = `Compare ${athlete1.name} and ${athlete2.name}, both ${sportName} athletes. Provide a comprehensive analysis including:
-
-1. Strengths comparison - List 4-5 specific strengths for each athlete
-2. Weaknesses comparison - List 3-4 areas for improvement for each athlete  
-3. Ranking analysis - Compare their current rankings and performance levels
-4. Head-to-head prediction - Who would likely win in direct competition with confidence percentage
-5. Overall analysis - Comprehensive comparison of their abilities and potential
-
-Base this on their known performance characteristics, playing styles, recent results, and sport-specific attributes.
-
-Format as JSON:
-{
-  "strengths": {
-    "athlete1": ["strength1", "strength2", ...],
-    "athlete2": ["strength1", "strength2", ...],
-    "advantage": "athlete1" | "athlete2" | "even"
-  },
-  "weaknesses": {
-    "athlete1": ["weakness1", "weakness2", ...], 
-    "athlete2": ["weakness1", "weakness2", ...],
-    "advantage": "athlete1" | "athlete2" | "even"
-  },
-  "ranking": {
-    "athlete1Rank": ${athlete1.rank || 50},
-    "athlete2Rank": ${athlete2.rank || 50},
-    "advantage": "athlete1" | "athlete2" | "even"
-  },
-  "headToHead": {
-    "prediction": "athlete1" | "athlete2" | "even",
-    "confidence": number (0-100),
-    "reasoning": "Detailed explanation of prediction"
-  },
-  "overallAnalysis": "Comprehensive comparison summary"
-}`;
-
-      // GPT-5 comparison analysis with temperature 1.0 (default minimum)
-      
-      const response = await openai.responses.create({
-        model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after gpt-4o. do not change this unless explicitly requested by the user
-        input: comparisonPrompt,
-        max_output_tokens: 3000,
-        tools: [{ type: "web_search_preview" }],
-        // temperature: 1.0 is default and minimum for GPT-5
-      });
-
-      const comparisonData = JSON.parse(response.output_text);
-
-      const result = {
-        athlete1,
-        athlete2,
-        comparison: {
-          strengths: comparisonData.strengths || {
-            athlete1: ["Strong fundamental skills", "Good competitive mindset"],
-            athlete2: ["Technical proficiency", "Physical conditioning"],
-            advantage: "even"
-          },
-          weaknesses: comparisonData.weaknesses || {
-            athlete1: ["Areas for tactical improvement"],
-            athlete2: ["Consistency under pressure"],
-            advantage: "even"
-          },
-          ranking: comparisonData.ranking || {
-            athlete1Rank: athlete1.rank || 50,
-            athlete2Rank: athlete2.rank || 50,
-            advantage: "even"
-          },
-          headToHead: comparisonData.headToHead || {
-            prediction: "even",
-            confidence: 50,
-            reasoning: "Both athletes show comparable skill levels and potential."
-          },
-          overallAnalysis: comparisonData.overallAnalysis || `Both ${athlete1.name} and ${athlete2.name} are skilled ${sportName} athletes with unique strengths and development areas.`
-        }
-      };
+      // Generate comparison using dedicated GPT-5 compareAthletes function
+      const comparisonResult = await compareAthletes(athlete1, athlete2, sportName);
 
       // Log the comparison
       await storage.createAnalysisLog({
         userId,
         athleteId: athlete1Id,
         serviceType: "comparison",
-        resultData: result
+        resultData: comparisonResult
       });
 
-      res.json(result);
+      res.json(comparisonResult);
     } catch (error) {
       console.error("Error generating athlete comparison:", error);
       res.status(500).json({ message: "Failed to generate comparison" });

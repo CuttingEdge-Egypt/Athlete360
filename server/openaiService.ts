@@ -1525,3 +1525,270 @@ export async function searchAthleteImage(athleteName: string, sport?: string): P
 
 // Export the taekwondo data search function for use in routes
 export { searchTaekwondoDataProfilePicture };
+
+// GPT-5 powered athlete comparison with comprehensive analysis
+export async function compareAthletes(athlete1: any, athlete2: any, sport: string): Promise<any> {
+  const timestamp = new Date().toISOString();
+  const sessionId = Math.random().toString(36).substring(7);
+
+  const prompt = `You are an expert ${sport} analyst and coach. Create a comprehensive comparison between two professional athletes in ${sport}.
+
+Session ID: ${sessionId} - Generation Time: ${timestamp}
+
+CRITICAL: Return only valid JSON. No extra text or explanations. Each comparison must be completely unique and based on authentic athlete data.
+
+Athlete 1 Profile:
+- Name: ${athlete1.name}
+- Country: ${athlete1.country || 'Unknown'}
+- Current Rank: ${athlete1.rank || 'N/A'}
+- Biography: ${athlete1.bio?.substring(0, 500) || 'Professional athlete'}
+- Achievements: ${athlete1.achievements?.join(', ') || 'N/A'}
+- Competition Record: ${athlete1.competitionRecord || 'N/A'}
+
+Athlete 2 Profile:
+- Name: ${athlete2.name}
+- Country: ${athlete2.country || 'Unknown'}  
+- Current Rank: ${athlete2.rank || 'N/A'}
+- Biography: ${athlete2.bio?.substring(0, 500) || 'Professional athlete'}
+- Achievements: ${athlete2.achievements?.join(', ') || 'N/A'}
+- Competition Record: ${athlete2.competitionRecord || 'N/A'}
+
+Search the web for recent competition footage, match results, head-to-head records, and expert analysis of both athletes to provide authentic comparison data.
+
+ANALYSIS REQUIREMENTS:
+1. Technical Skills Comparison - Compare specific techniques, tactical approaches, and sport-specific abilities
+2. Physical Attributes - Strength, speed, endurance, and physical advantages
+3. Mental Game - Competition psychology, pressure handling, and strategic thinking
+4. Performance Metrics - Recent results, ranking progression, and competitive consistency
+5. Head-to-Head Analysis - Direct matchup prediction with detailed reasoning
+
+Return this exact JSON structure:
+{
+  "athlete1": {
+    "name": "${athlete1.name}",
+    "country": "${athlete1.country || 'Unknown'}",
+    "rank": "${athlete1.rank || 'N/A'}",
+    "profileImageUrl": "${athlete1.profileImageUrl || ''}"
+  },
+  "athlete2": {
+    "name": "${athlete2.name}",
+    "country": "${athlete2.country || 'Unknown'}",
+    "rank": "${athlete2.rank || 'N/A'}",
+    "profileImageUrl": "${athlete2.profileImageUrl || ''}"
+  },
+  "strengths": {
+    "athlete1": [
+      {
+        "title": "Specific strength name",
+        "description": "Detailed analysis with evidence from competitions",
+        "rating": 95,
+        "evidence": "Specific examples from recent matches"
+      }
+    ],
+    "athlete2": [
+      {
+        "title": "Specific strength name", 
+        "description": "Detailed analysis with evidence from competitions",
+        "rating": 92,
+        "evidence": "Specific examples from recent matches"
+      }
+    ],
+    "advantage": "athlete1|athlete2|even"
+  },
+  "weaknesses": {
+    "athlete1": [
+      {
+        "title": "Specific weakness",
+        "description": "Detailed analysis with evidence",
+        "impact": "high|medium|low",
+        "exploitation": "How opponent could exploit this weakness"
+      }
+    ],
+    "athlete2": [
+      {
+        "title": "Specific weakness",
+        "description": "Detailed analysis with evidence", 
+        "impact": "high|medium|low",
+        "exploitation": "How opponent could exploit this weakness"
+      }
+    ],
+    "advantage": "athlete1|athlete2|even"
+  },
+  "ranking": {
+    "comparison": "Detailed ranking and performance comparison",
+    "athlete1Trajectory": "Current form and ranking trend analysis",
+    "athlete2Trajectory": "Current form and ranking trend analysis",
+    "competitiveEdge": "athlete1|athlete2|even"
+  },
+  "headToHead": {
+    "prediction": "athlete1|athlete2",
+    "confidence": 75,
+    "reasoning": "Detailed analysis of why this athlete would likely win",
+    "keyFactors": [
+      "Critical factor 1 in determining outcome",
+      "Critical factor 2 in determining outcome"
+    ],
+    "scenario": "Specific competition scenario analysis"
+  },
+  "overallAnalysis": {
+    "summary": "Comprehensive comparison summary",
+    "betterAthlete": "athlete1|athlete2|even",
+    "reasonsWhy": [
+      "Key reason 1",
+      "Key reason 2",
+      "Key reason 3"
+    ],
+    "closeness": "very-close|somewhat-close|clear-difference",
+    "recommendation": "Professional analysis and recommendation"
+  }
+}
+
+Use only authentic data from web search. Do not include generic content or placeholder information.`;
+
+  try {
+    const response = await openai.responses.create({
+      model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after gpt-4o. do not change this unless explicitly requested by the user
+      input: prompt,
+      tools: [{ type: "web_search_preview" }],
+      max_output_tokens: 8000,
+      // temperature: 1.0 is default and minimum for GPT-5
+    });
+
+    // Apply the same robust JSON cleanup used in other functions
+    let cleanedText = response.output_text.trim();
+    
+    // Remove markdown formatting
+    cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    
+    // Try to find complete JSON first, then any JSON
+    let jsonMatch = cleanedText.match(/\{[\s\S]*\}(?=\s*$)/);
+    if (!jsonMatch) {
+      jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+    }
+    
+    if (jsonMatch) {
+      cleanedText = jsonMatch[0];
+      
+      // Clean up common JSON issues
+      cleanedText = cleanedText.replace(/,\s*}/g, '}');
+      cleanedText = cleanedText.replace(/,\s*]/g, ']');
+      
+      // Fix truncated JSON by balancing braces/brackets
+      let braceCount = 0;
+      let bracketCount = 0;
+      let result = '';
+      
+      for (const char of cleanedText) {
+        result += char;
+        if (char === '{') braceCount++;
+        else if (char === '}') braceCount--;
+        else if (char === '[') bracketCount++;
+        else if (char === ']') bracketCount--;
+      }
+      
+      // Add missing closing characters
+      while (braceCount > 0) {
+        result += '}';
+        braceCount--;
+      }
+      while (bracketCount > 0) {
+        result += ']';
+        bracketCount--;
+      }
+      
+      cleanedText = result;
+    }
+    
+    const parsedData = JSON.parse(cleanedText);
+    
+    // Ensure we have the expected structure
+    return {
+      athlete1: {
+        name: athlete1.name,
+        country: athlete1.country || 'Unknown',
+        rank: athlete1.rank || 'N/A',
+        profileImageUrl: athlete1.profileImageUrl || ''
+      },
+      athlete2: {
+        name: athlete2.name,
+        country: athlete2.country || 'Unknown',
+        rank: athlete2.rank || 'N/A', 
+        profileImageUrl: athlete2.profileImageUrl || ''
+      },
+      strengths: parsedData.strengths || {
+        athlete1: [],
+        athlete2: [],
+        advantage: "even"
+      },
+      weaknesses: parsedData.weaknesses || {
+        athlete1: [],
+        athlete2: [],
+        advantage: "even"
+      },
+      ranking: parsedData.ranking || {
+        comparison: "Comparison data not available",
+        athlete1Trajectory: "Data not available",
+        athlete2Trajectory: "Data not available",
+        competitiveEdge: "even"
+      },
+      headToHead: parsedData.headToHead || {
+        prediction: "athlete1",
+        confidence: 50,
+        reasoning: "Unable to determine clear advantage",
+        keyFactors: [],
+        scenario: "Analysis not available"
+      },
+      overallAnalysis: parsedData.overallAnalysis || {
+        summary: "Comparison analysis not available",
+        betterAthlete: "even",
+        reasonsWhy: [],
+        closeness: "even",
+        recommendation: "Additional analysis needed"
+      }
+    };
+    
+  } catch (error: any) {
+    console.error(`Error generating athlete comparison for ${athlete1.name} vs ${athlete2.name}:`, error);
+    
+    // Return error instead of generic fallback data
+    return {
+      athlete1: {
+        name: athlete1.name,
+        country: athlete1.country || 'Unknown',
+        rank: athlete1.rank || 'N/A',
+        profileImageUrl: athlete1.profileImageUrl || ''
+      },
+      athlete2: {
+        name: athlete2.name,
+        country: athlete2.country || 'Unknown',
+        rank: athlete2.rank || 'N/A',
+        profileImageUrl: athlete2.profileImageUrl || ''
+      },
+      error: true,
+      message: `Unable to generate authentic comparison between ${athlete1.name} and ${athlete2.name} at this time. Please try again later or contact support if the issue persists.`,
+      strengths: { athlete1: [], athlete2: [], advantage: "even" },
+      weaknesses: { athlete1: [], athlete2: [], advantage: "even" },
+      ranking: {
+        comparison: "Analysis temporarily unavailable",
+        athlete1Trajectory: "Data not available",
+        athlete2Trajectory: "Data not available", 
+        competitiveEdge: "even"
+      },
+      headToHead: {
+        prediction: "athlete1",
+        confidence: 50,
+        reasoning: "Analysis temporarily unavailable",
+        keyFactors: [],
+        scenario: "Unable to generate scenario analysis"
+      },
+      overallAnalysis: {
+        summary: "Comparison analysis temporarily unavailable",
+        betterAthlete: "even",
+        reasonsWhy: [],
+        closeness: "even",
+        recommendation: "Please try again later"
+      }
+    };
+  }
+}
