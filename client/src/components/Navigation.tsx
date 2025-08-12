@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { HistoryDropdown } from "@/components/ui/history-dropdown";
-import { ReferralDropdown } from "@/components/ui/referral-dropdown";
+import { ProfileDropdown } from "@/components/ui/profile-dropdown";
 import { Trophy, Coins, Plus, LogOut, User as UserIcon } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -75,26 +75,10 @@ export function Navigation() {
             </Badge>
           </div>
 
-          {/* History, Referral, and User Menu */}
+          {/* History and Profile Menu */}
           <div className="flex items-center space-x-2">
             <HistoryDropdown />
-            <ReferralDropdown />
-            
-            <Link href="/account" className="cursor-pointer">
-              {user?.profileImageUrl ? (
-                <img 
-                  src={user.profileImageUrl} 
-                  alt="Profile" 
-                  className="w-8 h-8 rounded-full object-cover hover:ring-2 hover:ring-blue-400 transition-all"
-                  data-testid="profile-image-account-link"
-                />
-              ) : (
-                <UserIcon 
-                  className="text-gray-300 hover:text-white w-8 h-8 transition-colors" 
-                  data-testid="profile-icon-account-link"
-                />
-              )}
-            </Link>
+            <ProfileDropdown />
             
             <Button 
               onClick={handleLogout}
