@@ -250,7 +250,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
           <div className="flex justify-center pt-4">
             <Button
               onClick={handleAnalyze}
-              disabled={!uploadedFile || !athlete1Name || !athlete2Name || isAnalyzing}
+              disabled={!uploadedFile || isAnalyzing}
               className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3"
               data-testid="button-analyze-video"
             >
