@@ -145,9 +145,23 @@ export class DatabaseStorage implements IStorage {
     
     const newTokens = Math.max(0, (currentUser.tokens || 0) - amount);
     console.log(`DEDUCTING ${amount} tokens from user ${userId}: ${currentUser.tokens} → ${newTokens}`);
-    const result = await this.updateUserTokens(userId, newTokens);
-    console.log(`DEDUCTION RESULT: User now has ${result.tokens} tokens`);
-    return result;
+    
+    // When deducting, only update current tokens, keep totalTokensPurchased unchanged
+    const [updatedUser] = await db
+      .update(users)
+      .set({ 
+        tokens: newTokens, 
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!updatedUser) {
+      throw new Error(`Failed to deduct tokens for user ${userId}`);
+    }
+    
+    console.log(`DEDUCTION RESULT: User now has ${updatedUser.tokens}/${updatedUser.totalTokensPurchased} tokens`);
+    return updatedUser;
   }
 
   async addTokensPurchase(userId: string, tokensToAdd: number): Promise<User> {
@@ -155,11 +169,11 @@ export class DatabaseStorage implements IStorage {
     if (!user) throw new Error("User not found");
     
     const currentTokens = user.tokens || 0;
-    const currentTotal = user.totalTokensPurchased || 0;
     const newTokens = currentTokens + tokensToAdd;
-    const newTotalPurchased = currentTotal + tokensToAdd;
+    // totalTokensPurchased should be the new current balance after purchase
+    const newTotalPurchased = newTokens;
     
-    console.log(`ADDING ${tokensToAdd} tokens to user ${userId}: ${currentTokens} → ${newTokens}, total: ${currentTotal} → ${newTotalPurchased}`);
+    console.log(`ADDING ${tokensToAdd} tokens to user ${userId}: ${currentTokens} → ${newTokens}, total purchased: ${newTotalPurchased}`);
     
     const [updatedUser] = await db
       .update(users)
