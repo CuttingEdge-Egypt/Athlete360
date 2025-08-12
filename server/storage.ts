@@ -11,6 +11,8 @@ import {
   rankHistory,
   transactions,
   analysisLogs,
+  paymentReceipts,
+  referrals,
   type User,
   type UpsertUser,
   type Sport,
@@ -24,9 +26,13 @@ import {
   type RankHistory,
   type Transaction,
   type AnalysisLog,
+  type PaymentReceipt,
+  type Referral,
   type InsertSport,
   type InsertAthlete,
   type InsertTransaction,
+  type InsertPaymentReceipt,
+  type InsertReferral,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, asc, sql, ilike } from "drizzle-orm";
@@ -37,6 +43,9 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   updateUserTokens(userId: string, tokens: number): Promise<User>;
   deductTokens(userId: string, amount: number): Promise<User>;
+  updateUserPaymentCard(userId: string, cardData: { cardToken: string, cardLast4: string, cardBrand: string, paymobCustomerId?: string }): Promise<User>;
+  generateReferralCode(userId: string): Promise<string>;
+  getUserByReferralCode(referralCode: string): Promise<User | undefined>;
 
   // Sports operations
   getAllSports(): Promise<Sport[]>;
@@ -82,6 +91,16 @@ export interface IStorage {
   createAnalysisLog(log: Partial<AnalysisLog>): Promise<AnalysisLog>;
   getUserAnalysisLogs(userId: string): Promise<AnalysisLog[]>;
   getAnalysisLogById(id: string): Promise<AnalysisLog | undefined>;
+
+  // Payment receipts
+  createPaymentReceipt(receipt: InsertPaymentReceipt): Promise<PaymentReceipt>;
+  getUserPaymentReceipts(userId: string): Promise<PaymentReceipt[]>;
+  getPaymentReceiptById(id: string): Promise<PaymentReceipt | undefined>;
+
+  // Referrals
+  createReferral(referral: InsertReferral): Promise<Referral>;
+  getUserReferrals(userId: string): Promise<Referral[]>;
+  getReferralCount(userId: string): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -408,6 +427,100 @@ export class DatabaseStorage implements IStorage {
       // Clear analysis logs
       await tx.delete(analysisLogs).where(eq(analysisLogs.userId, userId));
     });
+  }
+
+  // Payment card operations
+  async updateUserPaymentCard(userId: string, cardData: { cardToken: string, cardLast4: string, cardBrand: string, paymobCustomerId?: string }): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        cardToken: cardData.cardToken,
+        cardLast4: cardData.cardLast4,
+        cardBrand: cardData.cardBrand,
+        paymobCustomerId: cardData.paymobCustomerId,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!user) {
+      throw new Error(`Failed to update payment card for user ${userId}`);
+    }
+    return user;
+  }
+
+  // Referral operations
+  async generateReferralCode(userId: string): Promise<string> {
+    // Generate a unique 8-character code
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let referralCode: string;
+    let isUnique = false;
+    
+    do {
+      referralCode = '';
+      for (let i = 0; i < 8; i++) {
+        referralCode += characters.charAt(Math.floor(Math.random() * characters.length));
+      }
+      
+      // Check if code already exists
+      const existingUser = await this.getUserByReferralCode(referralCode);
+      isUnique = !existingUser;
+    } while (!isUnique);
+
+    // Update user with referral code
+    await db
+      .update(users)
+      .set({ referralCode, updatedAt: new Date() })
+      .where(eq(users.id, userId));
+    
+    return referralCode;
+  }
+
+  async getUserByReferralCode(referralCode: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.referralCode, referralCode));
+    return user;
+  }
+
+  // Payment receipts operations
+  async createPaymentReceipt(receiptData: InsertPaymentReceipt): Promise<PaymentReceipt> {
+    const [receipt] = await db.insert(paymentReceipts).values(receiptData).returning();
+    return receipt;
+  }
+
+  async getUserPaymentReceipts(userId: string): Promise<PaymentReceipt[]> {
+    return await db
+      .select()
+      .from(paymentReceipts)
+      .where(eq(paymentReceipts.userId, userId))
+      .orderBy(desc(paymentReceipts.createdAt));
+  }
+
+  async getPaymentReceiptById(id: string): Promise<PaymentReceipt | undefined> {
+    const [receipt] = await db.select().from(paymentReceipts).where(eq(paymentReceipts.id, id));
+    return receipt;
+  }
+
+  // Referrals operations
+  async createReferral(referralData: InsertReferral): Promise<Referral> {
+    const [referral] = await db.insert(referrals).values(referralData).returning();
+    return referral;
+  }
+
+  async getUserReferrals(userId: string): Promise<Referral[]> {
+    return await db
+      .select()
+      .from(referrals)
+      .where(eq(referrals.referrerId, userId))
+      .orderBy(desc(referrals.createdAt));
+  }
+
+  async getReferralCount(userId: string): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(referrals)
+      .where(eq(referrals.referrerId, userId));
+    
+    return result[0]?.count || 0;
   }
 }
 

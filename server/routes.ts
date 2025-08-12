@@ -6,6 +6,7 @@ import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
 import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, generateNutritionPlan } from "./openaiService";
+import { paymobService } from "./paymobService";
 import OpenAI from "openai";
 
 // All LLM implementations now use GPT-5 with temperature 1.0 (default minimum)
@@ -1666,6 +1667,237 @@ Format as JSON:
     } catch (error) {
       console.error("Error generating athlete comparison:", error);
       res.status(500).json({ message: "Failed to generate comparison" });
+    }
+  });
+
+  // ==== PAYMENT AND REFERRAL SYSTEM ROUTES ====
+
+  // Complete user signup with mandatory payment card
+  app.post('/api/auth/complete-signup', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { cardToken, cardLast4, cardBrand, paymobCustomerId, referralCode } = req.body;
+
+      if (!cardToken || !cardLast4 || !cardBrand) {
+        return res.status(400).json({ message: "Payment card information is required" });
+      }
+
+      let user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Update user with payment card info
+      await storage.updateUserPaymentCard(userId, {
+        cardToken,
+        cardLast4,
+        cardBrand,
+        paymobCustomerId
+      });
+
+      // Generate unique referral code for the user
+      const userReferralCode = await storage.generateReferralCode(userId);
+
+      // Process referral bonus if user was referred
+      if (referralCode) {
+        const referrer = await storage.getUserByReferralCode(referralCode);
+        if (referrer) {
+          // Add 100 bonus tokens to referrer
+          await storage.updateUserTokens(referrer.id, (referrer.tokens || 0) + 100);
+          
+          // Create referral record
+          await storage.createReferral({
+            referrerId: referrer.id,
+            referredUserId: userId,
+            bonusTokens: 100,
+            status: "completed"
+          });
+
+          // Create transaction for referrer
+          await storage.createTransaction({
+            userId: referrer.id,
+            action: "Referral Bonus",
+            tokensDeducted: -100,
+            serviceType: "referral"
+          });
+        }
+      }
+
+      const updatedUser = await storage.getUser(userId);
+      res.json({
+        message: "Signup completed successfully",
+        user: updatedUser,
+        referralCode: userReferralCode
+      });
+    } catch (error) {
+      console.error("Error completing signup:", error);
+      res.status(500).json({ message: "Failed to complete signup" });
+    }
+  });
+
+  // Create payment intent for token purchase
+  app.post('/api/payments/create-intent', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { amount, tokensAmount } = req.body;
+
+      if (!amount || !tokensAmount) {
+        return res.status(400).json({ message: "Amount and tokens amount are required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const paymentIntent = await paymobService.createPaymentIntent({
+        amount,
+        currency: 'EGP',
+        billingData: {
+          email: user.email || '',
+          firstName: user.firstName || '',
+          lastName: user.lastName || ''
+        }
+      });
+
+      res.json({
+        paymentToken: paymentIntent.token,
+        iframeUrl: paymentIntent.iframeUrl,
+        orderId: paymentIntent.orderId
+      });
+    } catch (error) {
+      console.error("Error creating payment intent:", error);
+      res.status(500).json({ message: "Failed to create payment intent" });
+    }
+  });
+
+  // Process payment completion
+  app.post('/api/payments/complete', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { transactionId, amount, tokensAmount, paymentMethod, cardLast4, cardBrand } = req.body;
+
+      if (!transactionId || !amount || !tokensAmount) {
+        return res.status(400).json({ message: "Transaction details are required" });
+      }
+
+      // Verify payment with Paymob
+      const paymentVerification = await paymobService.verifyPayment(transactionId);
+      
+      if (paymentVerification.success) {
+        const user = await storage.getUser(userId);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+
+        // Add tokens to user account
+        await storage.updateUserTokens(userId, (user.tokens || 0) + tokensAmount);
+
+        // Create payment receipt
+        const receiptNumber = paymobService.generateReceiptNumber();
+        const receipt = await storage.createPaymentReceipt({
+          userId,
+          paymobTransactionId: transactionId,
+          amount: amount.toString(),
+          currency: 'EGP',
+          tokensAmount,
+          paymentMethod,
+          cardLast4,
+          cardBrand,
+          status: 'completed',
+          receiptNumber
+        });
+
+        // Create transaction record
+        await storage.createTransaction({
+          userId,
+          action: "Token Purchase",
+          tokensDeducted: -tokensAmount,
+          serviceType: "purchase"
+        });
+
+        const updatedUser = await storage.getUser(userId);
+        res.json({
+          message: "Payment completed successfully",
+          receipt,
+          user: updatedUser
+        });
+      } else {
+        res.status(400).json({ message: "Payment verification failed" });
+      }
+    } catch (error) {
+      console.error("Error completing payment:", error);
+      res.status(500).json({ message: "Failed to complete payment" });
+    }
+  });
+
+  // Get user payment receipts
+  app.get('/api/payments/receipts', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const receipts = await storage.getUserPaymentReceipts(userId);
+      res.json(receipts);
+    } catch (error) {
+      console.error("Error fetching payment receipts:", error);
+      res.status(500).json({ message: "Failed to fetch payment receipts" });
+    }
+  });
+
+  // Get specific payment receipt
+  app.get('/api/payments/receipts/:receiptId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const receiptId = req.params.receiptId;
+      
+      const receipt = await storage.getPaymentReceiptById(receiptId);
+      if (!receipt || receipt.userId !== userId) {
+        return res.status(404).json({ message: "Receipt not found" });
+      }
+
+      res.json(receipt);
+    } catch (error) {
+      console.error("Error fetching payment receipt:", error);
+      res.status(500).json({ message: "Failed to fetch payment receipt" });
+    }
+  });
+
+  // Get user referrals
+  app.get('/api/referrals', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const referrals = await storage.getUserReferrals(userId);
+      const referralCount = await storage.getReferralCount(userId);
+      
+      const user = await storage.getUser(userId);
+      res.json({
+        referrals,
+        referralCount,
+        referralCode: user?.referralCode,
+        totalBonusTokens: referralCount * 100
+      });
+    } catch (error) {
+      console.error("Error fetching referrals:", error);
+      res.status(500).json({ message: "Failed to fetch referrals" });
+    }
+  });
+
+  // Validate referral code
+  app.get('/api/referrals/validate/:code', async (req, res) => {
+    try {
+      const referralCode = req.params.code;
+      const user = await storage.getUserByReferralCode(referralCode);
+      
+      if (user) {
+        res.json({ 
+          valid: true, 
+          referrerName: `${user.firstName} ${user.lastName}`.trim() || user.email 
+        });
+      } else {
+        res.json({ valid: false });
+      }
+    } catch (error) {
+      console.error("Error validating referral code:", error);
+      res.status(500).json({ message: "Failed to validate referral code" });
     }
   });
 
