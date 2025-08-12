@@ -67,6 +67,7 @@ export default function PaymentCenter() {
       const intentData = await intentResponse.json();
       
       // Open Paymob iframe
+      console.log('Payment intent response:', intentData);
       setPaymentIframeUrl(intentData.iframeUrl);
 
       toast({
