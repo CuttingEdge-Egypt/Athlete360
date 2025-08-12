@@ -123,13 +123,13 @@ export function ProfileDropdown() {
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Referrals Made:</span>
-              <span className="font-medium">{referralData?.referralCount || 0}</span>
+              <span className="font-medium">{(referralData as any)?.referralCount || 0}</span>
             </div>
             
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Tokens Earned:</span>
               <span className="font-medium text-green-600">
-                {(parseInt(referralData?.referralCount || '0') * 100).toLocaleString()}
+                {(parseInt((referralData as any)?.referralCount || '0') * 100).toLocaleString()}
               </span>
             </div>
             
