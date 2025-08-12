@@ -132,7 +132,7 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] lg:max-w-[800px] max-h-[90vh] overflow-hidden flex flex-col" data-testid="signup-flow-dialog">
+      <DialogContent className="sm:max-w-[700px] lg:max-w-[800px] max-h-[75vh] overflow-hidden flex flex-col" data-testid="signup-flow-dialog">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Zap className="h-5 w-5 text-blue-500" />
@@ -155,7 +155,7 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="personal" className="mt-6">
+          <TabsContent value="personal" className="mt-4 flex-1 overflow-y-auto">
             <Card className="border-gray-200 dark:border-gray-700 shadow-sm">
               <CardHeader className="pb-6">
                 <CardTitle className="flex items-center gap-2 text-xl">
@@ -215,7 +215,7 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
             </Card>
           </TabsContent>
 
-          <TabsContent value="payment" className="mt-6 flex-1 flex flex-col overflow-hidden">
+          <TabsContent value="payment" className="mt-4 flex-1 flex flex-col overflow-hidden">
             <div className="space-y-6 flex-1 overflow-y-auto pr-2">
               <Card className="border-gray-200 dark:border-gray-700 shadow-sm">
                 <CardHeader className="pb-6">

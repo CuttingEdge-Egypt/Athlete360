@@ -27,8 +27,8 @@ function Router() {
       if (pendingSignupData) {
         // User just completed Replit auth flow, now complete signup with stored data
         completeSignupWithStoredData(JSON.parse(pendingSignupData));
-      } else if (!user.cardToken) {
-        // User needs to complete signup normally
+      } else if (!user.paymentCardLast4) {
+        // User needs to complete signup normally (check for actual card data)
         setShowSignupModal(true);
       }
     }
