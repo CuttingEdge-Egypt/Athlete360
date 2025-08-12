@@ -7,6 +7,7 @@ import { z } from "zod";
 import { seedDatabase } from "./seedData";
 import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, generateNutritionPlan } from "./openaiService";
 import { paymobService } from "./paymobService";
+import { TestingService } from "./testingService";
 import OpenAI from "openai";
 
 // All LLM implementations now use GPT-5 with temperature 1.0 (default minimum)
@@ -1899,6 +1900,55 @@ Format as JSON:
       console.error("Error validating referral code:", error);
       res.status(500).json({ message: "Failed to validate referral code" });
     }
+  });
+
+  // Testing routes (for simulation)
+  app.post('/api/test/simulate-payment', isAuthenticated, async (req: any, res) => {
+    try {
+      const { amount, tokens } = req.body;
+      const userId = req.user.claims.sub;
+      
+      if (!amount || !tokens) {
+        return res.status(400).json({ message: 'Amount and tokens are required' });
+      }
+
+      const result = await TestingService.simulatePaymentCompletion(userId, amount, tokens);
+      
+      res.json({
+        success: true,
+        message: `Simulated payment of $${amount} for ${tokens} tokens`,
+        transaction: result
+      });
+    } catch (error) {
+      console.error('Error simulating payment:', error);
+      res.status(500).json({ message: 'Failed to simulate payment' });
+    }
+  });
+
+  app.post('/api/test/simulate-referral', isAuthenticated, async (req: any, res) => {
+    try {
+      const { email } = req.body;
+      const referrerUserId = req.user.claims.sub;
+      
+      if (!email) {
+        return res.status(400).json({ message: 'Email is required' });
+      }
+
+      const result = await TestingService.simulateReferralSignup(referrerUserId, email);
+      
+      res.json({
+        success: true,
+        message: `Simulated referral signup for ${email}`,
+        result
+      });
+    } catch (error) {
+      console.error('Error simulating referral:', error);
+      res.status(500).json({ message: 'Failed to simulate referral' });
+    }
+  });
+
+  app.get('/api/test/scenarios', (req, res) => {
+    res.json(TestingService.getTestScenarios());
   });
 
   const httpServer = createServer(app);
