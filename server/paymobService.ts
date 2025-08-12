@@ -34,6 +34,12 @@ export class PaymobService {
       iframeId: process.env.PAYMOB_IFRAME_ID || ''
     };
 
+    console.log('Paymob config initialized:', {
+      apiKey: this.config.apiKey ? `Set (${this.config.apiKey.length} chars)` : 'Not set',
+      integrationId: this.config.integrationId,
+      iframeId: this.config.iframeId ? 'Set' : 'Not set'
+    });
+
     if (!this.config.apiKey || !this.config.integrationId || !this.config.iframeId) {
       console.warn('Paymob configuration incomplete. Please check environment variables.');
     }
@@ -113,7 +119,7 @@ export class PaymobService {
           state: 'NA',
         },
         currency: paymentIntent.currency,
-        integration_id: this.config.integrationId,
+        integration_id: parseInt(this.config.integrationId),
       }),
     });
 
