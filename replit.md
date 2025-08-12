@@ -93,3 +93,4 @@ Preferred communication style: Simple, everyday language.
 - **Complete Match Analysis**: Non-timestamped overall match analysis displayed separately for reference
 - **Updated Gemini Model**: Now using `gemini-2.5-pro` for all video analysis operations
 - **Live Scoreboard Layout**: Video centered with Blue/Red player stats on sides showing live-updating scores, kicks, and yellow cards
+- **Enhanced Analysis Accuracy**: Round-specific prompts, proper score summation (1+1+2=4), consistent kick counting, and timestamped warnings

@@ -77,7 +77,9 @@ Explain who performed better and why.
 Take your time in processing to make sure the results are accurate.
 Make sure you're not scanning the yellow card as an actual score.`;
 
-    const promptScore = `Identify when a player scored using the scoreboard. Focus on the scoreboard change for better accuracy. Listen to commentators they will help you reference which player scored how many points. Include final match score (from scoreboard) in the summary.
+    const promptScore = `Watch round ${roundToAnalyze} only. Identify when a player scored using the scoreboard. Focus on the scoreboard change for better accuracy. Listen to commentators they will help you reference which player scored how many points. Include final match score (from scoreboard) in the summary.
+
+IMPORTANT: Calculate total_points by adding up all individual kick scores. For example: if kicks are [1, 1, 2], then total_points = 1+1+2 = 4.
 
 Return JSON format:
 {
@@ -139,7 +141,9 @@ Return JSON format:
   ]
 }`;
 
-    const promptKickNo = `Analyze this sports video and count the number of kicks for each player in round ${roundToAnalyze}.
+    const promptKickNo = `Watch round ${roundToAnalyze} only. Watch the taekwondo match and count the total number of kicks both players executed. Even if kicks doesn't hit the opponent or if they blocked it; count every time there is an attempt.
+
+IMPORTANT: This total_kick_number should match the total_kicks count from the scoring analysis.
 
 Return JSON format:
 {
@@ -163,7 +167,9 @@ Return JSON format:
   ]
 }`;
 
-    const promptYellowCards = `This is a taekwondo match, following taekwondo rules. By looking at the scoreboard and watching when the referee gives a warning or 'yellow card' to a player, list all yellow cards.
+    const promptYellowCards = `Watch round ${roundToAnalyze} only. This is a taekwondo match, following taekwondo rules. By looking at the scoreboard and watching when the referee gives a warning or 'yellow card' to a player, list all yellow cards with their exact timestamps.
+
+IMPORTANT: Calculate total_yellows by adding up all individual warning amounts. For example: if warnings are [1, 1, 1], then total_yellows = 1+1+1 = 3.
 
 Return JSON format:
 {
@@ -173,7 +179,7 @@ Return JSON format:
       "Yellow_cards": [
         {
           "timestamp": "HH:MM:SS",
-          "Amount": 0
+          "Amount": 1
         }
       ],
       "total_yellows": 0
@@ -183,7 +189,7 @@ Return JSON format:
       "Yellow_cards": [
         {
           "timestamp": "HH:MM:SS",
-          "Amount": 0
+          "Amount": 1
         }
       ],
       "total_yellows": 0
