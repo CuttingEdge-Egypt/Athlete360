@@ -869,56 +869,56 @@ Search the web for specific traditional foods from ${athleteCountry} and create 
 
 CRITICAL: Search for REAL traditional recipes and cooking methods from ${athleteCountry}. Include specific ingredient names, cooking techniques, and cultural meal timing. DO NOT include any URLs, links, citations, references, or parenthetical web source mentions in meal descriptions. Clean, citation-free text only.
 
-Return this exact JSON structure with authentic ${athleteCountry} foods:
+MUST research authentic ${athleteCountry} cuisine and create specific meal plans. Return this JSON structure with REAL traditional foods:
 {
   "currentWeight": "${currentWeight}",
   "age": "${age}",
   "target": "${target}",
   "cuisine": "${cuisine}",
   "nationality": "${athleteCountry}",
-  "dailyCalories": "Calculate based on gender, age ${age}, weight ${currentWeight}, and ${sport} demands",
+  "dailyCalories": "Calculate exact calories based on gender, age ${age}, weight ${currentWeight}, and ${sport} training demands",
   "macros": {
-    "protein": "25%",
-    "carbs": "50%",
-    "fats": "25%"
+    "protein": "Calculate exact percentage based on sport needs",
+    "carbs": "Calculate exact percentage for ${sport} energy demands", 
+    "fats": "Calculate exact percentage for athlete recovery"
   },
   "meals": {
     "breakfast": [{
-      "name": "Traditional ${athleteCountry} Athletic Breakfast",
-      "description": "Authentic morning meal with ${athleteCountry} foods",
-      "calories": "650 kcal",
-      "timing": "7:00 AM",
-      "benefits": "Energy boost with familiar flavors",
-      "foods": ["Specific ${athleteCountry} breakfast foods"]
+      "name": "Create unique breakfast name using traditional ${athleteCountry} dish names",
+      "description": "Detailed description of authentic ${athleteCountry} breakfast with specific cooking methods",
+      "calories": "Calculate exact calories",
+      "timing": "Optimal timing for ${sport} athletes",
+      "benefits": "Specific nutritional benefits for ${sport} performance",
+      "foods": ["List exact traditional ${athleteCountry} breakfast foods with portions - NO generic descriptions"]
     }],
     "lunch": [{
-      "name": "${athleteCountry} Power Lunch", 
-      "description": "Traditional midday meal adapted for athletes",
-      "calories": "800 kcal",
-      "timing": "12:30 PM",
-      "benefits": "Sustained energy",
-      "foods": ["Specific ${athleteCountry} lunch foods"]
+      "name": "Create unique lunch name using traditional ${athleteCountry} dish names",
+      "description": "Detailed description of authentic ${athleteCountry} lunch with specific preparation methods", 
+      "calories": "Calculate exact calories",
+      "timing": "Optimal timing for ${sport} training",
+      "benefits": "Specific benefits for sustained ${sport} performance",
+      "foods": ["List exact traditional ${athleteCountry} lunch foods with portions - NO generic descriptions"]
     }],
     "dinner": [{
-      "name": "${athleteCountry} Recovery Dinner",
-      "description": "Traditional evening meal for muscle recovery",
-      "calories": "700 kcal", 
-      "timing": "7:00 PM",
-      "benefits": "Muscle recovery",
-      "foods": ["Specific ${athleteCountry} dinner foods"]
+      "name": "Create unique dinner name using traditional ${athleteCountry} dish names",
+      "description": "Detailed description of authentic ${athleteCountry} dinner with cultural preparation methods",
+      "calories": "Calculate exact calories",
+      "timing": "Optimal timing for ${sport} recovery", 
+      "benefits": "Specific recovery benefits for ${sport} athletes",
+      "foods": ["List exact traditional ${athleteCountry} dinner foods with portions - NO generic descriptions"]
     }],
     "snacks": [{
-      "name": "${athleteCountry} Training Fuel",
-      "description": "Traditional snacks for training",
-      "calories": "250 kcal",
-      "timing": "Pre-training",
-      "benefits": "Quick energy",
-      "foods": ["Traditional ${athleteCountry} snack foods"]
+      "name": "Create unique snack name using traditional ${athleteCountry} snack foods",
+      "description": "Detailed description of authentic ${athleteCountry} training snacks",
+      "calories": "Calculate exact calories",
+      "timing": "Optimal timing around ${sport} training",
+      "benefits": "Specific pre/post training benefits",
+      "foods": ["List exact traditional ${athleteCountry} snack foods with portions - NO generic descriptions"]
     }]
   },
-  "hydration": "Hydration adapted to ${athleteCountry} climate",
-  "supplements": ["Supplements available in ${athleteCountry}"],
-  "culturalNotes": "How this plan respects ${athleteCountry} food culture"
+  "hydration": "Detailed hydration strategy adapted to ${athleteCountry} climate with specific traditional drinks and amounts",
+  "supplements": ["List specific supplements commonly available in ${athleteCountry} with exact dosages"],
+  "culturalNotes": "Detailed explanation of how this plan respects ${athleteCountry} food culture, meal timing, and cooking traditions"
 }`;
 
   try {
