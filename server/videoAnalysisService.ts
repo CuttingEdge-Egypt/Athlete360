@@ -21,38 +21,26 @@ const model = genai.getGenerativeModel({
   generationConfig,
 });
 
-// Process video with Gemini and return all 5 analyses in one call (like Python version)
+// Process video with Gemini using base64 encoding (working approach)
 export async function processVideoGemini(videoFilePath: string, roundToAnalyze: number) {
   console.log(`[PROCESS_VIDEO_GEMINI] Starting video analysis for round ${roundToAnalyze}`);
   console.log(`[PROCESS_VIDEO_GEMINI] Video file: ${videoFilePath}`);
-
-  let uploadedFile = null;
   
   try {
-    // Upload video to Gemini File API (similar to Python genai.upload_file)
-    console.log(`[PROCESS_VIDEO_GEMINI] Uploading video file to Gemini...`);
+    // Read video file and convert to base64 for Gemini API
+    console.log(`[PROCESS_VIDEO_GEMINI] Reading video file...`);
     const videoBuffer = fs.readFileSync(videoFilePath);
+    const videoBase64 = videoBuffer.toString('base64');
     
-    uploadedFile = await genai.uploadFile(videoFilePath, {
-      mimeType: "video/mp4",
-      displayName: `video_analysis_${Date.now()}.mp4`
-    });
+    const videoData = {
+      inlineData: {
+        data: videoBase64,
+        mimeType: "video/mp4"
+      }
+    };
     
-    console.log(`[PROCESS_VIDEO_GEMINI] File uploaded successfully: ${uploadedFile.name}`);
-    
-    // Wait for file to be processed
-    let file = await genai.getFile(uploadedFile.name);
-    while (file.state === "PROCESSING") {
-      console.log(`[PROCESS_VIDEO_GEMINI] Waiting for file processing...`);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      file = await genai.getFile(uploadedFile.name);
-    }
-
-    if (file.state === "FAILED") {
-      throw new Error("Video file processing failed");
-    }
-
-    console.log(`[PROCESS_VIDEO_GEMINI] File ready for analysis. Starting 5 analysis calls...`);
+    console.log(`[PROCESS_VIDEO_GEMINI] Video prepared (${videoBase64.length} chars base64)`);
+    console.log(`[PROCESS_VIDEO_GEMINI] Starting 5 analysis calls...`);
 
     // Define prompts for each analysis type
     const promptMatch = `Write me a match Analysis of what happened in round ${roundToAnalyze} in technical terms. Include the story of the round.
@@ -208,11 +196,11 @@ Return JSON format:
     console.log(`[PROCESS_VIDEO_GEMINI] Making 5 parallel analysis calls...`);
     
     const [responseMatch, responseScore, responsePunch, responseKickNo, responseYellowCards] = await Promise.all([
-      model.generateContent([file, promptMatch]),
-      model.generateContent([file, promptScore]),
-      model.generateContent([file, promptPunch]),
-      model.generateContent([file, promptKickNo]),
-      model.generateContent([file, promptYellowCards])
+      model.generateContent([videoData, promptMatch]),
+      model.generateContent([videoData, promptScore]),
+      model.generateContent([videoData, promptPunch]),
+      model.generateContent([videoData, promptKickNo]),
+      model.generateContent([videoData, promptYellowCards])
     ]);
 
     console.log(`[PROCESS_VIDEO_GEMINI] All 5 analysis calls completed`);
@@ -228,7 +216,7 @@ Return JSON format:
 
     // Return the tuple like Python version
     return [
-      uploadedFile,
+      null, // No uploaded file in this approach
       matchAnalysis,
       scoreAnalysis,
       punchAnalysis, 
@@ -316,14 +304,7 @@ export async function analyzeVideoFile(
       }
     }
 
-    // Delete the file from Gemini's storage (like Python genai.delete_file)
-    if (videoFile) {
-      try {
-        await genai.deleteFile(videoFile.name);
-        console.log(`[ANALYZE_VIDEO_FILE] Deleted file from Gemini storage: ${videoFile.name}`);
-      } catch (deleteError) {
-        console.warn(`[ANALYZE_VIDEO_FILE] Failed to delete file from Gemini:`, deleteError);
-      }
-    }
+    // No need to delete file from Gemini storage since we use base64 approach
+    console.log(`[ANALYZE_VIDEO_FILE] Cleanup complete`);
   }
 }
