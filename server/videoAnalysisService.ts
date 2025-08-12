@@ -2,13 +2,13 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import fs from 'fs';
 import path from 'path';
 
-const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-if (!GOOGLE_API_KEY) {
-  throw new Error('GOOGLE_API_KEY environment variable is required');
+if (!GEMINI_API_KEY) {
+  throw new Error('GEMINI_API_KEY environment variable is required');
 }
 
-const genai = new GoogleGenerativeAI(GOOGLE_API_KEY);
+const genai = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 const generationConfig = {
   temperature: 0,
