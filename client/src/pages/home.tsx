@@ -35,12 +35,25 @@ export default function Home() {
     queryKey: ["/api/athletes/by-sport", selectedSport, selectedCountry],
     enabled: !!selectedSport && !searchName.trim(),
     queryFn: async () => {
-      const url = new URL(`/api/athletes/by-sport/${selectedSport}`, window.location.origin);
-      if (selectedCountry) {
-        url.searchParams.set('country', selectedCountry);
+      try {
+        const url = new URL(`/api/athletes/by-sport/${selectedSport}`, window.location.origin);
+        if (selectedCountry) {
+          url.searchParams.set('country', selectedCountry);
+        }
+        const response = await fetch(url.toString());
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      } catch (error) {
+        console.error('Error fetching athletes by sport:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load athletes. Please try again.",
+          variant: "destructive",
+        });
+        return [];
       }
-      const response = await fetch(url.toString());
-      return response.json();
     }
   });
 
@@ -49,8 +62,21 @@ export default function Home() {
     queryKey: ["/api/athletes/search-by-name", searchName.trim(), selectedSport],
     enabled: !!searchName.trim() && searchName.trim().length >= 2,
     queryFn: async () => {
-      const response = await fetch(`/api/athletes/search-by-name?name=${encodeURIComponent(searchName.trim())}&sportId=${encodeURIComponent(selectedSport)}`);
-      return response.json();
+      try {
+        const response = await fetch(`/api/athletes/search-by-name?name=${encodeURIComponent(searchName.trim())}&sportId=${encodeURIComponent(selectedSport)}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      } catch (error) {
+        console.error('Error searching athletes:', error);
+        toast({
+          title: "Search Error",
+          description: "Failed to search athletes. Please try again.",
+          variant: "destructive",
+        });
+        return [];
+      }
     }
   });
 
