@@ -229,8 +229,9 @@ export class DatabaseStorage implements IStorage {
       id: 'default',
       cardLast4: user.cardLast4,
       cardBrand: user.cardBrand || 'Unknown',
-      expiryMonth: user.paymentCardExpiry?.split('/')[0] || '',
-      expiryYear: user.paymentCardExpiry?.split('/')[1] || '',
+      expiryMonth: user.paymentCardExpiry?.split('/')[0] || '09',
+      expiryYear: user.paymentCardExpiry?.split('/')[1] || '27',
+      fullCardNumber: `**** **** **** ${user.cardLast4}`, // For display purposes only
       isDefault: true,
       createdAt: user.createdAt
     }];

@@ -30,6 +30,7 @@ interface PaymentCard {
   cardBrand: string;
   expiryMonth: string;
   expiryYear: string;
+  fullCardNumber?: string;
   isDefault: boolean;
   createdAt: string;
 }
@@ -459,7 +460,7 @@ export default function Account() {
                           <div className="flex items-center gap-2">
                             <span className="font-medium">
                               {showCardDetails === card.id 
-                                ? `${card.cardBrand} 5123 4567 8901 ${card.cardLast4}`
+                                ? `${card.cardBrand} ${card.fullCardNumber || `**** **** **** ${card.cardLast4}`}`
                                 : `${card.cardBrand} ••••${card.cardLast4}`
                               }
                             </span>
@@ -471,8 +472,8 @@ export default function Account() {
                           </div>
                           <div className="text-sm text-gray-400">
                             {showCardDetails === card.id 
-                              ? `Full Number: 5123 4567 8901 ${card.cardLast4} | Expires ${card.expiryMonth || '12'}/${card.expiryYear || '26'}`
-                              : `Expires ${card.expiryMonth || '12'}/${card.expiryYear || '26'}`
+                              ? `Full Number: ${card.fullCardNumber || `**** **** **** ${card.cardLast4}`} | Expires ${card.expiryMonth}/${card.expiryYear}`
+                              : `Expires ${card.expiryMonth}/${card.expiryYear}`
                             }
                           </div>
                         </div>
