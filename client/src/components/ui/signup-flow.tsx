@@ -312,33 +312,33 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
               </div>
             </div>
             
-            {/* Fixed bottom action buttons */}
-            <div className="flex flex-col gap-3 pt-6 border-t border-gray-200 dark:border-gray-700 mt-6 -mx-6 px-6">
+            {/* Action buttons - side by side */}
+            <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700 mt-4 -mx-6 px-6">
+              <Button 
+                variant="outline"
+                onClick={() => setActiveTab("personal")}
+                className="flex-1 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 h-9 text-sm"
+                data-testid="button-back"
+              >
+                Back
+              </Button>
               <Button 
                 onClick={handleCardSubmit}
                 disabled={isProcessing}
-                className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-medium"
+                className="flex-[2] bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-medium h-9 text-sm"
                 data-testid="button-create-account"
               >
                 {isProcessing ? (
                   <>
-                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
-                    Creating Account...
+                    <div className="animate-spin w-3 h-3 border-2 border-white border-t-transparent rounded-full mr-2" />
+                    Creating...
                   </>
                 ) : (
                   <>
-                    <Gift className="mr-2 h-4 w-4" />
+                    <Gift className="mr-1 h-3 w-3" />
                     Create Account & Start Free Trial
                   </>
                 )}
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={() => setActiveTab("personal")}
-                className="w-full border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
-                data-testid="button-back"
-              >
-                Back to Personal Info
               </Button>
             </div>
           </TabsContent>
