@@ -85,7 +85,7 @@ Return JSON format:
 {
   "players": [
     {
-      "name": "Player 1",
+      "name": "Player 1 (Blue)",
       "kicks": [
         {
           "timestamp": "HH:MM:SS",
@@ -96,7 +96,7 @@ Return JSON format:
       "total_points": 0
     },
     {
-      "name": "Player 2", 
+      "name": "Player 2 (Red)", 
       "kicks": [
         {
           "timestamp": "HH:MM:SS",
@@ -175,7 +175,7 @@ Return JSON format:
 {
   "players": [
     {
-      "name": "Player 1",
+      "name": "Player 1 (Blue)",
       "Yellow_cards": [
         {
           "timestamp": "HH:MM:SS",
@@ -185,7 +185,7 @@ Return JSON format:
       "total_yellows": 0
     },
     {
-      "name": "Player 2",
+      "name": "Player 2 (Red)",
       "Yellow_cards": [
         {
           "timestamp": "HH:MM:SS",
