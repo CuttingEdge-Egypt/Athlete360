@@ -284,28 +284,27 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
               </Card>
 
               {/* Benefits and Security Notice - Side by Side */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+              <div className="grid grid-cols-2 gap-3 mt-4">
                 {/* Free Trial Benefits */}
-                <div className="flex items-start gap-3 p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                  <Gift className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                <div className="flex items-start gap-2 p-3 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <Gift className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <h4 className="font-semibold text-green-800 dark:text-green-200 text-sm">Free Trial Benefits</h4>
+                    <h4 className="font-medium text-green-800 dark:text-green-200 text-xs">Free Trial Benefits</h4>
                     <ul className="text-xs text-green-700 dark:text-green-300 mt-1 space-y-0.5">
-                      <li>• 1,000 free tokens to start</li>
-                      <li>• No charges during signup</li>
-                      <li>• Card for future purchases</li>
+                      <li>• 1,000 free tokens</li>
+                      <li>• No signup charges</li>
                       <li>• Cancel anytime</li>
                     </ul>
                   </div>
                 </div>
 
                 {/* Security Notice */}
-                <div className="flex items-center gap-2 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <Shield className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <Shield className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <h4 className="font-semibold text-blue-800 dark:text-blue-200 text-sm">Secure Payment</h4>
+                    <h4 className="font-medium text-blue-800 dark:text-blue-200 text-xs">Secure Payment</h4>
                     <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                      Your payment information is encrypted and secure
+                      Your payment info is encrypted and secure
                     </p>
                   </div>
                 </div>
@@ -314,14 +313,6 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
             
             {/* Action buttons - side by side */}
             <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700 mt-4 -mx-6 px-6">
-              <Button 
-                variant="outline"
-                onClick={() => setActiveTab("personal")}
-                className="flex-1 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 h-9 text-sm"
-                data-testid="button-back"
-              >
-                Back
-              </Button>
               <Button 
                 onClick={handleCardSubmit}
                 disabled={isProcessing}
@@ -336,9 +327,17 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
                 ) : (
                   <>
                     <Gift className="mr-1 h-3 w-3" />
-                    Create Account & Start Free Trial
+                    Create Account
                   </>
                 )}
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => setActiveTab("personal")}
+                className="flex-1 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 h-9 text-sm"
+                data-testid="button-back"
+              >
+                Back
               </Button>
             </div>
           </TabsContent>
