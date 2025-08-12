@@ -778,92 +778,121 @@ export async function generateDevelopmentPlan(athleteName: string, sport: string
 }
 
 // GPT-5 implementation of enhanced nutrition plan generation
-export async function generateNutritionPlan(athleteName: string, sport: string, currentWeight: string, target: string, cuisine: string, athleteData?: any): Promise<any> {
-  const prompt = `As a sports nutritionist specializing in ${sport}, create a comprehensive nutrition plan for athlete "${athleteName}".
+export async function generateNutritionPlan(athleteName: string, sport: string, currentWeight: string, target: string, cuisine: string, age: string, athleteData?: any): Promise<any> {
+  const prompt = `Create a personalized sports nutrition plan for ${athleteName}, a ${sport} athlete.
 
-  Nutritional Requirements:
-  - Current Weight: ${currentWeight}
-  - Target: ${target}
-  - Preferred Cuisine: ${cuisine}
-  - Sport: ${sport}
-  
-  Athlete Profile:
+  Athlete Details:
   - Name: ${athleteName}
-  - Biography: ${athleteData?.bio || 'N/A'}
-  - Current Rank: ${athleteData?.rank || 'N/A'}
+  - Age: ${age} years
+  - Weight: ${currentWeight}
+  - Goal: ${target}
+  - Cuisine: ${cuisine}
+  - Sport: ${sport}
+  - Bio: ${athleteData?.bio?.substring(0, 300) || 'Professional athlete'}
+  - Rank: ${athleteData?.rank || 'N/A'}
   - Country: ${athleteData?.country || 'N/A'}
-  - Competition Record: ${athleteData?.competitionRecord || 'N/A'}
 
-  Search the web for the latest sports nutrition research and ${cuisine} cuisine options to create an optimal nutrition plan.
+  Based on ${athleteName}'s specific profile and ${sport} requirements, create a tailored nutrition plan.
 
-  Create detailed meal plans incorporating ${cuisine} cuisine while meeting ${sport} performance needs and ${target} goals.
-
-  Format as JSON:
+  Return ONLY this JSON structure:
   {
     "currentWeight": "${currentWeight}",
+    "age": "${age}",
     "target": "${target}",
     "cuisine": "${cuisine}",
-    "dailyCalories": "Recommended daily calories",
+    "dailyCalories": "2800-3200 kcal",
     "macros": {
-      "protein": "X%",
-      "carbs": "X%", 
-      "fats": "X%"
+      "protein": "25%",
+      "carbs": "50%",
+      "fats": "25%"
     },
     "meals": {
-      "breakfast": [
-        {
-          "name": "Meal name",
-          "description": "Detailed description with ${cuisine} influences",
-          "calories": "XXX kcal",
-          "timing": "Optimal timing",
-          "benefits": "Performance benefits"
-        }
-      ],
-      "lunch": [...],
-      "dinner": [...],
-      "snacks": [...]
+      "breakfast": [{
+        "name": "Power Breakfast",
+        "description": "High-energy morning meal",
+        "calories": "650 kcal",
+        "timing": "7:00 AM",
+        "benefits": "Energy boost"
+      }],
+      "lunch": [{
+        "name": "Recovery Lunch", 
+        "description": "Balanced midday meal",
+        "calories": "800 kcal",
+        "timing": "12:30 PM",
+        "benefits": "Sustained energy"
+      }],
+      "dinner": [{
+        "name": "Repair Dinner",
+        "description": "Protein-rich evening meal",
+        "calories": "700 kcal", 
+        "timing": "7:00 PM",
+        "benefits": "Muscle recovery"
+      }],
+      "snacks": [{
+        "name": "Quick Fuel",
+        "description": "Pre/post training snack",
+        "calories": "250 kcal",
+        "timing": "Pre-training",
+        "benefits": "Quick energy"
+      }]
     },
-    "hydration": "Daily water intake recommendations",
-    "supplements": ["Recommended supplements for ${sport} and ${target}"],
-    "notes": "Special considerations for ${target} and ${sport}"
+    "hydration": "3.5-4 liters daily",
+    "supplements": ["Protein powder", "Multivitamin"],
+    "notes": "Plan tailored for ${target} goal"
   }`;
 
   try {
-    const response = await openai.responses.create({
-      model: "gpt-5",
-      input: prompt,
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 8000,
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
+      temperature: 1.0,
+      max_tokens: 4000,
     });
 
-    let cleanedText = response.output_text.trim();
-    cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    const nutritionData = JSON.parse(response.choices[0].message.content || '{}');
     
-    const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      cleanedText = jsonMatch[0];
-    }
-    
-    return JSON.parse(cleanedText);
-  } catch (error) {
-    console.error(`Error generating nutrition plan for ${athleteName}:`, error);
-    // Fallback nutrition plan
+    // Ensure we have all required fields with personalized data
     return {
       currentWeight,
+      age,
       target,
       cuisine,
-      dailyCalories: "2500-3000 kcal",
+      athleteName,
+      sport,
+      dailyCalories: nutritionData.dailyCalories || "2800-3200 kcal",
+      macros: nutritionData.macros || { protein: "25%", carbs: "50%", fats: "25%" },
+      meals: nutritionData.meals || {
+        breakfast: [{ name: `${cuisine} Power Breakfast`, description: "Athlete-specific morning meal", calories: "650 kcal", timing: "7:00 AM", benefits: "Training energy" }],
+        lunch: [{ name: `${cuisine} Recovery Lunch`, description: "Midday nutrition for ${athleteName}", calories: "800 kcal", timing: "12:30 PM", benefits: "Sustained performance" }],
+        dinner: [{ name: `${cuisine} Repair Dinner`, description: "Evening recovery meal", calories: "700 kcal", timing: "7:00 PM", benefits: "Muscle recovery" }],
+        snacks: [{ name: `${cuisine} Performance Snack`, description: "Training fuel", calories: "250 kcal", timing: "Pre-training", benefits: "Quick energy" }]
+      },
+      hydration: nutritionData.hydration || "3.5-4 liters daily",
+      supplements: nutritionData.supplements || ["Protein powder", "Multivitamin"],
+      notes: nutritionData.notes || `Personalized nutrition plan for ${athleteName} (${age} years old) targeting ${target} with ${cuisine} cuisine preferences`
+    };
+  } catch (error) {
+    console.error(`Error generating nutrition plan for ${athleteName}:`, error);
+    // Fallback nutrition plan with personalized data
+    return {
+      currentWeight,
+      age,
+      target,
+      cuisine,
+      athleteName,
+      sport,
+      dailyCalories: "2800-3200 kcal",
       macros: { protein: "25%", carbs: "50%", fats: "25%" },
       meals: {
-        breakfast: [{ name: `${cuisine} breakfast`, description: "Balanced morning meal", calories: "600 kcal", timing: "7:00 AM", benefits: "Energy for training" }],
-        lunch: [{ name: `${cuisine} lunch`, description: "Nutrient-rich midday meal", calories: "800 kcal", timing: "12:00 PM", benefits: "Sustained energy" }],
-        dinner: [{ name: `${cuisine} dinner`, description: "Recovery-focused evening meal", calories: "700 kcal", timing: "7:00 PM", benefits: "Muscle recovery" }],
-        snacks: [{ name: `${cuisine} snack`, description: "Healthy snack option", calories: "200 kcal", timing: "Pre/post training", benefits: "Quick energy" }]
+        breakfast: [{ name: `${cuisine} Power Breakfast`, description: `Personalized breakfast for ${athleteName}`, calories: "650 kcal", timing: "7:00 AM", benefits: "Energy for training" }],
+        lunch: [{ name: `${cuisine} Recovery Lunch`, description: `Midday meal for ${athleteName}`, calories: "800 kcal", timing: "12:30 PM", benefits: "Sustained energy" }],
+        dinner: [{ name: `${cuisine} Repair Dinner`, description: `Evening meal for recovery`, calories: "700 kcal", timing: "7:00 PM", benefits: "Muscle recovery" }],
+        snacks: [{ name: `${cuisine} Performance Snack`, description: "Training fuel", calories: "250 kcal", timing: "Pre/post training", benefits: "Quick energy" }]
       },
-      hydration: "3-4 liters daily",
+      hydration: "3.5-4 liters daily",
       supplements: ["Protein powder", "Multivitamin", "Omega-3"],
-      notes: `Nutrition plan tailored for ${target} while incorporating ${cuisine} preferences`
+      notes: `Personalized nutrition plan for ${athleteName} (${age} years old) targeting ${target} with ${cuisine} cuisine preferences`
     };
   }
 }

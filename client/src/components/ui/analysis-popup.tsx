@@ -58,6 +58,7 @@ export function AnalysisPopup({
   const [developmentDuration, setDevelopmentDuration] = useState("4 weeks");
   const [developmentGoal, setDevelopmentGoal] = useState("Improve overall performance");
   const [currentWeight, setCurrentWeight] = useState("70 kg");
+  const [age, setAge] = useState("25");
   const [nutritionTarget, setNutritionTarget] = useState("maintain weight");
   const [preferredCuisine, setPreferredCuisine] = useState("Mediterranean");
 
@@ -214,7 +215,7 @@ export function AnalysisPopup({
   const generateNutritionPlan = useMutation({
     mutationFn: async () => {
       if (!athleteId) throw new Error("Athlete ID required");
-      return apiRequest("POST", `/api/analysis/${athleteId}/nutrition?currentWeight=${encodeURIComponent(currentWeight)}&target=${encodeURIComponent(nutritionTarget)}&cuisine=${encodeURIComponent(preferredCuisine)}`);
+      return apiRequest("POST", `/api/analysis/${athleteId}/nutrition?currentWeight=${encodeURIComponent(currentWeight)}&age=${encodeURIComponent(age)}&target=${encodeURIComponent(nutritionTarget)}&cuisine=${encodeURIComponent(preferredCuisine)}`);
     },
     onSuccess: () => {
       setShowInputForm(false);
@@ -1540,7 +1541,7 @@ export function AnalysisPopup({
                 <Utensils className="mr-2 text-green-400" size={20} />
                 Customize Nutrition Plan
               </h3>
-              <div className="grid md:grid-cols-3 gap-4">
+              <div className="grid md:grid-cols-4 gap-4">
                 <div>
                   <Label htmlFor="currentWeight" className="text-gray-300">Current Weight</Label>
                   <Input
@@ -1548,6 +1549,16 @@ export function AnalysisPopup({
                     value={currentWeight}
                     onChange={(e) => setCurrentWeight(e.target.value)}
                     placeholder="e.g., 70 kg"
+                    className="bg-athlete-gray-700 border-gray-600 text-white"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="age" className="text-gray-300">Age</Label>
+                  <Input
+                    id="age"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    placeholder="e.g., 25"
                     className="bg-athlete-gray-700 border-gray-600 text-white"
                   />
                 </div>

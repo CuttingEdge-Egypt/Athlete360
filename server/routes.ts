@@ -1099,12 +1099,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const athleteId = req.params.athleteId;
       
-      // Extract user preferences from request body
-      const { 
-        currentWeight = "70 kg", 
-        target = "maintain weight", 
-        cuisine = "Mediterranean" 
-      } = req.body;
+      // Extract user preferences from query parameters
+      const currentWeight = req.query.currentWeight || "70 kg";
+      const age = req.query.age || "25";
+      const target = req.query.target || "maintain weight";
+      const cuisine = req.query.cuisine || "Mediterranean";
 
       const user = await storage.getUser(userId);
       if (!user || (user.tokens || 0) < tokenCost) {
@@ -1130,7 +1129,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sportName = sport?.name || "Unknown Sport";
       
       // Always generate fresh personalized nutrition plan based on user inputs
-      console.log(`Generating personalized nutrition plan for ${athlete.name} - Weight: ${currentWeight}, Target: ${target}, Cuisine: ${cuisine}`);
+      console.log(`Generating personalized nutrition plan for ${athlete.name} - Age: ${age}, Weight: ${currentWeight}, Target: ${target}, Cuisine: ${cuisine}`);
       
       // Get enhanced data for taekwondo athletes  
       let enhancedData = null;
@@ -1152,7 +1151,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       // Generate personalized nutrition plan
-      const nutritionPlan = await generateNutritionPlan(athlete.name, sportName, currentWeight, target, cuisine, athleteDataForAnalysis);
+      const nutritionPlan = await generateNutritionPlan(athlete.name, sportName, currentWeight, target, cuisine, age, athleteDataForAnalysis);
 
       await storage.createAnalysisLog({
         userId,
