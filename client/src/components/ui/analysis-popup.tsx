@@ -233,34 +233,39 @@ export function AnalysisPopup({
     generateDevelopmentPlan.mutate();
   };
 
-  const generateNutritionPlan = useMutation({
-    mutationFn: async () => {
-      if (!athleteId) throw new Error("Athlete ID required");
-      // Add timestamp to force fresh data and prevent caching
-      const timestamp = Date.now();
-      return apiRequest("POST", `/api/analysis/${athleteId}/nutrition?currentWeight=${encodeURIComponent(currentWeight)}&age=${encodeURIComponent(age)}&target=${encodeURIComponent(nutritionTarget)}&cuisine=${encodeURIComponent(preferredCuisine)}&timestamp=${timestamp}`);
-    },
-    onSuccess: (data) => {
+  const [isGeneratingNutrition, setIsGeneratingNutrition] = useState(false);
+
+  const handleGenerateNutritionPlan = async () => {
+    if (!athleteId) return;
+    
+    setIsGeneratingNutrition(true);
+    try {
+      const response = await fetch(`/api/analysis/${athleteId}/nutrition?currentWeight=${encodeURIComponent(currentWeight)}&age=${encodeURIComponent(age)}&target=${encodeURIComponent(nutritionTarget)}&cuisine=${encodeURIComponent(preferredCuisine)}`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate nutrition plan');
+      }
+
+      const nutritionData = await response.json();
+      console.log('Fresh nutrition data received:', nutritionData);
+      
       setShowInputForm(false);
       toast({ title: "Nutrition Plan Generated", description: "Personalized nutrition plan created successfully" });
       
-      // Aggressively invalidate all related queries to force refresh
-      queryClient.invalidateQueries({ queryKey: [`/api/analysis/${athleteId}/nutrition`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/analysis-logs`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/auth/user`] });
-      queryClient.removeQueries({ queryKey: [`/api/analysis/${athleteId}/nutrition`] });
-      
-      // Force a complete refresh of the parent component
+      // Directly update the data in parent component
       onOpenChange(false);
       if (onRefresh) onRefresh();
       
-      console.log('Nutrition plan generated successfully:', data);
-    },
-    onError: (error) => {
+    } catch (error) {
       console.error('Nutrition plan generation failed:', error);
       toast({ title: "Generation Failed", description: "Could not create nutrition plan", variant: "destructive" });
+    } finally {
+      setIsGeneratingNutrition(false);
     }
-  });
+  };
 
   const handleExportToPDF = async () => {
     setIsExporting(true);
@@ -1679,12 +1684,12 @@ export function AnalysisPopup({
               </div>
               <div className="flex space-x-3">
                 <Button
-                  onClick={() => generateNutritionPlan.mutate()}
-                  disabled={generateNutritionPlan.isPending}
+                  onClick={handleGenerateNutritionPlan}
+                  disabled={isGeneratingNutrition}
                   className="bg-green-500 hover:bg-green-600 text-white"
                 >
                   <Apple size={16} className="mr-2" />
-                  {generateNutritionPlan.isPending ? 'Generating...' : 'Generate Plan'}
+                  {isGeneratingNutrition ? 'Generating...' : 'Generate Plan'}
                 </Button>
                 <Button
                   onClick={() => setShowInputForm(false)}

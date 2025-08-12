@@ -49,15 +49,6 @@ export const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       staleTime: 5 * 60 * 1000, // 5 minutes instead of Infinity
       retry: false,
-      // Force fresh data for nutrition analysis endpoints
-      queryKeyHashFn: (queryKey) => {
-        const keyStr = JSON.stringify(queryKey);
-        // Don't cache nutrition analysis results
-        if (keyStr.includes('/nutrition') || keyStr.includes('/analysis/')) {
-          return `${keyStr}_${Date.now()}`;
-        }
-        return keyStr;
-      }
     },
     mutations: {
       retry: false,
