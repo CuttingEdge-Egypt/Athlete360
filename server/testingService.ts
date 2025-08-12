@@ -20,22 +20,25 @@ export class TestingService {
     };
   }
 
-  // Simulate payment completion for testing
+  // Simulate payment completion for testing (mimics real payment flow)
   static async simulatePaymentCompletion(userId: string, amount: number, tokens: number) {
-    // Create a mock payment record
-    const mockTransaction = {
-      userId,
-      amount,
-      tokens,
-      status: 'completed' as const,
-      paymobTransactionId: `test_txn_${Date.now()}`,
-      paymentMethod: 'test_card',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-
+    // Simulate the same flow as real payment completion
+    console.log(`SIMULATING payment completion: User ${userId}, Amount: $${amount}, Tokens: ${tokens}`);
+    
     // Add tokens to user balance (additive purchase)
-    await storage.addTokensPurchase(userId, tokens);
+    const updatedUser = await storage.addTokensPurchase(userId, tokens);
+
+    // Create payment receipt (same as real payments)
+    const receipt = await storage.createPaymentReceipt({
+      userId,
+      amount: amount.toString(),
+      currency: 'USD',
+      tokensAmount: tokens,
+      status: 'completed',
+      paymobTransactionId: `sim_txn_${Date.now()}`,
+      paymentMethod: 'test_simulation',
+      receiptNumber: `SIM-${Date.now()}`
+    });
 
     // Record the transaction
     await storage.createTransaction({
@@ -45,12 +48,14 @@ export class TestingService {
       serviceType: 'payment'
     });
 
-    const updatedUser = await storage.getUser(userId);
+    console.log(`SIMULATION COMPLETE: User now has ${updatedUser.tokens}/${updatedUser.totalTokensPurchased} tokens`);
     
     return {
-      ...mockTransaction,
-      newBalance: updatedUser?.tokens || 0,
-      totalPurchased: updatedUser?.totalTokensPurchased || 0
+      success: true,
+      receipt,
+      newBalance: updatedUser.tokens || 0,
+      totalPurchased: updatedUser.totalTokensPurchased || 0,
+      message: `Successfully added ${tokens} tokens to your account`
     };
   }
 
@@ -90,72 +95,6 @@ export class TestingService {
       referralBonus: 100,
       referrerNewBalance: updatedReferrer?.tokens || 0,
       referrerTotalPurchased: updatedReferrer?.totalTokensPurchased || 0
-    };
-  }
-
-  // Generate test credit card data for simulation
-  static generateTestCard() {
-    const testCards = [
-      { number: '4242424242424242', brand: 'visa', last4: '4242' },
-      { number: '5555555555554444', brand: 'mastercard', last4: '4444' },
-      { number: '378282246310005', brand: 'amex', last4: '0005' },
-    ];
-    
-    return testCards[Math.floor(Math.random() * testCards.length)];
-  }
-
-  // Simulate card validation for testing
-  static validateTestCard(cardNumber: string, expiry: string, cvv: string) {
-    const testCardNumbers = [
-      '4242424242424242', // Visa
-      '5555555555554444', // Mastercard
-      '378282246310005',  // Amex
-      '4000000000000002'  // Declined card for testing failures
-    ];
-
-    if (!testCardNumbers.includes(cardNumber)) {
-      return { valid: false, error: 'Invalid test card number' };
-    }
-
-    if (cardNumber === '4000000000000002') {
-      return { valid: false, error: 'Test card declined' };
-    }
-
-    // Simple expiry validation (MM/YY format)
-    const [month, year] = expiry.split('/');
-    if (!month || !year || month < '01' || month > '12') {
-      return { valid: false, error: 'Invalid expiry date' };
-    }
-
-    // Simple CVV validation
-    if (!cvv || cvv.length < 3 || cvv.length > 4) {
-      return { valid: false, error: 'Invalid CVV' };
-    }
-
-    return { valid: true };
-  }
-
-  // Create test scenarios
-  static getTestScenarios() {
-    return {
-      cards: {
-        success: '4242424242424242',
-        declined: '4000000000000002',
-        networkError: '4000000000000127',
-        insufficientFunds: '4000000000009995'
-      },
-      referral: {
-        codes: ['TEST1234', 'DEMO5678', 'SIMU9012'],
-        emails: ['test1@example.com', 'test2@example.com', 'demo@example.com']
-      },
-      tokens: {
-        packages: [
-          { tokens: 100, price: 5 },
-          { tokens: 500, price: 20 },
-          { tokens: 1000, price: 35 },
-          { tokens: 2500, price: 80 }
-        ]
-      }
     };
   }
 }

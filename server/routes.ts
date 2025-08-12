@@ -1791,8 +1791,8 @@ Format as JSON:
           return res.status(404).json({ message: "User not found" });
         }
 
-        // Add tokens to user account
-        await storage.updateUserTokens(userId, (user.tokens || 0) + tokensAmount);
+        // Add tokens to user account (additive)
+        await storage.addTokensPurchase(userId, tokensAmount);
 
         // Create payment receipt
         const receiptNumber = paymobService.generateReceiptNumber();

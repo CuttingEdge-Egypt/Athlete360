@@ -51,7 +51,7 @@ export function Navigation() {
               className="bg-athlete-accent hover:bg-blue-600 text-white"
             >
               <Plus className="mr-2" size={16} />
-              Payment Center
+              Buy Tokens
             </Button>
           </Link>
         </div>
