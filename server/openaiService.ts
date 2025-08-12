@@ -93,7 +93,7 @@ export interface AthleteData {
   referenceLinks?: string[];
 }
 
-// Enhanced function to get taekwondo-specific data using AI web search
+// Enhanced function to get taekwondo-specific data using AI web search with timeout
 export async function getEnhancedTaekwondoData(athleteName: string, nationality?: string): Promise<{worldRank: string, currentRecord: string}> {
   try {
     console.log(`Fetching enhanced taekwondo data for ${athleteName} using AI web search...`);
@@ -101,7 +101,12 @@ export async function getEnhancedTaekwondoData(athleteName: string, nationality?
     const nationalityContext = nationality ? ` from ${nationality}` : '';
     
     // Use GPT-5 with web search to get specific ranking and record data
-    const response = await openai.responses.create({
+    // Add timeout to prevent long delays
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('AI web search timeout')), 15000); // 15 second timeout
+    });
+    
+    const searchPromise = openai.responses.create({
       model: "gpt-5",
       input: `Search the web for current World Taekwondo (WT) ranking and competition record information for the athlete "${athleteName}"${nationalityContext}.
 
@@ -124,6 +129,8 @@ Response format:
       tools: [{ type: "web_search_preview" }],
       max_output_tokens: 8000
     });
+    
+    const response = await Promise.race([searchPromise, timeoutPromise]);
 
     console.log("AI Ranking Search Response:", response.output_text);
     
@@ -165,16 +172,17 @@ Response format:
     }
     
   } catch (error) {
-    console.error(`Error getting enhanced taekwondo data for ${athleteName}:`, error);
-    // Fallback to basic TaekwondoData extraction
+    console.error(`Error getting enhanced taekwondo data for ${athleteName}:`, error.message);
+    console.log('Falling back to faster TaekwondoData extraction...');
+    // Fallback to basic TaekwondoData extraction  
     return await getTaekwondoDataInfo(athleteName, nationality);
   }
 }
 
-// Fallback function to get taekwondo-specific data from TaekwondoData.com
+// Fallback function to get taekwondo-specific data from TaekwondoData.com (faster, no AI)
 async function getTaekwondoDataInfo(athleteName: string, nationality?: string): Promise<{worldRank: string, currentRecord: string}> {
   try {
-    console.log(`Fetching enhanced TaekwondoData info for ${athleteName}...`);
+    console.log(`Fast fallback: Fetching TaekwondoData info for ${athleteName} (no AI web search)...`);
     
     // Create search parameters with multiple variations
     const nameParts = athleteName.toLowerCase().split(' ');

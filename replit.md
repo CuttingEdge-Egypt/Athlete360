@@ -12,6 +12,8 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**Performance Optimization for AI Analysis (August 12, 2025)**: Fixed long-running rank analysis issue by adding 15-second timeout to GPT-5 web search operations. Added faster fallback system that uses direct data extraction instead of AI web search when timeouts occur. This prevents rank history analysis from hanging indefinitely while maintaining data quality through intelligent fallback mechanisms.
+
 **Fixed Signup Completion & Referral System (August 12, 2025)**: Resolved critical signup completion issue where form was refreshing instead of properly handling server response. Fixed 5-second backend timeout handling and improved frontend error management. Corrected referral system logic - referral links (not codes) now properly credit bonus tokens to link owner (referrer), not link user. Added comprehensive payment testing system with card selection modal, multiple payment methods support, and full simulation endpoints. Token balance display works correctly as "current/total" with high-water mark system.
 
 **Comprehensive Testing Infrastructure (August 12, 2025)**: Created complete web crawler test system using Puppeteer for full signup and token purchase flow automation. Includes both browser-based testing (crawler_test.js) and API endpoint testing (test_public_endpoints.js) with comprehensive error handling, detailed logging, and environment-specific configurations. Tests validate complete user journey from signup with payment card registration through token purchases, with support for both visual and headless modes.
