@@ -458,7 +458,10 @@ export default function Account() {
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="font-medium">
-                              {card.cardBrand} ••••{card.cardLast4}
+                              {showCardDetails === card.id 
+                                ? `${card.cardBrand} **** **** **** ${card.cardLast4}`
+                                : `${card.cardBrand} ••••${card.cardLast4}`
+                              }
                             </span>
                             {card.isDefault && (
                               <Badge variant="secondary" className="text-xs">
@@ -467,7 +470,10 @@ export default function Account() {
                             )}
                           </div>
                           <div className="text-sm text-gray-400">
-                            Expires {card.expiryMonth}/{card.expiryYear}
+                            {showCardDetails === card.id 
+                              ? `Full Number: **** **** **** ${card.cardLast4} | Expires ${card.expiryMonth || 'XX'}/${card.expiryYear || 'XX'}`
+                              : `Expires ${card.expiryMonth || 'XX'}/${card.expiryYear || 'XX'}`
+                            }
                           </div>
                         </div>
                       </div>
@@ -487,8 +493,19 @@ export default function Account() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => deleteCardMutation.mutate(card.id)}
-                          className="text-red-400 hover:text-red-300"
+                          onClick={() => {
+                            if (profile?.cards && profile.cards.length > 1) {
+                              deleteCardMutation.mutate(card.id);
+                            } else {
+                              toast({
+                                title: "Cannot remove card",
+                                description: "You must have at least one payment method",
+                                variant: "destructive",
+                              });
+                            }
+                          }}
+                          disabled={profile?.cards && profile.cards.length <= 1}
+                          className="text-red-400 hover:text-red-300 disabled:text-gray-500 disabled:cursor-not-allowed"
                           data-testid={`button-delete-card-${card.id}`}
                         >
                           <Trash2 className="h-4 w-4" />

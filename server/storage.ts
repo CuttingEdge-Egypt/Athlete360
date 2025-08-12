@@ -274,8 +274,9 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(users)
       .set({
-        paymentCardLast4: null,
-        paymentCardBrand: null,
+        cardToken: null,
+        cardLast4: null,
+        cardBrand: null,
         paymentCardExpiry: null,
         updatedAt: new Date(),
       })
@@ -616,11 +617,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserSavedCards(userId: string): Promise<SavedCard[]> {
-    return await db
-      .select()
-      .from(savedCards)
-      .where(eq(savedCards.userId, userId))
-      .orderBy(desc(savedCards.createdAt));
+    try {
+      return await db
+        .select()
+        .from(savedCards)
+        .where(eq(savedCards.userId, userId))
+        .orderBy(desc(savedCards.createdAt));
+    } catch (error) {
+      // If saved_cards table doesn't exist or has issues, return empty array
+      console.log("Saved cards table not accessible, returning empty array");
+      return [];
+    }
   }
 
   async getSavedCardById(id: string): Promise<SavedCard | undefined> {

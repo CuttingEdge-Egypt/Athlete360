@@ -125,6 +125,33 @@ export default function PaymentCenter() {
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
+      {/* Payment Iframe Modal */}
+      {paymentIframeUrl && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-4 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-black">Complete Payment</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setPaymentIframeUrl(null)}
+                className="text-black hover:bg-gray-100"
+              >
+                ✕
+              </Button>
+            </div>
+            <iframe
+              src={paymentIframeUrl}
+              width="100%"
+              height="400"
+              frameBorder="0"
+              title="Payment Form"
+              className="rounded-lg"
+            />
+          </div>
+        </div>
+      )}
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Payment Center</h1>
         <p className="text-muted-foreground">

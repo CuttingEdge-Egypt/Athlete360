@@ -1994,7 +1994,27 @@ Format as JSON:
   app.get('/api/payments/cards', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const cards = await storage.getUserSavedCards(userId);
+      
+      // Try to get saved cards first
+      let cards = await storage.getUserSavedCards(userId);
+      
+      // If no saved cards, check if user has card info in user table (legacy)
+      if (cards.length === 0) {
+        const user = await storage.getUser(userId);
+        if (user && user.cardLast4) {
+          cards = [{
+            id: 'legacy-card',
+            userId: userId,
+            cardToken: user.cardToken || '',
+            cardLast4: user.cardLast4,
+            cardBrand: user.cardBrand || 'Unknown',
+            isDefault: true,
+            createdAt: user.createdAt || new Date(),
+            updatedAt: user.updatedAt || new Date()
+          }];
+        }
+      }
+      
       res.json(cards);
     } catch (error) {
       console.error("Error fetching saved cards:", error);
