@@ -32,29 +32,19 @@ const modelMatch = genai.getGenerativeModel({
   generationConfig: generationConfigMatch,
 });
 
-async function uploadToGemini(videoFilePath: string, mimeType?: string) {
-  console.log(`Uploading file...`);
+async function prepareVideoForGemini(videoFilePath: string, mimeType?: string) {
+  console.log(`Reading video file for analysis...`);
   
-  const fileBuffer = fs.readFileSync(videoFilePath);
-  const uploadResponse = await genai.uploadFile(videoFilePath, {
-    mimeType: mimeType || "video/mp4",
-  });
+  // Read the video file as base64
+  const videoBuffer = fs.readFileSync(videoFilePath);
+  const videoBase64 = videoBuffer.toString('base64');
   
-  console.log(`Completed upload: ${uploadResponse.file.uri}`);
-
-  // Wait for processing
-  let file = uploadResponse.file;
-  while (file.state === "PROCESSING") {
-    console.log("Processing...");
-    await new Promise(resolve => setTimeout(resolve, 10000));
-    file = await genai.getFile(file.name);
-  }
-
-  if (file.state === "FAILED") {
-    throw new Error(`File processing failed: ${file.state}`);
-  }
-
-  return file;
+  return {
+    inlineData: {
+      data: videoBase64,
+      mimeType: mimeType || "video/mp4"
+    }
+  };
 }
 
 export async function processVideoGemini(
@@ -63,7 +53,7 @@ export async function processVideoGemini(
   athlete1Name: string,
   athlete2Name: string
 ) {
-  const promptKickNo = `Count the number of kicks for each player in round ${roundToAnalyze}. Use player names: ${athlete1Name} (blue) and ${athlete2Name} (red).
+  const promptKickNo = `Analyze this sports video and count the number of kicks for each player in round ${roundToAnalyze}. Use player names: ${athlete1Name} (blue) and ${athlete2Name} (red).
 
 Output Format:
 {
@@ -213,7 +203,7 @@ Take your time in processing to make sure the results are accurate.
 Make sure you're not scanning the yellow card as an actual score.`;
 
   try {
-    const videoFile = await uploadToGemini(videoFilePath);
+    const videoData = await prepareVideoForGemini(videoFilePath);
 
     console.log(`Processing video analysis for ${athlete1Name} vs ${athlete2Name}, Round ${roundToAnalyze}`);
 
@@ -225,11 +215,11 @@ Make sure you're not scanning the yellow card as an actual score.`;
       responseKickNo,
       responseYellowCards
     ] = await Promise.all([
-      modelMatch.generateContent([videoFile, promptMatch]),
-      model.generateContent([videoFile, promptMatchScore]),
-      model.generateContent([videoFile, promptPunch]),
-      model.generateContent([videoFile, promptKickNo]),
-      model.generateContent([videoFile, promptYellowCards])
+      modelMatch.generateContent([videoData, promptMatch]),
+      model.generateContent([videoData, promptMatchScore]),
+      model.generateContent([videoData, promptPunch]),
+      model.generateContent([videoData, promptKickNo]),
+      model.generateContent([videoData, promptYellowCards])
     ]);
 
     // Parse responses
@@ -245,14 +235,7 @@ Make sure you're not scanning the yellow card as an actual score.`;
       processedAt: new Date().toISOString()
     };
 
-    // Clean up uploaded file
-    try {
-      await genai.deleteFile(videoFile.name);
-      console.log('Gemini file cleaned up successfully');
-    } catch (cleanupError) {
-      console.warn('Failed to cleanup Gemini file:', cleanupError);
-    }
-
+    console.log('Video analysis completed successfully');
     return results;
 
   } catch (error) {
