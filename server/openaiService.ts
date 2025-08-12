@@ -100,13 +100,8 @@ export async function getEnhancedTaekwondoData(athleteName: string, nationality?
     
     const nationalityContext = nationality ? ` from ${nationality}` : '';
     
-    // Use GPT-5 with web search to get specific ranking and record data
-    // Add timeout to prevent indefinite hanging (90 seconds for accuracy)
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('AI web search timeout')), 90000); // 90 second timeout
-    });
-    
-    const searchPromise = openai.responses.create({
+    // Use GPT-5 with web search to get specific ranking and record data (no timeout)
+    const response = await openai.responses.create({
       model: "gpt-5",
       input: `Search the web for current World Taekwondo (WT) ranking and competition record information for the athlete "${athleteName}"${nationalityContext}.
 
@@ -129,8 +124,6 @@ Response format:
       tools: [{ type: "web_search_preview" }],
       max_output_tokens: 8000
     });
-    
-    const response = await Promise.race([searchPromise, timeoutPromise]);
 
     console.log("AI Ranking Search Response:", response.output_text);
     

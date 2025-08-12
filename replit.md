@@ -12,7 +12,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-**Performance Optimization for AI Analysis (August 12, 2025)**: Fixed long-running rank analysis issue by adding 90-second timeout to GPT-5 web search operations (optimized for accuracy over speed per user preference). Added faster fallback system that uses direct data extraction instead of AI web search when timeouts occur. This prevents rank history analysis from hanging indefinitely while maintaining data quality through intelligent fallback mechanisms.
+**Performance Optimization for AI Analysis (August 12, 2025)**: Removed all timeouts from GPT-5 web search operations to maximize accuracy (per user preference for thorough analysis over speed). Maintained fallback system for error handling while allowing unlimited time for AI web search to research comprehensive ranking data. System prioritizes complete and accurate results over quick responses.
 
 **Fixed Signup Completion & Referral System (August 12, 2025)**: Resolved critical signup completion issue where form was refreshing instead of properly handling server response. Fixed 5-second backend timeout handling and improved frontend error management. Corrected referral system logic - referral links (not codes) now properly credit bonus tokens to link owner (referrer), not link user. Added comprehensive payment testing system with card selection modal, multiple payment methods support, and full simulation endpoints. Token balance display works correctly as "current/total" with high-water mark system.
 
