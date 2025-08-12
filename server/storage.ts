@@ -13,6 +13,7 @@ import {
   analysisLogs,
   paymentReceipts,
   referrals,
+  savedCards,
   type User,
   type UpsertUser,
   type Sport,
@@ -28,11 +29,13 @@ import {
   type AnalysisLog,
   type PaymentReceipt,
   type Referral,
+  type SavedCard,
   type InsertSport,
   type InsertAthlete,
   type InsertTransaction,
   type InsertPaymentReceipt,
   type InsertReferral,
+  type InsertSavedCard,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, asc, sql, ilike } from "drizzle-orm";
@@ -513,6 +516,43 @@ export class DatabaseStorage implements IStorage {
   async getPaymentReceiptById(id: string): Promise<PaymentReceipt | undefined> {
     const [receipt] = await db.select().from(paymentReceipts).where(eq(paymentReceipts.id, id));
     return receipt;
+  }
+
+  // Saved cards operations
+  async createSavedCard(cardData: InsertSavedCard): Promise<SavedCard> {
+    const [card] = await db.insert(savedCards).values(cardData).returning();
+    return card;
+  }
+
+  async getUserSavedCards(userId: string): Promise<SavedCard[]> {
+    return await db
+      .select()
+      .from(savedCards)
+      .where(eq(savedCards.userId, userId))
+      .orderBy(desc(savedCards.createdAt));
+  }
+
+  async getSavedCardById(id: string): Promise<SavedCard | undefined> {
+    const [card] = await db.select().from(savedCards).where(eq(savedCards.id, id));
+    return card;
+  }
+
+  async setDefaultCard(userId: string, cardId: string): Promise<void> {
+    // First, remove default from all user cards
+    await db
+      .update(savedCards)
+      .set({ isDefault: false })
+      .where(eq(savedCards.userId, userId));
+    
+    // Set the selected card as default
+    await db
+      .update(savedCards)
+      .set({ isDefault: true })
+      .where(eq(savedCards.id, cardId));
+  }
+
+  async deleteSavedCard(cardId: string): Promise<void> {
+    await db.delete(savedCards).where(eq(savedCards.id, cardId));
   }
 
   // Referrals operations

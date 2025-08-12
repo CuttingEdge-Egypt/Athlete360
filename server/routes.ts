@@ -1844,6 +1844,75 @@ Format as JSON:
     }
   });
 
+  // Get user saved cards
+  app.get('/api/payments/cards', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const cards = await storage.getUserSavedCards(userId);
+      res.json(cards);
+    } catch (error) {
+      console.error("Error fetching saved cards:", error);
+      res.status(500).json({ message: "Failed to fetch saved cards" });
+    }
+  });
+
+  // Add new saved card
+  app.post('/api/payments/cards', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { cardToken, cardLast4, cardBrand, isDefault } = req.body;
+
+      if (!cardToken || !cardLast4 || !cardBrand) {
+        return res.status(400).json({ message: "Card details are required" });
+      }
+
+      const cardData = {
+        userId,
+        cardToken,
+        cardLast4,
+        cardBrand,
+        isDefault: isDefault || false
+      };
+
+      const savedCard = await storage.createSavedCard(cardData);
+      
+      if (isDefault) {
+        await storage.setDefaultCard(userId, savedCard.id);
+      }
+
+      res.json(savedCard);
+    } catch (error) {
+      console.error("Error saving card:", error);
+      res.status(500).json({ message: "Failed to save card" });
+    }
+  });
+
+  // Set default card
+  app.patch('/api/payments/cards/:cardId/default', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { cardId } = req.params;
+
+      await storage.setDefaultCard(userId, cardId);
+      res.json({ message: "Default card updated" });
+    } catch (error) {
+      console.error("Error setting default card:", error);
+      res.status(500).json({ message: "Failed to set default card" });
+    }
+  });
+
+  // Delete saved card
+  app.delete('/api/payments/cards/:cardId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { cardId } = req.params;
+      await storage.deleteSavedCard(cardId);
+      res.json({ message: "Card deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting card:", error);
+      res.status(500).json({ message: "Failed to delete card" });
+    }
+  });
+
   // Get specific payment receipt
   app.get('/api/payments/receipts/:receiptId', isAuthenticated, async (req: any, res) => {
     try {

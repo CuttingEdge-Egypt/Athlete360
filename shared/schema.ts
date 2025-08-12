@@ -36,9 +36,6 @@ export const users = pgTable("users", {
   totalTokensPurchased: integer("total_tokens_purchased").default(1000), // Track total tokens ever purchased
   subscriptionStatus: varchar("subscription_status").default("active"), // Active with free tokens
   paymobCustomerId: varchar("paymob_customer_id"), // Paymob customer ID
-  cardToken: varchar("card_token"), // Stored card token from Paymob
-  cardLast4: varchar("card_last_4"), // Last 4 digits for display
-  cardBrand: varchar("card_brand"), // Card brand (Visa, Mastercard, etc.)
   referralCode: varchar("referral_code").unique(), // User's unique referral code
   referredBy: varchar("referred_by"), // Who referred this user
   createdAt: timestamp("created_at").defaultNow(),
@@ -276,7 +273,21 @@ export const insertReferralSchema = createInsertSchema(referrals).pick({
 
 // Types
 export type UpsertUser = typeof users.$inferInsert;
+// Saved payment cards table
+export const savedCards = pgTable("saved_cards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  cardToken: varchar("card_token").notNull(), // Stored card token from Paymob
+  cardLast4: varchar("card_last_4").notNull(), // Last 4 digits for display
+  cardBrand: varchar("card_brand").notNull(), // Card brand (Visa, Mastercard, etc.)
+  isDefault: boolean("is_default").default(false), // Default payment method
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
+export type SavedCard = typeof savedCards.$inferSelect;
+export type InsertSavedCard = typeof savedCards.$inferInsert;
 export type Sport = typeof sports.$inferSelect;
 export type Athlete = typeof athletes.$inferSelect;
 export type AthleteStrength = typeof athleteStrengths.$inferSelect;

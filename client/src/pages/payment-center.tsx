@@ -3,17 +3,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PaymentReceipts } from "@/components/ui/payment-receipts";
 import { ReferralSystem } from "@/components/ui/referral-system";
+import { TestingPanel } from "@/components/ui/testing-panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CardSelectionModal } from "@/components/ui/card-selection-modal";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { CreditCard, Coins, Zap, Crown } from "lucide-react";
+import type { SavedCard } from "@shared/schema";
 
 export default function PaymentCenter() {
   const [tokenAmount, setTokenAmount] = useState(1000);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState<{ tokens: number; price: number } | null>(null);
+  const [showCardSelection, setShowCardSelection] = useState(false);
+  const [paymentIframeUrl, setPaymentIframeUrl] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -34,60 +40,86 @@ export default function PaymentCenter() {
   };
 
   const handleTokenPurchase = async (tokens: number) => {
+    const price = calculatePrice(tokens);
+    setSelectedPackage({ tokens, price });
+    setShowCardSelection(true);
+  };
+
+  const handleCardSelected = async (selectedCard: SavedCard | null) => {
+    if (!selectedPackage) return;
+    
     setIsProcessing(true);
     try {
-      const price = calculatePrice(tokens);
-      
-      // Create payment intent
-      const intentResponse = await apiRequest('POST', '/api/payments/create-intent', {
-        amount: price,
-        tokensAmount: tokens
-      });
+      // Create payment intent with or without card info
+      const intentPayload: any = {
+        amount: selectedPackage.price,
+        tokensAmount: selectedPackage.tokens
+      };
 
-      // In a real implementation, you would open the Paymob iframe here
-      // For now, we'll simulate a successful payment
+      // If using saved card, include card info
+      if (selectedCard) {
+        intentPayload.cardToken = selectedCard.cardToken;
+        intentPayload.cardLast4 = selectedCard.cardLast4;
+        intentPayload.cardBrand = selectedCard.cardBrand;
+      }
+
+      const intentResponse = await apiRequest('POST', '/api/payments/create-intent', intentPayload);
+      const intentData = await intentResponse.json();
+      
+      // Open Paymob iframe
+      setPaymentIframeUrl(intentData.iframeUrl);
+
       toast({
         title: "Payment initiated",
         description: "Opening payment window...",
       });
 
-      // Simulate payment completion after 3 seconds
-      setTimeout(async () => {
-        try {
-          await apiRequest('POST', '/api/payments/complete', {
-            transactionId: `txn_${Date.now()}`,
-            amount: price,
-            tokensAmount: tokens,
-            paymentMethod: 'card',
-            cardLast4: user?.cardLast4 || '1234',
-            cardBrand: user?.cardBrand || 'Visa'
-          });
-
-          toast({
-            title: "Payment successful!",
-            description: `${tokens} tokens added to your account`,
-          });
-
-          // Refresh user data and receipts
-          queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-          queryClient.invalidateQueries({ queryKey: ['/api/payments/receipts'] });
-        } catch (error) {
-          toast({
-            title: "Payment failed",
-            description: "Please try again or contact support",
-            variant: "destructive",
-          });
-        } finally {
-          setIsProcessing(false);
-        }
-      }, 3000);
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Payment error:', error);
       toast({
-        title: "Failed to initiate payment",
-        description: "Please try again later",
+        title: "Error",
+        description: "Failed to initiate payment",
         variant: "destructive",
       });
+    } finally {
       setIsProcessing(false);
+      setSelectedPackage(null);
+    }
+  };
+
+  const handlePaymentSuccess = async (transactionData: any) => {
+    try {
+      if (!selectedPackage) return;
+
+      await apiRequest('POST', '/api/payments/complete', {
+        transactionId: transactionData.transactionId,
+        amount: selectedPackage.price,
+        tokensAmount: selectedPackage.tokens,
+        paymentMethod: transactionData.paymentMethod,
+        cardLast4: transactionData.cardLast4,
+        cardBrand: transactionData.cardBrand
+      });
+
+      toast({
+        title: "Payment successful!",
+        description: `${selectedPackage.tokens} tokens added to your account`,
+      });
+
+      // Refresh user data and receipts
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/payments/receipts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/payments/cards'] });
+      
+      setPaymentIframeUrl(null);
+      setSelectedPackage(null);
+      
+    } catch (error: any) {
+      console.error('Payment completion error:', error);
+      toast({
+        title: "Error",
+        description: "Payment completed but failed to update account",
+        variant: "destructive",
+      });
     }
   };
 
@@ -101,7 +133,7 @@ export default function PaymentCenter() {
       </div>
 
       <Tabs defaultValue="purchase" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="purchase" data-testid="tab-purchase">
             <Coins className="h-4 w-4 mr-2" />
             Buy Tokens
@@ -113,6 +145,10 @@ export default function PaymentCenter() {
           <TabsTrigger value="referrals" data-testid="tab-referrals">
             <Crown className="h-4 w-4 mr-2" />
             Referrals
+          </TabsTrigger>
+          <TabsTrigger value="testing" data-testid="tab-testing">
+            <Zap className="h-4 w-4 mr-2" />
+            Testing
           </TabsTrigger>
         </TabsList>
 
@@ -127,7 +163,7 @@ export default function PaymentCenter() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-green-600">
-                {user?.tokens || 0} tokens
+                {user?.tokens || 0} / {user?.totalTokensPurchased || 0} tokens
               </div>
               <p className="text-sm text-muted-foreground">
                 Ready for AI-powered athlete analysis
@@ -221,7 +257,7 @@ export default function PaymentCenter() {
                   data-testid="button-buy-custom"
                 >
                   <Zap className="h-4 w-4 mr-2" />
-                  Buy Tokens
+                  Buy Custom
                 </Button>
               </div>
             </CardContent>
@@ -235,7 +271,52 @@ export default function PaymentCenter() {
         <TabsContent value="referrals">
           <ReferralSystem />
         </TabsContent>
+
+        <TabsContent value="testing">
+          <TestingPanel />
+        </TabsContent>
       </Tabs>
+
+      {/* Card Selection Modal */}
+      <CardSelectionModal
+        open={showCardSelection}
+        onOpenChange={setShowCardSelection}
+        onCardSelected={handleCardSelected}
+        tokenAmount={selectedPackage?.tokens || 0}
+        price={selectedPackage?.price || 0}
+      />
+
+      {/* Payment Iframe Modal */}
+      {paymentIframeUrl && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-md max-h-[80vh] overflow-hidden">
+            <div className="p-4 border-b">
+              <h3 className="text-lg font-semibold">Complete Payment</h3>
+              <Button
+                onClick={() => setPaymentIframeUrl(null)}
+                className="absolute top-2 right-2"
+                variant="ghost"
+                size="sm"
+              >
+                ×
+              </Button>
+            </div>
+            <iframe
+              src={paymentIframeUrl}
+              className="w-full h-96"
+              title="Payment"
+              onLoad={() => {
+                // Listen for payment success messages
+                window.addEventListener('message', (event) => {
+                  if (event.data?.type === 'payment_success') {
+                    handlePaymentSuccess(event.data);
+                  }
+                });
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
