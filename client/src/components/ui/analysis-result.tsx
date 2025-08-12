@@ -347,89 +347,169 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     );
   };
 
-  const renderBeatStrategies = (data: any) => (
-    <div>
-      <div className="grid gap-4 mb-6">
-        {data.strategies?.map((strategy: any, index: number) => (
-          <Card key={index} className="bg-athlete-gray-700 border-gray-600">
+  const renderBeatStrategies = (data: any) => {
+    console.log('Frontend Beat Strategies Data RECEIVED:', JSON.stringify(data, null, 2));
+    
+    // Check for error state first
+    if (data.error || data.message?.includes('Unable to generate')) {
+      return (
+        <div className="p-6 text-center">
+          <div className="text-red-400 mb-4">⚠ Analysis Unavailable</div>
+          <p className="text-gray-300 mb-4">
+            {data.message || 'Unable to generate authentic strategic analysis at this time.'}
+          </p>
+          <p className="text-sm text-gray-400">
+            Please try again later or contact support if the issue persists.
+          </p>
+        </div>
+      );
+    }
+
+    // Enhanced error handling for strategies data
+    let strategies: any[] = [];
+    try {
+      strategies = Array.isArray(data.strategies) ? data.strategies : [];
+    } catch (error) {
+      console.error('Error processing strategies data:', error);
+      strategies = [];
+    }
+
+    return (
+      <div>
+        <div className="grid gap-4 mb-6">
+          {strategies.length > 0 ? strategies.map((strategy: any, index: number) => (
+            <Card key={index} className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-4">
+                <h5 className="font-semibold text-red-400 mb-2">
+                  {strategy.strategy || strategy.title || `Strategy ${index + 1}`}
+                </h5>
+                <p className="text-sm text-gray-300">
+                  {strategy.description || 'Strategy details not available'}
+                </p>
+              </CardContent>
+            </Card>
+          )) : (
+            <div className="text-gray-400 text-center py-8">
+              No strategic analysis data available
+            </div>
+          )}
+        </div>
+        {data.keyWeaknesses && Array.isArray(data.keyWeaknesses) && data.keyWeaknesses.length > 0 && (
+          <Card className="bg-athlete-gray-700 border-gray-600">
             <CardContent className="p-4">
-              <h5 className="font-semibold text-red-400 mb-2">{strategy.strategy}</h5>
-              <p className="text-sm text-gray-300">{strategy.description}</p>
+              <h5 className="font-semibold text-athlete-warning mb-2">Key Weaknesses to Exploit</h5>
+              <ul className="text-sm text-gray-300 space-y-1">
+                {data.keyWeaknesses.map((weakness: string, index: number) => (
+                  <li key={index}>• {weakness}</li>
+                ))}
+              </ul>
             </CardContent>
           </Card>
-        ))}
+        )}
       </div>
-      {data.keyWeaknesses && (
-        <Card className="bg-athlete-gray-700 border-gray-600">
-          <CardContent className="p-4">
-            <h5 className="font-semibold text-athlete-warning mb-2">Key Weaknesses to Exploit</h5>
-            <ul className="text-sm text-gray-300 space-y-1">
-              {data.keyWeaknesses.map((weakness: string, index: number) => (
-                <li key={index}>• {weakness}</li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
+    );
+  };
 
-  const renderVideoAnalysis = (data: any) => (
-    <div>
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
-        <Card className="bg-athlete-gray-700 border-gray-600">
-          <CardContent className="p-4">
-            <h5 className="font-semibold text-white mb-2">Overall Performance</h5>
-            <div className="space-y-2">
-              <div className="text-2xl font-bold text-athlete-accent">{data.overallScore}/10</div>
-              <div className="text-sm text-gray-300">{data.comparedToAverage}</div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-athlete-gray-700 border-gray-600">
-          <CardContent className="p-4">
-            <h5 className="font-semibold text-white mb-2">Analysis Type</h5>
-            <div className="text-athlete-accent font-semibold">{data.analysisType}</div>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <div className="grid gap-4">
-        <Card className="bg-athlete-gray-700 border-gray-600">
-          <CardContent className="p-4">
-            <h5 className="font-semibold text-athlete-success mb-2">Key Findings</h5>
-            <ul className="text-sm text-gray-300 space-y-1">
-              {data.keyFindings?.map((finding: string, index: number) => (
-                <li key={index}>• {finding}</li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+  const renderVideoAnalysis = (data: any) => {
+    console.log('Frontend Video Analysis Data RECEIVED:', JSON.stringify(data, null, 2));
+    
+    // Check for error state first
+    if (data.error || data.message?.includes('Unable to generate')) {
+      return (
+        <div className="p-6 text-center">
+          <div className="text-red-400 mb-4">⚠ Analysis Unavailable</div>
+          <p className="text-gray-300 mb-4">
+            {data.message || 'Unable to generate authentic video analysis at this time.'}
+          </p>
+          <p className="text-sm text-gray-400">
+            Please try again later or contact support if the issue persists.
+          </p>
+        </div>
+      );
+    }
+
+    // Enhanced error handling for array data
+    let keyFindings: string[] = [];
+    let technicalInsights: string[] = [];
+    let recommendations: string[] = [];
+    
+    try {
+      keyFindings = Array.isArray(data.keyFindings) ? data.keyFindings : [];
+      technicalInsights = Array.isArray(data.technicalInsights) ? data.technicalInsights : [];
+      recommendations = Array.isArray(data.recommendations) ? data.recommendations : [];
+    } catch (error) {
+      console.error('Error processing video analysis data:', error);
+    }
+
+    return (
+      <div>
+        <div className="grid md:grid-cols-2 gap-6 mb-6">
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-4">
+              <h5 className="font-semibold text-white mb-2">Overall Performance</h5>
+              <div className="space-y-2">
+                <div className="text-2xl font-bold text-athlete-accent">
+                  {data.overallScore || 'N/A'}/10
+                </div>
+                <div className="text-sm text-gray-300">
+                  {data.comparedToAverage || 'Analysis not available'}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-4">
+              <h5 className="font-semibold text-white mb-2">Analysis Type</h5>
+              <div className="text-athlete-accent font-semibold">
+                {data.analysisType || 'Video Performance Analysis'}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
         
-        <Card className="bg-athlete-gray-700 border-gray-600">
-          <CardContent className="p-4">
-            <h5 className="font-semibold text-athlete-warning mb-2">Technical Insights</h5>
-            <ul className="text-sm text-gray-300 space-y-1">
-              {data.technicalInsights?.map((insight: string, index: number) => (
-                <li key={index}>• {insight}</li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-athlete-gray-700 border-gray-600">
-          <CardContent className="p-4">
-            <h5 className="font-semibold text-purple-400 mb-2">Recommendations</h5>
-            <ul className="text-sm text-gray-300 space-y-1">
-              {data.recommendations?.map((rec: string, index: number) => (
-                <li key={index}>• {rec}</li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+        <div className="grid gap-4">
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-4">
+              <h5 className="font-semibold text-athlete-success mb-2">Key Findings</h5>
+              <ul className="text-sm text-gray-300 space-y-1">
+                {keyFindings.length > 0 ? keyFindings.map((finding: string, index: number) => (
+                  <li key={index}>• {finding}</li>
+                )) : (
+                  <li className="text-gray-400">No findings available</li>
+                )}
+              </ul>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-4">
+              <h5 className="font-semibold text-athlete-warning mb-2">Technical Insights</h5>
+              <ul className="text-sm text-gray-300 space-y-1">
+                {technicalInsights.length > 0 ? technicalInsights.map((insight: string, index: number) => (
+                  <li key={index}>• {insight}</li>
+                )) : (
+                  <li className="text-gray-400">No insights available</li>
+                )}
+              </ul>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-4">
+              <h5 className="font-semibold text-purple-400 mb-2">Recommendations</h5>
+              <ul className="text-sm text-gray-300 space-y-1">
+                {recommendations.length > 0 ? recommendations.map((rec: string, index: number) => (
+                  <li key={index}>• {rec}</li>
+                )) : (
+                  <li className="text-gray-400">No recommendations available</li>
+                )}
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderAnalysisContent = () => {
     if (!data) {
