@@ -998,7 +998,11 @@ Return this exact JSON structure with authentic ${athleteCountry} foods:
     
     console.log(`GPT-5 Nutrition Response for ${athleteName}:`, JSON.stringify(nutritionData, null, 2));
     
-    // Return structured data with nationality-specific content
+    // Return only authentic AI-generated data
+    if (!nutritionData.meals || !nutritionData.dailyCalories) {
+      throw new Error("AI failed to generate authentic nutrition data");
+    }
+    
     const finalData = {
       currentWeight,
       age,
@@ -1009,12 +1013,12 @@ Return this exact JSON structure with authentic ${athleteCountry} foods:
       sport,
       sessionId,
       generatedAt: timestamp,
-      dailyCalories: nutritionData.dailyCalories || calculateCaloriesForAthlete(age, currentWeight, target),
-      macros: nutritionData.macros || getOptimalMacros(sport, target),
-      meals: nutritionData.meals || generateFallbackMeals(athleteCountry, cuisine, athleteName),
-      hydration: nutritionData.hydration || getHydrationGuidelines(athleteCountry, sport),
-      supplements: nutritionData.supplements || getRegionalSupplements(athleteCountry),
-      culturalNotes: nutritionData.culturalNotes || `Nutrition plan adapted for ${athleteCountry} food culture and ${sport} requirements`
+      dailyCalories: nutritionData.dailyCalories,
+      macros: nutritionData.macros,
+      meals: nutritionData.meals,
+      hydration: nutritionData.hydration,
+      supplements: nutritionData.supplements,
+      culturalNotes: nutritionData.culturalNotes
     };
     
     console.log(`Final nutrition data being returned:`, JSON.stringify(finalData, null, 2));
@@ -1022,96 +1026,35 @@ Return this exact JSON structure with authentic ${athleteCountry} foods:
     
   } catch (error) {
     console.error(`Error generating nutrition plan for ${athleteName}:`, error);
-    // Enhanced fallback with nationality and gender considerations
-    return generateEnhancedFallbackNutrition(athleteName, sport, currentWeight, age, target, cuisine, athleteCountry, athleteData);
+    // Return error instead of generic fallback data
+    return {
+      currentWeight,
+      age,
+      target,
+      cuisine,
+      nationality: athleteCountry,
+      athleteName,
+      sport,
+      error: true,
+      message: `Unable to generate authentic nutrition plan for ${athleteName} at this time. Please try again later or contact support if the issue persists.`,
+      dailyCalories: "N/A",
+      macros: { protein: "N/A", carbs: "N/A", fats: "N/A" },
+      meals: {
+        breakfast: [{ name: "Analysis Unavailable", description: "Unable to generate authentic meal recommendations", calories: "N/A", timing: "N/A", benefits: "N/A", foods: [] }],
+        lunch: [{ name: "Analysis Unavailable", description: "Unable to generate authentic meal recommendations", calories: "N/A", timing: "N/A", benefits: "N/A", foods: [] }],
+        dinner: [{ name: "Analysis Unavailable", description: "Unable to generate authentic meal recommendations", calories: "N/A", timing: "N/A", benefits: "N/A", foods: [] }],
+        snacks: [{ name: "Analysis Unavailable", description: "Unable to generate authentic meal recommendations", calories: "N/A", timing: "N/A", benefits: "N/A", foods: [] }]
+      },
+      hydration: "N/A",
+      supplements: [],
+      culturalNotes: "Authentic nutrition analysis temporarily unavailable"
+    };
   }
 }
 
-// Helper functions for nutrition calculations
-function calculateCaloriesForAthlete(age: string, weight: string, target: string): string {
-  const ageNum = parseInt(age) || 25;
-  const weightNum = parseInt(weight.replace(/[^\d]/g, '')) || 70;
-  
-  // Base metabolic rate calculation with activity factor for athletes
-  let baseCalories = 2200 + (weightNum * 15) + (30 - ageNum) * 10;
-  
-  if (target.includes('gain') || target.includes('muscle')) {
-    baseCalories += 400;
-  } else if (target.includes('lose')) {
-    baseCalories -= 300;
-  }
-  
-  return `${baseCalories}-${baseCalories + 400} kcal`;
-}
+// Removed all generic helper functions - nutrition analysis now only uses authentic AI-generated data
 
-function getOptimalMacros(sport: string, target: string) {
-  if (sport.toLowerCase().includes('taekwondo') || sport.toLowerCase().includes('martial')) {
-    if (target.includes('muscle') || target.includes('strength')) {
-      return { protein: "30%", carbs: "45%", fats: "25%" };
-    } else if (target.includes('lose')) {
-      return { protein: "35%", carbs: "40%", fats: "25%" };
-    }
-  }
-  return { protein: "25%", carbs: "50%", fats: "25%" };
-}
-
-function generateFallbackMeals(country: string, cuisine: string, athleteName: string) {
-  const countryMeals: Record<string, any> = {
-    "Egypt": {
-      breakfast: [{ name: "Egyptian Athletic Breakfast", description: "Ful medames with whole wheat baladi bread, boiled eggs, and fresh tomatoes", calories: "650 kcal", timing: "7:00 AM", benefits: "Sustained energy from traditional foods", foods: ["Ful medames", "Baladi bread", "Boiled eggs", "Fresh vegetables"] }],
-      lunch: [{ name: "Egyptian Power Lunch", description: "Grilled fish with rice pilaf, mixed vegetables, and tahini", calories: "800 kcal", timing: "12:30 PM", benefits: "High protein recovery meal", foods: ["Grilled tilapia", "Egyptian rice", "Roasted vegetables", "Tahini sauce"] }],
-      dinner: [{ name: "Egyptian Recovery Dinner", description: "Chicken molokhia with brown rice and mixed salad", calories: "700 kcal", timing: "7:00 PM", benefits: "Muscle recovery nutrients", foods: ["Molokhia stew", "Lean chicken", "Brown rice", "Egyptian salad"] }],
-      snacks: [{ name: "Egyptian Training Fuel", description: "Dates, almonds, and fresh fruit", calories: "250 kcal", timing: "Pre-training", benefits: "Natural energy boost", foods: ["Medjool dates", "Almonds", "Fresh fruits"] }]
-    }
-  };
-  
-  return countryMeals[country] || {
-    breakfast: [{ name: `${cuisine} Athletic Breakfast`, description: `Traditional breakfast adapted for ${athleteName}`, calories: "650 kcal", timing: "7:00 AM", benefits: "Energy for training", foods: [`Traditional ${cuisine} foods`] }],
-    lunch: [{ name: `${cuisine} Power Lunch`, description: `Midday meal for athletic performance`, calories: "800 kcal", timing: "12:30 PM", benefits: "Sustained energy", foods: [`Regional ${cuisine} specialties`] }],
-    dinner: [{ name: `${cuisine} Recovery Dinner`, description: `Evening meal for muscle recovery`, calories: "700 kcal", timing: "7:00 PM", benefits: "Muscle recovery", foods: [`Traditional ${cuisine} dinner foods`] }],
-    snacks: [{ name: `${cuisine} Training Fuel`, description: `Regional training snacks`, calories: "250 kcal", timing: "Pre-training", benefits: "Quick energy", foods: [`Traditional ${cuisine} snacks`] }]
-  };
-}
-
-function getHydrationGuidelines(country: string, sport: string): string {
-  if (country === "Egypt" || country.includes("Middle East")) {
-    return "4-5 liters daily due to hot climate, increase to 6+ liters during summer training";
-  }
-  return "3.5-4 liters daily, adjust based on training intensity and climate";
-}
-
-function getRegionalSupplements(country: string): string[] {
-  const regional: Record<string, string[]> = {
-    "Egypt": ["Protein powder", "Vitamin D3", "Iron (if needed)", "Electrolytes"],
-    "Korea": ["Protein powder", "Omega-3", "Vitamin B complex", "Ginseng extract"],
-    "Mexico": ["Protein powder", "Magnesium", "Vitamin C", "Spirulina"]
-  };
-  
-  return regional[country] || ["Protein powder", "Multivitamin", "Omega-3"];
-}
-
-function generateEnhancedFallbackNutrition(athleteName: string, sport: string, currentWeight: string, age: string, target: string, cuisine: string, country: string, athleteData?: any) {
-  // Determine gender from biography if available
-  const bio = athleteData?.bio?.toLowerCase() || '';
-  const isLikelyFemale = bio.includes('she') || bio.includes('her') || bio.includes('woman') || bio.includes('female');
-  
-  return {
-    currentWeight,
-    age,
-    target,
-    cuisine,
-    nationality: country,
-    athleteName,
-    sport,
-    gender: isLikelyFemale ? 'Female' : 'Male',
-    dailyCalories: calculateCaloriesForAthlete(age, currentWeight, target),
-    macros: getOptimalMacros(sport, target),
-    meals: generateFallbackMeals(country, cuisine, athleteName),
-    hydration: getHydrationGuidelines(country, sport),
-    supplements: getRegionalSupplements(country),
-    culturalNotes: `Nutrition plan adapted for ${country} food culture, considering ${isLikelyFemale ? 'female' : 'male'} athlete nutritional needs in ${sport}`
-  };
-}
+// Removed generateEnhancedFallbackNutrition - no longer using generic fallback data
 
 // GPT-5 implementation of enhanced rank history generation with competition-by-competition tracking
 export async function generateRankHistory(athleteName: string, sport: string, nationality?: string): Promise<any> {
