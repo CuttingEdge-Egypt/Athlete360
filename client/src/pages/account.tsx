@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { HistoryPanel } from "@/components/ui/history-panel";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -21,7 +23,8 @@ import {
   Trash2,
   Eye,
   EyeOff,
-  Coins
+  Coins,
+  History
 } from "lucide-react";
 
 interface PaymentCard {
@@ -66,7 +69,7 @@ export default function Account() {
   });
 
   // Fetch user profile and cards
-  const { data: profile = {} as UserProfile, isLoading } = useQuery({
+  const { data: profile, isLoading } = useQuery<UserProfile>({
     queryKey: ["/api/user/profile"]
   });
 
@@ -213,10 +216,27 @@ export default function Account() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Account Settings</h1>
-          <p className="text-gray-300">Manage your profile information and payment methods</p>
+          <p className="text-gray-300">Manage your profile, payment methods, and view your history</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Tabs defaultValue="profile" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3 max-w-lg">
+            <TabsTrigger value="profile" data-testid="tab-profile">
+              <User className="h-4 w-4 mr-2" />
+              Profile
+            </TabsTrigger>
+            <TabsTrigger value="payments" data-testid="tab-payments">
+              <CreditCard className="h-4 w-4 mr-2" />
+              Payments
+            </TabsTrigger>
+            <TabsTrigger value="history" data-testid="tab-history">
+              <History className="h-4 w-4 mr-2" />
+              History
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="profile" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Profile Information */}
           <Card className="bg-gray-800/50 border-gray-700">
             <CardHeader>
@@ -240,10 +260,10 @@ export default function Account() {
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-green-400">
-                    {profile?.currentTokens || 0}
+                    {profile?.currentTokens ?? 0}
                   </div>
                   <div className="text-sm text-gray-400">
-                    of {profile?.totalTokensPurchased || 0} purchased
+                    of {profile?.totalTokensPurchased ?? 0} purchased
                   </div>
                 </div>
               </div>
@@ -523,10 +543,10 @@ export default function Account() {
               )}
             </CardContent>
           </Card>
-        </div>
+            </div>
 
-        {/* Security Section */}
-        <Card className="mt-8 bg-gray-800/50 border-gray-700">
+            {/* Security Section */}
+            <Card className="bg-gray-800/50 border-gray-700">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-yellow-400" />
@@ -556,6 +576,194 @@ export default function Account() {
             </div>
           </CardContent>
         </Card>
+          </TabsContent>
+
+          <TabsContent value="payments" className="space-y-6">
+            {/* Payment Methods */}
+            <Card className="bg-gray-800/50 border-gray-700">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <CreditCard className="h-5 w-5 text-green-400" />
+                      Payment Methods
+                    </CardTitle>
+                    <CardDescription className="text-gray-400">
+                      Manage your saved payment cards
+                    </CardDescription>
+                  </div>
+                  <Dialog open={isAddCardOpen} onOpenChange={setIsAddCardOpen}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        className="bg-blue-600 hover:bg-blue-700"
+                        data-testid="button-add-payment-method"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Card
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-gray-800 border-gray-700 text-white">
+                      <DialogHeader>
+                        <DialogTitle>Add New Payment Method</DialogTitle>
+                        <DialogDescription className="text-gray-400">
+                          Add a new credit or debit card to your account
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="cardName">Cardholder Name</Label>
+                          <Input
+                            id="cardName"
+                            value={newCard.name}
+                            onChange={(e) => setNewCard(prev => ({ ...prev, name: e.target.value }))}
+                            placeholder="John Doe"
+                            data-testid="input-new-card-name"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="cardNumber">Card Number</Label>
+                          <Input
+                            id="cardNumber"
+                            value={newCard.number}
+                            onChange={(e) => setNewCard(prev => ({ ...prev, number: formatCardNumber(e.target.value) }))}
+                            placeholder="1234 5678 9012 3456"
+                            maxLength={19}
+                            data-testid="input-new-card-number"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="expiry">Expiry</Label>
+                            <Input
+                              id="expiry"
+                              value={newCard.expiry}
+                              onChange={(e) => setNewCard(prev => ({ ...prev, expiry: formatExpiry(e.target.value) }))}
+                              placeholder="MM/YY"
+                              maxLength={5}
+                              data-testid="input-new-card-expiry"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="cvv">CVV</Label>
+                            <Input
+                              id="cvv"
+                              value={newCard.cvv}
+                              onChange={(e) => setNewCard(prev => ({ ...prev, cvv: e.target.value.replace(/\D/g, '') }))}
+                              placeholder="123"
+                              maxLength={4}
+                              type="password"
+                              data-testid="input-new-card-cvv"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex gap-3">
+                          <Button
+                            onClick={handleAddCard}
+                            disabled={addCardMutation.isPending}
+                            className="flex-1"
+                            data-testid="button-save-card"
+                          >
+                            Add Card
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => setIsAddCardOpen(false)}
+                            className="flex-1"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {profile?.cards && profile.cards.length > 0 ? (
+                  <div className="space-y-3">
+                    {profile.cards.map((card) => (
+                      <div
+                        key={card.id}
+                        className="flex items-center justify-between p-4 bg-gray-900/30 rounded-lg border border-gray-700"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="text-2xl">
+                            {getCardBrandIcon(card.cardBrand)}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">
+                                {showCardDetails === card.id 
+                                  ? `${card.cardBrand} ${card.fullCardNumber || `**** **** **** ${card.cardLast4}`}`
+                                  : `${card.cardBrand} ••••${card.cardLast4}`
+                                }
+                              </span>
+                              {card.isDefault && (
+                                <Badge variant="secondary" className="text-xs">
+                                  Default
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="text-sm text-gray-400">
+                              {showCardDetails === card.id 
+                                ? `Full Number: ${card.fullCardNumber || `**** **** **** ${card.cardLast4}`} | Expires ${card.expiryMonth}/${card.expiryYear}`
+                                : `Expires ${card.expiryMonth}/${card.expiryYear}`
+                              }
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setShowCardDetails(showCardDetails === card.id ? null : card.id)}
+                            data-testid={`button-toggle-card-${card.id}`}
+                          >
+                            {showCardDetails === card.id ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              if (profile?.cards && profile.cards.length > 1) {
+                                deleteCardMutation.mutate(card.id);
+                              } else {
+                                toast({
+                                  title: "Cannot remove card",
+                                  description: "You must have at least one payment method",
+                                  variant: "destructive",
+                                });
+                              }
+                            }}
+                            disabled={profile?.cards && profile.cards.length <= 1}
+                            className="text-red-400 hover:text-red-300 disabled:text-gray-500 disabled:cursor-not-allowed"
+                            data-testid={`button-delete-card-${card.id}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-400">
+                    <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No payment methods saved</p>
+                    <p className="text-sm">Add a card to make token purchases</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="history" className="space-y-6">
+            <HistoryPanel />
+          </TabsContent>
+        </Tabs>
       </div>
   );
 }
