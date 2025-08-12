@@ -813,7 +813,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let enhancedData = null;
         if (sportName.toLowerCase() === 'taekwondo') {
           try {
-            enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country);
+            enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country || undefined);
             console.log(`Enhanced taekwondo data for ${athlete.name}:`, enhancedData);
           } catch (error) {
             console.error(`Failed to get enhanced taekwondo data for ${athlete.name}:`, error);
@@ -911,7 +911,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let enhancedData = null;
         if (sportName.toLowerCase() === 'taekwondo') {
           try {
-            enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country);
+            enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country || undefined);
           } catch (error) {
             console.error(`Failed to get enhanced taekwondo data: ${error}`);
           }
@@ -1042,7 +1042,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let enhancedData = null;
         if (sportName.toLowerCase() === 'taekwondo') {
           try {
-            enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country);
+            enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country || undefined);
           } catch (error) {
             console.error(`Failed to get enhanced taekwondo data: ${error}`);
           }
@@ -1160,7 +1160,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let enhancedData = null;
       if (sportName.toLowerCase() === 'taekwondo') {
         try {
-          enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country);
+          enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country || undefined);
         } catch (error) {
           console.error(`Failed to get enhanced taekwondo data: ${error}`);
         }
@@ -1254,7 +1254,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let enhancedData = null;
       if (sportName.toLowerCase() === 'taekwondo') {
         try {
-          enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country);
+          enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country || undefined);
         } catch (error) {
           console.error(`Failed to get enhanced taekwondo data: ${error}`);
         }
@@ -1284,7 +1284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error generating nutrition plan:", error);
       res.status(500).json({ 
         message: "Unable to generate authentic nutrition plan at this time. Please try again later.",
-        error: error.message 
+        error: error instanceof Error ? error.message : String(error)
       });
     }
   });
@@ -1325,7 +1325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let enhancedData = null;
       if (sportName.toLowerCase() === 'taekwondo') {
         try {
-          enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country);
+          enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country || undefined);
         } catch (error) {
           console.error(`Failed to get enhanced taekwondo data: ${error}`);
         }
@@ -1399,75 +1399,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error generating beat strategies:", error);
       res.status(500).json({ 
         message: "Unable to generate authentic beat strategies at this time. Please try again later.",
-        error: error.message 
+        error: error instanceof Error ? error.message : String(error)
       });
     }
   });
 
-  // Video upload and analysis endpoint
-  app.post('/api/analysis/:athleteId/video-analysis', isAuthenticated, upload.single('video'), async (req: any, res) => {
-    const tokenCost = 120;
-    try {
-      const userId = req.user.claims.sub;
-      const athleteId = req.params.athleteId;
-
-      const user = await storage.getUser(userId);
-      if (!user || (user.tokens || 0) < tokenCost) {
-        return res.status(402).json({ message: "Insufficient tokens" });
-      }
-
-      // Check if video file was uploaded
-      if (!req.file) {
-        return res.status(400).json({ message: "Video file is required for analysis" });
-      }
-
-      await storage.deductTokens(userId, tokenCost);
-      await storage.createTransaction({
-        userId,
-        action: "Video Analysis",
-        tokensDeducted: tokenCost,
-        athleteId,
-        serviceType: "video"
-      });
-
-      // Get athlete data
-      const athlete = await storage.getAthleteById(athleteId);
-      if (!athlete) {
-        return res.status(404).json({ message: "Athlete not found" });
-      }
-
-      // Extract analysis parameters from request
-      const roundToAnalyze = parseInt(req.body.round) || 1;
-      const athlete1Name = req.body.athlete1Name || athlete.name;
-      const athlete2Name = req.body.athlete2Name || "Opponent";
-
-      console.log(`Generating new video analysis for ${athlete1Name} vs ${athlete2Name}, Round ${roundToAnalyze}`);
-      
-      // Use the comprehensive Gemini video analysis service
-      const videoAnalysis = await analyzeVideoFile(
-        req.file.buffer,
-        req.file.originalname,
-        roundToAnalyze,
-        athlete1Name,
-        athlete2Name
-      );
-
-      await storage.createAnalysisLog({
-        userId,
-        athleteId,
-        serviceType: "video",
-        resultData: videoAnalysis
-      });
-
-      res.json(videoAnalysis);
-    } catch (error) {
-      console.error("Error generating video analysis:", error);
-      res.status(500).json({ 
-        message: "Failed to generate video analysis",
-        error: error.message 
-      });
-    }
-  });
+  // Old video route removed - using standalone /api/analysis/video instead
 
   // Transaction history
   app.get('/api/transactions', isAuthenticated, async (req: any, res) => {
@@ -1684,7 +1621,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error generating athlete comparison:", error);
       res.status(500).json({ 
         message: "Unable to generate authentic athlete comparison at this time. Please try again later.",
-        error: error.message 
+        error: error instanceof Error ? error.message : String(error)
       });
     }
   });
@@ -1935,7 +1872,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         amount,
         tokensAmount,
         paymentMethod: 'card',
-        transactionId: '369575690', // Latest Order ID from server logs
+        paymobTransactionId: '369575690', // Latest Order ID from server logs
         receiptNumber,
         cardLast4: '4889',
         cardBrand: 'Mastercard'
@@ -1981,7 +1918,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         amount,
         tokensAmount,
         paymentMethod: 'card',
-        transactionId,
+        paymobTransactionId: transactionId,
         receiptNumber,
         cardLast4: '4889',
         cardBrand: 'Mastercard'

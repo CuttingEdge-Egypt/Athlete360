@@ -77,3 +77,12 @@ Preferred communication style: Simple, everyday language.
 - **Vite**: Fast build tool.
 - **ESBuild**: Fast JavaScript bundler.
 - **TypeScript**: Static type checking.
+
+## Recent Changes
+
+### Video Analysis System Fixes (August 12, 2025)
+- **Removed athlete_id dependency**: Video analysis now works independently without requiring athlete profiles
+- **Fixed API integration**: Switched from failed file upload API to working base64 encoding approach for Google Gemini
+- **Cleaned up duplicate routes**: Removed conflicting video analysis endpoints, keeping only the standalone `/api/analysis/video` route
+- **Fixed TypeScript errors**: Resolved all 12 TypeScript compilation errors in routes.ts
+- **Enhanced error handling**: Improved error messages and proper null/undefined handling throughout the codebase
