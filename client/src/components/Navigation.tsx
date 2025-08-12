@@ -80,26 +80,20 @@ export function Navigation() {
             <HistoryDropdown />
             <ReferralDropdown />
             
-            {user?.profileImageUrl ? (
-              <img 
-                src={user.profileImageUrl} 
-                alt="Profile" 
-                className="w-8 h-8 rounded-full object-cover"
-              />
-            ) : (
-              <UserIcon className="text-gray-300 w-8 h-8" />
-            )}
-            
-            <Link href="/account">
-              <Button 
-                data-testid="button-account"
-                variant="ghost" 
-                size="sm"
-                className="text-gray-300 hover:text-white"
-              >
-                <UserIcon size={16} />
-                <span className="hidden sm:inline ml-2">Account</span>
-              </Button>
+            <Link href="/account" className="cursor-pointer">
+              {user?.profileImageUrl ? (
+                <img 
+                  src={user.profileImageUrl} 
+                  alt="Profile" 
+                  className="w-8 h-8 rounded-full object-cover hover:ring-2 hover:ring-blue-400 transition-all"
+                  data-testid="profile-image-account-link"
+                />
+              ) : (
+                <UserIcon 
+                  className="text-gray-300 hover:text-white w-8 h-8 transition-colors" 
+                  data-testid="profile-icon-account-link"
+                />
+              )}
             </Link>
             
             <Button 
