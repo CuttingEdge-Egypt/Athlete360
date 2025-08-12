@@ -217,28 +217,6 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
 
           <TabsContent value="payment" className="mt-6 flex-1 flex flex-col overflow-hidden">
             <div className="space-y-6 flex-1 overflow-y-auto pr-2">
-              {/* Free Trial Benefits */}
-              <div className="flex items-start gap-3 p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                <Gift className="h-5 w-5 text-green-600 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold text-green-800 dark:text-green-200">Free Trial Benefits</h4>
-                  <ul className="text-sm text-green-700 dark:text-green-300 mt-1 space-y-1">
-                    <li>• 1,000 free tokens to start analyzing athletes</li>
-                    <li>• No money will be charged during signup</li>
-                    <li>• Card is only for future token purchases</li>
-                    <li>• Cancel anytime with no obligations</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Security Notice */}
-              <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <Shield className="h-4 w-4 text-blue-600" />
-                <span className="text-sm text-blue-700 dark:text-blue-300">
-                  Your payment information is encrypted and secure
-                </span>
-              </div>
-
               <Card className="border-gray-200 dark:border-gray-700 shadow-sm">
                 <CardHeader className="pb-6">
                   <CardTitle className="flex items-center gap-2 text-xl">
@@ -304,10 +282,38 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
                 
                 </CardContent>
               </Card>
+
+              {/* Benefits and Security Notice - Side by Side */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+                {/* Free Trial Benefits */}
+                <div className="flex items-start gap-3 p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <Gift className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-green-800 dark:text-green-200 text-sm">Free Trial Benefits</h4>
+                    <ul className="text-xs text-green-700 dark:text-green-300 mt-1 space-y-0.5">
+                      <li>• 1,000 free tokens to start</li>
+                      <li>• No charges during signup</li>
+                      <li>• Card for future purchases</li>
+                      <li>• Cancel anytime</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Security Notice */}
+                <div className="flex items-center gap-2 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <Shield className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-blue-800 dark:text-blue-200 text-sm">Secure Payment</h4>
+                    <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                      Your payment information is encrypted and secure
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
             
             {/* Fixed bottom action buttons */}
-            <div className="flex flex-col gap-3 pt-6 border-t border-gray-200 dark:border-gray-700 mt-6 bg-gradient-to-r from-gray-50/50 to-blue-50/50 dark:from-gray-800/50 dark:to-blue-900/20 -mx-6 px-6 rounded-b-lg">
+            <div className="flex flex-col gap-3 pt-6 border-t border-gray-200 dark:border-gray-700 mt-6 -mx-6 px-6">
               <Button 
                 onClick={handleCardSubmit}
                 disabled={isProcessing}
