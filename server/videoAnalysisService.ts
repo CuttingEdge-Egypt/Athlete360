@@ -13,11 +13,10 @@ const genai = new GoogleGenerativeAI(GEMINI_API_KEY);
 const generationConfig = {
   temperature: 0,
   maxOutputTokens: 8192,
-  responseMimeType: "application/json",
 };
 
 const model = genai.getGenerativeModel({
-  model: "gemini-2.0-flash-exp",
+  model: "gemini-1.5-pro",
   generationConfig,
 });
 
@@ -195,12 +194,30 @@ Return JSON format:
     // Make 5 parallel API calls (like Python version)
     console.log(`[PROCESS_VIDEO_GEMINI] Making 5 parallel analysis calls...`);
     
+    // Create separate model instances for different response types
+    const textModel = genai.getGenerativeModel({
+      model: "gemini-1.5-pro",
+      generationConfig: {
+        temperature: 0,
+        maxOutputTokens: 8192,
+      }
+    });
+
+    const jsonModel = genai.getGenerativeModel({
+      model: "gemini-1.5-pro", 
+      generationConfig: {
+        temperature: 0,
+        maxOutputTokens: 8192,
+        responseMimeType: "application/json",
+      }
+    });
+    
     const [responseMatch, responseScore, responsePunch, responseKickNo, responseYellowCards] = await Promise.all([
-      model.generateContent([videoData, promptMatch]),
-      model.generateContent([videoData, promptScore]),
-      model.generateContent([videoData, promptPunch]),
-      model.generateContent([videoData, promptKickNo]),
-      model.generateContent([videoData, promptYellowCards])
+      textModel.generateContent([videoData, promptMatch]),
+      jsonModel.generateContent([videoData, promptScore]),
+      jsonModel.generateContent([videoData, promptPunch]),
+      jsonModel.generateContent([videoData, promptKickNo]),
+      jsonModel.generateContent([videoData, promptYellowCards])
     ]);
 
     console.log(`[PROCESS_VIDEO_GEMINI] All 5 analysis calls completed`);
