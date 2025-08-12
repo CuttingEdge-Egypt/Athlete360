@@ -48,31 +48,30 @@ export default function PaymentCenter() {
   const handleCardSelected = async (selectedCard: SavedCard | null) => {
     if (!selectedPackage) return;
     
+    // Close card selection modal
+    setShowCardSelection(false);
+    
     setIsProcessing(true);
     try {
-      // Create payment intent with or without card info
-      const intentPayload: any = {
+      // Create payment intent - always use fresh card input through Paymob iframe
+      // Don't pass saved card tokens to avoid "last 4 digits only" issue
+      const intentPayload = {
         amount: selectedPackage.price,
         tokensAmount: selectedPackage.tokens
       };
 
-      // If using saved card, include card info
-      if (selectedCard) {
-        intentPayload.cardToken = selectedCard.cardToken;
-        intentPayload.cardLast4 = selectedCard.cardLast4;
-        intentPayload.cardBrand = selectedCard.cardBrand;
-      }
+      console.log('🔄 Creating payment intent for fresh card input:', intentPayload);
 
       const intentResponse = await apiRequest('POST', '/api/payments/create-intent', intentPayload);
       const intentData = await intentResponse.json();
       
-      // Open Paymob iframe
+      // Open Paymob iframe for fresh card entry
       console.log('Payment intent response:', intentData);
       setPaymentIframeUrl(intentData.iframeUrl);
 
       toast({
         title: "Payment initiated",
-        description: "Opening payment window...",
+        description: "Enter your complete card details in the payment window",
       });
 
     } catch (error: any) {
@@ -84,7 +83,6 @@ export default function PaymentCenter() {
       });
     } finally {
       setIsProcessing(false);
-      setSelectedPackage(null);
     }
   };
 

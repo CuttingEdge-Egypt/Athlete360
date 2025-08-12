@@ -119,7 +119,7 @@ export function CardSelectionModal({
                   ) : (
                     <Plus className="mr-2" size={16} />
                   )}
-                  Add New Card
+                  Enter New Card Details
                 </Button>
               </div>
             </>
