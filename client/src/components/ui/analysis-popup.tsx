@@ -236,14 +236,30 @@ export function AnalysisPopup({
   const generateNutritionPlan = useMutation({
     mutationFn: async () => {
       if (!athleteId) throw new Error("Athlete ID required");
-      return apiRequest("POST", `/api/analysis/${athleteId}/nutrition?currentWeight=${encodeURIComponent(currentWeight)}&age=${encodeURIComponent(age)}&target=${encodeURIComponent(nutritionTarget)}&cuisine=${encodeURIComponent(preferredCuisine)}`);
+      // Add timestamp to force fresh data and prevent caching
+      const timestamp = Date.now();
+      return apiRequest("POST", `/api/analysis/${athleteId}/nutrition?currentWeight=${encodeURIComponent(currentWeight)}&age=${encodeURIComponent(age)}&target=${encodeURIComponent(nutritionTarget)}&cuisine=${encodeURIComponent(preferredCuisine)}&timestamp=${timestamp}`);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       setShowInputForm(false);
       toast({ title: "Nutrition Plan Generated", description: "Personalized nutrition plan created successfully" });
+      
+      // Aggressively invalidate all related queries to force refresh
       queryClient.invalidateQueries({ queryKey: [`/api/analysis/${athleteId}/nutrition`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/analysis-logs`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/auth/user`] });
+      queryClient.removeQueries({ queryKey: [`/api/analysis/${athleteId}/nutrition`] });
+      
+      // Force a complete refresh of the parent component
+      onOpenChange(false);
+      if (onRefresh) onRefresh();
+      
+      console.log('Nutrition plan generated successfully:', data);
     },
-    onError: () => toast({ title: "Generation Failed", description: "Could not create nutrition plan", variant: "destructive" })
+    onError: (error) => {
+      console.error('Nutrition plan generation failed:', error);
+      toast({ title: "Generation Failed", description: "Could not create nutrition plan", variant: "destructive" });
+    }
   });
 
   const handleExportToPDF = async () => {

@@ -193,7 +193,8 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
   );
 
   const renderNutritionPlan = (data: any) => {
-    console.log('Frontend Nutrition Data:', JSON.stringify(data, null, 2));
+    console.log('Frontend Nutrition Data RECEIVED:', JSON.stringify(data, null, 2));
+    console.log('Data timestamp check:', data.generatedAt, data.sessionId);
     
     // Enhanced data structure support - check both old and new formats
     const meals = data.meals?.breakfast ? [
