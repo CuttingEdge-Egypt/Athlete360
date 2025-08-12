@@ -11,18 +11,61 @@ import Subscribe from "@/pages/subscribe";
 import AthleteAnalysis from "@/pages/athlete-analysis";
 import PaymentCenter from "@/pages/payment-center";
 import { SignupWithCard } from "@/components/ui/signup-with-card";
+import { SignupFlow } from "@/components/ui/signup-flow";
 import { useState, useEffect } from "react";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
   const [showSignupModal, setShowSignupModal] = useState(false);
 
-  // Check if user needs to complete signup (no card on file)
+  // Check if user needs to complete signup (no card on file) or has pending signup data
   useEffect(() => {
-    if (isAuthenticated && user && !user.cardToken) {
-      setShowSignupModal(true);
+    if (isAuthenticated && user) {
+      const pendingSignupData = sessionStorage.getItem('pendingSignupData');
+      
+      if (pendingSignupData) {
+        // User just completed Replit auth flow, now complete signup with stored data
+        completeSignupWithStoredData(JSON.parse(pendingSignupData));
+      } else if (!user.cardToken) {
+        // User needs to complete signup normally
+        setShowSignupModal(true);
+      }
     }
   }, [isAuthenticated, user]);
+
+  // Complete signup with data stored during signup flow
+  const completeSignupWithStoredData = async (signupData: any) => {
+    try {
+      const response = await fetch('/api/auth/complete-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          cardToken: signupData.cardDetails.cardToken,
+          cardLast4: signupData.cardDetails.cardLast4,
+          cardBrand: signupData.cardDetails.cardBrand,
+          paymobCustomerId: signupData.cardDetails.paymobCustomerId,
+          referralCode: signupData.referralCode
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Clear stored data
+        sessionStorage.removeItem('pendingSignupData');
+        
+        // Refresh page to update user data
+        window.location.reload();
+      } else {
+        throw new Error(result.message || 'Signup completion failed');
+      }
+    } catch (error) {
+      console.error('Error completing signup:', error);
+      // Fallback to normal signup modal
+      setShowSignupModal(true);
+    }
+  };
 
   // Handle signup completion
   const handleSignupComplete = (updatedUser: any) => {
