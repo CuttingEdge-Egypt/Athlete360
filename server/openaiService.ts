@@ -830,69 +830,89 @@ Create a plan for the full duration specified. Use authentic data and personaliz
   }
 }
 
-// GPT-5 implementation of enhanced nutrition plan generation
+// GPT-5 implementation of enhanced nutrition plan generation with nationality adaptation
 export async function generateNutritionPlan(athleteName: string, sport: string, currentWeight: string, target: string, cuisine: string, age: string, athleteData?: any): Promise<any> {
-  const prompt = `Create a personalized sports nutrition plan for ${athleteName}, a ${sport} athlete.
+  const athleteCountry = athleteData?.country || 'Unknown';
+  
+  const prompt = `You are an expert sports nutritionist specializing in ${sport}. Create a comprehensive nutrition plan for athlete "${athleteName}" from ${athleteCountry}.
 
-  Athlete Details:
-  - Name: ${athleteName}
-  - Age: ${age} years
-  - Weight: ${currentWeight}
-  - Goal: ${target}
-  - Cuisine: ${cuisine}
-  - Sport: ${sport}
-  - Bio: ${athleteData?.bio?.substring(0, 300) || 'Professional athlete'}
-  - Rank: ${athleteData?.rank || 'N/A'}
-  - Country: ${athleteData?.country || 'N/A'}
+CRITICAL: Return only valid JSON. No extra text or explanations.
 
-  Based on ${athleteName}'s specific profile and ${sport} requirements, create a tailored nutrition plan.
+Athlete Profile:
+- Name: ${athleteName}
+- Age: ${age} years
+- Current Weight: ${currentWeight}
+- Sport: ${sport}
+- Target: ${target}
+- Country: ${athleteCountry}
+- Preferred Cuisine: ${cuisine}
+- Biography: ${athleteData?.bio?.substring(0, 300) || 'Professional athlete'}
+- Competition Record: ${athleteData?.competitionRecord || 'N/A'}
 
-  Return ONLY this JSON structure:
-  {
-    "currentWeight": "${currentWeight}",
-    "age": "${age}",
-    "target": "${target}",
-    "cuisine": "${cuisine}",
-    "dailyCalories": "2800-3200 kcal",
-    "macros": {
-      "protein": "25%",
-      "carbs": "50%",
-      "fats": "25%"
-    },
-    "meals": {
-      "breakfast": [{
-        "name": "Power Breakfast",
-        "description": "High-energy morning meal",
-        "calories": "650 kcal",
-        "timing": "7:00 AM",
-        "benefits": "Energy boost"
-      }],
-      "lunch": [{
-        "name": "Recovery Lunch", 
-        "description": "Balanced midday meal",
-        "calories": "800 kcal",
-        "timing": "12:30 PM",
-        "benefits": "Sustained energy"
-      }],
-      "dinner": [{
-        "name": "Repair Dinner",
-        "description": "Protein-rich evening meal",
-        "calories": "700 kcal", 
-        "timing": "7:00 PM",
-        "benefits": "Muscle recovery"
-      }],
-      "snacks": [{
-        "name": "Quick Fuel",
-        "description": "Pre/post training snack",
-        "calories": "250 kcal",
-        "timing": "Pre-training",
-        "benefits": "Quick energy"
-      }]
-    },
-    "hydration": "3.5-4 liters daily",
-    "supplements": ["Protein powder", "Multivitamin"],
-    "notes": "Plan tailored for ${target} goal"
-  }`;
+IMPORTANT: Create authentic, nationality-specific meal recommendations:
+- Use traditional foods and dishes from ${athleteCountry}
+- Include culturally appropriate meal timing and preparation methods
+- Respect dietary customs and food availability in ${athleteCountry}
+- Incorporate local ingredients and cooking styles
+- Adapt portion sizes to cultural norms while meeting athletic needs
+
+For example:
+- If Egyptian: Include ful medames, koshari, grilled fish, dates, Egyptian bread
+- If Korean: Include kimchi, bulgogi, bibimbap, rice dishes, traditional soups
+- If Mexican: Include quinoa, beans, corn tortillas, fresh vegetables, traditional proteins
+- If Italian: Include pasta, olive oil, fresh vegetables, lean meats, regional specialties
+
+Return this exact JSON structure with authentic ${athleteCountry} foods:
+{
+  "currentWeight": "${currentWeight}",
+  "age": "${age}",
+  "target": "${target}",
+  "cuisine": "${cuisine}",
+  "nationality": "${athleteCountry}",
+  "dailyCalories": "2800-3200 kcal",
+  "macros": {
+    "protein": "25%",
+    "carbs": "50%",
+    "fats": "25%"
+  },
+  "meals": {
+    "breakfast": [{
+      "name": "Traditional ${athleteCountry} Athletic Breakfast",
+      "description": "Authentic morning meal with ${athleteCountry} foods",
+      "calories": "650 kcal",
+      "timing": "7:00 AM",
+      "benefits": "Energy boost with familiar flavors",
+      "foods": ["Specific ${athleteCountry} breakfast foods"]
+    }],
+    "lunch": [{
+      "name": "${athleteCountry} Power Lunch", 
+      "description": "Traditional midday meal adapted for athletes",
+      "calories": "800 kcal",
+      "timing": "12:30 PM",
+      "benefits": "Sustained energy",
+      "foods": ["Specific ${athleteCountry} lunch foods"]
+    }],
+    "dinner": [{
+      "name": "${athleteCountry} Recovery Dinner",
+      "description": "Traditional evening meal for muscle recovery",
+      "calories": "700 kcal", 
+      "timing": "7:00 PM",
+      "benefits": "Muscle recovery",
+      "foods": ["Specific ${athleteCountry} dinner foods"]
+    }],
+    "snacks": [{
+      "name": "${athleteCountry} Training Fuel",
+      "description": "Traditional snacks for training",
+      "calories": "250 kcal",
+      "timing": "Pre-training",
+      "benefits": "Quick energy",
+      "foods": ["Traditional ${athleteCountry} snack foods"]
+    }]
+  },
+  "hydration": "Hydration adapted to ${athleteCountry} climate",
+  "supplements": ["Supplements available in ${athleteCountry}"],
+  "culturalNotes": "How this plan respects ${athleteCountry} food culture"
+}`;
 
   try {
     const response = await openai.chat.completions.create({
