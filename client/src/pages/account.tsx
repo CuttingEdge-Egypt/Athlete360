@@ -209,8 +209,7 @@ export default function Account() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-white">
-      <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Account Settings</h1>
@@ -558,6 +557,5 @@ export default function Account() {
           </CardContent>
         </Card>
       </div>
-    </div>
   );
 }

@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigation } from "@/components/Navigation";
+
 import { ServiceCard } from "@/components/ui/service-card";
 import { TokenModal } from "@/components/ui/token-modal";
 import { TestingPanel } from "@/components/ui/testing-panel";
@@ -260,11 +260,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-athlete-primary text-white">
-      <Navigation />
-      
-      <div className="pt-20 pb-20">
-        <div className="container mx-auto px-4">
+    <div className="container mx-auto px-4">
           {/* Welcome Section */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-4 text-white">
@@ -500,25 +496,23 @@ export default function Home() {
               <TestingPanel />
             </TabsContent>
           </Tabs>
+
+          <TokenModal 
+            open={showTokenModal} 
+            onOpenChange={setShowTokenModal}
+          />
+
+          {showBioPopup && bioData && selectedAthlete && (
+            <AnalysisPopup
+              open={showBioPopup}
+              onOpenChange={setShowBioPopup}
+              type="bio"
+              data={bioData}
+              athleteName={selectedAthlete.name}
+              athleteId={selectedAthlete.id}
+              createdAt={new Date().toISOString()}
+            />
+          )}
         </div>
-      </div>
-
-      <TokenModal 
-        open={showTokenModal} 
-        onOpenChange={setShowTokenModal}
-      />
-
-      {showBioPopup && bioData && selectedAthlete && (
-        <AnalysisPopup
-          open={showBioPopup}
-          onOpenChange={setShowBioPopup}
-          type="bio"
-          data={bioData}
-          athleteName={selectedAthlete.name}
-          athleteId={selectedAthlete.id}
-          createdAt={new Date().toISOString()}
-        />
-      )}
-    </div>
   );
 }

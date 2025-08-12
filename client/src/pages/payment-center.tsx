@@ -167,7 +167,8 @@ export default function PaymentCenter() {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
+    <div className="min-h-screen bg-athlete-primary text-white">
+      <div className="container mx-auto p-6 max-w-6xl">
       {/* Payment Iframe Modal */}
       {paymentIframeUrl && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -382,6 +383,7 @@ export default function PaymentCenter() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

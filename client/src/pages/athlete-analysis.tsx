@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute } from "wouter";
-import { Navigation } from "@/components/Navigation";
+
 import { AnalysisResult } from "@/components/ui/analysis-result";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -81,11 +81,7 @@ export default function AthleteAnalysis() {
   }
 
   return (
-    <div className="min-h-screen bg-athlete-primary text-white">
-      <Navigation />
-      
-      <div className="pt-20 pb-20">
-        <div className="container mx-auto px-4">
+    <div className="container mx-auto px-4">
           {/* Header */}
           <div className="mb-8">
             <Button 
@@ -244,7 +240,5 @@ export default function AthleteAnalysis() {
             </TabsContent>
           </Tabs>
         </div>
-      </div>
-    </div>
   );
 }
