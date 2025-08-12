@@ -176,7 +176,7 @@ export const referrals = pgTable("referrals", {
 export const analysisLogs = pgTable("analysis_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id),
-  athleteId: varchar("athlete_id").notNull().references(() => athletes.id),
+  athleteId: varchar("athlete_id").references(() => athletes.id), // Made nullable for general video analysis
   serviceType: varchar("service_type").notNull(),
   resultData: jsonb("result_data"),
   shared: boolean("shared").default(false),
