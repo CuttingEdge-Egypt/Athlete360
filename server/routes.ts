@@ -1282,7 +1282,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(nutritionPlan);
     } catch (error) {
       console.error("Error generating nutrition plan:", error);
-      res.status(500).json({ message: "Failed to generate nutrition plan" });
+      res.status(500).json({ 
+        message: "Unable to generate authentic nutrition plan at this time. Please try again later.",
+        error: error.message 
+      });
     }
   });
 
@@ -1394,11 +1397,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(beatStrategies);
     } catch (error) {
       console.error("Error generating beat strategies:", error);
-      res.status(500).json({ message: "Failed to generate beat strategies" });
+      res.status(500).json({ 
+        message: "Unable to generate authentic beat strategies at this time. Please try again later.",
+        error: error.message 
+      });
     }
   });
 
-  app.post('/api/analysis/:athleteId/video-analysis', isAuthenticated, async (req: any, res) => {
+  // Video upload and analysis endpoint
+  app.post('/api/analysis/:athleteId/video-analysis', isAuthenticated, upload.single('video'), async (req: any, res) => {
     const tokenCost = 120;
     try {
       const userId = req.user.claims.sub;
@@ -1407,6 +1414,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(userId);
       if (!user || (user.tokens || 0) < tokenCost) {
         return res.status(402).json({ message: "Insufficient tokens" });
+      }
+
+      // Check if video file was uploaded
+      if (!req.file) {
+        return res.status(400).json({ message: "Video file is required for analysis" });
       }
 
       await storage.deductTokens(userId, tokenCost);
@@ -1418,86 +1430,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         serviceType: "video"
       });
 
-      // Get athlete data and check database for existing video analysis
+      // Get athlete data
       const athlete = await storage.getAthleteById(athleteId);
       if (!athlete) {
         return res.status(404).json({ message: "Athlete not found" });
       }
 
-      const sport = await storage.getSportById(athlete.sportId);
-      const sportName = sport?.name || "Unknown Sport";
+      // Extract analysis parameters from request
+      const roundToAnalyze = parseInt(req.body.round) || 1;
+      const athlete1Name = req.body.athlete1Name || athlete.name;
+      const athlete2Name = req.body.athlete2Name || "Opponent";
+
+      console.log(`Generating new video analysis for ${athlete1Name} vs ${athlete2Name}, Round ${roundToAnalyze}`);
       
-      const forceUpdate = req.query.forceUpdate === 'true'; // Check for force update parameter
-      
-      // Check for existing dynamic analysis in database (video analysis) (skip if force update)
-      const existingAnalysis = await storage.getDynamicAnalysis(athleteId);
-      
-      let videoAnalysis;
-      if (!forceUpdate && existingAnalysis.length > 0) {
-        // Use database video analysis
-        const latestAnalysis = existingAnalysis[0]; // Get most recent
-        videoAnalysis = {
-          analysisType: latestAnalysis.analysisType || "Performance Review",
-          keyFindings: latestAnalysis.findings ? [latestAnalysis.findings] : [
-            "Database analysis findings",
-            "Historical performance data",
-            "Stored technical insights"
-          ],
-          technicalInsights: [
-            "Based on stored analysis data",
-            "Historical technical patterns",
-            "Database performance metrics"
-          ],
-          recommendations: latestAnalysis.recommendations ? [latestAnalysis.recommendations] : [
-            "Database-driven recommendations",
-            "Historical improvement areas",
-            "Stored coaching insights"
-          ],
-          overallScore: 8.5, // Default score
-          comparedToAverage: "Based on database metrics"
-        };
-      } else {
-        // Generate fresh video analysis using OpenAI o3 (either no data exists or force update requested)
-        console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} video analysis for ${athlete.name}`);
-        const aiAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'video');
-        
-        // Default video analysis
-        const defaultAnalysis = {
-          analysisType: "Performance Review",
-          keyFindings: [
-            "Excellent form consistency throughout the performance",
-            "Minor timing adjustments needed in transition phases",
-            "Strong mental focus and concentration maintained"
-          ],
-          technicalInsights: [
-            "Body positioning optimal in 89% of movements",
-            "Speed execution varies by 12% from peak performance",
-            "Recovery time between actions could be improved"
-          ],
-          recommendations: [
-            "Focus on transition timing drills",
-            "Implement specific speed training protocols",
-            "Practice recovery techniques between high-intensity actions"
-          ],
-          overallScore: 8.7,
-          comparedToAverage: "+15% above peer average"
-        };
-        
-        videoAnalysis = defaultAnalysis;
-        
-        // Store video analysis in database for future use
-        try {
-          await storage.createDynamicAnalysis({
-            athleteId,
-            videoUrl: null,
-            analysisType: defaultAnalysis.analysisType,
-            findings: defaultAnalysis.keyFindings.join('; '),
-            recommendations: defaultAnalysis.recommendations.join('; ')
-          });
-        } catch (error) {
-          console.log(`Could not store video analysis: ${error}`);
-        }
-      }
+      // Use the comprehensive Gemini video analysis service
+      const videoAnalysis = await analyzeVideoFile(
+        req.file.buffer,
+        req.file.originalname,
+        roundToAnalyze,
+        athlete1Name,
+        athlete2Name
+      );
 
       await storage.createAnalysisLog({
         userId,
@@ -1509,7 +1462,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(videoAnalysis);
     } catch (error) {
       console.error("Error generating video analysis:", error);
-      res.status(500).json({ message: "Failed to generate video analysis" });
+      res.status(500).json({ 
+        message: "Failed to generate video analysis",
+        error: error.message 
+      });
     }
   });
 
@@ -1726,7 +1682,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(comparisonResult);
     } catch (error) {
       console.error("Error generating athlete comparison:", error);
-      res.status(500).json({ message: "Failed to generate comparison" });
+      res.status(500).json({ 
+        message: "Unable to generate authentic athlete comparison at this time. Please try again later.",
+        error: error.message 
+      });
     }
   });
 

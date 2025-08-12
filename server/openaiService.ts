@@ -1030,31 +1030,10 @@ Return this exact JSON structure with authentic ${athleteCountry} foods:
     console.log(`Final nutrition data being returned:`, JSON.stringify(finalData, null, 2));
     return finalData;
     
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error generating nutrition plan for ${athleteName}:`, error);
-    // Return error instead of generic fallback data
-    return {
-      currentWeight,
-      age,
-      target,
-      cuisine,
-      nationality: athleteCountry,
-      athleteName,
-      sport,
-      error: true,
-      message: `Unable to generate authentic nutrition plan for ${athleteName} at this time. Please try again later or contact support if the issue persists.`,
-      dailyCalories: "N/A",
-      macros: { protein: "N/A", carbs: "N/A", fats: "N/A" },
-      meals: {
-        breakfast: [{ name: "Analysis Unavailable", description: "Unable to generate authentic meal recommendations", calories: "N/A", timing: "N/A", benefits: "N/A", foods: [] }],
-        lunch: [{ name: "Analysis Unavailable", description: "Unable to generate authentic meal recommendations", calories: "N/A", timing: "N/A", benefits: "N/A", foods: [] }],
-        dinner: [{ name: "Analysis Unavailable", description: "Unable to generate authentic meal recommendations", calories: "N/A", timing: "N/A", benefits: "N/A", foods: [] }],
-        snacks: [{ name: "Analysis Unavailable", description: "Unable to generate authentic meal recommendations", calories: "N/A", timing: "N/A", benefits: "N/A", foods: [] }]
-      },
-      hydration: "N/A",
-      supplements: [],
-      culturalNotes: "Authentic nutrition analysis temporarily unavailable"
-    };
+    // Throw error instead of returning fallback data
+    throw new Error(`Nutrition plan generation failed for ${athleteName}: ${error?.message || 'Unknown error'}`);
   }
 }
 
@@ -1767,45 +1746,7 @@ Use only authentic data from web search. Do not include generic content or place
     
   } catch (error: any) {
     console.error(`Error generating athlete comparison for ${athlete1.name} vs ${athlete2.name}:`, error);
-    
-    // Return error instead of generic fallback data
-    return {
-      athlete1: {
-        name: athlete1.name,
-        country: athlete1.country || 'Unknown',
-        rank: athlete1.rank || 'N/A',
-        profileImageUrl: athlete1.profileImageUrl || ''
-      },
-      athlete2: {
-        name: athlete2.name,
-        country: athlete2.country || 'Unknown',
-        rank: athlete2.rank || 'N/A',
-        profileImageUrl: athlete2.profileImageUrl || ''
-      },
-      error: true,
-      message: `Unable to generate authentic comparison between ${athlete1.name} and ${athlete2.name} at this time. Please try again later or contact support if the issue persists.`,
-      strengths: { athlete1: [], athlete2: [], advantage: "even" },
-      weaknesses: { athlete1: [], athlete2: [], advantage: "even" },
-      ranking: {
-        comparison: "Analysis temporarily unavailable",
-        athlete1Trajectory: "Data not available",
-        athlete2Trajectory: "Data not available", 
-        competitiveEdge: "even"
-      },
-      headToHead: {
-        prediction: "even",
-        confidence: 50,
-        reasoning: "Authentic head-to-head analysis temporarily unavailable. Please try again later or contact support if the issue persists.",
-        keyFactors: ["Analysis unavailable"],
-        scenario: "GPT-5 analysis temporarily unavailable"
-      },
-      overallAnalysis: {
-        summary: "Authentic overall analysis temporarily unavailable. Please try again later or contact support if the issue persists.",
-        betterAthlete: "even",
-        reasonsWhy: ["Analysis unavailable"],
-        closeness: "even",
-        recommendation: "Please try again later as authentic analysis could not be generated"
-      }
-    };
+    // Throw error instead of returning fallback data
+    throw new Error(`Athlete comparison failed for ${athlete1.name} vs ${athlete2.name}: ${error.message}`);
   }
 }
