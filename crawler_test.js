@@ -12,7 +12,7 @@
  * - Ensure the application is running on port 5000
  */
 
-const puppeteer = require('puppeteer');
+import puppeteer from 'puppeteer';
 
 class Athlete360Crawler {
   constructor() {
@@ -34,9 +34,18 @@ class Athlete360Crawler {
     console.log('🚀 Starting Athlete360 Crawler Test...');
     
     this.browser = await puppeteer.launch({
-      headless: false, // Set to true for headless mode
-      slowMo: 100, // Slow down by 100ms for better visibility
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      headless: 'new', // Use new headless mode for Replit compatibility
+      slowMo: 50, // Slow down by 50ms for better reliability
+      args: [
+        '--no-sandbox', 
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+        '--window-size=1920,1080',
+        '--remote-debugging-port=9222',
+        '--disable-features=VizDisplayCompositor'
+      ]
     });
     
     this.page = await this.browser.newPage();
@@ -255,10 +264,10 @@ class TestScenarios {
 }
 
 // Export for use in other test files
-module.exports = { Athlete360Crawler, TestScenarios };
+export { Athlete360Crawler, TestScenarios };
 
 // Run the test if this file is executed directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const crawler = new Athlete360Crawler();
   
   // Handle process termination gracefully
