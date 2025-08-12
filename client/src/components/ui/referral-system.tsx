@@ -214,26 +214,11 @@ export function ReferralSystem() {
               </p>
             </div>
 
-            {/* Alternative: Show code for manual entry */}
-            <div>
-              <p className="text-sm font-medium mb-2">Or share just the code</p>
-              <div className="flex items-center gap-2">
-                <Input
-                  value={referralData.referralCode}
-                  readOnly
-                  className="font-mono text-lg text-center tracking-wider"
-                  data-testid="referral-code-display"
-                />
-                <Button
-                  variant="outline"
-                  onClick={copyReferralCode}
-                  className="flex items-center gap-2"
-                  data-testid="button-copy-code"
-                >
-                  <Copy className="h-4 w-4" />
-                  {copied ? "Copied!" : "Copy"}
-                </Button>
-              </div>
+            {/* Quick access note */}
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                <strong>💡 Quick tip:</strong> Your referral link is also available in the header next to your profile for easy access!
+              </p>
             </div>
 
             {/* Share Button */}

@@ -178,20 +178,7 @@ export function SignupWithCard({ isOpen, onClose, onComplete }: SignupWithCardPr
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {!referralCode && (
-                <div className="space-y-2">
-                  <Label htmlFor="referral">Referral Code (Optional)</Label>
-                  <Input
-                    id="referral"
-                    value={referralCode}
-                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                    placeholder="Enter 8-character code"
-                    maxLength={8}
-                    data-testid="input-referral-code"
-                  />
-                </div>
-              )}
-              {referrerName && (
+              {referralCode && referrerName && (
                 <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                   <Gift className="h-4 w-4 text-green-600" />
                   <span className="text-sm text-green-700 dark:text-green-300">
@@ -203,8 +190,14 @@ export function SignupWithCard({ isOpen, onClose, onComplete }: SignupWithCardPr
                 <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                   <Users className="h-4 w-4 text-blue-600" />
                   <span className="text-sm text-blue-700 dark:text-blue-300">
-                    Using referral code: {referralCode}
+                    Using referral link: {referralCode}
                   </span>
+                </div>
+              )}
+              {!referralCode && (
+                <div className="text-center text-muted-foreground">
+                  <p className="text-sm">No referral link detected</p>
+                  <p className="text-xs">You can still sign up and start with 1000 free tokens!</p>
                 </div>
               )}
               <Button 

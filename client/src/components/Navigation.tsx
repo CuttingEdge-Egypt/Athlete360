@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { HistoryDropdown } from "@/components/ui/history-dropdown";
+import { ReferralDropdown } from "@/components/ui/referral-dropdown";
 import { Trophy, Coins, Plus, LogOut, User as UserIcon } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -74,9 +75,10 @@ export function Navigation() {
             </Badge>
           </div>
 
-          {/* History and User Menu */}
+          {/* History, Referral, and User Menu */}
           <div className="flex items-center space-x-2">
             <HistoryDropdown />
+            <ReferralDropdown />
             
             {user?.profileImageUrl ? (
               <img 
