@@ -10,6 +10,7 @@ import Home from "@/pages/home";
 import Subscribe from "@/pages/subscribe";
 import AthleteAnalysis from "@/pages/athlete-analysis";
 import PaymentCenter from "@/pages/payment-center";
+import Account from "@/pages/account";
 import { SignupWithCard } from "@/components/ui/signup-with-card";
 import { SignupFlow } from "@/components/ui/signup-flow";
 import { useState, useEffect } from "react";
@@ -85,6 +86,7 @@ function Router() {
             <Route path="/subscribe" component={Subscribe} />
             <Route path="/athlete/:id" component={AthleteAnalysis} />
             <Route path="/payment-center" component={PaymentCenter} />
+            <Route path="/account" component={Account} />
           </>
         )}
         <Route component={NotFound} />

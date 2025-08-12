@@ -90,6 +90,18 @@ export function Navigation() {
               <UserIcon className="text-gray-300 w-8 h-8" />
             )}
             
+            <Link href="/account">
+              <Button 
+                data-testid="button-account"
+                variant="ghost" 
+                size="sm"
+                className="text-gray-300 hover:text-white"
+              >
+                <UserIcon size={16} />
+                <span className="hidden sm:inline ml-2">Account</span>
+              </Button>
+            </Link>
+            
             <Button 
               onClick={handleLogout}
               data-testid="button-logout"

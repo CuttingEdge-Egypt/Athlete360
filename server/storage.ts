@@ -50,6 +50,19 @@ export interface IStorage {
   generateReferralCode(userId: string): Promise<string>;
   getUserByReferralCode(referralCode: string): Promise<User | undefined>;
 
+  // User profile management
+  updateUserProfile(userId: string, profileData: { firstName: string; lastName: string; email: string }): Promise<User>;
+  getUserPaymentCards(userId: string): Promise<any[]>;
+  addPaymentCard(userId: string, cardData: {
+    cardLast4: string;
+    cardBrand: string;
+    expiryMonth: string;
+    expiryYear: string;
+    cardholderName: string;
+    isDefault: boolean;
+  }): Promise<any>;
+  removePaymentCard(userId: string, cardId: string): Promise<void>;
+
   // Sports operations
   getAllSports(): Promise<Sport[]>;
   getSportById(id: string): Promise<Sport | undefined>;
@@ -189,6 +202,84 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return updatedUser;
+  }
+
+  // User profile management
+  async updateUserProfile(userId: string, profileData: { firstName: string; lastName: string; email: string }): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        ...profileData,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async getUserPaymentCards(userId: string): Promise<any[]> {
+    // For now, return the user's stored card info from the user table
+    // In a real app, this would query a separate payment_cards table
+    const user = await this.getUser(userId);
+    if (!user || !user.paymentCardLast4) {
+      return [];
+    }
+
+    return [{
+      id: 'default',
+      cardLast4: user.paymentCardLast4,
+      cardBrand: user.paymentCardBrand || 'Unknown',
+      expiryMonth: user.paymentCardExpiry?.split('/')[0] || '',
+      expiryYear: user.paymentCardExpiry?.split('/')[1] || '',
+      isDefault: true,
+      createdAt: user.createdAt
+    }];
+  }
+
+  async addPaymentCard(userId: string, cardData: {
+    cardLast4: string;
+    cardBrand: string;
+    expiryMonth: string;
+    expiryYear: string;
+    cardholderName: string;
+    isDefault: boolean;
+  }) {
+    // For simplicity, we'll update the user's primary card info
+    // In a real app, this would insert into a separate payment_cards table
+    const [user] = await db
+      .update(users)
+      .set({
+        paymentCardLast4: cardData.cardLast4,
+        paymentCardBrand: cardData.cardBrand,
+        paymentCardExpiry: `${cardData.expiryMonth}/${cardData.expiryYear}`,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+
+    return {
+      id: 'default',
+      cardLast4: cardData.cardLast4,
+      cardBrand: cardData.cardBrand,
+      expiryMonth: cardData.expiryMonth,
+      expiryYear: cardData.expiryYear,
+      isDefault: true,
+      createdAt: new Date()
+    };
+  }
+
+  async removePaymentCard(userId: string, cardId: string) {
+    // For simplicity, we'll clear the user's primary card info
+    // In a real app, this would delete from a separate payment_cards table
+    await db
+      .update(users)
+      .set({
+        paymentCardLast4: null,
+        paymentCardBrand: null,
+        paymentCardExpiry: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
   }
 
   // Sports operations

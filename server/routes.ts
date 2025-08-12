@@ -32,6 +32,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User profile and account management routes
+  app.get('/api/user/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      const cards = await storage.getUserPaymentCards(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const profileData = {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        currentTokens: user.tokens || 0,
+        totalTokensPurchased: user.totalTokensPurchased || 0,
+        memberSince: user.createdAt,
+        cards: cards || []
+      };
+
+      res.json(profileData);
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      res.status(500).json({ message: "Failed to fetch user profile" });
+    }
+  });
+
+  app.put('/api/user/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { firstName, lastName, email } = req.body;
+
+      const updatedUser = await storage.updateUserProfile(userId, {
+        firstName,
+        lastName,
+        email
+      });
+
+      res.json({ message: "Profile updated successfully", user: updatedUser });
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      res.status(500).json({ message: "Failed to update user profile" });
+    }
+  });
+
+  app.post('/api/user/cards', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { cardNumber, expiryMonth, expiryYear, cvv, cardholderName } = req.body;
+
+      // Basic validation
+      if (!cardNumber || !expiryMonth || !expiryYear || !cvv || !cardholderName) {
+        return res.status(400).json({ message: "All card details are required" });
+      }
+
+      const cardLast4 = cardNumber.slice(-4);
+      const cardBrand = getCardBrand(cardNumber);
+
+      const card = await storage.addPaymentCard(userId, {
+        cardLast4,
+        cardBrand,
+        expiryMonth,
+        expiryYear,
+        cardholderName,
+        isDefault: false
+      });
+
+      res.json({ message: "Payment card added successfully", card });
+    } catch (error) {
+      console.error("Error adding payment card:", error);
+      res.status(500).json({ message: "Failed to add payment card" });
+    }
+  });
+
+  app.delete('/api/user/cards/:cardId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { cardId } = req.params;
+
+      await storage.removePaymentCard(userId, cardId);
+      res.json({ message: "Payment card removed successfully" });
+    } catch (error) {
+      console.error("Error removing payment card:", error);
+      res.status(500).json({ message: "Failed to remove payment card" });
+    }
+  });
+
   // Sports routes
   app.get('/api/sports', async (req, res) => {
     try {
@@ -2092,4 +2180,16 @@ Format as JSON:
 
   const httpServer = createServer(app);
   return httpServer;
+}
+
+// Helper function to detect card brand
+function getCardBrand(cardNumber: string): string {
+  const number = cardNumber.replace(/\D/g, '');
+  
+  if (number.match(/^4/)) return 'Visa';
+  if (number.match(/^5[1-5]/)) return 'Mastercard';
+  if (number.match(/^3[47]/)) return 'American Express';
+  if (number.match(/^6011/)) return 'Discover';
+  
+  return 'Unknown';
 }
