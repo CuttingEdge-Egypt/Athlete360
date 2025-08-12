@@ -997,35 +997,79 @@ export async function generateSpecificAnalysis(athleteName: string, sport: strin
   if (analysisType === 'rank' && athleteData) {
     // Use the new enhanced rank history generation
     return await generateRankHistory(athleteName, sport, athleteData.country);
-  } else if (analysisType === 'weaknesses' && athleteData) {
-    prompt = `As an expert ${sport} coach and analyst, analyze the specific weaknesses and areas for improvement for athlete "${athleteName}".
+  } else if (analysisType === 'strengths' && athleteData) {
+    prompt = `You are an expert ${sport} coach and analyst. Research and analyze the specific competitive strengths of athlete "${athleteName}" from ${athleteData.country || 'unknown country'}.
 
-    Use the following athlete information to provide personalized analysis:
-    - Biography: ${athleteData.bio || 'N/A'}
-    - Current Rank: ${athleteData.rank || 'N/A'}
-    - Country: ${athleteData.country || 'N/A'}
-    - Recent Competition Record: ${athleteData.competitionRecord || 'N/A'}
-    - Known Achievements: ${athleteData.achievements?.join(', ') || 'N/A'}
+CRITICAL: Return only valid JSON. No extra text or explanations.
 
-    Search the web for recent competition footage, match results, and expert commentary about ${athleteName}'s performance to identify specific weaknesses.
+Use the following athlete information for personalized analysis:
+- Name: ${athleteName}
+- Sport: ${sport}
+- Country: ${athleteData.country || 'N/A'}
+- Biography: ${athleteData.bio || 'N/A'}
+- Current Rank: ${athleteData.rank || 'N/A'}
+- Competition Record: ${athleteData.competitionRecord || 'N/A'}
+- Achievements: ${athleteData.achievements?.join(', ') || 'N/A'}
 
-    Provide 3-4 specific, actionable weaknesses based on:
-    1. Technical deficiencies observed in recent competitions
-    2. Tactical vulnerabilities exploited by opponents
-    3. Physical or mental limitations affecting performance
-    4. Strategic gaps compared to top-ranked athletes in ${sport}
+Search the web for recent competition footage, match results, and expert commentary about ${athleteName}'s performance to identify specific strengths.
 
-    Format as JSON:
+Provide 3-4 specific, evidence-based strengths based on:
+- Technical skills unique to this athlete
+- Tactical advantages in competition
+- Physical attributes that give competitive edge
+- Mental/psychological strengths shown in matches
+- Signature techniques or fighting style elements
+
+Return this exact JSON structure:
+{
+  "strengths": [
     {
-      "weaknesses": [
-        {
-          "title": "Specific weakness title",
-          "description": "Detailed analysis of this weakness with evidence from recent competitions",
-          "impact": "high|medium|low",
-          "improvement_timeline": "short-term|medium-term|long-term"
-        }
-      ]
-    }`;
+      "title": "Specific strength name",
+      "description": "Detailed analysis with evidence from competitions and expert observations",
+      "rating": 95,
+      "evidence": "Specific examples from matches or competitions",
+      "impact": "high"
+    }
+  ]
+}
+
+Use authentic data only - base analysis on real competition results and verified performance data.`;
+  } else if (analysisType === 'weaknesses' && athleteData) {
+    prompt = `You are an expert ${sport} coach and analyst. Research and analyze the specific weaknesses and areas for improvement for athlete "${athleteName}" from ${athleteData.country || 'unknown country'}.
+
+CRITICAL: Return only valid JSON. No extra text or explanations.
+
+Use the following athlete information for personalized analysis:
+- Name: ${athleteName}
+- Sport: ${sport}
+- Country: ${athleteData.country || 'N/A'}
+- Biography: ${athleteData.bio || 'N/A'}
+- Current Rank: ${athleteData.rank || 'N/A'}
+- Competition Record: ${athleteData.competitionRecord || 'N/A'}
+- Achievements: ${athleteData.achievements?.join(', ') || 'N/A'}
+
+Search the web for recent competition footage, match results, and expert commentary about ${athleteName}'s performance to identify specific weaknesses.
+
+Provide 3-4 specific, actionable weaknesses based on:
+- Technical deficiencies observed in recent competitions
+- Tactical vulnerabilities exploited by opponents
+- Physical or mental limitations affecting performance
+- Strategic gaps compared to top-ranked athletes in ${sport}
+
+Return this exact JSON structure:
+{
+  "weaknesses": [
+    {
+      "title": "Specific weakness title",
+      "description": "Detailed analysis with evidence from recent competitions and expert observations",
+      "impact": "high",
+      "improvement_timeline": "short-term",
+      "evidence": "Specific examples from matches or competitions"
+    }
+  ]
+}
+
+Use authentic data only - base analysis on real competition results and verified performance data.`;
   } else if (analysisType === 'beat-strategies' && athleteData) {
     prompt = `As an expert ${sport} coach specializing in tactical analysis, develop specific strategies to defeat athlete "${athleteName}".
 
