@@ -1297,89 +1297,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sport = await storage.getSportById(athlete.sportId);
       const sportName = sport?.name || "Unknown Sport";
       
-      const forceUpdate = req.query.forceUpdate === 'true'; // Check for force update parameter
+      // Always generate fresh athlete-specific beat strategies using GPT-5 for authentic analysis
+      console.log(`Generating new beat strategies for ${athlete.name}`);
       
-      // Check for existing beat strategies in database (skip if force update)
-      const existingStrategies = await storage.getBeatStrategies(athleteId);
+      // Get enhanced data for taekwondo athletes
+      let enhancedData = null;
+      if (sportName.toLowerCase() === 'taekwondo') {
+        try {
+          enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country);
+        } catch (error) {
+          console.error(`Failed to get enhanced taekwondo data: ${error}`);
+        }
+      }
+      
+      // Prepare athlete data for personalized analysis
+      const athleteDataForAnalysis = {
+        bio: athlete.bio,
+        rank: athlete.rank,
+        country: athlete.country,
+        achievements: athlete.achievements,
+        competitionRecord: enhancedData?.currentRecord || "N/A"
+      };
+      
+      // Generate athlete-specific beat strategies
+      const strategiesAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'beat-strategies', athleteDataForAnalysis);
       
       let beatStrategies;
-      if (!forceUpdate && existingStrategies.length > 0) {
-        // Use database beat strategies
-        beatStrategies = {
-          strategies: existingStrategies.map(s => ({
-            strategy: s.strategy,
-            description: s.description || "Strategy details"
-          })),
-          keyWeaknesses: existingStrategies.map(() => "Key weakness from database").filter(Boolean)
-        };
-      } else {
-        // Generate fresh athlete-specific beat strategies using GPT-5 (either no data exists or force update requested)
-        console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} beat strategies for ${athlete.name}`);
-        
-        // Get enhanced data for taekwondo athletes
-        let enhancedData = null;
-        if (sportName.toLowerCase() === 'taekwondo') {
-          try {
-            enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country);
-          } catch (error) {
-            console.error(`Failed to get enhanced taekwondo data: ${error}`);
-          }
-        }
-        
-        // Prepare athlete data for personalized analysis
-        const athleteDataForAnalysis = {
-          bio: athlete.bio,
-          rank: athlete.rank,
-          country: athlete.country,
-          achievements: athlete.achievements,
-          competitionRecord: enhancedData?.currentRecord || "N/A"
-        };
-        
-        // Generate athlete-specific beat strategies
-        const strategiesAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'beat-strategies', athleteDataForAnalysis);
-        
-        const aiBeatStrategies = strategiesAnalysis.strategies?.length > 0 
-          ? strategiesAnalysis.strategies.map((strategy: any) => ({
-              strategy: strategy.title,
-              description: strategy.description,
-              execution: strategy.execution || "Apply systematically during competition",
-              success_probability: strategy.success_probability || "medium",
-              risk_level: strategy.risk_level || "medium"
-            }))
-          : [
-              {
-                strategy: "Exploit Weak Side",
-                description: "Target technical weaknesses identified through AI analysis"
-              },
-              {
-                strategy: "Pressure Early", 
-                description: "Apply tactical pressure based on AI performance patterns"
-              },
-              {
-                strategy: "Endurance Challenge",
-                description: "Test stamina limitations found in AI assessment"
-              },
-              {
-                strategy: "Tactical Variation",
-                description: "Use strategic variations from AI competitive analysis"
-              }
-            ];
-        
-        const aiWeaknesses = strategiesAnalysis.keyWeaknesses || [
-              "Performance inconsistencies identified through AI analysis",
-              "Technical limitations found in AI assessment", 
-              "Strategic vulnerabilities from AI performance data"
-            ];
+      if (strategiesAnalysis.strategies?.length > 0) {
+        // Use authentic AI-generated strategies
+        const aiBeatStrategies = strategiesAnalysis.strategies.map((strategy: any) => ({
+          strategy: strategy.title,
+          description: strategy.description,
+          execution: strategy.execution || "Apply systematically during competition",
+          success_probability: strategy.success_probability || "medium",
+          risk_level: strategy.risk_level || "medium"
+        }));
         
         beatStrategies = {
           strategies: aiBeatStrategies,
-          keyWeaknesses: aiWeaknesses,
-          aiGenerated: true,
-          lastUpdated: forceUpdate ? "Force updated with OpenAI" : "Fresh OpenAI analysis"
+          keyWeaknesses: strategiesAnalysis.keyWeaknesses || []
         };
-        
-        // Store AI beat strategies in database for future use
-        for (const strategy of aiBeatStrategies) {
+      } else {
+        // If AI analysis fails, inform user that analysis couldn't be generated
+        beatStrategies = {
+          strategies: [{
+            strategy: "Analysis Unavailable",
+            description: `Unable to generate authentic strategic analysis for ${athlete.name} at this time. Please try again later or contact support if the issue persists.`,
+            execution: "N/A",
+            success_probability: "N/A",
+            risk_level: "N/A"
+          }],
+          keyWeaknesses: []
+        };
+      }
+      
+      // Store AI beat strategies in database for future reference
+      if (beatStrategies.strategies && beatStrategies.strategies.length > 0 && beatStrategies.strategies[0].strategy !== "Analysis Unavailable") {
+        for (const strategy of beatStrategies.strategies) {
           try {
             await storage.createBeatStrategy({
               athleteId,
