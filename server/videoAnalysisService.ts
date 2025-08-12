@@ -16,210 +16,233 @@ const generationConfig = {
   responseMimeType: "application/json",
 };
 
-const generationConfigMatch = {
-  temperature: 0.2,
-  maxOutputTokens: 8192,
-  responseMimeType: "application/json",
-};
-
 const model = genai.getGenerativeModel({
   model: "gemini-2.0-flash-exp",
   generationConfig,
 });
 
-const modelMatch = genai.getGenerativeModel({
-  model: "gemini-2.0-flash-exp",
-  generationConfig: generationConfigMatch,
-});
+// Process video with Gemini and return all 5 analyses in one call (like Python version)
+export async function processVideoGemini(videoFilePath: string, roundToAnalyze: number) {
+  console.log(`[PROCESS_VIDEO_GEMINI] Starting video analysis for round ${roundToAnalyze}`);
+  console.log(`[PROCESS_VIDEO_GEMINI] Video file: ${videoFilePath}`);
 
-async function prepareVideoForGemini(videoFilePath: string, mimeType?: string) {
-  console.log(`Reading video file for analysis...`);
+  let uploadedFile = null;
   
-  // Read the video file as base64
-  const videoBuffer = fs.readFileSync(videoFilePath);
-  const videoBase64 = videoBuffer.toString('base64');
-  
-  return {
-    inlineData: {
-      data: videoBase64,
-      mimeType: mimeType || "video/mp4"
-    }
-  };
-}
-
-export async function processVideoGemini(
-  videoFilePath: string, 
-  roundToAnalyze: number,
-  athlete1Name: string,
-  athlete2Name: string
-) {
-  // Combined comprehensive prompt for all analyses
-  const comprehensivePrompt = `Analyze this taekwondo video comprehensively for round ${roundToAnalyze}. Use player names: ${athlete1Name} (blue) and ${athlete2Name} (red).
-
-Please provide a complete analysis covering all aspects below. Return your response as a JSON object with the following exact structure:
-
-{
-  "match_analysis": "Write a detailed match analysis of what happened in round ${roundToAnalyze} in technical terms. Include the story of the round, match score, kick count & types for both players, punch count, technical analysis of both players' approaches and strategies, strategic adaptation, key moments/commentator notes, and a summary of who performed better and why. Take your time in processing to make sure the results are accurate.",
-  
-  "score_analysis": {
-    "players": [
-      {
-        "name": "${athlete1Name}",
-        "kicks": [
-          {
-            "timestamp": "HH:MM:SS",
-            "score": 0
-          }
-        ],
-        "total_kicks": 0,
-        "total_points": 0
-      },
-      {
-        "name": "${athlete2Name}",
-        "kicks": [
-          {
-            "timestamp": "HH:MM:SS",
-            "score": 0
-          }
-        ],
-        "total_kicks": 0,
-        "total_points": 0
-      }
-    ],
-    "summary": {
-      "total_match_score_blue": 0,
-      "total_match_score_red": 0
-    }
-  },
-  
-  "punch_analysis": {
-    "players": [
-      {
-        "name": "${athlete1Name}",
-        "Punch": [
-          {
-            "timestamp": "HH:MM:SS",
-            "score": 0
-          }
-        ],
-        "total_punches": 0
-      },
-      {
-        "name": "${athlete2Name}",
-        "Punch": [
-          {
-            "timestamp": "HH:MM:SS",
-            "score": 0
-          }
-        ],
-        "total_punches": 0
-      }
-    ]
-  },
-  
-  "kick_count_analysis": {
-    "players": [
-      {
-        "name": "${athlete1Name}",
-        "kicks": [
-          {
-            "total_kick_number": 0
-          }
-        ]
-      },
-      {
-        "name": "${athlete2Name}",
-        "kicks": [
-          {
-            "total_kick_number": 0
-          }
-        ]
-      }
-    ]
-  },
-  
-  "yellow_card_analysis": {
-    "players": [
-      {
-        "name": "${athlete1Name}",
-        "Yellow_cards": [
-          {
-            "timestamp": "HH:MM:SS",
-            "Amount": 0
-          }
-        ],
-        "total_yellows": 0
-      },
-      {
-        "name": "${athlete2Name}",
-        "Yellow_cards": [
-          {
-            "timestamp": "HH:MM:SS", 
-            "Amount": 0
-          }
-        ],
-        "total_yellows": 0
-      }
-    ]
-  }
-}
-
-Instructions:
-- Focus on the scoreboard for accurate scoring information
-- Listen to commentators for additional insights
-- If no punches are found, set Punch arrays to empty []
-- If no yellow cards are found, set Yellow_cards arrays to empty []
-- Provide realistic timestamps in HH:MM:SS format
-- Ensure all numbers are realistic based on what you observe
-- Take your time to ensure accuracy and don't mistake yellow cards for actual scores`;
-
   try {
-    console.log(`[VIDEO ANALYSIS] Starting comprehensive analysis for ${athlete1Name} vs ${athlete2Name}, Round ${roundToAnalyze}`);
-    console.log(`[VIDEO ANALYSIS] Step 1: Preparing video data...`);
+    // Upload video to Gemini File API (similar to Python genai.upload_file)
+    console.log(`[PROCESS_VIDEO_GEMINI] Uploading video file to Gemini...`);
+    const videoBuffer = fs.readFileSync(videoFilePath);
     
-    const videoData = await prepareVideoForGemini(videoFilePath);
-    console.log(`[VIDEO ANALYSIS] Step 1 Complete: Video data prepared (size: ${videoData.inlineData.data.length} chars)`);
-
-    console.log(`[VIDEO ANALYSIS] Step 2: Making single comprehensive API call to Google Gemini...`);
-    const startTime = Date.now();
-
-    const response = await model.generateContent([videoData, comprehensivePrompt]);
+    uploadedFile = await genai.uploadFile(videoFilePath, {
+      mimeType: "video/mp4",
+      displayName: `video_analysis_${Date.now()}.mp4`
+    });
     
-    const apiCallTime = Date.now() - startTime;
-    console.log(`[VIDEO ANALYSIS] Step 2 Complete: API call finished in ${apiCallTime}ms`);
-
-    console.log(`[VIDEO ANALYSIS] Step 3: Parsing comprehensive response...`);
+    console.log(`[PROCESS_VIDEO_GEMINI] File uploaded successfully: ${uploadedFile.name}`);
     
-    const responseText = response.response.text();
-    console.log(`[VIDEO ANALYSIS] Raw response length: ${responseText.length} characters`);
+    // Wait for file to be processed
+    let file = await genai.getFile(uploadedFile.name);
+    while (file.state === "PROCESSING") {
+      console.log(`[PROCESS_VIDEO_GEMINI] Waiting for file processing...`);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      file = await genai.getFile(uploadedFile.name);
+    }
+
+    if (file.state === "FAILED") {
+      throw new Error("Video file processing failed");
+    }
+
+    console.log(`[PROCESS_VIDEO_GEMINI] File ready for analysis. Starting 5 analysis calls...`);
+
+    // Define prompts for each analysis type
+    const promptMatch = `Write me a match Analysis of what happened in round ${roundToAnalyze} in technical terms. Include the story of the round.
+
+Listen to any insights the commentator might have. Here is a template:
+
+Match Score:
+Give me the final score of the match.
+
+Kick Count & Types:
+This analysis is limited by the fast action and occasional obscured views, but here are some highlights. Precise numbers are hard to determine but I will use as many markers as possible.
+
+Player 1 (Blue): Describe their technique style.
+Count of spinning kicks: Estimate based on observation
+Number of front kicks: Estimate based on observation
+
+Player 2 (Red): Describe their technique style.  
+Count of Round housekicks: Estimate based on observation
+Number of Tipi-chaji: Estimate based on observation
+
+Punch Count:
+Mention if there were any punches in the match
+
+Match Brief & Technical Analysis:
+Provide detailed technical analysis of both players' approaches and strategies.
+
+Strategic Adaptation: How each player adapted during the round.
+
+Key Moments/Commentator Notes:
+Include any key insights from commentators.
+
+Summary:
+Explain who performed better and why.
+
+Take your time in processing to make sure the results are accurate.
+Make sure you're not scanning the yellow card as an actual score.`;
+
+    const promptScore = `Identify when a player scored using the scoreboard. Focus on the scoreboard change for better accuracy. Listen to commentators they will help you reference which player scored how many points. Include final match score (from scoreboard) in the summary.
+
+Return JSON format:
+{
+  "players": [
+    {
+      "name": "Player 1",
+      "kicks": [
+        {
+          "timestamp": "HH:MM:SS",
+          "score": 0
+        }
+      ],
+      "total_kicks": 0,
+      "total_points": 0
+    },
+    {
+      "name": "Player 2", 
+      "kicks": [
+        {
+          "timestamp": "HH:MM:SS",
+          "score": 0
+        }
+      ],
+      "total_kicks": 0,
+      "total_points": 0
+    }
+  ],
+  "summary": {
+    "total_match_score_blue": 0,
+    "total_match_score_red": 0
+  }
+}`;
+
+    const promptPunch = `Watch round ${roundToAnalyze} only. Watch this taekwondo match and tell me when a player performed a punch, a punch is when a player clenches their fist and tries to hit another player. If there are no punches found let the JSON be NONE.
+
+Return JSON format:
+{
+  "players": [
+    {
+      "name": "Player 1",
+      "Punch": [
+        {
+          "timestamp": "HH:MM:SS",
+          "score": 0
+        }
+      ],
+      "total_punches": 0
+    },
+    {
+      "name": "Player 2",
+      "Punch": [
+        {
+          "timestamp": "HH:MM:SS", 
+          "score": 0
+        }
+      ],
+      "total_punches": 0
+    }
+  ]
+}`;
+
+    const promptKickNo = `Analyze this sports video and count the number of kicks for each player in round ${roundToAnalyze}.
+
+Return JSON format:
+{
+  "players": [
+    {
+      "name": "Player 1",
+      "kicks": [
+        {
+          "total_kick_number": 0
+        }
+      ]
+    },
+    {
+      "name": "Player 2",
+      "kicks": [
+        {
+          "total_kick_number": 0
+        }
+      ]
+    }
+  ]
+}`;
+
+    const promptYellowCards = `This is a taekwondo match, following taekwondo rules. By looking at the scoreboard and watching when the referee gives a warning or 'yellow card' to a player, list all yellow cards.
+
+Return JSON format:
+{
+  "players": [
+    {
+      "name": "Player 1",
+      "Yellow_cards": [
+        {
+          "timestamp": "HH:MM:SS",
+          "Amount": 0
+        }
+      ],
+      "total_yellows": 0
+    },
+    {
+      "name": "Player 2",
+      "Yellow_cards": [
+        {
+          "timestamp": "HH:MM:SS",
+          "Amount": 0
+        }
+      ],
+      "total_yellows": 0
+    }
+  ]
+}`;
+
+    // Make 5 parallel API calls (like Python version)
+    console.log(`[PROCESS_VIDEO_GEMINI] Making 5 parallel analysis calls...`);
     
-    const parsedResults = JSON.parse(responseText);
-    console.log(`[VIDEO ANALYSIS] Response parsed successfully`);
+    const [responseMatch, responseScore, responsePunch, responseKickNo, responseYellowCards] = await Promise.all([
+      model.generateContent([file, promptMatch]),
+      model.generateContent([file, promptScore]),
+      model.generateContent([file, promptPunch]),
+      model.generateContent([file, promptKickNo]),
+      model.generateContent([file, promptYellowCards])
+    ]);
 
-    // Structure results to match the expected format
-    const results = {
-      match_analysis: parsedResults.match_analysis,
-      score_analysis: parsedResults.score_analysis,
-      punch_analysis: parsedResults.punch_analysis,
-      kick_count_analysis: parsedResults.kick_count_analysis,
-      yellow_card_analysis: parsedResults.yellow_card_analysis,
-      athlete1Name,
-      athlete2Name,
-      roundAnalyzed: roundToAnalyze,
-      processedAt: new Date().toISOString()
-    };
+    console.log(`[PROCESS_VIDEO_GEMINI] All 5 analysis calls completed`);
 
-    const totalTime = Date.now() - startTime;
-    console.log(`[VIDEO ANALYSIS] Step 3 Complete: All results structured`);
-    console.log(`[VIDEO ANALYSIS] SUCCESS: Video analysis completed in ${totalTime}ms total`);
-    return results;
+    // Extract text responses
+    const matchAnalysis = responseMatch.response.text();
+    const scoreAnalysis = responseScore.response.text();
+    const punchAnalysis = responsePunch.response.text();
+    const kickCountAnalysis = responseKickNo.response.text();
+    const yellowCardAnalysis = responseYellowCards.response.text();
+
+    console.log(`[PROCESS_VIDEO_GEMINI] Analysis completed successfully`);
+
+    // Return the tuple like Python version
+    return [
+      uploadedFile,
+      matchAnalysis,
+      scoreAnalysis,
+      punchAnalysis, 
+      kickCountAnalysis,
+      yellowCardAnalysis
+    ];
 
   } catch (error) {
-    console.error('[VIDEO ANALYSIS] Error processing video with Gemini:', error);
-    throw new Error(`Video analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error(`[PROCESS_VIDEO_GEMINI] Error:`, error);
+    throw error;
   }
 }
 
+// Main function that matches the Python API pattern
 export async function analyzeVideoFile(
   videoBuffer: Buffer,
   filename: string,
@@ -227,43 +250,80 @@ export async function analyzeVideoFile(
   athlete1Name: string,
   athlete2Name: string
 ) {
-  console.log(`[ANALYZE FILE] Starting analyzeVideoFile for ${filename} (${videoBuffer.length} bytes)`);
-  console.log(`[ANALYZE FILE] Athletes: ${athlete1Name} vs ${athlete2Name}, Round: ${roundToAnalyze}`);
+  console.log(`[ANALYZE_VIDEO_FILE] Starting video analysis for ${filename} (${videoBuffer.length} bytes)`);
+  console.log(`[ANALYZE_VIDEO_FILE] Athletes: ${athlete1Name} vs ${athlete2Name}, Round: ${roundToAnalyze}`);
   
-  // Create temp directory if it doesn't exist
-  const tempDir = path.join(process.cwd(), 'temp');
-  if (!fs.existsSync(tempDir)) {
-    console.log(`[ANALYZE FILE] Creating temp directory: ${tempDir}`);
-    fs.mkdirSync(tempDir, { recursive: true });
-  }
-
-  // Save video to temporary file
-  const tempFilePath = path.join(tempDir, `video_${Date.now()}_${filename}`);
-  console.log(`[ANALYZE FILE] Saving video to temp file: ${tempFilePath}`);
-  fs.writeFileSync(tempFilePath, videoBuffer);
-  console.log(`[ANALYZE FILE] Video saved successfully, file size: ${fs.statSync(tempFilePath).size} bytes`);
+  let tempFilePath = null;
+  let videoFile = null;
 
   try {
-    console.log(`[ANALYZE FILE] Calling processVideoGemini...`);
-    const startTime = Date.now();
-    
-    const results = await processVideoGemini(
-      tempFilePath,
-      roundToAnalyze,
-      athlete1Name,
-      athlete2Name
-    );
+    // Save the uploaded video file temporarily (like Python)
+    const tempDir = path.join(process.cwd(), 'temp');
+    if (!fs.existsSync(tempDir)) {
+      console.log(`[ANALYZE_VIDEO_FILE] Creating temp directory: ${tempDir}`);
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
 
-    const totalTime = Date.now() - startTime;
-    console.log(`[ANALYZE FILE] processVideoGemini completed in ${totalTime}ms`);
-    return results;
+    // Create unique filename like Python uuid.uuid4()
+    const uuid = `video_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    tempFilePath = path.join(tempDir, `${uuid}.mp4`);
+    
+    console.log(`[ANALYZE_VIDEO_FILE] Saving video to: ${tempFilePath}`);
+    fs.writeFileSync(tempFilePath, videoBuffer);
+    console.log(`[ANALYZE_VIDEO_FILE] Video saved successfully, size: ${fs.statSync(tempFilePath).size} bytes`);
+
+    // Send the video and round number to Gemini for processing (like Python)
+    console.log(`[ANALYZE_VIDEO_FILE] Calling processVideoGemini...`);
+    const [
+      uploadedVideoFile,
+      responseMatch,
+      responseScore,
+      responsePunch,
+      responseKickNo,
+      responseYellowCards
+    ] = await processVideoGemini(tempFilePath, roundToAnalyze);
+
+    videoFile = uploadedVideoFile;
+
+    console.log(`[ANALYZE_VIDEO_FILE] Processing complete, structuring results...`);
+
+    // Return the consolidated analysis from Gemini (like Python)
+    return {
+      match_analysis: responseMatch,
+      score_analysis: responseScore,
+      punch_analysis: responsePunch,
+      kick_count_analysis: responseKickNo,
+      yellow_card_analysis: responseYellowCards,
+      athlete1Name,
+      athlete2Name,
+      roundAnalyzed: roundToAnalyze,
+      processedAt: new Date().toISOString()
+    };
+
+  } catch (error) {
+    console.error(`[ANALYZE_VIDEO_FILE] Error occurred: ${error}`);
+    console.error(`[ANALYZE_VIDEO_FILE] Stack trace:`, error instanceof Error ? error.stack : 'No stack trace');
+    throw new Error(`Video analysis failed: ${error instanceof Error ? error.message : String(error)}`);
+
   } finally {
-    // Clean up temp file
-    try {
-      fs.unlinkSync(tempFilePath);
-      console.log('[ANALYZE FILE] Temporary video file cleaned up successfully');
-    } catch (cleanupError) {
-      console.warn('[ANALYZE FILE] Failed to cleanup temp file:', cleanupError);
+    // Clean up the temporary local file (like Python)
+    if (tempFilePath && fs.existsSync(tempFilePath)) {
+      try {
+        fs.unlinkSync(tempFilePath);
+        console.log(`[ANALYZE_VIDEO_FILE] Cleaned up temporary file: ${tempFilePath}`);
+      } catch (cleanupError) {
+        console.warn(`[ANALYZE_VIDEO_FILE] Failed to cleanup temp file:`, cleanupError);
+      }
+    }
+
+    // Delete the file from Gemini's storage (like Python genai.delete_file)
+    if (videoFile) {
+      try {
+        await genai.deleteFile(videoFile.name);
+        console.log(`[ANALYZE_VIDEO_FILE] Deleted file from Gemini storage: ${videoFile.name}`);
+      } catch (deleteError) {
+        console.warn(`[ANALYZE_VIDEO_FILE] Failed to delete file from Gemini:`, deleteError);
+      }
     }
   }
 }
