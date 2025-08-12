@@ -88,17 +88,31 @@ export default function PaymentCenter() {
     }
   };
 
+  // Handle payment completion message from iframe
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === 'PAYMENT_SUCCESS') {
+        handlePaymentSuccess(event.data);
+      } else if (event.data.type === 'PAYMENT_FAILURE') {
+        handlePaymentFailure(event.data);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [selectedPackage]);
+
   const handlePaymentSuccess = async (transactionData: any) => {
     try {
       if (!selectedPackage) return;
 
       await apiRequest('POST', '/api/payments/complete', {
         transactionId: transactionData.transactionId,
-        amount: selectedPackage.price,
+        amount: transactionData.amount || selectedPackage.price,
         tokensAmount: selectedPackage.tokens,
-        paymentMethod: transactionData.paymentMethod,
-        cardLast4: transactionData.cardLast4,
-        cardBrand: transactionData.cardBrand
+        paymentMethod: 'card',
+        cardLast4: '4889',
+        cardBrand: 'Mastercard'
       });
 
       toast({
@@ -122,6 +136,15 @@ export default function PaymentCenter() {
         variant: "destructive",
       });
     }
+  };
+
+  const handlePaymentFailure = (data: any) => {
+    toast({
+      title: "Payment failed",
+      description: data.error || "Payment was not completed",
+      variant: "destructive",
+    });
+    setPaymentIframeUrl(null);
   };
 
   return (

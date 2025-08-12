@@ -1918,6 +1918,56 @@ Format as JSON:
     }
   });
 
+  // Mock payment iframe for testing
+  app.get('/api/payments/mock-iframe', (req, res) => {
+    const { token, amount } = req.query;
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Test Payment</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+            .payment-form { background: white; padding: 30px; border-radius: 8px; max-width: 400px; margin: 0 auto; }
+            .btn { background: #4CAF50; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; width: 100%; margin: 10px 0; }
+            .btn:hover { background: #45a049; }
+            .btn.fail { background: #f44336; }
+            .amount { font-size: 24px; font-weight: bold; margin: 20px 0; text-align: center; }
+          </style>
+        </head>
+        <body>
+          <div class="payment-form">
+            <h2>Test Payment Gateway</h2>
+            <div class="amount">Amount: ${amount} EGP</div>
+            <p>This is a test payment system. Click below to simulate payment completion:</p>
+            <button class="btn" onclick="completePayment('success')">✅ Complete Payment Successfully</button>
+            <button class="btn fail" onclick="completePayment('failure')">❌ Simulate Payment Failure</button>
+            <script>
+              function completePayment(status) {
+                if (status === 'success') {
+                  // Simulate successful payment
+                  window.parent.postMessage({
+                    type: 'PAYMENT_SUCCESS',
+                    transactionId: 'TEST_TXN_' + Date.now(),
+                    amount: ${amount},
+                    token: '${token}'
+                  }, '*');
+                } else {
+                  // Simulate failed payment
+                  window.parent.postMessage({
+                    type: 'PAYMENT_FAILURE',
+                    error: 'Payment was declined'
+                  }, '*');
+                }
+              }
+            </script>
+          </div>
+        </body>
+      </html>
+    `;
+    res.send(html);
+  });
+
   // Process payment completion
   app.post('/api/payments/complete', isAuthenticated, async (req: any, res) => {
     try {
