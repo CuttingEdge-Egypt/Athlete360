@@ -2,6 +2,8 @@ import fetch from 'node-fetch';
 
 interface PaymobConfig {
   apiKey: string;
+  publicKey: string;
+  secretKey: string;
   integrationId: string;
   iframeId: string;
 }
@@ -30,12 +32,16 @@ export class PaymobService {
   constructor() {
     this.config = {
       apiKey: process.env.PAYMOB_API_KEY || '',
+      publicKey: process.env.PAYMOB_PUBLIC_KEY || '',
+      secretKey: process.env.PAYMOB_SECRET_KEY || '',
       integrationId: process.env.PAYMOB_INTEGRATION_ID || '',
       iframeId: process.env.PAYMOB_IFRAME_ID || ''
     };
 
     console.log('Paymob config initialized:', {
       apiKey: this.config.apiKey ? `Set (${this.config.apiKey.length} chars)` : 'Not set',
+      publicKey: this.config.publicKey ? `Set (${this.config.publicKey.length} chars)` : 'Not set',
+      secretKey: this.config.secretKey ? `Set (${this.config.secretKey.length} chars)` : 'Not set',
       integrationId: this.config.integrationId,
       iframeId: this.config.iframeId ? 'Set' : 'Not set'
     });
@@ -46,19 +52,29 @@ export class PaymobService {
   }
 
   private async getAuthToken(): Promise<string> {
+    console.log('Attempting Paymob authentication...');
+    
+    const requestBody = {
+      api_key: this.config.apiKey,
+    };
+    
+    console.log('Auth request body:', JSON.stringify(requestBody, null, 2));
+    
     const response = await fetch(`${this.baseUrl}/auth/tokens`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        api_key: this.config.apiKey,
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     const data = await response.json() as any;
+    console.log('Auth response status:', response.status);
+    console.log('Auth response data:', data);
+    
     if (!response.ok) {
-      throw new Error(`Paymob auth failed: ${data.message || 'Unknown error'}`);
+      console.error('Paymob auth failed:', data);
+      throw new Error(`Paymob auth failed: ${data.message || JSON.stringify(data)}`);
     }
 
     return data.token;
@@ -89,8 +105,12 @@ export class PaymobService {
     });
 
     const data = await response.json() as any;
+    console.log('Order response status:', response.status);
+    console.log('Order response data:', data);
+    
     if (!response.ok) {
-      throw new Error(`Paymob order creation failed: ${data.message || 'Unknown error'}`);
+      console.error('Paymob order creation failed:', data);
+      throw new Error(`Paymob order creation failed: ${data.message || JSON.stringify(data)}`);
     }
 
     return data.id;
