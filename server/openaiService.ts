@@ -900,60 +900,51 @@ export async function generateNutritionPlan(athleteName: string, sport: string, 
 
 // GPT-5 implementation of enhanced rank history generation with competition-by-competition tracking
 export async function generateRankHistory(athleteName: string, sport: string, nationality?: string): Promise<any> {
-  const prompt = `As an expert ${sport} analyst, research and provide a comprehensive ranking progression analysis for athlete "${athleteName}" from ${nationality || 'unknown nationality'}.
+  const prompt = `You are an expert ${sport} analyst. Research "${athleteName}" from ${nationality || 'unknown nationality'} and provide a comprehensive ranking analysis.
 
-Search the web thoroughly for:
-1. Complete competition history with dates
-2. How their world ranking changed after each major competition
-3. Current official competitive record (wins-losses if applicable)
-4. Whether the athlete is currently active or retired
-5. Peak ranking achieved and when
+CRITICAL: You must return valid JSON only. No extra text, explanations, or markdown formatting.
 
-Focus on official rankings from governing bodies (World Taekwondo, BWF, etc.) and verified competition results.
+Search for:
+1. Competition history with exact dates and results
+2. World ranking changes after each major tournament
+3. Official competitive record (wins/losses)
+4. Current activity status (active/retired)
+5. Peak ranking achieved and date
 
-Response format (JSON):
+Return this exact JSON structure:
 {
   "athlete": {
     "name": "${athleteName}",
     "nationality": "${nationality || 'N/A'}",
     "sport": "${sport}",
-    "isActive": true/false,
-    "officialRecord": "13-7 (65%)" or "N/A if not applicable",
-    "peakRanking": "#5" or "N/A",
-    "peakRankingDate": "2023-04-15" or "N/A",
-    "currentRanking": "#12" or "N/A",
+    "isActive": true,
+    "officialRecord": "W-L (XX%)",
+    "peakRanking": "#X",
+    "peakRankingDate": "YYYY-MM-DD",
+    "currentRanking": "#X",
     "lastUpdated": "2025-08-12"
   },
   "rankingProgression": [
     {
-      "competition": "2025 World Championships",
-      "date": "2025-06-15",
-      "result": "Gold Medal",
-      "rankingBefore": "#8",
-      "rankingAfter": "#3",
-      "points": "450 points gained",
-      "significance": "Major breakthrough performance"
-    },
-    {
-      "competition": "2024 Asian Games",  
-      "date": "2024-10-02",
-      "result": "Bronze Medal",
-      "rankingBefore": "#12",
-      "rankingAfter": "#8",
-      "points": "280 points gained",
-      "significance": "First major international medal"
+      "competition": "Competition Name",
+      "date": "YYYY-MM-DD",
+      "result": "Result",
+      "rankingBefore": "#X",
+      "rankingAfter": "#X",
+      "points": "Points info",
+      "significance": "Impact description"
     }
   ],
   "careerSummary": {
-    "totalCompetitions": 45,
-    "majorTitles": 3,
-    "rankingTrend": "upward/stable/declining",
-    "notableAchievements": ["First Olympic appearance", "Continental champion"],
-    "currentForm": "Excellent recent results with consistent podium finishes"
+    "totalCompetitions": 0,
+    "majorTitles": 0,
+    "rankingTrend": "upward",
+    "notableAchievements": ["Achievement 1"],
+    "currentForm": "Form description"
   }
 }
 
-Provide authentic data only - if information is not found, use "N/A" rather than making assumptions.`;
+Use "N/A" for unavailable data. Return only valid JSON.`;
 
   try {
     const response = await openai.responses.create({
@@ -1093,20 +1084,138 @@ export async function generateSpecificAnalysis(athleteName: string, sport: strin
     cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
     cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
     
-    // Try to find the JSON object within the response
-    const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+    // Try to find the JSON object within the response - look for complete JSON
+    let jsonMatch = cleanedText.match(/\{[\s\S]*\}(?=\s*$)/);
+    if (!jsonMatch) {
+      // Try to find any JSON object in the response
+      jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+    }
+    
     if (jsonMatch) {
       cleanedText = jsonMatch[0];
+      
+      // Additional cleanup for common JSON issues
+      cleanedText = cleanedText.replace(/,\s*}/g, '}'); // Remove trailing commas
+      cleanedText = cleanedText.replace(/,\s*]/g, ']'); // Remove trailing commas in arrays
+      
+      // Try to fix truncated JSON by ensuring proper closing
+      let braceCount = 0;
+      let bracketCount = 0;
+      let result = '';
+      
+      for (let i = 0; i < cleanedText.length; i++) {
+        const char = cleanedText[i];
+        result += char;
+        
+        if (char === '{') braceCount++;
+        else if (char === '}') braceCount--;
+        else if (char === '[') bracketCount++;
+        else if (char === ']') bracketCount--;
+      }
+      
+      // Add missing closing braces/brackets
+      while (braceCount > 0) {
+        result += '}';
+        braceCount--;
+      }
+      while (bracketCount > 0) {
+        result += ']';
+        bracketCount--;
+      }
+      
+      cleanedText = result;
     }
     
     try {
-      return JSON.parse(cleanedText);
+      const parsedData = JSON.parse(cleanedText);
+      
+      // For rank analysis, ensure we have the expected structure
+      if (analysisType === 'rank') {
+        return {
+          athlete: parsedData.athlete || {
+            name: athleteName,
+            nationality: 'N/A',
+            sport: sport,
+            isActive: true,
+            officialRecord: 'N/A',
+            peakRanking: 'N/A',
+            peakRankingDate: 'N/A',
+            currentRanking: 'N/A',
+            lastUpdated: new Date().toISOString().split('T')[0]
+          },
+          rankingProgression: parsedData.rankingProgression || [],
+          careerSummary: parsedData.careerSummary || {
+            totalCompetitions: 'N/A',
+            majorTitles: 'N/A',
+            rankingTrend: 'N/A',
+            notableAchievements: [],
+            currentForm: 'Data not available'
+          }
+        };
+      }
+      
+      return parsedData;
     } catch (parseError) {
-      console.error('JSON parsing failed, raw response:', response.output_text.substring(0, 500));
+      console.error('JSON parsing failed, raw response:', response.output_text.substring(0, 1000));
+      console.error('Parse error:', parseError.message);
+      
+      // For rank analysis, return a structured fallback
+      if (analysisType === 'rank') {
+        return {
+          athlete: {
+            name: athleteName,
+            nationality: 'Unknown',
+            sport: sport,
+            isActive: true,
+            officialRecord: 'Data not available',
+            peakRanking: 'N/A',
+            peakRankingDate: 'N/A',
+            currentRanking: 'N/A',
+            lastUpdated: new Date().toISOString().split('T')[0]
+          },
+          rankingProgression: [],
+          careerSummary: {
+            totalCompetitions: 'N/A',
+            majorTitles: 'N/A',
+            rankingTrend: 'N/A',
+            notableAchievements: [],
+            currentForm: 'Unable to retrieve current form data due to parsing error'
+          },
+          error: 'JSON parsing failed - response may be incomplete'
+        };
+      }
+      
       throw parseError;
     }
   } catch (error) {
     console.error(`Error generating ${analysisType} analysis for ${athleteName}:`, error);
+    
+    // For rank analysis, return structured error response
+    if (analysisType === 'rank') {
+      return {
+        athlete: {
+          name: athleteName,
+          nationality: 'Unknown',
+          sport: sport,
+          isActive: true,
+          officialRecord: 'Service unavailable',
+          peakRanking: 'N/A',
+          peakRankingDate: 'N/A',
+          currentRanking: 'N/A',
+          lastUpdated: new Date().toISOString().split('T')[0]
+        },
+        rankingProgression: [],
+        careerSummary: {
+          totalCompetitions: 'N/A',
+          majorTitles: 'N/A',
+          rankingTrend: 'N/A',
+          notableAchievements: [],
+          currentForm: 'GPT-5 service temporarily unavailable'
+        },
+        error: 'Analysis generation failed'
+      };
+    }
+    
     return {
       analysisType,
       athlete: athleteName,
