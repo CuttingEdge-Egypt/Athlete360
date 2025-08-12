@@ -52,11 +52,12 @@ export function AnalysisPopup({
   const { toast } = useToast();
   const [isExporting, setIsExporting] = useState(false);
   const [showInputForm, setShowInputForm] = useState(false);
+  const [showCustomizePlanModal, setShowCustomizePlanModal] = useState(false);
   const queryClient = useQueryClient();
   
   // User input states for enhanced analysis
   const [developmentDuration, setDevelopmentDuration] = useState("4 weeks");
-  const [developmentGoal, setDevelopmentGoal] = useState("Improve overall performance");
+  const [developmentGoal, setDevelopmentGoal] = useState("");
   const [currentWeight, setCurrentWeight] = useState("70 kg");
   const [age, setAge] = useState("25");
   const [nutritionTarget, setNutritionTarget] = useState("maintain weight");
@@ -205,12 +206,32 @@ export function AnalysisPopup({
       return apiRequest("POST", `/api/analysis/${athleteId}/development-plan?duration=${encodeURIComponent(developmentDuration)}&goal=${encodeURIComponent(developmentGoal)}`);
     },
     onSuccess: () => {
-      setShowInputForm(false);
-      toast({ title: "Development Plan Generated", description: "Personalized 12-week plan created successfully" });
+      setShowCustomizePlanModal(false);
+      toast({ title: "Development Plan Generated", description: "Personalized development plan created successfully" });
       queryClient.invalidateQueries({ queryKey: [`/api/analysis/${athleteId}/development-plan`] });
+      onOpenChange(false);
+      if (onRefresh) onRefresh();
     },
     onError: () => toast({ title: "Generation Failed", description: "Could not create development plan", variant: "destructive" })
   });
+
+  // Handler to show customize plan modal
+  const handleGenerateDevelopmentPlan = () => {
+    setShowCustomizePlanModal(true);
+  };
+
+  // Handler to confirm and generate the plan
+  const handleConfirmGeneratePlan = () => {
+    if (!developmentGoal.trim()) {
+      toast({
+        title: "Goal Required",
+        description: "Please specify what you want to achieve",
+        variant: "destructive"
+      });
+      return;
+    }
+    generateDevelopmentPlan.mutate();
+  };
 
   const generateNutritionPlan = useMutation({
     mutationFn: async () => {
@@ -1450,25 +1471,29 @@ export function AnalysisPopup({
               <span className="ml-3">{getTitle(type)}</span>
             </div>
             <div className="flex items-center space-x-2">
-              {/* Show input form button for development and nutrition plans */}
-              {(type === 'development' || type === 'development-plan' || type === 'nutrition') && !showInputForm && (
+              {/* Generate Development Plan button */}
+              {(type === 'development' || type === 'development-plan') && (
+                <Button
+                  onClick={handleGenerateDevelopmentPlan}
+                  variant="outline"
+                  size="sm"
+                  className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white"
+                >
+                  <Clock size={16} className="mr-2" />
+                  Generate Development Plan
+                </Button>
+              )}
+              
+              {/* Customize Nutrition button */}
+              {type === 'nutrition' && !showInputForm && (
                 <Button
                   onClick={() => setShowInputForm(true)}
                   variant="outline"
                   size="sm"
                   className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white"
                 >
-                  {type === 'development' || type === 'development-plan' ? (
-                    <>
-                      <Clock size={16} className="mr-2" />
-                      Customize Plan
-                    </>
-                  ) : (
-                    <>
-                      <Utensils size={16} className="mr-2" />
-                      Customize Nutrition
-                    </>
-                  )}
+                  <Utensils size={16} className="mr-2" />
+                  Customize Nutrition
                 </Button>
               )}
               
@@ -1661,6 +1686,79 @@ export function AnalysisPopup({
           {renderContent()}
         </div>
       </DialogContent>
+
+      {/* Customize Development Plan Modal */}
+      <Dialog open={showCustomizePlanModal} onOpenChange={setShowCustomizePlanModal}>
+        <DialogContent className="max-w-md bg-athlete-primary border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="flex items-center text-white">
+              <Target className="mr-2 text-athlete-accent" size={24} />
+              Customize Development Plan
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              What specific goal do you want to achieve with {athleteName}?
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="goal-input" className="text-gray-300">Training Goal</Label>
+              <Input
+                id="goal-input"
+                placeholder="e.g., Improve kicking speed and accuracy"
+                value={developmentGoal}
+                onChange={(e) => setDevelopmentGoal(e.target.value)}
+                className="bg-athlete-gray-700 border-gray-600 text-white mt-2"
+                data-testid="input-development-goal"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="duration-select" className="text-gray-300">Training Duration</Label>
+              <Select value={developmentDuration} onValueChange={setDevelopmentDuration}>
+                <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white mt-2" data-testid="select-development-duration">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-athlete-gray-700 border-gray-600">
+                  <SelectItem value="4 weeks">4 weeks</SelectItem>
+                  <SelectItem value="8 weeks">8 weeks</SelectItem>
+                  <SelectItem value="12 weeks">12 weeks (Recommended)</SelectItem>
+                  <SelectItem value="16 weeks">16 weeks</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <div className="flex justify-end space-x-3 pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowCustomizePlanModal(false)}
+              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+              data-testid="button-cancel-plan"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmGeneratePlan}
+              disabled={generateDevelopmentPlan.isPending}
+              className="bg-athlete-accent hover:bg-athlete-accent/80 text-white"
+              data-testid="button-generate-plan"
+            >
+              {generateDevelopmentPlan.isPending ? (
+                <>
+                  <Clock className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Target className="mr-2 h-4 w-4" />
+                  Generate Plan
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }

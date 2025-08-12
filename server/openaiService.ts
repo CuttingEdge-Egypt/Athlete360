@@ -703,44 +703,41 @@ export async function getDetailedAnalysis(athleteName: string, sport: string): P
 
 // GPT-5 implementation of enhanced development plan generation
 export async function generateDevelopmentPlan(athleteName: string, sport: string, duration: string, goal: string, athleteData?: any): Promise<any> {
-  const prompt = `As an expert ${sport} coach and performance analyst, create a detailed development plan for athlete "${athleteName}".
+  const prompt = `You are an expert ${sport} coach and performance analyst. Create a detailed development plan for athlete "${athleteName}" from ${athleteData?.country || 'unknown country'}.
 
-  Development Plan Requirements:
-  - Duration: ${duration}
-  - Primary Goal: ${goal}
-  - Sport: ${sport}
-  
-  Athlete Profile:
-  - Name: ${athleteName}
-  - Biography: ${athleteData?.bio || 'N/A'}
-  - Current Rank: ${athleteData?.rank || 'N/A'}
-  - Country: ${athleteData?.country || 'N/A'}
-  - Competition Record: ${athleteData?.competitionRecord || 'N/A'}
-  - Known Achievements: ${athleteData?.achievements?.join(', ') || 'N/A'}
+CRITICAL: Return only valid JSON. No extra text or explanations.
 
-  Search the web for the latest training methodologies, techniques, and strategies specific to ${sport} to create a comprehensive development plan.
+Development Plan Requirements:
+- Duration: ${duration}
+- Primary Goal: ${goal}
+- Sport: ${sport}
 
-  Create a weekly breakdown that progresses toward the specified goal. Include:
-  - Technical skill development
-  - Physical conditioning
-  - Mental preparation
-  - Tactical training
-  - Recovery protocols
+Use the following athlete information for personalized planning:
+- Name: ${athleteName}
+- Biography: ${athleteData?.bio || 'N/A'}
+- Current Rank: ${athleteData?.rank || 'N/A'}
+- Country: ${athleteData?.country || 'N/A'}
+- Competition Record: ${athleteData?.competitionRecord || 'N/A'}
+- Achievements: ${athleteData?.achievements?.join(', ') || 'N/A'}
 
-  Format as JSON:
-  {
-    "duration": "${duration}",
-    "goal": "${goal}",
-    "plan": [
-      {
-        "week": number,
-        "focus": "Primary focus area",
-        "activities": ["Specific activity 1", "Specific activity 2", "Specific activity 3"],
-        "objectives": "What to achieve this week",
-        "metrics": "How to measure progress"
-      }
-    ]
-  }`;
+Search the web for latest training methodologies specific to ${sport} and ${goal}. Create a personalized weekly plan that addresses this athlete's specific needs and goals.
+
+Return this exact JSON structure:
+{
+  "duration": "${duration}",
+  "goal": "${goal}",
+  "plan": [
+    {
+      "week": 1,
+      "focus": "Week 1 specific focus based on goal",
+      "activities": ["Specific activity 1", "Specific activity 2", "Specific activity 3"],
+      "objectives": "What to achieve this week",
+      "metrics": "How to measure progress"
+    }
+  ]
+}
+
+Create a plan for the full duration specified. Use authentic data and personalize based on the athlete's profile and specified goal.`;
 
   try {
     const response = await openai.responses.create({
@@ -750,29 +747,84 @@ export async function generateDevelopmentPlan(athleteName: string, sport: string
       max_output_tokens: 8000,
     });
 
+    // Apply the same robust JSON cleanup used in generateSpecificAnalysis
     let cleanedText = response.output_text.trim();
+    
+    // Remove markdown formatting
     cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
     cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
     
-    const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      cleanedText = jsonMatch[0];
+    // Try to find complete JSON first, then any JSON
+    let jsonMatch = cleanedText.match(/\{[\s\S]*\}(?=\s*$)/);
+    if (!jsonMatch) {
+      jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
     }
     
-    return JSON.parse(cleanedText);
+    if (jsonMatch) {
+      cleanedText = jsonMatch[0];
+      
+      // Clean up common JSON issues
+      cleanedText = cleanedText.replace(/,\s*}/g, '}');
+      cleanedText = cleanedText.replace(/,\s*]/g, ']');
+      
+      // Fix truncated JSON by balancing braces/brackets
+      let braceCount = 0;
+      let bracketCount = 0;
+      let result = '';
+      
+      for (let i = 0; i < cleanedText.length; i++) {
+        const char = cleanedText[i];
+        result += char;
+        
+        if (char === '{') braceCount++;
+        else if (char === '}') braceCount--;
+        else if (char === '[') bracketCount++;
+        else if (char === ']') bracketCount--;
+      }
+      
+      // Add missing closing characters
+      while (braceCount > 0) {
+        result += '}';
+        braceCount--;
+      }
+      while (bracketCount > 0) {
+        result += ']';
+        bracketCount--;
+      }
+      
+      cleanedText = result;
+    }
+    
+    const parsedData = JSON.parse(cleanedText);
+    
+    // Ensure we have the expected structure
+    return {
+      duration: parsedData.duration || duration,
+      goal: parsedData.goal || goal,
+      plan: parsedData.plan || []
+    };
+    
   } catch (error) {
     console.error(`Error generating development plan for ${athleteName}:`, error);
-    // Fallback plan
+    // Enhanced fallback plan with personalized content
     const weeks = parseInt(duration.split(' ')[0]) || 4;
     return {
       duration,
       goal,
       plan: Array.from({ length: weeks }, (_, i) => ({
         week: i + 1,
-        focus: `Week ${i + 1} Focus`,
-        activities: [`Activity for ${goal}`, `${sport} specific training`, "Recovery and assessment"],
-        objectives: `Progress toward ${goal}`,
-        metrics: "Performance improvement tracking"
+        focus: `Week ${i + 1}: ${goal.includes('strength') ? 'Strength Development' : 
+                                  goal.includes('speed') ? 'Speed Enhancement' :
+                                  goal.includes('technique') ? 'Technical Improvement' :
+                                  goal.includes('endurance') ? 'Endurance Building' : 
+                                  'Performance Enhancement'}`,
+        activities: [
+          `${sport}-specific training for ${goal.toLowerCase()}`,
+          "Technical skill development",
+          "Recovery and mobility work"
+        ],
+        objectives: `Build foundation for ${goal.toLowerCase()}`,
+        metrics: "Progress tracking and assessment"
       }))
     };
   }
