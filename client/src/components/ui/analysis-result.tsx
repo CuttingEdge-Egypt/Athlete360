@@ -234,164 +234,220 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
   };
 
   const renderNutritionPlan = (data: any) => {
-    console.log('Frontend Nutrition Data RECEIVED:', JSON.stringify(data, null, 2));
-    console.log('Data timestamp check:', data.generatedAt, data.sessionId);
+    console.log('Nutrition Plan Data:', JSON.stringify(data, null, 2));
     
-    // Check for error state first
+    // Error state handling
     if (data.error || data.message?.includes('Unable to generate')) {
       return (
-        <div className="p-6 text-center">
-          <div className="text-red-400 mb-4">⚠ Analysis Unavailable</div>
-          <p className="text-gray-300 mb-4">
+        <div className="text-center py-8">
+          <div className="text-red-400 text-lg mb-3">⚠ Analysis Unavailable</div>
+          <p className="text-gray-300">
             {data.message || 'Unable to generate authentic nutrition plan at this time.'}
-          </p>
-          <p className="text-sm text-gray-400">
-            Please try again later or contact support if the issue persists.
           </p>
         </div>
       );
     }
-    
-    // Enhanced data structure support with better error handling
-    let meals: any[] = [];
-    try {
-      if (data.meals?.breakfast) {
-        meals = [
-          ...(Array.isArray(data.meals.breakfast) ? data.meals.breakfast : []).map((meal: any) => ({ ...meal, mealType: 'Breakfast' })),
-          ...(Array.isArray(data.meals.lunch) ? data.meals.lunch : []).map((meal: any) => ({ ...meal, mealType: 'Lunch' })),
-          ...(Array.isArray(data.meals.dinner) ? data.meals.dinner : []).map((meal: any) => ({ ...meal, mealType: 'Dinner' })),
-          ...(Array.isArray(data.meals.snacks) ? data.meals.snacks : []).map((meal: any) => ({ ...meal, mealType: 'Snacks' }))
-        ];
-      } else if (Array.isArray(data.meals)) {
-        meals = data.meals;
-      }
-    } catch (error) {
-      console.error('Error processing meals data:', error);
-      meals = [];
-    }
 
-    console.log('Processed meals:', meals);
+    // Extract meals with proper data structure handling
+    const extractMeals = () => {
+      let allMeals: any[] = [];
+      
+      // Direct meals array
+      if (Array.isArray(data.meals)) {
+        allMeals = [...data.meals];
+      }
+      
+      // Nested meal plan structure
+      if (data.mealPlan?.meals && Array.isArray(data.mealPlan.meals)) {
+        allMeals = [...allMeals, ...data.mealPlan.meals];
+      }
+      
+      // Object-based meals (breakfast, lunch, dinner keys)
+      if (data.meals && typeof data.meals === 'object' && !Array.isArray(data.meals)) {
+        Object.entries(data.meals).forEach(([mealType, mealData]: [string, any]) => {
+          allMeals.push({ mealType: mealType.charAt(0).toUpperCase() + mealType.slice(1), ...mealData });
+        });
+      }
+      
+      // Add snacks as meals
+      if (Array.isArray(data.snacks)) {
+        data.snacks.forEach((snack: any) => {
+          allMeals.push({ mealType: 'Snack', ...snack });
+        });
+      }
+      
+      return allMeals;
+    };
+
+    const meals = extractMeals();
 
     return (
-      <div>
-        {/* Enhanced overview with nationality and gender info */}
-        <div className="grid md:grid-cols-3 gap-6 mb-6">
+      <div className="space-y-6">
+        {/* Overview Cards */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Daily Summary */}
           <Card className="bg-athlete-gray-700 border-gray-600">
             <CardContent className="p-4">
-              <h5 className="font-semibold text-white mb-2">Daily Overview</h5>
+              <h4 className="font-semibold text-white mb-3">Daily Summary</h4>
               <div className="space-y-2 text-sm">
-                <div>Calories: <span className="text-athlete-warning font-semibold">{data.dailyCalories}</span></div>
-                <div>Hydration: <span className="text-white">{data.hydration}</span></div>
+                {data.dailyCalories && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Target Calories:</span>
+                    <span className="text-athlete-warning font-medium">{data.dailyCalories}</span>
+                  </div>
+                )}
                 {data.nationality && (
-                  <div>Cuisine: <span className="text-athlete-accent font-semibold">{data.nationality}</span></div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Cuisine:</span>
+                    <span className="text-athlete-accent font-medium">{data.nationality}</span>
+                  </div>
                 )}
               </div>
             </CardContent>
           </Card>
-          
-          <Card className="bg-athlete-gray-700 border-gray-600">
-            <CardContent className="p-4">
-              <h5 className="font-semibold text-white mb-2">Macro Breakdown</h5>
-              <div className="space-y-2 text-sm">
-                {(data.macros || data.macroBreakdown) && Object.entries(data.macros || data.macroBreakdown).map(([key, value]) => (
-                  <div key={key} className="capitalize">
-                    {key}: <span className="text-athlete-accent font-semibold">{value as string}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
 
+          {/* Macronutrients */}
+          {(data.macros || data.macroBreakdown) && (
+            <Card className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-4">
+                <h4 className="font-semibold text-white mb-3">Macronutrients</h4>
+                <div className="space-y-2 text-sm">
+                  {Object.entries(data.macros || data.macroBreakdown).map(([nutrient, amount]) => (
+                    <div key={nutrient} className="flex justify-between">
+                      <span className="text-gray-400 capitalize">{nutrient}:</span>
+                      <span className="text-white font-medium">{amount as string}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Cultural Notes */}
           {data.culturalNotes && (
             <Card className="bg-athlete-gray-700 border-gray-600">
               <CardContent className="p-4">
-                <h5 className="font-semibold text-white mb-2">Cultural Adaptation</h5>
-                <div className="text-sm text-gray-300">
+                <h4 className="font-semibold text-white mb-3">Cultural Adaptation</h4>
+                <p className="text-sm text-gray-300 leading-relaxed">
                   {data.culturalNotes}
-                </div>
+                </p>
               </CardContent>
             </Card>
           )}
         </div>
 
-        {/* Enhanced meal display */}
+        {/* Meals Section */}
         {meals.length > 0 ? (
-          <div className="grid gap-4">
-            {meals.map((meal: any, index: number) => (
-            <Card key={index} className="bg-athlete-gray-700 border-gray-600">
-              <CardContent className="p-4">
-                <div className="flex justify-between items-center mb-3">
-                  <h5 className="font-semibold text-white">
-                    {meal.mealType || meal.meal || meal.name}
-                  </h5>
-                  <div className="flex gap-2">
-                    <Badge variant="outline" className="border-athlete-warning text-athlete-warning">
-                      {meal.calories}
-                    </Badge>
-                    {meal.timing && (
-                      <Badge variant="outline" className="border-blue-400 text-blue-400">
-                        {meal.timing}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-                
-                {meal.description && (
-                  <p className="text-sm text-gray-300 mb-3 italic">
-                    {meal.description}
-                  </p>
-                )}
-                
-                <div className="space-y-2">
-                  {meal.foods && (
-                    <div className="text-sm">
-                      <span className="text-gray-400">Foods: </span>
-                      <span className="text-white">
-                        {Array.isArray(meal.foods) ? meal.foods.join(", ") : meal.foods}
-                      </span>
-                    </div>
-                  )}
-                  
-                  {meal.benefits && (
-                    <div className="text-sm">
-                      <span className="text-gray-400">Benefits: </span>
-                      <span className="text-athlete-accent">{meal.benefits}</span>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold text-white">Meal Plan</h3>
+            <div className="grid gap-4">
+              {meals.map((meal: any, index: number) => {
+                const mealName = meal.mealType || meal.meal || meal.name;
+                if (!mealName) return null;
+
+                return (
+                  <Card key={index} className="bg-athlete-gray-700 border-gray-600">
+                    <CardContent className="p-5">
+                      {/* Meal Header */}
+                      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                        <h4 className="text-lg font-semibold text-white">{mealName}</h4>
+                        <div className="flex gap-2">
+                          {meal.calories && (
+                            <Badge variant="outline" className="border-athlete-warning text-athlete-warning">
+                              {meal.calories}
+                            </Badge>
+                          )}
+                          {meal.timing && (
+                            <Badge variant="outline" className="border-blue-400 text-blue-400">
+                              {meal.timing}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Meal Description */}
+                      {meal.description && (
+                        <p className="text-gray-300 text-sm mb-4 italic border-l-2 border-athlete-accent pl-3">
+                          {meal.description}
+                        </p>
+                      )}
+
+                      {/* Foods List */}
+                      {meal.foods && (
+                        <div className="mb-4">
+                          <h5 className="text-white font-medium mb-2">Foods:</h5>
+                          <div className="text-sm text-gray-300">
+                            {Array.isArray(meal.foods) ? (
+                              <ul className="list-disc list-inside space-y-1">
+                                {meal.foods.map((food: string, foodIndex: number) => (
+                                  <li key={foodIndex}>{food}</li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p>{meal.foods}</p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Benefits */}
+                      {meal.benefits && (
+                        <div className="bg-athlete-gray-800 rounded-lg p-3">
+                          <h5 className="text-athlete-accent font-medium mb-1">Benefits:</h5>
+                          <p className="text-sm text-gray-300">{meal.benefits}</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
           </div>
         ) : (
-          <div className="p-6 text-center">
-            <div className="text-red-400 mb-4">⚠ No Meal Data Available</div>
+          <div className="text-center py-8">
+            <div className="text-red-400 text-lg mb-3">⚠ No Meal Data Available</div>
             <p className="text-gray-300">
               No authentic meal data was generated. Please try regenerating the nutrition plan.
             </p>
           </div>
         )}
 
-        {/* Enhanced supplements section */}
+        {/* Hydration Guidelines */}
+        {data.hydration && (
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-5">
+              <h4 className="font-semibold text-white mb-3">Hydration Guidelines</h4>
+              <p className="text-sm text-gray-300 leading-relaxed">{data.hydration}</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Supplements */}
         {data.supplements && (
-          <Card className="bg-athlete-gray-700 border-gray-600 mt-4">
-            <CardContent className="p-4">
-              <h5 className="font-semibold text-white mb-2">Recommended Supplements</h5>
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-5">
+              <h4 className="font-semibold text-white mb-3">Recommended Supplements</h4>
               <div className="text-sm text-gray-300">
-                {Array.isArray(data.supplements) ? data.supplements.join(", ") : data.supplements}
+                {Array.isArray(data.supplements) ? (
+                  <ul className="list-disc list-inside space-y-1">
+                    {data.supplements.map((supplement: string, index: number) => (
+                      <li key={index}>{supplement}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>{data.supplements}</p>
+                )}
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Additional notes */}
+        {/* Additional Notes */}
         {data.notes && (
-          <Card className="bg-athlete-gray-700 border-gray-600 mt-4">
-            <CardContent className="p-4">
-              <h5 className="font-semibold text-white mb-2">Additional Notes</h5>
-              <div className="text-sm text-gray-300">
-                {data.notes}
-              </div>
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-5">
+              <h4 className="font-semibold text-white mb-3">Additional Notes</h4>
+              <p className="text-sm text-gray-300 leading-relaxed">{data.notes}</p>
             </CardContent>
           </Card>
         )}
