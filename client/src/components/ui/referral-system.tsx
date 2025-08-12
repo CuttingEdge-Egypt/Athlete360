@@ -39,7 +39,7 @@ export function ReferralSystem() {
       setCopied(true);
       toast({
         title: "Referral code copied!",
-        description: "Share it with friends to earn bonus tokens",
+        description: "Share this code with friends to earn bonus tokens",
       });
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
@@ -58,10 +58,12 @@ export function ReferralSystem() {
     
     try {
       await navigator.clipboard.writeText(referralLink);
+      setCopied(true);
       toast({
         title: "Referral link copied!",
-        description: "Share this link to invite friends",
+        description: "Anyone who signs up using this link will give you 100 tokens",
       });
+      setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       toast({
         title: "Failed to copy",
@@ -75,12 +77,12 @@ export function ReferralSystem() {
     if (!referralData?.referralCode) return;
     
     const referralLink = `${window.location.origin}?ref=${referralData.referralCode}`;
-    const shareText = `Join me on Athlete360 and get 1000 free tokens for AI-powered athlete analysis! Use my referral code: ${referralData.referralCode} or click this link: ${referralLink}`;
+    const shareText = `Join me on Athlete360 and get 1000 free tokens for AI-powered athlete analysis! Click this link to sign up: ${referralLink}`;
     
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Join Athlete360',
+          title: 'Join Athlete360 - Get 1000 Free Tokens!',
           text: shareText,
           url: referralLink,
         });
@@ -92,8 +94,8 @@ export function ReferralSystem() {
       try {
         await navigator.clipboard.writeText(shareText);
         toast({
-          title: "Share text copied!",
-          description: "Paste this message to invite friends",
+          title: "Share message copied!",
+          description: "Paste this message to invite friends via the referral link",
         });
       } catch (error) {
         toast({
@@ -186,10 +188,35 @@ export function ReferralSystem() {
             </div>
           </div>
 
-          {/* Referral Code */}
+          {/* Referral Link */}
           <div className="space-y-4">
             <div>
-              <p className="text-sm font-medium mb-2">Your Referral Code</p>
+              <p className="text-sm font-medium mb-2">Your Referral Link</p>
+              <div className="flex items-center gap-2">
+                <Input
+                  value={`${window.location.origin}?ref=${referralData.referralCode}`}
+                  readOnly
+                  className="font-mono text-sm"
+                  data-testid="referral-link-display"
+                />
+                <Button
+                  variant="outline"
+                  onClick={copyReferralLink}
+                  className="flex items-center gap-2"
+                  data-testid="button-copy-link"
+                >
+                  <Copy className="h-4 w-4" />
+                  {copied ? "Copied!" : "Copy Link"}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Anyone who signs up using this link will give you 100 bonus tokens
+              </p>
+            </div>
+
+            {/* Alternative: Show code for manual entry */}
+            <div>
+              <p className="text-sm font-medium mb-2">Or share just the code</p>
               <div className="flex items-center gap-2">
                 <Input
                   value={referralData.referralCode}
@@ -209,24 +236,15 @@ export function ReferralSystem() {
               </div>
             </div>
 
-            {/* Share Buttons */}
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={copyReferralLink}
-                className="flex items-center gap-2 flex-1"
-                data-testid="button-copy-link"
-              >
-                <ExternalLink className="h-4 w-4" />
-                Copy Link
-              </Button>
+            {/* Share Button */}
+            <div>
               <Button
                 onClick={shareReferralCode}
-                className="flex items-center gap-2 flex-1"
+                className="flex items-center gap-2 w-full"
                 data-testid="button-share"
               >
                 <Share2 className="h-4 w-4" />
-                Share
+                Share Referral Link
               </Button>
             </div>
           </div>
@@ -235,9 +253,9 @@ export function ReferralSystem() {
           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <h4 className="font-medium mb-2">How it works:</h4>
             <ol className="text-sm text-muted-foreground space-y-1">
-              <li>1. Share your referral code or link with friends</li>
-              <li>2. They sign up using your code</li>
-              <li>3. You both get bonus tokens (100 for you, 1000 starting for them)</li>
+              <li>1. Copy and share your referral link with friends</li>
+              <li>2. They click your link and sign up for Athlete360</li>
+              <li>3. You get 100 bonus tokens, they start with 1000 free tokens</li>
               <li>4. Start analyzing athletes together!</li>
             </ol>
           </div>

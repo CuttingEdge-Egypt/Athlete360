@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,27 +28,38 @@ export function SignupWithCard({ isOpen, onClose, onComplete }: SignupWithCardPr
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
 
-  const validateReferralCode = async () => {
-    if (!referralCode.trim()) {
+  // Extract referral code from URL on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+      setReferralCode(refCode);
+      validateReferralCode(refCode);
+    }
+  }, []);
+
+  const validateReferralCode = async (codeToValidate?: string) => {
+    const code = codeToValidate || referralCode;
+    if (!code.trim()) {
       setStep('payment');
       return;
     }
 
     setIsValidatingReferral(true);
     try {
-      const response = await fetch(`/api/referrals/validate/${referralCode}`);
+      const response = await fetch(`/api/referrals/validate/${code}`);
       const data = await response.json();
       
       if (data.valid) {
         setReferrerName(data.referrerName);
         toast({
-          title: "Valid referral code!",
-          description: `You'll receive bonus tokens from ${data.referrerName}`,
+          title: "Valid referral link!",
+          description: `You were referred by ${data.referrerName} - they'll get 100 bonus tokens when you sign up!`,
         });
       } else {
         toast({
-          title: "Invalid referral code",
-          description: "Code not found, but you can still continue signup",
+          title: "Invalid referral link",
+          description: "Link not found, but you can still continue signup",
           variant: "destructive",
         });
       }
@@ -93,7 +104,7 @@ export function SignupWithCard({ isOpen, onClose, onComplete }: SignupWithCardPr
         description: "Your account is ready with 1000 free tokens",
       });
 
-      onComplete(response.user);
+      onComplete(response);
       onClose();
     } catch (error) {
       console.error('Signup error:', error);
@@ -157,24 +168,29 @@ export function SignupWithCard({ isOpen, onClose, onComplete }: SignupWithCardPr
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Users className="h-5 w-5 text-blue-500" />
-                Do you have a referral code?
+                {referralCode ? "Referral Link Detected!" : "Do you have a referral link?"}
               </CardTitle>
               <CardDescription>
-                Optional: Enter a friend's referral code to give them bonus tokens
+                {referralCode ? 
+                  "You used a referral link to get here. Your friend will get bonus tokens when you sign up!" :
+                  "Optional: If someone shared a referral link with you, enter the code here"
+                }
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="referral">Referral Code (Optional)</Label>
-                <Input
-                  id="referral"
-                  value={referralCode}
-                  onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                  placeholder="Enter 8-character code"
-                  maxLength={8}
-                  data-testid="input-referral-code"
-                />
-              </div>
+              {!referralCode && (
+                <div className="space-y-2">
+                  <Label htmlFor="referral">Referral Code (Optional)</Label>
+                  <Input
+                    id="referral"
+                    value={referralCode}
+                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                    placeholder="Enter 8-character code"
+                    maxLength={8}
+                    data-testid="input-referral-code"
+                  />
+                </div>
+              )}
               {referrerName && (
                 <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                   <Gift className="h-4 w-4 text-green-600" />
@@ -183,8 +199,16 @@ export function SignupWithCard({ isOpen, onClose, onComplete }: SignupWithCardPr
                   </span>
                 </div>
               )}
+              {referralCode && !referrerName && (
+                <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <Users className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm text-blue-700 dark:text-blue-300">
+                    Using referral code: {referralCode}
+                  </span>
+                </div>
+              )}
               <Button 
-                onClick={validateReferralCode} 
+                onClick={() => validateReferralCode()} 
                 disabled={isValidatingReferral}
                 className="w-full"
                 data-testid="button-continue-referral"

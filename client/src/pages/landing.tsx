@@ -1,8 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus } from "lucide-react";
+import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus, Gift } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function Landing() {
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check if there's a referral code in the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+      setReferralCode(refCode);
+    }
+  }, []);
+
   const handleLogin = () => {
     window.location.href = "/api/login";
   };
@@ -36,9 +48,23 @@ export default function Landing() {
             <p className="text-xl md:text-2xl text-gray-300 mb-8">
               AI-Powered Athlete Analytics & Performance Optimization Platform
             </p>
-            <p className="text-lg text-gray-400 mb-12 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-400 mb-8 max-w-2xl mx-auto">
               Analyze any athlete's performance, get tactical insights, create development plans, and unlock the secrets to athletic excellence with our revolutionary AI system.
             </p>
+            
+            {/* Referral Bonus Banner - only show if there's a referral code */}
+            {referralCode && (
+              <div className="bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-400/30 rounded-lg p-4 mb-12 max-w-lg mx-auto">
+                <div className="flex items-center justify-center gap-2 text-green-400 mb-2">
+                  <Gift className="h-5 w-5" />
+                  <span className="font-semibold">You're using a referral link!</span>
+                </div>
+                <p className="text-sm text-gray-300">
+                  Your friend will get 100 bonus tokens when you sign up!<br/>
+                  You'll start with 1000 free tokens.
+                </p>
+              </div>
+            )}
             
             {/* Feature Preview Cards */}
             <div className="grid md:grid-cols-3 gap-6 mb-12">
