@@ -168,29 +168,70 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     </div>
   );
 
-  const renderDevelopmentPlan = (data: any) => (
-    <div>
-      <div className="mb-6">
-        <Badge variant="secondary" className="bg-athlete-accent text-white">
-          Duration: {data.duration}
-        </Badge>
+  const renderDevelopmentPlan = (data: any) => {
+    console.log('Frontend Development Plan Data RECEIVED:', JSON.stringify(data, null, 2));
+    
+    // Check for error state first
+    if (data.error || data.message?.includes('Unable to generate')) {
+      return (
+        <div className="p-6 text-center">
+          <div className="text-red-400 mb-4">⚠ Analysis Unavailable</div>
+          <p className="text-gray-300 mb-4">
+            {data.message || 'Unable to generate authentic development plan at this time.'}
+          </p>
+          <p className="text-sm text-gray-400">
+            Please try again later or contact support if the issue persists.
+          </p>
+        </div>
+      );
+    }
+
+    // Enhanced error handling for plan data
+    let planItems: any[] = [];
+    try {
+      planItems = Array.isArray(data.plan) ? data.plan : [];
+    } catch (error) {
+      console.error('Error processing development plan data:', error);
+      planItems = [];
+    }
+
+    return (
+      <div>
+        {data.duration && (
+          <div className="mb-6">
+            <Badge variant="secondary" className="bg-athlete-accent text-white">
+              {data.duration}
+            </Badge>
+          </div>
+        )}
+        <div className="grid gap-4">
+          {planItems.length > 0 ? planItems.map((item: any, index: number) => (
+            <Card key={index} className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-4">
+                <h5 className="font-semibold text-white mb-2">
+                  {item.title || item.focus || item.phase || item.name || "Development Phase"}
+                </h5>
+                {item.description && (
+                  <p className="text-sm text-gray-300 mb-3 italic">
+                    {item.description}
+                  </p>
+                )}
+                <ul className="text-sm text-gray-300 space-y-1">
+                  {(item.activities || item.details || item.exercises || []).map((activity: string, idx: number) => (
+                    <li key={idx}>• {activity}</li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )) : (
+            <div className="text-gray-400 text-center py-8">
+              No development plan data available
+            </div>
+          )}
+        </div>
       </div>
-      <div className="grid gap-4">
-        {data.plan?.map((week: any, index: number) => (
-          <Card key={index} className="bg-athlete-gray-700 border-gray-600">
-            <CardContent className="p-4">
-              <h5 className="font-semibold text-white mb-2">Week {week.week}: {week.focus}</h5>
-              <ul className="text-sm text-gray-300 space-y-1">
-                {week.activities?.map((activity: string, idx: number) => (
-                  <li key={idx}>• {activity}</li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
+    );
+  };
 
   const renderNutritionPlan = (data: any) => {
     console.log('Frontend Nutrition Data RECEIVED:', JSON.stringify(data, null, 2));
@@ -377,18 +418,32 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     return (
       <div>
         <div className="grid gap-4 mb-6">
-          {strategies.length > 0 ? strategies.map((strategy: any, index: number) => (
-            <Card key={index} className="bg-athlete-gray-700 border-gray-600">
-              <CardContent className="p-4">
-                <h5 className="font-semibold text-red-400 mb-2">
-                  {strategy.strategy || strategy.title || `Strategy ${index + 1}`}
-                </h5>
-                <p className="text-sm text-gray-300">
-                  {strategy.description || 'Strategy details not available'}
-                </p>
-              </CardContent>
-            </Card>
-          )) : (
+          {strategies.length > 0 ? strategies.map((strategy: any, index: number) => {
+            // Only render if we have authentic strategy data, no generic fallbacks
+            if (!strategy.strategy && !strategy.title && !strategy.name) {
+              return null; // Skip rendering generic entries
+            }
+            
+            return (
+              <Card key={index} className="bg-athlete-gray-700 border-gray-600">
+                <CardContent className="p-4">
+                  <h5 className="font-semibold text-red-400 mb-2">
+                    {strategy.strategy || strategy.title || strategy.name}
+                  </h5>
+                  {strategy.description && (
+                    <p className="text-sm text-gray-300">
+                      {strategy.description}
+                    </p>
+                  )}
+                  {strategy.details && (
+                    <p className="text-sm text-gray-300 mt-2">
+                      {strategy.details}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          }).filter(Boolean) : (
             <div className="text-gray-400 text-center py-8">
               No strategic analysis data available
             </div>

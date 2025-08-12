@@ -164,7 +164,7 @@ Response format:
       return { worldRank, currentRecord };
     }
     
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error getting enhanced taekwondo data for ${athleteName}:`, error.message);
     console.log('Falling back to faster TaekwondoData extraction...');
     // Fallback to basic TaekwondoData extraction  
@@ -804,28 +804,15 @@ Create a plan for the full duration specified. Use authentic data and personaliz
       plan: parsedData.plan || []
     };
     
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error generating development plan for ${athleteName}:`, error);
-    // Enhanced fallback plan with personalized content
-    const weeks = parseInt(duration.split(' ')[0]) || 4;
+    // Return error instead of generic fallback data
     return {
       duration,
       goal,
-      plan: Array.from({ length: weeks }, (_, i) => ({
-        week: i + 1,
-        focus: `Week ${i + 1}: ${goal.includes('strength') ? 'Strength Development' : 
-                                  goal.includes('speed') ? 'Speed Enhancement' :
-                                  goal.includes('technique') ? 'Technical Improvement' :
-                                  goal.includes('endurance') ? 'Endurance Building' : 
-                                  'Performance Enhancement'}`,
-        activities: [
-          `${sport}-specific training for ${goal.toLowerCase()}`,
-          "Technical skill development",
-          "Recovery and mobility work"
-        ],
-        objectives: `Build foundation for ${goal.toLowerCase()}`,
-        metrics: "Progress tracking and assessment"
-      }))
+      error: true,
+      message: `Unable to generate authentic development plan for ${athleteName} at this time. Please try again later or contact support if the issue persists.`,
+      plan: []
     };
   }
 }
@@ -858,7 +845,6 @@ Athlete Profile:
 CRITICAL CONSIDERATIONS:
 - Gender-specific nutritional needs (protein requirements, iron needs for females, etc.)
 - Age-related metabolism and recovery requirements (${age} years old)
-- Weight-specific caloric and portion calculations (current weight: ${currentWeight})
 - Sport-specific energy and nutrient demands for ${sport}
 - Climate and cultural food preferences in ${athleteCountry}
 
@@ -1377,7 +1363,7 @@ Use authentic data only - base analysis on real competition results and verified
       }
       
       return parsedData;
-    } catch (parseError) {
+    } catch (parseError: any) {
       console.error('JSON parsing failed, raw response:', response.output_text.substring(0, 1000));
       console.error('Parse error:', parseError.message);
       
