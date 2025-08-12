@@ -25,7 +25,7 @@ interface PaymentResponse {
 
 export class PaymobService {
   private config: PaymobConfig;
-  private baseUrl = 'https://accept.paymob.com/api';
+  private baseUrl = 'https://accept.paymobsolutions.com/api';
 
   constructor() {
     this.config = {
@@ -65,23 +65,27 @@ export class PaymobService {
   }
 
   private async createOrder(authToken: string, amount: number): Promise<string> {
+    const requestBody = {
+      auth_token: authToken,
+      delivery_needed: 'false',
+      amount_cents: Math.round(amount * 100), // Convert to cents
+      currency: 'EGP',
+      items: [{
+        name: 'Athlete360 Tokens',
+        amount_cents: Math.round(amount * 100),
+        description: 'AI Analysis Tokens',
+        quantity: 1,
+      }],
+    };
+
+    console.log('Creating order with body:', JSON.stringify(requestBody, null, 2));
+
     const response = await fetch(`${this.baseUrl}/ecommerce/orders`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        auth_token: authToken,
-        delivery_needed: 'false',
-        amount_cents: Math.round(amount * 100), // Convert to cents
-        currency: 'EGP',
-        items: [{
-          name: 'Athlete360 Tokens',
-          amount_cents: Math.round(amount * 100),
-          description: 'AI Analysis Tokens',
-          quantity: 1,
-        }],
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     const data = await response.json() as any;
@@ -93,38 +97,45 @@ export class PaymobService {
   }
 
   private async createPaymentKey(authToken: string, orderId: string, paymentIntent: PaymentIntent): Promise<string> {
+    const requestBody = {
+      auth_token: authToken,
+      amount_cents: Math.round(paymentIntent.amount * 100),
+      expiration: 3600, // 1 hour
+      order_id: orderId,
+      billing_data: {
+        apartment: 'NA',
+        email: paymentIntent.billingData.email,
+        floor: 'NA',
+        first_name: paymentIntent.billingData.firstName,
+        street: 'NA',
+        building: 'NA',
+        phone_number: paymentIntent.billingData.phoneNumber || '+20100000000',
+        shipping_method: 'NA',
+        postal_code: 'NA',
+        city: 'Cairo',
+        country: 'EG',
+        last_name: paymentIntent.billingData.lastName,
+        state: 'Cairo',
+      },
+      currency: paymentIntent.currency,
+      integration_id: parseInt(this.config.integrationId),
+    };
+
+    console.log('Creating payment key with body:', JSON.stringify(requestBody, null, 2));
+
     const response = await fetch(`${this.baseUrl}/acceptance/payment_keys`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        auth_token: authToken,
-        amount_cents: Math.round(paymentIntent.amount * 100),
-        expiration: 3600, // 1 hour
-        order_id: orderId,
-        billing_data: {
-          apartment: 'NA',
-          email: paymentIntent.billingData.email,
-          floor: 'NA',
-          first_name: paymentIntent.billingData.firstName,
-          street: 'NA',
-          building: 'NA',
-          phone_number: paymentIntent.billingData.phoneNumber || '+20100000000',
-          shipping_method: 'NA',
-          postal_code: 'NA',
-          city: 'NA',
-          country: 'EG',
-          last_name: paymentIntent.billingData.lastName,
-          state: 'NA',
-        },
-        currency: paymentIntent.currency,
-        integration_id: parseInt(this.config.integrationId),
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     const data = await response.json() as any;
+    console.log('Payment key response:', data);
+
     if (!response.ok) {
+      console.error('Payment key creation failed:', data);
       throw new Error(`Paymob payment key creation failed: ${data.message || 'Unknown error'}`);
     }
 
