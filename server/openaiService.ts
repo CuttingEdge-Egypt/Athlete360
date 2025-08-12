@@ -700,13 +700,248 @@ export async function getDetailedAnalysis(athleteName: string, sport: string): P
   }
 }
 
-// GPT-5 implementation of specific analysis generation
-export async function generateSpecificAnalysis(athleteName: string, sport: string, analysisType: string): Promise<any> {
-  const prompt = `Generate ${analysisType} analysis for ${athleteName}, a ${sport} athlete.
+// GPT-5 implementation of enhanced development plan generation
+export async function generateDevelopmentPlan(athleteName: string, sport: string, duration: string, goal: string, athleteData?: any): Promise<any> {
+  const prompt = `As an expert ${sport} coach and performance analyst, create a detailed development plan for athlete "${athleteName}".
+
+  Development Plan Requirements:
+  - Duration: ${duration}
+  - Primary Goal: ${goal}
+  - Sport: ${sport}
   
-  Provide detailed, professional analysis specific to ${analysisType}.
-  Format the response as a JSON object appropriate for ${analysisType} analysis.
-  Include practical, actionable insights based on ${sport} expertise.`;
+  Athlete Profile:
+  - Name: ${athleteName}
+  - Biography: ${athleteData?.bio || 'N/A'}
+  - Current Rank: ${athleteData?.rank || 'N/A'}
+  - Country: ${athleteData?.country || 'N/A'}
+  - Competition Record: ${athleteData?.competitionRecord || 'N/A'}
+  - Known Achievements: ${athleteData?.achievements?.join(', ') || 'N/A'}
+
+  Search the web for the latest training methodologies, techniques, and strategies specific to ${sport} to create a comprehensive development plan.
+
+  Create a weekly breakdown that progresses toward the specified goal. Include:
+  - Technical skill development
+  - Physical conditioning
+  - Mental preparation
+  - Tactical training
+  - Recovery protocols
+
+  Format as JSON:
+  {
+    "duration": "${duration}",
+    "goal": "${goal}",
+    "plan": [
+      {
+        "week": number,
+        "focus": "Primary focus area",
+        "activities": ["Specific activity 1", "Specific activity 2", "Specific activity 3"],
+        "objectives": "What to achieve this week",
+        "metrics": "How to measure progress"
+      }
+    ]
+  }`;
+
+  try {
+    const response = await openai.responses.create({
+      model: "gpt-5",
+      input: prompt,
+      tools: [{ type: "web_search_preview" }],
+      max_output_tokens: 8000,
+    });
+
+    let cleanedText = response.output_text.trim();
+    cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    
+    const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleanedText = jsonMatch[0];
+    }
+    
+    return JSON.parse(cleanedText);
+  } catch (error) {
+    console.error(`Error generating development plan for ${athleteName}:`, error);
+    // Fallback plan
+    const weeks = parseInt(duration.split(' ')[0]) || 4;
+    return {
+      duration,
+      goal,
+      plan: Array.from({ length: weeks }, (_, i) => ({
+        week: i + 1,
+        focus: `Week ${i + 1} Focus`,
+        activities: [`Activity for ${goal}`, `${sport} specific training`, "Recovery and assessment"],
+        objectives: `Progress toward ${goal}`,
+        metrics: "Performance improvement tracking"
+      }))
+    };
+  }
+}
+
+// GPT-5 implementation of enhanced nutrition plan generation
+export async function generateNutritionPlan(athleteName: string, sport: string, currentWeight: string, target: string, cuisine: string, athleteData?: any): Promise<any> {
+  const prompt = `As a sports nutritionist specializing in ${sport}, create a comprehensive nutrition plan for athlete "${athleteName}".
+
+  Nutritional Requirements:
+  - Current Weight: ${currentWeight}
+  - Target: ${target}
+  - Preferred Cuisine: ${cuisine}
+  - Sport: ${sport}
+  
+  Athlete Profile:
+  - Name: ${athleteName}
+  - Biography: ${athleteData?.bio || 'N/A'}
+  - Current Rank: ${athleteData?.rank || 'N/A'}
+  - Country: ${athleteData?.country || 'N/A'}
+  - Competition Record: ${athleteData?.competitionRecord || 'N/A'}
+
+  Search the web for the latest sports nutrition research and ${cuisine} cuisine options to create an optimal nutrition plan.
+
+  Create detailed meal plans incorporating ${cuisine} cuisine while meeting ${sport} performance needs and ${target} goals.
+
+  Format as JSON:
+  {
+    "currentWeight": "${currentWeight}",
+    "target": "${target}",
+    "cuisine": "${cuisine}",
+    "dailyCalories": "Recommended daily calories",
+    "macros": {
+      "protein": "X%",
+      "carbs": "X%", 
+      "fats": "X%"
+    },
+    "meals": {
+      "breakfast": [
+        {
+          "name": "Meal name",
+          "description": "Detailed description with ${cuisine} influences",
+          "calories": "XXX kcal",
+          "timing": "Optimal timing",
+          "benefits": "Performance benefits"
+        }
+      ],
+      "lunch": [...],
+      "dinner": [...],
+      "snacks": [...]
+    },
+    "hydration": "Daily water intake recommendations",
+    "supplements": ["Recommended supplements for ${sport} and ${target}"],
+    "notes": "Special considerations for ${target} and ${sport}"
+  }`;
+
+  try {
+    const response = await openai.responses.create({
+      model: "gpt-5",
+      input: prompt,
+      tools: [{ type: "web_search_preview" }],
+      max_output_tokens: 8000,
+    });
+
+    let cleanedText = response.output_text.trim();
+    cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    
+    const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleanedText = jsonMatch[0];
+    }
+    
+    return JSON.parse(cleanedText);
+  } catch (error) {
+    console.error(`Error generating nutrition plan for ${athleteName}:`, error);
+    // Fallback nutrition plan
+    return {
+      currentWeight,
+      target,
+      cuisine,
+      dailyCalories: "2500-3000 kcal",
+      macros: { protein: "25%", carbs: "50%", fats: "25%" },
+      meals: {
+        breakfast: [{ name: `${cuisine} breakfast`, description: "Balanced morning meal", calories: "600 kcal", timing: "7:00 AM", benefits: "Energy for training" }],
+        lunch: [{ name: `${cuisine} lunch`, description: "Nutrient-rich midday meal", calories: "800 kcal", timing: "12:00 PM", benefits: "Sustained energy" }],
+        dinner: [{ name: `${cuisine} dinner`, description: "Recovery-focused evening meal", calories: "700 kcal", timing: "7:00 PM", benefits: "Muscle recovery" }],
+        snacks: [{ name: `${cuisine} snack`, description: "Healthy snack option", calories: "200 kcal", timing: "Pre/post training", benefits: "Quick energy" }]
+      },
+      hydration: "3-4 liters daily",
+      supplements: ["Protein powder", "Multivitamin", "Omega-3"],
+      notes: `Nutrition plan tailored for ${target} while incorporating ${cuisine} preferences`
+    };
+  }
+}
+
+// GPT-5 implementation of specific analysis generation
+export async function generateSpecificAnalysis(athleteName: string, sport: string, analysisType: string, athleteData?: any, customPrompt?: string): Promise<any> {
+  let prompt = '';
+  
+  if (analysisType === 'weaknesses' && athleteData) {
+    prompt = `As an expert ${sport} coach and analyst, analyze the specific weaknesses and areas for improvement for athlete "${athleteName}".
+
+    Use the following athlete information to provide personalized analysis:
+    - Biography: ${athleteData.bio || 'N/A'}
+    - Current Rank: ${athleteData.rank || 'N/A'}
+    - Country: ${athleteData.country || 'N/A'}
+    - Recent Competition Record: ${athleteData.competitionRecord || 'N/A'}
+    - Known Achievements: ${athleteData.achievements?.join(', ') || 'N/A'}
+
+    Search the web for recent competition footage, match results, and expert commentary about ${athleteName}'s performance to identify specific weaknesses.
+
+    Provide 3-4 specific, actionable weaknesses based on:
+    1. Technical deficiencies observed in recent competitions
+    2. Tactical vulnerabilities exploited by opponents
+    3. Physical or mental limitations affecting performance
+    4. Strategic gaps compared to top-ranked athletes in ${sport}
+
+    Format as JSON:
+    {
+      "weaknesses": [
+        {
+          "title": "Specific weakness title",
+          "description": "Detailed analysis of this weakness with evidence from recent competitions",
+          "impact": "high|medium|low",
+          "improvement_timeline": "short-term|medium-term|long-term"
+        }
+      ]
+    }`;
+  } else if (analysisType === 'beat-strategies' && athleteData) {
+    prompt = `As an expert ${sport} coach specializing in tactical analysis, develop specific strategies to defeat athlete "${athleteName}".
+
+    Athlete Profile for Analysis:
+    - Name: ${athleteName}
+    - Sport: ${sport}
+    - Biography: ${athleteData.bio || 'N/A'}
+    - Current Rank: ${athleteData.rank || 'N/A'}
+    - Competition Record: ${athleteData.competitionRecord || 'N/A'}
+    - Known Achievements: ${athleteData.achievements?.join(', ') || 'N/A'}
+
+    Search the web for recent matches, fight videos, competition footage, and expert analysis of ${athleteName} to understand their:
+    - Fighting style and preferred techniques
+    - Common patterns and habits
+    - Defensive weaknesses
+    - Mental pressure points
+    - Physical limitations
+
+    Develop 3-4 specific tactical strategies that would be most effective against this particular athlete:
+
+    Format as JSON:
+    {
+      "strategies": [
+        {
+          "title": "Strategy name",
+          "description": "Detailed tactical approach specifically designed to exploit this athlete's weaknesses",
+          "execution": "Step-by-step implementation",
+          "success_probability": "high|medium|low",
+          "risk_level": "high|medium|low"
+        }
+      ]
+    }`;
+  } else if (customPrompt) {
+    prompt = customPrompt;
+  } else {
+    prompt = `Generate ${analysisType} analysis for ${athleteName}, a ${sport} athlete.
+    
+    Provide detailed, professional analysis specific to ${analysisType}.
+    Format the response as a JSON object appropriate for ${analysisType} analysis.
+    Include practical, actionable insights based on ${sport} expertise.`;
+  }
 
   try {
     const response = await openai.responses.create({

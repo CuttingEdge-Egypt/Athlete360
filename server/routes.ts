@@ -5,7 +5,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData } from "./openaiService";
+import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, generateNutritionPlan } from "./openaiService";
 import OpenAI from "openai";
 
 // All LLM implementations now use GPT-5 with temperature 1.0 (default minimum)
@@ -893,18 +893,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }))
         };
       } else {
-        // Generate fresh weaknesses using OpenAI o3 (either no data exists or force update requested)
+        // Generate fresh weaknesses using OpenAI GPT-5 (either no data exists or force update requested)
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} weaknesses analysis for ${athlete.name}`);
         
-        // Get detailed analysis from OpenAI
-        const detailedAnalysis = await getDetailedAnalysis(athlete.name, sportName);
+        // Get enhanced data for taekwondo athletes
+        let enhancedData = null;
+        if (sportName.toLowerCase() === 'taekwondo') {
+          try {
+            enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country);
+          } catch (error) {
+            console.error(`Failed to get enhanced taekwondo data: ${error}`);
+          }
+        }
         
-        const aiWeaknesses = detailedAnalysis.weaknesses.length > 0 
-          ? detailedAnalysis.weaknesses.map((weakness: any, index) => ({
+        // Prepare athlete data for personalized analysis
+        const athleteDataForAnalysis = {
+          bio: athlete.bio,
+          rank: athlete.rank,
+          country: athlete.country,
+          achievements: athlete.achievements,
+          competitionRecord: enhancedData?.currentRecord || "N/A"
+        };
+        
+        // Generate personalized weaknesses analysis
+        const weaknessesAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'weaknesses', athleteDataForAnalysis);
+        
+        const aiWeaknesses = weaknessesAnalysis.weaknesses?.length > 0 
+          ? weaknessesAnalysis.weaknesses.map((weakness: any, index) => ({
               title: weakness.title,
               description: weakness.description,
               impact: weakness.impact || (index === 0 ? 'High' : (index % 2 === 0 ? 'Medium' : 'High')),
-              improvement: weakness.improvement || `Develop targeted training to address ${weakness.title.toLowerCase()}`
+              improvement: weakness.improvement || `Develop targeted training to address ${weakness.title.toLowerCase()}`,
+              improvement_timeline: weakness.improvement_timeline || 'medium-term'
             }))
           : [
               {
@@ -964,6 +984,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const athleteId = req.params.athleteId;
+      
+      // Extract user preferences from request body
+      const { duration = "4 weeks", goal = "Improve overall performance" } = req.body;
 
       const user = await storage.getUser(userId);
       if (!user || (user.tokens || 0) < tokenCost) {
@@ -973,13 +996,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deductTokens(userId, tokenCost);
       await storage.createTransaction({
         userId,
-        action: "Development Plan",
+        action: `Development Plan - ${goal}`,
         tokensDeducted: tokenCost,
         athleteId,
         serviceType: "development"
       });
 
-      // Get athlete data and check database for existing development plans
+      // Get athlete data
       const athlete = await storage.getAthleteById(athleteId);
       if (!athlete) {
         return res.status(404).json({ message: "Athlete not found" });
@@ -988,106 +1011,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sport = await storage.getSportById(athlete.sportId);
       const sportName = sport?.name || "Unknown Sport";
       
-      const forceUpdate = req.query.forceUpdate === 'true'; // Check for force update parameter
+      // Always generate fresh personalized development plan based on user inputs
+      console.log(`Generating personalized development plan for ${athlete.name} - Duration: ${duration}, Goal: ${goal}`);
       
-      // Check for existing development plans in database (skip if force update)
-      const existingPlans = await storage.getDevelopmentPlans(athleteId);
-      
-      let developmentPlan;
-      if (!forceUpdate && existingPlans.length > 0) {
-        // Use database development plans, group by week
-        const plansByWeek = existingPlans.reduce((acc, plan) => {
-          if (!acc[plan.week]) {
-            acc[plan.week] = {
-              week: plan.week,
-              focus: plan.title,
-              activities: []
-            };
-          }
-          acc[plan.week].activities.push(plan.description);
-          return acc;
-        }, {} as any);
-        
-        developmentPlan = {
-          duration: "4 weeks",
-          plan: Object.values(plansByWeek).sort((a: any, b: any) => a.week - b.week)
-        };
-      } else {
-        // Generate fresh development plan using OpenAI o3 (either no data exists or force update requested)
-        console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} development plan for ${athlete.name}`);
-        
-        // Get detailed analysis from OpenAI
-        const detailedAnalysis = await getDetailedAnalysis(athlete.name, sportName);
-        console.log(`OpenAI Analysis received - Development Plans count: ${detailedAnalysis.developmentPlans.length}`);
-        if (detailedAnalysis.developmentPlans.length > 0) {
-          console.log(`First development plan: ${JSON.stringify(detailedAnalysis.developmentPlans[0])}`);
+      // Get enhanced data for taekwondo athletes  
+      let enhancedData = null;
+      if (sportName.toLowerCase() === 'taekwondo') {
+        try {
+          enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country);
+        } catch (error) {
+          console.error(`Failed to get enhanced taekwondo data: ${error}`);
         }
-        
-        // Default development plan
-        const defaultPlan = [
-          {
-            week: 1,
-            focus: "Foundation Building",
-            activities: [
-              "Basic technique refinement",
-              "Fitness assessment and baseline establishment", 
-              "Mental preparation exercises"
-            ]
-          },
-          {
-            week: 2,
-            focus: "Skill Enhancement",
-            activities: [
-              "Advanced technique training",
-              "Tactical awareness development",
-              "Strength and conditioning focus"
-            ]
-          },
-          {
-            week: 3,
-            focus: "Integration and Practice", 
-            activities: [
-              "Combining skills in game-like scenarios",
-              "Pressure situation training",
-              "Performance analysis and feedback"
-            ]
-          },
-          {
-            week: 4,
-            focus: "Peak Performance",
-            activities: [
-              "Competition simulation",
-              "Final technique adjustments",
-              "Mental conditioning and confidence building"
-            ]
-          }
-        ];
-        
-        const aiDevelopmentPlans = detailedAnalysis.developmentPlans.length > 0 
-          ? detailedAnalysis.developmentPlans.map((plan, index) => ({
-              week: plan.week || (index + 1),
-              focus: plan.title,
-              activities: [plan.description]
-            }))
-          : defaultPlan;
-        
-        developmentPlan = {
-          duration: "12 weeks",
-          plan: aiDevelopmentPlans
-        };
-        
-        // Store development plans in database for future use
-        for (const weekPlan of aiDevelopmentPlans) {
-          for (const activity of weekPlan.activities) {
-            try {
-              await storage.createDevelopmentPlan({
-                athleteId,
-                title: weekPlan.focus,
-                description: activity,
-                week: weekPlan.week
-              });
-            } catch (error) {
-              console.log(`Could not store development plan: ${error}`);
+      }
+      
+      // Prepare athlete data for personalized analysis
+      const athleteDataForAnalysis = {
+        bio: athlete.bio,
+        rank: athlete.rank,
+        country: athlete.country,
+        achievements: athlete.achievements,
+        competitionRecord: enhancedData?.currentRecord || "N/A"
+      };
+      
+      // Generate personalized development plan
+      const developmentPlan = await generateDevelopmentPlan(athlete.name, sportName, duration, goal, athleteDataForAnalysis);
+      
+      // Store development plans in database for future use
+      if (developmentPlan.plan && developmentPlan.plan.length > 0) {
+        for (const weekPlan of developmentPlan.plan) {
+          if (weekPlan.activities && weekPlan.activities.length > 0) {
+            for (const activity of weekPlan.activities) {
+              try {
+                await storage.createDevelopmentPlan({
+                  athleteId,
+                  title: weekPlan.focus || 'Weekly Focus',
+                  description: activity,
+                  week: weekPlan.week
+                });
+              } catch (error) {
+                console.log(`Could not store development plan: ${error}`);
+              }
             }
           }
         }
@@ -1112,6 +1075,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const athleteId = req.params.athleteId;
+      
+      // Extract user preferences from request body
+      const { 
+        currentWeight = "70 kg", 
+        target = "maintain weight", 
+        cuisine = "Mediterranean" 
+      } = req.body;
 
       const user = await storage.getUser(userId);
       if (!user || (user.tokens || 0) < tokenCost) {
@@ -1121,13 +1091,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deductTokens(userId, tokenCost);
       await storage.createTransaction({
         userId,
-        action: "Nutrition Plan",
+        action: `Nutrition Plan - ${target}`,
         tokensDeducted: tokenCost,
         athleteId,
         serviceType: "nutrition"
       });
 
-      // Get athlete data and check database for existing nutrition plans
+      // Get athlete data
       const athlete = await storage.getAthleteById(athleteId);
       if (!athlete) {
         return res.status(404).json({ message: "Athlete not found" });
@@ -1136,88 +1106,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sport = await storage.getSportById(athlete.sportId);
       const sportName = sport?.name || "Unknown Sport";
       
-      const forceUpdate = req.query.forceUpdate === 'true'; // Check for force update parameter
+      // Always generate fresh personalized nutrition plan based on user inputs
+      console.log(`Generating personalized nutrition plan for ${athlete.name} - Weight: ${currentWeight}, Target: ${target}, Cuisine: ${cuisine}`);
       
-      // Check for existing nutrition plans in database (skip if force update)
-      const existingNutrition = await storage.getNutritionPlans(athleteId);
-      
-      let nutritionPlan;
-      if (!forceUpdate && existingNutrition.length > 0) {
-        // Use database nutrition plans, group by meal type
-        const mealsByType = existingNutrition.reduce((acc, plan) => {
-          if (!acc[plan.mealType]) {
-            acc[plan.mealType] = {
-              meal: plan.mealType,
-              foods: [],
-              calories: plan.calories || 0
-            };
-          }
-          acc[plan.mealType].foods.push(plan.foodItem);
-          return acc;
-        }, {} as any);
-        
-        nutritionPlan = {
-          dailyCalories: Object.values(mealsByType).reduce((sum: number, meal: any) => sum + meal.calories, 0) || 2800,
-          macroBreakdown: {
-            protein: "25%",
-            carbohydrates: "50%",
-            fats: "25%"
-          },
-          meals: Object.values(mealsByType),
-          hydration: "3-4 liters of water daily (from database records)",
-          supplements: ["Based on stored nutrition data", "Customized supplements", "Performance enhancers"]
-        };
-      } else {
-        // Generate fresh nutrition plan using OpenAI (either no data exists or force update requested)
-        console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} nutrition plan for ${athlete.name}`);
-        
-        // Get detailed analysis from OpenAI
-        const detailedAnalysis = await getDetailedAnalysis(athlete.name, sportName);
-        
-        const aiNutritionPlans = detailedAnalysis.nutritionPlans.length > 0 
-          ? detailedAnalysis.nutritionPlans
-          : [
-              { title: "High-Protein Breakfast", description: "Oatmeal with berries, Greek yogurt, Orange juice", mealType: "breakfast" },
-              { title: "Power Lunch", description: "Grilled chicken breast, Quinoa salad, Mixed vegetables", mealType: "lunch" },
-              { title: "Recovery Dinner", description: "Salmon fillet, Sweet potato, Steamed broccoli", mealType: "dinner" },
-              { title: "Performance Snacks", description: "Protein shake, Nuts and fruits, Energy bar", mealType: "snack" }
-            ];
-        
-        const mealData = aiNutritionPlans.map(plan => ({
-          meal: plan.mealType.charAt(0).toUpperCase() + plan.mealType.slice(1),
-          foods: plan.description.split(', '),
-          calories: plan.mealType === 'lunch' ? 700 : (plan.mealType === 'breakfast' || plan.mealType === 'dinner' ? 650 : 400)
-        }));
-        
-        nutritionPlan = {
-          dailyCalories: 2800,
-          macroBreakdown: {
-            protein: "25%",
-            carbohydrates: "50%", 
-            fats: "25%"
-          },
-          meals: mealData,
-          hydration: "3-4 liters of water daily",
-          supplements: ["Multivitamin", "Omega-3", "Protein powder"],
-          aiGenerated: true,
-          lastUpdated: forceUpdate ? "Force updated with OpenAI" : "Fresh OpenAI analysis"
-        };
-        
-        // Store AI nutrition plans in database for future use
-        for (const plan of aiNutritionPlans) {
-          try {
-            await storage.createNutritionPlan({
-              athleteId,
-              description: plan.description,
-              mealType: plan.mealType,
-              foodItem: plan.title,
-              calories: plan.mealType === 'lunch' ? 700 : (plan.mealType === 'breakfast' || plan.mealType === 'dinner' ? 650 : 400)
-            });
-          } catch (error) {
-            console.log(`Could not store nutrition plan: ${error}`);
-          }
+      // Get enhanced data for taekwondo athletes  
+      let enhancedData = null;
+      if (sportName.toLowerCase() === 'taekwondo') {
+        try {
+          enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country);
+        } catch (error) {
+          console.error(`Failed to get enhanced taekwondo data: ${error}`);
         }
       }
+      
+      // Prepare athlete data for personalized analysis
+      const athleteDataForAnalysis = {
+        bio: athlete.bio,
+        rank: athlete.rank,
+        country: athlete.country,
+        achievements: athlete.achievements,
+        competitionRecord: enhancedData?.currentRecord || "N/A"
+      };
+      
+      // Generate personalized nutrition plan
+      const nutritionPlan = await generateNutritionPlan(athlete.name, sportName, currentWeight, target, cuisine, athleteDataForAnalysis);
 
       await storage.createAnalysisLog({
         userId,
@@ -1278,16 +1190,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
           keyWeaknesses: existingStrategies.map(() => "Key weakness from database").filter(Boolean)
         };
       } else {
-        // Generate fresh beat strategies using OpenAI (either no data exists or force update requested)
+        // Generate fresh athlete-specific beat strategies using GPT-5 (either no data exists or force update requested)
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} beat strategies for ${athlete.name}`);
         
-        // Get detailed analysis from OpenAI
-        const detailedAnalysis = await getDetailedAnalysis(athlete.name, sportName);
+        // Get enhanced data for taekwondo athletes
+        let enhancedData = null;
+        if (sportName.toLowerCase() === 'taekwondo') {
+          try {
+            enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country);
+          } catch (error) {
+            console.error(`Failed to get enhanced taekwondo data: ${error}`);
+          }
+        }
         
-        const aiBeatStrategies = detailedAnalysis.beatStrategies.length > 0 
-          ? detailedAnalysis.beatStrategies.map(strategy => ({
+        // Prepare athlete data for personalized analysis
+        const athleteDataForAnalysis = {
+          bio: athlete.bio,
+          rank: athlete.rank,
+          country: athlete.country,
+          achievements: athlete.achievements,
+          competitionRecord: enhancedData?.currentRecord || "N/A"
+        };
+        
+        // Generate athlete-specific beat strategies
+        const strategiesAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'beat-strategies', athleteDataForAnalysis);
+        
+        const aiBeatStrategies = strategiesAnalysis.strategies?.length > 0 
+          ? strategiesAnalysis.strategies.map(strategy => ({
               strategy: strategy.title,
-              description: strategy.description
+              description: strategy.description,
+              execution: strategy.execution || "Apply systematically during competition",
+              success_probability: strategy.success_probability || "medium",
+              risk_level: strategy.risk_level || "medium"
             }))
           : [
               {
@@ -1308,9 +1242,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
             ];
         
-        const aiWeaknesses = detailedAnalysis.weaknesses.length > 0
-          ? detailedAnalysis.weaknesses.map(w => w.description)
-          : [
+        const aiWeaknesses = strategiesAnalysis.keyWeaknesses || [
               "Performance inconsistencies identified through AI analysis",
               "Technical limitations found in AI assessment", 
               "Strategic vulnerabilities from AI performance data"

@@ -16,6 +16,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 
 
@@ -48,7 +51,15 @@ export function AnalysisPopup({
 }: AnalysisPopupProps) {
   const { toast } = useToast();
   const [isExporting, setIsExporting] = useState(false);
+  const [showInputForm, setShowInputForm] = useState(false);
   const queryClient = useQueryClient();
+  
+  // User input states for enhanced analysis
+  const [developmentDuration, setDevelopmentDuration] = useState("4 weeks");
+  const [developmentGoal, setDevelopmentGoal] = useState("Improve overall performance");
+  const [currentWeight, setCurrentWeight] = useState("70 kg");
+  const [nutritionTarget, setNutritionTarget] = useState("maintain weight");
+  const [preferredCuisine, setPreferredCuisine] = useState("Mediterranean");
 
   // Helper function to format biography with proper headings and structure
   const formatBiography = (bio: string) => {
@@ -186,52 +197,276 @@ export function AnalysisPopup({
     }
   };
 
+  // Enhanced analysis mutations with user input
+  const generateDevelopmentPlan = useMutation({
+    mutationFn: async () => {
+      if (!athleteId) throw new Error("Athlete ID required");
+      return apiRequest("POST", `/api/analysis/${athleteId}/development-plan?duration=${encodeURIComponent(developmentDuration)}&goal=${encodeURIComponent(developmentGoal)}`);
+    },
+    onSuccess: () => {
+      setShowInputForm(false);
+      toast({ title: "Development Plan Generated", description: "Personalized 12-week plan created successfully" });
+      queryClient.invalidateQueries({ queryKey: [`/api/analysis/${athleteId}/development-plan`] });
+    },
+    onError: () => toast({ title: "Generation Failed", description: "Could not create development plan", variant: "destructive" })
+  });
+
+  const generateNutritionPlan = useMutation({
+    mutationFn: async () => {
+      if (!athleteId) throw new Error("Athlete ID required");
+      return apiRequest("POST", `/api/analysis/${athleteId}/nutrition?currentWeight=${encodeURIComponent(currentWeight)}&target=${encodeURIComponent(nutritionTarget)}&cuisine=${encodeURIComponent(preferredCuisine)}`);
+    },
+    onSuccess: () => {
+      setShowInputForm(false);
+      toast({ title: "Nutrition Plan Generated", description: "Personalized nutrition plan created successfully" });
+      queryClient.invalidateQueries({ queryKey: [`/api/analysis/${athleteId}/nutrition`] });
+    },
+    onError: () => toast({ title: "Generation Failed", description: "Could not create nutrition plan", variant: "destructive" })
+  });
+
   const handleExportToPDF = async () => {
     setIsExporting(true);
     try {
-      const element = document.getElementById('analysis-content');
-      if (!element) return;
-
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#0f172a'
-      });
-
-      const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
-      
-      const imgWidth = 210;
+      const pageWidth = 210;
       const pageHeight = 295;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-
-      let position = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      let currentY = 20;
+      
+      // Add Athlete360 logo and header
+      pdf.setFontSize(24);
+      pdf.setTextColor(51, 167, 255); // Athlete360 brand color
+      pdf.text('Athlete360', 20, currentY);
+      
+      pdf.setFontSize(12);
+      pdf.setTextColor(128, 128, 128);
+      pdf.text('AI-Powered Athletic Performance Analysis', 20, currentY + 8);
+      
+      currentY += 25;
+      
+      // Analysis title and athlete name
+      pdf.setFontSize(18);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(`${getTitle(type)} Analysis`, 20, currentY);
+      
+      pdf.setFontSize(14);
+      pdf.setTextColor(64, 64, 64);
+      pdf.text(`Athlete: ${athleteName}`, 20, currentY + 10);
+      
+      if (createdAt) {
+        const date = new Date(createdAt).toLocaleDateString();
+        pdf.text(`Generated: ${date}`, 20, currentY + 18);
       }
-
-      pdf.save(`${athleteName}_${getTitle(type)}.pdf`);
+      
+      currentY += 35;
+      
+      // Add analysis content based on type
+      if (type === 'development' || type === 'development-plan') {
+        await addDevelopmentPlanToPDF(pdf, data, currentY);
+      } else if (type === 'nutrition') {
+        await addNutritionPlanToPDF(pdf, data, currentY);
+      } else if (type === 'weaknesses') {
+        await addWeaknessesAnalysisToPDF(pdf, data, currentY);
+      } else if (type === 'beat' || type === 'beat-strategies') {
+        await addBeatStrategiesToPDF(pdf, data, currentY);
+      } else {
+        // Generic analysis content
+        await addGenericAnalysisToPDF(pdf, data, currentY);
+      }
+      
+      // Footer
+      pdf.setFontSize(8);
+      pdf.setTextColor(128, 128, 128);
+      pdf.text('Generated by Athlete360 - Professional Sports Analytics Platform', 20, pageHeight - 10);
+      
+      pdf.save(`${athleteName}_${getTitle(type)}_Analysis.pdf`);
       
       toast({
-        title: "PDF Generated Successfully",
-        description: `${athleteName}'s ${getTitle(type)} has been exported`,
+        title: "PDF Export Complete",
+        description: "Professional analysis report generated successfully",
       });
     } catch (error) {
+      console.error('PDF export error:', error);
       toast({
-        title: "Export Failed",
-        description: "Unable to generate PDF. Please try again.",
+        title: "Export Failed", 
+        description: "Could not export PDF. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  // PDF helper functions for different analysis types
+  const addDevelopmentPlanToPDF = async (pdf: jsPDF, data: any, startY: number) => {
+    let currentY = startY;
+    
+    if (data.duration) {
+      pdf.setFontSize(12);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(`Duration: ${data.duration}`, 20, currentY);
+      currentY += 8;
+    }
+    
+    if (data.goal) {
+      pdf.text(`Goal: ${data.goal}`, 20, currentY);
+      currentY += 15;
+    }
+    
+    if (data.plan && data.plan.length > 0) {
+      pdf.setFontSize(14);
+      pdf.text('Weekly Development Plan:', 20, currentY);
+      currentY += 10;
+      
+      data.plan.forEach((week: any) => {
+        if (currentY > 250) {
+          pdf.addPage();
+          currentY = 20;
+        }
+        
+        pdf.setFontSize(12);
+        pdf.setTextColor(51, 167, 255);
+        pdf.text(`Week ${week.week}: ${week.focus}`, 20, currentY);
+        currentY += 8;
+        
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFontSize(10);
+        if (week.activities && week.activities.length > 0) {
+          week.activities.forEach((activity: string) => {
+            const wrappedText = pdf.splitTextToSize(`• ${activity}`, 170);
+            pdf.text(wrappedText, 25, currentY);
+            currentY += wrappedText.length * 4;
+          });
+        }
+        currentY += 5;
+      });
+    }
+  };
+
+  const addNutritionPlanToPDF = async (pdf: jsPDF, data: any, startY: number) => {
+    let currentY = startY;
+    
+    if (data.currentWeight || data.target || data.cuisine) {
+      pdf.setFontSize(12);
+      pdf.setTextColor(0, 0, 0);
+      if (data.currentWeight) pdf.text(`Current Weight: ${data.currentWeight}`, 20, currentY), currentY += 6;
+      if (data.target) pdf.text(`Target: ${data.target}`, 20, currentY), currentY += 6;
+      if (data.cuisine) pdf.text(`Preferred Cuisine: ${data.cuisine}`, 20, currentY), currentY += 12;
+    }
+    
+    if (data.dailyCalories) {
+      pdf.text(`Daily Calories: ${data.dailyCalories}`, 20, currentY);
+      currentY += 10;
+    }
+    
+    if (data.meals) {
+      pdf.setFontSize(14);
+      pdf.text('Daily Meal Plan:', 20, currentY);
+      currentY += 10;
+      
+      Object.entries(data.meals).forEach(([mealType, meals]) => {
+        if (currentY > 250) {
+          pdf.addPage();
+          currentY = 20;
+        }
+        
+        pdf.setFontSize(12);
+        pdf.setTextColor(51, 167, 255);
+        pdf.text(mealType.charAt(0).toUpperCase() + mealType.slice(1), 20, currentY);
+        currentY += 8;
+        
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFontSize(10);
+        if (Array.isArray(meals)) {
+          meals.forEach((meal: any) => {
+            pdf.text(`• ${meal.name || meal.description}`, 25, currentY);
+            currentY += 6;
+            if (meal.calories) {
+              pdf.text(`  Calories: ${meal.calories}`, 25, currentY);
+              currentY += 4;
+            }
+          });
+        }
+        currentY += 8;
+      });
+    }
+  };
+
+  const addWeaknessesAnalysisToPDF = async (pdf: jsPDF, data: any, startY: number) => {
+    let currentY = startY;
+    
+    if (data.weaknesses && data.weaknesses.length > 0) {
+      pdf.setFontSize(14);
+      pdf.text('Areas for Improvement:', 20, currentY);
+      currentY += 10;
+      
+      data.weaknesses.forEach((weakness: any, index: number) => {
+        if (currentY > 250) {
+          pdf.addPage();
+          currentY = 20;
+        }
+        
+        pdf.setFontSize(12);
+        pdf.setTextColor(255, 67, 67);
+        pdf.text(`${index + 1}. ${weakness.title}`, 20, currentY);
+        currentY += 8;
+        
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFontSize(10);
+        const wrappedDesc = pdf.splitTextToSize(weakness.description, 170);
+        pdf.text(wrappedDesc, 25, currentY);
+        currentY += wrappedDesc.length * 4 + 5;
+        
+        if (weakness.improvement) {
+          pdf.setTextColor(0, 128, 0);
+          const wrappedImpr = pdf.splitTextToSize(`Improvement: ${weakness.improvement}`, 170);
+          pdf.text(wrappedImpr, 25, currentY);
+          currentY += wrappedImpr.length * 4 + 8;
+        }
+      });
+    }
+  };
+
+  const addBeatStrategiesToPDF = async (pdf: jsPDF, data: any, startY: number) => {
+    let currentY = startY;
+    
+    if (data.strategies && data.strategies.length > 0) {
+      pdf.setFontSize(14);
+      pdf.text('Tactical Strategies:', 20, currentY);
+      currentY += 10;
+      
+      data.strategies.forEach((strategy: any, index: number) => {
+        if (currentY > 250) {
+          pdf.addPage();
+          currentY = 20;
+        }
+        
+        pdf.setFontSize(12);
+        pdf.setTextColor(51, 167, 255);
+        pdf.text(`${index + 1}. ${strategy.strategy}`, 20, currentY);
+        currentY += 8;
+        
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFontSize(10);
+        const wrappedDesc = pdf.splitTextToSize(strategy.description, 170);
+        pdf.text(wrappedDesc, 25, currentY);
+        currentY += wrappedDesc.length * 4 + 8;
+      });
+    }
+  };
+
+  const addGenericAnalysisToPDF = async (pdf: jsPDF, data: any, startY: number) => {
+    let currentY = startY;
+    
+    pdf.setFontSize(12);
+    pdf.setTextColor(0, 0, 0);
+    
+    if (typeof data === 'string') {
+      const wrappedText = pdf.splitTextToSize(data, 170);
+      pdf.text(wrappedText, 20, currentY);
+    } else if (data && typeof data === 'object') {
+      const content = JSON.stringify(data, null, 2);
+      const wrappedText = pdf.splitTextToSize(content, 170);
+      pdf.text(wrappedText, 20, currentY);
     }
   };
 
@@ -1174,6 +1409,42 @@ export function AnalysisPopup({
               <span className="ml-3">{getTitle(type)}</span>
             </div>
             <div className="flex items-center space-x-2">
+              {/* Show input form button for development and nutrition plans */}
+              {(type === 'development' || type === 'development-plan' || type === 'nutrition') && !showInputForm && (
+                <Button
+                  onClick={() => setShowInputForm(true)}
+                  variant="outline"
+                  size="sm"
+                  className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white"
+                >
+                  {type === 'development' || type === 'development-plan' ? (
+                    <>
+                      <Clock size={16} className="mr-2" />
+                      Customize Plan
+                    </>
+                  ) : (
+                    <>
+                      <Utensils size={16} className="mr-2" />
+                      Customize Nutrition
+                    </>
+                  )}
+                </Button>
+              )}
+              
+              {/* Refresh button for biography */}
+              {type === 'bio' && athleteId && (
+                <Button
+                  onClick={() => refreshBioMutation.mutate()}
+                  disabled={refreshBioMutation.isPending}
+                  variant="outline"
+                  size="sm"
+                  className="border-green-500 text-green-400 hover:bg-green-500 hover:text-white"
+                >
+                  <RefreshCw size={16} className="mr-2" />
+                  {refreshBioMutation.isPending ? 'Refreshing...' : 'Refresh Bio'}
+                </Button>
+              )}
+              
               <Button
                 onClick={handleShare}
                 variant="outline"
@@ -1199,6 +1470,141 @@ export function AnalysisPopup({
             Comprehensive analysis for {athleteName} • Generated {createdAt ? new Date(createdAt).toLocaleDateString() : 'Recently'}
           </DialogDescription>
         </DialogHeader>
+        
+        {/* User Input Forms */}
+        {showInputForm && (type === 'development' || type === 'development-plan') && (
+          <div className="border-b border-gray-700 pb-4">
+            <div className="bg-athlete-gray-800 rounded-lg p-4 space-y-4">
+              <h3 className="text-white font-semibold flex items-center">
+                <Clock className="mr-2 text-athlete-accent" size={20} />
+                Customize Development Plan
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="duration" className="text-gray-300">Training Duration</Label>
+                  <Select value={developmentDuration} onValueChange={setDevelopmentDuration}>
+                    <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-athlete-gray-700 border-gray-600">
+                      <SelectItem value="4 weeks">4 weeks</SelectItem>
+                      <SelectItem value="8 weeks">8 weeks</SelectItem>
+                      <SelectItem value="12 weeks">12 weeks (Recommended)</SelectItem>
+                      <SelectItem value="16 weeks">16 weeks</SelectItem>
+                      <SelectItem value="20 weeks">20 weeks</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="goal" className="text-gray-300">Primary Goal</Label>
+                  <Select value={developmentGoal} onValueChange={setDevelopmentGoal}>
+                    <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-athlete-gray-700 border-gray-600">
+                      <SelectItem value="Improve overall performance">Improve overall performance</SelectItem>
+                      <SelectItem value="Increase strength and power">Increase strength and power</SelectItem>
+                      <SelectItem value="Enhance technical skills">Enhance technical skills</SelectItem>
+                      <SelectItem value="Boost endurance and stamina">Boost endurance and stamina</SelectItem>
+                      <SelectItem value="Competition preparation">Competition preparation</SelectItem>
+                      <SelectItem value="Recovery and rehabilitation">Recovery and rehabilitation</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="flex space-x-3">
+                <Button
+                  onClick={() => generateDevelopmentPlan.mutate()}
+                  disabled={generateDevelopmentPlan.isPending}
+                  className="bg-athlete-accent hover:bg-athlete-accent/80 text-white"
+                >
+                  <Target size={16} className="mr-2" />
+                  {generateDevelopmentPlan.isPending ? 'Generating...' : 'Generate Plan'}
+                </Button>
+                <Button
+                  onClick={() => setShowInputForm(false)}
+                  variant="outline"
+                  className="border-gray-600 text-gray-300"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {showInputForm && type === 'nutrition' && (
+          <div className="border-b border-gray-700 pb-4">
+            <div className="bg-athlete-gray-800 rounded-lg p-4 space-y-4">
+              <h3 className="text-white font-semibold flex items-center">
+                <Utensils className="mr-2 text-green-400" size={20} />
+                Customize Nutrition Plan
+              </h3>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="currentWeight" className="text-gray-300">Current Weight</Label>
+                  <Input
+                    id="currentWeight"
+                    value={currentWeight}
+                    onChange={(e) => setCurrentWeight(e.target.value)}
+                    placeholder="e.g., 70 kg"
+                    className="bg-athlete-gray-700 border-gray-600 text-white"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="target" className="text-gray-300">Goal</Label>
+                  <Select value={nutritionTarget} onValueChange={setNutritionTarget}>
+                    <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-athlete-gray-700 border-gray-600">
+                      <SelectItem value="maintain weight">Maintain weight</SelectItem>
+                      <SelectItem value="lose weight">Lose weight</SelectItem>
+                      <SelectItem value="gain weight">Gain weight</SelectItem>
+                      <SelectItem value="build muscle">Build muscle</SelectItem>
+                      <SelectItem value="improve performance">Improve performance</SelectItem>
+                      <SelectItem value="recovery focused">Recovery focused</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="cuisine" className="text-gray-300">Preferred Cuisine</Label>
+                  <Select value={preferredCuisine} onValueChange={setPreferredCuisine}>
+                    <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-athlete-gray-700 border-gray-600">
+                      <SelectItem value="Mediterranean">Mediterranean</SelectItem>
+                      <SelectItem value="Asian">Asian</SelectItem>
+                      <SelectItem value="Western">Western</SelectItem>
+                      <SelectItem value="Middle Eastern">Middle Eastern</SelectItem>
+                      <SelectItem value="Latin American">Latin American</SelectItem>
+                      <SelectItem value="Indian">Indian</SelectItem>
+                      <SelectItem value="Mixed/International">Mixed/International</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="flex space-x-3">
+                <Button
+                  onClick={() => generateNutritionPlan.mutate()}
+                  disabled={generateNutritionPlan.isPending}
+                  className="bg-green-500 hover:bg-green-600 text-white"
+                >
+                  <Apple size={16} className="mr-2" />
+                  {generateNutritionPlan.isPending ? 'Generating...' : 'Generate Plan'}
+                </Button>
+                <Button
+                  onClick={() => setShowInputForm(false)}
+                  variant="outline"
+                  className="border-gray-600 text-gray-300"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
         
         <div id="analysis-content" className="py-6">
           {renderContent()}
