@@ -749,122 +749,162 @@ export function AnalysisPopup({
         </div>
 
         {/* Main Analysis Content */}
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          {/* Athlete Status Overview */}
+          {data.athlete && (
+            <div className="grid md:grid-cols-4 gap-4">
+              <Card className="bg-athlete-gray-800 border-gray-700">
+                <CardContent className="p-4 text-center">
+                  <div className={`w-3 h-3 rounded-full mx-auto mb-2 ${data.athlete.isActive ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                  <p className="text-sm text-gray-400">Status</p>
+                  <p className="text-white font-semibold">{data.athlete.isActive ? 'Active' : 'Retired'}</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-athlete-gray-800 border-gray-700">
+                <CardContent className="p-4 text-center">
+                  <Trophy className="w-6 h-6 text-yellow-500 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400">Current Rank</p>
+                  <p className="text-white font-semibold">{data.athlete.currentRanking || 'N/A'}</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-athlete-gray-800 border-gray-700">
+                <CardContent className="p-4 text-center">
+                  <Star className="w-6 h-6 text-purple-500 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400">Peak Rank</p>
+                  <p className="text-white font-semibold">{data.athlete.peakRanking || 'N/A'}</p>
+                  {data.athlete.peakRankingDate && data.athlete.peakRankingDate !== 'N/A' && (
+                    <p className="text-xs text-gray-500">{data.athlete.peakRankingDate}</p>
+                  )}
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-athlete-gray-800 border-gray-700">
+                <CardContent className="p-4 text-center">
+                  <Target className="w-6 h-6 text-blue-500 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400">Record</p>
+                  <p className="text-white font-semibold">{data.athlete.officialRecord || 'N/A'}</p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
           {/* Ranking Progression Timeline */}
           <Card className="bg-athlete-gray-800 border-gray-700">
             <CardHeader>
               <CardTitle className="flex items-center text-white">
                 <TrendingUp className="mr-2 text-athlete-success" size={20} />
-                Ranking Progression
+                Competition-by-Competition Ranking Progression
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {rankingProgression.length > 0 ? (
-                <div className="space-y-3">
-                  {rankingProgression.map((rankPoint: any, index: number) => (
-                    <div key={index} className="flex items-center space-x-3 p-3 bg-athlete-gray-700 rounded-lg">
-                      <div className="w-8 h-8 bg-athlete-accent rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-white text-xs font-bold">#{rankPoint.rank}</span>
+              {data.rankingProgression && data.rankingProgression.length > 0 ? (
+                <div className="space-y-4">
+                  {data.rankingProgression.map((competition: any, index: number) => (
+                    <div key={index} className="border border-gray-600 rounded-lg p-4 bg-athlete-gray-700">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h4 className="text-white font-semibold text-sm">{competition.competition}</h4>
+                          <p className="text-gray-400 text-xs">{competition.date}</p>
+                        </div>
+                        <Badge variant="secondary" className="ml-2">
+                          {competition.result}
+                        </Badge>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-white font-medium text-sm">World Rank #{rankPoint.rank}</p>
-                        <p className="text-gray-400 text-xs mt-1">{rankPoint.date || rankPoint.note || 'Career achievement'}</p>
+                      
+                      <div className="grid grid-cols-3 gap-4 mb-3">
+                        <div className="text-center">
+                          <p className="text-xs text-gray-400">Before</p>
+                          <p className="text-white font-semibold">{competition.rankingBefore || 'N/A'}</p>
+                        </div>
+                        <div className="text-center">
+                          <ChevronRight className="w-4 h-4 text-gray-400 mx-auto" />
+                          <p className="text-xs text-gray-400">Change</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-xs text-gray-400">After</p>
+                          <p className="text-white font-semibold">{competition.rankingAfter || 'N/A'}</p>
+                        </div>
                       </div>
-                      <div className="text-xs text-gray-500">
-                        {index === 0 ? 'Current' : index === rankingProgression.length - 1 ? 'Peak' : 'Historic'}
-                      </div>
+                      
+                      {competition.points && (
+                        <p className="text-xs text-blue-400 mb-2">{competition.points}</p>
+                      )}
+                      
+                      {competition.significance && (
+                        <p className="text-xs text-gray-300 italic">{competition.significance}</p>
+                      )}
                     </div>
                   ))}
                 </div>
               ) : (
-                athleteData.currentRank && athleteData.currentRank !== "Unranked" ? (
-                  <div className="flex items-center space-x-3 p-3 bg-athlete-gray-700 rounded-lg">
-                    <div className="w-8 h-8 bg-athlete-accent rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white text-xs font-bold">
-                        {typeof athleteData.currentRank === 'string' 
-                          ? athleteData.currentRank.replace('#', '').substring(0, 2)
-                          : String(athleteData.currentRank).substring(0, 2)
-                        }
-                      </span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-white font-medium text-sm">{athleteData.currentRank}</p>
-                      <p className="text-gray-400 text-xs mt-1">Current world ranking in {athleteData.sport}</p>
-                    </div>
-                    <div className="text-xs text-gray-500">Current</div>
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Trophy className="mx-auto mb-3 text-gray-500" size={32} />
-                    <p className="text-gray-400">Ranking history will appear here</p>
-                    <p className="text-gray-500 text-sm">Based on authentic competition data</p>
-                  </div>
-                )
+                <div className="text-center py-8 text-gray-400">
+                  <TrendingUp className="mx-auto h-12 w-12 mb-4 opacity-50" />
+                  <p>No ranking progression data available</p>
+                  <p className="text-sm">Competition-by-competition ranking changes will appear here</p>
+                </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Performance Analytics */}
-          <Card className="bg-athlete-gray-800 border-gray-700">
-            <CardHeader>
-              <CardTitle className="flex items-center text-white">
-                <TrendingUp className="mr-2 text-athlete-success" size={20} />
-                Performance Analytics
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-4">
-                <div className="bg-athlete-gray-700 rounded-lg p-4">
-                  <h4 className="text-white font-semibold mb-3">Key Metrics</h4>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-300 text-sm">Sport Category</span>
-                      <span className="text-white font-medium">{athleteData.sport}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-300 text-sm">Ranking Status</span>
-                      <Badge className="bg-athlete-accent text-white">
-                        {athleteData.currentRank !== "N/A" ? `World ${athleteData.currentRank}` : "Unranked"}
-                      </Badge>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-300 text-sm">Competition Record</span>
-                      <span className="text-white font-medium">
-                        {athleteData.competitionRecord && athleteData.competitionRecord !== "Data not available" 
-                          ? athleteData.competitionRecord 
-                          : "Data not available"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-300 text-sm">Best World Ranking Achieved</span>
-                      <Badge className="bg-athlete-success text-white">
-                        {athleteData.bestWorldRanking && athleteData.bestWorldRanking !== "Data not available" 
-                          ? athleteData.bestWorldRanking 
-                          : "Data not available"}
-                      </Badge>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-300 text-sm">Analysis Date</span>
-                      <span className="text-gray-400 text-sm">{athleteData.analysisDate}</span>
+          {/* Career Summary */}
+          {data.careerSummary && (
+            <Card className="bg-athlete-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center text-white">
+                  <Award className="mr-2 text-yellow-500" size={20} />
+                  Career Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="text-athlete-accent font-medium mb-3">Career Statistics</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300 text-sm">Total Competitions</span>
+                        <span className="text-white font-semibold">{data.careerSummary.totalCompetitions || "N/A"}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300 text-sm">Major Titles</span>
+                        <span className="text-white font-semibold">{data.careerSummary.majorTitles || "N/A"}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300 text-sm">Ranking Trend</span>
+                        <Badge variant={
+                          data.careerSummary.rankingTrend === 'upward' ? 'default' : 
+                          data.careerSummary.rankingTrend === 'stable' ? 'secondary' : 
+                          'destructive'
+                        }>
+                          {data.careerSummary.rankingTrend || 'N/A'}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <div className="bg-gradient-to-r from-athlete-accent/10 to-transparent rounded-lg p-4 border border-athlete-accent/20">
-                  <div className="flex items-center mb-2">
-                    <Brain className="mr-2 text-athlete-accent" size={16} />
-                    <span className="text-athlete-accent font-semibold text-sm">AI Analysis</span>
+                  
+                  <div>
+                    <h4 className="text-athlete-accent font-medium mb-3">Current Form</h4>
+                    <p className="text-gray-300 text-sm mb-3">{data.careerSummary.currentForm || 'No current form data available'}</p>
+                    
+                    {data.careerSummary.notableAchievements && data.careerSummary.notableAchievements.length > 0 && (
+                      <div>
+                        <h5 className="text-white text-sm font-medium mb-2">Notable Achievements</h5>
+                        <div className="space-y-1">
+                          {data.careerSummary.notableAchievements.map((achievement: string, index: number) => (
+                            <div key={index} className="flex items-center text-xs">
+                              <Trophy className="w-3 h-3 text-yellow-500 mr-2 flex-shrink-0" />
+                              <span className="text-gray-300">{achievement}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-gray-300 text-sm">
-                    {athleteData.record && athleteData.record !== "To Be Updated"
-                      ? `Current competitive record: ${athleteData.record}. Analysis includes ranking progression and ${athleteData.sport} performance metrics.`
-                      : `Performance analysis for ${athleteData.sport} athlete with authentic ranking data and competition history.`
-                    }
-                  </p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Data Source Information */}

@@ -898,11 +898,115 @@ export async function generateNutritionPlan(athleteName: string, sport: string, 
   }
 }
 
-// GPT-5 implementation of specific analysis generation
+// GPT-5 implementation of enhanced rank history generation with competition-by-competition tracking
+export async function generateRankHistory(athleteName: string, sport: string, nationality?: string): Promise<any> {
+  const prompt = `As an expert ${sport} analyst, research and provide a comprehensive ranking progression analysis for athlete "${athleteName}" from ${nationality || 'unknown nationality'}.
+
+Search the web thoroughly for:
+1. Complete competition history with dates
+2. How their world ranking changed after each major competition
+3. Current official competitive record (wins-losses if applicable)
+4. Whether the athlete is currently active or retired
+5. Peak ranking achieved and when
+
+Focus on official rankings from governing bodies (World Taekwondo, BWF, etc.) and verified competition results.
+
+Response format (JSON):
+{
+  "athlete": {
+    "name": "${athleteName}",
+    "nationality": "${nationality || 'N/A'}",
+    "sport": "${sport}",
+    "isActive": true/false,
+    "officialRecord": "13-7 (65%)" or "N/A if not applicable",
+    "peakRanking": "#5" or "N/A",
+    "peakRankingDate": "2023-04-15" or "N/A",
+    "currentRanking": "#12" or "N/A",
+    "lastUpdated": "2025-08-12"
+  },
+  "rankingProgression": [
+    {
+      "competition": "2025 World Championships",
+      "date": "2025-06-15",
+      "result": "Gold Medal",
+      "rankingBefore": "#8",
+      "rankingAfter": "#3",
+      "points": "450 points gained",
+      "significance": "Major breakthrough performance"
+    },
+    {
+      "competition": "2024 Asian Games",  
+      "date": "2024-10-02",
+      "result": "Bronze Medal",
+      "rankingBefore": "#12",
+      "rankingAfter": "#8",
+      "points": "280 points gained",
+      "significance": "First major international medal"
+    }
+  ],
+  "careerSummary": {
+    "totalCompetitions": 45,
+    "majorTitles": 3,
+    "rankingTrend": "upward/stable/declining",
+    "notableAchievements": ["First Olympic appearance", "Continental champion"],
+    "currentForm": "Excellent recent results with consistent podium finishes"
+  }
+}
+
+Provide authentic data only - if information is not found, use "N/A" rather than making assumptions.`;
+
+  try {
+    const response = await openai.responses.create({
+      model: "gpt-5",
+      input: prompt,
+      tools: [{ type: "web_search_preview" }],
+      max_output_tokens: 8000,
+    });
+
+    let cleanedText = response.output_text.trim();
+    cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    
+    const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleanedText = jsonMatch[0];
+    }
+    
+    return JSON.parse(cleanedText);
+  } catch (error) {
+    console.error(`Error generating rank history for ${athleteName}:`, error);
+    return {
+      athlete: {
+        name: athleteName,
+        nationality: nationality || 'N/A',
+        sport: sport,
+        isActive: true,
+        officialRecord: "N/A",
+        peakRanking: "N/A",
+        peakRankingDate: "N/A",
+        currentRanking: "N/A",
+        lastUpdated: new Date().toISOString().split('T')[0]
+      },
+      rankingProgression: [],
+      careerSummary: {
+        totalCompetitions: "N/A",
+        majorTitles: "N/A", 
+        rankingTrend: "N/A",
+        notableAchievements: [],
+        currentForm: "Data not available"
+      }
+    };
+  }
+}
+
+// GPT-5 implementation of specific analysis generation  
 export async function generateSpecificAnalysis(athleteName: string, sport: string, analysisType: string, athleteData?: any, customPrompt?: string): Promise<any> {
   let prompt = '';
   
-  if (analysisType === 'weaknesses' && athleteData) {
+  if (analysisType === 'rank' && athleteData) {
+    // Use the new enhanced rank history generation
+    return await generateRankHistory(athleteName, sport, athleteData.country);
+  } else if (analysisType === 'weaknesses' && athleteData) {
     prompt = `As an expert ${sport} coach and analyst, analyze the specific weaknesses and areas for improvement for athlete "${athleteName}".
 
     Use the following athlete information to provide personalized analysis:
