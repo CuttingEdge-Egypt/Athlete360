@@ -2294,10 +2294,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`[ROUTE ${requestId}] User: ${userId}, File: ${req.file?.originalname}, Athletes: ${athlete1Name} vs ${athlete2Name}, Round: ${roundToAnalyze}`);
       
       // Validate required fields
-      if (!athlete1Name || !athlete2Name || !roundToAnalyze) {
-        console.log(`[ROUTE ${requestId}] Validation failed: Missing required fields`);
+      if (!roundToAnalyze) {
+        console.log(`[ROUTE ${requestId}] Validation failed: Missing required field roundToAnalyze`);
         return res.status(400).json({ 
-          message: "Missing required fields: athlete1Name, athlete2Name, roundToAnalyze" 
+          message: "Missing required field: roundToAnalyze" 
         });
       }
       
@@ -2341,9 +2341,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const analysisResults = await analyzeVideoFile(
         req.file.buffer,
         req.file.originalname,
-        parseInt(roundToAnalyze),
-        athlete1Name,
-        athlete2Name
+        parseInt(roundToAnalyze)
       );
 
       const analysisTime = Date.now() - analysisStartTime;

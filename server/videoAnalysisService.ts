@@ -234,12 +234,10 @@ Return JSON format:
 export async function analyzeVideoFile(
   videoBuffer: Buffer,
   filename: string,
-  roundToAnalyze: number,
-  athlete1Name: string,
-  athlete2Name: string
+  roundToAnalyze: number
 ) {
   console.log(`[ANALYZE_VIDEO_FILE] Starting video analysis for ${filename} (${videoBuffer.length} bytes)`);
-  console.log(`[ANALYZE_VIDEO_FILE] Athletes: ${athlete1Name} vs ${athlete2Name}, Round: ${roundToAnalyze}`);
+  console.log(`[ANALYZE_VIDEO_FILE] Round: ${roundToAnalyze}`);
   
   let tempFilePath = null;
   let videoFile = null;
@@ -282,8 +280,6 @@ export async function analyzeVideoFile(
       punch_analysis: responsePunch,
       kick_count_analysis: responseKickNo,
       yellow_card_analysis: responseYellowCards,
-      athlete1Name,
-      athlete2Name,
       roundAnalyzed: roundToAnalyze,
       processedAt: new Date().toISOString()
     };

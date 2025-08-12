@@ -14,8 +14,6 @@ interface VideoAnalysisUploadProps {
 
 export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [athlete1Name, setAthlete1Name] = useState('');
-  const [athlete2Name, setAthlete2Name] = useState('');
   const [roundToAnalyze, setRoundToAnalyze] = useState(1);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
@@ -68,10 +66,10 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
   };
 
   const handleAnalyze = async () => {
-    if (!uploadedFile || !athlete1Name || !athlete2Name) {
+    if (!uploadedFile) {
       toast({
-        title: "Missing Information",
-        description: "Please upload a video and enter both athlete names",
+        title: "Missing Video",
+        description: "Please upload a video file",
         variant: "destructive",
       });
       return;
@@ -81,8 +79,6 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
     
     const formData = new FormData();
     formData.append('video', uploadedFile);
-    formData.append('athlete1Name', athlete1Name);
-    formData.append('athlete2Name', athlete2Name);
     formData.append('roundToAnalyze', roundToAnalyze.toString());
 
     try {
@@ -134,8 +130,6 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
               onClick={() => {
                 setAnalysisResult(null);
                 setUploadedFile(null);
-                setAthlete1Name('');
-                setAthlete2Name('');
                 setRoundToAnalyze(1);
               }}
               variant="outline"
@@ -226,37 +220,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
             </div>
           </div>
 
-          {/* Athlete Information */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="athlete1" className="text-white font-medium">
-                Athlete 1 Name (Blue Corner)
-              </Label>
-              <Input
-                id="athlete1"
-                type="text"
-                placeholder="Enter blue corner athlete name"
-                value={athlete1Name}
-                onChange={(e) => setAthlete1Name(e.target.value)}
-                className="bg-athlete-gray-700 border-gray-600 text-white"
-                data-testid="input-athlete1-name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="athlete2" className="text-white font-medium">
-                Athlete 2 Name (Red Corner)
-              </Label>
-              <Input
-                id="athlete2"
-                type="text"
-                placeholder="Enter red corner athlete name"
-                value={athlete2Name}
-                onChange={(e) => setAthlete2Name(e.target.value)}
-                className="bg-athlete-gray-700 border-gray-600 text-white"
-                data-testid="input-athlete2-name"
-              />
-            </div>
-          </div>
+
 
           {/* Round Selection */}
           <div className="space-y-2">
