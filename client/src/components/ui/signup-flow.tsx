@@ -166,32 +166,32 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
                   Tell us about yourself to get started
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-3">
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
                     <Label htmlFor="firstName" className="text-sm font-medium">First Name</Label>
                     <Input
                       id="firstName"
                       value={personalInfo.firstName}
                       onChange={(e) => setPersonalInfo(prev => ({ ...prev, firstName: e.target.value }))}
                       placeholder="John"
-                      className="h-12 text-base"
+                      className="h-10 text-base"
                       data-testid="input-first-name"
                     />
                   </div>
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     <Label htmlFor="lastName" className="text-sm font-medium">Last Name</Label>
                     <Input
                       id="lastName"
                       value={personalInfo.lastName}
                       onChange={(e) => setPersonalInfo(prev => ({ ...prev, lastName: e.target.value }))}
                       placeholder="Doe"
-                      className="h-12 text-base"
+                      className="h-10 text-base"
                       data-testid="input-last-name"
                     />
                   </div>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
                   <Input
                     id="email"
@@ -199,13 +199,13 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
                     value={personalInfo.email}
                     onChange={(e) => setPersonalInfo(prev => ({ ...prev, email: e.target.value }))}
                     placeholder="john.doe@example.com"
-                    className="h-12 text-base"
+                    className="h-10 text-base"
                     data-testid="input-email"
                   />
                 </div>
                 <Button 
                   onClick={handlePersonalInfoSubmit}
-                  className="w-full bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white font-semibold py-3 text-base shadow-lg hover:shadow-xl transition-all duration-200"
+                  className="w-full bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white font-medium"
                   data-testid="button-continue-personal"
                 >
                   Continue to Payment Method
@@ -311,7 +311,7 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
               <Button 
                 onClick={handleCardSubmit}
                 disabled={isProcessing}
-                className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold py-3 text-base shadow-lg hover:shadow-xl transition-all duration-200"
+                className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-medium"
                 data-testid="button-create-account"
               >
                 {isProcessing ? (
