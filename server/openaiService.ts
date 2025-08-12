@@ -1702,6 +1702,23 @@ Use only authentic data from web search. Do not include generic content or place
     
     const parsedData = JSON.parse(cleanedText);
     
+    console.log(`GPT-5 Comparison Response for ${athlete1.name} vs ${athlete2.name}:`, JSON.stringify(parsedData, null, 2));
+    
+    // Validate that we received authentic GPT-5 data
+    const hasAuthenticOverallAnalysis = parsedData.overallAnalysis?.summary && 
+      !parsedData.overallAnalysis.summary.includes('not available') &&
+      !parsedData.overallAnalysis.summary.includes('Analysis unavailable');
+      
+    const hasAuthenticHeadToHead = parsedData.headToHead?.reasoning && 
+      !parsedData.headToHead.reasoning.includes('Unable to determine') &&
+      !parsedData.headToHead.reasoning.includes('Analysis unavailable');
+    
+    if (hasAuthenticOverallAnalysis && hasAuthenticHeadToHead) {
+      console.log(`✅ Authentic GPT-5 comparison analysis generated for ${athlete1.name} vs ${athlete2.name}`);
+    } else {
+      console.log(`⚠️ Partial GPT-5 data received for ${athlete1.name} vs ${athlete2.name} - using fallbacks for missing sections`);
+    }
+    
     // Ensure we have the expected structure
     return {
       athlete1: {
@@ -1727,24 +1744,24 @@ Use only authentic data from web search. Do not include generic content or place
         advantage: "even"
       },
       ranking: parsedData.ranking || {
-        comparison: "Comparison data not available",
-        athlete1Trajectory: "Data not available",
-        athlete2Trajectory: "Data not available",
+        comparison: "GPT-5 analysis temporarily unavailable",
+        athlete1Trajectory: "Analysis unavailable", 
+        athlete2Trajectory: "Analysis unavailable",
         competitiveEdge: "even"
       },
       headToHead: parsedData.headToHead || {
-        prediction: "athlete1",
+        prediction: "even",
         confidence: 50,
-        reasoning: "Unable to determine clear advantage",
-        keyFactors: [],
-        scenario: "Analysis not available"
+        reasoning: "Authentic head-to-head analysis temporarily unavailable. GPT-5 was unable to generate detailed comparison data.",
+        keyFactors: ["Analysis unavailable"],
+        scenario: "GPT-5 analysis temporarily unavailable"
       },
       overallAnalysis: parsedData.overallAnalysis || {
-        summary: "Comparison analysis not available",
+        summary: "Authentic overall analysis temporarily unavailable. GPT-5 was unable to generate comprehensive comparison data.",
         betterAthlete: "even",
-        reasonsWhy: [],
-        closeness: "even",
-        recommendation: "Additional analysis needed"
+        reasonsWhy: ["Analysis unavailable"],
+        closeness: "even", 
+        recommendation: "Please try again later as authentic analysis could not be generated"
       }
     };
     
@@ -1776,18 +1793,18 @@ Use only authentic data from web search. Do not include generic content or place
         competitiveEdge: "even"
       },
       headToHead: {
-        prediction: "athlete1",
+        prediction: "even",
         confidence: 50,
-        reasoning: "Analysis temporarily unavailable",
-        keyFactors: [],
-        scenario: "Unable to generate scenario analysis"
+        reasoning: "Authentic head-to-head analysis temporarily unavailable. Please try again later or contact support if the issue persists.",
+        keyFactors: ["Analysis unavailable"],
+        scenario: "GPT-5 analysis temporarily unavailable"
       },
       overallAnalysis: {
-        summary: "Comparison analysis temporarily unavailable",
+        summary: "Authentic overall analysis temporarily unavailable. Please try again later or contact support if the issue persists.",
         betterAthlete: "even",
-        reasonsWhy: [],
+        reasonsWhy: ["Analysis unavailable"],
         closeness: "even",
-        recommendation: "Please try again later"
+        recommendation: "Please try again later as authentic analysis could not be generated"
       }
     };
   }
