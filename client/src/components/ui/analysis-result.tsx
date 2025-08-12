@@ -315,13 +315,14 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
         </div>
 
         {/* Enhanced meal display */}
-        <div className="grid gap-4">
-          {meals.map((meal: any, index: number) => (
+        {meals.length > 0 ? (
+          <div className="grid gap-4">
+            {meals.map((meal: any, index: number) => (
             <Card key={index} className="bg-athlete-gray-700 border-gray-600">
               <CardContent className="p-4">
                 <div className="flex justify-between items-center mb-3">
                   <h5 className="font-semibold text-white">
-                    {meal.mealType || meal.meal || meal.name || `Meal ${index + 1}`}
+                    {meal.mealType || meal.meal || meal.name}
                   </h5>
                   <div className="flex gap-2">
                     <Badge variant="outline" className="border-athlete-warning text-athlete-warning">
@@ -342,12 +343,14 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
                 )}
                 
                 <div className="space-y-2">
-                  <div className="text-sm">
-                    <span className="text-gray-400">Foods: </span>
-                    <span className="text-white">
-                      {meal.foods ? meal.foods.join(", ") : "Traditional cuisine items"}
-                    </span>
-                  </div>
+                  {meal.foods && (
+                    <div className="text-sm">
+                      <span className="text-gray-400">Foods: </span>
+                      <span className="text-white">
+                        {Array.isArray(meal.foods) ? meal.foods.join(", ") : meal.foods}
+                      </span>
+                    </div>
+                  )}
                   
                   {meal.benefits && (
                     <div className="text-sm">
@@ -359,7 +362,15 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
               </CardContent>
             </Card>
           ))}
-        </div>
+          </div>
+        ) : (
+          <div className="p-6 text-center">
+            <div className="text-red-400 mb-4">⚠ No Meal Data Available</div>
+            <p className="text-gray-300">
+              No authentic meal data was generated. Please try regenerating the nutrition plan.
+            </p>
+          </div>
+        )}
 
         {/* Enhanced supplements section */}
         {data.supplements && (
