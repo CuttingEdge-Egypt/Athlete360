@@ -91,3 +91,5 @@ Preferred communication style: Simple, everyday language.
 - **Timeline Navigation**: Users can click on timeline events to jump to specific moments in the video
 - **Real-time Analysis Display**: Live events show within 3 seconds of current video time
 - **Complete Match Analysis**: Non-timestamped overall match analysis displayed separately for reference
+- **Updated Gemini Model**: Now using `gemini-2.5-pro` for all video analysis operations
+- **Live Scoreboard Layout**: Video centered with Blue/Red player stats on sides showing live-updating scores, kicks, and yellow cards

@@ -16,7 +16,7 @@ const generationConfig = {
 };
 
 const model = genai.getGenerativeModel({
-  model: "gemini-1.5-pro",
+  model: "gemini-2.5-pro",
   generationConfig,
 });
 
@@ -196,7 +196,7 @@ Return JSON format:
     
     // Create separate model instances for different response types
     const textModel = genai.getGenerativeModel({
-      model: "gemini-1.5-pro",
+      model: "gemini-2.5-pro",
       generationConfig: {
         temperature: 0,
         maxOutputTokens: 8192,
@@ -204,7 +204,7 @@ Return JSON format:
     });
 
     const jsonModel = genai.getGenerativeModel({
-      model: "gemini-1.5-pro", 
+      model: "gemini-2.5-pro", 
       generationConfig: {
         temperature: 0,
         maxOutputTokens: 8192,
