@@ -127,65 +127,32 @@ export class PaymobService {
 
   async createPaymentIntent(paymentIntent: PaymentIntent): Promise<PaymentResponse> {
     try {
-      // Check if we have valid Paymob credentials
-      if (!this.config.apiKey || this.config.apiKey === '' || !this.config.integrationId || this.config.integrationId === '') {
-        console.log('Using mock payment system for testing...');
-        // Return mock payment data for testing
-        const mockOrderId = `TEST_ORDER_${Date.now()}`;
-        const mockToken = `TEST_TOKEN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
-        return {
-          token: mockToken,
-          iframeUrl: `/api/payments/mock-iframe?token=${mockToken}&amount=${paymentIntent.amount}`,
-          orderId: mockOrderId,
-        };
-      }
-
+      console.log('Creating Paymob payment intent with real credentials...');
       const authToken = await this.getAuthToken();
       const orderId = await this.createOrder(authToken, paymentIntent.amount);
       const paymentToken = await this.createPaymentKey(authToken, orderId, paymentIntent);
 
+      // Handle iframe URL - check if it's already a full URL or just an ID
+      let iframeUrl;
+      if (this.config.iframeId.startsWith('https://')) {
+        iframeUrl = `${this.config.iframeId}?payment_token=${paymentToken}`;
+      } else {
+        iframeUrl = `https://accept.paymob.com/api/acceptance/iframes/${this.config.iframeId}?payment_token=${paymentToken}`;
+      }
+
       return {
         token: paymentToken,
-        iframeUrl: `https://accept.paymob.com/api/acceptance/iframes/${this.config.iframeId}?payment_token=${paymentToken}`,
+        iframeUrl: iframeUrl,
         orderId,
       };
     } catch (error) {
       console.error('Paymob payment intent creation error:', error);
-      // Fallback to mock system if Paymob fails
-      console.log('Falling back to mock payment system...');
-      const mockOrderId = `TEST_ORDER_${Date.now()}`;
-      const mockToken = `TEST_TOKEN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      return {
-        token: mockToken,
-        iframeUrl: `/api/payments/mock-iframe?token=${mockToken}&amount=${paymentIntent.amount}`,
-        orderId: mockOrderId,
-      };
+      throw error;
     }
   }
 
   async verifyPayment(transactionId: string): Promise<any> {
     try {
-      // Handle test transactions
-      if (transactionId.startsWith('TEST_TXN_')) {
-        console.log('Verifying test transaction:', transactionId);
-        return {
-          success: true,
-          id: transactionId,
-          amount_cents: 2500, // Mock amount
-          currency: 'EGP',
-          success: true,
-          is_3d_secure: false,
-          integration_id: 'test_integration',
-          profile_id: 'test_profile',
-          has_parent_transaction: false,
-          order: {
-            id: transactionId.replace('TEST_TXN_', 'TEST_ORDER_')
-          }
-        };
-      }
-
       const authToken = await this.getAuthToken();
       const response = await fetch(`${this.baseUrl}/acceptance/transactions/${transactionId}`, {
         method: 'GET',
@@ -202,10 +169,6 @@ export class PaymobService {
       return data;
     } catch (error) {
       console.error('Payment verification error:', error);
-      // For test transactions, don't fail
-      if (transactionId.startsWith('TEST_TXN_')) {
-        return { success: true, id: transactionId };
-      }
       throw error;
     }
   }
