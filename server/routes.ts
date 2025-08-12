@@ -2337,31 +2337,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Video Analysis endpoint
   app.post('/api/analysis/video', isAuthenticated, upload.single('video'), async (req: any, res) => {
     const tokenCost = 200; // Video analysis costs more tokens
+    const requestId = `req_${Date.now()}`;
+    
     try {
+      console.log(`[ROUTE ${requestId}] Starting video analysis request`);
       const userId = req.user.claims.sub;
       const { athlete1Name, athlete2Name, roundToAnalyze } = req.body;
       
+      console.log(`[ROUTE ${requestId}] User: ${userId}, File: ${req.file?.originalname}, Athletes: ${athlete1Name} vs ${athlete2Name}, Round: ${roundToAnalyze}`);
+      
       // Validate required fields
       if (!athlete1Name || !athlete2Name || !roundToAnalyze) {
+        console.log(`[ROUTE ${requestId}] Validation failed: Missing required fields`);
         return res.status(400).json({ 
           message: "Missing required fields: athlete1Name, athlete2Name, roundToAnalyze" 
         });
       }
       
       if (!req.file) {
+        console.log(`[ROUTE ${requestId}] Validation failed: No video file uploaded`);
         return res.status(400).json({ message: "No video file uploaded" });
       }
 
+      console.log(`[ROUTE ${requestId}] File validation passed: ${req.file.originalname} (${req.file.size} bytes)`);
+
       // Check if user has enough tokens
+      console.log(`[ROUTE ${requestId}] Checking user tokens...`);
       const user = await storage.getUser(userId);
       if (!user || (user.tokens || 0) < tokenCost) {
+        console.log(`[ROUTE ${requestId}] Insufficient tokens: User has ${user?.tokens || 0}, needs ${tokenCost}`);
         return res.status(402).json({ message: "Insufficient tokens" });
       }
 
+      console.log(`[ROUTE ${requestId}] Token check passed: User has ${user.tokens} tokens`);
+
       // Deduct tokens
+      console.log(`[ROUTE ${requestId}] Deducting ${tokenCost} tokens...`);
       await storage.deductTokens(userId, tokenCost);
+      console.log(`[ROUTE ${requestId}] Tokens deducted successfully`);
 
       // Create transaction
+      console.log(`[ROUTE ${requestId}] Creating transaction record...`);
       await storage.createTransaction({
         userId,
         action: "Video Analysis",
@@ -2369,8 +2385,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         athleteId: null, // No specific athlete for video analysis
         serviceType: "video"
       });
+      console.log(`[ROUTE ${requestId}] Transaction record created`);
 
-      console.log(`Processing video analysis for ${athlete1Name} vs ${athlete2Name}, Round ${roundToAnalyze}`);
+      console.log(`[ROUTE ${requestId}] Starting video analysis processing...`);
+      const analysisStartTime = Date.now();
       
       // Process video with Gemini
       const analysisResults = await analyzeVideoFile(
@@ -2381,14 +2399,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         athlete2Name
       );
 
+      const analysisTime = Date.now() - analysisStartTime;
+      console.log(`[ROUTE ${requestId}] Video analysis completed in ${analysisTime}ms`);
+
       // Save analysis log
+      console.log(`[ROUTE ${requestId}] Saving analysis log to database...`);
       await storage.createAnalysisLog({
         userId,
         athleteId: null,
         serviceType: "video",
         resultData: analysisResults
       });
+      console.log(`[ROUTE ${requestId}] Analysis log saved to database`);
 
+      console.log(`[ROUTE ${requestId}] Sending successful response`);
       res.json({
         success: true,
         message: "Video analysis completed successfully",
@@ -2396,7 +2420,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
     } catch (error) {
-      console.error("Error processing video analysis:", error);
+      console.error(`[ROUTE ${requestId}] Error processing video analysis:`, error);
       res.status(500).json({ 
         message: "Failed to analyze video",
         error: error instanceof Error ? error.message : String(error)

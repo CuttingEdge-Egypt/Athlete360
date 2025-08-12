@@ -203,11 +203,18 @@ Take your time in processing to make sure the results are accurate.
 Make sure you're not scanning the yellow card as an actual score.`;
 
   try {
+    console.log(`[VIDEO ANALYSIS] Starting analysis for ${athlete1Name} vs ${athlete2Name}, Round ${roundToAnalyze}`);
+    console.log(`[VIDEO ANALYSIS] Step 1: Preparing video data...`);
+    
     const videoData = await prepareVideoForGemini(videoFilePath);
+    console.log(`[VIDEO ANALYSIS] Step 1 Complete: Video data prepared (size: ${videoData.inlineData.data.length} chars)`);
 
-    console.log(`Processing video analysis for ${athlete1Name} vs ${athlete2Name}, Round ${roundToAnalyze}`);
+    console.log(`[VIDEO ANALYSIS] Step 2: Starting 5 parallel API calls to Google Gemini...`);
+    const startTime = Date.now();
 
-    // Generate all analyses
+    // Generate all analyses with individual logging
+    console.log(`[VIDEO ANALYSIS] Calling API for: Match Analysis, Match Score, Punches, Kick Count, Yellow Cards`);
+    
     const [
       responseMatchAnalysis,
       responseMatchScore,
@@ -215,27 +222,104 @@ Make sure you're not scanning the yellow card as an actual score.`;
       responseKickNo,
       responseYellowCards
     ] = await Promise.all([
-      modelMatch.generateContent([videoData, promptMatch]),
-      model.generateContent([videoData, promptMatchScore]),
-      model.generateContent([videoData, promptPunch]),
-      model.generateContent([videoData, promptKickNo]),
-      model.generateContent([videoData, promptYellowCards])
+      (async () => {
+        console.log(`[VIDEO ANALYSIS] Starting: Match Analysis`);
+        const response = await modelMatch.generateContent([videoData, promptMatch]);
+        console.log(`[VIDEO ANALYSIS] Completed: Match Analysis`);
+        return response;
+      })(),
+      (async () => {
+        console.log(`[VIDEO ANALYSIS] Starting: Match Score`);
+        const response = await model.generateContent([videoData, promptMatchScore]);
+        console.log(`[VIDEO ANALYSIS] Completed: Match Score`);
+        return response;
+      })(),
+      (async () => {
+        console.log(`[VIDEO ANALYSIS] Starting: Punches`);
+        const response = await model.generateContent([videoData, promptPunch]);
+        console.log(`[VIDEO ANALYSIS] Completed: Punches`);
+        return response;
+      })(),
+      (async () => {
+        console.log(`[VIDEO ANALYSIS] Starting: Kick Count`);
+        const response = await model.generateContent([videoData, promptKickNo]);
+        console.log(`[VIDEO ANALYSIS] Completed: Kick Count`);
+        return response;
+      })(),
+      (async () => {
+        console.log(`[VIDEO ANALYSIS] Starting: Yellow Cards`);
+        const response = await model.generateContent([videoData, promptYellowCards]);
+        console.log(`[VIDEO ANALYSIS] Completed: Yellow Cards`);
+        return response;
+      })()
     ]);
 
-    // Parse responses
+    const apiCallTime = Date.now() - startTime;
+    console.log(`[VIDEO ANALYSIS] Step 2 Complete: All API calls finished in ${apiCallTime}ms`);
+
+    console.log(`[VIDEO ANALYSIS] Step 3: Parsing responses...`);
+    
+    // Parse responses with error handling
     const results = {
-      matchAnalysis: JSON.parse(responseMatchAnalysis.response.text()),
-      matchScore: JSON.parse(responseMatchScore.response.text()),
-      punches: JSON.parse(responsePunch.response.text()),
-      kickCount: JSON.parse(responseKickNo.response.text()),
-      yellowCards: JSON.parse(responseYellowCards.response.text()),
+      matchAnalysis: (() => {
+        try {
+          const parsed = JSON.parse(responseMatchAnalysis.response.text());
+          console.log(`[VIDEO ANALYSIS] Match Analysis parsed successfully`);
+          return parsed;
+        } catch (e) {
+          console.error(`[VIDEO ANALYSIS] Error parsing Match Analysis:`, e);
+          return { error: 'Failed to parse match analysis' };
+        }
+      })(),
+      matchScore: (() => {
+        try {
+          const parsed = JSON.parse(responseMatchScore.response.text());
+          console.log(`[VIDEO ANALYSIS] Match Score parsed successfully`);
+          return parsed;
+        } catch (e) {
+          console.error(`[VIDEO ANALYSIS] Error parsing Match Score:`, e);
+          return { error: 'Failed to parse match score' };
+        }
+      })(),
+      punches: (() => {
+        try {
+          const parsed = JSON.parse(responsePunch.response.text());
+          console.log(`[VIDEO ANALYSIS] Punches parsed successfully`);
+          return parsed;
+        } catch (e) {
+          console.error(`[VIDEO ANALYSIS] Error parsing Punches:`, e);
+          return { error: 'Failed to parse punches' };
+        }
+      })(),
+      kickCount: (() => {
+        try {
+          const parsed = JSON.parse(responseKickNo.response.text());
+          console.log(`[VIDEO ANALYSIS] Kick Count parsed successfully`);
+          return parsed;
+        } catch (e) {
+          console.error(`[VIDEO ANALYSIS] Error parsing Kick Count:`, e);
+          return { error: 'Failed to parse kick count' };
+        }
+      })(),
+      yellowCards: (() => {
+        try {
+          const parsed = JSON.parse(responseYellowCards.response.text());
+          console.log(`[VIDEO ANALYSIS] Yellow Cards parsed successfully`);
+          return parsed;
+        } catch (e) {
+          console.error(`[VIDEO ANALYSIS] Error parsing Yellow Cards:`, e);
+          return { error: 'Failed to parse yellow cards' };
+        }
+      })(),
       athlete1Name,
       athlete2Name,
       roundAnalyzed: roundToAnalyze,
       processedAt: new Date().toISOString()
     };
 
-    console.log('Video analysis completed successfully');
+    const totalTime = Date.now() - (startTime - apiCallTime);
+    console.log(`[VIDEO ANALYSIS] Step 3 Complete: All responses parsed`);
+    console.log(`[VIDEO ANALYSIS] SUCCESS: Video analysis completed in ${totalTime}ms total`);
     return results;
 
   } catch (error) {
@@ -251,17 +335,26 @@ export async function analyzeVideoFile(
   athlete1Name: string,
   athlete2Name: string
 ) {
+  console.log(`[ANALYZE FILE] Starting analyzeVideoFile for ${filename} (${videoBuffer.length} bytes)`);
+  console.log(`[ANALYZE FILE] Athletes: ${athlete1Name} vs ${athlete2Name}, Round: ${roundToAnalyze}`);
+  
   // Create temp directory if it doesn't exist
   const tempDir = path.join(process.cwd(), 'temp');
   if (!fs.existsSync(tempDir)) {
+    console.log(`[ANALYZE FILE] Creating temp directory: ${tempDir}`);
     fs.mkdirSync(tempDir, { recursive: true });
   }
 
   // Save video to temporary file
   const tempFilePath = path.join(tempDir, `video_${Date.now()}_${filename}`);
+  console.log(`[ANALYZE FILE] Saving video to temp file: ${tempFilePath}`);
   fs.writeFileSync(tempFilePath, videoBuffer);
+  console.log(`[ANALYZE FILE] Video saved successfully, file size: ${fs.statSync(tempFilePath).size} bytes`);
 
   try {
+    console.log(`[ANALYZE FILE] Calling processVideoGemini...`);
+    const startTime = Date.now();
+    
     const results = await processVideoGemini(
       tempFilePath,
       roundToAnalyze,
@@ -269,14 +362,16 @@ export async function analyzeVideoFile(
       athlete2Name
     );
 
+    const totalTime = Date.now() - startTime;
+    console.log(`[ANALYZE FILE] processVideoGemini completed in ${totalTime}ms`);
     return results;
   } finally {
     // Clean up temp file
     try {
       fs.unlinkSync(tempFilePath);
-      console.log('Temporary video file cleaned up');
+      console.log('[ANALYZE FILE] Temporary video file cleaned up successfully');
     } catch (cleanupError) {
-      console.warn('Failed to cleanup temp file:', cleanupError);
+      console.warn('[ANALYZE FILE] Failed to cleanup temp file:', cleanupError);
     }
   }
 }
