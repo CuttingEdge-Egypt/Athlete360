@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { HistoryDropdown } from "@/components/ui/history-dropdown";
 import { ProfileDropdown } from "@/components/ui/profile-dropdown";
-import { Trophy, Coins, Plus, LogOut, User as UserIcon } from "lucide-react";
+import { Trophy, Coins, Plus, LogOut, User as UserIcon, Video } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { User } from "@shared/schema";
@@ -44,6 +44,17 @@ export function Navigation() {
               )}
             </div>
           </div>
+          
+          <Link href="/video-analysis">
+            <Button 
+              data-testid="button-video-analysis"
+              variant="ghost"
+              className="text-gray-300 hover:text-white"
+            >
+              <Video className="mr-2" size={16} />
+              Video Analysis
+            </Button>
+          </Link>
           
           <Link href="/payment-center">
             <Button 

@@ -550,85 +550,178 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
       );
     }
 
-    // Enhanced error handling for array data
-    let keyFindings: string[] = [];
-    let technicalInsights: string[] = [];
-    let recommendations: string[] = [];
-    
-    try {
-      keyFindings = Array.isArray(data.keyFindings) ? data.keyFindings : [];
-      technicalInsights = Array.isArray(data.technicalInsights) ? data.technicalInsights : [];
-      recommendations = Array.isArray(data.recommendations) ? data.recommendations : [];
-    } catch (error) {
-      console.error('Error processing video analysis data:', error);
-    }
-
     return (
-      <div>
-        <div className="grid md:grid-cols-2 gap-6 mb-6">
+      <div className="space-y-6">
+        {/* Analysis Header */}
+        <div className="grid md:grid-cols-3 gap-4">
           <Card className="bg-athlete-gray-700 border-gray-600">
             <CardContent className="p-4">
-              <h5 className="font-semibold text-white mb-2">Overall Performance</h5>
-              <div className="space-y-2">
-                <div className="text-2xl font-bold text-athlete-accent">
-                  {data.overallScore || 'N/A'}/10
-                </div>
-                <div className="text-sm text-gray-300">
-                  {data.comparedToAverage || 'Analysis not available'}
-                </div>
+              <h5 className="font-semibold text-white mb-2">Match</h5>
+              <div className="text-athlete-accent font-medium">
+                {data.athlete1Name} vs {data.athlete2Name}
               </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-athlete-gray-700 border-gray-600">
-            <CardContent className="p-4">
-              <h5 className="font-semibold text-white mb-2">Analysis Type</h5>
-              <div className="text-athlete-accent font-semibold">
-                {data.analysisType || 'Video Performance Analysis'}
+              <div className="text-sm text-gray-400 mt-1">
+                Round {data.roundAnalyzed} Analysis
               </div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        <div className="grid gap-4">
-          <Card className="bg-athlete-gray-700 border-gray-600">
-            <CardContent className="p-4">
-              <h5 className="font-semibold text-athlete-success mb-2">Key Findings</h5>
-              <ul className="text-sm text-gray-300 space-y-1">
-                {keyFindings.length > 0 ? keyFindings.map((finding: string, index: number) => (
-                  <li key={index}>• {finding}</li>
-                )) : (
-                  <li className="text-gray-400">No findings available</li>
-                )}
-              </ul>
             </CardContent>
           </Card>
           
           <Card className="bg-athlete-gray-700 border-gray-600">
             <CardContent className="p-4">
-              <h5 className="font-semibold text-athlete-warning mb-2">Technical Insights</h5>
-              <ul className="text-sm text-gray-300 space-y-1">
-                {technicalInsights.length > 0 ? technicalInsights.map((insight: string, index: number) => (
-                  <li key={index}>• {insight}</li>
-                )) : (
-                  <li className="text-gray-400">No insights available</li>
-                )}
-              </ul>
+              <h5 className="font-semibold text-white mb-2">Final Score</h5>
+              <div className="text-athlete-warning font-bold text-lg">
+                {data.matchScore?.summary?.total_match_score_blue || 0} - {data.matchScore?.summary?.total_match_score_red || 0}
+              </div>
             </CardContent>
           </Card>
           
           <Card className="bg-athlete-gray-700 border-gray-600">
             <CardContent className="p-4">
-              <h5 className="font-semibold text-purple-400 mb-2">Recommendations</h5>
-              <ul className="text-sm text-gray-300 space-y-1">
-                {recommendations.length > 0 ? recommendations.map((rec: string, index: number) => (
-                  <li key={index}>• {rec}</li>
-                )) : (
-                  <li className="text-gray-400">No recommendations available</li>
-                )}
-              </ul>
+              <h5 className="font-semibold text-white mb-2">Processed</h5>
+              <div className="text-gray-300 text-sm">
+                {data.processedAt ? new Date(data.processedAt).toLocaleString() : 'Recently'}
+              </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* Match Analysis */}
+        {data.matchAnalysis && (
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-5">
+              <h4 className="font-semibold text-white mb-3">Match Analysis</h4>
+              <div className="text-gray-300 leading-relaxed whitespace-pre-line">
+                {typeof data.matchAnalysis === 'string' ? data.matchAnalysis : JSON.stringify(data.matchAnalysis, null, 2)}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Player Statistics */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Athlete 1 Stats */}
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-5">
+              <h4 className="font-semibold text-blue-400 mb-3">{data.athlete1Name} (Blue)</h4>
+              
+              {data.kickCount?.players?.[0] && (
+                <div className="mb-4">
+                  <h5 className="font-medium text-white mb-2">Kick Count</h5>
+                  <div className="text-athlete-accent">
+                    {data.kickCount.players[0].kicks?.[0]?.total_kick_number || 0} kicks
+                  </div>
+                </div>
+              )}
+
+              {data.matchScore?.players?.[0] && (
+                <div className="mb-4">
+                  <h5 className="font-medium text-white mb-2">Scoring</h5>
+                  <div className="space-y-1 text-sm">
+                    <div>Total Points: <span className="text-athlete-warning">{data.matchScore.players[0].total_points || 0}</span></div>
+                    <div>Scoring Kicks: <span className="text-athlete-accent">{data.matchScore.players[0].total_kicks || 0}</span></div>
+                  </div>
+                </div>
+              )}
+
+              {data.punches?.players?.[0] && (
+                <div className="mb-4">
+                  <h5 className="font-medium text-white mb-2">Punches</h5>
+                  <div className="text-athlete-accent">
+                    {data.punches.players[0].total_punches || 0} punches
+                  </div>
+                </div>
+              )}
+
+              {data.yellowCards?.players?.[0] && (
+                <div>
+                  <h5 className="font-medium text-white mb-2">Yellow Cards</h5>
+                  <div className="text-yellow-400">
+                    {data.yellowCards.players[0].total_yellows || 0} warnings
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Athlete 2 Stats */}
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-5">
+              <h4 className="font-semibold text-red-400 mb-3">{data.athlete2Name} (Red)</h4>
+              
+              {data.kickCount?.players?.[1] && (
+                <div className="mb-4">
+                  <h5 className="font-medium text-white mb-2">Kick Count</h5>
+                  <div className="text-athlete-accent">
+                    {data.kickCount.players[1].kicks?.[0]?.total_kick_number || 0} kicks
+                  </div>
+                </div>
+              )}
+
+              {data.matchScore?.players?.[1] && (
+                <div className="mb-4">
+                  <h5 className="font-medium text-white mb-2">Scoring</h5>
+                  <div className="space-y-1 text-sm">
+                    <div>Total Points: <span className="text-athlete-warning">{data.matchScore.players[1].total_points || 0}</span></div>
+                    <div>Scoring Kicks: <span className="text-athlete-accent">{data.matchScore.players[1].total_kicks || 0}</span></div>
+                  </div>
+                </div>
+              )}
+
+              {data.punches?.players?.[1] && (
+                <div className="mb-4">
+                  <h5 className="font-medium text-white mb-2">Punches</h5>
+                  <div className="text-athlete-accent">
+                    {data.punches.players[1].total_punches || 0} punches
+                  </div>
+                </div>
+              )}
+
+              {data.yellowCards?.players?.[1] && (
+                <div>
+                  <h5 className="font-medium text-white mb-2">Yellow Cards</h5>
+                  <div className="text-yellow-400">
+                    {data.yellowCards.players[1].total_yellows || 0} warnings
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Technical Breakdown */}
+        {(data.kickCount?.players || data.matchScore?.players) && (
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-5">
+              <h4 className="font-semibold text-white mb-3">Technical Breakdown</h4>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h5 className="font-medium text-blue-400 mb-2">{data.athlete1Name}</h5>
+                  {data.matchScore?.players?.[0]?.kicks && (
+                    <div className="space-y-1 text-sm text-gray-300">
+                      {data.matchScore.players[0].kicks.map((kick: any, index: number) => (
+                        <div key={index}>
+                          {kick.timestamp}: +{kick.score} points
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h5 className="font-medium text-red-400 mb-2">{data.athlete2Name}</h5>
+                  {data.matchScore?.players?.[1]?.kicks && (
+                    <div className="space-y-1 text-sm text-gray-300">
+                      {data.matchScore.players[1].kicks.map((kick: any, index: number) => (
+                        <div key={index}>
+                          {kick.timestamp}: +{kick.score} points
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     );
   };

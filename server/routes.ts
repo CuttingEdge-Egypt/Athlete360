@@ -6,12 +6,30 @@ import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
 import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, generateNutritionPlan, compareAthletes } from "./openaiService";
+import { analyzeVideoFile } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
 import { TestingService } from "./testingService";
 import OpenAI from "openai";
+import multer from "multer";
 
 // All LLM implementations now use GPT-5 with temperature 1.0 (default minimum)
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// Configure multer for video file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 100 * 1024 * 1024, // 100MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept video files
+    if (file.mimetype.startsWith('video/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only video files are allowed'));
+    }
+  }
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -2354,6 +2372,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error simulating referral:', error);
       res.status(500).json({ message: 'Failed to simulate referral' });
+    }
+  });
+
+  // Video Analysis endpoint
+  app.post('/api/analysis/video', isAuthenticated, upload.single('video'), async (req: any, res) => {
+    const tokenCost = 200; // Video analysis costs more tokens
+    try {
+      const userId = req.user.claims.sub;
+      const { athlete1Name, athlete2Name, roundToAnalyze } = req.body;
+      
+      // Validate required fields
+      if (!athlete1Name || !athlete2Name || !roundToAnalyze) {
+        return res.status(400).json({ 
+          message: "Missing required fields: athlete1Name, athlete2Name, roundToAnalyze" 
+        });
+      }
+      
+      if (!req.file) {
+        return res.status(400).json({ message: "No video file uploaded" });
+      }
+
+      // Check if user has enough tokens
+      const user = await storage.getUser(userId);
+      if (!user || (user.tokens || 0) < tokenCost) {
+        return res.status(402).json({ message: "Insufficient tokens" });
+      }
+
+      // Deduct tokens
+      await storage.deductTokens(userId, tokenCost);
+
+      // Create transaction
+      await storage.createTransaction({
+        userId,
+        action: "Video Analysis",
+        tokensDeducted: tokenCost,
+        athleteId: null, // No specific athlete for video analysis
+        serviceType: "video"
+      });
+
+      console.log(`Processing video analysis for ${athlete1Name} vs ${athlete2Name}, Round ${roundToAnalyze}`);
+      
+      // Process video with Gemini
+      const analysisResults = await analyzeVideoFile(
+        req.file.buffer,
+        req.file.originalname,
+        parseInt(roundToAnalyze),
+        athlete1Name,
+        athlete2Name
+      );
+
+      // Save analysis log
+      await storage.createAnalysisLog({
+        userId,
+        athleteId: null,
+        serviceType: "video",
+        resultData: analysisResults
+      });
+
+      res.json({
+        success: true,
+        message: "Video analysis completed successfully",
+        data: analysisResults
+      });
+
+    } catch (error) {
+      console.error("Error processing video analysis:", error);
+      res.status(500).json({ 
+        message: "Failed to analyze video",
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   });
 
