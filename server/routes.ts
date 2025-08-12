@@ -2339,8 +2339,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const tokenCost = 200; // Video analysis costs more tokens
     const requestId = `req_${Date.now()}`;
     
+    console.log(`[VIDEO ROUTE ${requestId}] ===== VIDEO ANALYSIS REQUEST STARTED =====`);
+    console.log(`[VIDEO ROUTE ${requestId}] Request received at ${new Date().toISOString()}`);
+    console.log(`[VIDEO ROUTE ${requestId}] Headers:`, req.headers);
+    console.log(`[VIDEO ROUTE ${requestId}] Body keys:`, Object.keys(req.body || {}));
+    console.log(`[VIDEO ROUTE ${requestId}] File info:`, req.file ? { 
+      originalname: req.file.originalname, 
+      mimetype: req.file.mimetype, 
+      size: req.file.size 
+    } : 'No file');
+
     try {
-      console.log(`[ROUTE ${requestId}] Starting video analysis request`);
+      console.log(`[VIDEO ROUTE ${requestId}] Starting video analysis request`);
       const userId = req.user.claims.sub;
       const { athlete1Name, athlete2Name, roundToAnalyze } = req.body;
       
