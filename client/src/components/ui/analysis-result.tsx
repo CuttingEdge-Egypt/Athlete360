@@ -196,13 +196,38 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     console.log('Frontend Nutrition Data RECEIVED:', JSON.stringify(data, null, 2));
     console.log('Data timestamp check:', data.generatedAt, data.sessionId);
     
-    // Enhanced data structure support - check both old and new formats
-    const meals = data.meals?.breakfast ? [
-      ...(data.meals.breakfast || []).map((meal: any) => ({ ...meal, mealType: 'Breakfast' })),
-      ...(data.meals.lunch || []).map((meal: any) => ({ ...meal, mealType: 'Lunch' })),
-      ...(data.meals.dinner || []).map((meal: any) => ({ ...meal, mealType: 'Dinner' })),
-      ...(data.meals.snacks || []).map((meal: any) => ({ ...meal, mealType: 'Snacks' }))
-    ] : data.meals || [];
+    // Check for error state first
+    if (data.error || data.message?.includes('Unable to generate')) {
+      return (
+        <div className="p-6 text-center">
+          <div className="text-red-400 mb-4">⚠ Analysis Unavailable</div>
+          <p className="text-gray-300 mb-4">
+            {data.message || 'Unable to generate authentic nutrition plan at this time.'}
+          </p>
+          <p className="text-sm text-gray-400">
+            Please try again later or contact support if the issue persists.
+          </p>
+        </div>
+      );
+    }
+    
+    // Enhanced data structure support with better error handling
+    let meals: any[] = [];
+    try {
+      if (data.meals?.breakfast) {
+        meals = [
+          ...(Array.isArray(data.meals.breakfast) ? data.meals.breakfast : []).map((meal: any) => ({ ...meal, mealType: 'Breakfast' })),
+          ...(Array.isArray(data.meals.lunch) ? data.meals.lunch : []).map((meal: any) => ({ ...meal, mealType: 'Lunch' })),
+          ...(Array.isArray(data.meals.dinner) ? data.meals.dinner : []).map((meal: any) => ({ ...meal, mealType: 'Dinner' })),
+          ...(Array.isArray(data.meals.snacks) ? data.meals.snacks : []).map((meal: any) => ({ ...meal, mealType: 'Snacks' }))
+        ];
+      } else if (Array.isArray(data.meals)) {
+        meals = data.meals;
+      }
+    } catch (error) {
+      console.error('Error processing meals data:', error);
+      meals = [];
+    }
 
     console.log('Processed meals:', meals);
 

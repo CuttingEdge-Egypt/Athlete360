@@ -881,7 +881,7 @@ Search the web for specific traditional foods from ${athleteCountry} and create 
 - If Mexican: Include mole dishes, pozole, tamales, quinoa, black beans, corn tortillas, chiles, traditional salsas
 - If Italian: Include specific pasta types, risotto, polenta, prosciutto, fresh mozzarella, regional specialties by region
 
-IMPORTANT: Search for REAL traditional recipes and cooking methods from ${athleteCountry}. Include specific ingredient names, cooking techniques, and cultural meal timing.
+CRITICAL: Search for REAL traditional recipes and cooking methods from ${athleteCountry}. Include specific ingredient names, cooking techniques, and cultural meal timing. DO NOT include any URLs, links, citations, references, or parenthetical web source mentions in meal descriptions. Clean, citation-free text only.
 
 Return this exact JSON structure with authentic ${athleteCountry} foods:
 {
@@ -995,6 +995,26 @@ Return this exact JSON structure with authentic ${athleteCountry} foods:
     }
 
     const nutritionData = JSON.parse(cleanedText);
+    
+    // Clean up any URLs or citations that might have slipped through
+    if (nutritionData.meals) {
+      const cleanMealData = (meal: any) => {
+        if (meal.description) {
+          // Remove all content in parentheses containing URLs
+          meal.description = meal.description.replace(/\([^)]*(?:\.com|\.org|\.net|\.edu|\.gov|https?:\/\/)[^)]*\)/gi, '');
+          // Remove any remaining URL patterns
+          meal.description = meal.description.replace(/https?:\/\/[^\s\)]+/gi, '');
+          // Clean up extra spaces
+          meal.description = meal.description.replace(/\s+/g, ' ').trim();
+        }
+        return meal;
+      };
+      
+      if (nutritionData.meals.breakfast) nutritionData.meals.breakfast = nutritionData.meals.breakfast.map(cleanMealData);
+      if (nutritionData.meals.lunch) nutritionData.meals.lunch = nutritionData.meals.lunch.map(cleanMealData);
+      if (nutritionData.meals.dinner) nutritionData.meals.dinner = nutritionData.meals.dinner.map(cleanMealData);
+      if (nutritionData.meals.snacks) nutritionData.meals.snacks = nutritionData.meals.snacks.map(cleanMealData);
+    }
     
     console.log(`GPT-5 Nutrition Response for ${athleteName}:`, JSON.stringify(nutritionData, null, 2));
     
