@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { CreditCard, User, Gift, Shield, Zap } from "lucide-react";
+import { CreditCard, User, Gift, Shield, Zap, ArrowRight } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface SignupFlowProps {
@@ -132,7 +132,7 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-hidden flex flex-col" data-testid="signup-flow-dialog">
+      <DialogContent className="sm:max-w-[700px] lg:max-w-[800px] max-h-[90vh] overflow-hidden flex flex-col" data-testid="signup-flow-dialog">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Zap className="h-5 w-5 text-blue-500" />
@@ -156,63 +156,67 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
           </TabsList>
 
           <TabsContent value="personal" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
+            <Card className="border-gray-200 dark:border-gray-700 shadow-sm">
+              <CardHeader className="pb-6">
+                <CardTitle className="flex items-center gap-2 text-xl">
                   <User className="h-5 w-5 text-blue-500" />
                   Your Information
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-base">
                   Tell us about yourself to get started
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <Label htmlFor="firstName" className="text-sm font-medium">First Name</Label>
                     <Input
                       id="firstName"
                       value={personalInfo.firstName}
                       onChange={(e) => setPersonalInfo(prev => ({ ...prev, firstName: e.target.value }))}
                       placeholder="John"
+                      className="h-12 text-base"
                       data-testid="input-first-name"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="lastName" className="text-sm font-medium">Last Name</Label>
                     <Input
                       id="lastName"
                       value={personalInfo.lastName}
                       onChange={(e) => setPersonalInfo(prev => ({ ...prev, lastName: e.target.value }))}
                       placeholder="Doe"
+                      className="h-12 text-base"
                       data-testid="input-last-name"
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
                   <Input
                     id="email"
                     type="email"
                     value={personalInfo.email}
                     onChange={(e) => setPersonalInfo(prev => ({ ...prev, email: e.target.value }))}
                     placeholder="john.doe@example.com"
+                    className="h-12 text-base"
                     data-testid="input-email"
                   />
                 </div>
                 <Button 
                   onClick={handlePersonalInfoSubmit}
-                  className="w-full"
+                  className="w-full bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white font-semibold py-3 text-base shadow-lg hover:shadow-xl transition-all duration-200"
                   data-testid="button-continue-personal"
                 >
                   Continue to Payment Method
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="payment" className="mt-6 flex-1 flex flex-col overflow-hidden">
-            <div className="space-y-4 flex-1 overflow-y-auto pr-2">
+            <div className="space-y-6 flex-1 overflow-y-auto pr-2">
               {/* Free Trial Benefits */}
               <div className="flex items-start gap-3 p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg border border-green-200 dark:border-green-800">
                 <Gift className="h-5 w-5 text-green-600 mt-0.5" />
@@ -235,53 +239,56 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
                 </span>
               </div>
 
-              <Card>
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-2 text-lg">
+              <Card className="border-gray-200 dark:border-gray-700 shadow-sm">
+                <CardHeader className="pb-6">
+                  <CardTitle className="flex items-center gap-2 text-xl">
                     <CreditCard className="h-5 w-5 text-green-500" />
                     Payment Method
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-base">
                     Secure your account with a payment method for future token purchases
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-5">
 
-                <div className="space-y-2">
-                  <Label htmlFor="cardName">Cardholder Name</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="cardName" className="text-sm font-medium">Cardholder Name</Label>
                   <Input
                     id="cardName"
                     value={cardDetails.name}
                     onChange={(e) => setCardDetails(prev => ({ ...prev, name: e.target.value }))}
                     placeholder="John Doe"
+                    className="h-12 text-base"
                     data-testid="input-card-name"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="cardNumber">Card Number</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="cardNumber" className="text-sm font-medium">Card Number</Label>
                   <Input
                     id="cardNumber"
                     value={cardDetails.number}
                     onChange={(e) => setCardDetails(prev => ({ ...prev, number: formatCardNumber(e.target.value) }))}
                     placeholder="1234 5678 9012 3456"
                     maxLength={19}
+                    className="h-12 text-base font-mono tracking-wider"
                     data-testid="input-card-number"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="expiry">Expiry Date</Label>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <Label htmlFor="expiry" className="text-sm font-medium">Expiry Date</Label>
                     <Input
                       id="expiry"
                       value={cardDetails.expiry}
                       onChange={(e) => setCardDetails(prev => ({ ...prev, expiry: formatExpiry(e.target.value) }))}
                       placeholder="MM/YY"
                       maxLength={5}
+                      className="h-12 text-base font-mono"
                       data-testid="input-card-expiry"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cvv">CVV</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="cvv" className="text-sm font-medium">CVV</Label>
                     <Input
                       id="cvv"
                       value={cardDetails.cvv}
@@ -289,6 +296,7 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
                       placeholder="123"
                       maxLength={4}
                       type="password"
+                      className="h-12 text-base font-mono"
                       data-testid="input-card-cvv"
                     />
                   </div>
@@ -299,19 +307,29 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
             </div>
             
             {/* Fixed bottom action buttons */}
-            <div className="flex flex-col gap-2 pt-4 border-t bg-white dark:bg-gray-900 mt-4">
+            <div className="flex flex-col gap-3 pt-6 border-t border-gray-200 dark:border-gray-700 mt-6 bg-gradient-to-r from-gray-50/50 to-blue-50/50 dark:from-gray-800/50 dark:to-blue-900/20 -mx-6 px-6 rounded-b-lg">
               <Button 
                 onClick={handleCardSubmit}
                 disabled={isProcessing}
-                className="w-full"
+                className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold py-3 text-base shadow-lg hover:shadow-xl transition-all duration-200"
                 data-testid="button-create-account"
               >
-                {isProcessing ? "Creating Account..." : "Create Account & Start Free Trial"}
+                {isProcessing ? (
+                  <>
+                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                    Creating Account...
+                  </>
+                ) : (
+                  <>
+                    <Gift className="mr-2 h-4 w-4" />
+                    Create Account & Start Free Trial
+                  </>
+                )}
               </Button>
               <Button 
-                variant="ghost"
+                variant="outline"
                 onClick={() => setActiveTab("personal")}
-                className="w-full"
+                className="w-full border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
                 data-testid="button-back"
               >
                 Back to Personal Info
