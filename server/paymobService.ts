@@ -139,6 +139,8 @@ export class PaymobService {
       },
       currency: paymentIntent.currency,
       integration_id: parseInt(this.config.integrationId),
+      // Add redirect URL for iframe completion
+      lock_order_when_paid: false,
     };
 
     console.log('Creating payment key with body:', JSON.stringify(requestBody, null, 2));

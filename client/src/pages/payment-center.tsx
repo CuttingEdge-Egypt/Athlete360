@@ -378,12 +378,7 @@ export default function PaymentCenter() {
               className="w-full h-96"
               title="Payment"
               onLoad={() => {
-                // Listen for payment success messages
-                window.addEventListener('message', (event) => {
-                  if (event.data?.type === 'payment_success') {
-                    handlePaymentSuccess(event.data);
-                  }
-                });
+                console.log('Payment iframe loaded with URL:', paymentIframeUrl);
               }}
             />
           </div>

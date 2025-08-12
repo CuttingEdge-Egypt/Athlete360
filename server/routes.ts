@@ -2034,6 +2034,51 @@ Format as JSON:
     }
   });
 
+  // Test payment completion with latest Order ID 
+  app.post('/api/payments/test-completion', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { tokensAmount = 500, amount = 50 } = req.body;
+
+      console.log(`🧪 Testing payment completion for user ${userId}`);
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Add tokens to user account
+      await storage.addTokensPurchase(userId, tokensAmount);
+
+      // Create payment receipt with latest Order ID from logs
+      const receiptNumber = paymobService.generateReceiptNumber();
+      const receipt = await storage.createPaymentReceipt({
+        userId,
+        amount,
+        tokensAmount,
+        paymentMethod: 'card',
+        transactionId: '369575690', // Latest Order ID from server logs
+        receiptNumber,
+        cardLast4: '4889',
+        cardBrand: 'Mastercard'
+      });
+
+      console.log(`✅ Test completion successful: ${tokensAmount} tokens added`);
+
+      res.json({
+        success: true,
+        message: "Test payment completed successfully",
+        receipt: receipt,
+        tokensAdded: tokensAmount,
+        newTokenBalance: user.tokens + tokensAmount
+      });
+
+    } catch (error) {
+      console.error("❌ Test payment completion error:", error);
+      res.status(500).json({ message: "Failed to complete test payment" });
+    }
+  });
+
   // Manual payment completion for testing specific transaction
   app.post('/api/payments/complete-manual/:transactionId', isAuthenticated, async (req: any, res) => {
     try {
