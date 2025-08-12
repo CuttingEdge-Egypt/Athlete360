@@ -132,7 +132,7 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]" data-testid="signup-flow-dialog">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-hidden flex flex-col" data-testid="signup-flow-dialog">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Zap className="h-5 w-5 text-blue-500" />
@@ -143,7 +143,7 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col overflow-hidden">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="personal" className="flex items-center gap-2">
               <User className="h-4 w-4" />
@@ -211,39 +211,41 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
             </Card>
           </TabsContent>
 
-          <TabsContent value="payment" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <CreditCard className="h-5 w-5 text-green-500" />
-                  Payment Method
-                </CardTitle>
-                <CardDescription>
-                  Secure your account with a payment method for future token purchases
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Free Trial Benefits */}
-                <div className="flex items-start gap-3 p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                  <Gift className="h-5 w-5 text-green-600 mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold text-green-800 dark:text-green-200">Free Trial Benefits</h4>
-                    <ul className="text-sm text-green-700 dark:text-green-300 mt-1 space-y-1">
-                      <li>• 1,000 free tokens to start analyzing athletes</li>
-                      <li>• No money will be charged during signup</li>
-                      <li>• Card is only for future token purchases</li>
-                      <li>• Cancel anytime with no obligations</li>
-                    </ul>
-                  </div>
+          <TabsContent value="payment" className="mt-6 flex-1 flex flex-col overflow-hidden">
+            <div className="space-y-4 flex-1 overflow-y-auto pr-2">
+              {/* Free Trial Benefits */}
+              <div className="flex items-start gap-3 p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                <Gift className="h-5 w-5 text-green-600 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-green-800 dark:text-green-200">Free Trial Benefits</h4>
+                  <ul className="text-sm text-green-700 dark:text-green-300 mt-1 space-y-1">
+                    <li>• 1,000 free tokens to start analyzing athletes</li>
+                    <li>• No money will be charged during signup</li>
+                    <li>• Card is only for future token purchases</li>
+                    <li>• Cancel anytime with no obligations</li>
+                  </ul>
                 </div>
+              </div>
 
-                {/* Security Notice */}
-                <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  <Shield className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm text-blue-700 dark:text-blue-300">
-                    Your payment information is encrypted and secure
-                  </span>
-                </div>
+              {/* Security Notice */}
+              <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <Shield className="h-4 w-4 text-blue-600" />
+                <span className="text-sm text-blue-700 dark:text-blue-300">
+                  Your payment information is encrypted and secure
+                </span>
+              </div>
+
+              <Card>
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <CreditCard className="h-5 w-5 text-green-500" />
+                    Payment Method
+                  </CardTitle>
+                  <CardDescription>
+                    Secure your account with a payment method for future token purchases
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
 
                 <div className="space-y-2">
                   <Label htmlFor="cardName">Cardholder Name</Label>
@@ -292,26 +294,29 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
                   </div>
                 </div>
                 
-                <div className="flex flex-col gap-2">
-                  <Button 
-                    onClick={handleCardSubmit}
-                    disabled={isProcessing}
-                    className="w-full"
-                    data-testid="button-create-account"
-                  >
-                    {isProcessing ? "Creating Account..." : "Create Account & Start Free Trial"}
-                  </Button>
-                  <Button 
-                    variant="ghost"
-                    onClick={() => setActiveTab("personal")}
-                    className="w-full"
-                    data-testid="button-back"
-                  >
-                    Back to Personal Info
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
+            
+            {/* Fixed bottom action buttons */}
+            <div className="flex flex-col gap-2 pt-4 border-t bg-white dark:bg-gray-900 mt-4">
+              <Button 
+                onClick={handleCardSubmit}
+                disabled={isProcessing}
+                className="w-full"
+                data-testid="button-create-account"
+              >
+                {isProcessing ? "Creating Account..." : "Create Account & Start Free Trial"}
+              </Button>
+              <Button 
+                variant="ghost"
+                onClick={() => setActiveTab("personal")}
+                className="w-full"
+                data-testid="button-back"
+              >
+                Back to Personal Info
+              </Button>
+            </div>
           </TabsContent>
         </Tabs>
       </DialogContent>
