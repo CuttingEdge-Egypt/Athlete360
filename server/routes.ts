@@ -1221,10 +1221,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sport = await storage.getSportById(athlete.sportId);
       const sportName = sport?.name || "Unknown Sport";
 
-      // Check if athlete has all required fields for nutrition plan
-      if (!athlete.age || !athlete.gender || !athlete.country) {
+      // Check if athlete has all required fields for nutrition plan, extract from bio if missing
+      let athleteAge = athlete.age;
+      let athleteGender = athlete.gender;
+      let athleteCountry = athlete.country;
+
+      // Smart fallback: extract missing info from bio or use AI
+      if (!athleteAge || !athleteGender || !athleteCountry) {
+        console.log(`Missing data for ${athlete.name}. Attempting to extract from bio or AI...`);
+        
+        try {
+          // First, try to extract from existing bio
+          if (athlete.bio) {
+            const bioText = athlete.bio.toLowerCase();
+            
+            // Extract gender from bio
+            if (!athleteGender) {
+              if (bioText.includes('women') || bioText.includes('female') || bioText.includes('she ') || bioText.includes('her ')) {
+                athleteGender = 'Female';
+              } else if (bioText.includes('men') || bioText.includes('male') || bioText.includes('he ') || bioText.includes('his ')) {
+                athleteGender = 'Male';
+              }
+            }
+            
+            // Extract country/nationality from bio
+            if (!athleteCountry) {
+              const countryMatches = bioText.match(/(egyptian|american|spanish|british|french|german|brazilian|chinese|japanese|korean|russian|italian|australian|canadian|mexican|indian|south african|nigerian|kenyan|ethiopian|moroccan|tunisian|algerian|palestinian|jordanian|lebanese|saudi|turkish|greek|swedish|norwegian|dutch|portuguese|argentinian|chilean|colombian|peruvian|venezuelan|ecuadorian|bolivian|uruguayan|paraguayan|thai|vietnamese|malaysian|indonesian|filipino|singaporean|iranian|iraqi|afghan|pakistani|bangladeshi|sri lankan|nepalese|polish|czech|slovakian|hungarian|romanian|bulgarian|serbian|croatian|slovenian|ukrainian|lithuanian|latvian|estonian|finnish|danish|icelandic|irish|welsh|scottish|new zealander)/);
+              
+              if (countryMatches) {
+                const nationalityMap: { [key: string]: string } = {
+                  'egyptian': 'Egypt', 'american': 'United States', 'spanish': 'Spain', 'british': 'United Kingdom',
+                  'french': 'France', 'german': 'Germany', 'brazilian': 'Brazil', 'chinese': 'China',
+                  'japanese': 'Japan', 'korean': 'South Korea', 'russian': 'Russia', 'italian': 'Italy',
+                  'australian': 'Australia', 'canadian': 'Canada', 'mexican': 'Mexico', 'indian': 'India',
+                  'saudi': 'Saudi Arabia', 'turkish': 'Turkey', 'palestinian': 'Palestine'
+                };
+                athleteCountry = nationalityMap[countryMatches[1]] || countryMatches[1];
+              }
+            }
+          }
+          
+          // If still missing critical info, use AI to extract from bio
+          if ((!athleteAge || !athleteGender || !athleteCountry) && athlete.bio) {
+            console.log(`Using AI to extract missing info for ${athlete.name}...`);
+            
+            const extractionPrompt = `Extract the following information from this athlete biography:
+Bio: "${athlete.bio}"
+
+Please provide ONLY the missing information in JSON format:
+${!athleteAge ? '- age: estimated age as a number' : ''}
+${!athleteGender ? '- gender: "Male" or "Female"' : ''}
+${!athleteCountry ? '- country: full country name' : ''}
+
+Return only valid JSON with the missing fields.`;
+
+            const aiResponse = await generateSpecificAnalysis(athlete.name, sportName, 'info-extraction', { bio: athlete.bio, extractionPrompt });
+            
+            if (aiResponse.extractedInfo) {
+              if (!athleteAge && aiResponse.extractedInfo.age) athleteAge = aiResponse.extractedInfo.age;
+              if (!athleteGender && aiResponse.extractedInfo.gender) athleteGender = aiResponse.extractedInfo.gender;
+              if (!athleteCountry && aiResponse.extractedInfo.country) athleteCountry = aiResponse.extractedInfo.country;
+            }
+          }
+          
+          // Update athlete record with extracted information
+          if (athleteAge || athleteGender || athleteCountry) {
+            const updateData: any = {};
+            if (athleteAge && !athlete.age) updateData.age = athleteAge;
+            if (athleteGender && !athlete.gender) updateData.gender = athleteGender;
+            if (athleteCountry && !athlete.country) updateData.country = athleteCountry;
+            
+            if (Object.keys(updateData).length > 0) {
+              await storage.updateAthlete(athleteId, updateData);
+              console.log(`Updated ${athlete.name} with extracted data:`, updateData);
+            }
+          }
+          
+        } catch (extractionError) {
+          console.error(`Failed to extract missing info for ${athlete.name}:`, extractionError);
+        }
+      }
+
+      // Final check - if still missing critical info, return error
+      if (!athleteAge || !athleteGender || !athleteCountry) {
+        const missing = [];
+        if (!athleteAge) missing.push('age');
+        if (!athleteGender) missing.push('gender');
+        if (!athleteCountry) missing.push('nationality');
+        
         return res.status(400).json({ 
-          message: "Athlete profile incomplete. Age, gender, and nationality are required for nutrition plan generation." 
+          message: `Unable to generate nutrition plan. Missing required information: ${missing.join(', ')}. Please update the athlete's profile or try again later.`
         });
       }
 
@@ -1246,10 +1332,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const generatedPlan = await generateNutritionPlan(
             athlete.name,
-            athlete.age,
-            athlete.gender,
+            athleteAge!,
+            athleteGender!,
             sportName,
-            athlete.country
+            athleteCountry!
           );
 
           // Store nutrition plan in database

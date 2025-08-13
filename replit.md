@@ -45,6 +45,7 @@ Preferred communication style: Simple, everyday language.
 ### Service Architecture
 - **Analysis Services**: Eight distinct analytical services (Bio, Rank, Strengths, Weaknesses, Development Plans, Nutrition, Beat Strategies, Video Analysis).
 - **Athlete Comparison**: AI-powered one-click comparison system.
+- **Smart Data Extraction**: Intelligent fallback system that automatically extracts missing athlete data (age, gender, nationality) from existing biographies using pattern matching and AI analysis.
 - **Cost Structure**: Predefined token costs per service.
 - **Data Seeding**: Automatic database seeding with sample data.
 - **CRUD Operations**: Full capabilities for sports, athletes, and analysis data.
@@ -54,7 +55,9 @@ Preferred communication style: Simple, everyday language.
 
 ### AI and Language Models
 - **OpenAI GPT-5**: Exclusive LLM provider for all athlete analysis, biography generation, comparison analysis, and sports insights. Uses web search capabilities (`responses.create()` API with `web_search_preview` tool).
+- **Google Gemini 2.5 Pro**: Specialized AI model for nutrition plan generation, providing culturally-aware meal recommendations based on athlete nationality, sport, age, and gender.
 - **OpenAI SDK**: Official OpenAI JavaScript SDK for GPT-5 integration.
+- **Google Generative AI SDK**: Official Google SDK for Gemini integration.
 
 ### Database and Storage
 - **Neon PostgreSQL**: Serverless PostgreSQL database.
