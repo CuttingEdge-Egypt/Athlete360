@@ -869,6 +869,13 @@ Search the web for specific traditional foods from ${athleteCountry} and create 
 
 CRITICAL: Search for REAL traditional recipes and cooking methods from ${athleteCountry}. Include specific ingredient names, cooking techniques, and cultural meal timing. DO NOT include any URLs, links, citations, references, or parenthetical web source mentions in meal descriptions. Clean, citation-free text only.
 
+JSON FORMATTING RULES - EXTREMELY IMPORTANT:
+1. NEVER use commas inside string values - use semicolons or 'and' instead
+2. Example: Instead of "3000 kcal (female, 25 y, 70 kg)" write "3000 kcal (female; 25 y; 70 kg)"
+3. Example: Instead of "for balance, health, recovery" write "for balance and health and recovery"
+4. ALL parenthetical content must use semicolons not commas
+5. Return ONLY the JSON object - no text before or after
+
 MUST research authentic ${athleteCountry} cuisine and create specific meal plans. Return this JSON structure with REAL traditional foods:
 {
   "currentWeight": "${currentWeight}",
@@ -940,6 +947,7 @@ MUST research authentic ${athleteCountry} cuisine and create specific meal plans
     let cleanedText = response.output_text.trim();
     
     console.log(`Raw GPT-5 response length: ${cleanedText.length} characters`);
+    console.log(`Full GPT-5 Response for debugging:\n${cleanedText}`);
     
     // Remove markdown formatting
     cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
@@ -959,13 +967,29 @@ MUST research authentic ${athleteCountry} cuisine and create specific meal plans
       cleanedText = cleanedText.replace(/,\s*}/g, '}');
       cleanedText = cleanedText.replace(/,\s*]/g, ']');
       
+      // Fix commas inside quoted strings that break JSON - more aggressive approach
+      // Handle multiple patterns where commas appear inside string values
+      
+      // Pattern 1: Commas inside parentheses (e.g., "(female, 25 y, 70 kg)")
+      cleanedText = cleanedText.replace(/:\s*"([^"]*?\([^)]*?),([^)]*?\)[^"]*?)"([,\}\]])/g, ': "$1;$2"$3');
+      
+      // Pattern 2: Fix numeric values with commas inside strings (e.g., "3000 kcal/day (female, 25)")
+      cleanedText = cleanedText.replace(/:\s*"(\d+[^"]*?)\s*,\s*([^"]*?)"([,\}\]])/g, (match, p1, p2, p3) => {
+        // Check if p2 looks like continuation of the string vs new property
+        if (!p2.includes('":') && !p2.match(/^\s*"\w+"\s*:/)) {
+          return `: "${p1}; ${p2}"${p3}`;
+        }
+        return match;
+      });
+      
+      // Pattern 3: Fix lists with commas (e.g., "for balance, health, recovery")
+      cleanedText = cleanedText.replace(/:\s*"([^"]*?for[^"]*?),([^"]*?)"([,\}\]])/g, ': "$1 and$2"$3');
+      cleanedText = cleanedText.replace(/:\s*"([^"]*?with[^"]*?),([^"]*?)"([,\}\]])/g, ': "$1 and$2"$3');
+      
       // Fix missing commas between array elements
       cleanedText = cleanedText.replace(/"(\s*)\s+"/g, '", "');
       cleanedText = cleanedText.replace(/(\d)\s+"/g, '$1, "');
       cleanedText = cleanedText.replace(/"(\s+)(\d)/g, '", $2');
-      
-      // Fix unescaped quotes in strings (simpler approach)
-      cleanedText = cleanedText.replace(/:(\s*)"([^"]*)'([^"]*)"([,\}\]])/g, ':"$2\'$3"$4');
       
       // Remove any control characters
       cleanedText = cleanedText.replace(/[\x00-\x1F\x7F]/g, ' ');
@@ -1032,35 +1056,63 @@ MUST research authentic ${athleteCountry} cuisine and create specific meal plans
       console.error(`JSON Parse Error: ${parseError.message}`);
       const errorPos = parseInt(parseError.message.match(/\d+/)?.[0] || '0');
       console.error(`Problematic JSON substring around position ${errorPos}:`);
-      console.error(cleanedText.substring(Math.max(0, errorPos - 200), Math.min(cleanedText.length, errorPos + 200)));
+      const problemArea = cleanedText.substring(Math.max(0, errorPos - 200), Math.min(cleanedText.length, errorPos + 200));
+      console.error(problemArea);
       
-      // Try more aggressive cleanup
-      try {
-        // Remove any incomplete objects at the end
-        const lastCompleteObject = cleanedText.lastIndexOf('"}');
-        if (lastCompleteObject > 0) {
-          let truncated = cleanedText.substring(0, lastCompleteObject + 2);
-          // Close any open arrays and objects
-          const openBrackets = (truncated.match(/\[/g) || []).length;
-          const closeBrackets = (truncated.match(/\]/g) || []).length;
-          const openBraces = (truncated.match(/\{/g) || []).length;
-          const closeBraces = (truncated.match(/\}/g) || []).length;
-          
-          for (let i = 0; i < openBrackets - closeBrackets; i++) {
-            truncated += ']';
-          }
-          for (let i = 0; i < openBraces - closeBraces; i++) {
-            truncated += '}';
-          }
-          
-          nutritionData = JSON.parse(truncated);
-          console.log('Successfully parsed after aggressive cleanup');
-        } else {
-          throw parseError;
+      // More aggressive comma fixing inside strings
+      console.log('Attempting aggressive comma cleanup...');
+      
+      // Find all string values and fix commas inside them
+      cleanedText = cleanedText.replace(/"([^"]*)"/g, (match, stringContent) => {
+        // Skip if this is a property name (followed by colon)
+        const afterMatch = cleanedText.substring(cleanedText.indexOf(match) + match.length);
+        if (afterMatch.trimStart().startsWith(':')) {
+          return match; // This is a property name, don't modify
         }
-      } catch (secondError) {
-        console.error('Aggressive cleanup also failed:', secondError);
-        throw new Error(`Unable to parse nutrition data after ${retryCount + 1} attempts. Error at position ${errorPos}`);
+        
+        // Replace commas with semicolons in string values
+        const fixed = stringContent.replace(/,/g, ';');
+        return `"${fixed}"`;
+      });
+      
+      console.log('Retrying parse after aggressive cleanup...');
+      
+      try {
+        nutritionData = JSON.parse(cleanedText);
+        console.log('Successfully parsed after aggressive comma cleanup');
+      } catch (secondParseError: any) {
+        console.error('Parse still failed after cleanup:', secondParseError.message);
+      }
+      
+      // If still no nutritionData, try more aggressive cleanup
+      if (!nutritionData) {
+        try {
+          // Remove any incomplete objects at the end
+          const lastCompleteObject = cleanedText.lastIndexOf('"}');
+          if (lastCompleteObject > 0) {
+            let truncated = cleanedText.substring(0, lastCompleteObject + 2);
+            // Close any open arrays and objects
+            const openBrackets = (truncated.match(/\[/g) || []).length;
+            const closeBrackets = (truncated.match(/\]/g) || []).length;
+            const openBraces = (truncated.match(/\{/g) || []).length;
+            const closeBraces = (truncated.match(/\}/g) || []).length;
+            
+            for (let i = 0; i < openBrackets - closeBrackets; i++) {
+              truncated += ']';
+            }
+            for (let i = 0; i < openBraces - closeBraces; i++) {
+              truncated += '}';
+            }
+            
+            nutritionData = JSON.parse(truncated);
+            console.log('Successfully parsed after truncation cleanup');
+          } else {
+            throw parseError;
+          }
+        } catch (thirdError) {
+          console.error('Truncation cleanup also failed:', thirdError);
+          throw new Error(`Unable to parse nutrition data after ${retryCount + 1} attempts. Error at position ${errorPos}`);
+        }
       }
     }
     
