@@ -62,87 +62,145 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
 
     // Parse scoring events with cumulative tracking
     if (scoreAnalysis) {
-      const content = typeof scoreAnalysis === 'string' ? scoreAnalysis : JSON.stringify(scoreAnalysis);
-      const lines = content.split('\n');
       let blueScore = 0;
       let redScore = 0;
 
-      lines.forEach(line => {
-        const timestamps = line.match(timestampRegex);
-        if (timestamps) {
-          timestamps.forEach(match => {
-            const timestamp = parseTimestamp(match);
-            if (timestamp > 0) {
-              // Determine which player scored based on context
-              const isBlueScore = line.toLowerCase().includes('blue') || line.toLowerCase().includes('player 1');
-              const isRedScore = line.toLowerCase().includes('red') || line.toLowerCase().includes('player 2');
-              
-              // Extract point value (default to 1 point)
-              const pointMatch = line.match(/(\d+)\s*point/i);
-              const points = pointMatch ? parseInt(pointMatch[1]) : 1;
+      // Handle both old format (string content) and new JSON format with color field
+      if (typeof scoreAnalysis === 'string') {
+        // Old format - parse text content
+        const lines = scoreAnalysis.split('\n');
+        lines.forEach(line => {
+          const timestamps = line.match(timestampRegex);
+          if (timestamps) {
+            timestamps.forEach(match => {
+              const timestamp = parseTimestamp(match);
+              if (timestamp > 0) {
+                const isBlueScore = line.toLowerCase().includes('blue') || line.toLowerCase().includes('player 1');
+                const isRedScore = line.toLowerCase().includes('red') || line.toLowerCase().includes('player 2');
+                const pointMatch = line.match(/(\d+)\s*point/i);
+                const points = pointMatch ? parseInt(pointMatch[1]) : 1;
 
-              if (isBlueScore) {
-                blueScore += points;
-                scoreEvents.push({
-                  timestamp,
-                  blueScore,
-                  redScore,
-                  increment: points,
-                  player: 'blue'
-                });
-              } else if (isRedScore) {
-                redScore += points;
-                scoreEvents.push({
-                  timestamp,
-                  blueScore,
-                  redScore,
-                  increment: points,
-                  player: 'red'
-                });
+                if (isBlueScore) {
+                  blueScore += points;
+                  scoreEvents.push({
+                    timestamp,
+                    blueScore,
+                    redScore,
+                    increment: points,
+                    player: 'blue'
+                  });
+                } else if (isRedScore) {
+                  redScore += points;
+                  scoreEvents.push({
+                    timestamp,
+                    blueScore,
+                    redScore,
+                    increment: points,
+                    player: 'red'
+                  });
+                }
               }
+            });
+          }
+        });
+      } else if (scoreAnalysis && Array.isArray(scoreAnalysis.events)) {
+        // New JSON format - use color field
+        scoreAnalysis.events.forEach((event: any) => {
+          if (event.timestamp && event.color) {
+            const timestamp = parseTimestamp(event.timestamp);
+            const points = event.points || 1;
+            const player = event.color.toLowerCase();
+
+            if (player === 'blue') {
+              blueScore += points;
+              scoreEvents.push({
+                timestamp,
+                blueScore,
+                redScore,
+                increment: points,
+                player: 'blue'
+              });
+            } else if (player === 'red') {
+              redScore += points;
+              scoreEvents.push({
+                timestamp,
+                blueScore,
+                redScore,
+                increment: points,
+                player: 'red'
+              });
             }
-          });
-        }
-      });
+          }
+        });
+      }
     }
 
     // Parse yellow card events with cumulative tracking
     if (yellowCardAnalysis) {
-      const content = typeof yellowCardAnalysis === 'string' ? yellowCardAnalysis : JSON.stringify(yellowCardAnalysis);
-      const lines = content.split('\n');
       let blueCards = 0;
       let redCards = 0;
 
-      lines.forEach(line => {
-        const timestamps = line.match(timestampRegex);
-        if (timestamps) {
-          timestamps.forEach(match => {
-            const timestamp = parseTimestamp(match);
-            if (timestamp > 0) {
-              const isBlueCard = line.toLowerCase().includes('blue') || line.toLowerCase().includes('player 1');
-              const isRedCard = line.toLowerCase().includes('red') || line.toLowerCase().includes('player 2');
+      // Handle both old format (string content) and new JSON format with color field
+      if (typeof yellowCardAnalysis === 'string') {
+        // Old format - parse text content
+        const lines = yellowCardAnalysis.split('\n');
+        lines.forEach(line => {
+          const timestamps = line.match(timestampRegex);
+          if (timestamps) {
+            timestamps.forEach(match => {
+              const timestamp = parseTimestamp(match);
+              if (timestamp > 0) {
+                const isBlueCard = line.toLowerCase().includes('blue') || line.toLowerCase().includes('player 1');
+                const isRedCard = line.toLowerCase().includes('red') || line.toLowerCase().includes('player 2');
 
-              if (isBlueCard) {
-                blueCards++;
-                yellowCardEvents.push({
-                  timestamp,
-                  blueCards,
-                  redCards,
-                  player: 'blue'
-                });
-              } else if (isRedCard) {
-                redCards++;
-                yellowCardEvents.push({
-                  timestamp,
-                  blueCards,
-                  redCards,
-                  player: 'red'
-                });
+                if (isBlueCard) {
+                  blueCards++;
+                  yellowCardEvents.push({
+                    timestamp,
+                    blueCards,
+                    redCards,
+                    player: 'blue'
+                  });
+                } else if (isRedCard) {
+                  redCards++;
+                  yellowCardEvents.push({
+                    timestamp,
+                    blueCards,
+                    redCards,
+                    player: 'red'
+                  });
+                }
               }
+            });
+          }
+        });
+      } else if (yellowCardAnalysis && Array.isArray(yellowCardAnalysis.events)) {
+        // New JSON format - use color field
+        yellowCardAnalysis.events.forEach((event: any) => {
+          if (event.timestamp && event.color) {
+            const timestamp = parseTimestamp(event.timestamp);
+            const player = event.color.toLowerCase();
+
+            if (player === 'blue') {
+              blueCards++;
+              yellowCardEvents.push({
+                timestamp,
+                blueCards,
+                redCards,
+                player: 'blue'
+              });
+            } else if (player === 'red') {
+              redCards++;
+              yellowCardEvents.push({
+                timestamp,
+                blueCards,
+                redCards,
+                player: 'red'
+              });
             }
-          });
-        }
-      });
+          }
+        });
+      }
     }
 
     // Extract total kick counts

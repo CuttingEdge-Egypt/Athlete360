@@ -85,7 +85,8 @@ Return JSON format:
 {
   "players": [
     {
-      "name": "Player 1 (Blue)",
+      "name": "Player 1",
+      "color": "Red/Blue"
       "kicks": [
         {
           "timestamp": "HH:MM:SS",
@@ -175,7 +176,8 @@ Return JSON format:
 {
   "players": [
     {
-      "name": "Player 1 (Blue)",
+      "name": "Player 1",
+      "color": "Red/Blue"
       "Yellow_cards": [
         {
           "timestamp": "HH:MM:SS",

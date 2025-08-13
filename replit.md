@@ -106,3 +106,5 @@ Preferred communication style: Simple, everyday language.
 - **Full response logging**: Added comprehensive logging to capture complete GPT-5 responses for debugging
 - **Pattern-based fixes**: Created specific regex patterns to handle common JSON formatting issues in AI responses
 - **Robust error handling**: Improved error messages and fallback data structures for failed parsing attempts
+- **UI visibility improvements**: Removed problematic background colors from nutrition plan display for better text readability
+- **Video analysis color field integration**: Updated video player analysis to use "color" field from JSON for accurate score and yellow card attribution to blue/red players
