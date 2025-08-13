@@ -105,7 +105,47 @@ Requirements:
       model: "gemini-2.5-pro",
       config: {
         systemInstruction: systemPrompt,
-        responseMimeType: "application/json"
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "object",
+          properties: {
+            days: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  day: {
+                    type: "object",
+                    properties: {
+                      date: { type: "string" },
+                      name: { type: "string" }
+                    },
+                    required: ["date", "name"]
+                  },
+                  meals: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        scan_meal: { type: "object" },
+                        calories_intake: { type: "string" },
+                        meal_description: {
+                          type: "array",
+                          items: { type: "string" }
+                        }
+                      },
+                      required: ["calories_intake", "meal_description"]
+                    }
+                  },
+                  explanation: { type: "string" },
+                  total_calories_intake: { type: "string" }
+                },
+                required: ["day", "meals", "explanation", "total_calories_intake"]
+              }
+            }
+          },
+          required: ["days"]
+        }
       },
       contents: prompt,
     });
