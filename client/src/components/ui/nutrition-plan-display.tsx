@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { Clock, Utensils, Droplets, Zap, Target, Apple, Pill, NotebookPen } from "lucide-react";
 
 interface NutritionPlanProps {
-  plan: string;
+  plan: string | any;
 }
 
 interface StructuredNutritionPlan {
@@ -59,34 +59,43 @@ interface StructuredNutritionPlan {
 export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
   let nutritionData: StructuredNutritionPlan | null = null;
 
+  console.log("NutritionPlanDisplay received plan:", typeof plan, plan);
+
   // Try to parse the plan as JSON
   try {
-    // Handle nested JSON structure from database
+    let parsedData: any = null;
+    
     if (typeof plan === 'string') {
-      let parsed = JSON.parse(plan);
-      // If it's nested (from database storage), extract the content
-      if (parsed.content) {
-        if (typeof parsed.content === 'string') {
-          parsed = JSON.parse(parsed.content);
-        } else {
-          parsed = parsed.content;
-        }
+      try {
+        parsedData = JSON.parse(plan);
+      } catch (e) {
+        // If string parsing fails, treat as raw text
+        parsedData = null;
       }
-      nutritionData = parsed;
-    } else if (typeof plan === 'object') {
-      // If it's already an object
-      if (plan.content) {
-        if (typeof plan.content === 'string') {
-          nutritionData = JSON.parse(plan.content);
-        } else {
-          nutritionData = plan.content;
+    } else if (typeof plan === 'object' && plan !== null) {
+      parsedData = plan;
+    }
+    
+    // Handle nested structure from database
+    if (parsedData && typeof parsedData === 'object') {
+      if (parsedData.content) {
+        if (typeof parsedData.content === 'string') {
+          try {
+            nutritionData = JSON.parse(parsedData.content);
+          } catch (e) {
+            // If content parsing fails, use raw content
+            parsedData = null;
+          }
+        } else if (typeof parsedData.content === 'object') {
+          nutritionData = parsedData.content;
         }
-      } else {
-        nutritionData = plan;
+      } else if (parsedData.dailyCalories || parsedData.macronutrients) {
+        // Direct nutrition plan structure
+        nutritionData = parsedData;
       }
     }
   } catch (error) {
-    console.error("Failed to parse nutrition plan:", error);
+    console.error("Failed to parse nutrition plan:", error, plan);
   }
 
   // If parsing failed, show raw text
