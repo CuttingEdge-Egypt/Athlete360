@@ -112,7 +112,7 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
       <div className="space-y-6">
         {nutritionData.days.map((dayPlan, dayIndex) => (
           <Card key={dayIndex} className="overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20">
+            <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
@@ -123,7 +123,7 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
                     <p className="text-sm text-muted-foreground">{dayPlan.day.date}</p>
                   </div>
                 </div>
-                <Badge variant="outline" className="bg-white dark:bg-gray-800">
+                <Badge variant="outline">
                   {dayPlan.total_calories_intake}
                 </Badge>
               </CardTitle>
@@ -141,7 +141,7 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
                     </div>
                     <div className="space-y-2">
                       {meal.meal_description.map((item, itemIndex) => (
-                        <div key={itemIndex} className="text-sm bg-gray-50 dark:bg-gray-800 p-2 rounded text-center">
+                        <div key={itemIndex} className="text-sm p-2 rounded text-center border border-gray-200 dark:border-gray-700">
                           {item}
                         </div>
                       ))}
