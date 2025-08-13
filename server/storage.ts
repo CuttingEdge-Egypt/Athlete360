@@ -5,6 +5,7 @@ import {
   athleteStrengths,
   athleteWeaknesses,
   developmentPlans,
+  nutritionPlans,
   beatStrategies,
   dynamicAnalysis,
   rankHistory,
@@ -20,6 +21,7 @@ import {
   type AthleteStrength,
   type AthleteWeakness,
   type DevelopmentPlan,
+  type NutritionPlan,
   type BeatStrategy,
   type DynamicAnalysis,
   type RankHistory,
@@ -85,6 +87,8 @@ export interface IStorage {
   createAthleteWeakness(weakness: Partial<AthleteWeakness>): Promise<AthleteWeakness>;
   getDevelopmentPlans(athleteId: string): Promise<DevelopmentPlan[]>;
   createDevelopmentPlan(plan: Partial<DevelopmentPlan>): Promise<DevelopmentPlan>;
+  getNutritionPlans(athleteId: string): Promise<NutritionPlan[]>;
+  createNutritionPlan(plan: Partial<NutritionPlan>): Promise<NutritionPlan>;
 
   getBeatStrategies(athleteId: string): Promise<BeatStrategy[]>;
   createBeatStrategy(strategy: Partial<BeatStrategy>): Promise<BeatStrategy>;
@@ -409,7 +413,14 @@ export class DatabaseStorage implements IStorage {
     return newPlan;
   }
 
+  async getNutritionPlans(athleteId: string): Promise<NutritionPlan[]> {
+    return db.select().from(nutritionPlans).where(eq(nutritionPlans.athleteId, athleteId));
+  }
 
+  async createNutritionPlan(plan: Partial<NutritionPlan>): Promise<NutritionPlan> {
+    const [newPlan] = await db.insert(nutritionPlans).values(plan as any).returning();
+    return newPlan;
+  }
 
   async getBeatStrategies(athleteId: string): Promise<BeatStrategy[]> {
     return db.select().from(beatStrategies).where(eq(beatStrategies.athleteId, athleteId));

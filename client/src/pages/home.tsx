@@ -260,6 +260,14 @@ export default function Home() {
       color: "text-purple-400"
     },
     {
+      id: "nutrition-plan",
+      title: "Nutrition Plan",
+      description: "AI-powered personalized nutrition plan based on sport, age, gender, and nationality",
+      cost: 75,
+      icon: "apple-alt",
+      color: "text-green-500"
+    },
+    {
       id: "beat-strategies",
       title: "How to Beat",
       description: "Tactical strategies and techniques to gain competitive advantage",

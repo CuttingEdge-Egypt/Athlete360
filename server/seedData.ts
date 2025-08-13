@@ -262,6 +262,9 @@ export async function seedDatabase() {
       {
         name: "Cristiano Ronaldo",
         sportId: soccerSport?.id || allSports[0]?.id || "default",
+        age: 39,
+        gender: "Male",
+        country: "Portugal",
         bio: "Portuguese professional footballer widely regarded as one of the greatest players of all time. Known for his incredible goal-scoring ability, athleticism, and dedication to fitness.",
         rank: 3,
         profileImageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"
@@ -269,6 +272,9 @@ export async function seedDatabase() {
       {
         name: "Lionel Messi",
         sportId: soccerSport?.id || allSports[0]?.id || "default",
+        age: 37,
+        gender: "Male",
+        country: "Argentina",
         bio: "Argentine professional footballer considered one of the greatest players in football history. Winner of multiple Ballon d'Or awards and known for his incredible dribbling and playmaking abilities.",
         rank: 1,
         profileImageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"
@@ -276,6 +282,9 @@ export async function seedDatabase() {
       {
         name: "Serena Williams",
         sportId: tennisSport?.id || allSports[0]?.id || "default",
+        age: 43,
+        gender: "Female",
+        country: "United States",
         bio: "American former professional tennis player widely regarded as one of the greatest tennis players of all time. Winner of 23 Grand Slam singles titles.",
         rank: 2,
         profileImageUrl: "https://images.unsplash.com/photo-1544717297-fa95b6ee9643?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"
@@ -283,6 +292,9 @@ export async function seedDatabase() {
       {
         name: "LeBron James",
         sportId: basketballSport?.id || allSports[0]?.id || "default",
+        age: 39,
+        gender: "Male",
+        country: "United States",
         bio: "American professional basketball player widely considered one of the greatest players in NBA history. Four-time NBA champion and four-time NBA Finals MVP.",
         rank: 1,
         profileImageUrl: "https://images.unsplash.com/photo-1546525848-3ce03ca516f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"
@@ -290,6 +302,9 @@ export async function seedDatabase() {
       {
         name: "Tom Brady",
         sportId: footballSport?.id || allSports[0]?.id || "default",
+        age: 46,
+        gender: "Male",
+        country: "United States",
         bio: "American former professional football quarterback who played 23 seasons in the NFL. Seven-time Super Bowl champion and widely considered the greatest quarterback of all time.",
         rank: 1,
         profileImageUrl: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"
@@ -297,6 +312,9 @@ export async function seedDatabase() {
       {
         name: "Seif Eissa",
         sportId: taekwondoSport?.id || allSports[0]?.id || "default",
+        age: 26,
+        gender: "Male",
+        country: "Egypt",
         bio: "Elite Egyptian Taekwondo athlete and Olympic medalist. Olympic bronze medalist at Tokyo 2020, known for lightning-fast combinations, tactical brilliance, and exceptional mental fortitude. Current top-3 world ranking with multiple international gold medals and dominance in the -80kg weight category.",
         rank: 3,
         profileImageUrl: "/attached_assets/IMG_0107_1754340258245.webp"
@@ -304,6 +322,9 @@ export async function seedDatabase() {
       {
         name: "Rafael Nadal",
         sportId: tennisSport?.id || allSports[0]?.id || "default",
+        age: 38,
+        gender: "Male",
+        country: "Spain",
         bio: "Spanish professional tennis player known as the 'King of Clay'. Winner of 22 Grand Slam singles titles, including 14 French Open titles.",
         rank: 4,
         profileImageUrl: "https://images.unsplash.com/photo-1544717297-fa95b6ee9643?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"
@@ -311,6 +332,9 @@ export async function seedDatabase() {
       {
         name: "Stephen Curry",
         sportId: basketballSport?.id || allSports[0]?.id || "default",
+        age: 36,
+        gender: "Male", 
+        country: "United States",
         bio: "American professional basketball player widely regarded as one of the greatest shooters in NBA history. Four-time NBA champion and two-time MVP.",
         rank: 3,
         profileImageUrl: "https://images.unsplash.com/photo-1546525848-3ce03ca516f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"

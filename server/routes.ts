@@ -6,6 +6,7 @@ import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
 import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, compareAthletes } from "./openaiService";
+import { generateNutritionPlan } from "./geminiService";
 import { analyzeVideoFile } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
 import { TestingService } from "./testingService";
@@ -1190,7 +1191,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Nutrition Plan endpoint using Gemini 2.5 Pro
+  app.post('/api/analysis/:athleteId/nutrition-plan', isAuthenticated, async (req: any, res) => {
+    const tokenCost = 75;
+    try {
+      const userId = req.user.claims.sub;
+      const athleteId = req.params.athleteId;
 
+      const user = await storage.getUser(userId);
+      if (!user || (user.tokens || 0) < tokenCost) {
+        return res.status(402).json({ message: "Insufficient tokens" });
+      }
+
+      await storage.deductTokens(userId, tokenCost);
+      await storage.createTransaction({
+        userId,
+        action: "Nutrition Plan Generation",
+        tokensDeducted: tokenCost,
+        athleteId,
+        serviceType: "nutrition-plan"
+      });
+
+      // Get athlete data
+      const athlete = await storage.getAthleteById(athleteId);
+      if (!athlete) {
+        return res.status(404).json({ message: "Athlete not found" });
+      }
+
+      const sport = await storage.getSportById(athlete.sportId);
+      const sportName = sport?.name || "Unknown Sport";
+
+      // Check if athlete has all required fields for nutrition plan
+      if (!athlete.age || !athlete.gender || !athlete.country) {
+        return res.status(400).json({ 
+          message: "Athlete profile incomplete. Age, gender, and nationality are required for nutrition plan generation." 
+        });
+      }
+
+      const forceUpdate = req.query.forceUpdate === 'true';
+      
+      // Check for existing nutrition plans in database (skip if force update)
+      const existingNutritionPlans = await storage.getNutritionPlans(athleteId);
+      
+      let nutritionPlanData;
+      if (!forceUpdate && existingNutritionPlans.length > 0) {
+        // Use existing nutrition plan
+        nutritionPlanData = {
+          plan: existingNutritionPlans[0].plan
+        };
+      } else {
+        // Generate fresh nutrition plan using Gemini 2.5 Pro
+        console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} nutrition plan for ${athlete.name}`);
+        
+        try {
+          const generatedPlan = await generateNutritionPlan(
+            athlete.name,
+            athlete.age,
+            athlete.gender,
+            sportName,
+            athlete.country
+          );
+
+          // Store nutrition plan in database
+          if (generatedPlan.plan) {
+            await storage.createNutritionPlan({
+              athleteId,
+              plan: generatedPlan.plan
+            });
+          }
+
+          nutritionPlanData = generatedPlan;
+        } catch (aiError) {
+          console.error(`Error generating nutrition plan for ${athlete.name}:`, aiError);
+          return res.status(500).json({ 
+            message: "Failed to generate nutrition plan using AI",
+            error: aiError instanceof Error ? aiError.message : String(aiError)
+          });
+        }
+      }
+
+      await storage.createAnalysisLog({
+        userId,
+        athleteId,
+        serviceType: "nutrition-plan",
+        resultData: nutritionPlanData
+      });
+
+      res.json(nutritionPlanData);
+    } catch (error) {
+      console.error("Error generating nutrition plan:", error);
+      res.status(500).json({ message: "Failed to generate nutrition plan" });
+    }
+  });
 
   app.post('/api/analysis/:athleteId/beat-strategies', isAuthenticated, async (req: any, res) => {
     const tokenCost = 100;

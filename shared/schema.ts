@@ -58,7 +58,9 @@ export const athletes = pgTable("athletes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   sportId: varchar("sport_id").notNull().references(() => sports.id),
   name: varchar("name").notNull(),
-  country: varchar("country"),
+  age: integer("age"),
+  gender: varchar("gender"), // Male, Female, Other
+  country: varchar("country"), // This is nationality 
   bio: text("bio"),
   rank: integer("rank"),
   profileImageUrl: varchar("profile_image_url"),
@@ -92,6 +94,14 @@ export const developmentPlans = pgTable("development_plans", {
   title: varchar("title").notNull(),
   description: text("description"),
   week: integer("week").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Nutrition plans
+export const nutritionPlans = pgTable("nutrition_plans", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  athleteId: varchar("athlete_id").notNull().references(() => athletes.id),
+  plan: text("plan").notNull(), // Generated nutrition plan content
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -188,6 +198,7 @@ export const athletesRelations = relations(athletes, ({ one, many }) => ({
   strengths: many(athleteStrengths),
   weaknesses: many(athleteWeaknesses),
   developmentPlans: many(developmentPlans),
+  nutritionPlans: many(nutritionPlans),
   beatStrategies: many(beatStrategies),
   dynamicAnalysis: many(dynamicAnalysis),
   rankHistory: many(rankHistory),
@@ -231,6 +242,8 @@ export const insertSportSchema = createInsertSchema(sports).pick({
 export const insertAthleteSchema = createInsertSchema(athletes).pick({
   sportId: true,
   name: true,
+  age: true,
+  gender: true,
   country: true,
   bio: true,
   rank: true,
@@ -287,6 +300,7 @@ export type Athlete = typeof athletes.$inferSelect;
 export type AthleteStrength = typeof athleteStrengths.$inferSelect;
 export type AthleteWeakness = typeof athleteWeaknesses.$inferSelect;
 export type DevelopmentPlan = typeof developmentPlans.$inferSelect;
+export type NutritionPlan = typeof nutritionPlans.$inferSelect;
 
 export type BeatStrategy = typeof beatStrategies.$inferSelect;
 export type DynamicAnalysis = typeof dynamicAnalysis.$inferSelect;
