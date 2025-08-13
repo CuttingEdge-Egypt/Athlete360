@@ -260,14 +260,6 @@ export default function Home() {
       color: "text-purple-400"
     },
     {
-      id: "nutrition",
-      title: "Nutrition Plan",
-      description: "Comprehensive meal planning based on body composition and goals",
-      cost: 90,
-      icon: "apple-alt",
-      color: "text-green-400"
-    },
-    {
       id: "beat-strategies",
       title: "How to Beat",
       description: "Tactical strategies and techniques to gain competitive advantage",

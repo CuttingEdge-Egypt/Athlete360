@@ -5,7 +5,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, generateNutritionPlan, compareAthletes } from "./openaiService";
+import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, compareAthletes } from "./openaiService";
 import { analyzeVideoFile } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
 import { TestingService } from "./testingService";
@@ -361,16 +361,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
         
-        // Store nutrition plans
-        for (const nutrition of detailedAnalysis.nutritionPlans.slice(0, 3)) {
-          await storage.createNutritionPlan({
-            athleteId: athlete.id,
-            description: nutrition.description,
-            mealType: nutrition.mealType,
-            foodItem: nutrition.title,
-            calories: null
-          });
-        }
+
         
         // Store beat strategies
         for (const strategy of detailedAnalysis.beatStrategies.slice(0, 3)) {
@@ -480,20 +471,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
         
-        // Store nutrition plans
-        for (const nutrition of detailedAnalysis.nutritionPlans) {
-          try {
-            await storage.createNutritionPlan({
-              athleteId: athlete.id,
-              description: nutrition.description,
-              mealType: nutrition.mealType,
-              foodItem: nutrition.title,
-              calories: null
-            });
-          } catch (error) {
-            console.log(`Skipping nutrition plan for ${athlete.id}:`, error);
-          }
-        }
+
         
         // Store beat strategies
         for (const strategy of detailedAnalysis.beatStrategies) {
@@ -1212,82 +1190,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/analysis/:athleteId/nutrition', isAuthenticated, async (req: any, res) => {
-    const tokenCost = 90;
-    try {
-      const userId = req.user.claims.sub;
-      const athleteId = req.params.athleteId;
-      
-      // Extract user preferences from query parameters
-      const currentWeight = req.query.currentWeight || "70 kg";
-      const age = req.query.age || "25";
-      const target = req.query.target || "maintain weight";
-      const cuisine = req.query.cuisine || "Mediterranean";
 
-      const user = await storage.getUser(userId);
-      if (!user || (user.tokens || 0) < tokenCost) {
-        return res.status(402).json({ message: "Insufficient tokens" });
-      }
-
-      await storage.deductTokens(userId, tokenCost);
-      await storage.createTransaction({
-        userId,
-        action: `Nutrition Plan - ${target}`,
-        tokensDeducted: tokenCost,
-        athleteId,
-        serviceType: "nutrition"
-      });
-
-      // Get athlete data
-      const athlete = await storage.getAthleteById(athleteId);
-      if (!athlete) {
-        return res.status(404).json({ message: "Athlete not found" });
-      }
-
-      const sport = await storage.getSportById(athlete.sportId);
-      const sportName = sport?.name || "Unknown Sport";
-      
-      // Always generate fresh personalized nutrition plan based on user inputs
-      console.log(`Generating personalized nutrition plan for ${athlete.name} - Age: ${age}, Weight: ${currentWeight}, Target: ${target}, Cuisine: ${cuisine}`);
-      
-      // Get enhanced data for taekwondo athletes  
-      let enhancedData = null;
-      if (sportName.toLowerCase() === 'taekwondo') {
-        try {
-          enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country || undefined);
-        } catch (error) {
-          console.error(`Failed to get enhanced taekwondo data: ${error}`);
-        }
-      }
-      
-      // Prepare athlete data for personalized analysis
-      const athleteDataForAnalysis = {
-        bio: athlete.bio,
-        rank: athlete.rank,
-        country: athlete.country,
-        achievements: athlete.achievements,
-        competitionRecord: enhancedData?.currentRecord || "N/A"
-      };
-      
-      // Generate personalized nutrition plan
-      const nutritionPlan = await generateNutritionPlan(athlete.name, sportName, currentWeight, target, cuisine, age, athleteDataForAnalysis);
-
-      await storage.createAnalysisLog({
-        userId,
-        athleteId,
-        serviceType: "nutrition",
-        resultData: nutritionPlan
-      });
-
-      res.json(nutritionPlan);
-    } catch (error) {
-      console.error("Error generating nutrition plan:", error);
-      res.status(500).json({ 
-        message: "Unable to generate authentic nutrition plan at this time. Please try again later.",
-        error: error instanceof Error ? error.message : String(error)
-      });
-    }
-  });
 
   app.post('/api/analysis/:athleteId/beat-strategies', isAuthenticated, async (req: any, res) => {
     const tokenCost = 100;
@@ -2106,32 +2009,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ==== TESTING ENDPOINTS ====
 
-  // Test nutrition plan generation without auth to see GPT-5 response
-  app.post('/api/test/nutrition-debug', async (req, res) => {
-    try {
-      console.log('DEBUG: Starting nutrition plan test...');
-      const result = await generateNutritionPlan(
-        'test-session',
-        'Test Athlete',
-        'South Korea',
-        'Taekwondo',
-        '25',
-        '70',
-        'maintain'
-      );
-      
-      res.json({
-        success: true,
-        data: result
-      });
-    } catch (error: any) {
-      console.error('DEBUG: Nutrition plan failed:', error);
-      res.status(500).json({ 
-        success: false, 
-        error: error.message 
-      });
-    }
-  });
+
 
   // Simulate payment completion for testing
   app.post('/api/test/simulate-payment', isAuthenticated, async (req: any, res) => {

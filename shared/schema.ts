@@ -95,16 +95,7 @@ export const developmentPlans = pgTable("development_plans", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Nutrition plans
-export const nutritionPlans = pgTable("nutrition_plans", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  athleteId: varchar("athlete_id").notNull().references(() => athletes.id),
-  mealType: varchar("meal_type").notNull(),
-  foodItem: varchar("food_item").notNull(),
-  calories: integer("calories"),
-  description: text("description"),
-  createdAt: timestamp("created_at").defaultNow(),
-});
+
 
 // How to beat strategies
 export const beatStrategies = pgTable("beat_strategies", {
@@ -197,7 +188,6 @@ export const athletesRelations = relations(athletes, ({ one, many }) => ({
   strengths: many(athleteStrengths),
   weaknesses: many(athleteWeaknesses),
   developmentPlans: many(developmentPlans),
-  nutritionPlans: many(nutritionPlans),
   beatStrategies: many(beatStrategies),
   dynamicAnalysis: many(dynamicAnalysis),
   rankHistory: many(rankHistory),
@@ -297,7 +287,7 @@ export type Athlete = typeof athletes.$inferSelect;
 export type AthleteStrength = typeof athleteStrengths.$inferSelect;
 export type AthleteWeakness = typeof athleteWeaknesses.$inferSelect;
 export type DevelopmentPlan = typeof developmentPlans.$inferSelect;
-export type NutritionPlan = typeof nutritionPlans.$inferSelect;
+
 export type BeatStrategy = typeof beatStrategies.$inferSelect;
 export type DynamicAnalysis = typeof dynamicAnalysis.$inferSelect;
 export type RankHistory = typeof rankHistory.$inferSelect;

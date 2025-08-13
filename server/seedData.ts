@@ -90,45 +90,6 @@ async function seedSeifEissaData(athleteId: string) {
     }
   ];
 
-  // Nutrition Plans
-  const nutritionPlans = [
-    {
-      athleteId,
-      mealType: "Pre-Training Breakfast",
-      foodItem: "Oatmeal with berries and almonds",
-      calories: 450,
-      description: "Complex carbohydrates for sustained energy, antioxidants for recovery, healthy fats for hormone production. Consumed 2 hours before morning training."
-    },
-    {
-      athleteId,
-      mealType: "Post-Workout Recovery",
-      foodItem: "Whey protein shake with banana",
-      calories: 280,
-      description: "Fast-absorbing protein for muscle recovery, simple carbs for glycogen replenishment. Consumed within 15 minutes post-training."
-    },
-    {
-      athleteId,
-      mealType: "Competition Day Lunch",
-      foodItem: "Grilled chicken with quinoa and vegetables",
-      calories: 520,
-      description: "Lean protein for muscle maintenance, complex carbs for energy, micronutrients for optimal performance. Light and easily digestible."
-    },
-    {
-      athleteId,
-      mealType: "Evening Recovery Dinner",
-      foodItem: "Salmon with sweet potato and broccoli",
-      calories: 580,
-      description: "Omega-3 fatty acids for inflammation reduction, slow-digesting carbs, fiber and vitamins for overall health and recovery."
-    },
-    {
-      athleteId,
-      mealType: "Pre-Competition Snack",
-      foodItem: "Dates with almond butter",
-      calories: 200,
-      description: "Quick energy source 30 minutes before competition. Natural sugars for immediate fuel, minimal digestion required."
-    }
-  ];
-
   // Beat Strategies (how to defeat common opponent types)
   const beatStrategies = [
     {
@@ -223,14 +184,7 @@ async function seedSeifEissaData(athleteId: string) {
       }
     }
 
-    // Insert nutrition plans
-    for (const nutrition of nutritionPlans) {
-      try {
-        await storage.createNutritionPlan(nutrition);
-      } catch (error) {
-        console.log(`Skipping nutrition plan for ${athleteId}:`, error);
-      }
-    }
+
 
     // Insert beat strategies
     for (const strategy of beatStrategies) {

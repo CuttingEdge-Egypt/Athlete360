@@ -30,7 +30,7 @@ const serviceIcons = {
   strengths: Target,
   weaknesses: Target,
   development: Zap,
-  nutrition: Utensils,
+
   beat: Zap,
   video: Video,
   comparison: GitCompare,
@@ -42,7 +42,7 @@ const serviceLabels = {
   strengths: "Strengths Analysis", 
   weaknesses: "Weaknesses Analysis",
   development: "Development Plan",
-  nutrition: "Nutrition Plan",
+
   beat: "Beat Strategies",
   video: "Video Analysis",
   comparison: "Athlete Comparison",
