@@ -2106,6 +2106,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ==== TESTING ENDPOINTS ====
 
+  // Test nutrition plan generation without auth to see GPT-5 response
+  app.post('/api/test/nutrition-debug', async (req, res) => {
+    try {
+      console.log('DEBUG: Starting nutrition plan test...');
+      const result = await generateNutritionPlan(
+        'test-session',
+        'Test Athlete',
+        'South Korea',
+        'Taekwondo',
+        '25',
+        '70',
+        'maintain'
+      );
+      
+      res.json({
+        success: true,
+        data: result
+      });
+    } catch (error: any) {
+      console.error('DEBUG: Nutrition plan failed:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: error.message 
+      });
+    }
+  });
+
   // Simulate payment completion for testing
   app.post('/api/test/simulate-payment', isAuthenticated, async (req: any, res) => {
     try {
