@@ -1321,9 +1321,23 @@ Return only valid JSON with the missing fields.`;
       
       let nutritionPlanData;
       if (!forceUpdate && existingNutritionPlans.length > 0) {
-        // Use existing nutrition plan
+        // Use existing nutrition plan - parse JSON if stored as string
+        const storedPlan = existingNutritionPlans[0].plan;
+        let planContent;
+        
+        try {
+          if (typeof storedPlan === 'string') {
+            const parsedPlan = JSON.parse(storedPlan);
+            planContent = parsedPlan.content || storedPlan;
+          } else {
+            planContent = storedPlan;
+          }
+        } catch (e) {
+          planContent = storedPlan;
+        }
+        
         nutritionPlanData = {
-          plan: existingNutritionPlans[0].plan
+          plan: planContent
         };
       } else {
         // Generate fresh nutrition plan using Gemini 2.5 Pro
@@ -1342,7 +1356,7 @@ Return only valid JSON with the missing fields.`;
           if (generatedPlan.plan) {
             await storage.createNutritionPlan({
               athleteId,
-              plan: generatedPlan.plan
+              plan: JSON.stringify({ content: generatedPlan.plan, generatedAt: new Date().toISOString() })
             });
           }
 
