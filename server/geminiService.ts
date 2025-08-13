@@ -51,7 +51,6 @@ CRITICAL: Return ONLY valid JSON in this EXACT structure with no additional text
       },
       "meals": [
         {
-          "scan_meal": {},
           "calories_intake": "500 kcal",
           "meal_description": [
             "Traditional ${nationality} breakfast item 100g",
@@ -59,28 +58,24 @@ CRITICAL: Return ONLY valid JSON in this EXACT structure with no additional text
           ]
         },
         {
-          "scan_meal": {},
           "calories_intake": "300 kcal",
           "meal_description": [
             "Mid-morning snack items"
           ]
         },
         {
-          "scan_meal": {},
           "calories_intake": "700 kcal",
           "meal_description": [
             "Traditional ${nationality} lunch items"
           ]
         },
         {
-          "scan_meal": {},
           "calories_intake": "200 kcal",
           "meal_description": [
             "Afternoon snack"
           ]
         },
         {
-          "scan_meal": {},
           "calories_intake": "600 kcal",
           "meal_description": [
             "Traditional ${nationality} dinner items"
@@ -127,7 +122,6 @@ Requirements:
                     items: {
                       type: "object",
                       properties: {
-                        scan_meal: { type: "object" },
                         calories_intake: { type: "string" },
                         meal_description: {
                           type: "array",
@@ -174,27 +168,22 @@ Requirements:
             },
             meals: [
               {
-                scan_meal: {},
                 calories_intake: "500 kcal",
                 meal_description: [`Traditional ${nationality} breakfast items`, "Mixed with local ingredients"]
               },
               {
-                scan_meal: {},
                 calories_intake: "300 kcal", 
                 meal_description: ["Healthy snack options"]
               },
               {
-                scan_meal: {},
                 calories_intake: "700 kcal",
                 meal_description: [`Traditional ${nationality} lunch`, "Balanced for ${sport} training"]
               },
               {
-                scan_meal: {},
                 calories_intake: "200 kcal",
                 meal_description: ["Afternoon energy boost"]
               },
               {
-                scan_meal: {},
                 calories_intake: "600 kcal",
                 meal_description: [`Traditional ${nationality} dinner`, "Optimized for recovery"]
               }
