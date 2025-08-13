@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RankChart } from "./rank-chart";
+import { NutritionPlanDisplay } from "./nutrition-plan-display";
 import {
   Download,
   Share2,
@@ -20,6 +21,7 @@ import {
   Star,
   AlertTriangle,
   Calendar,
+  Apple,
   Swords,
   Video,
   Clock,
@@ -102,6 +104,9 @@ export function AnalysisPopup({
       case "development":
       case "development-plan":
         return <Calendar className="text-purple-400" size={28} />;
+      case "nutrition":
+      case "nutrition-plan":
+        return <Apple className="text-green-400" size={28} />;
       case "beat":
       case "beat-strategies":
         return <Swords className="text-red-400" size={28} />;
@@ -126,6 +131,9 @@ export function AnalysisPopup({
       case "development":
       case "development-plan":
         return "12-Week Development Program";
+      case "nutrition":
+      case "nutrition-plan":
+        return "Personalized Nutrition Plan";
       case "beat":
       case "beat-strategies":
         return "Strategic Combat Analysis";
@@ -140,6 +148,11 @@ export function AnalysisPopup({
   const renderAnalysisContent = () => {
     if (!data) {
       return <div className="text-gray-400 text-center py-8">Analysis data not available</div>;
+    }
+
+    // Special handling for nutrition plans
+    if (type === "nutrition" || type === "nutrition-plan") {
+      return <NutritionPlanDisplay plan={data.plan || data} />;
     }
 
     // Use AnalysisResult component for proper rendering
