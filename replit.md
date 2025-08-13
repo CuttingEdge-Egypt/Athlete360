@@ -94,3 +94,12 @@ Preferred communication style: Simple, everyday language.
 - **Updated Gemini Model**: Now using `gemini-2.5-pro` for all video analysis operations
 - **Live Scoreboard Layout**: Video centered with Blue/Red player stats on sides showing live-updating scores, kicks, and yellow cards
 - **Enhanced Analysis Accuracy**: Round-specific prompts, proper score summation (1+1+2=4), consistent kick counting, and timestamped warnings
+
+### Nutrition Plan JSON Parsing Enhancements (August 13, 2025)
+- **Comprehensive JSON cleanup**: Implemented multiple fallback strategies for handling malformed JSON responses from GPT-5
+- **Comma handling**: Added aggressive comma replacement in string values to prevent JSON parsing failures
+- **Enhanced prompt instructions**: Updated GPT-5 prompts with strict JSON formatting rules to prevent commas in string values
+- **Multiple retry mechanism**: Implemented 3-attempt retry system with progressive cleanup strategies
+- **Full response logging**: Added comprehensive logging to capture complete GPT-5 responses for debugging
+- **Pattern-based fixes**: Created specific regex patterns to handle common JSON formatting issues in AI responses
+- **Robust error handling**: Improved error messages and fallback data structures for failed parsing attempts
