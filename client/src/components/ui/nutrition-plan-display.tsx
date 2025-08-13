@@ -66,9 +66,24 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
       let parsed = JSON.parse(plan);
       // If it's nested (from database storage), extract the content
       if (parsed.content) {
-        parsed = JSON.parse(parsed.content);
+        if (typeof parsed.content === 'string') {
+          parsed = JSON.parse(parsed.content);
+        } else {
+          parsed = parsed.content;
+        }
       }
       nutritionData = parsed;
+    } else if (typeof plan === 'object') {
+      // If it's already an object
+      if (plan.content) {
+        if (typeof plan.content === 'string') {
+          nutritionData = JSON.parse(plan.content);
+        } else {
+          nutritionData = plan.content;
+        }
+      } else {
+        nutritionData = plan;
+      }
     }
   } catch (error) {
     console.error("Failed to parse nutrition plan:", error);
@@ -85,7 +100,9 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="whitespace-pre-wrap text-sm">{plan}</div>
+          <div className="whitespace-pre-wrap text-sm">
+            {typeof plan === 'string' ? plan : JSON.stringify(plan, null, 2)}
+          </div>
         </CardContent>
       </Card>
     );
