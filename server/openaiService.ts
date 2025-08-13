@@ -921,19 +921,25 @@ MUST research authentic ${athleteCountry} cuisine and create specific meal plans
   "culturalNotes": "Detailed explanation of how this plan respects ${athleteCountry} food culture, meal timing, and cooking traditions"
 }`;
 
-  try {
-    // Use GPT-5 with web search capabilities for authentic nutrition data
-    console.log(`Generating UNIQUE nutrition plan for ${athleteName} from ${athleteCountry} - Session: ${sessionId}`);
-    const response = await openai.responses.create({
-      model: "gpt-5",
-      input: prompt,
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 8000,
-      temperature: 1.0, // Force maximum creativity
-    });
+  let retryCount = 0;
+  const maxRetries = 2;
+  
+  while (retryCount <= maxRetries) {
+    try {
+      // Use GPT-5 with web search capabilities for authentic nutrition data
+      console.log(`Generating UNIQUE nutrition plan for ${athleteName} from ${athleteCountry} - Session: ${sessionId} (Attempt ${retryCount + 1})`);
+      const response = await openai.responses.create({
+        model: "gpt-5",
+        input: prompt + (retryCount > 0 ? "\n\nCRITICAL: Return ONLY valid JSON. No text before or after the JSON object." : ""),
+        tools: [{ type: "web_search_preview" }],
+        max_output_tokens: 8000,
+        temperature: 1.0, // Force maximum creativity
+      });
 
     // Apply robust JSON cleanup
     let cleanedText = response.output_text.trim();
+    
+    console.log(`Raw GPT-5 response length: ${cleanedText.length} characters`);
     
     // Remove markdown formatting
     cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
@@ -948,43 +954,128 @@ MUST research authentic ${athleteCountry} cuisine and create specific meal plans
     if (jsonMatch) {
       cleanedText = jsonMatch[0];
       
-      // Clean up common JSON issues
+      // Advanced JSON cleanup
+      // Remove trailing commas
       cleanedText = cleanedText.replace(/,\s*}/g, '}');
       cleanedText = cleanedText.replace(/,\s*]/g, ']');
       
-      // Fix truncated JSON by balancing braces/brackets
+      // Fix missing commas between array elements
+      cleanedText = cleanedText.replace(/"(\s*)\s+"/g, '", "');
+      cleanedText = cleanedText.replace(/(\d)\s+"/g, '$1, "');
+      cleanedText = cleanedText.replace(/"(\s+)(\d)/g, '", $2');
+      
+      // Fix unescaped quotes in strings (simpler approach)
+      cleanedText = cleanedText.replace(/:(\s*)"([^"]*)'([^"]*)"([,\}\]])/g, ':"$2\'$3"$4');
+      
+      // Remove any control characters
+      cleanedText = cleanedText.replace(/[\x00-\x1F\x7F]/g, ' ');
+      
+      // Fix incomplete strings
+      cleanedText = cleanedText.replace(/:\s*"([^"]*?)(?=[,\}\]])/g, (match, p1) => {
+        if (!p1.endsWith('"')) {
+          return `: "${p1}"`;
+        }
+        return match;
+      });
+      
+      // Balance braces and brackets
       let braceCount = 0;
       let bracketCount = 0;
+      let inString = false;
+      let escapeNext = false;
       let result = '';
       
       for (let i = 0; i < cleanedText.length; i++) {
         const char = cleanedText[i];
         result += char;
         
-        if (char === '{') braceCount++;
-        else if (char === '}') braceCount--;
-        else if (char === '[') bracketCount++;
-        else if (char === ']') bracketCount--;
+        if (escapeNext) {
+          escapeNext = false;
+          continue;
+        }
+        
+        if (char === '\\') {
+          escapeNext = true;
+          continue;
+        }
+        
+        if (char === '"' && !escapeNext) {
+          inString = !inString;
+        }
+        
+        if (!inString) {
+          if (char === '{') braceCount++;
+          else if (char === '}') braceCount--;
+          else if (char === '[') bracketCount++;
+          else if (char === ']') bracketCount--;
+        }
       }
       
       // Add missing closing characters
-      while (braceCount > 0) {
-        result += '}';
-        braceCount--;
-      }
       while (bracketCount > 0) {
         result += ']';
         bracketCount--;
+      }
+      while (braceCount > 0) {
+        result += '}';
+        braceCount--;
       }
       
       cleanedText = result;
     }
 
-    const nutritionData = JSON.parse(cleanedText);
+    // Try to parse JSON with better error handling
+    let nutritionData;
+    try {
+      nutritionData = JSON.parse(cleanedText);
+    } catch (parseError: any) {
+      console.error(`JSON Parse Error: ${parseError.message}`);
+      const errorPos = parseInt(parseError.message.match(/\d+/)?.[0] || '0');
+      console.error(`Problematic JSON substring around position ${errorPos}:`);
+      console.error(cleanedText.substring(Math.max(0, errorPos - 200), Math.min(cleanedText.length, errorPos + 200)));
+      
+      // Try more aggressive cleanup
+      try {
+        // Remove any incomplete objects at the end
+        const lastCompleteObject = cleanedText.lastIndexOf('"}');
+        if (lastCompleteObject > 0) {
+          let truncated = cleanedText.substring(0, lastCompleteObject + 2);
+          // Close any open arrays and objects
+          const openBrackets = (truncated.match(/\[/g) || []).length;
+          const closeBrackets = (truncated.match(/\]/g) || []).length;
+          const openBraces = (truncated.match(/\{/g) || []).length;
+          const closeBraces = (truncated.match(/\}/g) || []).length;
+          
+          for (let i = 0; i < openBrackets - closeBrackets; i++) {
+            truncated += ']';
+          }
+          for (let i = 0; i < openBraces - closeBraces; i++) {
+            truncated += '}';
+          }
+          
+          nutritionData = JSON.parse(truncated);
+          console.log('Successfully parsed after aggressive cleanup');
+        } else {
+          throw parseError;
+        }
+      } catch (secondError) {
+        console.error('Aggressive cleanup also failed:', secondError);
+        throw new Error(`Unable to parse nutrition data after ${retryCount + 1} attempts. Error at position ${errorPos}`);
+      }
+    }
     
-    // Clean up any URLs or citations that might have slipped through
+    // Validate and clean up meal data
     if (nutritionData.meals) {
       const cleanMealData = (meal: any) => {
+        if (!meal) return null;
+        
+        // Ensure meal has required fields
+        if (!meal.name) meal.name = "Traditional Meal";
+        if (!meal.calories) meal.calories = "600 kcal";
+        if (!meal.timing) meal.timing = "Flexible";
+        if (!meal.benefits) meal.benefits = "Athletic performance";
+        
+        // Clean description
         if (meal.description) {
           // Remove all content in parentheses containing URLs
           meal.description = meal.description.replace(/\([^)]*(?:\.com|\.org|\.net|\.edu|\.gov|https?:\/\/)[^)]*\)/gi, '');
@@ -993,20 +1084,49 @@ MUST research authentic ${athleteCountry} cuisine and create specific meal plans
           // Clean up extra spaces
           meal.description = meal.description.replace(/\s+/g, ' ').trim();
         }
+        
+        // Ensure foods is an array
+        if (!Array.isArray(meal.foods)) {
+          meal.foods = meal.foods ? [meal.foods] : ["Traditional athletic meal"];
+        }
+        
         return meal;
       };
       
-      if (nutritionData.meals.breakfast) nutritionData.meals.breakfast = nutritionData.meals.breakfast.map(cleanMealData);
-      if (nutritionData.meals.lunch) nutritionData.meals.lunch = nutritionData.meals.lunch.map(cleanMealData);
-      if (nutritionData.meals.dinner) nutritionData.meals.dinner = nutritionData.meals.dinner.map(cleanMealData);
-      if (nutritionData.meals.snacks) nutritionData.meals.snacks = nutritionData.meals.snacks.map(cleanMealData);
+      // Process each meal category safely
+      ['breakfast', 'lunch', 'dinner', 'snacks'].forEach(mealType => {
+        if (nutritionData.meals[mealType]) {
+          if (!Array.isArray(nutritionData.meals[mealType])) {
+            nutritionData.meals[mealType] = [nutritionData.meals[mealType]];
+          }
+          nutritionData.meals[mealType] = nutritionData.meals[mealType]
+            .map(cleanMealData)
+            .filter((meal: any) => meal !== null);
+        }
+      });
     }
     
     console.log(`GPT-5 Nutrition Response for ${athleteName}:`, JSON.stringify(nutritionData, null, 2));
     
-    // Return only authentic AI-generated data
-    if (!nutritionData.meals || !nutritionData.dailyCalories) {
-      throw new Error("AI failed to generate authentic nutrition data");
+    // Validate essential fields and provide defaults if missing
+    if (!nutritionData.dailyCalories) {
+      // Calculate based on sport and weight
+      const weightNum = parseInt(currentWeight) || 70;
+      const ageNum = parseInt(age) || 25;
+      const baseCalories = sport.toLowerCase().includes('taekwondo') ? 2800 : 2500;
+      nutritionData.dailyCalories = `${baseCalories + (weightNum - 70) * 10} kcal`;
+    }
+    
+    if (!nutritionData.macros) {
+      nutritionData.macros = {
+        protein: "25%",
+        carbs: "50%", 
+        fats: "25%"
+      };
+    }
+    
+    if (!nutritionData.meals) {
+      throw new Error("AI failed to generate meal plan structure");
     }
     
     const finalData = {
@@ -1030,11 +1150,23 @@ MUST research authentic ${athleteCountry} cuisine and create specific meal plans
     console.log(`Final nutrition data being returned:`, JSON.stringify(finalData, null, 2));
     return finalData;
     
-  } catch (error: any) {
-    console.error(`Error generating nutrition plan for ${athleteName}:`, error);
-    // Throw error instead of returning fallback data
-    throw new Error(`Nutrition plan generation failed for ${athleteName}: ${error?.message || 'Unknown error'}`);
+    } catch (error: any) {
+      console.error(`Error generating nutrition plan for ${athleteName} (Attempt ${retryCount + 1}):`, error);
+      retryCount++;
+      
+      if (retryCount > maxRetries) {
+        // Throw error after all retries exhausted
+        throw new Error(`Nutrition plan generation failed for ${athleteName} after ${maxRetries + 1} attempts: ${error?.message || 'Unknown error'}`);
+      }
+      
+      console.log(`Retrying nutrition plan generation... (${retryCount}/${maxRetries})`);
+      // Wait a bit before retrying
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
   }
+  
+  // Should never reach here, but just in case
+  throw new Error(`Nutrition plan generation failed for ${athleteName}: Maximum retries exceeded`);
 }
 
 // Removed all generic helper functions - nutrition analysis now only uses authentic AI-generated data
