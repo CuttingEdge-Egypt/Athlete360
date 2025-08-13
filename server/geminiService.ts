@@ -7,53 +7,22 @@ export interface NutritionPlanData {
   plan: string;
 }
 
+export interface NutritionPlanDay {
+  day: {
+    date: string;
+    name: string;
+  };
+  meals: {
+    scan_meal?: {};
+    calories_intake: string;
+    meal_description: string[];
+  }[];
+  explanation: string;
+  total_calories_intake: string;
+}
+
 export interface StructuredNutritionPlan {
-  dailyCalories: number;
-  macronutrients: {
-    protein: string;
-    carbs: string;
-    fats: string;
-  };
-  mealPlan: {
-    breakfast: {
-      time: string;
-      meal: string;
-      calories: number;
-    };
-    lunch: {
-      time: string;
-      meal: string;
-      calories: number;
-    };
-    dinner: {
-      time: string;
-      meal: string;
-      calories: number;
-    };
-    snacks: {
-      time: string;
-      meal: string;
-      calories: number;
-    }[];
-  };
-  preWorkout: {
-    timing: string;
-    foods: string[];
-    hydration: string;
-  };
-  postWorkout: {
-    timing: string;
-    foods: string[];
-    hydration: string;
-  };
-  culturalFoods: string[];
-  hydrationSchedule: string[];
-  recovery: {
-    foods: string[];
-    timing: string[];
-  };
-  supplements: string[];
-  notes: string;
+  days: NutritionPlanDay[];
 }
 
 export async function generateNutritionPlan(
@@ -64,66 +33,73 @@ export async function generateNutritionPlan(
   nationality: string
 ): Promise<NutritionPlanData> {
   try {
-    const systemPrompt = `You are a professional sports nutritionist. Create a comprehensive nutrition plan in JSON format only. Do not include any text before or after the JSON. The response must be valid JSON.`;
+    const systemPrompt = `You are a professional sports nutritionist specializing in ${nationality} cuisine. Create a 7-day nutrition plan in JSON format only. Do not include any text before or after the JSON. The response must be valid JSON without any markdown formatting.`;
 
-    const prompt = `Create a comprehensive personalized nutrition plan for this athlete:
+    const prompt = `Create a personalized 7-day nutrition plan for this athlete:
 
 Athlete: ${name} (${age} years old ${gender} from ${nationality})
 Sport: ${sport}
 
-Return ONLY valid JSON in this exact structure (no additional text):
+CRITICAL: Return ONLY valid JSON in this EXACT structure with no additional text, no markdown, no explanations:
+
 {
-  "dailyCalories": number,
-  "macronutrients": {
-    "protein": "percentage and grams",
-    "carbs": "percentage and grams", 
-    "fats": "percentage and grams"
-  },
-  "mealPlan": {
-    "breakfast": {
-      "time": "time range",
-      "meal": "detailed meal with ${nationality} foods",
-      "calories": number
-    },
-    "lunch": {
-      "time": "time range",
-      "meal": "detailed meal with ${nationality} foods",
-      "calories": number
-    },
-    "dinner": {
-      "time": "time range", 
-      "meal": "detailed meal with ${nationality} foods",
-      "calories": number
-    },
-    "snacks": [
-      {
-        "time": "time",
-        "meal": "snack details",
-        "calories": number
-      }
-    ]
-  },
-  "preWorkout": {
-    "timing": "when to eat before training",
-    "foods": ["food1", "food2", "food3"],
-    "hydration": "hydration guidance"
-  },
-  "postWorkout": {
-    "timing": "when to eat after training",
-    "foods": ["food1", "food2", "food3"], 
-    "hydration": "hydration guidance"
-  },
-  "culturalFoods": ["traditional ${nationality} foods for athletes"],
-  "hydrationSchedule": ["hydration timing throughout day"],
-  "recovery": {
-    "foods": ["recovery foods"],
-    "timing": ["when to consume recovery foods"]
-  },
-  "supplements": ["recommended supplements if appropriate"],
-  "notes": "additional important notes for ${sport} performance"
+  "days": [
+    {
+      "day": {
+        "date": "2024-08-14",
+        "name": "Monday"
+      },
+      "meals": [
+        {
+          "scan_meal": {},
+          "calories_intake": "500 kcal",
+          "meal_description": [
+            "Traditional ${nationality} breakfast item 100g",
+            "Another item with quantity"
+          ]
+        },
+        {
+          "scan_meal": {},
+          "calories_intake": "300 kcal",
+          "meal_description": [
+            "Mid-morning snack items"
+          ]
+        },
+        {
+          "scan_meal": {},
+          "calories_intake": "700 kcal",
+          "meal_description": [
+            "Traditional ${nationality} lunch items"
+          ]
+        },
+        {
+          "scan_meal": {},
+          "calories_intake": "200 kcal",
+          "meal_description": [
+            "Afternoon snack"
+          ]
+        },
+        {
+          "scan_meal": {},
+          "calories_intake": "600 kcal",
+          "meal_description": [
+            "Traditional ${nationality} dinner items"
+          ]
+        }
+      ],
+      "explanation": "Brief explanation of why this daily plan supports ${sport} performance with ${nationality} foods",
+      "total_calories_intake": "2300 kcal"
+    }
+  ]
 }
 
-Make it culturally appropriate for ${nationality} cuisine and optimized for ${sport} performance.`;
+Requirements:
+- Use traditional ${nationality} foods appropriate for ${sport} athletes
+- Include 5 meals per day (breakfast, snack, lunch, snack, dinner)
+- Consider ${sport} training needs (explosive power, agility, recovery)
+- Provide realistic portion sizes
+- Generate 7 complete days
+- Each meal should have 2-4 food items with quantities`;
 
     const result = await genAI.models.generateContent({
       model: "gemini-2.5-pro",
@@ -150,52 +126,43 @@ Make it culturally appropriate for ${nationality} cuisine and optimized for ${sp
       console.error("JSON parsing failed, using fallback structure:", parseError);
       // Fallback structure if parsing fails
       parsedPlan = {
-        dailyCalories: 2500,
-        macronutrients: {
-          protein: "25% (156g)",
-          carbs: "50% (313g)", 
-          fats: "25% (69g)"
-        },
-        mealPlan: {
-          breakfast: {
-            time: "7:00-8:00 AM",
-            meal: "Traditional breakfast with local ingredients",
-            calories: 500
-          },
-          lunch: {
-            time: "12:00-1:00 PM", 
-            meal: "Balanced lunch with cultural foods",
-            calories: 700
-          },
-          dinner: {
-            time: "6:00-7:00 PM",
-            meal: "Nutritious dinner with traditional elements",
-            calories: 600
-          },
-          snacks: [{
-            time: "3:00 PM",
-            meal: "Healthy snack",
-            calories: 200
-          }]
-        },
-        preWorkout: {
-          timing: "1-2 hours before training",
-          foods: ["Light carbohydrates", "Easily digestible foods"],
-          hydration: "16-20 oz water"
-        },
-        postWorkout: {
-          timing: "Within 30 minutes after training",
-          foods: ["Protein", "Carbohydrates", "Recovery foods"],
-          hydration: "24 oz water per pound lost"
-        },
-        culturalFoods: [`Traditional ${nationality} foods for athletic performance`],
-        hydrationSchedule: ["Morning: 16 oz", "Pre-workout: 8 oz", "During workout: 6-8 oz every 15-20 min"],
-        recovery: {
-          foods: ["Anti-inflammatory foods", "Protein-rich options"],
-          timing: ["Post-workout", "Before bed"]
-        },
-        supplements: ["As recommended by sports nutritionist"],
-        notes: `Nutrition plan tailored for ${sport} performance and ${nationality} cultural preferences`
+        days: [
+          {
+            day: {
+              date: new Date().toISOString().split('T')[0],
+              name: "Sample Day"
+            },
+            meals: [
+              {
+                scan_meal: {},
+                calories_intake: "500 kcal",
+                meal_description: [`Traditional ${nationality} breakfast items`, "Mixed with local ingredients"]
+              },
+              {
+                scan_meal: {},
+                calories_intake: "300 kcal", 
+                meal_description: ["Healthy snack options"]
+              },
+              {
+                scan_meal: {},
+                calories_intake: "700 kcal",
+                meal_description: [`Traditional ${nationality} lunch`, "Balanced for ${sport} training"]
+              },
+              {
+                scan_meal: {},
+                calories_intake: "200 kcal",
+                meal_description: ["Afternoon energy boost"]
+              },
+              {
+                scan_meal: {},
+                calories_intake: "600 kcal",
+                meal_description: [`Traditional ${nationality} dinner`, "Optimized for recovery"]
+              }
+            ],
+            explanation: `Sample nutrition plan for ${sport} athlete incorporating ${nationality} cuisine`,
+            total_calories_intake: "2300 kcal"
+          }
+        ]
       };
     }
 

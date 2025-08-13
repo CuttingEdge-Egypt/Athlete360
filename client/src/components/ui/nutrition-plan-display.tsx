@@ -7,53 +7,22 @@ interface NutritionPlanProps {
   plan: string | any;
 }
 
+interface NutritionPlanDay {
+  day: {
+    date: string;
+    name: string;
+  };
+  meals: {
+    scan_meal?: {};
+    calories_intake: string;
+    meal_description: string[];
+  }[];
+  explanation: string;
+  total_calories_intake: string;
+}
+
 interface StructuredNutritionPlan {
-  dailyCalories: number;
-  macronutrients: {
-    protein: string;
-    carbs: string;
-    fats: string;
-  };
-  mealPlan: {
-    breakfast: {
-      time: string;
-      meal: string;
-      calories: number;
-    };
-    lunch: {
-      time: string;
-      meal: string;
-      calories: number;
-    };
-    dinner: {
-      time: string;
-      meal: string;
-      calories: number;
-    };
-    snacks: {
-      time: string;
-      meal: string;
-      calories: number;
-    }[];
-  };
-  preWorkout: {
-    timing: string;
-    foods: string[];
-    hydration: string;
-  };
-  postWorkout: {
-    timing: string;
-    foods: string[];
-    hydration: string;
-  };
-  culturalFoods: string[];
-  hydrationSchedule: string[];
-  recovery: {
-    foods: string[];
-    timing: string[];
-  };
-  supplements: string[];
-  notes: string;
+  days: NutritionPlanDay[];
 }
 
 export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
@@ -89,8 +58,8 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
         } else if (typeof parsedData.content === 'object') {
           nutritionData = parsedData.content;
         }
-      } else if (parsedData.dailyCalories || parsedData.macronutrients) {
-        // Direct nutrition plan structure
+      } else if (parsedData.days) {
+        // Direct nutrition plan structure with days array
         nutritionData = parsedData;
       }
     }
@@ -123,282 +92,116 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-blue-500" />
-            Daily Nutrition Overview
+            <Apple className="h-5 w-5 text-green-500" />
+            7-Day Nutrition Plan
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                {nutritionData.dailyCalories}
-              </div>
-              <div className="text-sm text-muted-foreground">Daily Calories</div>
+          <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+            <div className="text-lg font-semibold text-green-600 dark:text-green-400">
+              {nutritionData.days.length} Days of Culturally-Tailored Meals
             </div>
-            <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <div className="text-lg font-semibold text-green-600 dark:text-green-400">
-                {nutritionData.macronutrients.protein}
-              </div>
-              <div className="text-sm text-muted-foreground">Protein</div>
-            </div>
-            <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-              <div className="text-lg font-semibold text-orange-600 dark:text-orange-400">
-                {nutritionData.macronutrients.carbs}
-              </div>
-              <div className="text-sm text-muted-foreground">Carbohydrates</div>
-            </div>
-            <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-              <div className="text-lg font-semibold text-purple-600 dark:text-purple-400">
-                {nutritionData.macronutrients.fats}
-              </div>
-              <div className="text-sm text-muted-foreground">Fats</div>
+            <div className="text-sm text-muted-foreground mt-2">
+              Designed for athletic performance with traditional foods
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Daily Meal Plan */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Utensils className="h-5 w-5 text-green-500" />
-            Daily Meal Plan
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Breakfast */}
-            <div className="p-4 border rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Clock className="h-4 w-4 text-yellow-500" />
-                <h3 className="font-semibold">Breakfast</h3>
-                <Badge variant="secondary">{nutritionData.mealPlan.breakfast.calories} cal</Badge>
-              </div>
-              <div className="text-sm text-muted-foreground mb-2">
-                {nutritionData.mealPlan.breakfast.time}
-              </div>
-              <div className="text-sm">{nutritionData.mealPlan.breakfast.meal}</div>
-            </div>
-
-            {/* Lunch */}
-            <div className="p-4 border rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Clock className="h-4 w-4 text-orange-500" />
-                <h3 className="font-semibold">Lunch</h3>
-                <Badge variant="secondary">{nutritionData.mealPlan.lunch.calories} cal</Badge>
-              </div>
-              <div className="text-sm text-muted-foreground mb-2">
-                {nutritionData.mealPlan.lunch.time}
-              </div>
-              <div className="text-sm">{nutritionData.mealPlan.lunch.meal}</div>
-            </div>
-
-            {/* Dinner */}
-            <div className="p-4 border rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Clock className="h-4 w-4 text-blue-500" />
-                <h3 className="font-semibold">Dinner</h3>
-                <Badge variant="secondary">{nutritionData.mealPlan.dinner.calories} cal</Badge>
-              </div>
-              <div className="text-sm text-muted-foreground mb-2">
-                {nutritionData.mealPlan.dinner.time}
-              </div>
-              <div className="text-sm">{nutritionData.mealPlan.dinner.meal}</div>
-            </div>
-
-            {/* Snacks */}
-            <div className="p-4 border rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Apple className="h-4 w-4 text-green-500" />
-                <h3 className="font-semibold">Snacks</h3>
-              </div>
-              <div className="space-y-2">
-                {nutritionData.mealPlan.snacks.map((snack, index) => (
-                  <div key={index}>
-                    <div className="text-sm text-muted-foreground">{snack.time}</div>
-                    <div className="text-sm">{snack.meal}</div>
-                    <Badge variant="outline" className="text-xs">{snack.calories} cal</Badge>
+      {/* Daily Meal Plans */}
+      <div className="space-y-6">
+        {nutritionData.days.map((dayPlan, dayIndex) => (
+          <Card key={dayIndex} className="overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20">
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
+                    {dayIndex + 1}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">{dayPlan.day.name}</h3>
+                    <p className="text-sm text-muted-foreground">{dayPlan.day.date}</p>
+                  </div>
+                </div>
+                <Badge variant="outline" className="bg-white dark:bg-gray-800">
+                  {dayPlan.total_calories_intake}
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              {/* Meals Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                {dayPlan.meals.map((meal, mealIndex) => (
+                  <div key={mealIndex} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <Badge variant="secondary" className="text-xs">
+                        {meal.calories_intake}
+                      </Badge>
+                    </div>
+                    <div className="space-y-2">
+                      {meal.meal_description.map((item, itemIndex) => (
+                        <div key={itemIndex} className="text-sm bg-gray-50 dark:bg-gray-800 p-2 rounded text-center">
+                          {item}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ))}
               </div>
+
+              {/* Daily Explanation */}
+              {dayPlan.explanation && (
+                <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <Target className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-sm text-blue-700 dark:text-blue-300 mb-1">
+                        Daily Focus
+                      </h4>
+                      <p className="text-sm text-blue-600 dark:text-blue-200">
+                        {dayPlan.explanation}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Summary Stats */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Target className="h-5 w-5 text-purple-500" />
+            Weekly Summary
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                {nutritionData.days.length}
+              </div>
+              <div className="text-sm text-muted-foreground">Days Planned</div>
+            </div>
+            <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                {nutritionData.days.reduce((total, day) => total + day.meals.length, 0)}
+              </div>
+              <div className="text-sm text-muted-foreground">Total Meals</div>
+            </div>
+            <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                5
+              </div>
+              <div className="text-sm text-muted-foreground">Meals per Day</div>
             </div>
           </div>
         </CardContent>
       </Card>
-
-      {/* Workout Nutrition */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-red-500" />
-              Pre-Workout Nutrition
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div>
-                <h4 className="font-semibold text-sm">Timing</h4>
-                <p className="text-sm text-muted-foreground">{nutritionData.preWorkout.timing}</p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-sm">Foods</h4>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {nutritionData.preWorkout.foods.map((food, index) => (
-                    <Badge key={index} variant="outline">{food}</Badge>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h4 className="font-semibold text-sm flex items-center gap-1">
-                  <Droplets className="h-3 w-3" />
-                  Hydration
-                </h4>
-                <p className="text-sm text-muted-foreground">{nutritionData.preWorkout.hydration}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-green-500" />
-              Post-Workout Nutrition
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div>
-                <h4 className="font-semibold text-sm">Timing</h4>
-                <p className="text-sm text-muted-foreground">{nutritionData.postWorkout.timing}</p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-sm">Foods</h4>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {nutritionData.postWorkout.foods.map((food, index) => (
-                    <Badge key={index} variant="outline">{food}</Badge>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h4 className="font-semibold text-sm flex items-center gap-1">
-                  <Droplets className="h-3 w-3" />
-                  Hydration
-                </h4>
-                <p className="text-sm text-muted-foreground">{nutritionData.postWorkout.hydration}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Additional Sections */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Cultural Foods */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Apple className="h-5 w-5 text-orange-500" />
-              Cultural Foods
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {nutritionData.culturalFoods.map((food, index) => (
-                <Badge key={index} variant="secondary">{food}</Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Hydration Schedule */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Droplets className="h-5 w-5 text-blue-500" />
-              Hydration Schedule
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {nutritionData.hydrationSchedule.map((schedule, index) => (
-                <div key={index} className="text-sm p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
-                  {schedule}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Recovery */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-purple-500" />
-              Recovery Nutrition
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div>
-                <h4 className="font-semibold text-sm">Foods</h4>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {nutritionData.recovery.foods.map((food, index) => (
-                    <Badge key={index} variant="outline">{food}</Badge>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h4 className="font-semibold text-sm">Timing</h4>
-                <div className="space-y-1">
-                  {nutritionData.recovery.timing.map((timing, index) => (
-                    <div key={index} className="text-sm text-muted-foreground">{timing}</div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Supplements */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Pill className="h-5 w-5 text-green-500" />
-              Supplements
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {nutritionData.supplements.length > 0 ? (
-                nutritionData.supplements.map((supplement, index) => (
-                  <Badge key={index} variant="outline">{supplement}</Badge>
-                ))
-              ) : (
-                <div className="text-sm text-muted-foreground">No supplements recommended</div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Notes */}
-      {nutritionData.notes && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <NotebookPen className="h-5 w-5 text-gray-500" />
-              Additional Notes
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-              <p className="text-sm">{nutritionData.notes}</p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
