@@ -392,6 +392,35 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
     }
   };
 
+  const prettifyMatchAnalysis = (rawText: string): JSX.Element[] => {
+    // Remove common introductory phrases
+    let cleanText = rawText
+      .replace(/^(Of course[!]?\s*Here's a detailed analysis of the taekwondo match\.?\s*)/i, '')
+      .replace(/^(Sure[!]?\s*Here's a detailed breakdown of the taekwondo match\.?\s*)/i, '')
+      .replace(/^(Certainly[!]?\s*Here's a comprehensive analysis\.?\s*)/i, '')
+      .trim();
+
+    // Split into paragraphs and process each
+    const paragraphs = cleanText.split('\n\n');
+    
+    return paragraphs.map((paragraph, index) => {
+      // Convert **text** to bold formatting
+      const formattedText = paragraph.split(/(\*\*[^*]+\*\*)/g).map((part, partIndex) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          const boldText = part.slice(2, -2);
+          return <strong key={partIndex} className="font-bold text-white">{boldText}</strong>;
+        }
+        return part;
+      });
+
+      return (
+        <div key={index} className="mb-4">
+          {formattedText}
+        </div>
+      );
+    });
+  };
+
   const matchAnalysis = parseMatchAnalysis();
 
   return (
@@ -564,13 +593,16 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-gray-300 leading-relaxed whitespace-pre-line" data-testid="match-analysis">
-            {typeof matchAnalysis === 'string' 
-              ? matchAnalysis 
-              : typeof matchAnalysis.content === 'string'
-              ? matchAnalysis.content
-              : JSON.stringify(matchAnalysis, null, 2)
-            }
+          <div className="text-gray-300 leading-relaxed" data-testid="match-analysis">
+            {(() => {
+              const rawText = typeof matchAnalysis === 'string' 
+                ? matchAnalysis 
+                : typeof matchAnalysis.content === 'string'
+                ? matchAnalysis.content
+                : JSON.stringify(matchAnalysis, null, 2);
+              
+              return prettifyMatchAnalysis(rawText);
+            })()}
           </div>
         </CardContent>
       </Card>
