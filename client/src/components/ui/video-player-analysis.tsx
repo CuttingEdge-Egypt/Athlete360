@@ -45,6 +45,13 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
     const yellowCardAnalysis = analysisData.yellow_card_analysis ? parseAnalysisData(analysisData.yellow_card_analysis) : null;
     const kickAnalysis = analysisData.kick_analysis ? parseAnalysisData(analysisData.kick_analysis) : null;
 
+    // Debug logging to check data structure
+    console.log("=== VIDEO ANALYSIS DEBUG ===");
+    console.log("Score Analysis:", scoreAnalysis);
+    console.log("Yellow Card Analysis:", yellowCardAnalysis);
+    console.log("Kick Analysis:", kickAnalysis);
+    console.log("Raw analysisData:", analysisData);
+
     const timestampRegex = /(\d{1,2}:\d{2}|\d{1,3}s|\d+\s*seconds?|\d+\s*min)/gi;
     
     const parseTimestamp = (timeStr: string): number => {
@@ -103,33 +110,38 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
             });
           }
         });
-      } else if (scoreAnalysis && Array.isArray(scoreAnalysis.events)) {
-        // New JSON format - use color field
-        scoreAnalysis.events.forEach((event: any) => {
-          if (event.timestamp && event.color) {
-            const timestamp = parseTimestamp(event.timestamp);
-            const points = event.points || 1;
-            const player = event.color.toLowerCase();
+      } else if (scoreAnalysis && Array.isArray(scoreAnalysis.players)) {
+        // New JSON format - use players array with color field
+        scoreAnalysis.players.forEach((player: any) => {
+          if (player.color && Array.isArray(player.kicks)) {
+            const playerColor = player.color.toLowerCase();
+            
+            player.kicks.forEach((kick: any) => {
+              if (kick.timestamp && kick.score) {
+                const timestamp = parseTimestamp(kick.timestamp);
+                const points = kick.score;
 
-            if (player === 'blue') {
-              blueScore += points;
-              scoreEvents.push({
-                timestamp,
-                blueScore,
-                redScore,
-                increment: points,
-                player: 'blue'
-              });
-            } else if (player === 'red') {
-              redScore += points;
-              scoreEvents.push({
-                timestamp,
-                blueScore,
-                redScore,
-                increment: points,
-                player: 'red'
-              });
-            }
+                if (playerColor === 'blue') {
+                  blueScore += points;
+                  scoreEvents.push({
+                    timestamp,
+                    blueScore,
+                    redScore,
+                    increment: points,
+                    player: 'blue'
+                  });
+                } else if (playerColor === 'red') {
+                  redScore += points;
+                  scoreEvents.push({
+                    timestamp,
+                    blueScore,
+                    redScore,
+                    increment: points,
+                    player: 'red'
+                  });
+                }
+              }
+            });
           }
         });
       }
@@ -174,30 +186,35 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
             });
           }
         });
-      } else if (yellowCardAnalysis && Array.isArray(yellowCardAnalysis.events)) {
-        // New JSON format - use color field
-        yellowCardAnalysis.events.forEach((event: any) => {
-          if (event.timestamp && event.color) {
-            const timestamp = parseTimestamp(event.timestamp);
-            const player = event.color.toLowerCase();
+      } else if (yellowCardAnalysis && Array.isArray(yellowCardAnalysis.players)) {
+        // New JSON format - use players array with color field
+        yellowCardAnalysis.players.forEach((player: any) => {
+          if (player.color && Array.isArray(player.Yellow_cards)) {
+            const playerColor = player.color.toLowerCase();
+            
+            player.Yellow_cards.forEach((card: any) => {
+              if (card.timestamp) {
+                const timestamp = parseTimestamp(card.timestamp);
 
-            if (player === 'blue') {
-              blueCards++;
-              yellowCardEvents.push({
-                timestamp,
-                blueCards,
-                redCards,
-                player: 'blue'
-              });
-            } else if (player === 'red') {
-              redCards++;
-              yellowCardEvents.push({
-                timestamp,
-                blueCards,
-                redCards,
-                player: 'red'
-              });
-            }
+                if (playerColor === 'blue') {
+                  blueCards++;
+                  yellowCardEvents.push({
+                    timestamp,
+                    blueCards,
+                    redCards,
+                    player: 'blue'
+                  });
+                } else if (playerColor === 'red') {
+                  redCards++;
+                  yellowCardEvents.push({
+                    timestamp,
+                    blueCards,
+                    redCards,
+                    player: 'red'
+                  });
+                }
+              }
+            });
           }
         });
       }
@@ -207,14 +224,27 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
     let blueKicks = 0;
     let redKicks = 0;
     if (kickAnalysis) {
-      const content = typeof kickAnalysis === 'string' ? kickAnalysis : JSON.stringify(kickAnalysis);
-      
-      // Extract kick counts for each player
-      const blueKickMatch = content.match(/player\s*1.*?(\d+).*?kick/i) || content.match(/blue.*?(\d+).*?kick/i);
-      const redKickMatch = content.match(/player\s*2.*?(\d+).*?kick/i) || content.match(/red.*?(\d+).*?kick/i);
-      
-      if (blueKickMatch) blueKicks = parseInt(blueKickMatch[1]) || 0;
-      if (redKickMatch) redKicks = parseInt(redKickMatch[1]) || 0;
+      // First try new JSON format with players array
+      if (Array.isArray(kickAnalysis.players)) {
+        kickAnalysis.players.forEach((player: any) => {
+          if (player.color && player.total_kicks) {
+            const playerColor = player.color.toLowerCase();
+            if (playerColor === 'blue') {
+              blueKicks = player.total_kicks;
+            } else if (playerColor === 'red') {
+              redKicks = player.total_kicks;
+            }
+          }
+        });
+      } else {
+        // Fallback to old text parsing method
+        const content = typeof kickAnalysis === 'string' ? kickAnalysis : JSON.stringify(kickAnalysis);
+        const blueKickMatch = content.match(/player\s*1.*?(\d+).*?kick/i) || content.match(/blue.*?(\d+).*?kick/i);
+        const redKickMatch = content.match(/player\s*2.*?(\d+).*?kick/i) || content.match(/red.*?(\d+).*?kick/i);
+        
+        if (blueKickMatch) blueKicks = parseInt(blueKickMatch[1]) || 0;
+        if (redKickMatch) redKicks = parseInt(redKickMatch[1]) || 0;
+      }
     }
 
     return { scoreEvents, yellowCardEvents, blueKicks, redKicks };
