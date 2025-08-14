@@ -20,6 +20,71 @@ const model = genai.getGenerativeModel({
   generationConfig,
 });
 
+// Function to clean and fix common JSON formatting issues in AI responses
+function cleanJsonResponse(responseText: string): string {
+  if (!responseText) return '{}';
+  
+  let cleanedText = responseText.trim();
+  
+  // Remove code block markers if present
+  cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+  cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+  
+  // Try to parse and reformat to catch basic JSON errors
+  try {
+    const parsed = JSON.parse(cleanedText);
+    return JSON.stringify(parsed);
+  } catch (error) {
+    console.log(`[CLEAN_JSON] Initial parse failed, attempting cleanup: ${error}`);
+    
+    // Multiple cleanup attempts
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        let attemptText = cleanedText;
+        
+        // Attempt 1: Fix common comma issues
+        if (attempt === 1) {
+          attemptText = attemptText.replace(/,(\s*[}\]])/g, '$1'); // Remove trailing commas
+          attemptText = attemptText.replace(/([}\]])(\s*)([{"\[])/g, '$1,$2$3'); // Add missing commas between objects
+        }
+        
+        // Attempt 2: Fix quote issues and escape sequences
+        if (attempt === 2) {
+          attemptText = attemptText.replace(/'/g, '"'); // Replace single quotes with double quotes
+          attemptText = attemptText.replace(/(\w+):/g, '"$1":'); // Quote unquoted keys
+          attemptText = attemptText.replace(/:\s*([^",{[\]}\s]+)(?=\s*[,}])/g, ': "$1"'); // Quote unquoted string values
+        }
+        
+        // Attempt 3: More aggressive cleanup
+        if (attempt === 3) {
+          attemptText = attemptText.replace(/\n/g, ' '); // Remove newlines
+          attemptText = attemptText.replace(/\s+/g, ' '); // Normalize whitespace
+          // Try to find JSON-like content and extract it
+          const jsonMatch = attemptText.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            attemptText = jsonMatch[0];
+          }
+        }
+        
+        const parsed = JSON.parse(attemptText);
+        console.log(`[CLEAN_JSON] Cleanup successful on attempt ${attempt}`);
+        return JSON.stringify(parsed);
+        
+      } catch (cleanupError) {
+        console.log(`[CLEAN_JSON] Attempt ${attempt} failed: ${cleanupError}`);
+        if (attempt === 3) {
+          // Final fallback - return empty structure
+          console.log(`[CLEAN_JSON] All cleanup attempts failed, returning fallback structure`);
+          return '{"players": []}';
+        }
+      }
+    }
+  }
+  
+  // Should never reach here, but just in case
+  return '{"players": []}';
+}
+
 // Process video with Gemini using base64 encoding (working approach)
 export async function processVideoGemini(videoFilePath: string, roundToAnalyze: number) {
   console.log(`[PROCESS_VIDEO_GEMINI] Starting video analysis for round ${roundToAnalyze}`);
@@ -230,12 +295,24 @@ Return JSON format:
 
     console.log(`[PROCESS_VIDEO_GEMINI] All 5 analysis calls completed`);
 
-    // Extract text responses
+    // Extract text responses with JSON cleanup
     const matchAnalysis = responseMatch.response.text();
-    const scoreAnalysis = responseScore.response.text();
-    const punchAnalysis = responsePunch.response.text();
-    const kickCountAnalysis = responseKickNo.response.text();
-    const yellowCardAnalysis = responseYellowCards.response.text();
+    const rawScoreResponse = responseScore.response.text();
+    const rawPunchResponse = responsePunch.response.text();
+    const rawKickCountResponse = responseKickNo.response.text();
+    const rawYellowCardResponse = responseYellowCards.response.text();
+
+    // Log raw responses for debugging
+    console.log(`[PROCESS_VIDEO_GEMINI] Raw Score Response:`, rawScoreResponse.substring(0, 200));
+    console.log(`[PROCESS_VIDEO_GEMINI] Raw Kick Count Response:`, rawKickCountResponse.substring(0, 200));
+    console.log(`[PROCESS_VIDEO_GEMINI] Raw Punch Response:`, rawPunchResponse.substring(0, 200));
+    console.log(`[PROCESS_VIDEO_GEMINI] Raw Yellow Card Response:`, rawYellowCardResponse.substring(0, 200));
+
+    // Clean the JSON responses
+    const scoreAnalysis = cleanJsonResponse(rawScoreResponse);
+    const punchAnalysis = cleanJsonResponse(rawPunchResponse);
+    const kickCountAnalysis = cleanJsonResponse(rawKickCountResponse);
+    const yellowCardAnalysis = cleanJsonResponse(rawYellowCardResponse);
 
     console.log(`[PROCESS_VIDEO_GEMINI] Analysis completed successfully`);
 
