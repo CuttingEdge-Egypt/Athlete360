@@ -121,3 +121,4 @@ Preferred communication style: Simple, everyday language.
 - **Enhanced error handling**: Added specific error messages for timeout, network, and analysis failures
 - **Improved user feedback**: Updated button text to indicate 5-10 minute processing time expectation
 - **Robust network handling**: Implemented AbortController for proper timeout management
+- **Kick count parsing reversion**: Reverted to player name-based identification instead of color field priority to maintain compatibility with working analysis format
