@@ -274,14 +274,6 @@ export default function Home() {
       cost: 100,
       icon: "chess",
       color: "text-red-400"
-    },
-    {
-      id: "video-analysis",
-      title: "Video Analysis",
-      description: "AI-powered analysis of performance videos and gameplay footage",
-      cost: 120,
-      icon: "video",
-      color: "text-indigo-400"
     }
   ];
 
