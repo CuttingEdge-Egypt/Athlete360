@@ -13,6 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RankChart } from "./rank-chart";
 import { NutritionPlanDisplay } from "./nutrition-plan-display";
+import { StrategicCombatDisplay } from "./strategic-combat-display";
 import {
   Download,
   Share2,
@@ -153,6 +154,11 @@ export function AnalysisPopup({
     // Special handling for nutrition plans
     if (type === "nutrition" || type === "nutrition-plan") {
       return <NutritionPlanDisplay plan={data.plan || data} />;
+    }
+
+    // Special handling for strategic combat analysis
+    if (type === "beat" || type === "beat-strategies") {
+      return <StrategicCombatDisplay data={data} />;
     }
 
     // Use AnalysisResult component for proper rendering
