@@ -154,7 +154,7 @@ Return JSON format:
       "color": "Red/Blue"
       "kicks": [
         {
-          "timestamp": "HH:MM:SS",
+          "timestamp": "MM:SS",
           "score": 0
         }
       ],
@@ -165,7 +165,7 @@ Return JSON format:
       "name": "Player 2 (Red)", 
       "kicks": [
         {
-          "timestamp": "HH:MM:SS",
+          "timestamp": "MM:SS",
           "score": 0
         }
       ],
@@ -188,7 +188,7 @@ Return JSON format:
       "name": "Player 1",
       "Punch": [
         {
-          "timestamp": "HH:MM:SS",
+          "timestamp": "MM:SS",
           "score": 0
         }
       ],
@@ -198,7 +198,7 @@ Return JSON format:
       "name": "Player 2",
       "Punch": [
         {
-          "timestamp": "HH:MM:SS", 
+          "timestamp": "MM:SS", 
           "score": 0
         }
       ],
@@ -245,7 +245,7 @@ Return JSON format:
       "color": "Red/Blue"
       "Yellow_cards": [
         {
-          "timestamp": "HH:MM:SS",
+          "timestamp": "MM:SS",
           "Amount": 1
         }
       ],
@@ -255,7 +255,7 @@ Return JSON format:
       "name": "Player 2 (Red)",
       "Yellow_cards": [
         {
-          "timestamp": "HH:MM:SS",
+          "timestamp": "MM:SS",
           "Amount": 1
         }
       ],
