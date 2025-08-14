@@ -82,10 +82,24 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
     formData.append('video', uploadedFile);
     formData.append('roundToAnalyze', roundToAnalyze.toString());
 
+    let controller: AbortController | null = null;
+    let timeoutId: NodeJS.Timeout | null = null;
+
+    const cleanup = () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+    };
+
     try {
       // Create AbortController with a 10-minute timeout for video analysis
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10 * 60 * 1000); // 10 minutes
+      controller = new AbortController();
+      timeoutId = setTimeout(() => {
+        if (controller) {
+          controller.abort();
+        }
+      }, 10 * 60 * 1000); // 10 minutes
 
       const response = await fetch('/api/analysis/video', {
         method: 'POST',
@@ -94,7 +108,8 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
         signal: controller.signal
       });
 
-      clearTimeout(timeoutId);
+      // Clear timeout as soon as we get a response
+      cleanup();
 
       const result = await response.json();
 
@@ -140,6 +155,8 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
         });
       }
     } finally {
+      // Clean up timeout if it's still active
+      cleanup();
       setIsAnalyzing(false);
     }
   };
