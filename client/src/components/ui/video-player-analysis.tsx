@@ -43,7 +43,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
 
     const scoreAnalysis = analysisData.score_analysis ? parseAnalysisData(analysisData.score_analysis) : null;
     const yellowCardAnalysis = analysisData.yellow_card_analysis ? parseAnalysisData(analysisData.yellow_card_analysis) : null;
-    const kickAnalysis = analysisData.kick_analysis ? parseAnalysisData(analysisData.kick_analysis) : null;
+    const kickAnalysis = analysisData.kick_count_analysis ? parseAnalysisData(analysisData.kick_count_analysis) : null;
 
     // Debug logging to check data structure
     console.log("=== VIDEO ANALYSIS DEBUG ===");
@@ -250,12 +250,24 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
     // Extract total kick counts
     let blueKicks = 0;
     let redKicks = 0;
-    
     if (kickAnalysis) {
       // First try new JSON format with players array
       if (Array.isArray(kickAnalysis.players)) {
         kickAnalysis.players.forEach((player: any) => {
-          if (player.color && player.total_kicks) {
+          // Handle the actual kick count JSON structure
+          if (player.kicks && Array.isArray(player.kicks) && player.kicks[0]?.total_kick_number !== undefined) {
+            const playerName = player.name?.toLowerCase() || '';
+            const totalKicks = player.kicks[0].total_kick_number;
+            
+            // Determine player color based on name or other identifiers
+            if (playerName.includes('blue') || playerName.includes('player 1')) {
+              blueKicks = totalKicks;
+            } else if (playerName.includes('red') || playerName.includes('player 2')) {
+              redKicks = totalKicks;
+            }
+          }
+          // Fallback to direct total_kicks property if available
+          else if (player.color && player.total_kicks) {
             const playerColor = player.color.toLowerCase();
             if (playerColor === 'blue') {
               blueKicks = player.total_kicks;
@@ -273,18 +285,6 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
         if (blueKickMatch) blueKicks = parseInt(blueKickMatch[1]) || 0;
         if (redKickMatch) redKicks = parseInt(redKickMatch[1]) || 0;
       }
-    } else if (scoreAnalysis && Array.isArray(scoreAnalysis.players)) {
-      // If no kick analysis, extract from score analysis
-      scoreAnalysis.players.forEach((player: any) => {
-        if (player.color && player.total_kicks) {
-          const playerColor = player.color.toLowerCase();
-          if (playerColor === 'blue') {
-            blueKicks = player.total_kicks;
-          } else if (playerColor === 'red') {
-            redKicks = player.total_kicks;
-          }
-        }
-      });
     }
 
     // Additional debug logging for parsed events

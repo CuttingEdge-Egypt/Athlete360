@@ -108,3 +108,9 @@ Preferred communication style: Simple, everyday language.
 - **Robust error handling**: Improved error messages and fallback data structures for failed parsing attempts
 - **UI visibility improvements**: Removed problematic background colors from nutrition plan display for better text readability
 - **Video analysis color field integration**: Updated video player analysis to use "color" field from JSON for accurate score and yellow card attribution to blue/red players
+
+### Video Analysis Kick Count Fix (August 14, 2025)
+- **Fixed frontend/backend property mismatch**: Changed frontend from `kick_analysis` to `kick_count_analysis` to match backend response
+- **Enhanced kick count parsing**: Updated frontend to handle actual JSON structure with `players[].kicks[].total_kick_number` format
+- **Improved player identification**: Added player name-based fallback for color detection in kick count analysis
+- **Maintained backward compatibility**: Kept fallback parsing for direct `total_kicks` property
