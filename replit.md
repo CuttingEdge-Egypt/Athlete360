@@ -112,13 +112,5 @@ Preferred communication style: Simple, everyday language.
 ### Video Analysis Kick Count Fix (August 14, 2025)
 - **Fixed frontend/backend property mismatch**: Changed frontend from `kick_analysis` to `kick_count_analysis` to match backend response
 - **Enhanced kick count parsing**: Updated frontend to handle actual JSON structure with `players[].kicks[].total_kick_number` format
-- **Added color field support**: Updated kick count analysis to use `color` field for consistent Blue/Red player identification
-- **Improved player identification**: Primary color-based identification with player name fallback for backward compatibility
+- **Improved player identification**: Added player name-based fallback for color detection in kick count analysis
 - **Maintained backward compatibility**: Kept fallback parsing for direct `total_kicks` property
-
-### Video Analysis Timeout Fix (August 14, 2025)
-- **Extended request timeout**: Increased frontend timeout from default to 10 minutes for long-running video analysis
-- **Enhanced error handling**: Added specific error messages for timeout, network, and analysis failures
-- **Improved user feedback**: Updated button text to indicate 5-10 minute processing time expectation
-- **Robust network handling**: Implemented AbortController for proper timeout management
-- **Kick count parsing reversion**: Reverted to player name-based identification instead of color field priority to maintain compatibility with working analysis format

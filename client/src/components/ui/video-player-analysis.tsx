@@ -254,11 +254,12 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
       // First try new JSON format with players array
       if (Array.isArray(kickAnalysis.players)) {
         kickAnalysis.players.forEach((player: any) => {
-          // Primary: Use player name-based identification (working version)
+          // Handle the actual kick count JSON structure
           if (player.kicks && Array.isArray(player.kicks) && player.kicks[0]?.total_kick_number !== undefined) {
             const playerName = player.name?.toLowerCase() || '';
             const totalKicks = player.kicks[0].total_kick_number;
             
+            // Determine player color based on name or other identifiers
             if (playerName.includes('blue') || playerName.includes('player 1')) {
               blueKicks = totalKicks;
             } else if (playerName.includes('red') || playerName.includes('player 2')) {
@@ -266,11 +267,11 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
             }
           }
           // Fallback to direct total_kicks property if available
-          else if (player.total_kicks) {
-            const playerName = player.name?.toLowerCase() || '';
-            if (playerName.includes('blue') || playerName.includes('player 1')) {
+          else if (player.color && player.total_kicks) {
+            const playerColor = player.color.toLowerCase();
+            if (playerColor === 'blue') {
               blueKicks = player.total_kicks;
-            } else if (playerName.includes('red') || playerName.includes('player 2')) {
+            } else if (playerColor === 'red') {
               redKicks = player.total_kicks;
             }
           }

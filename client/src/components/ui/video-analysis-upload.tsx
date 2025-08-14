@@ -82,34 +82,12 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
     formData.append('video', uploadedFile);
     formData.append('roundToAnalyze', roundToAnalyze.toString());
 
-    let controller: AbortController | null = null;
-    let timeoutId: NodeJS.Timeout | null = null;
-
-    const cleanup = () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-        timeoutId = null;
-      }
-    };
-
     try {
-      // Create AbortController with a 10-minute timeout for video analysis
-      controller = new AbortController();
-      timeoutId = setTimeout(() => {
-        if (controller) {
-          controller.abort();
-        }
-      }, 10 * 60 * 1000); // 10 minutes
-
       const response = await fetch('/api/analysis/video', {
         method: 'POST',
         body: formData,
-        credentials: 'include',
-        signal: controller.signal
+        credentials: 'include'
       });
-
-      // Clear timeout as soon as we get a response
-      cleanup();
 
       const result = await response.json();
 
@@ -133,30 +111,12 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
 
     } catch (error) {
       console.error('Video analysis error:', error);
-      
-      // Handle specific error types
-      if (error instanceof Error && error.name === 'AbortError') {
-        toast({
-          title: "Analysis Timeout",
-          description: "Video analysis took longer than expected (10 minutes). Please try with a shorter video or smaller file size.",
-          variant: "destructive",
-        });
-      } else if (error instanceof Error && error.message.includes('Failed to fetch')) {
-        toast({
-          title: "Network Error",
-          description: "Network connection failed. Please check your connection and try again.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Analysis Failed",
-          description: error instanceof Error ? error.message : 'Unknown error occurred',
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Analysis Failed",
+        description: error instanceof Error ? error.message : 'Unknown error occurred',
+        variant: "destructive",
+      });
     } finally {
-      // Clean up timeout if it's still active
-      cleanup();
       setIsAnalyzing(false);
     }
   };
@@ -297,7 +257,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
               {isAnalyzing ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Analyzing Video (this may take 5-10 minutes)...
+                  Analyzing Video...
                 </>
               ) : (
                 <>
