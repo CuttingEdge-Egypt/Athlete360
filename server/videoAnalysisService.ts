@@ -205,7 +205,9 @@ Return JSON format:
       "total_punches": 0
     }
   ]
-}`;
+}
+
+Return Time in Minutes and Seconds: MM:SS`;
 
     const promptKickNo = `Watch round ${roundToAnalyze} only. Watch the taekwondo match and count the total number of kicks both players executed. Even if kicks doesn't hit the opponent or if they blocked it; count every time there is an attempt.
 
@@ -262,7 +264,8 @@ Return JSON format:
       "total_yellows": 0
     }
   ]
-}`;
+}
+Return Time in Minutes and Seconds: MM:SS`;
 
     // Make 5 parallel API calls (like Python version)
     console.log(`[PROCESS_VIDEO_GEMINI] Making 5 parallel analysis calls...`);

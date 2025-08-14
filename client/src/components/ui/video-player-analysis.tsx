@@ -110,54 +110,65 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
             });
           }
         });
-      } else if (scoreAnalysis && Array.isArray(scoreAnalysis.players)) {
-        // New JSON format - use players array with color field
-        // First, collect all kicks from both players and sort by timestamp
-        const allKicks: Array<{timestamp: number, score: number, color: string}> = [];
+      } else if (scoreAnalysis) {
+        // New JSON format - handle both array-wrapped and direct object format
+        let playersArray = [];
         
-        scoreAnalysis.players.forEach((player: any) => {
-          if (player.color && Array.isArray(player.kicks)) {
-            const playerColor = player.color.toLowerCase();
+        // Handle array-wrapped response format
+        if (Array.isArray(scoreAnalysis) && scoreAnalysis[0]?.players) {
+          playersArray = scoreAnalysis[0].players;
+        } else if (scoreAnalysis.players) {
+          playersArray = scoreAnalysis.players;
+        }
+        
+        if (Array.isArray(playersArray)) {
+          // First, collect all kicks from both players and sort by timestamp
+          const allKicks: Array<{timestamp: number, score: number, color: string}> = [];
+          
+          playersArray.forEach((player: any) => {
+            if (player.color && Array.isArray(player.kicks)) {
+              const playerColor = player.color.toLowerCase();
             
-            player.kicks.forEach((kick: any) => {
-              if (kick.timestamp && kick.score) {
-                const timestamp = parseTimestamp(kick.timestamp);
-                const points = kick.score;
-                allKicks.push({
-                  timestamp,
-                  score: points,
-                  color: playerColor
-                });
-              }
-            });
-          }
-        });
+              player.kicks.forEach((kick: any) => {
+                if (kick.timestamp && kick.score) {
+                  const timestamp = parseTimestamp(kick.timestamp);
+                  const points = kick.score;
+                  allKicks.push({
+                    timestamp,
+                    score: points,
+                    color: playerColor
+                  });
+                }
+              });
+            }
+          });
 
-        // Sort kicks by timestamp to ensure proper cumulative scoring
-        allKicks.sort((a, b) => a.timestamp - b.timestamp);
+          // Sort kicks by timestamp to ensure proper cumulative scoring
+          allKicks.sort((a, b) => a.timestamp - b.timestamp);
 
-        // Now process kicks in chronological order
-        allKicks.forEach((kick) => {
-          if (kick.color === 'blue') {
-            blueScore += kick.score;
-            scoreEvents.push({
-              timestamp: kick.timestamp,
-              blueScore,
-              redScore,
-              increment: kick.score,
-              player: 'blue'
-            });
-          } else if (kick.color === 'red') {
-            redScore += kick.score;
-            scoreEvents.push({
-              timestamp: kick.timestamp,
-              blueScore,
-              redScore,
-              increment: kick.score,
-              player: 'red'
-            });
-          }
-        });
+          // Now process kicks in chronological order
+          allKicks.forEach((kick) => {
+            if (kick.color === 'blue') {
+              blueScore += kick.score;
+              scoreEvents.push({
+                timestamp: kick.timestamp,
+                blueScore,
+                redScore,
+                increment: kick.score,
+                player: 'blue'
+              });
+            } else if (kick.color === 'red') {
+              redScore += kick.score;
+              scoreEvents.push({
+                timestamp: kick.timestamp,
+                blueScore,
+                redScore,
+                increment: kick.score,
+                player: 'red'
+              });
+            }
+          });
+        }
       }
     }
 
