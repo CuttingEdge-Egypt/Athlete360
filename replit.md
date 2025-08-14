@@ -112,5 +112,6 @@ Preferred communication style: Simple, everyday language.
 ### Video Analysis Kick Count Fix (August 14, 2025)
 - **Fixed frontend/backend property mismatch**: Changed frontend from `kick_analysis` to `kick_count_analysis` to match backend response
 - **Enhanced kick count parsing**: Updated frontend to handle actual JSON structure with `players[].kicks[].total_kick_number` format
-- **Improved player identification**: Added player name-based fallback for color detection in kick count analysis
+- **Added color field support**: Updated kick count analysis to use `color` field for consistent Blue/Red player identification
+- **Improved player identification**: Primary color-based identification with player name fallback for backward compatibility
 - **Maintained backward compatibility**: Kept fallback parsing for direct `total_kicks` property

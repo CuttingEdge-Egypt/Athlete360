@@ -89,7 +89,7 @@ Return JSON format:
       "color": "Red/Blue"
       "kicks": [
         {
-          "timestamp": "HH:MM:SS",
+          "timestamp": "MM:SS",
           "score": 0
         }
       ],
@@ -97,10 +97,11 @@ Return JSON format:
       "total_points": 0
     },
     {
-      "name": "Player 2 (Red)", 
+      "name": "Player 2 (Red)",
+      "color": "Red/Blue"
       "kicks": [
         {
-          "timestamp": "HH:MM:SS",
+          "timestamp": "MM:SS",
           "score": 0
         }
       ],
@@ -123,7 +124,7 @@ Return JSON format:
       "name": "Player 1",
       "Punch": [
         {
-          "timestamp": "HH:MM:SS",
+          "timestamp": "MM:SS",
           "score": 0
         }
       ],
@@ -133,7 +134,7 @@ Return JSON format:
       "name": "Player 2",
       "Punch": [
         {
-          "timestamp": "HH:MM:SS", 
+          "timestamp": "MM:SS", 
           "score": 0
         }
       ],
@@ -151,6 +152,7 @@ Return JSON format:
   "players": [
     {
       "name": "Player 1",
+      "color": "Red/Blue"
       "kicks": [
         {
           "total_kick_number": 0
@@ -159,6 +161,7 @@ Return JSON format:
     },
     {
       "name": "Player 2",
+      "color": "Red/Blue"
       "kicks": [
         {
           "total_kick_number": 0
