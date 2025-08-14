@@ -112,6 +112,9 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
         });
       } else if (scoreAnalysis && Array.isArray(scoreAnalysis.players)) {
         // New JSON format - use players array with color field
+        // First, collect all kicks from both players and sort by timestamp
+        const allKicks: Array<{timestamp: number, score: number, color: string}> = [];
+        
         scoreAnalysis.players.forEach((player: any) => {
           if (player.color && Array.isArray(player.kicks)) {
             const playerColor = player.color.toLowerCase();
@@ -120,27 +123,38 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
               if (kick.timestamp && kick.score) {
                 const timestamp = parseTimestamp(kick.timestamp);
                 const points = kick.score;
-
-                if (playerColor === 'blue') {
-                  blueScore += points;
-                  scoreEvents.push({
-                    timestamp,
-                    blueScore,
-                    redScore,
-                    increment: points,
-                    player: 'blue'
-                  });
-                } else if (playerColor === 'red') {
-                  redScore += points;
-                  scoreEvents.push({
-                    timestamp,
-                    blueScore,
-                    redScore,
-                    increment: points,
-                    player: 'red'
-                  });
-                }
+                allKicks.push({
+                  timestamp,
+                  score: points,
+                  color: playerColor
+                });
               }
+            });
+          }
+        });
+
+        // Sort kicks by timestamp to ensure proper cumulative scoring
+        allKicks.sort((a, b) => a.timestamp - b.timestamp);
+
+        // Now process kicks in chronological order
+        allKicks.forEach((kick) => {
+          if (kick.color === 'blue') {
+            blueScore += kick.score;
+            scoreEvents.push({
+              timestamp: kick.timestamp,
+              blueScore,
+              redScore,
+              increment: kick.score,
+              player: 'blue'
+            });
+          } else if (kick.color === 'red') {
+            redScore += kick.score;
+            scoreEvents.push({
+              timestamp: kick.timestamp,
+              blueScore,
+              redScore,
+              increment: kick.score,
+              player: 'red'
             });
           }
         });
@@ -188,6 +202,9 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
         });
       } else if (yellowCardAnalysis && Array.isArray(yellowCardAnalysis.players)) {
         // New JSON format - use players array with color field
+        // First, collect all yellow cards from both players and sort by timestamp
+        const allCards: Array<{timestamp: number, color: string}> = [];
+        
         yellowCardAnalysis.players.forEach((player: any) => {
           if (player.color && Array.isArray(player.Yellow_cards)) {
             const playerColor = player.color.toLowerCase();
@@ -195,25 +212,35 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
             player.Yellow_cards.forEach((card: any) => {
               if (card.timestamp) {
                 const timestamp = parseTimestamp(card.timestamp);
-
-                if (playerColor === 'blue') {
-                  blueCards++;
-                  yellowCardEvents.push({
-                    timestamp,
-                    blueCards,
-                    redCards,
-                    player: 'blue'
-                  });
-                } else if (playerColor === 'red') {
-                  redCards++;
-                  yellowCardEvents.push({
-                    timestamp,
-                    blueCards,
-                    redCards,
-                    player: 'red'
-                  });
-                }
+                allCards.push({
+                  timestamp,
+                  color: playerColor
+                });
               }
+            });
+          }
+        });
+
+        // Sort cards by timestamp to ensure proper cumulative counting
+        allCards.sort((a, b) => a.timestamp - b.timestamp);
+
+        // Now process cards in chronological order
+        allCards.forEach((card) => {
+          if (card.color === 'blue') {
+            blueCards++;
+            yellowCardEvents.push({
+              timestamp: card.timestamp,
+              blueCards,
+              redCards,
+              player: 'blue'
+            });
+          } else if (card.color === 'red') {
+            redCards++;
+            yellowCardEvents.push({
+              timestamp: card.timestamp,
+              blueCards,
+              redCards,
+              player: 'red'
             });
           }
         });
@@ -246,6 +273,12 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
         if (redKickMatch) redKicks = parseInt(redKickMatch[1]) || 0;
       }
     }
+
+    // Additional debug logging for parsed events
+    console.log("=== PARSED EVENTS ===");
+    console.log("Score Events:", scoreEvents);
+    console.log("Yellow Card Events:", yellowCardEvents);
+    console.log("Blue Kicks:", blueKicks, "Red Kicks:", redKicks);
 
     return { scoreEvents, yellowCardEvents, blueKicks, redKicks };
   };
