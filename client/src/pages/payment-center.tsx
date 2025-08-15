@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { CreditCard, Coins, Zap, Crown } from "lucide-react";
-import type { SavedCard } from "@shared/schema";
+import type { SavedCard, User } from "@shared/schema";
 
 export default function PaymentCenter() {
   const [tokenAmount, setTokenAmount] = useState(1000);
@@ -23,7 +23,7 @@ export default function PaymentCenter() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: user } = useQuery({
+  const { data: user } = useQuery<User>({
     queryKey: ['/api/auth/user'],
   });
 

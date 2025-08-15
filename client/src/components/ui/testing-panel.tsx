@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Play, CreditCard, Coins, CheckCircle, AlertCircle } from "lucide-react";
+import type { User, SavedCard } from "@shared/schema";
 
 export function TestingPanel() {
   const [testAmount, setTestAmount] = useState(35);
@@ -19,11 +20,11 @@ export function TestingPanel() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: user } = useQuery({
+  const { data: user } = useQuery<User>({
     queryKey: ['/api/auth/user'],
   });
 
-  const { data: savedCards = [] } = useQuery({
+  const { data: savedCards = [] } = useQuery<SavedCard[]>({
     queryKey: ['/api/payments/cards'],
   });
 

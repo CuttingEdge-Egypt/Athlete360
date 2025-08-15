@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute } from "wouter";
 
+import { Navigation } from "@/components/Navigation";
 import { AnalysisResult } from "@/components/ui/analysis-result";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

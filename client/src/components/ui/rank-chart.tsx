@@ -68,7 +68,7 @@ export function RankChart({ data }: RankChartProps) {
             titleFont: {
               family: 'Inter, sans-serif',
               size: 14,
-              weight: '600'
+              weight: 600
             },
             bodyFont: {
               family: 'Inter, sans-serif',
@@ -110,7 +110,7 @@ export function RankChart({ data }: RankChartProps) {
               font: {
                 family: 'Inter, sans-serif',
                 size: 14,
-                weight: '600'
+                weight: 600
               }
             }
           },
@@ -133,7 +133,7 @@ export function RankChart({ data }: RankChartProps) {
               font: {
                 family: 'Inter, sans-serif',
                 size: 14,
-                weight: '600'
+                weight: 600
               }
             }
           }
