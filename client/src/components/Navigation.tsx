@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
-import { Trophy, Coins, Plus, LogOut, User as UserIcon } from "lucide-react";
+import { HistoryDropdown } from "@/components/ui/history-dropdown";
+import { ProfileDropdown } from "@/components/ui/profile-dropdown";
+import { Trophy, Coins, Plus, LogOut, User as UserIcon, Video } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { User } from "@shared/schema";
@@ -33,13 +35,30 @@ export function Navigation() {
             className="flex items-center space-x-2 bg-athlete-gray-800 px-4 py-2 rounded-full"
           >
             <Coins className="text-athlete-warning" size={20} />
-            <span className="font-semibold text-white">{user?.tokens || 0}</span>
-            <span className="text-sm text-gray-400">tokens</span>
+            <div className="flex flex-col items-center">
+              <span className="font-semibold text-white">{user?.tokens || 0}</span>
+              {user?.totalTokensPurchased && (
+                <span className="text-xs text-gray-400">
+                  /{user.totalTokensPurchased} tokens
+                </span>
+              )}
+            </div>
           </div>
           
-          <Link href="/subscribe">
+          <Link href="/video-analysis">
             <Button 
-              data-testid="button-buy-tokens"
+              data-testid="button-video-analysis"
+              variant="ghost"
+              className="text-gray-300 hover:text-white"
+            >
+              <Video className="mr-2" size={16} />
+              Video Analysis
+            </Button>
+          </Link>
+          
+          <Link href="/payment-center">
+            <Button 
+              data-testid="button-payment-center"
               className="bg-athlete-accent hover:bg-blue-600 text-white"
             >
               <Plus className="mr-2" size={16} />
@@ -53,24 +72,24 @@ export function Navigation() {
           <div className="md:hidden">
             <Badge 
               variant="secondary" 
-              className="bg-athlete-gray-800 text-athlete-warning"
+              className="bg-athlete-gray-800 text-athlete-warning flex flex-col py-2"
             >
-              <Coins className="mr-1" size={14} />
-              {user?.tokens || 0}
+              <div className="flex items-center">
+                <Coins className="mr-1" size={14} />
+                {user?.tokens || 0}
+              </div>
+              {user?.totalTokensPurchased && (
+                <span className="text-xs text-gray-400">
+                  /{user.totalTokensPurchased}
+                </span>
+              )}
             </Badge>
           </div>
 
-          {/* User Menu */}
+          {/* History and Profile Menu */}
           <div className="flex items-center space-x-2">
-            {user?.profileImageUrl ? (
-              <img 
-                src={user.profileImageUrl} 
-                alt="Profile" 
-                className="w-8 h-8 rounded-full object-cover"
-              />
-            ) : (
-              <UserIcon className="text-gray-300 w-8 h-8" />
-            )}
+            <HistoryDropdown />
+            <ProfileDropdown />
             
             <Button 
               onClick={handleLogout}

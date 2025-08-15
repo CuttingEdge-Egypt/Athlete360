@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RankChart } from "./rank-chart";
-import { Download, Share2, User, Trophy, Star, AlertTriangle, Calendar, Apple, Swords, Video } from "lucide-react";
+import { Download, Share2, User, Trophy, Star, AlertTriangle, Calendar, Swords, Video } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface AnalysisResultProps {
@@ -23,7 +23,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
       case 'strengths': return <Star className="text-athlete-success" size={24} />;
       case 'weaknesses': return <AlertTriangle className="text-athlete-danger" size={24} />;
       case 'development': return <Calendar className="text-purple-400" size={24} />;
-      case 'nutrition': return <Apple className="text-green-400" size={24} />;
+
       case 'beat': return <Swords className="text-red-400" size={24} />;
       case 'video': return <Video className="text-indigo-400" size={24} />;
       default: return <User className="text-athlete-accent" size={24} />;
@@ -37,7 +37,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
       case 'strengths': return 'Strengths Analysis';
       case 'weaknesses': return 'Weaknesses Analysis';
       case 'development': return 'Development Plan';
-      case 'nutrition': return 'Nutrition Plan';
+
       case 'beat': return 'Beat Strategies';
       case 'video': return 'Video Analysis';
       default: return 'Analysis Result';
@@ -72,11 +72,17 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
   const renderBioAnalysis = (data: any) => (
     <div className="grid md:grid-cols-3 gap-6">
       <div className="md:col-span-1">
-        <img 
-          src={data.profileImageUrl || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"} 
-          alt="Athlete" 
-          className="w-full h-64 object-cover rounded-xl"
-        />
+        {data.profileImageUrl ? (
+          <img 
+            src={data.profileImageUrl} 
+            alt="Athlete" 
+            className="w-full h-64 object-cover rounded-xl"
+          />
+        ) : (
+          <div className="w-full h-64 bg-athlete-gray-600 rounded-xl flex items-center justify-center">
+            <User className="w-24 h-24 text-gray-400" />
+          </div>
+        )}
       </div>
       <div className="md:col-span-2">
         <h4 className="text-xl font-semibold mb-4 text-white">{data.name}</h4>
@@ -95,7 +101,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
             <div>
               <p className="text-white font-semibold">Career Highlights:</p>
               <ul className="list-disc list-inside space-y-1 text-sm mt-2">
-                {data.achievements.map((achievement: string, index: number) => (
+                {data.achievements.slice(0, 4).map((achievement: string, index: number) => (
                   <li key={index}>{achievement}</li>
                 ))}
               </ul>
@@ -162,168 +168,315 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     </div>
   );
 
-  const renderDevelopmentPlan = (data: any) => (
-    <div>
-      <div className="mb-6">
-        <Badge variant="secondary" className="bg-athlete-accent text-white">
-          Duration: {data.duration}
-        </Badge>
+  const renderDevelopmentPlan = (data: any) => {
+    console.log('Frontend Development Plan Data RECEIVED:', JSON.stringify(data, null, 2));
+    
+    // Check for error state first
+    if (data.error || data.message?.includes('Unable to generate')) {
+      return (
+        <div className="p-6 text-center">
+          <div className="text-red-400 mb-4">⚠ Analysis Unavailable</div>
+          <p className="text-gray-300 mb-4">
+            {data.message || 'Unable to generate authentic development plan at this time.'}
+          </p>
+          <p className="text-sm text-gray-400">
+            Please try again later or contact support if the issue persists.
+          </p>
+        </div>
+      );
+    }
+
+    // Enhanced error handling for plan data
+    let planItems: any[] = [];
+    try {
+      planItems = Array.isArray(data.plan) ? data.plan : [];
+    } catch (error) {
+      console.error('Error processing development plan data:', error);
+      planItems = [];
+    }
+
+    return (
+      <div>
+        {data.duration && (
+          <div className="mb-6">
+            <Badge variant="secondary" className="bg-athlete-accent text-white">
+              {data.duration}
+            </Badge>
+          </div>
+        )}
+        <div className="grid gap-4">
+          {planItems.length > 0 ? planItems.map((item: any, index: number) => (
+            <Card key={index} className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-4">
+                <h5 className="font-semibold text-white mb-2">
+                  {item.title || item.focus || item.phase || item.name || "Development Phase"}
+                </h5>
+                {item.description && (
+                  <p className="text-sm text-gray-300 mb-3 italic">
+                    {item.description}
+                  </p>
+                )}
+                <ul className="text-sm text-gray-300 space-y-1">
+                  {(item.activities || item.details || item.exercises || []).map((activity: string, idx: number) => (
+                    <li key={idx}>• {activity}</li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )) : (
+            <div className="text-gray-400 text-center py-8">
+              No development plan data available
+            </div>
+          )}
+        </div>
       </div>
-      <div className="grid gap-4">
-        {data.plan?.map((week: any, index: number) => (
-          <Card key={index} className="bg-athlete-gray-700 border-gray-600">
+    );
+  };
+
+
+  const renderBeatStrategies = (data: any) => {
+    console.log('Frontend Beat Strategies Data RECEIVED:', JSON.stringify(data, null, 2));
+    
+    // Check for error state first
+    if (data.error || data.message?.includes('Unable to generate')) {
+      return (
+        <div className="p-6 text-center">
+          <div className="text-red-400 mb-4">⚠ Analysis Unavailable</div>
+          <p className="text-gray-300 mb-4">
+            {data.message || 'Unable to generate authentic strategic analysis at this time.'}
+          </p>
+          <p className="text-sm text-gray-400">
+            Please try again later or contact support if the issue persists.
+          </p>
+        </div>
+      );
+    }
+
+    // Enhanced error handling for strategies data
+    let strategies: any[] = [];
+    try {
+      strategies = Array.isArray(data.strategies) ? data.strategies : [];
+    } catch (error) {
+      console.error('Error processing strategies data:', error);
+      strategies = [];
+    }
+
+    return (
+      <div>
+        <div className="grid gap-4 mb-6">
+          {strategies.length > 0 ? strategies.map((strategy: any, index: number) => {
+            // Only render if we have authentic strategy data, no generic fallbacks
+            if (!strategy.strategy && !strategy.title && !strategy.name) {
+              return null; // Skip rendering generic entries
+            }
+            
+            return (
+              <Card key={index} className="bg-athlete-gray-700 border-gray-600">
+                <CardContent className="p-4">
+                  <h5 className="font-semibold text-red-400 mb-2">
+                    {strategy.strategy || strategy.title || strategy.name}
+                  </h5>
+                  {strategy.description && (
+                    <p className="text-sm text-gray-300">
+                      {strategy.description}
+                    </p>
+                  )}
+                  {strategy.details && (
+                    <p className="text-sm text-gray-300 mt-2">
+                      {strategy.details}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          }).filter(Boolean) : (
+            <div className="text-gray-400 text-center py-8">
+              No strategic analysis data available
+            </div>
+          )}
+        </div>
+        {data.keyWeaknesses && Array.isArray(data.keyWeaknesses) && data.keyWeaknesses.length > 0 && (
+          <Card className="bg-athlete-gray-700 border-gray-600">
             <CardContent className="p-4">
-              <h5 className="font-semibold text-white mb-2">Week {week.week}: {week.focus}</h5>
+              <h5 className="font-semibold text-athlete-warning mb-2">Key Weaknesses to Exploit</h5>
               <ul className="text-sm text-gray-300 space-y-1">
-                {week.activities?.map((activity: string, idx: number) => (
-                  <li key={idx}>• {activity}</li>
+                {data.keyWeaknesses.map((weakness: string, index: number) => (
+                  <li key={index}>• {weakness}</li>
                 ))}
               </ul>
             </CardContent>
           </Card>
-        ))}
+        )}
       </div>
-    </div>
-  );
+    );
+  };
 
-  const renderNutritionPlan = (data: any) => (
-    <div>
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
-        <Card className="bg-athlete-gray-700 border-gray-600">
-          <CardContent className="p-4">
-            <h5 className="font-semibold text-white mb-2">Daily Overview</h5>
-            <div className="space-y-2 text-sm">
-              <div>Calories: <span className="text-athlete-warning font-semibold">{data.dailyCalories}</span></div>
-              <div>Hydration: <span className="text-white">{data.hydration}</span></div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-athlete-gray-700 border-gray-600">
-          <CardContent className="p-4">
-            <h5 className="font-semibold text-white mb-2">Macro Breakdown</h5>
-            <div className="space-y-2 text-sm">
-              {data.macroBreakdown && Object.entries(data.macroBreakdown).map(([key, value]) => (
-                <div key={key} className="capitalize">
-                  {key}: <span className="text-athlete-accent font-semibold">{value as string}</span>
+  const renderVideoAnalysis = (data: any) => {
+    console.log('Frontend Video Analysis Data RECEIVED:', JSON.stringify(data, null, 2));
+    
+    // Check for error state first
+    if (data.error || data.message?.includes('Unable to generate')) {
+      return (
+        <div className="p-6 text-center">
+          <div className="text-red-400 mb-4">⚠ Analysis Unavailable</div>
+          <p className="text-gray-300 mb-4">
+            {data.message || 'Unable to generate authentic video analysis at this time.'}
+          </p>
+          <p className="text-sm text-gray-400">
+            Please try again later or contact support if the issue persists.
+          </p>
+        </div>
+      );
+    }
+
+    // Parse the JSON strings from the backend
+    const parseAnalysisData = (jsonString: string) => {
+      try {
+        return typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
+      } catch (error) {
+        return { content: jsonString };
+      }
+    };
+
+    const matchAnalysis = data.match_analysis ? parseAnalysisData(data.match_analysis) : null;
+    const scoreAnalysis = data.score_analysis ? parseAnalysisData(data.score_analysis) : null;
+    const kickAnalysis = data.kick_analysis ? parseAnalysisData(data.kick_analysis) : null;
+    const punchAnalysis = data.punch_analysis ? parseAnalysisData(data.punch_analysis) : null;
+    const yellowCardAnalysis = data.yellow_card_analysis ? parseAnalysisData(data.yellow_card_analysis) : null;
+
+    return (
+      <div className="space-y-6">
+        {/* Analysis Header */}
+        <div className="grid md:grid-cols-3 gap-4">
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-4">
+              <h5 className="font-semibold text-white mb-2">Video Analysis</h5>
+              <div className="text-athlete-accent font-medium">
+                Taekwondo Match Analysis
+              </div>
+              <div className="text-sm text-gray-400 mt-1">
+                Round {data.round || 1} Analysis
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-4">
+              <h5 className="font-semibold text-white mb-2">Analysis Types</h5>
+              <div className="text-athlete-warning text-sm">
+                5 Analysis Categories
+              </div>
+              <div className="text-xs text-gray-400 mt-1">
+                Match • Score • Kicks • Punches • Cards
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-4">
+              <h5 className="font-semibold text-white mb-2">Status</h5>
+              <div className="text-green-400 text-sm">
+                ✓ Analysis Complete
+              </div>
+              <div className="text-xs text-gray-400 mt-1">
+                {new Date().toLocaleString()}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Match Analysis */}
+        {matchAnalysis && (
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-5">
+              <h4 className="font-semibold text-white mb-3 flex items-center">
+                <Video className="mr-2" size={20} />
+                Match Analysis
+              </h4>
+              <div className="text-gray-300 leading-relaxed">
+                {typeof matchAnalysis === 'string' ? matchAnalysis : 
+                 typeof matchAnalysis.content === 'string' ? matchAnalysis.content :
+                 JSON.stringify(matchAnalysis, null, 2)}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Additional Analysis Sections */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Score Analysis */}
+          {scoreAnalysis && (
+            <Card className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-5">
+                <h4 className="font-semibold text-white mb-3 flex items-center">
+                  <Trophy className="mr-2 text-yellow-400" size={20} />
+                  Score Analysis
+                </h4>
+                <div className="text-gray-300 leading-relaxed text-sm">
+                  {typeof scoreAnalysis === 'string' ? scoreAnalysis : 
+                   typeof scoreAnalysis.content === 'string' ? scoreAnalysis.content :
+                   JSON.stringify(scoreAnalysis, null, 2)}
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      <div className="grid gap-4">
-        {data.meals?.map((meal: any, index: number) => (
-          <Card key={index} className="bg-athlete-gray-700 border-gray-600">
-            <CardContent className="p-4">
-              <div className="flex justify-between items-center mb-2">
-                <h5 className="font-semibold text-white">{meal.meal}</h5>
-                <Badge variant="outline" className="border-athlete-warning text-athlete-warning">
-                  {meal.calories} cal
-                </Badge>
-              </div>
-              <div className="text-sm text-gray-300">
-                {meal.foods?.join(", ")}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      {data.supplements && (
-        <Card className="bg-athlete-gray-700 border-gray-600 mt-4">
-          <CardContent className="p-4">
-            <h5 className="font-semibold text-white mb-2">Supplements</h5>
-            <div className="text-sm text-gray-300">
-              {data.supplements.join(", ")}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
+              </CardContent>
+            </Card>
+          )}
 
-  const renderBeatStrategies = (data: any) => (
-    <div>
-      <div className="grid gap-4 mb-6">
-        {data.strategies?.map((strategy: any, index: number) => (
-          <Card key={index} className="bg-athlete-gray-700 border-gray-600">
-            <CardContent className="p-4">
-              <h5 className="font-semibold text-red-400 mb-2">{strategy.strategy}</h5>
-              <p className="text-sm text-gray-300">{strategy.description}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      {data.keyWeaknesses && (
-        <Card className="bg-athlete-gray-700 border-gray-600">
-          <CardContent className="p-4">
-            <h5 className="font-semibold text-athlete-warning mb-2">Key Weaknesses to Exploit</h5>
-            <ul className="text-sm text-gray-300 space-y-1">
-              {data.keyWeaknesses.map((weakness: string, index: number) => (
-                <li key={index}>• {weakness}</li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
+          {/* Kick Analysis */}
+          {kickAnalysis && (
+            <Card className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-5">
+                <h4 className="font-semibold text-white mb-3 flex items-center">
+                  <Swords className="mr-2 text-blue-400" size={20} />
+                  Kick Analysis
+                </h4>
+                <div className="text-gray-300 leading-relaxed text-sm">
+                  {typeof kickAnalysis === 'string' ? kickAnalysis : 
+                   typeof kickAnalysis.content === 'string' ? kickAnalysis.content :
+                   JSON.stringify(kickAnalysis, null, 2)}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
-  const renderVideoAnalysis = (data: any) => (
-    <div>
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
-        <Card className="bg-athlete-gray-700 border-gray-600">
-          <CardContent className="p-4">
-            <h5 className="font-semibold text-white mb-2">Overall Performance</h5>
-            <div className="space-y-2">
-              <div className="text-2xl font-bold text-athlete-accent">{data.overallScore}/10</div>
-              <div className="text-sm text-gray-300">{data.comparedToAverage}</div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-athlete-gray-700 border-gray-600">
-          <CardContent className="p-4">
-            <h5 className="font-semibold text-white mb-2">Analysis Type</h5>
-            <div className="text-athlete-accent font-semibold">{data.analysisType}</div>
-          </CardContent>
-        </Card>
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Punch Analysis */}
+          {punchAnalysis && (
+            <Card className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-5">
+                <h4 className="font-semibold text-white mb-3 flex items-center">
+                  <Star className="mr-2 text-red-400" size={20} />
+                  Punch Analysis
+                </h4>
+                <div className="text-gray-300 leading-relaxed text-sm">
+                  {typeof punchAnalysis === 'string' ? punchAnalysis : 
+                   typeof punchAnalysis.content === 'string' ? punchAnalysis.content :
+                   JSON.stringify(punchAnalysis, null, 2)}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Yellow Card Analysis */}
+          {yellowCardAnalysis && (
+            <Card className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-5">
+                <h4 className="font-semibold text-white mb-3 flex items-center">
+                  <AlertTriangle className="mr-2 text-yellow-400" size={20} />
+                  Yellow Card Analysis
+                </h4>
+                <div className="text-gray-300 leading-relaxed text-sm">
+                  {typeof yellowCardAnalysis === 'string' ? yellowCardAnalysis : 
+                   typeof yellowCardAnalysis.content === 'string' ? yellowCardAnalysis.content :
+                   JSON.stringify(yellowCardAnalysis, null, 2)}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
-      
-      <div className="grid gap-4">
-        <Card className="bg-athlete-gray-700 border-gray-600">
-          <CardContent className="p-4">
-            <h5 className="font-semibold text-athlete-success mb-2">Key Findings</h5>
-            <ul className="text-sm text-gray-300 space-y-1">
-              {data.keyFindings?.map((finding: string, index: number) => (
-                <li key={index}>• {finding}</li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-athlete-gray-700 border-gray-600">
-          <CardContent className="p-4">
-            <h5 className="font-semibold text-athlete-warning mb-2">Technical Insights</h5>
-            <ul className="text-sm text-gray-300 space-y-1">
-              {data.technicalInsights?.map((insight: string, index: number) => (
-                <li key={index}>• {insight}</li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-athlete-gray-700 border-gray-600">
-          <CardContent className="p-4">
-            <h5 className="font-semibold text-purple-400 mb-2">Recommendations</h5>
-            <ul className="text-sm text-gray-300 space-y-1">
-              {data.recommendations?.map((rec: string, index: number) => (
-                <li key={index}>• {rec}</li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const renderAnalysisContent = () => {
     if (!data) {
@@ -336,7 +489,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
       case 'strengths': return renderStrengthsAnalysis(data);
       case 'weaknesses': return renderWeaknessesAnalysis(data);
       case 'development': return renderDevelopmentPlan(data);
-      case 'nutrition': return renderNutritionPlan(data);
+
       case 'beat': return renderBeatStrategies(data);
       case 'video': return renderVideoAnalysis(data);
       default: return <div className="text-gray-400 text-center py-8">Unsupported analysis type</div>;

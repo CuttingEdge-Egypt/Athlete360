@@ -11,7 +11,7 @@ import {
   User, Trophy, Star, AlertTriangle, Calendar, Apple, 
   Swords, Video, Loader2, Coins 
 } from "lucide-react";
-import type { Athlete } from "@shared/schema";
+import type { Athlete, User as UserType } from "@shared/schema";
 
 interface ServiceCardProps {
   service: {
@@ -40,7 +40,7 @@ const iconMap = {
 export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceCardProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user } = useAuth() as { user: UserType | null };
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
   const [analysisData, setAnalysisData] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -48,13 +48,16 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
   const IconComponent = iconMap[service.icon as keyof typeof iconMap] || User;
 
   const analysisMutation = useMutation({
-    mutationFn: async (forceUpdate = false) => {
+    mutationFn: async (forceUpdate?: boolean) => {
       if (isProcessing) {
         throw new Error("Analysis already in progress");
       }
       setIsProcessing(true);
       
-      const url = forceUpdate 
+      // For bio service refresh, use the specific bio refresh endpoint
+      const url = service.id === "bio" && forceUpdate 
+        ? `/api/athletes/${athlete.id}/refresh-bio`
+        : forceUpdate 
         ? `/api/analysis/${athlete.id}/${service.id}?forceUpdate=true`
         : `/api/analysis/${athlete.id}/${service.id}`;
       
@@ -71,10 +74,22 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         description: `${service.title} analysis generated successfully!`,
       });
       
-      // Invalidate queries to refresh data
+      // Invalidate queries to refresh data immediately
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/analysis-logs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user-history"] });
+      
+      // For bio service, also invalidate and force refetch athlete data to show updated bio
+      if (service.id === "bio") {
+        queryClient.invalidateQueries({ queryKey: ["/api/athletes", athlete.id] });
+        queryClient.invalidateQueries({ queryKey: ["/api/athletes"] });
+        // Force immediate refetch of the specific athlete
+        queryClient.refetchQueries({ queryKey: ["/api/athletes", athlete.id] });
+      }
+      
+      // Force refetch user data immediately
+      queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
     },
     onError: (error) => {
       setIsProcessing(false);
@@ -115,7 +130,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
     }
     
     // Check if user has enough tokens
-    if (!user || user.tokens < service.cost) {
+    if (!user || (user.tokens || 0) < service.cost) {
       onInsufficientTokens();
       return;
     }
@@ -191,6 +206,12 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
           type={service.id}
           data={analysisData}
           athleteName={athlete.name}
+          athleteId={athlete.id || ""}
+          athlete={athlete}
+          onRefresh={() => {
+            // Refresh the athlete data
+            queryClient.invalidateQueries({ queryKey: ["/api/athletes"] });
+          }}
           createdAt={new Date().toISOString()}
         />
       )}

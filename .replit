@@ -4,6 +4,7 @@ hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-24_05"
+packages = ["glib", "nss", "chromium"]
 
 [deployment]
 deploymentTarget = "autoscale"
@@ -39,4 +40,8 @@ localPort = 5000
 externalPort = 80
 
 [agent]
+<<<<<<< HEAD
 integrations = ["javascript_database==1.0.0", "javascript_openai==1.0.0", "javascript_gemini==1.0.0"]
+=======
+integrations = ["javascript_database==1.0.0", "javascript_object_storage==1.0.0", "javascript_stripe==1.0.0", "javascript_log_in_with_replit==1.0.0", "javascript_openai==1.0.0", "javascript_gemini==1.0.0"]
+>>>>>>> f6f2d314e186b6ba5a4b531a55322f8ef569b9a0

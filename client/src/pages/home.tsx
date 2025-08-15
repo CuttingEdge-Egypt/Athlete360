@@ -1,47 +1,90 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigation } from "@/components/Navigation";
+
 import { ServiceCard } from "@/components/ui/service-card";
 import { TokenModal } from "@/components/ui/token-modal";
+import { TestingPanel } from "@/components/ui/testing-panel";
 import { AnalysisPopup } from "@/components/ui/analysis-popup";
 import { AthleteComparison } from "@/components/ui/athlete-comparison";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Star } from "lucide-react";
+import { Search, Star, User, Loader2 } from "lucide-react";
 import type { Sport, Athlete } from "@shared/schema";
 
 export default function Home() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [selectedSport, setSelectedSport] = useState<string>("");
   const [selectedCountry, setSelectedCountry] = useState<string>("");
+  const [searchName, setSearchName] = useState<string>("");
+  const [isSearching, setIsSearching] = useState(false);
 
   // Get all countries
   const { data: countries = [] } = useQuery<string[]>({
     queryKey: ["/api/countries"],
   });
   
-  // Get athletes for the selected sport with deduplication
+  // Get athletes for the selected sport with deduplication (only if no search is active)
   const { data: allAthletes = [] } = useQuery<Athlete[]>({
     queryKey: ["/api/athletes/by-sport", selectedSport, selectedCountry],
-    enabled: !!selectedSport,
+    enabled: !!selectedSport && !searchName.trim(),
     queryFn: async () => {
-      const url = new URL(`/api/athletes/by-sport/${selectedSport}`, window.location.origin);
-      if (selectedCountry) {
-        url.searchParams.set('country', selectedCountry);
+      try {
+        const url = new URL(`/api/athletes/by-sport/${selectedSport}`, window.location.origin);
+        if (selectedCountry) {
+          url.searchParams.set('country', selectedCountry);
+        }
+        const response = await fetch(url.toString());
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      } catch (error) {
+        console.error('Error fetching athletes by sport:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load athletes. Please try again.",
+          variant: "destructive",
+        });
+        return [];
       }
-      const response = await fetch(url.toString());
-      return response.json();
     }
   });
 
+  // Search athletes by name with AI fallback
+  const { data: searchResults = [], isLoading: isSearchLoading } = useQuery<Athlete[]>({
+    queryKey: ["/api/athletes/search-by-name", searchName.trim(), selectedSport],
+    enabled: !!searchName.trim() && searchName.trim().length >= 2,
+    queryFn: async () => {
+      try {
+        const response = await fetch(`/api/athletes/search-by-name?name=${encodeURIComponent(searchName.trim())}&sportId=${encodeURIComponent(selectedSport)}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      } catch (error) {
+        console.error('Error searching athletes:', error);
+        toast({
+          title: "Search Error",
+          description: "Failed to search athletes. Please try again.",
+          variant: "destructive",
+        });
+        return [];
+      }
+    }
+  });
+
+  // Determine which athletes to display: search results or sport-filtered athletes
+  const displayAthletes = searchName.trim() ? searchResults : allAthletes;
+
   // Deduplicate athletes by name, keeping the most recent record
-  const availableAthletes = allAthletes.reduce((acc: Athlete[], current) => {
+  const availableAthletes = displayAthletes.reduce((acc: Athlete[], current) => {
     const existingIndex = acc.findIndex(athlete => 
       athlete.name.toLowerCase().trim() === current.name.toLowerCase().trim()
     );
@@ -71,10 +114,57 @@ export default function Home() {
     queryKey: ["/api/sports"],
   });
 
+  // Handle creating athlete with AI
+  const handleCreateAthleteWithAI = async (athleteName: string) => {
+    if (!selectedSport || !athleteName.trim()) return;
+    
+    setIsSearching(true);
+    try {
+      const response = await fetch('/api/athletes/create-with-ai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: athleteName.trim(),
+          sportId: selectedSport,
+          nationality: selectedCountry // Pass selected nationality to improve AI search accuracy
+        }),
+      });
+      
+      if (response.ok) {
+        const newAthlete = await response.json();
+        setSelectedAthlete(newAthlete);
+        setSearchName(newAthlete.name);
+        toast({
+          title: "Athlete Created",
+          description: `${newAthlete.name} has been added to our database with AI-powered insights.`,
+        });
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Creation Failed",
+          description: error.message || "Failed to create athlete with AI",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error creating athlete:', error);
+      toast({
+        title: "Error",
+        description: "Something went wrong while creating the athlete",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   // Reset selected athlete when sport changes
   const handleSportChange = (sportId: string) => {
     setSelectedSport(sportId);
     setSelectedAthlete(null);
+    setSearchName("");
   };
 
   // Reset selected athlete when country changes
@@ -96,6 +186,20 @@ export default function Home() {
         const data = await response.json();
         setBioData(data);
         setShowBioPopup(true);
+        
+        // Invalidate queries to refresh token balance immediately
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/analysis-logs"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/user-history"] });
+        
+        // Force refetch user data immediately
+        queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+        
+        toast({
+          title: "Analysis Complete",
+          description: "Biography analysis generated successfully!",
+        });
       } else {
         toast({
           title: "Analysis Error",
@@ -156,12 +260,12 @@ export default function Home() {
       color: "text-purple-400"
     },
     {
-      id: "nutrition",
+      id: "nutrition-plan",
       title: "Nutrition Plan",
-      description: "Comprehensive meal planning based on body composition and goals",
-      cost: 90,
+      description: "AI-powered personalized nutrition plan based on sport, age, gender, and nationality",
+      cost: 75,
       icon: "apple-alt",
-      color: "text-green-400"
+      color: "text-green-500"
     },
     {
       id: "beat-strategies",
@@ -170,23 +274,11 @@ export default function Home() {
       cost: 100,
       icon: "chess",
       color: "text-red-400"
-    },
-    {
-      id: "video-analysis",
-      title: "Video Analysis",
-      description: "AI-powered analysis of performance videos and gameplay footage",
-      cost: 120,
-      icon: "video",
-      color: "text-indigo-400"
     }
   ];
 
   return (
-    <div className="min-h-screen bg-athlete-primary text-white">
-      <Navigation />
-      
-      <div className="pt-20 pb-20">
-        <div className="container mx-auto px-4">
+    <div className="container mx-auto px-4 pt-20">
           {/* Welcome Section */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-4 text-white">
@@ -199,7 +291,7 @@ export default function Home() {
 
           {/* Main Content Tabs */}
           <Tabs defaultValue="analysis" className="max-w-6xl mx-auto">
-            <TabsList className="grid w-full grid-cols-2 bg-athlete-gray-800 mb-8">
+            <TabsList className="grid w-full grid-cols-3 bg-athlete-gray-800 mb-8">
               <TabsTrigger 
                 value="analysis" 
                 data-testid="tab-analysis"
@@ -213,6 +305,13 @@ export default function Home() {
                 className="data-[state=active]:bg-athlete-accent"
               >
                 Compare Athletes
+              </TabsTrigger>
+              <TabsTrigger 
+                value="testing" 
+                data-testid="tab-testing"
+                className="data-[state=active]:bg-athlete-accent"
+              >
+                🧪 Testing Panel
               </TabsTrigger>
             </TabsList>
 
@@ -263,35 +362,68 @@ export default function Home() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-300">Athlete</label>
-                  <Select
-                    value={selectedAthlete?.id || ""}
-                    onValueChange={(athleteId) => {
-                      const athlete = availableAthletes.find(a => a.id === athleteId);
-                      setSelectedAthlete(athlete || null);
-                    }}
-                    disabled={!selectedSport}
-                    data-testid="select-athlete"
-                  >
-                    <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white">
-                      <SelectValue placeholder={selectedSport ? "Select an athlete..." : "Select sport first"} />
-                    </SelectTrigger>
-                    <SelectContent>
+                  <label className="block text-sm font-medium mb-2 text-gray-300">Athlete Name</label>
+                  <div className="relative">
+                    <Input
+                      data-testid="search-athlete-name"
+                      placeholder="Search athlete by name..."
+                      value={searchName}
+                      onChange={(e) => setSearchName(e.target.value)}
+                      className="bg-athlete-gray-700 border-gray-600 text-white pl-10"
+                    />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    {isSearchLoading && (
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <div className="animate-spin w-4 h-4 border-2 border-athlete-accent border-t-transparent rounded-full"></div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Dropdown for search results */}
+                  {searchName.trim() && availableAthletes.length > 0 && (
+                    <div className="mt-2 bg-athlete-gray-700 border border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
                       {availableAthletes.map((athlete) => (
-                        <SelectItem key={athlete.id} value={athlete.id}>
-                          <div className="flex items-center gap-2">
-                            <span>{athlete.name}</span>
-                            {athlete.country && (
-                              <span className="text-xs text-gray-400">({athlete.country})</span>
-                            )}
-                            {athlete.rank && (
-                              <span className="text-xs text-gray-400">#{athlete.rank}</span>
-                            )}
-                          </div>
-                        </SelectItem>
+                        <button
+                          key={athlete.id}
+                          data-testid={`athlete-option-${athlete.id}`}
+                          onClick={() => {
+                            setSelectedAthlete(athlete);
+                            setSearchName(athlete.name);
+                          }}
+                          className="w-full text-left px-4 py-2 hover:bg-athlete-gray-600 text-white border-b border-gray-600 last:border-b-0"
+                        >
+                          <div className="font-medium">{athlete.name}</div>
+                          {athlete.country && (
+                            <div className="text-sm text-gray-400">{athlete.country}</div>
+                          )}
+                        </button>
                       ))}
-                    </SelectContent>
-                  </Select>
+                    </div>
+                  )}
+                  
+                  {searchName.trim() && !isSearchLoading && availableAthletes.length === 0 && (
+                    <div className="mt-2 bg-athlete-gray-700 border border-gray-600 rounded-md p-4 text-center">
+                      <p className="text-gray-300 mb-2">Athlete not found</p>
+                      <Button
+                        data-testid="create-athlete-ai"
+                        onClick={() => handleCreateAthleteWithAI(searchName.trim())}
+                        className="bg-athlete-accent hover:bg-athlete-accent/80 text-white"
+                        disabled={!selectedSport || isSearching}
+                      >
+                        {isSearching ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Searching with AI...
+                          </>
+                        ) : (
+                          <>
+                            <Search className="mr-2 h-4 w-4" />
+                            Search with AI
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -304,11 +436,28 @@ export default function Home() {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
-                        <img 
-                          src={selectedAthlete.profileImageUrl || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"}
-                          alt="Athlete profile" 
-                          className="w-16 h-16 rounded-full object-cover"
-                        />
+                        <div className="relative w-16 h-16">
+                          {selectedAthlete.profileImageUrl ? (
+                            <img 
+                              src={selectedAthlete.profileImageUrl}
+                              alt="Athlete profile" 
+                              className="w-16 h-16 rounded-full object-cover"
+                              onError={(e) => {
+                                const img = e.currentTarget;
+                                const fallback = img.parentElement?.querySelector('.profile-fallback') as HTMLElement;
+                                if (fallback) {
+                                  img.style.display = 'none';
+                                  fallback.style.display = 'flex';
+                                }
+                              }}
+                            />
+                          ) : null}
+                          <div 
+                            className={`profile-fallback w-16 h-16 rounded-full bg-athlete-gray-600 flex items-center justify-center absolute top-0 left-0 ${selectedAthlete.profileImageUrl ? 'hidden' : 'flex'}`}
+                          >
+                            <User className="text-gray-400" size={24} />
+                          </div>
+                        </div>
                         <div>
                           <h3 className="text-xl font-bold text-white">{selectedAthlete.name}</h3>
                           <p className="text-gray-400 capitalize">{selectedSport || "Multi-Sport"}</p>
@@ -360,25 +509,28 @@ export default function Home() {
             <TabsContent value="comparison" className="space-y-8">
               <AthleteComparison />
             </TabsContent>
+
+            <TabsContent value="testing" className="space-y-8">
+              <TestingPanel />
+            </TabsContent>
           </Tabs>
+
+          <TokenModal 
+            open={showTokenModal} 
+            onOpenChange={setShowTokenModal}
+          />
+
+          {showBioPopup && bioData && selectedAthlete && (
+            <AnalysisPopup
+              open={showBioPopup}
+              onOpenChange={setShowBioPopup}
+              type="bio"
+              data={bioData}
+              athleteName={selectedAthlete.name}
+              athleteId={selectedAthlete.id}
+              createdAt={new Date().toISOString()}
+            />
+          )}
         </div>
-      </div>
-
-      <TokenModal 
-        open={showTokenModal} 
-        onOpenChange={setShowTokenModal}
-      />
-
-      {showBioPopup && bioData && selectedAthlete && (
-        <AnalysisPopup
-          open={showBioPopup}
-          onOpenChange={setShowBioPopup}
-          type="bio"
-          data={bioData}
-          athleteName={selectedAthlete.name}
-          createdAt={new Date().toISOString()}
-        />
-      )}
-    </div>
   );
 }

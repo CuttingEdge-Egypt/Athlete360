@@ -1,10 +1,30 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus } from "lucide-react";
+import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus, Gift, UserPlus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { SignupFlow } from "@/components/ui/signup-flow";
 
 export default function Landing() {
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [showSignupModal, setShowSignupModal] = useState(false);
+
+  useEffect(() => {
+    // Check if there's a referral code in the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+      setReferralCode(refCode);
+    }
+  }, []);
+
   const handleLogin = () => {
     window.location.href = "/api/login";
+  };
+
+  const handleSignupComplete = (user: any) => {
+    setShowSignupModal(false);
+    // Redirect to app after signup
+    window.location.href = "/";
   };
 
   return (
@@ -16,13 +36,24 @@ export default function Landing() {
             <Trophy className="text-athlete-accent text-2xl" />
             <span className="text-xl font-bold">Athlete360</span>
           </div>
-          <Button 
-            onClick={handleLogin}
-            data-testid="button-login"
-            className="bg-athlete-accent hover:bg-blue-600 text-white"
-          >
-            Sign In
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button 
+              onClick={() => setShowSignupModal(true)}
+              data-testid="button-signup"
+              className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white"
+            >
+              <UserPlus className="mr-2 h-4 w-4" />
+              Sign Up
+            </Button>
+            <Button 
+              onClick={handleLogin}
+              data-testid="button-login"
+              variant="outline"
+              className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white"
+            >
+              Sign In
+            </Button>
+          </div>
         </div>
       </nav>
 
@@ -36,9 +67,45 @@ export default function Landing() {
             <p className="text-xl md:text-2xl text-gray-300 mb-8">
               AI-Powered Athlete Analytics & Performance Optimization Platform
             </p>
-            <p className="text-lg text-gray-400 mb-12 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-400 mb-8 max-w-2xl mx-auto">
               Analyze any athlete's performance, get tactical insights, create development plans, and unlock the secrets to athletic excellence with our revolutionary AI system.
             </p>
+            
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Button 
+                onClick={() => setShowSignupModal(true)}
+                data-testid="button-hero-signup"
+                size="lg"
+                className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white px-8 py-4 text-lg font-semibold"
+              >
+                <UserPlus className="mr-2 h-5 w-5" />
+                Start Free Trial - 1000 Tokens
+              </Button>
+              <Button 
+                onClick={handleLogin}
+                data-testid="button-hero-signin"
+                size="lg"
+                variant="outline"
+                className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white px-8 py-4 text-lg font-semibold"
+              >
+                Sign In to Continue
+              </Button>
+            </div>
+            
+            {/* Referral Bonus Banner - only show if there's a referral code */}
+            {referralCode && (
+              <div className="bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-400/30 rounded-lg p-4 mb-12 max-w-lg mx-auto">
+                <div className="flex items-center justify-center gap-2 text-green-400 mb-2">
+                  <Gift className="h-5 w-5" />
+                  <span className="font-semibold">You're using a referral link!</span>
+                </div>
+                <p className="text-sm text-gray-300">
+                  Your friend will get 100 bonus tokens when you sign up!<br/>
+                  You'll start with 1000 free tokens.
+                </p>
+              </div>
+            )}
             
             {/* Feature Preview Cards */}
             <div className="grid md:grid-cols-3 gap-6 mb-12">
@@ -71,13 +138,24 @@ export default function Landing() {
                 <h2 className="text-2xl font-bold mb-4 text-athlete-accent">Start Your Journey</h2>
                 <div className="text-4xl font-bold mb-2 text-white">$25<span className="text-lg text-gray-400">/month</span></div>
                 <p className="text-gray-300 mb-6">Get 1,000 tokens to analyze any athlete</p>
-                <Button 
-                  onClick={handleLogin}
-                  data-testid="button-start-now"
-                  className="w-full bg-gradient-to-r from-athlete-accent to-athlete-success hover:from-blue-600 hover:to-green-600 py-4 text-lg font-semibold"
-                >
-                  Start Now <ArrowRight className="ml-2" size={20} />
-                </Button>
+                <div className="space-y-3">
+                  <Button 
+                    onClick={() => setShowSignupModal(true)}
+                    data-testid="button-start-free-trial"
+                    className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 py-4 text-lg font-semibold"
+                  >
+                    <UserPlus className="mr-2" size={20} />
+                    Start Free Trial
+                  </Button>
+                  <Button 
+                    onClick={handleLogin}
+                    data-testid="button-start-now"
+                    variant="outline"
+                    className="w-full border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white py-4 text-lg font-semibold"
+                  >
+                    Sign In <ArrowRight className="ml-2" size={20} />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -192,6 +270,13 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+
+      {/* Signup Modal */}
+      <SignupFlow
+        isOpen={showSignupModal}
+        onClose={() => setShowSignupModal(false)}
+        onComplete={handleSignupComplete}
+      />
     </div>
   );
 }

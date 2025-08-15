@@ -1,94 +1,116 @@
 # Athlete360 - AI-Powered Athletic Performance Analysis Platform
 
 ## Overview
-
-Athlete360 is a subscription-based web application that provides AI-powered athletic performance analysis and insights. The platform allows users to analyze any athlete's performance through various analytical services, each consuming tokens from their subscription balance. Built as a full-stack application with a React frontend and Express backend, it features a modern dark-themed UI optimized for both desktop and mobile experiences.
-
-The application follows a token-based economy where users purchase subscriptions to receive tokens, which are then consumed when accessing different analytical services like athlete biographies, ranking analysis, strengths/weaknesses evaluation, development plans, nutrition guidance, and strategic analysis.
+Athlete360 is a subscription-based web application providing AI-powered athletic performance analysis and insights. It enables users to analyze any athlete's performance through various analytical services, consuming tokens from their subscription balance. The platform operates on a token-based economy where users purchase subscriptions to acquire tokens, which are then used to access services such as athlete biographies, ranking analysis, strengths/weaknesses evaluation, development plans, nutrition guidance, and strategic analysis. The business vision is to provide comprehensive, authentic, and real-time athletic insights, leveraging AI to offer personalized performance development and strategic advantages.
 
 ## User Preferences
-
 Preferred communication style: Simple, everyday language.
-
-## Recent Changes
-
-**OpenAI Model Fix (August 5, 2025)**: Reverted OpenAI API calls back to gpt-4o model after o3-pro caused compatibility issues. The gpt-4o model is the current stable model for chat completions. All AI-powered analysis services now properly use gpt-4o including athlete profiling, detailed analysis, comparison features, and specific analysis generation.
-
-**Dynamic Data Implementation (August 5, 2025)**: Updated analysis popups to read data dynamically from the database instead of hardcoded values. All major analysis views now display actual data:
-- Rank analysis: Peak ranking, current ranking, and performance metrics from API responses
-- Competitive strengths: Real athlete strengths with intelligent icon mapping and dynamic ratings (85-98%)
-- Areas for improvement: Actual weaknesses with impact levels and improvement strategies from database/AI
 
 ## System Architecture
 
 ### Frontend Architecture
-- **Framework**: React 18 with TypeScript and Vite for development/build tooling
-- **UI Components**: Radix UI primitives with shadcn/ui component library for consistent design system
-- **Styling**: Tailwind CSS with custom dark theme and CSS variables for theming
-- **State Management**: TanStack Query (React Query) for server state management and caching
-- **Routing**: Wouter for lightweight client-side routing
-- **Forms**: React Hook Form with Zod validation for type-safe form handling
-- **Interface Design**: Tab-based navigation with dedicated sections for athlete analysis and comparison features
+- **Framework**: React 18 with TypeScript and Vite.
+- **UI Components**: Radix UI primitives and shadcn/ui for a consistent design system.
+- **Styling**: Tailwind CSS with a custom dark theme.
+- **State Management**: TanStack Query (React Query) for server state management and caching.
+- **Routing**: Wouter for client-side routing.
+- **Forms**: React Hook Form with Zod validation.
+- **Interface Design**: Tab-based navigation with dedicated sections for athlete analysis and comparison.
 
 ### Backend Architecture
-- **Runtime**: Node.js with Express.js framework
-- **Language**: TypeScript with ESM modules
-- **Database**: PostgreSQL with Drizzle ORM for type-safe database operations
-- **Session Management**: Express sessions with PostgreSQL store for persistence
-- **Authentication**: Replit OIDC integration for seamless authentication in Replit environment
+- **Runtime**: Node.js with Express.js.
+- **Language**: TypeScript with ESM modules.
+- **Database**: PostgreSQL with Drizzle ORM for type-safe operations.
+- **Session Management**: Express sessions with PostgreSQL store.
+- **Authentication**: Replit OIDC integration.
 
 ### Data Storage Solutions
-- **Primary Database**: PostgreSQL via Neon serverless for scalable cloud database
-- **ORM**: Drizzle ORM with migrations support for type-safe database schema management
-- **Session Store**: PostgreSQL-based session storage using connect-pg-simple
-- **Schema Design**: Comprehensive relational schema supporting users, sports, athletes, analysis logs, transactions, and various analytical data types
+- **Primary Database**: PostgreSQL via Neon serverless.
+- **ORM**: Drizzle ORM with migrations.
+- **Session Store**: PostgreSQL-based session storage.
+- **Schema Design**: Relational schema for users, sports, athletes, analysis logs, transactions, and analytical data.
 
 ### Authentication and Authorization
-- **Authentication Provider**: Replit OIDC (OpenID Connect) for seamless integration
-- **Session Management**: Server-side sessions with PostgreSQL persistence
-- **Authorization**: Route-level protection with isAuthenticated middleware
-- **User Management**: Automatic user creation/updates with token balance tracking
+- **Authentication Provider**: Replit OIDC.
+- **Session Management**: Server-side sessions with PostgreSQL persistence.
+- **Authorization**: Route-level protection with `isAuthenticated` middleware.
+- **User Management**: Automatic user creation/updates with token balance tracking.
 
 ### Token Economy System
-- **Subscription Model**: $25 subscription provides 1000 tokens with pay-as-you-go thereafter
-- **Token Deduction**: Automatic token consumption per analytical service (ranging from 50-100 tokens)
-- **Balance Tracking**: Real-time token balance display with transaction history
-- **Insufficient Funds**: Modal-based token recharge system when balance is low
+- **Subscription Model**: Token-based with pay-as-you-go options.
+- **Token Deduction**: Automatic consumption per analytical service.
+- **Balance Tracking**: Real-time token balance display with transaction history.
+- **Insufficient Funds**: Modal-based token recharge system.
 
 ### Service Architecture
-- **Analysis Services**: Eight distinct analytical services (Bio, Rank, Strengths, Weaknesses, Development Plans, Nutrition, Beat Strategies, Video Analysis)
-- **Athlete Comparison**: AI-powered one-click comparison system with comprehensive analysis across strengths, weaknesses, rankings, and head-to-head predictions
-- **Cost Structure**: Each service has predefined token costs (50-120 tokens per analysis, 100 tokens for comparisons)
-- **Data Seeding**: Automatic database seeding with sample sports and famous athletes for demonstration
-- **CRUD Operations**: Full create, read, update, delete capabilities for sports, athletes, and analysis data
-- **Deduplication Logic**: Smart athlete deduplication by name to prevent redundancy while preserving most recent/complete records
+- **Analysis Services**: Eight distinct analytical services (Bio, Rank, Strengths, Weaknesses, Development Plans, Nutrition, Beat Strategies, Video Analysis).
+- **Athlete Comparison**: AI-powered one-click comparison system.
+- **Smart Data Extraction**: Intelligent fallback system that automatically extracts missing athlete data (age, gender, nationality) from existing biographies using pattern matching and AI analysis.
+- **Cost Structure**: Predefined token costs per service.
+- **Data Seeding**: Automatic database seeding with sample data.
+- **CRUD Operations**: Full capabilities for sports, athletes, and analysis data.
+- **Deduplication Logic**: Smart athlete deduplication by name.
 
 ## External Dependencies
 
+### AI and Language Models
+- **OpenAI GPT-5**: Exclusive LLM provider for all athlete analysis, biography generation, comparison analysis, and sports insights. Uses web search capabilities (`responses.create()` API with `web_search_preview` tool).
+- **Google Gemini 2.5 Pro**: Specialized AI model for nutrition plan generation, providing culturally-aware meal recommendations based on athlete nationality, sport, age, and gender.
+- **OpenAI SDK**: Official OpenAI JavaScript SDK for GPT-5 integration.
+- **Google Generative AI SDK**: Official Google SDK for Gemini integration.
+
 ### Database and Storage
-- **Neon PostgreSQL**: Serverless PostgreSQL database with WebSocket support for real-time connections
-- **Drizzle Kit**: Database migrations and schema management tooling
+- **Neon PostgreSQL**: Serverless PostgreSQL database.
+- **Drizzle Kit**: Database migrations and schema management.
 
 ### Authentication Services
-- **Replit OIDC**: OpenID Connect authentication provider integrated with Replit's identity system
-- **Passport.js**: Authentication middleware for Node.js with OpenID Connect strategy
+- **Replit OIDC**: OpenID Connect authentication provider.
+- **Passport.js**: Authentication middleware.
 
 ### Payment Processing
-- **Stripe**: Payment processing integration for token purchases and subscription management (frontend components implemented)
+- **Stripe**: Payment processing integration for token purchases and subscription management.
 
 ### UI and Styling
-- **Radix UI**: Headless UI primitives for accessible component foundation
-- **Tailwind CSS**: Utility-first CSS framework with custom dark theme
-- **Lucide React**: Icon library providing consistent iconography
-- **Chart.js**: Data visualization library for ranking history and performance charts
+- **Radix UI**: Headless UI primitives.
+- **Tailwind CSS**: Utility-first CSS framework.
+- **Lucide React**: Icon library.
+- **Chart.js**: Data visualization library.
 
 ### Development Tools
-- **Vite**: Fast build tool with React plugin and runtime error overlay
-- **ESBuild**: Fast JavaScript bundler for production builds
-- **TypeScript**: Static type checking across client, server, and shared code
-- **Replit Integration**: Development-time cartographer plugin and runtime banner for Replit environment
+- **Vite**: Fast build tool.
+- **ESBuild**: Fast JavaScript bundler.
+- **TypeScript**: Static type checking.
 
-### Query and Form Management
-- **TanStack Query**: Server state management with caching, background updates, and error handling
-- **React Hook Form**: Performant form library with minimal re-renders
-- **Zod**: TypeScript-first schema validation for runtime type safety
+## Recent Changes
+
+### Video Analysis System Implementation (August 12, 2025)
+- **Removed athlete_id dependency**: Video analysis now works independently without requiring athlete profiles
+- **Fixed API integration**: Switched from failed file upload API to working base64 encoding approach for Google Gemini
+- **Cleaned up duplicate routes**: Removed conflicting video analysis endpoints, keeping only the standalone `/api/analysis/video` route
+- **Fixed TypeScript errors**: Resolved all 12 TypeScript compilation errors in routes.ts
+- **Enhanced error handling**: Improved error messages and proper null/undefined handling throughout the codebase
+- **Interactive Video Player**: Created synchronized video player with timeline-based analysis events
+- **Timestamp Synchronization**: Analysis events (kicks, scores, punches, penalties) automatically highlight during video playback
+- **Timeline Navigation**: Users can click on timeline events to jump to specific moments in the video
+- **Real-time Analysis Display**: Live events show within 3 seconds of current video time
+- **Complete Match Analysis**: Non-timestamped overall match analysis displayed separately for reference
+- **Updated Gemini Model**: Now using `gemini-2.5-pro` for all video analysis operations
+- **Live Scoreboard Layout**: Video centered with Blue/Red player stats on sides showing live-updating scores, kicks, and yellow cards
+- **Enhanced Analysis Accuracy**: Round-specific prompts, proper score summation (1+1+2=4), consistent kick counting, and timestamped warnings
+
+### Nutrition Plan JSON Parsing Enhancements (August 13, 2025)
+- **Comprehensive JSON cleanup**: Implemented multiple fallback strategies for handling malformed JSON responses from GPT-5
+- **Comma handling**: Added aggressive comma replacement in string values to prevent JSON parsing failures
+- **Enhanced prompt instructions**: Updated GPT-5 prompts with strict JSON formatting rules to prevent commas in string values
+- **Multiple retry mechanism**: Implemented 3-attempt retry system with progressive cleanup strategies
+- **Full response logging**: Added comprehensive logging to capture complete GPT-5 responses for debugging
+- **Pattern-based fixes**: Created specific regex patterns to handle common JSON formatting issues in AI responses
+- **Robust error handling**: Improved error messages and fallback data structures for failed parsing attempts
+- **UI visibility improvements**: Removed problematic background colors from nutrition plan display for better text readability
+- **Video analysis color field integration**: Updated video player analysis to use "color" field from JSON for accurate score and yellow card attribution to blue/red players
+
+### Video Analysis Kick Count Fix (August 14, 2025)
+- **Fixed frontend/backend property mismatch**: Changed frontend from `kick_analysis` to `kick_count_analysis` to match backend response
+- **Enhanced kick count parsing**: Updated frontend to handle actual JSON structure with `players[].kicks[].total_kick_number` format
+- **Improved player identification**: Added player name-based fallback for color detection in kick count analysis
+- **Maintained backward compatibility**: Kept fallback parsing for direct `total_kicks` property

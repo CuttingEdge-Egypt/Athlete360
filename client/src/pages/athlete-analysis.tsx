@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute } from "wouter";
-import { Navigation } from "@/components/Navigation";
+
 import { AnalysisResult } from "@/components/ui/analysis-result";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, RefreshCw, Sparkles } from "lucide-react";
+import { ArrowLeft, RefreshCw, Sparkles, User } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Athlete, Transaction, AnalysisLog } from "@shared/schema";
@@ -81,11 +81,7 @@ export default function AthleteAnalysis() {
   }
 
   return (
-    <div className="min-h-screen bg-athlete-primary text-white">
-      <Navigation />
-      
-      <div className="pt-20 pb-20">
-        <div className="container mx-auto px-4">
+    <div className="container mx-auto px-4">
           {/* Header */}
           <div className="mb-8">
             <Button 
@@ -102,11 +98,17 @@ export default function AthleteAnalysis() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-6">
-                    <img 
-                      src={athlete.profileImageUrl || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500"}
-                      alt={athlete.name}
-                      className="w-24 h-24 rounded-full object-cover"
-                    />
+                    {athlete.profileImageUrl ? (
+                      <img 
+                        src={athlete.profileImageUrl}
+                        alt={athlete.name}
+                        className="w-24 h-24 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-24 h-24 rounded-full bg-athlete-gray-600 flex items-center justify-center">
+                        <User className="w-12 h-12 text-gray-400" />
+                      </div>
+                    )}
                     <div>
                       <h1 className="text-3xl font-bold text-white mb-2">{athlete.name}</h1>
                       <p className="text-gray-400 mb-2">{athlete.bio}</p>
@@ -168,7 +170,7 @@ export default function AthleteAnalysis() {
                       key={log.id}
                       type={log.serviceType}
                       data={log.resultData}
-                      createdAt={log.createdAt || new Date().toISOString()}
+                      createdAt={typeof log.createdAt === 'string' ? log.createdAt : (log.createdAt || new Date()).toISOString()}
                       shared={log.shared || false}
                       shareUrl={log.shareUrl || undefined}
                     />
@@ -238,7 +240,5 @@ export default function AthleteAnalysis() {
             </TabsContent>
           </Tabs>
         </div>
-      </div>
-    </div>
   );
 }

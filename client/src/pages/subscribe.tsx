@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Navigation } from "@/components/Navigation";
+
 import { Check, Coins, Star, Trophy, Zap } from "lucide-react";
 
 export default function Subscribe() {
@@ -25,11 +25,7 @@ export default function Subscribe() {
   };
 
   return (
-    <div className="min-h-screen bg-athlete-primary text-white">
-      <Navigation />
-      
-      <div className="pt-20 pb-20">
-        <div className="container mx-auto px-4">
+    <div className="container mx-auto px-4">
           {/* Header */}
           <div className="text-center mb-16">
             <h1 className="text-4xl font-bold mb-4 text-white">
@@ -211,7 +207,5 @@ export default function Subscribe() {
             </div>
           </div>
         </div>
-      </div>
-    </div>
   );
 }
