@@ -102,9 +102,47 @@ export default function TestAuthPage() {
       return;
     }
 
+    // Validate card number format (basic Luhn algorithm check)
+    if (!isValidCardNumber(signupData.cardNumber)) {
+      toast({
+        title: "Invalid card number",
+        description: "Please enter a valid card number",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate expiry date
+    const currentYear = new Date().getFullYear() % 100;
+    const currentMonth = new Date().getMonth() + 1;
+    const expiryYear = parseInt(signupData.expiryYear);
+    const expiryMonth = parseInt(signupData.expiryMonth);
+    
+    if (expiryYear < currentYear || (expiryYear === currentYear && expiryMonth < currentMonth)) {
+      toast({
+        title: "Card expired",
+        description: "Please use a card that hasn't expired",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // Process card details (simulate Paymob integration)
+      // First, authenticate the card with Paymob
+      const cardAuthResult = await authenticateCard({
+        cardNumber: signupData.cardNumber,
+        expiryMonth: signupData.expiryMonth,
+        expiryYear: signupData.expiryYear,
+        cvv: signupData.cvv,
+        cardholderName: signupData.cardholderName
+      });
+
+      if (!cardAuthResult.success) {
+        throw new Error(cardAuthResult.message || "Card authentication failed");
+      }
+
+      // Process card details with real Paymob response
       const cardLast4 = signupData.cardNumber.slice(-4);
       const cardBrand = getCardBrand(signupData.cardNumber);
       
@@ -112,8 +150,8 @@ export default function TestAuthPage() {
         ...signupData,
         cardLast4,
         cardBrand,
-        cardToken: `test_token_${Date.now()}`, // Simulate card token
-        paymobCustomerId: `test_customer_${Date.now()}` // Simulate customer ID
+        cardToken: cardAuthResult.cardToken,
+        paymobCustomerId: cardAuthResult.customerId
       };
 
       const response = await apiRequest('POST', '/api/auth/signup-with-card', signupPayload);
@@ -163,6 +201,39 @@ export default function TestAuthPage() {
     if (number.startsWith('5') || number.startsWith('2')) return 'Mastercard';
     if (number.startsWith('3')) return 'American Express';
     return 'Unknown';
+  };
+
+  // Luhn algorithm for basic card validation
+  const isValidCardNumber = (cardNumber: string) => {
+    const number = cardNumber.replace(/\s/g, '');
+    if (!/^\d{13,19}$/.test(number)) return false;
+    
+    let sum = 0;
+    let isEven = false;
+    
+    for (let i = number.length - 1; i >= 0; i--) {
+      let digit = parseInt(number[i]);
+      
+      if (isEven) {
+        digit *= 2;
+        if (digit > 9) digit -= 9;
+      }
+      
+      sum += digit;
+      isEven = !isEven;
+    }
+    
+    return sum % 10 === 0;
+  };
+
+  // Authenticate card with Paymob
+  const authenticateCard = async (cardData: any) => {
+    try {
+      const response = await apiRequest('POST', '/api/auth/validate-card', cardData);
+      return await response.json();
+    } catch (error) {
+      return { success: false, message: "Card validation failed" };
+    }
   };
 
   const handleLogout = async () => {
@@ -279,6 +350,27 @@ export default function TestAuthPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {currentStep === "payment" && (
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold text-white mb-2">Complete Your Signup</h2>
+                  <p className="text-gray-300">Secure your account with a payment method and start with 1000 free tokens</p>
+                  
+                  <div className="mt-4 p-4 bg-green-900 border border-green-600 rounded-lg">
+                    <div className="flex items-center gap-2 text-green-100">
+                      <div className="w-6 h-6 bg-green-600 rounded flex items-center justify-center">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                        </svg>
+                      </div>
+                      <span className="font-medium">Payment Method Required</span>
+                    </div>
+                    <p className="text-green-200 text-sm mt-2">
+                      Add a payment card to activate your account. No charges will be made now. You start with 1000 free tokens!
+                    </p>
+                  </div>
+                </div>
+              )}
+              
               {currentStep === "personal" ? (
                 <>
                   <div className="grid grid-cols-2 gap-4">
@@ -414,6 +506,13 @@ export default function TestAuthPage() {
                       />
                     </div>
                   </div>
+                  <div className="mt-4 p-3 bg-blue-900 border border-blue-600 rounded-lg">
+                    <div className="flex items-center gap-2 text-blue-100">
+                      <Gift className="h-4 w-4" />
+                      <span className="font-medium">You'll start with 1000 free tokens!</span>
+                    </div>
+                  </div>
+
                   <div className="flex gap-4">
                     <Button 
                       onClick={() => setCurrentStep("personal")}
@@ -426,10 +525,10 @@ export default function TestAuthPage() {
                     <Button 
                       onClick={handleSignup} 
                       disabled={isLoading || !signupData.cardNumber || !signupData.cvv || !signupData.cardholderName}
-                      className="flex-1"
+                      className="flex-1 bg-blue-600 hover:bg-blue-700"
                       data-testid="button-complete-signup"
                     >
-                      {isLoading ? "Creating Account..." : "Complete Signup"}
+                      {isLoading ? "Validating Card..." : "Complete Signup"}
                     </Button>
                   </div>
                 </>

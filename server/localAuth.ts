@@ -4,6 +4,7 @@ import { Strategy as LocalStrategy } from "passport-local";
 import type { Express, RequestHandler } from "express";
 import { storage } from "./storage";
 import { z } from "zod";
+import { paymobService } from "./paymobService";
 
 // Validation schemas
 const signupSchema = z.object({
@@ -331,6 +332,70 @@ export async function setupLocalAuth(app: Express) {
         });
       });
     })(req, res, next);
+  });
+
+  // Card validation endpoint
+  app.post('/api/auth/validate-card', async (req, res) => {
+    try {
+      console.log('[CARD VALIDATION] Validating card details');
+      
+      const { cardNumber, expiryMonth, expiryYear, cvv, cardholderName } = req.body;
+      
+      // Validate input
+      if (!cardNumber || !expiryMonth || !expiryYear || !cvv || !cardholderName) {
+        return res.status(400).json({
+          success: false,
+          message: "All card details are required"
+        });
+      }
+
+      // Use Paymob to validate and tokenize the card
+      const validationResult = await paymobService.validateAndTokenizeCard({
+        cardNumber: cardNumber.replace(/\s/g, ''),
+        expiryMonth,
+        expiryYear,
+        cvv,
+        cardholderName
+      });
+
+      if (validationResult.success) {
+        res.json({
+          success: true,
+          cardToken: validationResult.cardToken,
+          customerId: validationResult.customerId,
+          message: "Card validated successfully"
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: validationResult.message || "Card validation failed"
+        });
+      }
+    } catch (error) {
+      console.error('[CARD VALIDATION] Error:', error);
+      res.status(500).json({
+        success: false,
+        message: "Card validation service unavailable"
+      });
+    }
+  });
+
+  // Local logout route
+  app.get('/api/logout', (req, res) => {
+    console.log(`[LOCAL AUTH] Logout attempt`);
+    req.logout((err) => {
+      if (err) {
+        console.error('[LOCAL AUTH] Logout error:', err);
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      req.session.destroy((destroyErr) => {
+        if (destroyErr) {
+          console.error('[LOCAL AUTH] Session destroy error:', destroyErr);
+          return res.status(500).json({ message: "Session cleanup failed" });
+        }
+        res.json({ message: "Logged out successfully" });
+      });
+    });
   });
 }
 
