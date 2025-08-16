@@ -25,13 +25,17 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table (required for Replit Auth)
+// User storage table (supports both Replit Auth and local email/password auth)
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  // Local authentication fields
+  passwordHash: varchar("password_hash"), // For email/password auth
+  authProvider: varchar("auth_provider").default("replit"), // 'replit' or 'local'
+  emailVerified: boolean("email_verified").default(false), // Email verification status
   tokens: integer("tokens").default(1000), // 1000 free tokens upon signup
   totalTokensPurchased: integer("total_tokens_purchased").default(1000), // Track total tokens ever purchased
   subscriptionStatus: varchar("subscription_status").default("active"), // Active with free tokens

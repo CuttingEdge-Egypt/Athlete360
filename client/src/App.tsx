@@ -13,6 +13,7 @@ import AthleteAnalysis from "@/pages/athlete-analysis";
 import PaymentCenter from "@/pages/payment-center";
 import Account from "@/pages/account";
 import VideoAnalysis from "@/pages/video-analysis";
+import TestAuthPage from "@/pages/test-auth";
 import { SignupWithCard } from "@/components/ui/signup-with-card";
 import { SignupFlow } from "@/components/ui/signup-flow";
 import { useState, useEffect } from "react";
@@ -80,6 +81,9 @@ function Router() {
   return (
     <>
       <Switch>
+        {/* Test auth page - accessible without authentication */}
+        <Route path="/test-auth" component={TestAuthPage} />
+        
         {isLoading || !isAuthenticated ? (
           <Route path="/" component={Landing} />
         ) : (
