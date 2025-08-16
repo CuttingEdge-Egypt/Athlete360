@@ -368,6 +368,19 @@ export default function TestAuthPage() {
                       Add a payment card to activate your account. No charges will be made now. You start with 1000 free tokens!
                     </p>
                   </div>
+
+                  {/* Show referral info if one was provided, but don't ask again */}
+                  {signupData.referralCode && (
+                    <div className="mt-4 p-3 bg-blue-900 border border-blue-600 rounded-lg">
+                      <div className="flex items-center gap-2 text-blue-100">
+                        <Gift className="h-4 w-4" />
+                        <span className="font-medium">Referral Code Applied: {signupData.referralCode}</span>
+                      </div>
+                      <p className="text-blue-200 text-sm mt-1">
+                        Your referrer will get bonus tokens when you complete signup!
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
               
