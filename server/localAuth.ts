@@ -75,7 +75,121 @@ export async function setupLocalAuth(app: Express) {
     }
   ));
 
-  // Local signup route
+  // Local signup with card route
+  app.post('/api/auth/signup-with-card', async (req, res) => {
+    try {
+      console.log(`[LOCAL AUTH] Signup with card attempt for:`, req.body.email);
+      
+      const validation = signupSchema.extend({
+        cardNumber: z.string().min(1, "Card number is required"),
+        cardLast4: z.string().min(4, "Card last 4 digits required"),
+        cardBrand: z.string().min(1, "Card brand required"),
+        cardToken: z.string().min(1, "Card token required"),
+        paymobCustomerId: z.string().min(1, "Customer ID required"),
+        expiryMonth: z.string().min(1, "Expiry month required"),
+        expiryYear: z.string().min(1, "Expiry year required"),
+        cvv: z.string().min(3, "CVV required"),
+        cardholderName: z.string().min(1, "Cardholder name required")
+      }).safeParse(req.body);
+
+      if (!validation.success) {
+        return res.status(400).json({
+          message: "Validation failed",
+          errors: validation.error.errors
+        });
+      }
+
+      const { email, password, firstName, lastName, referralCode, cardLast4, cardBrand, cardToken, paymobCustomerId } = validation.data;
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "Email already registered" });
+      }
+
+      // Hash password
+      const saltRounds = 12;
+      const passwordHash = await bcrypt.hash(password, saltRounds);
+
+      // Create new user with local auth and payment info
+      const userId = await storage.createLocalUserWithCard({
+        email,
+        firstName,
+        lastName,
+        passwordHash,
+        authProvider: 'local',
+        emailVerified: true,
+        referralCode,
+        cardToken,
+        cardLast4,
+        cardBrand,
+        paymobCustomerId
+      });
+
+      console.log(`[LOCAL AUTH] Created new user with card: ${userId} for email: ${email}`);
+
+      // Auto-login the new user
+      const newUser = await storage.getUser(userId);
+      const sessionUser = {
+        claims: {
+          sub: newUser!.id,
+          email: newUser!.email,
+          first_name: newUser!.firstName,
+          last_name: newUser!.lastName,
+          profile_image_url: newUser!.profileImageUrl
+        },
+        access_token: 'local_auth_token',
+        expires_at: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // 7 days
+      };
+
+      req.login(sessionUser, (err) => {
+        if (err) {
+          console.error('[LOCAL AUTH] Auto-login after signup failed:', err);
+          return res.status(500).json({ message: "Signup successful but login failed" });
+        }
+
+        // Process referral bonus if provided
+        if (referralCode) {
+          storage.getUserByReferralCode(referralCode).then(async (referrer) => {
+            if (referrer) {
+              console.log(`[REFERRAL] Processing bonus for referrer: ${referrer.firstName} (${referrer.email})`);
+              
+              // Add 100 bonus tokens to the referrer
+              await storage.addTokensPurchase(referrer.id, 100);
+              
+              // Create referral record
+              await storage.createReferral({
+                referrerId: referrer.id,
+                referredUserId: userId,
+                bonusTokens: 100,
+                status: "completed"
+              });
+
+              // Create transaction for referrer
+              await storage.createTransaction({
+                userId: referrer.id,
+                action: "Referral Bonus",
+                tokensDeducted: -100,
+                serviceType: "referral"
+              });
+            }
+          }).catch(err => console.error('[REFERRAL] Error processing bonus:', err));
+        }
+
+        res.json({
+          message: "Signup successful",
+          user: newUser,
+          success: true
+        });
+      });
+
+    } catch (error) {
+      console.error('[LOCAL AUTH] Signup with card error:', error);
+      res.status(500).json({ message: "Signup failed" });
+    }
+  });
+
+  // Basic local signup route (without card)
   app.post('/api/auth/signup', async (req, res) => {
     try {
       console.log(`[LOCAL AUTH] Signup attempt for:`, req.body.email);

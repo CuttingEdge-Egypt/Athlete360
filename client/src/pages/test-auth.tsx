@@ -16,8 +16,15 @@ export default function TestAuthPage() {
     lastName: "",
     email: "",
     password: "",
-    referralCode: ""
+    referralCode: "",
+    // Card details
+    cardNumber: "",
+    expiryMonth: "",
+    expiryYear: "",
+    cvv: "",
+    cardholderName: ""
   });
+  const [currentStep, setCurrentStep] = useState<"personal" | "payment">("personal");
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
   const { toast } = useToast();
@@ -52,18 +59,85 @@ export default function TestAuthPage() {
     }
   };
 
+  const handlePersonalInfoNext = () => {
+    if (!signupData.firstName || !signupData.lastName || !signupData.email || !signupData.password) {
+      toast({
+        title: "Complete personal information",
+        description: "All fields are required to continue",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (signupData.password.length < 6) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 6 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(signupData.email)) {
+      toast({
+        title: "Invalid email address",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setCurrentStep("payment");
+  };
+
   const handleSignup = async () => {
+    // Validate card details
+    if (!signupData.cardNumber || !signupData.expiryMonth || !signupData.expiryYear || !signupData.cvv || !signupData.cardholderName) {
+      toast({
+        title: "Complete payment information",
+        description: "All card details are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const response = await apiRequest('POST', '/api/auth/signup', signupData);
+      // Process card details (simulate Paymob integration)
+      const cardLast4 = signupData.cardNumber.slice(-4);
+      const cardBrand = getCardBrand(signupData.cardNumber);
+      
+      const signupPayload = {
+        ...signupData,
+        cardLast4,
+        cardBrand,
+        cardToken: `test_token_${Date.now()}`, // Simulate card token
+        paymobCustomerId: `test_customer_${Date.now()}` // Simulate customer ID
+      };
+
+      const response = await apiRequest('POST', '/api/auth/signup-with-card', signupPayload);
       const result = await response.json();
       
       if (result.success) {
         toast({
           title: "Signup Successful",
-          description: `Welcome, ${result.user.firstName}! You got 1000 free tokens.`,
+          description: `Welcome, ${result.user.firstName}! You got 1000 free tokens and your card is registered.`,
         });
         setUser(result.user);
+        setCurrentStep("personal"); // Reset for next test
+        setSignupData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          password: "",
+          referralCode: "",
+          cardNumber: "",
+          expiryMonth: "",
+          expiryYear: "",
+          cvv: "",
+          cardholderName: ""
+        });
       } else {
         toast({
           title: "Signup Failed",
@@ -80,6 +154,15 @@ export default function TestAuthPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Helper function to detect card brand
+  const getCardBrand = (cardNumber: string) => {
+    const number = cardNumber.replace(/\s/g, '');
+    if (number.startsWith('4')) return 'Visa';
+    if (number.startsWith('5') || number.startsWith('2')) return 'Mastercard';
+    if (number.startsWith('3')) return 'American Express';
+    return 'Unknown';
   };
 
   const handleLogout = async () => {
@@ -186,83 +269,171 @@ export default function TestAuthPage() {
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <UserPlus className="h-5 w-5" />
-                Signup Test
+                Signup Test {currentStep === "payment" && "- Payment Info"}
               </CardTitle>
               <CardDescription className="text-gray-400">
-                Test user registration with referral code
+                {currentStep === "personal" 
+                  ? "Test user registration with referral code" 
+                  : "Add payment card to complete signup"
+                }
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              {currentStep === "personal" ? (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="signup-firstname" className="text-gray-300">First Name</Label>
+                    <Input
+                      id="signup-firstname"
+                      placeholder="John"
+                      value={signupData.firstName}
+                      onChange={(e) => setSignupData({...signupData, firstName: e.target.value})}
+                      className="bg-gray-800 border-gray-600 text-white"
+                      data-testid="input-signup-firstname"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="signup-lastname" className="text-gray-300">Last Name</Label>
+                    <Input
+                      id="signup-lastname"
+                      placeholder="Doe"
+                      value={signupData.lastName}
+                      onChange={(e) => setSignupData({...signupData, lastName: e.target.value})}
+                      className="bg-gray-800 border-gray-600 text-white"
+                      data-testid="input-signup-lastname"
+                    />
+                  </div>
+                </div>
                 <div>
-                  <Label htmlFor="signup-firstname" className="text-gray-300">First Name</Label>
+                  <Label htmlFor="signup-email" className="text-gray-300">Email</Label>
                   <Input
-                    id="signup-firstname"
-                    placeholder="John"
-                    value={signupData.firstName}
-                    onChange={(e) => setSignupData({...signupData, firstName: e.target.value})}
+                    id="signup-email"
+                    type="email"
+                    placeholder="john@example.com"
+                    value={signupData.email}
+                    onChange={(e) => setSignupData({...signupData, email: e.target.value})}
                     className="bg-gray-800 border-gray-600 text-white"
-                    data-testid="input-signup-firstname"
+                    data-testid="input-signup-email"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="signup-lastname" className="text-gray-300">Last Name</Label>
+                  <Label htmlFor="signup-password" className="text-gray-300">Password</Label>
                   <Input
-                    id="signup-lastname"
-                    placeholder="Doe"
-                    value={signupData.lastName}
-                    onChange={(e) => setSignupData({...signupData, lastName: e.target.value})}
+                    id="signup-password"
+                    type="password"
+                    placeholder="Password (min 6 chars)"
+                    value={signupData.password}
+                    onChange={(e) => setSignupData({...signupData, password: e.target.value})}
                     className="bg-gray-800 border-gray-600 text-white"
-                    data-testid="input-signup-lastname"
+                    data-testid="input-signup-password"
                   />
                 </div>
-              </div>
-              <div>
-                <Label htmlFor="signup-email" className="text-gray-300">Email</Label>
-                <Input
-                  id="signup-email"
-                  type="email"
-                  placeholder="john@example.com"
-                  value={signupData.email}
-                  onChange={(e) => setSignupData({...signupData, email: e.target.value})}
-                  className="bg-gray-800 border-gray-600 text-white"
-                  data-testid="input-signup-email"
-                />
-              </div>
-              <div>
-                <Label htmlFor="signup-password" className="text-gray-300">Password</Label>
-                <Input
-                  id="signup-password"
-                  type="password"
-                  placeholder="Password (min 6 chars)"
-                  value={signupData.password}
-                  onChange={(e) => setSignupData({...signupData, password: e.target.value})}
-                  className="bg-gray-800 border-gray-600 text-white"
-                  data-testid="input-signup-password"
-                />
-              </div>
-              <div>
-                <Label htmlFor="signup-referral" className="text-gray-300 flex items-center gap-2">
-                  <Gift className="h-4 w-4" />
-                  Referral Code (Optional)
-                </Label>
-                <Input
-                  id="signup-referral"
-                  placeholder="REF123"
-                  value={signupData.referralCode}
-                  onChange={(e) => setSignupData({...signupData, referralCode: e.target.value})}
-                  className="bg-gray-800 border-gray-600 text-white"
-                  data-testid="input-signup-referral"
-                />
-              </div>
-              <Button 
-                onClick={handleSignup} 
-                disabled={isLoading || !signupData.email || !signupData.password || !signupData.firstName || !signupData.lastName}
-                className="w-full"
-                data-testid="button-signup"
-              >
-                {isLoading ? "Creating Account..." : "Sign Up"}
-              </Button>
+                <div>
+                  <Label htmlFor="signup-referral" className="text-gray-300 flex items-center gap-2">
+                    <Gift className="h-4 w-4" />
+                    Referral Code (Optional)
+                  </Label>
+                  <Input
+                    id="signup-referral"
+                    placeholder="REF123"
+                    value={signupData.referralCode}
+                    onChange={(e) => setSignupData({...signupData, referralCode: e.target.value})}
+                    className="bg-gray-800 border-gray-600 text-white"
+                    data-testid="input-signup-referral"
+                  />
+                </div>
+                  <Button 
+                    onClick={handlePersonalInfoNext} 
+                    disabled={!signupData.email || !signupData.password || !signupData.firstName || !signupData.lastName}
+                    className="w-full"
+                    data-testid="button-next-to-payment"
+                  >
+                    Next: Add Payment Card
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <Label htmlFor="card-number" className="text-gray-300">Card Number</Label>
+                    <Input
+                      id="card-number"
+                      placeholder="1234 5678 9012 3456"
+                      value={signupData.cardNumber}
+                      onChange={(e) => setSignupData({...signupData, cardNumber: e.target.value})}
+                      className="bg-gray-800 border-gray-600 text-white"
+                      data-testid="input-card-number"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="cardholder-name" className="text-gray-300">Cardholder Name</Label>
+                    <Input
+                      id="cardholder-name"
+                      placeholder="John Doe"
+                      value={signupData.cardholderName}
+                      onChange={(e) => setSignupData({...signupData, cardholderName: e.target.value})}
+                      className="bg-gray-800 border-gray-600 text-white"
+                      data-testid="input-cardholder-name"
+                    />
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="expiry-month" className="text-gray-300">Month</Label>
+                      <Input
+                        id="expiry-month"
+                        placeholder="MM"
+                        maxLength={2}
+                        value={signupData.expiryMonth}
+                        onChange={(e) => setSignupData({...signupData, expiryMonth: e.target.value})}
+                        className="bg-gray-800 border-gray-600 text-white"
+                        data-testid="input-expiry-month"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="expiry-year" className="text-gray-300">Year</Label>
+                      <Input
+                        id="expiry-year"
+                        placeholder="YY"
+                        maxLength={2}
+                        value={signupData.expiryYear}
+                        onChange={(e) => setSignupData({...signupData, expiryYear: e.target.value})}
+                        className="bg-gray-800 border-gray-600 text-white"
+                        data-testid="input-expiry-year"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="cvv" className="text-gray-300">CVV</Label>
+                      <Input
+                        id="cvv"
+                        placeholder="123"
+                        maxLength={4}
+                        value={signupData.cvv}
+                        onChange={(e) => setSignupData({...signupData, cvv: e.target.value})}
+                        className="bg-gray-800 border-gray-600 text-white"
+                        data-testid="input-cvv"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <Button 
+                      onClick={() => setCurrentStep("personal")}
+                      variant="outline"
+                      className="bg-gray-800 border-gray-600 text-white hover:bg-gray-700"
+                      data-testid="button-back-to-personal"
+                    >
+                      Back
+                    </Button>
+                    <Button 
+                      onClick={handleSignup} 
+                      disabled={isLoading || !signupData.cardNumber || !signupData.cvv || !signupData.cardholderName}
+                      className="flex-1"
+                      data-testid="button-complete-signup"
+                    >
+                      {isLoading ? "Creating Account..." : "Complete Signup"}
+                    </Button>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>
