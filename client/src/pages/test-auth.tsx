@@ -7,7 +7,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { User, LogIn, UserPlus, Gift, Mail } from "lucide-react";
+import { User, LogIn, UserPlus, Gift, Mail, Eye, EyeOff, Check, X } from "lucide-react";
+import { 
+  validatePassword, 
+  validatePasswordMatch,
+  checkPasswordRequirements,
+  getPasswordStrengthColor,
+  getPasswordStrengthBgColor 
+} from "@/lib/passwordValidation";
+import { 
+  validateCard, 
+  formatCardNumber, 
+  formatExpiry,
+  detectCardBrand,
+  getCardBrandInfo 
+} from "@/lib/cardValidation";
 
 export default function TestAuthPage() {
   const [loginData, setLoginData] = useState({ email: "", password: "" });
@@ -16,6 +30,7 @@ export default function TestAuthPage() {
     lastName: "",
     email: "",
     password: "",
+    confirmPassword: "",
     referralCode: "",
     // Card details
     cardNumber: "",
@@ -27,6 +42,8 @@ export default function TestAuthPage() {
   const [currentStep, setCurrentStep] = useState<"personal" | "payment">("personal");
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
 
   const handleLogin = async () => {
@@ -60,29 +77,37 @@ export default function TestAuthPage() {
   };
 
   const handlePersonalInfoNext = () => {
-    if (!signupData.firstName || !signupData.lastName || !signupData.email || !signupData.password) {
-      toast({
-        title: "Complete personal information",
-        description: "All fields are required to continue",
-        variant: "destructive",
-      });
-      return;
-    }
+    const errors: string[] = [];
+    
+    // Check required fields
+    if (!signupData.firstName.trim()) errors.push('First name is required');
+    if (!signupData.lastName.trim()) errors.push('Last name is required');
+    if (!signupData.email.trim()) errors.push('Email is required');
+    if (!signupData.password) errors.push('Password is required');
+    if (!signupData.confirmPassword) errors.push('Please confirm your password');
 
-    if (signupData.password.length < 6) {
-      toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters",
-        variant: "destructive",
-      });
-      return;
-    }
-
+    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(signupData.email)) {
+    if (signupData.email && !emailRegex.test(signupData.email)) {
+      errors.push('Please enter a valid email address');
+    }
+
+    // Validate password
+    const passwordValidation = validatePassword(signupData.password);
+    if (!passwordValidation.isValid) {
+      errors.push(...passwordValidation.errors);
+    }
+
+    // Validate password match
+    const passwordMatchValidation = validatePasswordMatch(signupData.password, signupData.confirmPassword);
+    if (!passwordMatchValidation.match) {
+      errors.push(passwordMatchValidation.error || 'Passwords do not match');
+    }
+
+    if (errors.length > 0) {
       toast({
-        title: "Invalid email address",
-        description: "Please enter a valid email address",
+        title: "Please fix the following errors:",
+        description: errors.join(', '),
         variant: "destructive",
       });
       return;
@@ -92,36 +117,21 @@ export default function TestAuthPage() {
   };
 
   const handleSignup = async () => {
-    // Validate card details
-    if (!signupData.cardNumber || !signupData.expiryMonth || !signupData.expiryYear || !signupData.cvv || !signupData.cardholderName) {
-      toast({
-        title: "Complete payment information",
-        description: "All card details are required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate card number format (basic Luhn algorithm check)
-    if (!isValidCardNumber(signupData.cardNumber)) {
-      toast({
-        title: "Invalid card number",
-        description: "Please enter a valid card number",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate expiry date
-    const currentYear = new Date().getFullYear() % 100;
-    const currentMonth = new Date().getMonth() + 1;
-    const expiryYear = parseInt(signupData.expiryYear);
-    const expiryMonth = parseInt(signupData.expiryMonth);
+    // Create formatted expiry for validation
+    const formattedExpiry = `${signupData.expiryMonth.padStart(2, '0')}/${signupData.expiryYear.slice(-2)}`;
     
-    if (expiryYear < currentYear || (expiryYear === currentYear && expiryMonth < currentMonth)) {
+    // Validate card details using comprehensive validation
+    const cardValidation = validateCard({
+      number: signupData.cardNumber,
+      expiry: formattedExpiry,
+      cvv: signupData.cvv,
+      name: signupData.cardholderName
+    });
+
+    if (!cardValidation.isValid) {
       toast({
-        title: "Card expired",
-        description: "Please use a card that hasn't expired",
+        title: "Please fix card validation errors:",
+        description: cardValidation.errors.join(', '),
         variant: "destructive",
       });
       return;
@@ -142,16 +152,25 @@ export default function TestAuthPage() {
         throw new Error(cardAuthResult.message || "Card authentication failed");
       }
 
-      // Process card details with real Paymob response
-      const cardLast4 = signupData.cardNumber.slice(-4);
-      const cardBrand = getCardBrand(signupData.cardNumber);
+      // Process card details with proper formatting
+      const cleanCardNumber = signupData.cardNumber.replace(/\s/g, '');
+      const cardLast4 = cleanCardNumber.slice(-4);
+      const cardBrand = detectCardBrand(cleanCardNumber);
       
       const signupPayload = {
-        ...signupData,
+        firstName: signupData.firstName,
+        lastName: signupData.lastName,
+        email: signupData.email,
+        password: signupData.password,
+        referralCode: signupData.referralCode,
         cardLast4,
         cardBrand,
         cardToken: cardAuthResult.cardToken,
-        paymobCustomerId: cardAuthResult.customerId
+        paymobCustomerId: cardAuthResult.customerId,
+        expiryMonth: signupData.expiryMonth.padStart(2, '0'),
+        expiryYear: signupData.expiryYear,
+        cvv: signupData.cvv,
+        cardholderName: signupData.cardholderName
       };
 
       const response = await apiRequest('POST', '/api/auth/signup-with-card', signupPayload);
@@ -169,6 +188,7 @@ export default function TestAuthPage() {
           lastName: "",
           email: "",
           password: "",
+          confirmPassword: "",
           referralCode: "",
           cardNumber: "",
           expiryMonth: "",
@@ -192,38 +212,6 @@ export default function TestAuthPage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Helper function to detect card brand
-  const getCardBrand = (cardNumber: string) => {
-    const number = cardNumber.replace(/\s/g, '');
-    if (number.startsWith('4')) return 'Visa';
-    if (number.startsWith('5') || number.startsWith('2')) return 'Mastercard';
-    if (number.startsWith('3')) return 'American Express';
-    return 'Unknown';
-  };
-
-  // Luhn algorithm for basic card validation
-  const isValidCardNumber = (cardNumber: string) => {
-    const number = cardNumber.replace(/\s/g, '');
-    if (!/^\d{13,19}$/.test(number)) return false;
-    
-    let sum = 0;
-    let isEven = false;
-    
-    for (let i = number.length - 1; i >= 0; i--) {
-      let digit = parseInt(number[i]);
-      
-      if (isEven) {
-        digit *= 2;
-        if (digit > 9) digit -= 9;
-      }
-      
-      sum += digit;
-      isEven = !isEven;
-    }
-    
-    return sum % 10 === 0;
   };
 
   // Authenticate card with Paymob
@@ -424,15 +412,98 @@ export default function TestAuthPage() {
                 </div>
                 <div>
                   <Label htmlFor="signup-password" className="text-gray-300">Password</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="Password (min 6 chars)"
-                    value={signupData.password}
-                    onChange={(e) => setSignupData({...signupData, password: e.target.value})}
-                    className="bg-gray-800 border-gray-600 text-white"
-                    data-testid="input-signup-password"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="signup-password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Create a strong password (min 8 chars with uppercase, lowercase, number, special char)"
+                      value={signupData.password}
+                      onChange={(e) => setSignupData({...signupData, password: e.target.value})}
+                      className="bg-gray-800 border-gray-600 text-white pr-10"
+                      data-testid="input-signup-password"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-gray-400"
+                      onClick={() => setShowPassword(!showPassword)}
+                      data-testid="button-toggle-signup-password"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  
+                  {signupData.password && (
+                    <div className="space-y-2 mt-2">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 bg-gray-700 rounded-full h-2">
+                          <div 
+                            className={`h-2 rounded-full transition-all ${getPasswordStrengthBgColor(validatePassword(signupData.password).strength)}`}
+                            style={{ width: `${validatePassword(signupData.password).score}%` }}
+                          />
+                        </div>
+                        <span className={`text-xs font-medium ${getPasswordStrengthColor(validatePassword(signupData.password).strength)}`}>
+                          {validatePassword(signupData.password).strength.charAt(0).toUpperCase() + validatePassword(signupData.password).strength.slice(1)}
+                        </span>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-1 text-xs">
+                        {Object.entries(checkPasswordRequirements(signupData.password)).map(([requirement, met]) => (
+                          <div key={requirement} className="flex items-center gap-1">
+                            {met ? 
+                              <Check className="h-3 w-3 text-green-500" /> : 
+                              <X className="h-3 w-3 text-red-500" />
+                            }
+                            <span className={met ? "text-green-400" : "text-red-400"}>
+                              {requirement === 'length' && '8+ chars'}
+                              {requirement === 'uppercase' && 'Uppercase'}
+                              {requirement === 'lowercase' && 'Lowercase'}
+                              {requirement === 'number' && 'Number'}
+                              {requirement === 'special' && 'Special'}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div>
+                  <Label htmlFor="signup-confirm-password" className="text-gray-300">Confirm Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="signup-confirm-password"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm your password"
+                      value={signupData.confirmPassword}
+                      onChange={(e) => setSignupData({...signupData, confirmPassword: e.target.value})}
+                      className="bg-gray-800 border-gray-600 text-white pr-10"
+                      data-testid="input-signup-confirm-password"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-gray-400"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      data-testid="button-toggle-signup-confirm-password"
+                    >
+                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  
+                  {signupData.confirmPassword && (
+                    <div className="flex items-center gap-2 text-xs mt-1">
+                      {validatePasswordMatch(signupData.password, signupData.confirmPassword).match ? 
+                        <Check className="h-3 w-3 text-green-500" /> : 
+                        <X className="h-3 w-3 text-red-500" />
+                      }
+                      <span className={validatePasswordMatch(signupData.password, signupData.confirmPassword).match ? "text-green-400" : "text-red-400"}>
+                        {validatePasswordMatch(signupData.password, signupData.confirmPassword).match ? "Passwords match" : "Passwords don't match"}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="signup-referral" className="text-gray-300 flex items-center gap-2">
@@ -450,8 +521,16 @@ export default function TestAuthPage() {
                 </div>
                   <Button 
                     onClick={handlePersonalInfoNext} 
-                    disabled={!signupData.email || !signupData.password || !signupData.firstName || !signupData.lastName}
-                    className="w-full"
+                    disabled={
+                      !signupData.email.trim() || 
+                      !signupData.password || 
+                      !signupData.confirmPassword ||
+                      !signupData.firstName.trim() || 
+                      !signupData.lastName.trim() ||
+                      !validatePassword(signupData.password).isValid ||
+                      !validatePasswordMatch(signupData.password, signupData.confirmPassword).match
+                    }
+                    className="w-full disabled:opacity-50"
                     data-testid="button-next-to-payment"
                   >
                     Next: Add Payment Card
@@ -461,14 +540,35 @@ export default function TestAuthPage() {
                 <>
                   <div>
                     <Label htmlFor="card-number" className="text-gray-300">Card Number</Label>
-                    <Input
-                      id="card-number"
-                      placeholder="1234 5678 9012 3456"
-                      value={signupData.cardNumber}
-                      onChange={(e) => setSignupData({...signupData, cardNumber: e.target.value})}
-                      className="bg-gray-800 border-gray-600 text-white"
-                      data-testid="input-card-number"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="card-number"
+                        placeholder="1234 5678 9012 3456"
+                        value={signupData.cardNumber}
+                        onChange={(e) => {
+                          const formatted = formatCardNumber(e.target.value);
+                          setSignupData({...signupData, cardNumber: formatted});
+                        }}
+                        className="bg-gray-800 border-gray-600 text-white pr-12"
+                        data-testid="input-card-number"
+                        maxLength={19}
+                      />
+                      {signupData.cardNumber && (
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          {(() => {
+                            const brand = detectCardBrand(signupData.cardNumber);
+                            const brandInfo = getCardBrandInfo(brand);
+                            return (
+                              <div className="flex items-center gap-1">
+                                <span className={`text-xs font-bold px-2 py-1 rounded ${brandInfo.bgColor} ${brandInfo.textColor}`}>
+                                  {brandInfo.name}
+                                </span>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <Label htmlFor="cardholder-name" className="text-gray-300">Cardholder Name</Label>
@@ -481,29 +581,30 @@ export default function TestAuthPage() {
                       data-testid="input-cardholder-name"
                     />
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="expiry-month" className="text-gray-300">Month</Label>
+                      <Label htmlFor="expiry" className="text-gray-300">Expiry Date</Label>
                       <Input
-                        id="expiry-month"
-                        placeholder="MM"
-                        maxLength={2}
-                        value={signupData.expiryMonth}
-                        onChange={(e) => setSignupData({...signupData, expiryMonth: e.target.value})}
+                        id="expiry"
+                        placeholder="MM/YY"
+                        maxLength={5}
+                        value={(() => {
+                          if (!signupData.expiryMonth && !signupData.expiryYear) return '';
+                          const month = signupData.expiryMonth.padStart(2, '0');
+                          const year = signupData.expiryYear.slice(-2);
+                          return month && year ? `${month}/${year}` : (signupData.expiryMonth || '');
+                        })()}
+                        onChange={(e) => {
+                          const formatted = formatExpiry(e.target.value);
+                          const [month, year] = formatted.split('/');
+                          setSignupData({
+                            ...signupData, 
+                            expiryMonth: month || '',
+                            expiryYear: year ? `20${year}` : ''
+                          });
+                        }}
                         className="bg-gray-800 border-gray-600 text-white"
-                        data-testid="input-expiry-month"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="expiry-year" className="text-gray-300">Year</Label>
-                      <Input
-                        id="expiry-year"
-                        placeholder="YY"
-                        maxLength={2}
-                        value={signupData.expiryYear}
-                        onChange={(e) => setSignupData({...signupData, expiryYear: e.target.value})}
-                        className="bg-gray-800 border-gray-600 text-white"
-                        data-testid="input-expiry-year"
+                        data-testid="input-expiry"
                       />
                     </div>
                     <div>
@@ -513,17 +614,62 @@ export default function TestAuthPage() {
                         placeholder="123"
                         maxLength={4}
                         value={signupData.cvv}
-                        onChange={(e) => setSignupData({...signupData, cvv: e.target.value})}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '');
+                          setSignupData({...signupData, cvv: value});
+                        }}
                         className="bg-gray-800 border-gray-600 text-white"
                         data-testid="input-cvv"
                       />
                     </div>
                   </div>
+                  
+                  {/* Card validation feedback */}
+                  {(signupData.cardNumber || signupData.expiryMonth || signupData.expiryYear || signupData.cvv || signupData.cardholderName) && (
+                    <div className="space-y-2">
+                      {(() => {
+                        const formattedExpiry = signupData.expiryMonth && signupData.expiryYear ? 
+                          `${signupData.expiryMonth.padStart(2, '0')}/${signupData.expiryYear.slice(-2)}` : '';
+                        
+                        const cardValidation = validateCard({
+                          number: signupData.cardNumber,
+                          expiry: formattedExpiry,
+                          cvv: signupData.cvv,
+                          name: signupData.cardholderName
+                        });
+                        
+                        return (
+                          <div className="text-xs space-y-1">
+                            {cardValidation.errors.length > 0 && (
+                              <div className="space-y-1">
+                                {cardValidation.errors.map((error, index) => (
+                                  <div key={index} className="flex items-center gap-2 text-red-400">
+                                    <X className="h-3 w-3" />
+                                    <span>{error}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {cardValidation.isValid && (
+                              <div className="flex items-center gap-2 text-green-400">
+                                <Check className="h-3 w-3" />
+                                <span>Card details are valid</span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
+                  
                   <div className="mt-4 p-3 bg-blue-900 border border-blue-600 rounded-lg">
                     <div className="flex items-center gap-2 text-blue-100">
                       <Gift className="h-4 w-4" />
                       <span className="font-medium">You'll start with 1000 free tokens!</span>
                     </div>
+                    <p className="text-blue-200 text-sm mt-1">
+                      <strong>Test Cards:</strong> Use 4111111111111111 (Visa) or 5123456789012346 (Mastercard)
+                    </p>
                   </div>
 
                   <div className="flex gap-4">
@@ -537,8 +683,20 @@ export default function TestAuthPage() {
                     </Button>
                     <Button 
                       onClick={handleSignup} 
-                      disabled={isLoading || !signupData.cardNumber || !signupData.cvv || !signupData.cardholderName}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700"
+                      disabled={isLoading || (() => {
+                        const formattedExpiry = signupData.expiryMonth && signupData.expiryYear ? 
+                          `${signupData.expiryMonth.padStart(2, '0')}/${signupData.expiryYear.slice(-2)}` : '';
+                        
+                        const cardValidation = validateCard({
+                          number: signupData.cardNumber,
+                          expiry: formattedExpiry,
+                          cvv: signupData.cvv,
+                          name: signupData.cardholderName
+                        });
+                        
+                        return !cardValidation.isValid;
+                      })()}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
                       data-testid="button-complete-signup"
                     >
                       {isLoading ? "Validating Card..." : "Complete Signup"}

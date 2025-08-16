@@ -9,7 +9,12 @@ import { paymobService } from "./paymobService";
 // Validation schemas
 const signupSchema = z.object({
   email: z.string().email("Invalid email format"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/\d/, "Password must contain at least one number")
+    .regex(/[!@#$%^&*(),.?":{}|<>]/, "Password must contain at least one special character"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   referralCode: z.string().optional()
@@ -82,15 +87,18 @@ export async function setupLocalAuth(app: Express) {
       console.log(`[LOCAL AUTH] Signup with card attempt for:`, req.body.email);
       
       const validation = signupSchema.extend({
-        cardNumber: z.string().min(1, "Card number is required"),
-        cardLast4: z.string().min(4, "Card last 4 digits required"),
-        cardBrand: z.string().min(1, "Card brand required"),
-        cardToken: z.string().min(1, "Card token required"),
-        paymobCustomerId: z.string().min(1, "Customer ID required"),
-        expiryMonth: z.string().min(1, "Expiry month required"),
-        expiryYear: z.string().min(1, "Expiry year required"),
-        cvv: z.string().min(3, "CVV required"),
-        cardholderName: z.string().min(1, "Cardholder name required")
+        cardLast4: z.string().length(4, "Card last 4 digits must be exactly 4 digits"),
+        cardBrand: z.enum(['Visa', 'Mastercard', 'American Express', 'Discover'], {
+          errorMap: () => ({ message: "Unsupported card brand" })
+        }),
+        cardToken: z.string().min(1, "Card token is required"),
+        paymobCustomerId: z.string().min(1, "Customer ID is required"),
+        expiryMonth: z.string().regex(/^(0[1-9]|1[0-2])$/, "Invalid expiry month format"),
+        expiryYear: z.string().regex(/^20\d{2}$/, "Invalid expiry year format"),
+        cvv: z.string().regex(/^\d{3,4}$/, "CVV must be 3 or 4 digits"),
+        cardholderName: z.string()
+          .min(2, "Cardholder name must be at least 2 characters")
+          .regex(/^[a-zA-Z\s\-'\.]+$/, "Cardholder name contains invalid characters")
       }).safeParse(req.body);
 
       if (!validation.success) {
@@ -100,7 +108,29 @@ export async function setupLocalAuth(app: Express) {
         });
       }
 
-      const { email, password, firstName, lastName, referralCode, cardLast4, cardBrand, cardToken, paymobCustomerId } = validation.data;
+      const { email, password, firstName, lastName, referralCode, cardLast4, cardBrand, cardToken, paymobCustomerId, expiryMonth, expiryYear, cvv, cardholderName } = validation.data;
+
+      // Additional validation for expiry date
+      const currentYear = new Date().getFullYear();
+      const currentMonth = new Date().getMonth() + 1;
+      const expMonth = parseInt(expiryMonth);
+      const expYear = parseInt(expiryYear);
+      
+      if (expYear < currentYear || (expYear === currentYear && expMonth < currentMonth)) {
+        return res.status(400).json({
+          message: "Card has expired",
+          errors: [{ path: ['expiryDate'], message: "Card has expired" }]
+        });
+      }
+
+      // Validate CVV length based on card brand
+      const expectedCvvLength = cardBrand === 'American Express' ? 4 : 3;
+      if (cvv.length !== expectedCvvLength) {
+        return res.status(400).json({
+          message: "Invalid CVV length",
+          errors: [{ path: ['cvv'], message: `CVV must be ${expectedCvvLength} digits for ${cardBrand} cards` }]
+        });
+      }
 
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(email);
