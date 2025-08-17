@@ -122,3 +122,5 @@ Preferred communication style: Simple, everyday language.
 - **Improved visual hierarchy**: Biography (blue accent), Career Achievements (warning yellow), Recent News (purple), with larger 28px icons
 - **Consistent theming**: Updated border colors to match athlete brand colors and removed debugging logs for production readiness
 - **Complete JSON parsing solution**: Added robust data parsing with multiple fallback strategies for malformed JSON responses
+- **Added refresh bio functionality**: Implemented refresh button in bio popup with loading states, success notifications, and automatic cache invalidation
+- **Database cleanup**: Removed test athlete "Habiba Wael" and all 111 associated records (analysis logs, strengths, weaknesses, strategies, plans, transactions)
