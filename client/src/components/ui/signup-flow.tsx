@@ -150,8 +150,8 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[900px] lg:max-w-[1000px] h-[90vh] max-h-[90vh] overflow-hidden flex flex-col" data-testid="signup-flow-dialog">
-        <DialogHeader className="flex-shrink-0 pb-4">
+      <DialogContent className="sm:max-w-[900px] lg:max-w-[1000px] h-[85vh] max-h-[700px] overflow-hidden flex flex-col" data-testid="signup-flow-dialog">
+        <DialogHeader className="flex-shrink-0 pb-2">
           <DialogTitle className="flex items-center gap-2 text-lg">
             <Zap className="h-4 w-4 text-blue-500" />
             Join Athlete360
@@ -173,18 +173,18 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="personal" className="mt-4 flex-1 flex flex-col">
+          <TabsContent value="personal" className="mt-2 flex-1 flex flex-col">
             <Card className="border-gray-200 dark:border-gray-700 shadow-sm flex-1 flex flex-col">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <User className="h-5 w-5 text-blue-500" />
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <User className="h-4 w-4 text-blue-500" />
                   Your Information
                 </CardTitle>
-                <CardDescription className="text-base">
+                <CardDescription className="text-sm">
                   Tell us about yourself to get started
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6 flex-1 flex flex-col justify-center">
+              <CardContent className="space-y-4 flex-1 flex flex-col justify-center">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName" className="text-sm font-medium">First Name</Label>
@@ -193,7 +193,7 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
                       value={personalInfo.firstName}
                       onChange={(e) => setPersonalInfo(prev => ({ ...prev, firstName: e.target.value }))}
                       placeholder="John"
-                      className="h-10 text-base"
+                      className="h-10 text-sm"
                       data-testid="input-first-name"
                     />
                   </div>
@@ -204,7 +204,7 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
                       value={personalInfo.lastName}
                       onChange={(e) => setPersonalInfo(prev => ({ ...prev, lastName: e.target.value }))}
                       placeholder="Doe"
-                      className="h-10 text-base"
+                      className="h-10 text-sm"
                       data-testid="input-last-name"
                     />
                   </div>
@@ -217,7 +217,7 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
                     value={personalInfo.email}
                     onChange={(e) => setPersonalInfo(prev => ({ ...prev, email: e.target.value }))}
                     placeholder="john.doe@example.com"
-                    className="h-10 text-base"
+                    className="h-10 text-sm"
                     data-testid="input-email"
                   />
                 </div>
@@ -233,31 +233,31 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
             </Card>
           </TabsContent>
 
-          <TabsContent value="payment" className="mt-4 flex-1 flex flex-col">
+          <TabsContent value="payment" className="mt-2 flex-1 flex flex-col">
             <Card className="border-gray-200 dark:border-gray-700 shadow-sm flex-1 flex flex-col">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <CreditCard className="h-5 w-5 text-green-500" />
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <CreditCard className="h-4 w-4 text-green-500" />
                   Payment Method
                 </CardTitle>
-                <CardDescription className="text-base">
+                <CardDescription className="text-sm">
                   Secure your account with a payment method for future token purchases
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4 flex-1 flex flex-col justify-center">
+              <CardContent className="space-y-3 flex-1 flex flex-col justify-center">
 
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <Label htmlFor="cardName" className="text-sm font-medium">Cardholder Name</Label>
                   <Input
                     id="cardName"
                     value={cardDetails.name}
                     onChange={(e) => setCardDetails(prev => ({ ...prev, name: e.target.value }))}
                     placeholder="John Doe"
-                    className="h-12 text-base"
+                    className="h-10 text-sm"
                     data-testid="input-card-name"
                   />
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <Label htmlFor="cardNumber" className="text-sm font-medium">Card Number</Label>
                   <Input
                     id="cardNumber"
@@ -265,12 +265,12 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
                     onChange={(e) => setCardDetails(prev => ({ ...prev, number: formatCardNumber(e.target.value) }))}
                     placeholder="1234 5678 9012 3456"
                     maxLength={19}
-                    className="h-12 text-base font-mono tracking-wider"
+                    className="h-10 text-sm font-mono tracking-wider"
                     data-testid="input-card-number"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
                     <Label htmlFor="expiry" className="text-sm font-medium">Expiry Date</Label>
                     <Input
                       id="expiry"
@@ -278,11 +278,11 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
                       onChange={(e) => setCardDetails(prev => ({ ...prev, expiry: formatExpiry(e.target.value) }))}
                       placeholder="MM/YY"
                       maxLength={5}
-                      className="h-12 text-base font-mono"
+                      className="h-10 text-sm font-mono"
                       data-testid="input-card-expiry"
                     />
                   </div>
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     <Label htmlFor="cvv" className="text-sm font-medium">CVV</Label>
                     <Input
                       id="cvv"
@@ -291,20 +291,20 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
                       placeholder="123"
                       maxLength={4}
                       type="password"
-                      className="h-12 text-base font-mono"
+                      className="h-10 text-sm font-mono"
                       data-testid="input-card-cvv"
                     />
                   </div>
                 </div>
                 
                 {/* Benefits and Security Notice - Side by Side */}
-                <div className="grid grid-cols-2 gap-3 mt-4">
+                <div className="grid grid-cols-2 gap-2 mt-2">
                 {/* Free Trial Benefits */}
-                <div className="flex items-start gap-2 p-3 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                  <Gift className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                <div className="flex items-start gap-2 p-2 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <Gift className="h-3 w-3 text-green-600 mt-0.5 flex-shrink-0" />
                   <div>
                     <h4 className="font-medium text-green-800 dark:text-green-200 text-xs">Free Trial Benefits</h4>
-                    <ul className="text-xs text-green-700 dark:text-green-300 mt-1 space-y-0.5">
+                    <ul className="text-xs text-green-700 dark:text-green-300 mt-0.5 space-y-0">
                       <li>• 1,000 free tokens</li>
                       <li>• No signup charges</li>
                       <li>• Cancel anytime</li>
@@ -313,11 +313,11 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
                 </div>
 
                 {/* Security Notice */}
-                <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <Shield className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div className="flex items-start gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <Shield className="h-3 w-3 text-blue-600 mt-0.5 flex-shrink-0" />
                   <div>
                     <h4 className="font-medium text-blue-800 dark:text-blue-200 text-xs">Secure Payment</h4>
-                    <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                    <p className="text-xs text-blue-700 dark:text-blue-300 mt-0.5">
                       Your payment info is encrypted and secure
                     </p>
                   </div>
@@ -325,11 +325,11 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
                 </div>
                 
                 {/* Action buttons - side by side */}
-                <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700 mt-4">
+                <div className="flex gap-3 pt-2 border-t border-gray-200 dark:border-gray-700 mt-2">
                   <Button 
                     onClick={handleCardSubmit}
                     disabled={isProcessing}
-                    className="flex-[2] bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-medium h-12 text-sm"
+                    className="flex-[2] bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-medium h-10 text-sm"
                     data-testid="button-create-account"
                   >
                     {isProcessing ? (
@@ -347,7 +347,7 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
                   <Button 
                     variant="outline"
                     onClick={() => setActiveTab("personal")}
-                    className="flex-1 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 h-12 text-sm"
+                    className="flex-1 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 h-10 text-sm"
                     data-testid="button-back"
                   >
                     Back
