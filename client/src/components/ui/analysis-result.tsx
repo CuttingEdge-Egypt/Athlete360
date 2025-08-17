@@ -82,31 +82,67 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
   };
 
   const renderBioAnalysis = (data: any) => {
-    // Parse bio data properly
-    let bioData;
+    console.log('Bio Analysis Data Received:', data, 'Type:', typeof data);
     
-    if (typeof data === 'string') {
+    // Parse bio data properly - handle multiple levels of JSON strings
+    let bioData;
+    let rawData = data;
+    
+    // Sometimes data comes as nested JSON strings - parse them recursively
+    while (typeof rawData === 'string') {
       try {
-        bioData = JSON.parse(data);
+        const parsed = JSON.parse(rawData);
+        rawData = parsed;
+        console.log('Parsed bio data:', parsed);
       } catch (e) {
-        // If parsing fails, create structured sections from the raw text
-        return (
-          <div className="space-y-6">
-            <Card className="bg-athlete-gray-700 border-gray-600">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-white mb-4">Biography Analysis</h3>
-                <div className="prose prose-invert max-w-none">
-                  <pre className="text-gray-300 text-sm whitespace-pre-wrap leading-relaxed">
-                    {data}
-                  </pre>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        );
+        console.log('Failed to parse as JSON, treating as raw text');
+        break;
       }
-    } else {
-      bioData = data || {};
+    }
+    
+    bioData = rawData || {};
+    
+    // Force structured display - even if parsing failed, extract data from JSON string
+    if (typeof bioData === 'string') {
+      // Try to extract structured info from the JSON string for display
+      const jsonMatch = bioData.match(/"name":\s*"([^"]+)"/);
+      const bioMatch = bioData.match(/"bio":\s*"([^"]+(?:\\.[^"]*)*)"/) || bioData.match(/"bio":\s*"([^"]+)"/);
+      const rankMatch = bioData.match(/"rank":\s*"?([^",}]+)"?/);
+      const achievementsMatch = bioData.match(/"achievements":\s*\[([^\]]+)\]/);
+      const recentNewsMatch = bioData.match(/"recentNews":\s*\[([^\]]+)\]/);
+      
+      const extractedName = jsonMatch ? jsonMatch[1] : 'Athlete Biography';
+      const extractedBio = bioMatch ? bioMatch[1].replace(/\\"/g, '"').replace(/\\n/g, '\n') : '';
+      const extractedRank = rankMatch ? rankMatch[1] : '';
+      
+      // Convert to structured object
+      bioData = {
+        name: extractedName,
+        bio: extractedBio,
+        rank: extractedRank,
+        achievements: achievementsMatch ? achievementsMatch[1].split(',').map((a: string) => a.trim().replace(/"/g, '')) : [],
+        recentNews: recentNewsMatch ? recentNewsMatch[1].split(',').map((n: string) => n.trim().replace(/"/g, '')) : []
+      };
+      
+      console.log('Extracted structured data from JSON string:', bioData);
+    }
+    
+    // If we still don't have proper data structure, show formatted JSON
+    if (!bioData || (!bioData.name && !bioData.bio && Object.keys(bioData).length === 0)) {
+      return (
+        <div className="space-y-6">
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-white mb-4">Biography Analysis</h3>
+              <div className="prose prose-invert max-w-none">
+                <pre className="text-gray-300 text-sm whitespace-pre-wrap leading-relaxed">
+                  {JSON.stringify(data, null, 2)}
+                </pre>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
     }
     
     return (
