@@ -104,11 +104,8 @@ export function AnalysisPopup({
   };
 
   const renderBioAnalysis = (data: any) => {
-    console.log('POPUP Bio Analysis Data Received:', data, 'Type:', typeof data);
-    
     // Parse the data first using the utility function
     const parsedData = parseAnalysisData(data);
-    console.log('POPUP Parsed bio data:', parsedData);
     
     // Ensure we have a proper object to work with
     let bioData = parsedData;
@@ -155,8 +152,8 @@ export function AnalysisPopup({
         <Card className="bg-athlete-gray-800 border-gray-700">
           <CardHeader className="pb-4">
             <div className="flex items-center space-x-3">
-              <User className="text-athlete-accent" size={24} />
-              <CardTitle className="text-white text-xl">Biography</CardTitle>
+              <User className="text-athlete-accent" size={28} />
+              <CardTitle className="text-athlete-accent text-2xl font-bold">Biography</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -171,7 +168,7 @@ export function AnalysisPopup({
             )}
             
             <div className="prose prose-invert max-w-none">
-              <h3 className="text-lg font-semibold text-white mb-3">{name}</h3>
+              <h3 className="text-2xl font-bold text-athlete-accent mb-4">{name}</h3>
               <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
                 {bio || "No biography information available."}
               </div>
@@ -190,8 +187,8 @@ export function AnalysisPopup({
           <Card className="bg-athlete-gray-800 border-gray-700">
             <CardHeader className="pb-4">
               <div className="flex items-center space-x-3">
-                <Trophy className="text-athlete-warning" size={24} />
-                <CardTitle className="text-white text-xl">Career Achievements</CardTitle>
+                <Trophy className="text-athlete-warning" size={28} />
+                <CardTitle className="text-athlete-warning text-2xl font-bold">Career Achievements</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
@@ -217,8 +214,8 @@ export function AnalysisPopup({
           <Card className="bg-athlete-gray-800 border-gray-700">
             <CardHeader className="pb-4">
               <div className="flex items-center space-x-3">
-                <Calendar className="text-purple-400" size={24} />
-                <CardTitle className="text-white text-xl">Recent News</CardTitle>
+                <Calendar className="text-purple-400" size={28} />
+                <CardTitle className="text-purple-400 text-2xl font-bold">Recent News</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
@@ -309,18 +306,12 @@ export function AnalysisPopup({
   };
 
   const renderAnalysisContent = () => {
-    console.log('=== POPUP ANALYSIS RENDER DEBUG ===');
-    console.log('Type:', type);
-    console.log('Raw Data:', data);
-    console.log('Data Type:', typeof data);
-    
     if (!data) {
       return <div className="text-gray-400 text-center py-8">Analysis data not available</div>;
     }
 
     // Special handling for bio analysis
     if (type === "bio") {
-      console.log('CALLING renderBioAnalysis with:', data);
       return renderBioAnalysis(data);
     }
 

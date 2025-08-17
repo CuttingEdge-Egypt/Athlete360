@@ -82,11 +82,8 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
   };
 
   const renderBioAnalysis = (data: any) => {
-    console.log('Bio Analysis Data Received:', data, 'Type:', typeof data);
-    
     // Parse the data first using the utility function
     const parsedData = parseAnalysisData(data);
-    console.log('Parsed bio data:', parsedData);
     
     // Ensure we have a proper object to work with
     let bioData = parsedData;
@@ -147,7 +144,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
           </div>
           <div className="md:col-span-2">
             <div className="mb-6">
-              <h4 className="text-2xl font-bold text-white mb-2">{name}</h4>
+              <h4 className="text-3xl font-bold text-athlete-accent mb-2">{name}</h4>
               {rank && rank !== 'N/A' && (
                 <Badge className="bg-athlete-warning text-black font-bold text-base px-3 py-1">
                   World Rank #{rank}
@@ -159,10 +156,10 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
 
         {/* Biography Section */}
         {bio && (
-          <Card className="bg-athlete-gray-700 border-l-4 border-l-blue-500 border-gray-600">
+          <Card className="bg-athlete-gray-700 border-l-4 border-l-athlete-accent border-gray-600">
             <CardContent className="p-6">
-              <h3 className="text-xl font-bold text-white mb-4 flex items-center">
-                <User className="mr-3 text-blue-400" size={24} />
+              <h3 className="text-2xl font-bold text-athlete-accent mb-4 flex items-center">
+                <User className="mr-3 text-athlete-accent" size={28} />
                 Biography
               </h3>
               <div className="prose prose-invert max-w-none">
@@ -174,10 +171,10 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
 
         {/* Career Achievements Section */}
         {achievements.length > 0 && (
-          <Card className="bg-athlete-gray-700 border-l-4 border-l-yellow-500 border-gray-600">
+          <Card className="bg-athlete-gray-700 border-l-4 border-l-athlete-warning border-gray-600">
             <CardContent className="p-6">
-              <h3 className="text-xl font-bold text-white mb-4 flex items-center">
-                <Trophy className="mr-3 text-yellow-400" size={24} />
+              <h3 className="text-2xl font-bold text-athlete-warning mb-4 flex items-center">
+                <Trophy className="mr-3 text-athlete-warning" size={28} />
                 Career Achievements
               </h3>
               <div className="grid gap-3">
@@ -194,10 +191,10 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
 
         {/* Recent News Section */}
         {recentNews.length > 0 && (
-          <Card className="bg-athlete-gray-700 border-l-4 border-l-green-500 border-gray-600">
+          <Card className="bg-athlete-gray-700 border-l-4 border-l-purple-400 border-gray-600">
             <CardContent className="p-6">
-              <h3 className="text-xl font-bold text-white mb-4 flex items-center">
-                <Calendar className="mr-3 text-green-400" size={24} />
+              <h3 className="text-2xl font-bold text-purple-400 mb-4 flex items-center">
+                <Calendar className="mr-3 text-purple-400" size={28} />
                 Recent News
               </h3>
               <div className="grid gap-3">
@@ -582,22 +579,15 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
   };
 
   const renderAnalysisContent = () => {
-    console.log('=== ANALYSIS RENDER DEBUG ===');
-    console.log('Type:', type);
-    console.log('Raw Data:', data);
-    console.log('Data Type:', typeof data);
-    
     if (!data) {
       return <div className="text-gray-400 text-center py-8">Analysis data not available</div>;
     }
 
     // Parse the data to handle JSON strings consistently
     const parsedData = parseAnalysisData(data);
-    console.log('Parsed Data:', parsedData);
 
     switch (type) {
       case 'bio': 
-        console.log('CALLING renderBioAnalysis with:', parsedData);
         return renderBioAnalysis(parsedData);
       case 'rank': return renderRankAnalysis(parsedData);
       case 'strengths': return renderStrengthsAnalysis(parsedData);
