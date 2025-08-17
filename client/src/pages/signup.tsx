@@ -129,8 +129,10 @@ export function SignupPage() {
           title: "Account created successfully!",
           description: `Welcome ${result.user.firstName}! You got 1000 free tokens.`,
         });
-        // Redirect to dashboard
-        setLocation('/dashboard');
+        // Force page reload to update authentication state and redirect to dashboard
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1500);
       } else {
         toast({
           title: "Signup failed",
