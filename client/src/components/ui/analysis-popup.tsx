@@ -103,6 +103,41 @@ export function AnalysisPopup({
     return rawData;
   };
 
+  // Helper function to parse bio sections from the text
+  const parseBioSections = (bioText: string) => {
+    if (!bioText) return {};
+    
+    const sections: any = {};
+    
+    // Look for introduction (current status)
+    const introMatch = bioText.match(/^(.*?)\n\n/);
+    if (introMatch) {
+      sections.introduction = introMatch[1].trim();
+    }
+    
+    // Look for overall story section
+    const storyMatch = bioText.match(/Players' overall story and what they're known for[\s\S]*?\n\n([\s\S]*?)(?:\n\n|$)/);
+    if (storyMatch) {
+      sections.overallStory = storyMatch[1].trim();
+    } else {
+      // Fallback - use the middle portion of bio
+      const parts = bioText.split('\n\n');
+      if (parts.length > 1) {
+        sections.overallStory = parts.slice(1, -1).join('\n\n');
+      }
+    }
+    
+    // Look for career record section
+    const careerMatch = bioText.match(/career record|rankings|record/i);
+    if (careerMatch) {
+      const careerText = bioText.substring(careerMatch.index || 0);
+      const endMatch = careerText.match(/\n\n/);
+      sections.careerRecord = endMatch ? careerText.substring(0, endMatch.index) : careerText;
+    }
+    
+    return sections;
+  };
+
   const renderBioAnalysis = (data: any) => {
     // Parse the data first using the utility function
     const parsedData = parseAnalysisData(data);
@@ -146,60 +181,95 @@ export function AnalysisPopup({
     const recentNews = bioData.personalInfo?.recentNews || bioData.recentNews || [];
     const profileImageUrl = bioData.profileImageUrl;
     
+    // Parse bio content to extract different sections
+    const bioSections = parseBioSections(bio);
+
     return (
-      <div className="space-y-6 max-w-none">
-        {/* Biography Section */}
-        <Card className="bg-athlete-gray-800 border-gray-700">
-          <CardHeader className="pb-4">
-            <div className="flex items-center space-x-3">
-              <User className="text-athlete-accent" size={28} />
-              <CardTitle className="text-athlete-accent text-2xl font-bold">Biography</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {profileImageUrl && (
-              <div className="flex justify-center mb-4">
-                <img 
-                  src={profileImageUrl} 
-                  alt={name}
-                  className="w-32 h-32 rounded-full object-cover border-2 border-athlete-accent"
-                />
+      <div className="space-y-8 max-w-none">
+        {/* Athlete Profile Header */}
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-6">
+            {profileImageUrl && !profileImageUrl.includes('Habiba Wael') ? (
+              <img 
+                src={profileImageUrl} 
+                alt={name}
+                className="w-40 h-40 rounded-full object-cover border-4 border-athlete-accent shadow-lg"
+              />
+            ) : (
+              <div className="w-40 h-40 bg-athlete-gray-600 rounded-full flex items-center justify-center border-4 border-athlete-accent shadow-lg">
+                <User className="w-20 h-20 text-athlete-accent" />
               </div>
             )}
-            
-            <div className="prose prose-invert max-w-none">
-              <h3 className="text-2xl font-bold text-athlete-accent mb-4">{name}</h3>
-              <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
-                {bio || "No biography information available."}
-              </div>
-              {rank !== "N/A" && (
-                <div className="mt-4 p-3 bg-athlete-gray-700 rounded-lg">
-                  <span className="text-athlete-accent font-semibold">Current Rank: </span>
-                  <span className="text-white">{rank}</span>
-                </div>
-              )}
+          </div>
+          <h2 className="text-4xl font-bold text-athlete-accent mb-3">{name}</h2>
+          {rank !== "N/A" && (
+            <div className="inline-block px-6 py-2 bg-athlete-warning text-black font-bold text-lg rounded-full">
+              World Rank #{rank}
             </div>
-          </CardContent>
-        </Card>
+          )}
+        </div>
 
-        {/* Career Achievements Section */}
-        {achievements.length > 0 && (
-          <Card className="bg-athlete-gray-800 border-gray-700">
-            <CardHeader className="pb-4">
-              <div className="flex items-center space-x-3">
-                <Trophy className="text-athlete-warning" size={28} />
-                <CardTitle className="text-athlete-warning text-2xl font-bold">Career Achievements</CardTitle>
+        {/* Introduction Section */}
+        {bioSections.introduction && (
+          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-accent border-gray-600 shadow-xl">
+            <CardContent className="p-8">
+              <h3 className="text-3xl font-bold text-emerald-400 mb-6 flex items-center">
+                <User className="mr-4 text-emerald-400" size={32} />
+                Introduction
+              </h3>
+              <div className="prose prose-invert max-w-none">
+                <p className="text-gray-200 leading-relaxed text-lg">{bioSections.introduction}</p>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-3">
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Players' Overall Story Section */}
+        {bioSections.overallStory && (
+          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-cyan-400 border-gray-600 shadow-xl">
+            <CardContent className="p-8">
+              <h3 className="text-3xl font-bold text-cyan-400 mb-6 flex items-center">
+                <Star className="mr-4 text-cyan-400" size={32} />
+                Players' Overall Story
+              </h3>
+              <div className="prose prose-invert max-w-none">
+                <p className="text-gray-200 leading-relaxed text-lg">{bioSections.overallStory}</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Career Record and Rankings */}
+        {bioSections.careerRecord && (
+          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-orange-400 border-gray-600 shadow-xl">
+            <CardContent className="p-8">
+              <h3 className="text-3xl font-bold text-orange-400 mb-6 flex items-center">
+                <Trophy className="mr-4 text-orange-400" size={32} />
+                Career Record and Rankings
+              </h3>
+              <div className="prose prose-invert max-w-none">
+                <p className="text-gray-200 leading-relaxed text-lg">{bioSections.careerRecord}</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Notable Achievements Section */}
+        {achievements.length > 0 && (
+          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-warning border-gray-600 shadow-xl">
+            <CardContent className="p-8">
+              <h3 className="text-3xl font-bold text-athlete-warning mb-6 flex items-center">
+                <Award className="mr-4 text-athlete-warning" size={32} />
+                Notable Achievements
+              </h3>
+              <div className="grid gap-4">
                 {achievements.map((achievement: string, index: number) => (
                   <div 
                     key={index}
-                    className="flex items-start space-x-3 p-3 bg-athlete-gray-700 rounded-lg"
+                    className="flex items-start space-x-4 p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20"
                   >
-                    <Star className="text-athlete-warning mt-1 flex-shrink-0" size={16} />
-                    <p className="text-gray-300 leading-relaxed">
+                    <div className="w-3 h-3 bg-athlete-warning rounded-full mt-2 flex-shrink-0"></div>
+                    <p className="text-gray-200 leading-relaxed text-lg font-medium">
                       {achievement}
                     </p>
                   </div>
@@ -209,23 +279,21 @@ export function AnalysisPopup({
           </Card>
         )}
 
-        {/* Recent News Section */}
+        {/* Recent Competitions Section */}
         {recentNews.length > 0 && (
-          <Card className="bg-athlete-gray-800 border-gray-700">
-            <CardHeader className="pb-4">
-              <div className="flex items-center space-x-3">
-                <Calendar className="text-purple-400" size={28} />
-                <CardTitle className="text-purple-400 text-2xl font-bold">Recent News</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
+          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-purple-400 border-gray-600 shadow-xl">
+            <CardContent className="p-8">
+              <h3 className="text-3xl font-bold text-purple-400 mb-6 flex items-center">
+                <Calendar className="mr-4 text-purple-400" size={32} />
+                Recent Competitions: (2024–2025 results)
+              </h3>
               <div className="space-y-4">
                 {recentNews.map((news: string, index: number) => (
                   <div 
                     key={index}
-                    className="p-4 bg-athlete-gray-700 rounded-lg border-l-4 border-athlete-accent"
+                    className="p-6 bg-athlete-gray-600 rounded-xl border-l-4 border-purple-400 shadow-lg"
                   >
-                    <p className="text-gray-300 leading-relaxed">
+                    <p className="text-gray-200 leading-relaxed text-lg font-medium">
                       {news}
                     </p>
                   </div>
