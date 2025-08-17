@@ -32,9 +32,6 @@ function Router() {
       if (pendingSignupData) {
         // User just completed Replit auth flow, now complete signup with stored data
         completeSignupWithStoredData(JSON.parse(pendingSignupData));
-      } else if (!user.paymobCustomerId) {
-        // User needs to complete signup (check for Paymob customer ID which indicates card is registered)
-        setShowSignupModal(true);
       }
     }
   }, [isAuthenticated, user]);

@@ -179,6 +179,9 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     
+    // Generate a unique referral code for the new user
+    await this.generateReferralCode(user.id);
+    
     return user.id;
   }
 
