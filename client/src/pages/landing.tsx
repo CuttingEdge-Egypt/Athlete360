@@ -2,13 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus, Gift, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { SignupFlow } from "@/components/ui/signup-flow";
-import { LoginModal } from "@/components/ui/login-modal";
+import { useLocation } from "wouter";
 
 export default function Landing() {
   const [referralCode, setReferralCode] = useState<string | null>(null);
-  const [showSignupModal, setShowSignupModal] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     // Check if there's a referral code in the URL
@@ -18,18 +16,6 @@ export default function Landing() {
       setReferralCode(refCode);
     }
   }, []);
-
-  const handleLoginComplete = (user: any) => {
-    setShowLoginModal(false);
-    // Redirect to app after login
-    window.location.href = "/";
-  };
-
-  const handleSignupComplete = (user: any) => {
-    setShowSignupModal(false);
-    // Redirect to app after signup
-    window.location.href = "/";
-  };
 
   return (
     <div className="min-h-screen bg-athlete-primary text-white">
@@ -42,7 +28,7 @@ export default function Landing() {
           </div>
           <div className="flex items-center gap-3">
             <Button 
-              onClick={() => setShowSignupModal(true)}
+              onClick={() => setLocation('/signup')}
               data-testid="button-signup"
               className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white"
             >
@@ -50,7 +36,7 @@ export default function Landing() {
               Sign Up
             </Button>
             <Button 
-              onClick={() => setShowLoginModal(true)}
+              onClick={() => setLocation('/login')}
               data-testid="button-login"
               variant="outline"
               className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white"
@@ -78,7 +64,7 @@ export default function Landing() {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Button 
-                onClick={() => setShowSignupModal(true)}
+                onClick={() => setLocation('/signup')}
                 data-testid="button-hero-signup"
                 size="lg"
                 className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white px-8 py-4 text-lg font-semibold"
@@ -87,7 +73,7 @@ export default function Landing() {
                 Start Free Trial - 1000 Tokens
               </Button>
               <Button 
-                onClick={() => setShowLoginModal(true)}
+                onClick={() => setLocation('/login')}
                 data-testid="button-hero-signin"
                 size="lg"
                 variant="outline"
@@ -144,7 +130,7 @@ export default function Landing() {
                 <p className="text-gray-300 mb-6">Get 1,000 tokens to analyze any athlete</p>
                 <div className="space-y-3">
                   <Button 
-                    onClick={() => setShowSignupModal(true)}
+                    onClick={() => setLocation('/signup')}
                     data-testid="button-start-free-trial"
                     className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 py-4 text-lg font-semibold"
                   >
@@ -152,7 +138,7 @@ export default function Landing() {
                     Start Free Trial
                   </Button>
                   <Button 
-                    onClick={() => setShowLoginModal(true)}
+                    onClick={() => setLocation('/login')}
                     data-testid="button-start-now"
                     variant="outline"
                     className="w-full border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white py-4 text-lg font-semibold"
@@ -275,19 +261,6 @@ export default function Landing() {
         </div>
       </footer>
 
-      {/* Signup Modal */}
-      <SignupFlow
-        isOpen={showSignupModal}
-        onClose={() => setShowSignupModal(false)}
-        onComplete={handleSignupComplete}
-      />
-
-      {/* Login Modal */}
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onComplete={handleLoginComplete}
-      />
     </div>
   );
 }

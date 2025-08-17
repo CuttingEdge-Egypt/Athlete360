@@ -14,6 +14,8 @@ import PaymentCenter from "@/pages/payment-center";
 import Account from "@/pages/account";
 import VideoAnalysis from "@/pages/video-analysis";
 import TestAuthPage from "@/pages/test-auth";
+import { SignupPage } from "@/pages/signup";
+import { LoginPage } from "@/pages/login";
 import { SignupWithCard } from "@/components/ui/signup-with-card";
 import { SignupFlow } from "@/components/ui/signup-flow";
 import { useState, useEffect } from "react";
@@ -81,14 +83,17 @@ function Router() {
   return (
     <>
       <Switch>
-        {/* Test auth page - accessible without authentication */}
+        {/* Public routes - accessible without authentication */}
         <Route path="/test-auth" component={TestAuthPage} />
+        <Route path="/signup" component={SignupPage} />
+        <Route path="/login" component={LoginPage} />
         
         {isLoading || !isAuthenticated ? (
           <Route path="/" component={Landing} />
         ) : (
           <AuthenticatedLayout>
             <Route path="/" component={Home} />
+            <Route path="/dashboard" component={Home} />
             <Route path="/subscribe" component={Subscribe} />
             <Route path="/athlete/:id" component={AthleteAnalysis} />
             <Route path="/payment-center" component={PaymentCenter} />
