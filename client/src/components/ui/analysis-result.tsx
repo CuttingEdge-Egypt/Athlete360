@@ -69,48 +69,98 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     }
   };
 
-  const renderBioAnalysis = (data: any) => (
-    <div className="grid md:grid-cols-3 gap-6">
-      <div className="md:col-span-1">
-        {data.profileImageUrl ? (
-          <img 
-            src={data.profileImageUrl} 
-            alt="Athlete" 
-            className="w-full h-64 object-cover rounded-xl"
-          />
-        ) : (
-          <div className="w-full h-64 bg-athlete-gray-600 rounded-xl flex items-center justify-center">
-            <User className="w-24 h-24 text-gray-400" />
-          </div>
-        )}
-      </div>
-      <div className="md:col-span-2">
-        <h4 className="text-xl font-semibold mb-4 text-white">{data.name}</h4>
-        <div className="space-y-3 text-gray-300">
-          <p><strong className="text-white">Current Rank:</strong> #{data.rank}</p>
-          <p><strong className="text-white">Bio:</strong> {data.bio}</p>
-          {data.personalInfo && (
-            <>
-              <p><strong className="text-white">Born:</strong> {data.personalInfo.birthDate}</p>
-              <p><strong className="text-white">Nationality:</strong> {data.personalInfo.nationality}</p>
-              <p><strong className="text-white">Height:</strong> {data.personalInfo.height}</p>
-              <p><strong className="text-white">Weight:</strong> {data.personalInfo.weight}</p>
-            </>
-          )}
-          {data.achievements && (
-            <div>
-              <p className="text-white font-semibold">Career Highlights:</p>
-              <ul className="list-disc list-inside space-y-1 text-sm mt-2">
-                {data.achievements.slice(0, 4).map((achievement: string, index: number) => (
-                  <li key={index}>{achievement}</li>
-                ))}
-              </ul>
+  const renderBioAnalysis = (data: any) => {
+    // Handle different data formats - ensure we always have proper data structure
+    const bioData = typeof data === 'string' ? { bio: data, name: 'Unknown Athlete' } : data;
+    
+    return (
+      <div className="grid md:grid-cols-3 gap-6">
+        <div className="md:col-span-1">
+          {bioData.profileImageUrl ? (
+            <img 
+              src={bioData.profileImageUrl} 
+              alt="Athlete" 
+              className="w-full h-64 object-cover rounded-xl"
+            />
+          ) : (
+            <div className="w-full h-64 bg-athlete-gray-600 rounded-xl flex items-center justify-center">
+              <User className="w-24 h-24 text-gray-400" />
             </div>
           )}
         </div>
+        <div className="md:col-span-2">
+          <h4 className="text-xl font-semibold mb-4 text-white">{bioData.name || 'Athlete Profile'}</h4>
+          <div className="space-y-4 text-gray-300">
+            {bioData.rank && (
+              <div className="flex items-center space-x-2">
+                <Badge className="bg-athlete-warning text-black font-bold">
+                  Rank #{bioData.rank}
+                </Badge>
+              </div>
+            )}
+            
+            {bioData.bio && (
+              <div>
+                <h5 className="text-white font-semibold mb-2">Biography</h5>
+                <p className="leading-relaxed">{bioData.bio}</p>
+              </div>
+            )}
+            
+            {bioData.personalInfo && (
+              <div>
+                <h5 className="text-white font-semibold mb-2">Personal Information</h5>
+                <div className="grid md:grid-cols-2 gap-3 text-sm">
+                  {bioData.personalInfo.sport && (
+                    <p><strong className="text-white">Sport:</strong> {bioData.personalInfo.sport}</p>
+                  )}
+                  {bioData.personalInfo.status && (
+                    <p><strong className="text-white">Status:</strong> {bioData.personalInfo.status}</p>
+                  )}
+                  {bioData.personalInfo.birthDate && (
+                    <p><strong className="text-white">Born:</strong> {bioData.personalInfo.birthDate}</p>
+                  )}
+                  {bioData.personalInfo.nationality && (
+                    <p><strong className="text-white">Nationality:</strong> {bioData.personalInfo.nationality}</p>
+                  )}
+                  {bioData.personalInfo.height && (
+                    <p><strong className="text-white">Height:</strong> {bioData.personalInfo.height}</p>
+                  )}
+                  {bioData.personalInfo.weight && (
+                    <p><strong className="text-white">Weight:</strong> {bioData.personalInfo.weight}</p>
+                  )}
+                  {bioData.personalInfo.lastUpdated && (
+                    <p><strong className="text-white">Last Updated:</strong> {bioData.personalInfo.lastUpdated}</p>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {bioData.achievements && Array.isArray(bioData.achievements) && bioData.achievements.length > 0 && (
+              <div>
+                <h5 className="text-white font-semibold mb-2">Career Highlights</h5>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  {bioData.achievements.map((achievement: string, index: number) => (
+                    <li key={index} className="leading-relaxed">{achievement}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {bioData.personalInfo?.recentNews && Array.isArray(bioData.personalInfo.recentNews) && bioData.personalInfo.recentNews.length > 0 && (
+              <div>
+                <h5 className="text-white font-semibold mb-2">Recent News</h5>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  {bioData.personalInfo.recentNews.map((news: string, index: number) => (
+                    <li key={index} className="leading-relaxed text-athlete-accent">{news}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderRankAnalysis = (data: any) => (
     <div>
