@@ -110,7 +110,7 @@ export function SignupPage() {
         email: personalInfo.email,
         password: personalInfo.password,
         confirmPassword: personalInfo.confirmPassword,
-        referralCode: '',
+        referralCode: new URLSearchParams(window.location.search).get('ref') || '',
         cardNumber: cardDetails.number,
         expiryMonth: cardDetails.expiry.split('/')[0] || '',
         expiryYear: cardDetails.expiry.split('/')[1] ? `20${cardDetails.expiry.split('/')[1]}` : '',
