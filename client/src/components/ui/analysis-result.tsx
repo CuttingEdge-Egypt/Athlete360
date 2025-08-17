@@ -84,183 +84,133 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
   const renderBioAnalysis = (data: any) => {
     console.log('Bio Analysis Data Received:', data, 'Type:', typeof data);
     
-    // Parse bio data properly - handle multiple levels of JSON strings
-    let bioData;
-    let rawData = data;
+    // Parse the data first using the utility function
+    const parsedData = parseAnalysisData(data);
+    console.log('Parsed bio data:', parsedData);
     
-    // Sometimes data comes as nested JSON strings - parse them recursively
-    while (typeof rawData === 'string') {
+    // Ensure we have a proper object to work with
+    let bioData = parsedData;
+    
+    // If it's still a string, try to extract structured information
+    if (typeof bioData === 'string') {
       try {
-        const parsed = JSON.parse(rawData);
-        rawData = parsed;
-        console.log('Parsed bio data:', parsed);
+        // Try one more JSON parse attempt
+        bioData = JSON.parse(bioData);
       } catch (e) {
-        console.log('Failed to parse as JSON, treating as raw text');
-        break;
+        // Create a basic structure for display
+        bioData = {
+          name: "Athlete Biography",
+          bio: bioData,
+          rank: "N/A",
+          achievements: [],
+          personalInfo: { recentNews: [] }
+        };
       }
     }
     
-    bioData = rawData || {};
-    
-    // Force structured display - even if parsing failed, extract data from JSON string
-    if (typeof bioData === 'string') {
-      // Try to extract structured info from the JSON string for display
-      const jsonMatch = bioData.match(/"name":\s*"([^"]+)"/);
-      const bioMatch = bioData.match(/"bio":\s*"([^"]+(?:\\.[^"]*)*)"/) || bioData.match(/"bio":\s*"([^"]+)"/);
-      const rankMatch = bioData.match(/"rank":\s*"?([^",}]+)"?/);
-      const achievementsMatch = bioData.match(/"achievements":\s*\[([^\]]+)\]/);
-      const recentNewsMatch = bioData.match(/"recentNews":\s*\[([^\]]+)\]/);
-      
-      const extractedName = jsonMatch ? jsonMatch[1] : 'Athlete Biography';
-      const extractedBio = bioMatch ? bioMatch[1].replace(/\\"/g, '"').replace(/\\n/g, '\n') : '';
-      const extractedRank = rankMatch ? rankMatch[1] : '';
-      
-      // Convert to structured object
+    // Ensure we have the minimum required structure
+    if (!bioData || typeof bioData !== 'object') {
       bioData = {
-        name: extractedName,
-        bio: extractedBio,
-        rank: extractedRank,
-        achievements: achievementsMatch ? achievementsMatch[1].split(',').map((a: string) => a.trim().replace(/"/g, '')) : [],
-        recentNews: recentNewsMatch ? recentNewsMatch[1].split(',').map((n: string) => n.trim().replace(/"/g, '')) : []
+        name: "Athlete Biography",
+        bio: "Analysis data could not be parsed properly",
+        rank: "N/A",
+        achievements: [],
+        personalInfo: { recentNews: [] }
       };
-      
-      console.log('Extracted structured data from JSON string:', bioData);
     }
     
-    // If we still don't have proper data structure, show formatted JSON
-    if (!bioData || (!bioData.name && !bioData.bio && Object.keys(bioData).length === 0)) {
-      return (
-        <div className="space-y-6">
-          <Card className="bg-athlete-gray-700 border-gray-600">
+    // Extract data with safe fallbacks
+    const name = bioData.name || "Athlete Profile";
+    const bio = bioData.bio || "";
+    const rank = bioData.rank || "N/A";
+    const achievements = Array.isArray(bioData.achievements) ? bioData.achievements : [];
+    const recentNews = bioData.personalInfo?.recentNews || bioData.recentNews || [];
+    const profileImageUrl = bioData.profileImageUrl;
+    
+    // Always render structured sections - never show raw JSON
+    return (
+      <div className="space-y-6">
+        {/* Main Profile Section */}
+        <div className="grid md:grid-cols-3 gap-6">
+          <div className="md:col-span-1">
+            {profileImageUrl ? (
+              <img 
+                src={profileImageUrl} 
+                alt="Athlete" 
+                className="w-full h-64 object-cover rounded-xl"
+              />
+            ) : (
+              <div className="w-full h-64 bg-athlete-gray-600 rounded-xl flex items-center justify-center">
+                <User className="w-24 h-24 text-gray-400" />
+              </div>
+            )}
+          </div>
+          <div className="md:col-span-2">
+            <div className="mb-6">
+              <h4 className="text-2xl font-bold text-white mb-2">{name}</h4>
+              {rank && rank !== 'N/A' && (
+                <Badge className="bg-athlete-warning text-black font-bold text-base px-3 py-1">
+                  World Rank #{rank}
+                </Badge>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Biography Section */}
+        {bio && (
+          <Card className="bg-athlete-gray-700 border-l-4 border-l-blue-500 border-gray-600">
             <CardContent className="p-6">
-              <h3 className="text-xl font-bold text-white mb-4">Biography Analysis</h3>
+              <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+                <User className="mr-3 text-blue-400" size={24} />
+                Biography
+              </h3>
               <div className="prose prose-invert max-w-none">
-                <pre className="text-gray-300 text-sm whitespace-pre-wrap leading-relaxed">
-                  {JSON.stringify(data, null, 2)}
-                </pre>
+                <p className="text-gray-300 leading-relaxed">{bio}</p>
               </div>
             </CardContent>
           </Card>
-        </div>
-      );
-    }
-    
-    return (
-      <div className="grid md:grid-cols-3 gap-6">
-        <div className="md:col-span-1">
-          {bioData.profileImageUrl ? (
-            <img 
-              src={bioData.profileImageUrl} 
-              alt="Athlete" 
-              className="w-full h-64 object-cover rounded-xl"
-            />
-          ) : (
-            <div className="w-full h-64 bg-athlete-gray-600 rounded-xl flex items-center justify-center">
-              <User className="w-24 h-24 text-gray-400" />
-            </div>
-          )}
-        </div>
-        <div className="md:col-span-2">
-          <div className="mb-6">
-            <h4 className="text-2xl font-bold text-white mb-2">{bioData.name || 'Athlete Profile'}</h4>
-            {bioData.rank && bioData.rank !== 'N/A' && (
-              <Badge className="bg-athlete-warning text-black font-bold text-base px-3 py-1">
-                World Rank #{bioData.rank}
-              </Badge>
-            )}
-          </div>
-          <div className="space-y-4">
-            
-            {/* Biography Section */}
-            {bioData.bio && (
-              <Card className="bg-athlete-gray-600 border-gray-500">
-                <CardContent className="p-4">
-                  <h5 className="text-athlete-accent font-bold text-lg mb-3">Biography</h5>
-                  <p className="leading-relaxed text-gray-200">{bioData.bio}</p>
-                </CardContent>
-              </Card>
-            )}
-            
-            {/* Rank Section */}
-            {bioData.rank && bioData.rank !== 'N/A' && (
-              <Card className="bg-athlete-gray-600 border-gray-500">
-                <CardContent className="p-4">
-                  <h5 className="text-athlete-warning font-bold text-lg mb-3">Current Ranking</h5>
-                  <div className="flex items-center space-x-2">
-                    <Badge className="bg-athlete-warning text-black font-bold text-lg px-3 py-1">
-                      #{bioData.rank}
-                    </Badge>
+        )}
+
+        {/* Career Achievements Section */}
+        {achievements.length > 0 && (
+          <Card className="bg-athlete-gray-700 border-l-4 border-l-yellow-500 border-gray-600">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+                <Trophy className="mr-3 text-yellow-400" size={24} />
+                Career Achievements
+              </h3>
+              <div className="grid gap-3">
+                {achievements.map((achievement: string, index: number) => (
+                  <div key={index} className="flex items-start space-x-3">
+                    <div className="w-2 h-2 bg-yellow-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <p className="text-gray-300 leading-relaxed">{achievement}</p>
                   </div>
-                </CardContent>
-              </Card>
-            )}
-            
-            {/* Achievements Section */}
-            {bioData.achievements && Array.isArray(bioData.achievements) && bioData.achievements.length > 0 && (
-              <Card className="bg-athlete-gray-600 border-gray-500">
-                <CardContent className="p-4">
-                  <h5 className="text-athlete-success font-bold text-lg mb-3">Career Achievements</h5>
-                  <ul className="space-y-2">
-                    {bioData.achievements.map((achievement: string, index: number) => (
-                      <li key={index} className="flex items-start space-x-2">
-                        <Star className="w-4 h-4 text-yellow-400 mt-1 flex-shrink-0" />
-                        <span className="text-gray-200 leading-relaxed">{achievement}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            )}
-            
-            {/* Recent News Section */}
-            {bioData.recentNews && Array.isArray(bioData.recentNews) && bioData.recentNews.length > 0 && (
-              <Card className="bg-athlete-gray-600 border-gray-500">
-                <CardContent className="p-4">
-                  <h5 className="text-blue-400 font-bold text-lg mb-3">Recent News & Updates</h5>
-                  <ul className="space-y-3">
-                    {bioData.recentNews.map((news: string, index: number) => (
-                      <li key={index} className="border-l-2 border-blue-400 pl-3">
-                        <span className="text-gray-200 leading-relaxed">{news}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            )}
-            
-            {/* Personal Information Section */}
-            {bioData.personalInfo && (
-              <Card className="bg-athlete-gray-600 border-gray-500">
-                <CardContent className="p-4">
-                  <h5 className="text-purple-400 font-bold text-lg mb-3">Personal Information</h5>
-                  <div className="grid md:grid-cols-2 gap-3 text-sm">
-                    {bioData.personalInfo.sport && (
-                      <p><strong className="text-white">Sport:</strong> <span className="text-gray-200">{bioData.personalInfo.sport}</span></p>
-                    )}
-                    {bioData.personalInfo.status && (
-                      <p><strong className="text-white">Status:</strong> <span className="text-gray-200">{bioData.personalInfo.status}</span></p>
-                    )}
-                    {bioData.personalInfo.birthDate && (
-                      <p><strong className="text-white">Born:</strong> <span className="text-gray-200">{bioData.personalInfo.birthDate}</span></p>
-                    )}
-                    {bioData.personalInfo.nationality && (
-                      <p><strong className="text-white">Nationality:</strong> <span className="text-gray-200">{bioData.personalInfo.nationality}</span></p>
-                    )}
-                    {bioData.personalInfo.height && (
-                      <p><strong className="text-white">Height:</strong> <span className="text-gray-200">{bioData.personalInfo.height}</span></p>
-                    )}
-                    {bioData.personalInfo.weight && (
-                      <p><strong className="text-white">Weight:</strong> <span className="text-gray-200">{bioData.personalInfo.weight}</span></p>
-                    )}
-                    {bioData.personalInfo.lastUpdated && (
-                      <p><strong className="text-white">Last Updated:</strong> <span className="text-gray-200">{bioData.personalInfo.lastUpdated}</span></p>
-                    )}
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Recent News Section */}
+        {recentNews.length > 0 && (
+          <Card className="bg-athlete-gray-700 border-l-4 border-l-green-500 border-gray-600">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+                <Calendar className="mr-3 text-green-400" size={24} />
+                Recent News
+              </h3>
+              <div className="grid gap-3">
+                {recentNews.map((newsItem: string, index: number) => (
+                  <div key={index} className="flex items-start space-x-3">
+                    <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <p className="text-gray-300 leading-relaxed">{newsItem}</p>
                   </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     );
   };
