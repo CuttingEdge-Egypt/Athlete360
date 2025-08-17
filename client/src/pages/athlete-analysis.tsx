@@ -59,22 +59,19 @@ export default function AthleteAnalysis() {
 
   if (!athlete) {
     return (
-      <div className="min-h-screen bg-athlete-primary text-white">
-        <Navigation />
-        <div className="pt-20 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-6xl mb-4">🔍</div>
-            <h2 className="text-2xl font-bold mb-4">Athlete Not Found</h2>
-            <p className="text-gray-400 mb-6">The athlete you're looking for doesn't exist.</p>
-            <Button 
-              onClick={() => window.history.back()}
-              data-testid="button-go-back"
-              className="bg-athlete-accent hover:bg-blue-600"
-            >
-              <ArrowLeft className="mr-2" size={16} />
-              Go Back
-            </Button>
-          </div>
+      <div className="min-h-screen bg-athlete-primary text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🔍</div>
+          <h2 className="text-2xl font-bold mb-4">Athlete Not Found</h2>
+          <p className="text-gray-400 mb-6">The athlete you're looking for doesn't exist.</p>
+          <Button 
+            onClick={() => window.history.back()}
+            data-testid="button-go-back"
+            className="bg-athlete-accent hover:bg-blue-600"
+          >
+            <ArrowLeft className="mr-2" size={16} />
+            Go Back
+          </Button>
         </div>
       </div>
     );

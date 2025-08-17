@@ -16,6 +16,18 @@ interface AnalysisResultProps {
 export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: AnalysisResultProps) {
   const { toast } = useToast();
 
+  // Utility function to parse data that might be stored as JSON strings
+  const parseAnalysisData = (rawData: any) => {
+    if (typeof rawData === 'string') {
+      try {
+        return JSON.parse(rawData);
+      } catch (e) {
+        return rawData;
+      }
+    }
+    return rawData;
+  };
+
   const getIcon = (type: string) => {
     switch (type) {
       case 'bio': return <User className="text-athlete-accent" size={24} />;
@@ -70,8 +82,8 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
   };
 
   const renderBioAnalysis = (data: any) => {
-    // Handle different data formats - ensure we always have proper data structure
-    const bioData = typeof data === 'string' ? { bio: data, name: 'Unknown Athlete' } : data;
+    // Data is already parsed at the top level, just ensure fallback structure
+    const bioData = data || {};
     
     return (
       <div className="grid md:grid-cols-3 gap-6">
@@ -533,15 +545,18 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
       return <div className="text-gray-400 text-center py-8">Analysis data not available</div>;
     }
 
-    switch (type) {
-      case 'bio': return renderBioAnalysis(data);
-      case 'rank': return renderRankAnalysis(data);
-      case 'strengths': return renderStrengthsAnalysis(data);
-      case 'weaknesses': return renderWeaknessesAnalysis(data);
-      case 'development': return renderDevelopmentPlan(data);
+    // Parse the data to handle JSON strings consistently
+    const parsedData = parseAnalysisData(data);
 
-      case 'beat': return renderBeatStrategies(data);
-      case 'video': return renderVideoAnalysis(data);
+    switch (type) {
+      case 'bio': return renderBioAnalysis(parsedData);
+      case 'rank': return renderRankAnalysis(parsedData);
+      case 'strengths': return renderStrengthsAnalysis(parsedData);
+      case 'weaknesses': return renderWeaknessesAnalysis(parsedData);
+      case 'development': return renderDevelopmentPlan(parsedData);
+
+      case 'beat': return renderBeatStrategies(parsedData);
+      case 'video': return renderVideoAnalysis(parsedData);
       default: return <div className="text-gray-400 text-center py-8">Unsupported analysis type</div>;
     }
   };
