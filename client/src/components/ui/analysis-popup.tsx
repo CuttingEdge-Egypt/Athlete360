@@ -44,6 +44,7 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+// Remove unused import
 import {
   Select,
   SelectContent,
@@ -79,6 +80,167 @@ export function AnalysisPopup({
   shareUrl,
   onRefresh,
 }: AnalysisPopupProps) {
+
+  // Utility function to parse analysis data consistently
+  const parseAnalysisData = (rawData: any) => {
+    if (!rawData) return rawData;
+    
+    // If it's already an object, return as is
+    if (typeof rawData === 'object' && rawData !== null) {
+      return rawData;
+    }
+    
+    // If it's a string, try to parse it as JSON
+    if (typeof rawData === 'string') {
+      try {
+        return JSON.parse(rawData);
+      } catch (e) {
+        // If JSON parsing fails, return the raw string
+        return rawData;
+      }
+    }
+    
+    return rawData;
+  };
+
+  const renderBioAnalysis = (data: any) => {
+    console.log('POPUP Bio Analysis Data Received:', data, 'Type:', typeof data);
+    
+    // Parse the data first using the utility function
+    const parsedData = parseAnalysisData(data);
+    console.log('POPUP Parsed bio data:', parsedData);
+    
+    // Ensure we have a proper object to work with
+    let bioData = parsedData;
+    
+    // If it's still a string, try to extract structured information
+    if (typeof bioData === 'string') {
+      try {
+        // Try one more JSON parse attempt
+        bioData = JSON.parse(bioData);
+      } catch (e) {
+        // Create a basic structure for display
+        bioData = {
+          name: "Athlete Biography",
+          bio: bioData,
+          rank: "N/A",
+          achievements: [],
+          personalInfo: { recentNews: [] }
+        };
+      }
+    }
+    
+    // Ensure we have the minimum required structure
+    if (!bioData || typeof bioData !== 'object') {
+      bioData = {
+        name: "Athlete Biography",
+        bio: "Analysis data could not be parsed properly",
+        rank: "N/A",
+        achievements: [],
+        personalInfo: { recentNews: [] }
+      };
+    }
+    
+    // Extract data with safe fallbacks
+    const name = bioData.name || "Athlete Profile";
+    const bio = bioData.bio || "";
+    const rank = bioData.rank || "N/A";
+    const achievements = Array.isArray(bioData.achievements) ? bioData.achievements : [];
+    const recentNews = bioData.personalInfo?.recentNews || bioData.recentNews || [];
+    const profileImageUrl = bioData.profileImageUrl;
+    
+    return (
+      <div className="space-y-6 max-w-none">
+        {/* Biography Section */}
+        <Card className="bg-athlete-gray-800 border-gray-700">
+          <CardHeader className="pb-4">
+            <div className="flex items-center space-x-3">
+              <User className="text-athlete-accent" size={24} />
+              <CardTitle className="text-white text-xl">Biography</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {profileImageUrl && (
+              <div className="flex justify-center mb-4">
+                <img 
+                  src={profileImageUrl} 
+                  alt={name}
+                  className="w-32 h-32 rounded-full object-cover border-2 border-athlete-accent"
+                />
+              </div>
+            )}
+            
+            <div className="prose prose-invert max-w-none">
+              <h3 className="text-lg font-semibold text-white mb-3">{name}</h3>
+              <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
+                {bio || "No biography information available."}
+              </div>
+              {rank !== "N/A" && (
+                <div className="mt-4 p-3 bg-athlete-gray-700 rounded-lg">
+                  <span className="text-athlete-accent font-semibold">Current Rank: </span>
+                  <span className="text-white">{rank}</span>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Career Achievements Section */}
+        {achievements.length > 0 && (
+          <Card className="bg-athlete-gray-800 border-gray-700">
+            <CardHeader className="pb-4">
+              <div className="flex items-center space-x-3">
+                <Trophy className="text-athlete-warning" size={24} />
+                <CardTitle className="text-white text-xl">Career Achievements</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3">
+                {achievements.map((achievement: string, index: number) => (
+                  <div 
+                    key={index}
+                    className="flex items-start space-x-3 p-3 bg-athlete-gray-700 rounded-lg"
+                  >
+                    <Star className="text-athlete-warning mt-1 flex-shrink-0" size={16} />
+                    <p className="text-gray-300 leading-relaxed">
+                      {achievement}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Recent News Section */}
+        {recentNews.length > 0 && (
+          <Card className="bg-athlete-gray-800 border-gray-700">
+            <CardHeader className="pb-4">
+              <div className="flex items-center space-x-3">
+                <Calendar className="text-purple-400" size={24} />
+                <CardTitle className="text-white text-xl">Recent News</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentNews.map((news: string, index: number) => (
+                  <div 
+                    key={index}
+                    className="p-4 bg-athlete-gray-700 rounded-lg border-l-4 border-athlete-accent"
+                  >
+                    <p className="text-gray-300 leading-relaxed">
+                      {news}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    );
+  };
+
   const { toast } = useToast();
   const [isExporting, setIsExporting] = useState(false);
   const [showInputForm, setShowInputForm] = useState(false);
@@ -147,8 +309,19 @@ export function AnalysisPopup({
   };
 
   const renderAnalysisContent = () => {
+    console.log('=== POPUP ANALYSIS RENDER DEBUG ===');
+    console.log('Type:', type);
+    console.log('Raw Data:', data);
+    console.log('Data Type:', typeof data);
+    
     if (!data) {
       return <div className="text-gray-400 text-center py-8">Analysis data not available</div>;
+    }
+
+    // Special handling for bio analysis
+    if (type === "bio") {
+      console.log('CALLING renderBioAnalysis with:', data);
+      return renderBioAnalysis(data);
     }
 
     // Special handling for nutrition plans
@@ -161,11 +334,14 @@ export function AnalysisPopup({
       return <StrategicCombatDisplay data={data} />;
     }
 
-    // Use AnalysisResult component for proper rendering
+    // Parse the data to handle JSON strings consistently
+    const parsedData = parseAnalysisData(data);
+
+    // For other analysis types, show structured display
     return (
       <div className="space-y-6">
         <div className="text-gray-300 max-w-none">
-          {JSON.stringify(data, null, 2)}
+          {JSON.stringify(parsedData, null, 2)}
         </div>
       </div>
     );
