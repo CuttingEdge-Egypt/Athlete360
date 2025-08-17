@@ -46,6 +46,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Check if user needs a referral code generated
+      if (!user.referralCode) {
+        console.log(`[REFERRAL] Generating missing referral code for user: ${user.email}`);
+        await storage.generateReferralCode(userId);
+        // Fetch updated user data
+        const updatedUser = await storage.getUser(userId);
+        return res.json(updatedUser);
+      }
+      
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);

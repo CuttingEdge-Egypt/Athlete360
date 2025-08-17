@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { User as UserIcon, Settings, Gift, Copy, Check, ExternalLink } from "lucide-react";
+import { User as UserIcon, Settings, Gift, Copy, Check, ExternalLink, AlertCircle } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { User } from "@shared/schema";
@@ -135,24 +135,33 @@ export function ProfileDropdown() {
             
             <div className="space-y-2">
               <Label htmlFor="referral-link" className="text-xs">Share this link to earn 100 tokens per signup:</Label>
-              <div className="flex items-center space-x-2">
-                <Input
-                  id="referral-link"
-                  value={user?.referralCode ? `${window.location.origin}?ref=${user.referralCode}` : ''}
-                  readOnly
-                  className="text-xs h-8"
-                  data-testid="input-referral-link"
-                />
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={copyReferralLink}
-                  className="px-2 h-8"
-                  data-testid="button-copy-referral"
-                >
-                  {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                </Button>
-              </div>
+              {user?.referralCode ? (
+                <div className="flex items-center space-x-2">
+                  <Input
+                    id="referral-link"
+                    value={`${window.location.origin}?ref=${user.referralCode}`}
+                    readOnly
+                    className="text-xs h-8"
+                    data-testid="input-referral-link"
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={copyReferralLink}
+                    className="px-2 h-8"
+                    data-testid="button-copy-referral"
+                  >
+                    {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                  </Button>
+                </div>
+              ) : (
+                <div className="p-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md">
+                  <div className="flex items-center text-xs text-amber-700 dark:text-amber-400">
+                    <AlertCircle className="h-3 w-3 mr-2" />
+                    Referral link being generated. Please refresh the page.
+                  </div>
+                </div>
+              )}
             </div>
             
             <Button
