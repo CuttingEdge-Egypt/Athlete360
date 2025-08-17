@@ -3,10 +3,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus, Gift, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SignupFlow } from "@/components/ui/signup-flow";
+import { LoginModal } from "@/components/ui/login-modal";
 
 export default function Landing() {
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [showSignupModal, setShowSignupModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
     // Check if there's a referral code in the URL
@@ -17,8 +19,10 @@ export default function Landing() {
     }
   }, []);
 
-  const handleLogin = () => {
-    window.location.href = "/api/login";
+  const handleLoginComplete = (user: any) => {
+    setShowLoginModal(false);
+    // Redirect to app after login
+    window.location.href = "/";
   };
 
   const handleSignupComplete = (user: any) => {
@@ -46,7 +50,7 @@ export default function Landing() {
               Sign Up
             </Button>
             <Button 
-              onClick={handleLogin}
+              onClick={() => setShowLoginModal(true)}
               data-testid="button-login"
               variant="outline"
               className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white"
@@ -83,7 +87,7 @@ export default function Landing() {
                 Start Free Trial - 1000 Tokens
               </Button>
               <Button 
-                onClick={handleLogin}
+                onClick={() => setShowLoginModal(true)}
                 data-testid="button-hero-signin"
                 size="lg"
                 variant="outline"
@@ -148,7 +152,7 @@ export default function Landing() {
                     Start Free Trial
                   </Button>
                   <Button 
-                    onClick={handleLogin}
+                    onClick={() => setShowLoginModal(true)}
                     data-testid="button-start-now"
                     variant="outline"
                     className="w-full border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white py-4 text-lg font-semibold"
@@ -276,6 +280,13 @@ export default function Landing() {
         isOpen={showSignupModal}
         onClose={() => setShowSignupModal(false)}
         onComplete={handleSignupComplete}
+      />
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onComplete={handleLoginComplete}
       />
     </div>
   );

@@ -69,28 +69,46 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
     setIsProcessing(true);
 
     try {
-      // Store signup data in sessionStorage for completion after auth
-      const signupData = {
-        personalInfo,
-        cardDetails: {
-          ...cardDetails,
-          cardToken: `card_token_${Date.now()}`,
-          cardLast4: cardDetails.number.replace(/\s/g, '').slice(-4),
-          cardBrand: getCardBrand(cardDetails.number.replace(/\s/g, '')),
-          paymobCustomerId: `customer_${Date.now()}`
-        },
-        referralCode: new URLSearchParams(window.location.search).get('ref')
+      // Create complete signup payload for local authentication
+      const signupPayload = {
+        firstName: personalInfo.firstName,
+        lastName: personalInfo.lastName,
+        email: personalInfo.email,
+        password: 'temp_password_123!', // Will be set by user later
+        confirmPassword: 'temp_password_123!',
+        referralCode: new URLSearchParams(window.location.search).get('ref') || '',
+        cardNumber: cardDetails.number,
+        expiryMonth: cardDetails.expiry.split('/')[0] || '',
+        expiryYear: cardDetails.expiry.split('/')[1] ? `20${cardDetails.expiry.split('/')[1]}` : '',
+        cvv: cardDetails.cvv,
+        cardholderName: cardDetails.name
       };
-      
-      sessionStorage.setItem('pendingSignupData', JSON.stringify(signupData));
-      
-      // Redirect to Replit auth - this will create the user account first
-      window.location.href = "/api/login";
-    } catch (error) {
-      console.error('Signup initiation error:', error);
+
+      console.log('Attempting local signup with:', signupPayload);
+
+      // Use local authentication signup endpoint
+      const response = await apiRequest('POST', '/api/auth/signup', signupPayload);
+      const result = await response.json();
+
+      if (result.success) {
+        toast({
+          title: "Account created successfully!",
+          description: `Welcome ${result.user.firstName}! You got 1000 free tokens.`,
+        });
+        onComplete(result.user);
+        onClose();
+      } else {
+        toast({
+          title: "Signup failed",
+          description: result.message || "Failed to create account",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error('Signup error:', error);
       toast({
         title: "Signup failed",
-        description: "Please try again or contact support",
+        description: error.message || "Please try again or contact support",
         variant: "destructive",
       });
     } finally {
@@ -132,7 +150,7 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] lg:max-w-[800px] h-[70vh] max-h-[70vh] overflow-hidden flex flex-col" data-testid="signup-flow-dialog">
+      <DialogContent className="sm:max-w-[900px] lg:max-w-[1000px] h-[90vh] max-h-[90vh] overflow-hidden flex flex-col" data-testid="signup-flow-dialog">
         <DialogHeader className="flex-shrink-0 pb-4">
           <DialogTitle className="flex items-center gap-2 text-lg">
             <Zap className="h-4 w-4 text-blue-500" />
@@ -155,9 +173,9 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="personal" className="mt-4 flex-1 overflow-y-auto">
-            <Card className="border-gray-200 dark:border-gray-700 shadow-sm">
-              <CardHeader className="pb-6">
+          <TabsContent value="personal" className="mt-4 flex-1 flex flex-col">
+            <Card className="border-gray-200 dark:border-gray-700 shadow-sm flex-1 flex flex-col">
+              <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2 text-xl">
                   <User className="h-5 w-5 text-blue-500" />
                   Your Information
@@ -166,7 +184,7 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
                   Tell us about yourself to get started
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6 flex-1 flex flex-col justify-center">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName" className="text-sm font-medium">First Name</Label>
@@ -215,19 +233,18 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
             </Card>
           </TabsContent>
 
-          <TabsContent value="payment" className="mt-4 flex-1 flex flex-col overflow-hidden">
-            <div className="space-y-6 flex-1 overflow-y-auto pr-2">
-              <Card className="border-gray-200 dark:border-gray-700 shadow-sm">
-                <CardHeader className="pb-6">
-                  <CardTitle className="flex items-center gap-2 text-xl">
-                    <CreditCard className="h-5 w-5 text-green-500" />
-                    Payment Method
-                  </CardTitle>
-                  <CardDescription className="text-base">
-                    Secure your account with a payment method for future token purchases
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-5">
+          <TabsContent value="payment" className="mt-4 flex-1 flex flex-col">
+            <Card className="border-gray-200 dark:border-gray-700 shadow-sm flex-1 flex flex-col">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <CreditCard className="h-5 w-5 text-green-500" />
+                  Payment Method
+                </CardTitle>
+                <CardDescription className="text-base">
+                  Secure your account with a payment method for future token purchases
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 flex-1 flex flex-col justify-center">
 
                 <div className="space-y-3">
                   <Label htmlFor="cardName" className="text-sm font-medium">Cardholder Name</Label>
@@ -280,11 +297,8 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
                   </div>
                 </div>
                 
-                </CardContent>
-              </Card>
-
-              {/* Benefits and Security Notice - Side by Side */}
-              <div className="grid grid-cols-2 gap-3 mt-4">
+                {/* Benefits and Security Notice - Side by Side */}
+                <div className="grid grid-cols-2 gap-3 mt-4">
                 {/* Free Trial Benefits */}
                 <div className="flex items-start gap-2 p-3 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg border border-green-200 dark:border-green-800">
                   <Gift className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
@@ -308,38 +322,39 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
                     </p>
                   </div>
                 </div>
-              </div>
-            </div>
-            
-            {/* Action buttons - side by side */}
-            <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700 mt-4 -mx-6 px-6">
-              <Button 
-                onClick={handleCardSubmit}
-                disabled={isProcessing}
-                className="flex-[2] bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-medium h-9 text-sm"
-                data-testid="button-create-account"
-              >
-                {isProcessing ? (
-                  <>
-                    <div className="animate-spin w-3 h-3 border-2 border-white border-t-transparent rounded-full mr-2" />
-                    Creating...
-                  </>
-                ) : (
-                  <>
-                    <Gift className="mr-1 h-3 w-3" />
-                    Create Account
-                  </>
-                )}
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={() => setActiveTab("personal")}
-                className="flex-1 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 h-9 text-sm"
-                data-testid="button-back"
-              >
-                Back
-              </Button>
-            </div>
+                </div>
+                
+                {/* Action buttons - side by side */}
+                <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700 mt-4">
+                  <Button 
+                    onClick={handleCardSubmit}
+                    disabled={isProcessing}
+                    className="flex-[2] bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-medium h-12 text-sm"
+                    data-testid="button-create-account"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <div className="animate-spin w-3 h-3 border-2 border-white border-t-transparent rounded-full mr-2" />
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <Gift className="mr-1 h-3 w-3" />
+                        Create Account
+                      </>
+                    )}
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => setActiveTab("personal")}
+                    className="flex-1 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 h-12 text-sm"
+                    data-testid="button-back"
+                  >
+                    Back
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </DialogContent>
