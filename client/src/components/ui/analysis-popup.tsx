@@ -139,8 +139,11 @@ export function AnalysisPopup({
   };
 
   const renderBioAnalysis = (data: any) => {
+    // Use refreshed data if available, otherwise use original data
+    const dataToRender = refreshedBioData || data;
+    
     // Parse the data first using the utility function
-    const parsedData = parseAnalysisData(data);
+    const parsedData = parseAnalysisData(dataToRender);
     
     // Ensure we have a proper object to work with
     let bioData = parsedData;
@@ -186,6 +189,24 @@ export function AnalysisPopup({
 
     return (
       <div className="space-y-8 max-w-none">
+        {/* Bio Analysis Header with Refresh Button */}
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center space-x-3">
+            <User className="text-athlete-accent" size={32} />
+            <h2 className="text-2xl font-bold text-athlete-accent">Biography Analysis</h2>
+          </div>
+          <Button
+            onClick={() => refreshBioMutation.mutate()}
+            disabled={refreshBioMutation.isPending}
+            variant="outline"
+            size="sm"
+            className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-black"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${refreshBioMutation.isPending ? 'animate-spin' : ''}`} />
+            {refreshBioMutation.isPending ? 'Refreshing...' : 'Refresh Bio'}
+          </Button>
+        </div>
+
         {/* Athlete Profile Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-6">
@@ -310,7 +331,41 @@ export function AnalysisPopup({
   const [isExporting, setIsExporting] = useState(false);
   const [showInputForm, setShowInputForm] = useState(false);
   const [showCustomizePlanModal, setShowCustomizePlanModal] = useState(false);
+  const [refreshedBioData, setRefreshedBioData] = useState<any>(null);
   const queryClient = useQueryClient();
+
+  // Refresh bio analysis mutation
+  const refreshBioMutation = useMutation({
+    mutationFn: async () => {
+      if (!athleteId) throw new Error('No athlete ID available');
+      const response = await fetch(`/api/analysis/${athleteId}/bio`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to refresh bio analysis');
+      }
+      return await response.json();
+    },
+    onSuccess: (result) => {
+      setRefreshedBioData(result.newAnalysis || result);
+      toast({
+        title: "Bio analysis refreshed!",
+        description: "Updated analysis with latest information.",
+      });
+      // Invalidate relevant queries
+      queryClient.invalidateQueries({ queryKey: ['/api/user-history'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to refresh analysis",
+        description: error.message || "Please try again later.",
+        variant: "destructive",
+      });
+    },
+  });
 
   // User input states for enhanced analysis
   const [developmentDuration, setDevelopmentDuration] = useState("4 weeks");
