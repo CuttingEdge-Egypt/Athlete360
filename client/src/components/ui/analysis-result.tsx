@@ -82,8 +82,32 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
   };
 
   const renderBioAnalysis = (data: any) => {
-    // Data is already parsed at the top level, just ensure fallback structure
-    const bioData = data || {};
+    // Parse bio data properly
+    let bioData;
+    
+    if (typeof data === 'string') {
+      try {
+        bioData = JSON.parse(data);
+      } catch (e) {
+        // If parsing fails, create structured sections from the raw text
+        return (
+          <div className="space-y-6">
+            <Card className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-white mb-4">Biography Analysis</h3>
+                <div className="prose prose-invert max-w-none">
+                  <pre className="text-gray-300 text-sm whitespace-pre-wrap leading-relaxed">
+                    {data}
+                  </pre>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+      }
+    } else {
+      bioData = data || {};
+    }
     
     return (
       <div className="grid md:grid-cols-3 gap-6">
@@ -101,72 +125,103 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
           )}
         </div>
         <div className="md:col-span-2">
-          <h4 className="text-xl font-semibold mb-4 text-white">{bioData.name || 'Athlete Profile'}</h4>
-          <div className="space-y-4 text-gray-300">
-            {bioData.rank && (
-              <div className="flex items-center space-x-2">
-                <Badge className="bg-athlete-warning text-black font-bold">
-                  Rank #{bioData.rank}
-                </Badge>
-              </div>
+          <div className="mb-6">
+            <h4 className="text-2xl font-bold text-white mb-2">{bioData.name || 'Athlete Profile'}</h4>
+            {bioData.rank && bioData.rank !== 'N/A' && (
+              <Badge className="bg-athlete-warning text-black font-bold text-base px-3 py-1">
+                World Rank #{bioData.rank}
+              </Badge>
             )}
+          </div>
+          <div className="space-y-4">
             
+            {/* Biography Section */}
             {bioData.bio && (
-              <div>
-                <h5 className="text-white font-semibold mb-2">Biography</h5>
-                <p className="leading-relaxed">{bioData.bio}</p>
-              </div>
+              <Card className="bg-athlete-gray-600 border-gray-500">
+                <CardContent className="p-4">
+                  <h5 className="text-athlete-accent font-bold text-lg mb-3">Biography</h5>
+                  <p className="leading-relaxed text-gray-200">{bioData.bio}</p>
+                </CardContent>
+              </Card>
             )}
             
-            {bioData.personalInfo && (
-              <div>
-                <h5 className="text-white font-semibold mb-2">Personal Information</h5>
-                <div className="grid md:grid-cols-2 gap-3 text-sm">
-                  {bioData.personalInfo.sport && (
-                    <p><strong className="text-white">Sport:</strong> {bioData.personalInfo.sport}</p>
-                  )}
-                  {bioData.personalInfo.status && (
-                    <p><strong className="text-white">Status:</strong> {bioData.personalInfo.status}</p>
-                  )}
-                  {bioData.personalInfo.birthDate && (
-                    <p><strong className="text-white">Born:</strong> {bioData.personalInfo.birthDate}</p>
-                  )}
-                  {bioData.personalInfo.nationality && (
-                    <p><strong className="text-white">Nationality:</strong> {bioData.personalInfo.nationality}</p>
-                  )}
-                  {bioData.personalInfo.height && (
-                    <p><strong className="text-white">Height:</strong> {bioData.personalInfo.height}</p>
-                  )}
-                  {bioData.personalInfo.weight && (
-                    <p><strong className="text-white">Weight:</strong> {bioData.personalInfo.weight}</p>
-                  )}
-                  {bioData.personalInfo.lastUpdated && (
-                    <p><strong className="text-white">Last Updated:</strong> {bioData.personalInfo.lastUpdated}</p>
-                  )}
-                </div>
-              </div>
+            {/* Rank Section */}
+            {bioData.rank && bioData.rank !== 'N/A' && (
+              <Card className="bg-athlete-gray-600 border-gray-500">
+                <CardContent className="p-4">
+                  <h5 className="text-athlete-warning font-bold text-lg mb-3">Current Ranking</h5>
+                  <div className="flex items-center space-x-2">
+                    <Badge className="bg-athlete-warning text-black font-bold text-lg px-3 py-1">
+                      #{bioData.rank}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
             )}
             
+            {/* Achievements Section */}
             {bioData.achievements && Array.isArray(bioData.achievements) && bioData.achievements.length > 0 && (
-              <div>
-                <h5 className="text-white font-semibold mb-2">Career Highlights</h5>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                  {bioData.achievements.map((achievement: string, index: number) => (
-                    <li key={index} className="leading-relaxed">{achievement}</li>
-                  ))}
-                </ul>
-              </div>
+              <Card className="bg-athlete-gray-600 border-gray-500">
+                <CardContent className="p-4">
+                  <h5 className="text-athlete-success font-bold text-lg mb-3">Career Achievements</h5>
+                  <ul className="space-y-2">
+                    {bioData.achievements.map((achievement: string, index: number) => (
+                      <li key={index} className="flex items-start space-x-2">
+                        <Star className="w-4 h-4 text-yellow-400 mt-1 flex-shrink-0" />
+                        <span className="text-gray-200 leading-relaxed">{achievement}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
             )}
             
-            {bioData.personalInfo?.recentNews && Array.isArray(bioData.personalInfo.recentNews) && bioData.personalInfo.recentNews.length > 0 && (
-              <div>
-                <h5 className="text-white font-semibold mb-2">Recent News</h5>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                  {bioData.personalInfo.recentNews.map((news: string, index: number) => (
-                    <li key={index} className="leading-relaxed text-athlete-accent">{news}</li>
-                  ))}
-                </ul>
-              </div>
+            {/* Recent News Section */}
+            {bioData.recentNews && Array.isArray(bioData.recentNews) && bioData.recentNews.length > 0 && (
+              <Card className="bg-athlete-gray-600 border-gray-500">
+                <CardContent className="p-4">
+                  <h5 className="text-blue-400 font-bold text-lg mb-3">Recent News & Updates</h5>
+                  <ul className="space-y-3">
+                    {bioData.recentNews.map((news: string, index: number) => (
+                      <li key={index} className="border-l-2 border-blue-400 pl-3">
+                        <span className="text-gray-200 leading-relaxed">{news}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+            
+            {/* Personal Information Section */}
+            {bioData.personalInfo && (
+              <Card className="bg-athlete-gray-600 border-gray-500">
+                <CardContent className="p-4">
+                  <h5 className="text-purple-400 font-bold text-lg mb-3">Personal Information</h5>
+                  <div className="grid md:grid-cols-2 gap-3 text-sm">
+                    {bioData.personalInfo.sport && (
+                      <p><strong className="text-white">Sport:</strong> <span className="text-gray-200">{bioData.personalInfo.sport}</span></p>
+                    )}
+                    {bioData.personalInfo.status && (
+                      <p><strong className="text-white">Status:</strong> <span className="text-gray-200">{bioData.personalInfo.status}</span></p>
+                    )}
+                    {bioData.personalInfo.birthDate && (
+                      <p><strong className="text-white">Born:</strong> <span className="text-gray-200">{bioData.personalInfo.birthDate}</span></p>
+                    )}
+                    {bioData.personalInfo.nationality && (
+                      <p><strong className="text-white">Nationality:</strong> <span className="text-gray-200">{bioData.personalInfo.nationality}</span></p>
+                    )}
+                    {bioData.personalInfo.height && (
+                      <p><strong className="text-white">Height:</strong> <span className="text-gray-200">{bioData.personalInfo.height}</span></p>
+                    )}
+                    {bioData.personalInfo.weight && (
+                      <p><strong className="text-white">Weight:</strong> <span className="text-gray-200">{bioData.personalInfo.weight}</span></p>
+                    )}
+                    {bioData.personalInfo.lastUpdated && (
+                      <p><strong className="text-white">Last Updated:</strong> <span className="text-gray-200">{bioData.personalInfo.lastUpdated}</span></p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             )}
           </div>
         </div>
