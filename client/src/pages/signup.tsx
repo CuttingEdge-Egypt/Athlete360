@@ -16,7 +16,9 @@ export function SignupPage() {
   const [personalInfo, setPersonalInfo] = useState({
     firstName: '',
     lastName: '',
-    email: ''
+    email: '',
+    password: '',
+    confirmPassword: ''
   });
   const [cardDetails, setCardDetails] = useState({
     number: '',
@@ -28,7 +30,7 @@ export function SignupPage() {
   const { toast } = useToast();
 
   const handlePersonalInfoSubmit = () => {
-    if (!personalInfo.firstName || !personalInfo.lastName || !personalInfo.email) {
+    if (!personalInfo.firstName || !personalInfo.lastName || !personalInfo.email || !personalInfo.password || !personalInfo.confirmPassword) {
       toast({
         title: "Complete personal information",
         description: "All fields are required to continue",
@@ -43,6 +45,43 @@ export function SignupPage() {
       toast({
         title: "Invalid email address",
         description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Password validation
+    if (personalInfo.password.length < 8) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 8 characters long",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!/[A-Z]/.test(personalInfo.password)) {
+      toast({
+        title: "Password validation failed",
+        description: "Password must contain at least one uppercase letter",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(personalInfo.password)) {
+      toast({
+        title: "Password validation failed",
+        description: "Password must contain at least one special character",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (personalInfo.password !== personalInfo.confirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        description: "Please ensure both passwords are identical",
         variant: "destructive",
       });
       return;
@@ -69,8 +108,8 @@ export function SignupPage() {
         firstName: personalInfo.firstName,
         lastName: personalInfo.lastName,
         email: personalInfo.email,
-        password: 'temp_password_123!', // Will be set by user later
-        confirmPassword: 'temp_password_123!',
+        password: personalInfo.password,
+        confirmPassword: personalInfo.confirmPassword,
         referralCode: new URLSearchParams(window.location.search).get('ref') || '',
         cardNumber: cardDetails.number,
         expiryMonth: cardDetails.expiry.split('/')[0] || '',
@@ -228,6 +267,33 @@ export function SignupPage() {
                       className="h-12 text-base bg-gray-700 border-gray-600 text-white"
                       data-testid="input-email"
                     />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="password" className="text-sm font-medium text-gray-200">Password</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={personalInfo.password}
+                        onChange={(e) => setPersonalInfo(prev => ({ ...prev, password: e.target.value }))}
+                        placeholder="Min. 8 chars, 1 uppercase, 1 special"
+                        className="h-12 text-base bg-gray-700 border-gray-600 text-white"
+                        data-testid="input-password"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-200">Confirm Password</Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        value={personalInfo.confirmPassword}
+                        onChange={(e) => setPersonalInfo(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                        placeholder="Re-enter password"
+                        className="h-12 text-base bg-gray-700 border-gray-600 text-white"
+                        data-testid="input-confirm-password"
+                      />
+                    </div>
                   </div>
                   
                   <Button 
