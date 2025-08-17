@@ -582,15 +582,23 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
   };
 
   const renderAnalysisContent = () => {
+    console.log('=== ANALYSIS RENDER DEBUG ===');
+    console.log('Type:', type);
+    console.log('Raw Data:', data);
+    console.log('Data Type:', typeof data);
+    
     if (!data) {
       return <div className="text-gray-400 text-center py-8">Analysis data not available</div>;
     }
 
     // Parse the data to handle JSON strings consistently
     const parsedData = parseAnalysisData(data);
+    console.log('Parsed Data:', parsedData);
 
     switch (type) {
-      case 'bio': return renderBioAnalysis(parsedData);
+      case 'bio': 
+        console.log('CALLING renderBioAnalysis with:', parsedData);
+        return renderBioAnalysis(parsedData);
       case 'rank': return renderRankAnalysis(parsedData);
       case 'strengths': return renderStrengthsAnalysis(parsedData);
       case 'weaknesses': return renderWeaknessesAnalysis(parsedData);
@@ -598,7 +606,14 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
 
       case 'beat': return renderBeatStrategies(parsedData);
       case 'video': return renderVideoAnalysis(parsedData);
-      default: return <div className="text-gray-400 text-center py-8">Unsupported analysis type</div>;
+      default: 
+        console.log('UNSUPPORTED TYPE - showing raw data:', type);
+        return (
+          <div className="text-gray-400 text-center py-8">
+            <p>Unsupported analysis type: {type}</p>
+            <pre className="text-xs mt-4 text-left">{JSON.stringify(data, null, 2)}</pre>
+          </div>
+        );
     }
   };
 
