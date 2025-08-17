@@ -16,13 +16,13 @@ import VideoAnalysis from "@/pages/video-analysis";
 import TestAuthPage from "@/pages/test-auth";
 import { SignupPage } from "@/pages/signup";
 import { LoginPage } from "@/pages/login";
-import { SignupWithCard } from "@/components/ui/signup-with-card";
+
 import { SignupFlow } from "@/components/ui/signup-flow";
 import { useState, useEffect } from "react";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
-  const [showSignupModal, setShowSignupModal] = useState(false);
+
 
   // Check if user needs to complete signup (no card on file) or has pending signup data
   useEffect(() => {
@@ -68,17 +68,12 @@ function Router() {
       }
     } catch (error) {
       console.error('Error completing signup:', error);
-      // Fallback to normal signup modal
-      setShowSignupModal(true);
+      // Fallback - redirect to signup page
+      window.location.href = '/signup';
     }
   };
 
-  // Handle signup completion
-  const handleSignupComplete = (updatedUser: any) => {
-    setShowSignupModal(false);
-    // Refresh the page to update user data
-    window.location.reload();
-  };
+
 
   return (
     <>
@@ -104,12 +99,7 @@ function Router() {
         <Route component={NotFound} />
       </Switch>
 
-      {/* Signup completion modal */}
-      <SignupWithCard
-        isOpen={showSignupModal}
-        onClose={() => setShowSignupModal(false)}
-        onComplete={handleSignupComplete}
-      />
+
     </>
   );
 }
