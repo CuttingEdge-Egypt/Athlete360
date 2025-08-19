@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,7 +21,8 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
   const [personalInfo, setPersonalInfo] = useState({
     firstName: '',
     lastName: '',
-    email: ''
+    email: '',
+    referralCode: ''
   });
   const [cardDetails, setCardDetails] = useState({
     number: '',
@@ -31,6 +32,20 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
   });
   
   const { toast } = useToast();
+
+  // Check for referral code in URL on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+      setPersonalInfo(prev => ({ ...prev, referralCode: refCode }));
+      // Show a friendly message about the referral
+      toast({
+        title: "Referral code applied!",
+        description: "You'll get bonus tokens when you sign up.",
+      });
+    }
+  }, []);
 
   const handlePersonalInfoSubmit = () => {
     if (!personalInfo.firstName || !personalInfo.lastName || !personalInfo.email) {
@@ -76,7 +91,7 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
         email: personalInfo.email,
         password: 'temp_password_123!', // Will be set by user later
         confirmPassword: 'temp_password_123!',
-        referralCode: new URLSearchParams(window.location.search).get('ref') || '',
+        referralCode: personalInfo.referralCode || '',
         cardNumber: cardDetails.number,
         expiryMonth: cardDetails.expiry.split('/')[0] || '',
         expiryYear: cardDetails.expiry.split('/')[1] ? `20${cardDetails.expiry.split('/')[1]}` : '',
@@ -221,6 +236,29 @@ export function SignupFlow({ isOpen, onClose, onComplete }: SignupFlowProps) {
                     data-testid="input-email"
                   />
                 </div>
+                
+                {/* Referral Code Field */}
+                <div className="space-y-2">
+                  <Label htmlFor="referralCode" className="text-sm font-medium flex items-center gap-2">
+                    <Gift className="h-4 w-4 text-green-500" />
+                    Referral Code (Optional)
+                  </Label>
+                  <Input
+                    id="referralCode"
+                    value={personalInfo.referralCode}
+                    onChange={(e) => setPersonalInfo(prev => ({ ...prev, referralCode: e.target.value.toUpperCase() }))}
+                    placeholder="Enter referral code to earn bonus tokens"
+                    className="h-10 text-sm"
+                    data-testid="input-referral-code"
+                  />
+                  {personalInfo.referralCode && (
+                    <p className="text-xs text-green-600 flex items-center gap-1">
+                      <Gift className="h-3 w-3" />
+                      You'll receive bonus tokens when you sign up!
+                    </p>
+                  )}
+                </div>
+
                 <Button 
                   onClick={handlePersonalInfoSubmit}
                   className="w-full bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white font-medium"
