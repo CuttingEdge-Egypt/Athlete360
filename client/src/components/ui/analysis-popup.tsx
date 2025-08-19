@@ -138,6 +138,257 @@ export function AnalysisPopup({
     return sections;
   };
 
+  const renderStrengthsAnalysis = (data: any) => {
+    console.log('Frontend Strengths Data RECEIVED:', JSON.stringify(data, null, 2));
+    
+    // Parse the data first using the utility function
+    const parsedData = parseAnalysisData(data);
+    
+    // Check for error state first
+    if (parsedData.error || parsedData.message?.includes('Unable to generate')) {
+      return (
+        <div className="p-6 text-center">
+          <div className="text-red-400 mb-4">⚠ Analysis Unavailable</div>
+          <p className="text-gray-300 mb-4">
+            {parsedData.message || 'Unable to generate authentic strengths analysis at this time.'}
+          </p>
+          <p className="text-sm text-gray-400">
+            Please try again later or contact support if the issue persists.
+          </p>
+        </div>
+      );
+    }
+
+    // Enhanced error handling for strengths data
+    let strengths: any[] = [];
+    try {
+      strengths = Array.isArray(parsedData.strengths) ? parsedData.strengths : [];
+    } catch (error) {
+      console.error('Error processing strengths data:', error);
+      strengths = [];
+    }
+
+    return (
+      <div className="space-y-6">
+        {strengths.length > 0 ? strengths.map((strength: any, index: number) => {
+          // Only render if we have authentic strength data
+          if (!strength.title && !strength.description) {
+            return null;
+          }
+          
+          return (
+            <Card key={index} className="bg-athlete-gray-700 border-gray-600 hover:border-athlete-success/50 transition-colors">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <h3 className="font-bold text-athlete-success text-lg mb-2">
+                    <Star className="inline-block w-5 h-5 mr-2" />
+                    {strength.title}
+                  </h3>
+                  {strength.rating && (
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="secondary" className="bg-athlete-success/20 text-athlete-success border-athlete-success/30">
+                        {strength.rating}/100
+                      </Badge>
+                      {strength.impact && (
+                        <Badge 
+                          variant={strength.impact === 'high' ? 'default' : 'secondary'} 
+                          className={strength.impact === 'high' 
+                            ? 'bg-red-600 text-white' 
+                            : strength.impact === 'medium' 
+                            ? 'bg-yellow-600 text-white' 
+                            : 'bg-gray-600 text-white'
+                          }
+                        >
+                          {strength.impact} impact
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                </div>
+                
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  {strength.description}
+                </p>
+                
+                {strength.evidence && (
+                  <div className="bg-athlete-gray-800 rounded-lg p-4 border-l-4 border-athlete-success">
+                    <h4 className="font-semibold text-white mb-2 flex items-center">
+                      <Award className="w-4 h-4 mr-2" />
+                      Evidence
+                    </h4>
+                    <p className="text-sm text-gray-300 italic">
+                      {strength.evidence}
+                    </p>
+                  </div>
+                )}
+                
+                {/* Progress bar for rating visualization */}
+                {strength.rating && (
+                  <div className="mt-4">
+                    <div className="flex justify-between text-sm text-gray-400 mb-1">
+                      <span>Strength Level</span>
+                      <span>{strength.rating}%</span>
+                    </div>
+                    <div className="w-full bg-gray-600 rounded-full h-2">
+                      <div 
+                        className="bg-gradient-to-r from-athlete-success to-green-400 h-2 rounded-full transition-all duration-500" 
+                        style={{ width: `${strength.rating || 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        }).filter(Boolean) : (
+          <div className="text-gray-400 text-center py-8">
+            <Star className="w-12 h-12 mx-auto mb-4 text-gray-500" />
+            <p>No strengths analysis data available</p>
+            <p className="text-sm mt-2">Generate a new analysis to see detailed insights.</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderWeaknessesAnalysis = (data: any) => {
+    const parsedData = parseAnalysisData(data);
+    
+    if (parsedData.error || parsedData.message?.includes('Unable to generate')) {
+      return (
+        <div className="p-6 text-center">
+          <div className="text-red-400 mb-4">⚠ Analysis Unavailable</div>
+          <p className="text-gray-300 mb-4">
+            {parsedData.message || 'Unable to generate authentic weaknesses analysis at this time.'}
+          </p>
+          <p className="text-sm text-gray-400">
+            Please try again later or contact support if the issue persists.
+          </p>
+        </div>
+      );
+    }
+
+    let weaknesses: any[] = [];
+    try {
+      weaknesses = Array.isArray(parsedData.weaknesses) ? parsedData.weaknesses : [];
+    } catch (error) {
+      console.error('Error processing weaknesses data:', error);
+      weaknesses = [];
+    }
+
+    return (
+      <div className="space-y-4">
+        {weaknesses.length > 0 ? weaknesses.map((weakness: any, index: number) => (
+          <Card key={index} className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-4">
+              <h5 className="font-semibold text-athlete-danger mb-2">{weakness.title}</h5>
+              <p className="text-sm text-gray-300">{weakness.description}</p>
+            </CardContent>
+          </Card>
+        )) : (
+          <div className="text-gray-400 text-center py-8">
+            <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-gray-500" />
+            <p>No weaknesses analysis data available</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderDevelopmentPlan = (data: any) => {
+    const parsedData = parseAnalysisData(data);
+    
+    if (parsedData.error || parsedData.message?.includes('Unable to generate')) {
+      return (
+        <div className="p-6 text-center">
+          <div className="text-red-400 mb-4">⚠ Analysis Unavailable</div>
+          <p className="text-gray-300 mb-4">
+            {parsedData.message || 'Unable to generate authentic development plan at this time.'}
+          </p>
+          <p className="text-sm text-gray-400">
+            Please try again later or contact support if the issue persists.
+          </p>
+        </div>
+      );
+    }
+
+    let planItems: any[] = [];
+    try {
+      planItems = Array.isArray(parsedData.plan) ? parsedData.plan : [];
+    } catch (error) {
+      console.error('Error processing development plan data:', error);
+      planItems = [];
+    }
+
+    return (
+      <div>
+        {parsedData.duration && (
+          <div className="mb-6">
+            <Badge variant="secondary" className="bg-athlete-accent text-white">
+              {parsedData.duration}
+            </Badge>
+          </div>
+        )}
+        <div className="grid gap-4">
+          {planItems.length > 0 ? planItems.map((item: any, index: number) => (
+            <Card key={index} className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-4">
+                <h5 className="font-semibold text-white mb-2">
+                  {item.title || item.focus || item.phase || item.name || "Development Phase"}
+                </h5>
+                {item.description && (
+                  <p className="text-sm text-gray-300 mb-3 italic">
+                    {item.description}
+                  </p>
+                )}
+                <ul className="text-sm text-gray-300 space-y-1">
+                  {(item.activities || item.details || item.exercises || []).map((activity: string, idx: number) => (
+                    <li key={idx}>• {activity}</li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )) : (
+            <div className="text-gray-400 text-center py-8">
+              No development plan data available
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderRankAnalysis = (data: any) => {
+    const parsedData = parseAnalysisData(data);
+    
+    return (
+      <div>
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-4">
+              <h5 className="font-semibold text-athlete-success mb-2">Recommendations</h5>
+              <ul className="text-sm text-gray-300 space-y-1">
+                {parsedData.recommendations?.map((rec: string, index: number) => (
+                  <li key={index}>• {rec}</li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-4">
+              <h5 className="font-semibold text-athlete-warning mb-2">Key Stats</h5>
+              <div className="text-sm text-gray-300 space-y-1">
+                <div>Current Rank: <span className="text-white font-semibold">#{parsedData.currentRank}</span></div>
+                <div>Peak Rank: <span className="text-white font-semibold">#{parsedData.peakRank}</span></div>
+                <div>Avg Position: <span className="text-white font-semibold">#{parsedData.averageRank}</span></div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  };
+
   const renderBioAnalysis = (data: any) => {
     // Use refreshed data if available, otherwise use original data
     const dataToRender = refreshedBioData || data;
@@ -446,6 +697,26 @@ export function AnalysisPopup({
     // Special handling for strategic combat analysis
     if (type === "beat" || type === "beat-strategies") {
       return <StrategicCombatDisplay data={data} />;
+    }
+
+    // Special handling for strengths analysis
+    if (type === "strengths") {
+      return renderStrengthsAnalysis(data);
+    }
+
+    // Special handling for weaknesses analysis
+    if (type === "weaknesses") {
+      return renderWeaknessesAnalysis(data);
+    }
+
+    // Special handling for development plan
+    if (type === "development" || type === "development-plan") {
+      return renderDevelopmentPlan(data);
+    }
+
+    // Special handling for rank analysis
+    if (type === "rank") {
+      return renderRankAnalysis(data);
     }
 
     // Parse the data to handle JSON strings consistently
