@@ -818,7 +818,7 @@ Create a plan for the full duration specified. Use authentic data and personaliz
 export async function generateRankHistory(athleteName: string, sport: string, nationality?: string): Promise<any> {
   const currentDate = new Date().toISOString().split('T')[0];
   
-  // Enhanced prompt focused on authentic ranking data
+  // Enhanced prompt focused on authentic ranking data with better guidance for incomplete data
   const prompt = `Search the web for detailed competition history and ranking progression for athlete "${athleteName}" from ${nationality || 'unknown nationality'} in ${sport}.
 
 CRITICAL REQUIREMENTS:
@@ -826,9 +826,15 @@ CRITICAL REQUIREMENTS:
 2. Search for official world rankings, federation rankings, or national rankings
 3. Look for tournament results that affected their ranking position
 4. Only include competitions with verified dates and outcomes
-5. Use "N/A" if no authentic data is found - do not create fictional entries
+5. If exact numerical rankings are not available, use descriptive terms like "Unranked", "Regional level", "National level", "International competitor"
 
-For ${sport === 'taekwondo' ? 'Taekwondo athletes, check World Taekwondo (WT) official rankings, Olympic results, World Championships, and Grand Prix series results.' : sport + ' athletes, search official federation websites and competition databases.'}
+RANKING DATA STRATEGY:
+- For established athletes: Search for official world rankings, federation rankings
+- For emerging athletes: Look for regional rankings, national team status, competition level progression
+- Use "Unranked" instead of "N/A" for athletes without official rankings
+- Estimate competitive level based on tournament results (e.g., "National level competitor", "Regional champion")
+
+For ${sport === 'taekwondo' ? 'Taekwondo athletes, check World Taekwondo (WT) official rankings, Olympic results, World Championships, Grand Prix series, and continental championships.' : sport + ' athletes, search official federation websites and competition databases.'}
 
 Return ONLY this JSON structure with authentic data:
 {
@@ -837,10 +843,10 @@ Return ONLY this JSON structure with authentic data:
     "nationality": "${nationality || 'N/A'}",
     "sport": "${sport}",
     "isActive": true,
-    "officialRecord": "W-L (XX%)",
-    "peakRanking": "#X",
-    "peakRankingDate": "YYYY-MM-DD",
-    "currentRanking": "#X",
+    "officialRecord": "Based on competition results if available, or 'Developing athlete'",
+    "peakRanking": "Highest verified ranking or 'Unranked' or competitive level description",
+    "peakRankingDate": "YYYY-MM-DD or 'N/A'",
+    "currentRanking": "Current verified ranking or 'Unranked' or competitive level",
     "lastUpdated": "${currentDate}"
   },
   "rankingProgression": [
@@ -848,22 +854,22 @@ Return ONLY this JSON structure with authentic data:
       "competition": "Official Competition Name (verified)",
       "date": "YYYY-MM-DD",
       "result": "Specific result (gold/silver/bronze/eliminated in round X)",
-      "rankingBefore": "#X",
-      "rankingAfter": "#X",
-      "points": "Ranking points gained/lost if available",
-      "significance": "How this result impacted their career ranking"
+      "rankingBefore": "Ranking or competitive level before",
+      "rankingAfter": "Ranking or competitive level after",
+      "points": "Ranking points if available or 'N/A'",
+      "significance": "How this result impacted their career progression"
     }
   ],
   "careerSummary": {
-    "totalCompetitions": 0,
-    "majorTitles": 0,
-    "rankingTrend": "upward/downward/stable",
-    "notableAchievements": ["Only verified achievements"],
-    "currentForm": "Recent performance description based on 2024-2025 results"
+    "totalCompetitions": "Count of verified competitions",
+    "majorTitles": "Count of significant titles",
+    "rankingTrend": "upward/downward/stable based on competition progression",
+    "notableAchievements": ["Only verified achievements from search results"],
+    "currentForm": "Recent performance analysis based on 2024-2025 results"
   }
 }
 
-IMPORTANT: If no reliable ranking progression data is found through web search, return minimal athlete data with empty rankingProgression array. Do not fabricate competition results.`;
+IMPORTANT: Focus on authentic data but provide meaningful analysis even for emerging athletes. Use competition level progression to show career development.`;
 
   try {
     const response = await openai.responses.create({

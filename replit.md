@@ -143,3 +143,6 @@ Preferred communication style: Simple, everyday language.
 - **Updated both analysis components**: Applied same UI improvements to both `analysis-result.tsx` and `analysis-popup.tsx` for consistent display
 - **Enhanced rank generation prompt**: Improved AI prompt to focus on authentic competition data from 2022-2025 with verified dates and official tournament results
 - **Added specialized taekwondo guidance**: Specific prompt instructions for World Taekwondo (WT) rankings, Olympic results, and Grand Prix series for accurate data extraction
+- **Created adaptive UI for multiple data formats**: Complete redesign with fallback strategies for old synthetic data, new enhanced format, and debug view for unrecognized structures
+- **Improved ranking data strategy**: Enhanced prompt to provide meaningful analysis for emerging athletes using descriptive terms like "Unranked", "Regional level" instead of "N/A"
+- **Added comprehensive JSON format handling**: Multiple parsing strategies and debug capabilities to handle any backend response format changes
