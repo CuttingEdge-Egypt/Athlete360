@@ -1145,6 +1145,42 @@ Use authentic data only - base analysis on real competition results and verified
         };
       }
       
+      // For strengths analysis, return a structured fallback
+      if (analysisType === 'strengths') {
+        return {
+          error: 'JSON parsing failed - response may be incomplete',
+          message: 'Unable to generate authentic strengths analysis due to parsing error',
+          strengths: []
+        };
+      }
+      
+      // For weaknesses analysis, return a structured fallback  
+      if (analysisType === 'weaknesses') {
+        return {
+          error: 'JSON parsing failed - response may be incomplete',
+          message: 'Unable to generate authentic weaknesses analysis due to parsing error',
+          weaknesses: []
+        };
+      }
+      
+      // For development analysis, return a structured fallback
+      if (analysisType === 'development') {
+        return {
+          error: 'JSON parsing failed - response may be incomplete', 
+          message: 'Unable to generate authentic development plan due to parsing error',
+          plan: []
+        };
+      }
+      
+      // For beat strategies analysis, return a structured fallback
+      if (analysisType === 'beat') {
+        return {
+          error: 'JSON parsing failed - response may be incomplete',
+          message: 'Unable to generate authentic strategic analysis due to parsing error', 
+          strategies: []
+        };
+      }
+      
       throw parseError;
     }
   } catch (error) {

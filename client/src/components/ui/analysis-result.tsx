@@ -315,18 +315,118 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     </div>
   );
 
-  const renderStrengthsAnalysis = (data: any) => (
-    <div className="space-y-4">
-      {data.strengths?.map((strength: any, index: number) => (
-        <Card key={index} className="bg-athlete-gray-700 border-gray-600">
-          <CardContent className="p-4">
-            <h5 className="font-semibold text-athlete-success mb-2">{strength.title}</h5>
-            <p className="text-sm text-gray-300">{strength.description}</p>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
+  const renderStrengthsAnalysis = (data: any) => {
+    console.log('Frontend Strengths Data RECEIVED:', JSON.stringify(data, null, 2));
+    
+    // Parse the data first using the utility function
+    const parsedData = parseAnalysisData(data);
+    
+    // Check for error state first
+    if (parsedData.error || parsedData.message?.includes('Unable to generate')) {
+      return (
+        <div className="p-6 text-center">
+          <div className="text-red-400 mb-4">⚠ Analysis Unavailable</div>
+          <p className="text-gray-300 mb-4">
+            {parsedData.message || 'Unable to generate authentic strengths analysis at this time.'}
+          </p>
+          <p className="text-sm text-gray-400">
+            Please try again later or contact support if the issue persists.
+          </p>
+        </div>
+      );
+    }
+
+    // Enhanced error handling for strengths data
+    let strengths: any[] = [];
+    try {
+      strengths = Array.isArray(parsedData.strengths) ? parsedData.strengths : [];
+    } catch (error) {
+      console.error('Error processing strengths data:', error);
+      strengths = [];
+    }
+
+    return (
+      <div className="space-y-6">
+        {strengths.length > 0 ? strengths.map((strength: any, index: number) => {
+          // Only render if we have authentic strength data
+          if (!strength.title && !strength.description) {
+            return null;
+          }
+          
+          return (
+            <Card key={index} className="bg-athlete-gray-700 border-gray-600 hover:border-athlete-success/50 transition-colors">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <h3 className="font-bold text-athlete-success text-lg mb-2">
+                    <Star className="inline-block w-5 h-5 mr-2" />
+                    {strength.title}
+                  </h3>
+                  {strength.rating && (
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="secondary" className="bg-athlete-success/20 text-athlete-success border-athlete-success/30">
+                        {strength.rating}/100
+                      </Badge>
+                      {strength.impact && (
+                        <Badge 
+                          variant={strength.impact === 'high' ? 'default' : 'secondary'} 
+                          className={strength.impact === 'high' 
+                            ? 'bg-red-600 text-white' 
+                            : strength.impact === 'medium' 
+                            ? 'bg-yellow-600 text-white' 
+                            : 'bg-gray-600 text-white'
+                          }
+                        >
+                          {strength.impact} impact
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                </div>
+                
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  {strength.description}
+                </p>
+                
+                {strength.evidence && (
+                  <div className="bg-athlete-gray-800 rounded-lg p-4 border-l-4 border-athlete-success">
+                    <h4 className="font-semibold text-white mb-2 flex items-center">
+                      <Award className="w-4 h-4 mr-2" />
+                      Evidence
+                    </h4>
+                    <p className="text-sm text-gray-300 italic">
+                      {strength.evidence}
+                    </p>
+                  </div>
+                )}
+                
+                {/* Progress bar for rating visualization */}
+                {strength.rating && (
+                  <div className="mt-4">
+                    <div className="flex justify-between text-sm text-gray-400 mb-1">
+                      <span>Strength Level</span>
+                      <span>{strength.rating}%</span>
+                    </div>
+                    <div className="w-full bg-gray-600 rounded-full h-2">
+                      <div 
+                        className="bg-gradient-to-r from-athlete-success to-green-400 h-2 rounded-full transition-all duration-500" 
+                        style={{ width: `${strength.rating || 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        }).filter(Boolean) : (
+          <div className="text-gray-400 text-center py-8">
+            <Star className="w-12 h-12 mx-auto mb-4 text-gray-500" />
+            <p>No strengths analysis data available</p>
+            <p className="text-sm mt-2">Generate a new analysis to see detailed insights.</p>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const renderWeaknessesAnalysis = (data: any) => (
     <div className="space-y-4">
