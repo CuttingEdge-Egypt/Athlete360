@@ -270,12 +270,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rankValue = Number(aiProfile.rank);
       }
       
+      // Extract nationality from bio data
+      const extractNationality = (bio: string): string | undefined => {
+        const text = bio.toLowerCase();
+        
+        // Country mapping for common nationalities found in bios
+        const nationalityMap: { [key: string]: string } = {
+          'american': 'United States',
+          'spanish': 'Spain',
+          'egyptian': 'Egypt',
+          'korean': 'South Korea',
+          'south korean': 'South Korea',
+          'uzbek': 'Uzbekistan',
+          'brazilian': 'Brazil',
+          'argentinian': 'Argentina',
+          'portuguese': 'Portugal',
+          'palestinian': 'Palestine',
+          'british': 'United Kingdom',
+          'english': 'United Kingdom',
+          'canadian': 'Canada',
+          'french': 'France',
+          'german': 'Germany',
+          'italian': 'Italy',
+          'japanese': 'Japan',
+          'chinese': 'China',
+          'australian': 'Australia',
+          'mexican': 'Mexico',
+          'turkish': 'Turkey',
+          'serbian': 'Serbia',
+          'croatian': 'Croatia',
+          'polish': 'Poland',
+          'russian': 'Russia',
+          'ukrainian': 'Ukraine',
+          'thai': 'Thailand',
+          'iranian': 'Iran',
+          'iraqui': 'Iraq',
+          'jordanian': 'Jordan',
+          'lebanese': 'Lebanon',
+          'moroccan': 'Morocco',
+          'tunisian': 'Tunisia',
+          'algerian': 'Algeria',
+          'south african': 'South Africa',
+          'nigerian': 'Nigeria',
+          'kenyan': 'Kenya',
+          'ethiopian': 'Ethiopia'
+        };
+
+        // Look for nationality patterns in bio
+        for (const [nationality, country] of Object.entries(nationalityMap)) {
+          if (text.includes(nationality)) {
+            return country;
+          }
+        }
+
+        // Look for direct country mentions
+        const countryPattern = /\b(united states|spain|egypt|south korea|uzbekistan|brazil|argentina|portugal|palestine|united kingdom|canada|france|germany|italy|japan|china|australia|mexico|turkey|serbia|croatia|poland|russia|ukraine|thailand|iran|iraq|jordan|lebanon|morocco|tunisia|algeria|south africa|nigeria|kenya|ethiopia)\b/i;
+        const match = bio.match(countryPattern);
+        if (match) {
+          return match[1].split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+        }
+
+        return undefined;
+      };
+
+      const extractedCountry = extractNationality(aiProfile.bio || '');
+
       const athleteData = {
         name: name.trim(),
         sportId,
         bio: aiProfile.bio || `Professional ${sport.name} athlete`,
         rank: rankValue,
-        country: undefined,
+        country: extractedCountry,
         profileImageUrl: profileImageUrl || undefined,
         achievements: aiProfile.achievements || []
       };
