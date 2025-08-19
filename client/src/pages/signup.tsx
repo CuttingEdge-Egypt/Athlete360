@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,8 @@ export function SignupPage() {
     lastName: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    referralCode: ''
   });
   const [cardDetails, setCardDetails] = useState({
     number: '',
@@ -28,6 +29,20 @@ export function SignupPage() {
   });
   
   const { toast } = useToast();
+
+  // Check for referral code in URL on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+      setPersonalInfo(prev => ({ ...prev, referralCode: refCode }));
+      // Show a friendly message about the referral
+      toast({
+        title: "Referral code applied!",
+        description: "You'll get bonus tokens when you sign up.",
+      });
+    }
+  }, []);
 
   const handlePersonalInfoSubmit = () => {
     if (!personalInfo.firstName || !personalInfo.lastName || !personalInfo.email || !personalInfo.password || !personalInfo.confirmPassword) {
@@ -110,7 +125,7 @@ export function SignupPage() {
         email: personalInfo.email,
         password: personalInfo.password,
         confirmPassword: personalInfo.confirmPassword,
-        referralCode: new URLSearchParams(window.location.search).get('ref') || '',
+        referralCode: personalInfo.referralCode || '',
         cardNumber: cardDetails.number,
         expiryMonth: cardDetails.expiry.split('/')[0] || '',
         expiryYear: cardDetails.expiry.split('/')[1] ? `20${cardDetails.expiry.split('/')[1]}` : '',
@@ -269,6 +284,28 @@ export function SignupPage() {
                       className="h-12 text-base bg-gray-700 border-gray-600 text-white"
                       data-testid="input-email"
                     />
+                  </div>
+                  
+                  {/* Referral Code Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="referralCode" className="text-sm font-medium text-gray-200 flex items-center gap-2">
+                      <Gift className="h-4 w-4 text-green-500" />
+                      Referral Code (Optional)
+                    </Label>
+                    <Input
+                      id="referralCode"
+                      value={personalInfo.referralCode}
+                      onChange={(e) => setPersonalInfo(prev => ({ ...prev, referralCode: e.target.value.toUpperCase() }))}
+                      placeholder="Enter referral code to earn bonus tokens"
+                      className="h-12 text-base bg-gray-700 border-gray-600 text-white"
+                      data-testid="input-referral-code"
+                    />
+                    {personalInfo.referralCode && (
+                      <p className="text-xs text-green-400 flex items-center gap-1">
+                        <Gift className="h-3 w-3" />
+                        You'll receive bonus tokens when you sign up!
+                      </p>
+                    )}
                   </div>
                   
                   <div className="grid grid-cols-2 gap-6">

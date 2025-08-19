@@ -35,7 +35,7 @@ export function ProfileDropdown() {
   const copyReferralLink = async () => {
     if (!user?.referralCode) return;
     
-    const referralLink = `${window.location.origin}?ref=${user.referralCode}`;
+    const referralLink = `${window.location.origin}/signup?ref=${user.referralCode}`;
     
     try {
       await navigator.clipboard.writeText(referralLink);
@@ -57,7 +57,7 @@ export function ProfileDropdown() {
   const shareReferralLink = () => {
     if (!user?.referralCode) return;
     
-    const referralLink = `${window.location.origin}?ref=${user.referralCode}`;
+    const referralLink = `${window.location.origin}/signup?ref=${user.referralCode}`;
     const text = `Join Athlete360 and get AI-powered athlete insights! Use my referral link: ${referralLink}`;
     
     if (navigator.share) {
@@ -149,7 +149,7 @@ export function ProfileDropdown() {
                       size="sm"
                       variant="outline"
                       onClick={() => {
-                        navigator.clipboard.writeText(user.referralCode);
+                        navigator.clipboard.writeText(user.referralCode || '');
                         toast({ title: "Referral code copied!" });
                       }}
                       className="px-2 h-7"
@@ -169,7 +169,7 @@ export function ProfileDropdown() {
                   <div className="flex items-center space-x-2">
                     <Input
                       id="referral-link"
-                      value={`${window.location.origin}?ref=${user.referralCode}`}
+                      value={`${window.location.origin}/signup?ref=${user.referralCode}`}
                       readOnly
                       className="text-xs h-7"
                       data-testid="input-referral-link"
