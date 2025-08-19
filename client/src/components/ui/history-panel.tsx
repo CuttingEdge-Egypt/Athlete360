@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AnalysisPopup } from "@/components/ui/analysis-popup";
-import { AthleteComparison } from "@/components/ui/athlete-comparison";
+import { ComparisonHistoryDialog } from "@/components/ui/comparison-history-dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { History, Clock, User, TrendingUp, Target, Utensils, Zap, Video, GitCompare, Coins, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -241,16 +241,14 @@ export function HistoryPanel({ showHeader = true, className = "" }: HistoryPanel
 
       {/* Comparison Popup for revisiting comparisons */}
       {selectedHistoryItem && selectedHistoryItem.serviceType === 'comparison' && showComparisonPopup && (
-        <AthleteComparison
+        <ComparisonHistoryDialog
           open={showComparisonPopup}
-          onOpenChange={(open) => {
+          onOpenChange={(open: boolean) => {
             if (!open) {
               setShowComparisonPopup(false);
               setSelectedHistoryItem(null);
             }
           }}
-          athlete1={selectedHistoryItem.resultData?.athlete1}
-          athlete2={selectedHistoryItem.resultData?.athlete2}
           comparisonData={selectedHistoryItem.resultData}
         />
       )}
