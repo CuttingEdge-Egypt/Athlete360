@@ -142,7 +142,7 @@ export function ProfileDropdown() {
                     <Input
                       value={user.referralCode}
                       readOnly
-                      className="text-xs h-7 font-mono bg-gray-50 dark:bg-gray-800"
+                      className="text-xs h-7 font-mono bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                       data-testid="input-referral-code"
                     />
                     <Button

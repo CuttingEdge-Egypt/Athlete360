@@ -124,11 +124,11 @@ export function HistoryDropdown() {
         <DropdownMenuTrigger asChild>
           <Button 
             variant="ghost" 
-            size="icon"
             data-testid="button-history"
-            className="relative"
+            className="relative flex items-center gap-2 px-3"
           >
             <History className="h-4 w-4" />
+            <span className="text-sm">History</span>
             {historyItems.length > 0 && (
               <Badge 
                 variant="secondary" 
