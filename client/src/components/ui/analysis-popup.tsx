@@ -229,10 +229,13 @@ export function AnalysisPopup({
                       <span>Strength Level</span>
                       <span>{strength.rating}%</span>
                     </div>
-                    <div className="w-full bg-gray-600 rounded-full h-2">
+                    <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
                       <div 
-                        className="bg-gradient-to-r from-athlete-success to-green-400 h-2 rounded-full transition-all duration-500" 
-                        style={{ width: `${strength.rating || 0}%` }}
+                        className="h-3 rounded-full transition-all duration-700 ease-out"
+                        style={{ 
+                          width: `${Math.min(strength.rating || 0, 100)}%`,
+                          background: `linear-gradient(90deg, #10b981 0%, #34d399 50%, #6ee7b7 100%)`
+                        }}
                       ></div>
                     </div>
                   </div>
