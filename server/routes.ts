@@ -1922,6 +1922,57 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
+  // Dedicated /pay endpoint that returns iframe HTML with payment key
+  app.post('/api/pay', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { amount, tokensAmount } = req.body;
+
+      if (!amount || !tokensAmount) {
+        return res.status(400).json({ message: "Amount and tokens amount are required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Create payment intent to get the payment key
+      const paymentIntent = await paymobService.createPaymentIntent({
+        amount,
+        currency: 'EGP',
+        userId,
+        tokensAmount,
+        billingData: {
+          email: user.email || '',
+          firstName: user.firstName || '',
+          lastName: user.lastName || ''
+        }
+      });
+
+      // Generate iframe HTML with the payment key
+      const iframeHTML = `
+        <iframe 
+          src="${paymentIntent.iframeUrl}" 
+          width="100%" 
+          height="600" 
+          frameborder="0"
+          style="border: none; border-radius: 8px;">
+        </iframe>
+      `;
+
+      res.json({
+        iframeHTML,
+        paymentToken: paymentIntent.token,
+        iframeUrl: paymentIntent.iframeUrl,
+        orderId: paymentIntent.orderId
+      });
+    } catch (error) {
+      console.error("Error creating payment iframe:", error);
+      res.status(500).json({ message: "Failed to create payment iframe" });
+    }
+  });
+
   // Mock payment iframe for testing
   app.get('/api/payments/mock-iframe', (req, res) => {
     const { token, amount } = req.query;
