@@ -1,11 +1,12 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AnalysisPopup } from "@/components/ui/analysis-popup";
-import { AthleteComparison } from "@/components/ui/athlete-comparison";
+
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { History, Clock, User, TrendingUp, Target, Utensils, Zap, Video, GitCompare, Coins, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -51,9 +52,9 @@ const serviceLabels = {
 export function HistoryDropdown() {
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<HistoryItem | null>(null);
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
-  const [showComparisonPopup, setShowComparisonPopup] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const { data: historyItems = [], isLoading } = useQuery<HistoryItem[]>({
     queryKey: ["/api/user-history"],
@@ -83,7 +84,8 @@ export function HistoryDropdown() {
     setSelectedHistoryItem(item);
     
     if (item.serviceType === 'comparison') {
-      setShowComparisonPopup(true);
+      // Navigate to home with comparison tab and data
+      setLocation("/?tab=comparison&data=" + encodeURIComponent(JSON.stringify(item.resultData)));
     } else {
       setShowAnalysisPopup(true);
     }
@@ -232,21 +234,7 @@ export function HistoryDropdown() {
         />
       )}
 
-      {/* Comparison Popup for revisiting comparisons */}
-      {selectedHistoryItem && selectedHistoryItem.serviceType === 'comparison' && showComparisonPopup && (
-        <AthleteComparison
-          open={showComparisonPopup}
-          onOpenChange={(open) => {
-            if (!open) {
-              setShowComparisonPopup(false);
-              setSelectedHistoryItem(null);
-            }
-          }}
-          athlete1={selectedHistoryItem.resultData?.athlete1}
-          athlete2={selectedHistoryItem.resultData?.athlete2}
-          comparisonData={selectedHistoryItem.resultData}
-        />
-      )}
+
     </>
   );
 }
