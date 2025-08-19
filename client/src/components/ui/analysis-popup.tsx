@@ -362,29 +362,166 @@ export function AnalysisPopup({
   };
 
   const renderRankAnalysis = (data: any) => {
+    console.log('Frontend Rank Data RECEIVED (Popup):', JSON.stringify(data, null, 2));
+    
+    // Parse the data first using the utility function
     const parsedData = parseAnalysisData(data);
     
+    // Check for error state first
+    if (parsedData.error || parsedData.message?.includes('Unable to generate')) {
+      return (
+        <div className="p-6 text-center">
+          <div className="text-red-400 mb-4">⚠ Rank Analysis Unavailable</div>
+          <p className="text-gray-300 mb-4">
+            {parsedData.message || 'Unable to generate authentic rank history at this time.'}
+          </p>
+          <p className="text-sm text-gray-400">
+            Please try again later or contact support if the issue persists.
+          </p>
+        </div>
+      );
+    }
+
+    // Extract athlete and ranking data from the response
+    const athlete = parsedData.athlete || {};
+    const rankingProgression = parsedData.rankingProgression || [];
+    const careerSummary = parsedData.careerSummary || {};
+
     return (
-      <div>
-        <div className="grid md:grid-cols-2 gap-6">
-          <Card className="bg-athlete-gray-700 border-gray-600">
-            <CardContent className="p-4">
-              <h5 className="font-semibold text-athlete-success mb-2">Recommendations</h5>
-              <ul className="text-sm text-gray-300 space-y-1">
-                {parsedData.recommendations?.map((rec: string, index: number) => (
-                  <li key={index}>• {rec}</li>
+      <div className="space-y-6">
+        {/* Athlete Status Overview */}
+        <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-blue-400 border-gray-600 shadow-xl">
+          <CardContent className="p-6">
+            <h3 className="text-2xl font-bold text-blue-400 mb-4 flex items-center">
+              <Trophy className="mr-3 text-blue-400" size={24} />
+              Career Overview
+            </h3>
+            <div className="grid md:grid-cols-4 gap-4">
+              <div className="text-center p-4 bg-athlete-gray-600 rounded-lg">
+                <div className="text-2xl font-bold text-white">{athlete.currentRanking || 'N/A'}</div>
+                <div className="text-sm text-gray-300">Current Rank</div>
+              </div>
+              <div className="text-center p-4 bg-athlete-gray-600 rounded-lg">
+                <div className="text-2xl font-bold text-athlete-success">{athlete.peakRanking || 'N/A'}</div>
+                <div className="text-sm text-gray-300">Peak Rank</div>
+              </div>
+              <div className="text-center p-4 bg-athlete-gray-600 rounded-lg">
+                <div className="text-2xl font-bold text-athlete-warning">{athlete.officialRecord || 'N/A'}</div>
+                <div className="text-sm text-gray-300">Record</div>
+              </div>
+              <div className="text-center p-4 bg-athlete-gray-600 rounded-lg">
+                <div className="text-2xl font-bold text-purple-400">{careerSummary.totalCompetitions || 'N/A'}</div>
+                <div className="text-sm text-gray-300">Competitions</div>
+              </div>
+            </div>
+            
+            {athlete.isActive !== undefined && (
+              <div className="mt-4 flex items-center justify-center">
+                <Badge 
+                  variant={athlete.isActive ? 'default' : 'secondary'} 
+                  className={athlete.isActive 
+                    ? 'bg-green-600 text-white' 
+                    : 'bg-gray-600 text-white'
+                  }
+                >
+                  {athlete.isActive ? 'Active' : 'Inactive'}
+                </Badge>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Ranking Progression Timeline */}
+        {rankingProgression.length > 0 && (
+          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-success border-gray-600 shadow-xl">
+            <CardContent className="p-6">
+              <h3 className="text-2xl font-bold text-athlete-success mb-6 flex items-center">
+                <TrendingUp className="mr-3 text-athlete-success" size={24} />
+                Ranking Progression
+              </h3>
+              <div className="space-y-4">
+                {rankingProgression.map((entry: any, index: number) => (
+                  <div 
+                    key={index}
+                    className="flex items-center p-4 bg-athlete-gray-600 rounded-xl border-l-4 border-athlete-success"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-semibold text-white text-lg">{entry.competition}</h4>
+                        <span className="text-sm text-gray-300">{entry.date}</span>
+                      </div>
+                      <p className="text-gray-300 mb-2">{entry.result}</p>
+                      <div className="flex items-center space-x-4 text-sm">
+                        <span className="text-gray-400">
+                          Rank: {entry.rankingBefore} → 
+                          <span className={entry.rankingAfter?.includes('#') && parseInt(entry.rankingAfter.replace('#', '')) < parseInt(entry.rankingBefore?.replace('#', '') || '999') 
+                            ? 'text-green-400 font-semibold ml-1' 
+                            : 'text-red-400 font-semibold ml-1'}>
+                            {entry.rankingAfter}
+                          </span>
+                        </span>
+                        {entry.points && (
+                          <span className="text-blue-300">{entry.points}</span>
+                        )}
+                      </div>
+                      {entry.significance && (
+                        <p className="text-xs text-gray-400 mt-2 italic">{entry.significance}</p>
+                      )}
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Career Summary & Achievements */}
+        <div className="grid md:grid-cols-2 gap-6">
           <Card className="bg-athlete-gray-700 border-gray-600">
-            <CardContent className="p-4">
-              <h5 className="font-semibold text-athlete-warning mb-2">Key Stats</h5>
-              <div className="text-sm text-gray-300 space-y-1">
-                <div>Current Rank: <span className="text-white font-semibold">#{parsedData.currentRank}</span></div>
-                <div>Peak Rank: <span className="text-white font-semibold">#{parsedData.peakRank}</span></div>
-                <div>Avg Position: <span className="text-white font-semibold">#{parsedData.averageRank}</span></div>
+            <CardContent className="p-6">
+              <h5 className="font-semibold text-athlete-warning mb-4 flex items-center">
+                <Award className="mr-2" size={18} />
+                Career Summary
+              </h5>
+              <div className="space-y-3 text-sm text-gray-300">
+                {careerSummary.majorTitles && (
+                  <div>Major Titles: <span className="text-white font-semibold">{careerSummary.majorTitles}</span></div>
+                )}
+                {careerSummary.rankingTrend && (
+                  <div>Ranking Trend: 
+                    <span className={`font-semibold ml-1 ${
+                      careerSummary.rankingTrend === 'upward' ? 'text-green-400' :
+                      careerSummary.rankingTrend === 'downward' ? 'text-red-400' : 'text-gray-300'
+                    }`}>
+                      {careerSummary.rankingTrend}
+                    </span>
+                  </div>
+                )}
+                {careerSummary.currentForm && (
+                  <div>Current Form: <span className="text-white font-semibold">{careerSummary.currentForm}</span></div>
+                )}
               </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-6">
+              <h5 className="font-semibold text-purple-400 mb-4 flex items-center">
+                <Star className="mr-2" size={18} />
+                Notable Achievements
+              </h5>
+              {careerSummary.notableAchievements?.length > 0 ? (
+                <ul className="text-sm text-gray-300 space-y-2">
+                  {careerSummary.notableAchievements.map((achievement: string, index: number) => (
+                    <li key={index} className="flex items-start">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                      {achievement}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-400 text-sm">No specific achievements data available</p>
+              )}
             </CardContent>
           </Card>
         </div>

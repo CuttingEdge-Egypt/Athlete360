@@ -816,18 +816,21 @@ Create a plan for the full duration specified. Use authentic data and personaliz
 
 // GPT-5 implementation of enhanced rank history generation with competition-by-competition tracking
 export async function generateRankHistory(athleteName: string, sport: string, nationality?: string): Promise<any> {
-  const prompt = `You are an expert ${sport} analyst. Research "${athleteName}" from ${nationality || 'unknown nationality'} and provide a comprehensive ranking analysis.
+  const currentDate = new Date().toISOString().split('T')[0];
+  
+  // Enhanced prompt focused on authentic ranking data
+  const prompt = `Search the web for detailed competition history and ranking progression for athlete "${athleteName}" from ${nationality || 'unknown nationality'} in ${sport}.
 
-CRITICAL: You must return valid JSON only. No extra text, explanations, or markdown formatting.
+CRITICAL REQUIREMENTS:
+1. Find REAL competition results from 2022-2025 with specific dates
+2. Search for official world rankings, federation rankings, or national rankings
+3. Look for tournament results that affected their ranking position
+4. Only include competitions with verified dates and outcomes
+5. Use "N/A" if no authentic data is found - do not create fictional entries
 
-Search for:
-1. Competition history with exact dates and results
-2. World ranking changes after each major tournament
-3. Official competitive record (wins/losses)
-4. Current activity status (active/retired)
-5. Peak ranking achieved and date
+For ${sport === 'taekwondo' ? 'Taekwondo athletes, check World Taekwondo (WT) official rankings, Olympic results, World Championships, and Grand Prix series results.' : sport + ' athletes, search official federation websites and competition databases.'}
 
-Return this exact JSON structure:
+Return ONLY this JSON structure with authentic data:
 {
   "athlete": {
     "name": "${athleteName}",
@@ -838,29 +841,29 @@ Return this exact JSON structure:
     "peakRanking": "#X",
     "peakRankingDate": "YYYY-MM-DD",
     "currentRanking": "#X",
-    "lastUpdated": "2025-08-12"
+    "lastUpdated": "${currentDate}"
   },
   "rankingProgression": [
     {
-      "competition": "Competition Name",
+      "competition": "Official Competition Name (verified)",
       "date": "YYYY-MM-DD",
-      "result": "Result",
+      "result": "Specific result (gold/silver/bronze/eliminated in round X)",
       "rankingBefore": "#X",
       "rankingAfter": "#X",
-      "points": "Points info",
-      "significance": "Impact description"
+      "points": "Ranking points gained/lost if available",
+      "significance": "How this result impacted their career ranking"
     }
   ],
   "careerSummary": {
     "totalCompetitions": 0,
     "majorTitles": 0,
-    "rankingTrend": "upward",
-    "notableAchievements": ["Achievement 1"],
-    "currentForm": "Form description"
+    "rankingTrend": "upward/downward/stable",
+    "notableAchievements": ["Only verified achievements"],
+    "currentForm": "Recent performance description based on 2024-2025 results"
   }
 }
 
-Use "N/A" for unavailable data. Return only valid JSON.`;
+IMPORTANT: If no reliable ranking progression data is found through web search, return minimal athlete data with empty rankingProgression array. Do not fabricate competition results.`;
 
   try {
     const response = await openai.responses.create({
