@@ -27,8 +27,8 @@ Transaction response callback: https://accept.paymobsolutions.com/api/acceptance
 
 **CHANGE TO (Correct URLs):**
 ```
-Transaction processed callback: https://workspace--CuttingMo.replit.app/api/payments/paymob-processed
-Transaction response callback: https://workspace--CuttingMo.replit.app/api/payments/paymob-response
+Transaction processed callback: https://7a39e49f-f0e4-4a38-b983-657e85e5de90-00-24ejenwpt1nmi.riker.replit.dev/api/payments/paymob-processed
+Transaction response callback: https://7a39e49f-f0e4-4a38-b983-657e85e5de90-00-24ejenwpt1nmi.riker.replit.dev/api/payments/paymob-response
 ```
 
 ## Testing After Fix

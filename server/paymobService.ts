@@ -11,6 +11,8 @@ interface PaymobConfig {
 interface PaymentIntent {
   amount: number;
   currency: string;
+  userId: string;
+  tokensAmount: number;
   billingData: {
     email: string;
     firstName: string;
@@ -136,6 +138,10 @@ export class PaymobService {
         country: 'EG',
         last_name: paymentIntent.billingData.lastName,
         state: 'Cairo',
+        extra_data: {
+          user_id: paymentIntent.userId,
+          tokens_amount: paymentIntent.tokensAmount
+        }
       },
       currency: paymentIntent.currency,
       integration_id: parseInt(this.config.integrationId),

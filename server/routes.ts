@@ -1826,6 +1826,8 @@ Return only valid JSON with the missing fields.`;
       const paymentIntent = await paymobService.createPaymentIntent({
         amount,
         currency: 'EGP',
+        userId,
+        tokensAmount,
         billingData: {
           email: user.email || '',
           firstName: user.firstName || '',
@@ -1908,8 +1910,41 @@ Return only valid JSON with the missing fields.`;
         // Extract transaction details
         const amount = transactionData.amount_cents ? transactionData.amount_cents / 100 : 0;
         const orderId = transactionData.order?.id || transactionData.order_id;
+        const transactionId = transactionData.id;
         
-        console.log(`💰 Processing payment: $${amount} for order ${orderId}`);
+        console.log(`💰 Processing payment: $${amount} for order ${orderId}, transaction ${transactionId}`);
+        
+        // If we have billing data, extract user ID and complete payment
+        if (transactionData.billing_data && transactionData.billing_data.extra_data) {
+          const userId = transactionData.billing_data.extra_data.user_id;
+          const tokensAmount = transactionData.billing_data.extra_data.tokens_amount;
+          
+          if (userId && tokensAmount) {
+            console.log(`🎯 Processing payment completion for user ${userId}: ${tokensAmount} tokens`);
+            
+            try {
+              // Add tokens to user account
+              await storage.addTokensPurchase(userId, parseInt(tokensAmount));
+              
+              // Create payment receipt
+              const receiptNumber = paymobService.generateReceiptNumber();
+              await storage.createPaymentReceipt({
+                userId,
+                amount: amount.toString(),
+                tokensAmount: parseInt(tokensAmount),
+                paymentMethod: 'card',
+                paymobTransactionId: transactionId.toString(),
+                receiptNumber,
+                cardLast4: transactionData.source_data?.pan?.slice(-4) || '****',
+                cardBrand: transactionData.source_data?.type || 'Card'
+              });
+              
+              console.log(`✅ Payment completed successfully: ${tokensAmount} tokens added to user ${userId}`);
+            } catch (processingError) {
+              console.error('❌ Error processing payment completion:', processingError);
+            }
+          }
+        }
       } else {
         console.log('❌ Failed transaction processed:', transactionData.id);
       }
@@ -1926,29 +1961,78 @@ Return only valid JSON with the missing fields.`;
       console.log('🔔 Paymob transaction response callback received:', req.body);
       
       const transactionData = req.body;
+      const isSuccess = transactionData.success === 'true' || transactionData.success === true;
+      const amount = transactionData.amount_cents ? transactionData.amount_cents / 100 : 0;
+      const transactionId = transactionData.id;
       
-      // Send transaction data to frontend for processing
+      // Create a proper success/failure page that redirects back to our app
       const html = `
         <!DOCTYPE html>
         <html>
-        <head><title>Payment Response</title></head>
+        <head>
+          <title>Payment ${isSuccess ? 'Successful' : 'Failed'}</title>
+          <meta charset="utf-8">
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              text-align: center; 
+              padding: 50px; 
+              background: ${isSuccess ? '#f0f8ff' : '#fff5f5'};
+            }
+            .container { 
+              max-width: 500px; 
+              margin: 0 auto; 
+              background: white; 
+              padding: 40px; 
+              border-radius: 10px; 
+              box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            }
+            .success { color: #22c55e; font-size: 48px; }
+            .error { color: #ef4444; font-size: 48px; }
+            h1 { color: #1f2937; margin: 20px 0; }
+            p { color: #6b7280; margin: 10px 0; }
+            .redirect-text { font-size: 14px; color: #9ca3af; margin-top: 30px; }
+          </style>
+        </head>
         <body>
+          <div class="container">
+            ${isSuccess ? 
+              `<div class="success">✅</div>
+               <h1>Payment Successful!</h1>
+               <p>Your payment of ${amount} EGP has been processed successfully.</p>
+               <p>Transaction ID: ${transactionId}</p>
+               <p>Your tokens have been added to your account.</p>` :
+              `<div class="error">❌</div>
+               <h1>Payment Failed</h1>
+               <p>We couldn't process your payment. Please try again.</p>
+               <p>No charges have been made to your account.</p>`
+            }
+            <p class="redirect-text">Redirecting you back to Athlete360...</p>
+          </div>
+          
           <script>
             console.log('Paymob response data:', ${JSON.stringify(transactionData)});
             
+            // Send data to parent window if in iframe
             if (window.parent && window.parent !== window) {
               window.parent.postMessage({
                 type: 'PAYMOB_RESPONSE',
+                success: ${isSuccess},
+                transactionId: '${transactionId}',
+                amount: ${amount},
                 data: ${JSON.stringify(transactionData)}
               }, '*');
             }
             
-            // Close window after sending data
+            // Redirect back to payment center after 3 seconds
             setTimeout(() => {
-              window.close();
-            }, 1000);
+              if (window.parent && window.parent !== window) {
+                window.parent.location.href = '/payment-center?payment=${isSuccess ? 'success' : 'failed'}&txn=${transactionId}';
+              } else {
+                window.location.href = '/payment-center?payment=${isSuccess ? 'success' : 'failed'}&txn=${transactionId}';
+              }
+            }, 3000);
           </script>
-          <p>Processing payment response...</p>
         </body>
         </html>
       `;
@@ -1956,7 +2040,22 @@ Return only valid JSON with the missing fields.`;
       res.send(html);
     } catch (error) {
       console.error('❌ Paymob response callback error:', error);
-      res.status(500).send('Callback processing error');
+      res.status(500).send(`
+        <!DOCTYPE html>
+        <html>
+        <head><title>Payment Processing Error</title></head>
+        <body style="text-align: center; padding: 50px; font-family: Arial;">
+          <h1>Processing Error</h1>
+          <p>There was an error processing your payment response.</p>
+          <p>Please contact support if you believe this is a mistake.</p>
+          <script>
+            setTimeout(() => {
+              window.location.href = '/payment-center?payment=error';
+            }, 3000);
+          </script>
+        </body>
+        </html>
+      `);
     }
   });
 

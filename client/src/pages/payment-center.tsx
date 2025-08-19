@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PaymentReceipts } from "@/components/ui/payment-receipts";
@@ -20,10 +21,52 @@ export default function PaymentCenter() {
   const [selectedPackage, setSelectedPackage] = useState<{ tokens: number; price: number } | null>(null);
   const [showCardSelection, setShowCardSelection] = useState(false);
   const [paymentIframeUrl, setPaymentIframeUrl] = useState<string | null>(null);
+  const [location] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: user } = useQuery({
+  // Handle payment success/failure URL parameters
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+    const transactionId = urlParams.get('txn');
+    
+    if (paymentStatus === 'success' && transactionId) {
+      toast({
+        title: "Payment Successful!",
+        description: `Transaction ${transactionId} completed successfully. Your tokens have been added.`,
+      });
+      // Clear URL parameters
+      window.history.replaceState({}, document.title, '/payment-center');
+      // Refresh user data
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/payments/receipts'] });
+    } else if (paymentStatus === 'failed' && transactionId) {
+      toast({
+        title: "Payment Failed",
+        description: `Transaction ${transactionId} could not be completed. Please try again.`,
+        variant: "destructive",
+      });
+      window.history.replaceState({}, document.title, '/payment-center');
+    } else if (paymentStatus === 'error') {
+      toast({
+        title: "Processing Error",
+        description: "There was an error processing your payment. Please contact support if this persists.",
+        variant: "destructive",
+      });
+      window.history.replaceState({}, document.title, '/payment-center');
+    }
+  }, [location, toast, queryClient]);
+
+  const { data: user } = useQuery<{
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    tokens: number;
+    totalTokensPurchased: number;
+    subscriptionStatus: string;
+  }>({
     queryKey: ['/api/auth/user'],
   });
 
