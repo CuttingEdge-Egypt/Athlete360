@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -53,6 +54,13 @@ export default function Account() {
   const { toast } = useToast();
   const [isAddCardOpen, setIsAddCardOpen] = useState(false);
   const [showCardDetails, setShowCardDetails] = useState<string | null>(null);
+  const [, setLocation] = useLocation();
+
+  // Handle comparison selection from history
+  const handleComparisonFromHistory = (comparisonData: any) => {
+    // Navigate to home with comparison tab
+    setLocation("/?tab=comparison&data=" + encodeURIComponent(JSON.stringify(comparisonData)));
+  };
   const [editingProfile, setEditingProfile] = useState(false);
   
   const [newCard, setNewCard] = useState({
@@ -761,7 +769,7 @@ export default function Account() {
           </TabsContent>
 
           <TabsContent value="history" className="space-y-6">
-            <HistoryPanel />
+            <HistoryPanel onComparisonSelect={handleComparisonFromHistory} />
           </TabsContent>
         </Tabs>
       </div>

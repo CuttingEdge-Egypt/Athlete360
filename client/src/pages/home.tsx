@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,6 +25,34 @@ export default function Home() {
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [searchName, setSearchName] = useState<string>("");
   const [isSearching, setIsSearching] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("analysis");
+  const [comparisonData, setComparisonData] = useState<any>(null);
+  const [location] = useLocation();
+
+  // Check for URL parameters to load comparison data
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+    const data = urlParams.get('data');
+    
+    if (tab === 'comparison' && data) {
+      try {
+        const parsedData = JSON.parse(decodeURIComponent(data));
+        setComparisonData(parsedData);
+        setActiveTab("comparison");
+        // Clean up URL after loading data
+        window.history.replaceState({}, '', window.location.pathname);
+      } catch (error) {
+        console.error('Failed to parse comparison data from URL:', error);
+      }
+    }
+  }, [location]);
+
+  // Callback function to handle comparison loading from history
+  const handleComparisonFromHistory = (historyComparisonData: any) => {
+    setComparisonData(historyComparisonData);
+    setActiveTab("comparison");
+  };
 
   // Get all countries
   const { data: countries = [] } = useQuery<string[]>({
@@ -290,7 +319,7 @@ export default function Home() {
           </div>
 
           {/* Main Content Tabs */}
-          <Tabs defaultValue="analysis" className="max-w-6xl mx-auto">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-6xl mx-auto">
             <TabsList className="grid w-full grid-cols-3 bg-athlete-gray-800 mb-8">
               <TabsTrigger 
                 value="analysis" 
@@ -507,7 +536,7 @@ export default function Home() {
             </TabsContent>
 
             <TabsContent value="comparison" className="space-y-8">
-              <AthleteComparison />
+              <AthleteComparison preloadedComparisonData={comparisonData} />
             </TabsContent>
 
             <TabsContent value="testing" className="space-y-8">

@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AnalysisPopup } from "@/components/ui/analysis-popup";
-import { ComparisonHistoryDialog } from "@/components/ui/comparison-history-dialog";
+
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { History, Clock, User, TrendingUp, Target, Utensils, Zap, Video, GitCompare, Coins, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -51,12 +51,12 @@ const serviceLabels = {
 interface HistoryPanelProps {
   showHeader?: boolean;
   className?: string;
+  onComparisonSelect?: (comparisonData: any) => void;
 }
 
-export function HistoryPanel({ showHeader = true, className = "" }: HistoryPanelProps) {
+export function HistoryPanel({ showHeader = true, className = "", onComparisonSelect }: HistoryPanelProps) {
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<HistoryItem | null>(null);
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
-  const [showComparisonPopup, setShowComparisonPopup] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -88,7 +88,10 @@ export function HistoryPanel({ showHeader = true, className = "" }: HistoryPanel
     setSelectedHistoryItem(item);
     
     if (item.serviceType === 'comparison') {
-      setShowComparisonPopup(true);
+      // Call the callback to navigate to comparison tab with data
+      if (onComparisonSelect) {
+        onComparisonSelect(item.resultData);
+      }
     } else {
       setShowAnalysisPopup(true);
     }
@@ -239,19 +242,7 @@ export function HistoryPanel({ showHeader = true, className = "" }: HistoryPanel
         />
       )}
 
-      {/* Comparison Popup for revisiting comparisons */}
-      {selectedHistoryItem && selectedHistoryItem.serviceType === 'comparison' && showComparisonPopup && (
-        <ComparisonHistoryDialog
-          open={showComparisonPopup}
-          onOpenChange={(open: boolean) => {
-            if (!open) {
-              setShowComparisonPopup(false);
-              setSelectedHistoryItem(null);
-            }
-          }}
-          comparisonData={selectedHistoryItem.resultData}
-        />
-      )}
+
     </div>
   );
 }

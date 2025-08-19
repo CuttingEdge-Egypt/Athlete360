@@ -153,7 +153,11 @@ interface ComparisonData {
   message?: string;
 }
 
-export function AthleteComparison() {
+interface AthleteComparisonProps {
+  preloadedComparisonData?: any;
+}
+
+export function AthleteComparison({ preloadedComparisonData }: AthleteComparisonProps) {
   const [selectedSport, setSelectedSport] = useState<string>("");
   const [selectedCountry1, setSelectedCountry1] = useState<string>("");
   const [selectedCountry2, setSelectedCountry2] = useState<string>("");
@@ -289,7 +293,7 @@ export function AthleteComparison() {
     comparisonMutation.mutate();
   };
 
-  const comparisonData = comparisonMutation.data as ComparisonData | undefined;
+  const comparisonData = (comparisonMutation.data as ComparisonData | undefined) || preloadedComparisonData;
   const availableAthletes1 = athletes1.filter((a: Athlete) => a.id !== selectedAthlete2);
   const availableAthletes2 = athletes2.filter((a: Athlete) => a.id !== selectedAthlete1);
 
@@ -614,7 +618,7 @@ export function AthleteComparison() {
                             <div>
                               <h5 className="font-semibold text-green-400 mb-2">Technical Skills</h5>
                               <div className="space-y-2">
-                                {comparisonData.detailedAnalysis.athlete1.technicalSkills.map((skill, index) => (
+                                {comparisonData.detailedAnalysis.athlete1.technicalSkills.map((skill: any, index: number) => (
                                   <div key={index} className="bg-athlete-gray-800 p-3 rounded-lg">
                                     <div className="flex justify-between items-center mb-1">
                                       <span className="font-medium text-white">{skill.skill}</span>
@@ -697,7 +701,7 @@ export function AthleteComparison() {
                             <div>
                               <h5 className="font-semibold text-green-400 mb-2">Technical Skills</h5>
                               <div className="space-y-2">
-                                {comparisonData.detailedAnalysis.athlete2.technicalSkills.map((skill, index) => (
+                                {comparisonData.detailedAnalysis.athlete2.technicalSkills.map((skill: any, index: number) => (
                                   <div key={index} className="bg-athlete-gray-800 p-3 rounded-lg">
                                     <div className="flex justify-between items-center mb-1">
                                       <span className="font-medium text-white">{skill.skill}</span>
