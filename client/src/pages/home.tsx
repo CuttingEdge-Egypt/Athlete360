@@ -35,11 +35,15 @@ export default function Home() {
     const tab = urlParams.get('tab');
     const data = urlParams.get('data');
     
+    console.log('URL params:', { tab, data: data ? 'present' : 'null' });
+    
     if (tab === 'comparison' && data) {
       try {
         const parsedData = JSON.parse(decodeURIComponent(data));
+        console.log('Parsed comparison data:', parsedData);
         setComparisonData(parsedData);
         setActiveTab("comparison");
+        console.log('Set activeTab to comparison, comparisonData:', parsedData);
         // Clean up URL after loading data
         window.history.replaceState({}, '', window.location.pathname);
       } catch (error) {

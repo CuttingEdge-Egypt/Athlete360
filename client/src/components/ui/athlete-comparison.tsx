@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -158,12 +158,21 @@ interface AthleteComparisonProps {
 }
 
 export function AthleteComparison({ preloadedComparisonData }: AthleteComparisonProps) {
+  console.log('AthleteComparison received preloadedComparisonData:', preloadedComparisonData);
   const [selectedSport, setSelectedSport] = useState<string>("");
   const [selectedCountry1, setSelectedCountry1] = useState<string>("");
   const [selectedCountry2, setSelectedCountry2] = useState<string>("");
   const [selectedAthlete1, setSelectedAthlete1] = useState<string>("");
   const [selectedAthlete2, setSelectedAthlete2] = useState<string>("");
+  const [comparisonData, setComparisonData] = useState<ComparisonResult | null>(preloadedComparisonData || null);
   const { toast } = useToast();
+
+  // Update comparison data when preloaded data changes
+  useEffect(() => {
+    if (preloadedComparisonData) {
+      setComparisonData(preloadedComparisonData);
+    }
+  }, [preloadedComparisonData]);
 
   const { data: sports = [] } = useQuery<Sport[]>({
     queryKey: ["/api/sports"],
@@ -256,7 +265,8 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setComparisonData(data);
       toast({
         title: "Comparison Complete",
         description: "AI-powered athlete comparison generated successfully!",
@@ -293,7 +303,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
     comparisonMutation.mutate();
   };
 
-  const comparisonData = (comparisonMutation.data as ComparisonData | undefined) || preloadedComparisonData;
+  // Use comparisonData state that is initialized with preloaded data
   const availableAthletes1 = athletes1.filter((a: Athlete) => a.id !== selectedAthlete2);
   const availableAthletes2 = athletes2.filter((a: Athlete) => a.id !== selectedAthlete1);
 
