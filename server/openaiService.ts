@@ -487,14 +487,24 @@ export async function refreshAthleteBiographyWithSearch(name: string, sport: str
     - Latest news and achievements
     - Current world ranking status
     - 2024-2025 season performance
+    
+    CRITICAL WORLD RANKING REQUIREMENT:
+    You MUST search for and include the athlete's current world ranking position in their sport:
+    - For Taekwondo: Search "World Taekwondo ranking" or "WT ranking" for their weight category
+    - For Boxing: Search "world boxing rankings" for their weight division  
+    - For Judo: Search "IJF world ranking" for their weight category
+    - For Wrestling: Search "United World Wrestling ranking" for their category
+    - For other sports: Search "[sport name] world ranking" or official federation rankings
+    
+    Include the specific ranking number (e.g., "#5 in world", "Ranked 12th globally") or state "Unranked at world level" if no official ranking exists.
 
 Don't include the references in the biography. 
     
     Create an updated biography with fresh information, structured as:
-    - Introduction with current status
-    - Players' overall story and what they're known for in Taekwondo.
+    - Introduction with current status and world ranking position
+    - Players' overall story and what they're known for in their sport
     - "Recent Competitions:" (2024-2025 results)
-    - "Career Record and Rankings:" (current rankings and record)
+    - "Career Record and Rankings:" (current world ranking position and competitive record)
     - "Notable Achievements:" (career highlights)
 
     Only mention information that is 100% accurate and verifiable.
@@ -827,6 +837,16 @@ CRITICAL REQUIREMENTS:
 3. Look for tournament results that affected their ranking position
 4. Only include competitions with verified dates and outcomes
 5. If exact numerical rankings are not available, use descriptive terms like "Unranked", "Regional level", "National level", "International competitor"
+
+MANDATORY WORLD RANKING SEARCH:
+You MUST search for the athlete's current world ranking position in their sport:
+- For Taekwondo: Search "World Taekwondo ranking" or "WT ranking" for their weight category
+- For Boxing: Search "world boxing rankings" for their weight division
+- For Judo: Search "IJF world ranking" for their weight category
+- For Wrestling: Search "United World Wrestling ranking" for their category
+- For other sports: Search "[sport name] world ranking" or official federation rankings
+
+Include the specific ranking number (e.g., "#5 in world", "Ranked 12th globally") in currentRanking field, or state "Unranked at world level" if no official ranking exists.
 
 RANKING DATA STRATEGY:
 - For established athletes: Search for official world rankings, federation rankings
@@ -1376,6 +1396,16 @@ SEARCH AND ANALYZE:
 - Head-to-head records if they've competed against each other
 - Recent performance trends and current form
 - Expert analysis and commentary about each athlete
+
+CRITICAL WORLD RANKING REQUIREMENT:
+You MUST search for and include both athletes' current world ranking positions:
+- For Taekwondo: Search "World Taekwondo ranking" or "WT ranking" for their weight categories
+- For Boxing: Search "world boxing rankings" for their weight divisions
+- For Judo: Search "IJF world ranking" for their weight categories  
+- For Wrestling: Search "United World Wrestling ranking" for their categories
+- For other sports: Search "[sport name] world ranking" or official federation rankings
+
+Include specific ranking numbers (e.g., "#3 vs #7", "Ranked 5th vs 12th globally") or state "Unranked" if no official ranking exists.
 
 ANALYSIS REQUIREMENTS (use web search for ALL sections):
 1. Strengths Analysis - Find specific technical and tactical strengths from recent competitions

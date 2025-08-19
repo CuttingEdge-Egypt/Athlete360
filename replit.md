@@ -53,6 +53,7 @@ Preferred communication style: Simple, everyday language.
 - **Video Analysis System**: Independent video analysis with synchronized player, timeline navigation, real-time event display, and live scoreboard layout.
 - **AI Response Handling**: Robust JSON parsing and retry mechanisms for AI model responses.
 - **UI Structure**: Consistent structured UI for analysis results (Bio, Rank, etc.) across different components with visual hierarchy and theming.
+- **World Ranking Integration**: Enhanced prompts for Bio, Rank History, and Compare Athletes functions that mandate searching for current world rankings in the athlete's specific sport (e.g., World Taekwondo ranking, IJF world ranking, etc.).
 
 ## External Dependencies
 
