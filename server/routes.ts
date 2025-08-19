@@ -1884,6 +1884,17 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
+  // Debug endpoint to check available integrations
+  app.get('/api/payments/debug-integrations', isAuthenticated, async (req: any, res) => {
+    try {
+      const integrations = await paymobService.getAvailableIntegrations();
+      res.json({ integrations });
+    } catch (error) {
+      console.error("Error getting integrations:", error);
+      res.status(500).json({ message: "Failed to get integrations" });
+    }
+  });
+
   // Create payment intent for token purchase
   app.post('/api/payments/create-intent', isAuthenticated, async (req: any, res) => {
     try {

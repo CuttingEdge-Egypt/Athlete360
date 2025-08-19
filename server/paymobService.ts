@@ -36,7 +36,7 @@ export class PaymobService {
       apiKey: process.env.PAYMOB_API_KEY || '',
       publicKey: process.env.PAYMOB_PUBLIC_KEY || '',
       secretKey: process.env.PAYMOB_SECRET_KEY || '',
-      integrationId: process.env.INTEGRATION_ID || '',
+      integrationId: process.env.INTEGRATION_ID || '3036500', // Fallback to known working ID
       iframeId: process.env.PAYMOB_IFRAME_ID || ''
     };
 
@@ -170,10 +170,36 @@ export class PaymobService {
     return data.token;
   }
 
+  // Method to get available integrations for debugging
+  async getAvailableIntegrations(): Promise<any> {
+    try {
+      const authToken = await this.getAuthToken();
+      const response = await fetch(`${this.baseUrl}/ecommerce/integrations`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json() as any;
+      console.log('Available integrations:', data);
+      return data;
+    } catch (error) {
+      console.error('Failed to get integrations:', error);
+      throw error;
+    }
+  }
+
   async createPaymentIntent(paymentIntent: PaymentIntent): Promise<PaymentResponse> {
     try {
       console.log('Creating Paymob payment intent with real credentials...');
       const authToken = await this.getAuthToken();
+      
+      // Get available integrations for debugging
+      console.log('Checking available integrations...');
+      await this.getAvailableIntegrations();
+      
       const orderId = await this.createOrder(authToken, paymentIntent.amount);
       const paymentToken = await this.createPaymentKey(authToken, orderId, paymentIntent);
 
