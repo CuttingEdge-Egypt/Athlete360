@@ -56,11 +56,9 @@ export default function Home() {
         try {
           const parsedData = JSON.parse(decodeURIComponent(data));
           console.log('Parsed video analysis data:', parsedData);
-          setVideoAnalysisData(parsedData);
-          setActiveTab("video");
-          console.log('Set activeTab to video, videoAnalysisData:', parsedData);
-          // Clean up URL after loading data
-          window.history.replaceState({}, '', window.location.pathname);
+          // Store data temporarily in sessionStorage and redirect to dedicated video analysis page
+          sessionStorage.setItem('videoAnalysisData', JSON.stringify(parsedData));
+          window.location.href = '/video-analysis';
         } catch (error) {
           console.error('Failed to parse video analysis data from URL:', error);
         }
@@ -102,7 +100,9 @@ export default function Home() {
       try {
         const parsedData = JSON.parse(decodeURIComponent(data));
         console.log('Location change - Parsed video analysis data:', parsedData);
-        setVideoAnalysisData(parsedData);
+        // Store data temporarily in sessionStorage and redirect to dedicated video analysis page
+        sessionStorage.setItem('videoAnalysisData', JSON.stringify(parsedData));
+        window.location.href = '/video-analysis';
         setActiveTab("video");
         // Clean up URL after loading data
         window.history.replaceState({}, '', window.location.pathname);
@@ -384,7 +384,7 @@ export default function Home() {
 
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-6xl mx-auto">
-            <TabsList className="grid w-full grid-cols-4 bg-athlete-gray-800 mb-8">
+            <TabsList className="grid w-full grid-cols-3 bg-athlete-gray-800 mb-8">
               <TabsTrigger 
                 value="analysis" 
                 data-testid="tab-analysis"
@@ -398,13 +398,6 @@ export default function Home() {
                 className="data-[state=active]:bg-athlete-accent"
               >
                 Compare Athletes
-              </TabsTrigger>
-              <TabsTrigger 
-                value="video" 
-                data-testid="tab-video"
-                className="data-[state=active]:bg-athlete-accent"
-              >
-                Video Analysis
               </TabsTrigger>
               <TabsTrigger 
                 value="testing" 
@@ -608,23 +601,6 @@ export default function Home() {
 
             <TabsContent value="comparison" className="space-y-8">
               <AthleteComparison preloadedComparisonData={comparisonData} />
-            </TabsContent>
-
-            <TabsContent value="video" className="space-y-8">
-              {videoAnalysisData ? (
-                <VideoAnalysisResults analysisData={videoAnalysisData} />
-              ) : (
-                <div className="text-center py-20">
-                  <div className="text-6xl mb-4">📹</div>
-                  <h3 className="text-2xl font-bold mb-4 text-white">Video Analysis</h3>
-                  <p className="text-gray-400 max-w-md mx-auto mb-6">
-                    Upload a taekwondo match video for comprehensive AI-powered analysis using Google Gemini.
-                  </p>
-                  <p className="text-gray-400 max-w-md mx-auto">
-                    Navigate to the dedicated <a href="/video-analysis" className="text-athlete-accent hover:underline">Video Analysis page</a> to upload your videos.
-                  </p>
-                </div>
-              )}
             </TabsContent>
 
             <TabsContent value="testing" className="space-y-8">

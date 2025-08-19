@@ -52,10 +52,12 @@ export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps
       }
     };
 
-    // Extract scoring events
-    const scoreEvents: ScoreEvent[] = [];
-    let cumulativeBlueScore = 0;
-    let cumulativeRedScore = 0;
+    // Extract scoring events and sort by timestamp for proper incremental tracking
+    const allScoringEvents: Array<{
+      timestamp: number;
+      scoreValue: number;
+      player: 'blue' | 'red';
+    }> = [];
 
     if (scoreAnalysis && scoreAnalysis.players) {
       scoreAnalysis.players.forEach((player: any) => {
@@ -66,29 +68,49 @@ export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps
               const timestamp = parseTimestamp(kick.timestamp);
               const scoreValue = parseInt(kick.score) || 0;
               
-              if (isBlue) {
-                cumulativeBlueScore += scoreValue;
-              } else {
-                cumulativeRedScore += scoreValue;
+              if (scoreValue > 0) { // Only include actual scoring events
+                allScoringEvents.push({
+                  timestamp,
+                  scoreValue,
+                  player: isBlue ? 'blue' : 'red'
+                });
               }
-
-              scoreEvents.push({
-                timestamp,
-                blueScore: cumulativeBlueScore,
-                redScore: cumulativeRedScore,
-                increment: scoreValue,
-                player: isBlue ? 'blue' : 'red'
-              });
             }
           });
         }
       });
     }
 
-    // Extract yellow card events
-    const yellowCardEvents: YellowCardEvent[] = [];
-    let cumulativeBlueCards = 0;
-    let cumulativeRedCards = 0;
+    // Sort all scoring events by timestamp to create proper incremental timeline
+    allScoringEvents.sort((a, b) => a.timestamp - b.timestamp);
+
+    // Create cumulative score events in chronological order
+    const scoreEvents: ScoreEvent[] = [];
+    let cumulativeBlueScore = 0;
+    let cumulativeRedScore = 0;
+
+    allScoringEvents.forEach((event) => {
+      if (event.player === 'blue') {
+        cumulativeBlueScore += event.scoreValue;
+      } else {
+        cumulativeRedScore += event.scoreValue;
+      }
+
+      scoreEvents.push({
+        timestamp: event.timestamp,
+        blueScore: cumulativeBlueScore,
+        redScore: cumulativeRedScore,
+        increment: event.scoreValue,
+        player: event.player
+      });
+    });
+
+    // Extract yellow card events and sort by timestamp for proper incremental tracking
+    const allCardEvents: Array<{
+      timestamp: number;
+      cardValue: number;
+      player: 'blue' | 'red';
+    }> = [];
 
     if (yellowCardAnalysis && yellowCardAnalysis.players) {
       yellowCardAnalysis.players.forEach((player: any) => {
@@ -100,23 +122,41 @@ export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps
               const timestamp = parseTimestamp(card.timestamp);
               const cardValue = parseInt(card.Amount) || 0;
               
-              if (isBlue) {
-                cumulativeBlueCards += cardValue;
-              } else {
-                cumulativeRedCards += cardValue;
+              if (cardValue > 0) { // Only include actual card events
+                allCardEvents.push({
+                  timestamp,
+                  cardValue,
+                  player: isBlue ? 'blue' : 'red'
+                });
               }
-
-              yellowCardEvents.push({
-                timestamp,
-                blueCards: cumulativeBlueCards,
-                redCards: cumulativeRedCards,
-                player: isBlue ? 'blue' : 'red'
-              });
             }
           });
         }
       });
     }
+
+    // Sort all card events by timestamp to create proper incremental timeline
+    allCardEvents.sort((a, b) => a.timestamp - b.timestamp);
+
+    // Create cumulative card events in chronological order
+    const yellowCardEvents: YellowCardEvent[] = [];
+    let cumulativeBlueCards = 0;
+    let cumulativeRedCards = 0;
+
+    allCardEvents.forEach((event) => {
+      if (event.player === 'blue') {
+        cumulativeBlueCards += event.cardValue;
+      } else {
+        cumulativeRedCards += event.cardValue;
+      }
+
+      yellowCardEvents.push({
+        timestamp: event.timestamp,
+        blueCards: cumulativeBlueCards,
+        redCards: cumulativeRedCards,
+        player: event.player
+      });
+    });
 
     // Extract kick counts
     let blueKickCount = 0;
