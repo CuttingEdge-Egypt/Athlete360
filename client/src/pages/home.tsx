@@ -12,6 +12,7 @@ import { TokenModal } from "@/components/ui/token-modal";
 import { TestingPanel } from "@/components/ui/testing-panel";
 import { AnalysisPopup } from "@/components/ui/analysis-popup";
 import { AthleteComparison } from "@/components/ui/athlete-comparison";
+import { VideoAnalysisResults } from "@/components/ui/video-analysis-results";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Star, User, Loader2 } from "lucide-react";
@@ -611,71 +612,7 @@ export default function Home() {
 
             <TabsContent value="video" className="space-y-8">
               {videoAnalysisData ? (
-                <div className="bg-athlete-gray-800 border-gray-700 rounded-lg p-6">
-                  <h2 className="text-2xl font-bold mb-6 text-center text-white">Video Analysis Results</h2>
-                  <div className="text-white">
-                    <div className="mb-4">
-                      <p className="text-gray-300 mb-2">Analysis Date: {new Date(videoAnalysisData.processedAt || Date.now()).toLocaleDateString()}</p>
-                      <p className="text-gray-300 mb-4">Round Analyzed: {videoAnalysisData.roundAnalyzed || 1}</p>
-                    </div>
-                    
-                    {/* Match Analysis */}
-                    <div className="bg-athlete-gray-700 rounded-lg p-4 mb-6">
-                      <h3 className="text-lg font-semibold mb-3 text-athlete-accent">Match Analysis</h3>
-                      <div className="text-sm text-gray-300 whitespace-pre-wrap">
-                        {videoAnalysisData.match_analysis || 'No match analysis available'}
-                      </div>
-                    </div>
-
-                    {/* Score Analysis */}
-                    {videoAnalysisData.score_analysis && (
-                      <div className="bg-athlete-gray-700 rounded-lg p-4 mb-6">
-                        <h3 className="text-lg font-semibold mb-3 text-athlete-accent">Score Analysis</h3>
-                        <pre className="text-sm text-gray-300 whitespace-pre-wrap">
-                          {typeof videoAnalysisData.score_analysis === 'string' 
-                            ? videoAnalysisData.score_analysis 
-                            : JSON.stringify(videoAnalysisData.score_analysis, null, 2)}
-                        </pre>
-                      </div>
-                    )}
-
-                    {/* Yellow Card Analysis */}
-                    {videoAnalysisData.yellow_card_analysis && (
-                      <div className="bg-athlete-gray-700 rounded-lg p-4 mb-6">
-                        <h3 className="text-lg font-semibold mb-3 text-athlete-accent">Yellow Card Analysis</h3>
-                        <pre className="text-sm text-gray-300 whitespace-pre-wrap">
-                          {typeof videoAnalysisData.yellow_card_analysis === 'string' 
-                            ? videoAnalysisData.yellow_card_analysis 
-                            : JSON.stringify(videoAnalysisData.yellow_card_analysis, null, 2)}
-                        </pre>
-                      </div>
-                    )}
-
-                    {/* Kick Count Analysis */}
-                    {videoAnalysisData.kick_count_analysis && (
-                      <div className="bg-athlete-gray-700 rounded-lg p-4 mb-6">
-                        <h3 className="text-lg font-semibold mb-3 text-athlete-accent">Kick Count Analysis</h3>
-                        <pre className="text-sm text-gray-300 whitespace-pre-wrap">
-                          {typeof videoAnalysisData.kick_count_analysis === 'string' 
-                            ? videoAnalysisData.kick_count_analysis 
-                            : JSON.stringify(videoAnalysisData.kick_count_analysis, null, 2)}
-                        </pre>
-                      </div>
-                    )}
-
-                    {/* Punch Analysis */}
-                    {videoAnalysisData.punch_analysis && (
-                      <div className="bg-athlete-gray-700 rounded-lg p-4 mb-6">
-                        <h3 className="text-lg font-semibold mb-3 text-athlete-accent">Punch Analysis</h3>
-                        <pre className="text-sm text-gray-300 whitespace-pre-wrap">
-                          {typeof videoAnalysisData.punch_analysis === 'string' 
-                            ? videoAnalysisData.punch_analysis 
-                            : JSON.stringify(videoAnalysisData.punch_analysis, null, 2)}
-                        </pre>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <VideoAnalysisResults analysisData={videoAnalysisData} />
               ) : (
                 <div className="text-center py-20">
                   <div className="text-6xl mb-4">📹</div>
