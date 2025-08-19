@@ -447,11 +447,22 @@ export function AthleteComparison() {
                       <Brain className="h-5 w-5 text-blue-400" />
                       <h4 className="font-semibold text-white">Overall Analysis</h4>
                     </div>
-                    <p className="text-gray-300 leading-relaxed">
-                      {comparisonData.error ? 
-                        comparisonData.message : 
-                        comparisonData.overallAnalysis?.summary || "Analysis not available"}
-                    </p>
+                    {comparisonData.error ? (
+                      <div className="p-3 bg-red-900/30 border border-red-600/50 rounded-lg">
+                        <p className="text-red-300">{comparisonData.message}</p>
+                      </div>
+                    ) : comparisonData.overallAnalysis?.summary && 
+                         !comparisonData.overallAnalysis.summary.includes('temporarily unavailable') ? (
+                      <p className="text-gray-300 leading-relaxed">
+                        {comparisonData.overallAnalysis.summary}
+                      </p>
+                    ) : (
+                      <div className="p-3 bg-yellow-900/30 border border-yellow-600/50 rounded-lg">
+                        <p className="text-yellow-300">
+                          Authentic overall analysis temporarily unavailable. GPT-5 was unable to generate comprehensive comparison data.
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -647,10 +658,11 @@ export function AthleteComparison() {
                     <div>
                       <h4 className="font-semibold text-white mb-2">Analysis Reasoning</h4>
                       <p className="text-gray-300 leading-relaxed">
-                        {comparisonData.headToHead?.reasoning || "Analysis reasoning not available"}
+                        {comparisonData.headToHead?.reasoning || "Authentic head-to-head analysis temporarily unavailable. GPT-5 was unable to generate detailed comparison data."}
                       </p>
                       
-                      {comparisonData.headToHead?.keyFactors && comparisonData.headToHead.keyFactors.length > 0 && (
+                      {comparisonData.headToHead?.keyFactors && comparisonData.headToHead.keyFactors.length > 0 && 
+                       !comparisonData.headToHead.keyFactors.includes("Analysis unavailable") && (
                         <div className="mt-4">
                           <h5 className="font-medium text-white mb-2">Key Factors</h5>
                           <ul className="space-y-1">
@@ -664,12 +676,26 @@ export function AthleteComparison() {
                         </div>
                       )}
                       
-                      {comparisonData.headToHead?.scenario && (
+                      {comparisonData.headToHead?.keyFactors && comparisonData.headToHead.keyFactors.includes("Analysis unavailable") && (
+                        <div className="mt-4 p-3 bg-yellow-900/30 border border-yellow-600/50 rounded-lg">
+                          <p className="text-yellow-300 text-sm">• Analysis unavailable</p>
+                        </div>
+                      )}
+                      
+                      {comparisonData.headToHead?.scenario && 
+                       !comparisonData.headToHead.scenario.includes("temporarily unavailable") && (
                         <div className="mt-4">
                           <h5 className="font-medium text-white mb-2">Competition Scenario</h5>
                           <p className="text-gray-300 text-sm">
                             {comparisonData.headToHead.scenario}
                           </p>
+                        </div>
+                      )}
+                      
+                      {comparisonData.headToHead?.scenario && 
+                       comparisonData.headToHead.scenario.includes("temporarily unavailable") && (
+                        <div className="mt-4 p-3 bg-yellow-900/30 border border-yellow-600/50 rounded-lg">
+                          <p className="text-yellow-300 text-sm">GPT-5 analysis temporarily unavailable</p>
                         </div>
                       )}
                     </div>
