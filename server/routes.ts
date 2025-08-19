@@ -6,7 +6,7 @@ import { setupLocalAuth, isAuthenticatedUniversal } from "./localAuth";
 import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, compareAthletes } from "./openaiService";
+import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, compareAthletes, generateRankHistory } from "./openaiService";
 import { generateNutritionPlan } from "./geminiService";
 import { analyzeVideoFile } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
@@ -801,43 +801,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ]
         };
       } else {
-        // Generate fresh rank analysis using OpenAI GPT-5 (either no data exists or force update requested)
+        // Generate fresh rank analysis using OpenAI GPT-5 with enhanced rank history format
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} rank analysis for ${athlete.name}`);
         
-        // Get enhanced taekwondo data for authentic competition record and ranking
-        let enhancedData = null;
-        if (sportName.toLowerCase() === 'taekwondo') {
-          try {
-            enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country || undefined);
-            console.log(`Enhanced taekwondo data for ${athlete.name}:`, enhancedData);
-          } catch (error) {
-            console.error(`Failed to get enhanced taekwondo data for ${athlete.name}:`, error);
-          }
+        // Use the new generateRankHistory function to get authentic ranking progression data
+        rankData = await generateRankHistory(athlete.name, sportName, athlete.country || undefined);
+        
+        // Ensure we have valid data structure
+        if (!rankData || !rankData.athlete) {
+          throw new Error("Failed to generate valid rank history data");
         }
-        
-        const aiAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'rank');
-        
-        // Create synthetic history and store in database
-        const syntheticHistory = Array.from({ length: 12 }, (_, i) => ({
-          month: new Date(2024, i, 1).toLocaleDateString('en', { month: 'short' }),
-          rank: Math.floor(Math.random() * 5) + 1
-        }));
-        
-        rankData = {
-          currentRank: athlete.rank || Math.floor(Math.random() * 10) + 1,
-          peakRank: 1,
-          averageRank: 2.4,
-          history: syntheticHistory,
-          recommendations: [
-            forceUpdate ? "Force updated AI ranking insights" : "AI-powered ranking improvement suggestions",
-            "Focus on consistent competitive performance from latest GPT-5 analysis",
-            "Develop strategic approach to rankings based on current trends"
-          ],
-          // Add authentic competition data from enhanced web search
-          competitionRecord: enhancedData?.currentRecord || "Data not available",
-          bestWorldRanking: enhancedData?.worldRank || "Data not available",
-          analysisDate: new Date().toISOString()
-        };
       }
 
       await storage.createAnalysisLog({
