@@ -874,15 +874,41 @@ IMPORTANT: If no reliable ranking progression data is found through web search, 
     });
 
     let cleanedText = response.output_text.trim();
+    console.log(`Raw GPT-5 rank response for ${athleteName}:`, cleanedText.substring(0, 500) + '...');
+    
+    // Remove markdown formatting
     cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
     cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
     
+    // Extract JSON from response
     const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       cleanedText = jsonMatch[0];
     }
     
-    return JSON.parse(cleanedText);
+    // Aggressive JSON cleanup for GPT-5 responses
+    let attempts = 0;
+    while (attempts < 3) {
+      try {
+        // Try different cleanup strategies
+        if (attempts === 1) {
+          // Replace problematic commas in strings
+          cleanedText = cleanedText.replace(/("(?:[^"\\]|\\.)*"),(\s*[}\]])/g, '$1$2');
+          cleanedText = cleanedText.replace(/,(\s*[}\]])/g, '$1');
+        } else if (attempts === 2) {
+          // More aggressive comma cleanup
+          cleanedText = cleanedText.replace(/,(\s*[}\]])/g, '$1');
+          cleanedText = cleanedText.replace(/("[^"]*"),(\s*"[^"]*"\s*:)/g, '$1$2');
+        }
+        
+        return JSON.parse(cleanedText);
+      } catch (parseError: any) {
+        console.log(`JSON parse attempt ${attempts + 1} failed:`, parseError.message);
+        attempts++;
+      }
+    }
+    
+    throw new Error("Failed to parse JSON after 3 attempts");
   } catch (error) {
     console.error(`Error generating rank history for ${athleteName}:`, error);
     return {
