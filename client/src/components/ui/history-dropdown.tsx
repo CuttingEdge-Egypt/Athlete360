@@ -99,6 +99,20 @@ export function HistoryDropdown() {
         window.history.pushState({}, '', url);
         window.dispatchEvent(new PopStateEvent('popstate'));
       }, 100);
+    } else if (item.serviceType === 'video') {
+      // Navigate to home with video tab and data
+      const encodedData = encodeURIComponent(JSON.stringify(item.resultData));
+      const url = "/?tab=video&data=" + encodedData;
+      console.log('Navigating to video analysis:', url);
+      
+      // Use both wouter navigation and manual URL update
+      setLocation(url);
+      
+      // Also update the URL directly and trigger event
+      setTimeout(() => {
+        window.history.pushState({}, '', url);
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      }, 100);
     } else {
       setShowAnalysisPopup(true);
     }

@@ -27,6 +27,7 @@ export default function Home() {
   const [isSearching, setIsSearching] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("analysis");
   const [comparisonData, setComparisonData] = useState<any>(null);
+  const [videoAnalysisData, setVideoAnalysisData] = useState<any>(null);
   const [location] = useLocation();
 
   // Check for URL parameters to load comparison data
@@ -49,6 +50,18 @@ export default function Home() {
           window.history.replaceState({}, '', window.location.pathname);
         } catch (error) {
           console.error('Failed to parse comparison data from URL:', error);
+        }
+      } else if (tab === 'video' && data) {
+        try {
+          const parsedData = JSON.parse(decodeURIComponent(data));
+          console.log('Parsed video analysis data:', parsedData);
+          setVideoAnalysisData(parsedData);
+          setActiveTab("video");
+          console.log('Set activeTab to video, videoAnalysisData:', parsedData);
+          // Clean up URL after loading data
+          window.history.replaceState({}, '', window.location.pathname);
+        } catch (error) {
+          console.error('Failed to parse video analysis data from URL:', error);
         }
       }
     };
@@ -83,6 +96,17 @@ export default function Home() {
         window.history.replaceState({}, '', window.location.pathname);
       } catch (error) {
         console.error('Failed to parse comparison data from URL:', error);
+      }
+    } else if (tab === 'video' && data) {
+      try {
+        const parsedData = JSON.parse(decodeURIComponent(data));
+        console.log('Location change - Parsed video analysis data:', parsedData);
+        setVideoAnalysisData(parsedData);
+        setActiveTab("video");
+        // Clean up URL after loading data
+        window.history.replaceState({}, '', window.location.pathname);
+      } catch (error) {
+        console.error('Failed to parse video analysis data from URL:', error);
       }
     }
   }, [location]);
@@ -359,7 +383,7 @@ export default function Home() {
 
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-6xl mx-auto">
-            <TabsList className="grid w-full grid-cols-3 bg-athlete-gray-800 mb-8">
+            <TabsList className="grid w-full grid-cols-4 bg-athlete-gray-800 mb-8">
               <TabsTrigger 
                 value="analysis" 
                 data-testid="tab-analysis"
@@ -373,6 +397,13 @@ export default function Home() {
                 className="data-[state=active]:bg-athlete-accent"
               >
                 Compare Athletes
+              </TabsTrigger>
+              <TabsTrigger 
+                value="video" 
+                data-testid="tab-video"
+                className="data-[state=active]:bg-athlete-accent"
+              >
+                Video Analysis
               </TabsTrigger>
               <TabsTrigger 
                 value="testing" 
@@ -576,6 +607,87 @@ export default function Home() {
 
             <TabsContent value="comparison" className="space-y-8">
               <AthleteComparison preloadedComparisonData={comparisonData} />
+            </TabsContent>
+
+            <TabsContent value="video" className="space-y-8">
+              {videoAnalysisData ? (
+                <div className="bg-athlete-gray-800 border-gray-700 rounded-lg p-6">
+                  <h2 className="text-2xl font-bold mb-6 text-center text-white">Video Analysis Results</h2>
+                  <div className="text-white">
+                    <div className="mb-4">
+                      <p className="text-gray-300 mb-2">Analysis Date: {new Date(videoAnalysisData.processedAt || Date.now()).toLocaleDateString()}</p>
+                      <p className="text-gray-300 mb-4">Round Analyzed: {videoAnalysisData.roundAnalyzed || 1}</p>
+                    </div>
+                    
+                    {/* Match Analysis */}
+                    <div className="bg-athlete-gray-700 rounded-lg p-4 mb-6">
+                      <h3 className="text-lg font-semibold mb-3 text-athlete-accent">Match Analysis</h3>
+                      <div className="text-sm text-gray-300 whitespace-pre-wrap">
+                        {videoAnalysisData.match_analysis || 'No match analysis available'}
+                      </div>
+                    </div>
+
+                    {/* Score Analysis */}
+                    {videoAnalysisData.score_analysis && (
+                      <div className="bg-athlete-gray-700 rounded-lg p-4 mb-6">
+                        <h3 className="text-lg font-semibold mb-3 text-athlete-accent">Score Analysis</h3>
+                        <pre className="text-sm text-gray-300 whitespace-pre-wrap">
+                          {typeof videoAnalysisData.score_analysis === 'string' 
+                            ? videoAnalysisData.score_analysis 
+                            : JSON.stringify(videoAnalysisData.score_analysis, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+
+                    {/* Yellow Card Analysis */}
+                    {videoAnalysisData.yellow_card_analysis && (
+                      <div className="bg-athlete-gray-700 rounded-lg p-4 mb-6">
+                        <h3 className="text-lg font-semibold mb-3 text-athlete-accent">Yellow Card Analysis</h3>
+                        <pre className="text-sm text-gray-300 whitespace-pre-wrap">
+                          {typeof videoAnalysisData.yellow_card_analysis === 'string' 
+                            ? videoAnalysisData.yellow_card_analysis 
+                            : JSON.stringify(videoAnalysisData.yellow_card_analysis, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+
+                    {/* Kick Count Analysis */}
+                    {videoAnalysisData.kick_count_analysis && (
+                      <div className="bg-athlete-gray-700 rounded-lg p-4 mb-6">
+                        <h3 className="text-lg font-semibold mb-3 text-athlete-accent">Kick Count Analysis</h3>
+                        <pre className="text-sm text-gray-300 whitespace-pre-wrap">
+                          {typeof videoAnalysisData.kick_count_analysis === 'string' 
+                            ? videoAnalysisData.kick_count_analysis 
+                            : JSON.stringify(videoAnalysisData.kick_count_analysis, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+
+                    {/* Punch Analysis */}
+                    {videoAnalysisData.punch_analysis && (
+                      <div className="bg-athlete-gray-700 rounded-lg p-4 mb-6">
+                        <h3 className="text-lg font-semibold mb-3 text-athlete-accent">Punch Analysis</h3>
+                        <pre className="text-sm text-gray-300 whitespace-pre-wrap">
+                          {typeof videoAnalysisData.punch_analysis === 'string' 
+                            ? videoAnalysisData.punch_analysis 
+                            : JSON.stringify(videoAnalysisData.punch_analysis, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-20">
+                  <div className="text-6xl mb-4">📹</div>
+                  <h3 className="text-2xl font-bold mb-4 text-white">Video Analysis</h3>
+                  <p className="text-gray-400 max-w-md mx-auto mb-6">
+                    Upload a taekwondo match video for comprehensive AI-powered analysis using Google Gemini.
+                  </p>
+                  <p className="text-gray-400 max-w-md mx-auto">
+                    Navigate to the dedicated <a href="/video-analysis" className="text-athlete-accent hover:underline">Video Analysis page</a> to upload your videos.
+                  </p>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="testing" className="space-y-8">
