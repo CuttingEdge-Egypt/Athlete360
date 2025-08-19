@@ -154,3 +154,6 @@ Preferred communication style: Simple, everyday language.
 - **Added separate country filters**: Redesigned athlete comparison UI with independent country selectors for Athlete 1 and Athlete 2
 - **Enhanced athlete comparison queries**: Updated frontend to fetch athletes independently for each selection with proper country filtering
 - **Fixed TypeScript compilation errors**: Resolved all type errors in athlete comparison component for proper functionality
+- **Completely rewrote comparison logic for authentic web search**: Changed from passing existing athlete bio data to GPT-5 using only name, country, and sport for fresh web search analysis
+- **Enhanced GPT-5 prompts for current data**: All comparison sections (strengths, weaknesses, head-to-head, overview) now use live web search instead of pre-existing database content
+- **Improved error handling**: Added better fallback UI with yellow warning boxes for partial GPT-5 responses while maintaining successful analysis sections

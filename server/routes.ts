@@ -1761,8 +1761,21 @@ Return only valid JSON with the missing fields.`;
 
       console.log(`Generating GPT-5 powered comparison between ${athlete1.name} and ${athlete2.name}...`);
 
-      // Generate comparison using dedicated GPT-5 compareAthletes function
-      const comparisonResult = await compareAthletes(athlete1, athlete2, sportName);
+      // Create minimal athlete data for GPT-5 web search (name, country, sport only)
+      const athlete1ForComparison = {
+        name: athlete1.name,
+        country: athlete1.country,
+        profileImageUrl: athlete1.profileImageUrl
+      };
+      
+      const athlete2ForComparison = {
+        name: athlete2.name, 
+        country: athlete2.country,
+        profileImageUrl: athlete2.profileImageUrl
+      };
+      
+      // Generate comparison using GPT-5 with web search capabilities (no pre-existing data)
+      const comparisonResult = await compareAthletes(athlete1ForComparison, athlete2ForComparison, sportName);
 
       // Log the comparison
       await storage.createAnalysisLog({

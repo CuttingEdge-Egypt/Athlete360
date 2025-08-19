@@ -1349,41 +1349,40 @@ export async function searchAthleteImage(athleteName: string, sport?: string): P
 // Export the taekwondo data search function for use in routes
 export { searchTaekwondoDataProfilePicture };
 
-// GPT-5 powered athlete comparison with comprehensive analysis
+// GPT-5 powered athlete comparison with comprehensive web search analysis
 export async function compareAthletes(athlete1: any, athlete2: any, sport: string): Promise<any> {
   const timestamp = new Date().toISOString();
   const sessionId = Math.random().toString(36).substring(7);
 
-  const prompt = `You are an expert ${sport} analyst and coach. Create a comprehensive comparison between two professional athletes in ${sport}.
+  const prompt = `You are an expert ${sport} analyst and coach. Use your web search capabilities to find current, authentic information about these two athletes and create a comprehensive comparison.
 
 Session ID: ${sessionId} - Generation Time: ${timestamp}
 
-CRITICAL: Return only valid JSON. No extra text or explanations. Each comparison must be completely unique and based on authentic athlete data.
+CRITICAL INSTRUCTIONS:
+1. Use web search to find current competition records, rankings, recent matches, and performance data
+2. Find authentic biographical information, achievements, and career statistics  
+3. Return only valid JSON with no extra text or explanations
+4. Base ALL analysis on current web search results, not pre-existing data
 
-Athlete 1 Profile:
-- Name: ${athlete1.name}
-- Country: ${athlete1.country || 'Unknown'}
-- Current Rank: ${athlete1.rank || 'N/A'}
-- Biography: ${athlete1.bio?.substring(0, 500) || 'Professional athlete'}
-- Achievements: ${athlete1.achievements?.join(', ') || 'N/A'}
-- Competition Record: ${athlete1.competitionRecord || 'N/A'}
+ATHLETES TO RESEARCH:
+Athlete 1: ${athlete1.name} from ${athlete1.country || 'Unknown country'} (${sport})
+Athlete 2: ${athlete2.name} from ${athlete2.country || 'Unknown country'} (${sport})
 
-Athlete 2 Profile:
-- Name: ${athlete2.name}
-- Country: ${athlete2.country || 'Unknown'}  
-- Current Rank: ${athlete2.rank || 'N/A'}
-- Biography: ${athlete2.bio?.substring(0, 500) || 'Professional athlete'}
-- Achievements: ${athlete2.achievements?.join(', ') || 'N/A'}
-- Competition Record: ${athlete2.competitionRecord || 'N/A'}
+SEARCH AND ANALYZE:
+- Current world rankings and recent competition results
+- Technical skills, fighting style, and signature techniques
+- Physical attributes and athletic performance metrics
+- Career achievements, major titles, and competition history
+- Head-to-head records if they've competed against each other
+- Recent performance trends and current form
+- Expert analysis and commentary about each athlete
 
-Search the web for recent competition footage, match results, head-to-head records, and expert analysis of both athletes to provide authentic comparison data.
-
-ANALYSIS REQUIREMENTS:
-1. Technical Skills Comparison - Compare specific techniques, tactical approaches, and sport-specific abilities
-2. Physical Attributes - Strength, speed, endurance, and physical advantages
-3. Mental Game - Competition psychology, pressure handling, and strategic thinking
-4. Performance Metrics - Recent results, ranking progression, and competitive consistency
-5. Head-to-Head Analysis - Direct matchup prediction with detailed reasoning
+ANALYSIS REQUIREMENTS (use web search for ALL sections):
+1. Strengths Analysis - Find specific technical and tactical strengths from recent competitions
+2. Weaknesses Analysis - Identify areas for improvement based on competition footage and expert analysis
+3. Ranking Analysis - Research current standings, ranking trajectories, and competitive records
+4. Head-to-Head Prediction - Predict matchup outcome based on fighting styles and recent form
+5. Overall Analysis - Comprehensive comparison summary based on web research
 
 Return this exact JSON structure:
 {
@@ -1466,7 +1465,7 @@ Return this exact JSON structure:
   }
 }
 
-Use only authentic data from web search. Do not include generic content or placeholder information.`;
+MANDATORY: Use ONLY current web search results. Do not use generic descriptions or placeholder content. If you cannot find specific information about an athlete through web search, clearly state "Information not found through web search" in the relevant sections.`;
 
   try {
     const response = await openai.responses.create({
