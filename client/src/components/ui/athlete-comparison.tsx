@@ -72,6 +72,12 @@ interface ComparisonData {
     reasoning: string;
     keyFactors: string[];
     scenario: string;
+    tacticalAdvice?: {
+      forAthlete1: string;
+      forAthlete2: string;
+    };
+    historicalContext?: string;
+    expertPredictions?: string;
   };
   overallAnalysis?: {
     summary: string;
@@ -79,6 +85,69 @@ interface ComparisonData {
     reasonsWhy: string[];
     closeness: string;
     recommendation: string;
+  };
+  detailedAnalysis?: {
+    athlete1: {
+      name: string;
+      country: string;
+      currentForm: string;
+      technicalSkills: Array<{
+        skill: string;
+        proficiency: number;
+        description: string;
+        evidence: string;
+      }>;
+      physicalAttributes: {
+        height?: string;
+        weight?: string;
+        reach?: string;
+        stance?: string;
+        strengths?: string[];
+      };
+      recentPerformance: {
+        wins?: string;
+        losses?: string;
+        lastCompetition?: string;
+        rankingChange?: string;
+        form?: string;
+      };
+    };
+    athlete2: {
+      name: string;
+      country: string;
+      currentForm: string;
+      technicalSkills: Array<{
+        skill: string;
+        proficiency: number;
+        description: string;
+        evidence: string;
+      }>;
+      physicalAttributes: {
+        height?: string;
+        weight?: string;
+        reach?: string;
+        stance?: string;
+        strengths?: string[];
+      };
+      recentPerformance: {
+        wins?: string;
+        losses?: string;
+        lastCompetition?: string;
+        rankingChange?: string;
+        form?: string;
+      };
+    };
+    comparison: {
+      technicalEdge?: string;
+      physicalEdge?: string;
+      experienceEdge?: string;
+      formEdge?: string;
+    };
+  };
+  aiModels?: {
+    basicComparison: string;
+    detailedAnalysis: string;
+    headToHead: string;
   };
   error?: boolean;
   message?: string;
@@ -433,8 +502,9 @@ export function AthleteComparison() {
 
             {/* Detailed Comparison */}
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 bg-athlete-gray-700">
+              <TabsList className="grid w-full grid-cols-5 bg-athlete-gray-700">
                 <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
+                <TabsTrigger value="detailed" data-testid="tab-detailed">Detailed</TabsTrigger>
                 <TabsTrigger value="strengths" data-testid="tab-strengths">Strengths</TabsTrigger>
                 <TabsTrigger value="weaknesses" data-testid="tab-weaknesses">Weaknesses</TabsTrigger>
                 <TabsTrigger value="prediction" data-testid="tab-prediction">Head-to-Head</TabsTrigger>
@@ -500,6 +570,262 @@ export function AthleteComparison() {
                     </CardContent>
                   </Card>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="detailed" className="space-y-4">
+                {comparisonData.detailedAnalysis ? (
+                  <div className="space-y-6">
+                    {/* AI Models Info */}
+                    {comparisonData.aiModels && (
+                      <Card className="bg-blue-900/30 border-blue-600/50">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Brain className="h-4 w-4 text-blue-400" />
+                            <span className="text-sm font-medium text-blue-300">Powered by AI Models</span>
+                          </div>
+                          <div className="text-xs text-blue-200">
+                            Basic Analysis: {comparisonData.aiModels.basicComparison} • 
+                            Detailed Analysis: {comparisonData.aiModels.detailedAnalysis} • 
+                            Head-to-Head: {comparisonData.aiModels.headToHead}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Athletes Side-by-Side Analysis */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Athlete 1 Detailed Analysis */}
+                      <Card className="bg-athlete-gray-900 border-gray-600">
+                        <CardHeader>
+                          <CardTitle className="text-white flex items-center gap-2">
+                            <User className="h-5 w-5" />
+                            {comparisonData.detailedAnalysis.athlete1.name}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          {/* Current Form */}
+                          <div>
+                            <h5 className="font-semibold text-blue-400 mb-2">Current Form</h5>
+                            <p className="text-sm text-gray-300">{comparisonData.detailedAnalysis.athlete1.currentForm}</p>
+                          </div>
+
+                          {/* Technical Skills */}
+                          {comparisonData.detailedAnalysis.athlete1.technicalSkills?.length > 0 && (
+                            <div>
+                              <h5 className="font-semibold text-green-400 mb-2">Technical Skills</h5>
+                              <div className="space-y-2">
+                                {comparisonData.detailedAnalysis.athlete1.technicalSkills.map((skill, index) => (
+                                  <div key={index} className="bg-athlete-gray-800 p-3 rounded-lg">
+                                    <div className="flex justify-between items-center mb-1">
+                                      <span className="font-medium text-white">{skill.skill}</span>
+                                      <Badge variant="outline" className="text-xs">
+                                        {skill.proficiency}%
+                                      </Badge>
+                                    </div>
+                                    <p className="text-xs text-gray-400">{skill.description}</p>
+                                    {skill.evidence && (
+                                      <p className="text-xs text-blue-300 mt-1">Evidence: {skill.evidence}</p>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Physical Attributes */}
+                          {comparisonData.detailedAnalysis.athlete1.physicalAttributes && (
+                            <div>
+                              <h5 className="font-semibold text-yellow-400 mb-2">Physical Attributes</h5>
+                              <div className="bg-athlete-gray-800 p-3 rounded-lg space-y-1">
+                                {comparisonData.detailedAnalysis.athlete1.physicalAttributes.height && (
+                                  <div className="text-sm text-gray-300">
+                                    <span className="text-gray-400">Height:</span> {comparisonData.detailedAnalysis.athlete1.physicalAttributes.height}
+                                  </div>
+                                )}
+                                {comparisonData.detailedAnalysis.athlete1.physicalAttributes.weight && (
+                                  <div className="text-sm text-gray-300">
+                                    <span className="text-gray-400">Weight:</span> {comparisonData.detailedAnalysis.athlete1.physicalAttributes.weight}
+                                  </div>
+                                )}
+                                {comparisonData.detailedAnalysis.athlete1.physicalAttributes.stance && (
+                                  <div className="text-sm text-gray-300">
+                                    <span className="text-gray-400">Stance:</span> {comparisonData.detailedAnalysis.athlete1.physicalAttributes.stance}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Recent Performance */}
+                          {comparisonData.detailedAnalysis.athlete1.recentPerformance && (
+                            <div>
+                              <h5 className="font-semibold text-purple-400 mb-2">Recent Performance</h5>
+                              <div className="bg-athlete-gray-800 p-3 rounded-lg space-y-1">
+                                {comparisonData.detailedAnalysis.athlete1.recentPerformance.lastCompetition && (
+                                  <div className="text-sm text-gray-300">
+                                    <span className="text-gray-400">Last Competition:</span> {comparisonData.detailedAnalysis.athlete1.recentPerformance.lastCompetition}
+                                  </div>
+                                )}
+                                {comparisonData.detailedAnalysis.athlete1.recentPerformance.form && (
+                                  <div className="text-sm text-gray-300">
+                                    <span className="text-gray-400">Form:</span> {comparisonData.detailedAnalysis.athlete1.recentPerformance.form}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+
+                      {/* Athlete 2 Detailed Analysis */}
+                      <Card className="bg-athlete-gray-900 border-gray-600">
+                        <CardHeader>
+                          <CardTitle className="text-white flex items-center gap-2">
+                            <User className="h-5 w-5" />
+                            {comparisonData.detailedAnalysis.athlete2.name}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          {/* Current Form */}
+                          <div>
+                            <h5 className="font-semibold text-blue-400 mb-2">Current Form</h5>
+                            <p className="text-sm text-gray-300">{comparisonData.detailedAnalysis.athlete2.currentForm}</p>
+                          </div>
+
+                          {/* Technical Skills */}
+                          {comparisonData.detailedAnalysis.athlete2.technicalSkills?.length > 0 && (
+                            <div>
+                              <h5 className="font-semibold text-green-400 mb-2">Technical Skills</h5>
+                              <div className="space-y-2">
+                                {comparisonData.detailedAnalysis.athlete2.technicalSkills.map((skill, index) => (
+                                  <div key={index} className="bg-athlete-gray-800 p-3 rounded-lg">
+                                    <div className="flex justify-between items-center mb-1">
+                                      <span className="font-medium text-white">{skill.skill}</span>
+                                      <Badge variant="outline" className="text-xs">
+                                        {skill.proficiency}%
+                                      </Badge>
+                                    </div>
+                                    <p className="text-xs text-gray-400">{skill.description}</p>
+                                    {skill.evidence && (
+                                      <p className="text-xs text-blue-300 mt-1">Evidence: {skill.evidence}</p>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Physical Attributes */}
+                          {comparisonData.detailedAnalysis.athlete2.physicalAttributes && (
+                            <div>
+                              <h5 className="font-semibold text-yellow-400 mb-2">Physical Attributes</h5>
+                              <div className="bg-athlete-gray-800 p-3 rounded-lg space-y-1">
+                                {comparisonData.detailedAnalysis.athlete2.physicalAttributes.height && (
+                                  <div className="text-sm text-gray-300">
+                                    <span className="text-gray-400">Height:</span> {comparisonData.detailedAnalysis.athlete2.physicalAttributes.height}
+                                  </div>
+                                )}
+                                {comparisonData.detailedAnalysis.athlete2.physicalAttributes.weight && (
+                                  <div className="text-sm text-gray-300">
+                                    <span className="text-gray-400">Weight:</span> {comparisonData.detailedAnalysis.athlete2.physicalAttributes.weight}
+                                  </div>
+                                )}
+                                {comparisonData.detailedAnalysis.athlete2.physicalAttributes.stance && (
+                                  <div className="text-sm text-gray-300">
+                                    <span className="text-gray-400">Stance:</span> {comparisonData.detailedAnalysis.athlete2.physicalAttributes.stance}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Recent Performance */}
+                          {comparisonData.detailedAnalysis.athlete2.recentPerformance && (
+                            <div>
+                              <h5 className="font-semibold text-purple-400 mb-2">Recent Performance</h5>
+                              <div className="bg-athlete-gray-800 p-3 rounded-lg space-y-1">
+                                {comparisonData.detailedAnalysis.athlete2.recentPerformance.lastCompetition && (
+                                  <div className="text-sm text-gray-300">
+                                    <span className="text-gray-400">Last Competition:</span> {comparisonData.detailedAnalysis.athlete2.recentPerformance.lastCompetition}
+                                  </div>
+                                )}
+                                {comparisonData.detailedAnalysis.athlete2.recentPerformance.form && (
+                                  <div className="text-sm text-gray-300">
+                                    <span className="text-gray-400">Form:</span> {comparisonData.detailedAnalysis.athlete2.recentPerformance.form}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    {/* Comparison Summary */}
+                    {comparisonData.detailedAnalysis.comparison && (
+                      <Card className="bg-athlete-gray-900 border-gray-600">
+                        <CardHeader>
+                          <CardTitle className="text-white flex items-center gap-2">
+                            <Target className="h-5 w-5" />
+                            Comparison Summary
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {comparisonData.detailedAnalysis.comparison.technicalEdge && (
+                              <div className="text-center p-3 bg-athlete-gray-800 rounded-lg">
+                                <div className="text-xs text-gray-400 mb-1">Technical Edge</div>
+                                <div className="font-semibold text-green-400">
+                                  {comparisonData.detailedAnalysis.comparison.technicalEdge === 'athlete1' ? 
+                                    comparisonData.detailedAnalysis.athlete1.name : 
+                                    comparisonData.detailedAnalysis.athlete2.name}
+                                </div>
+                              </div>
+                            )}
+                            {comparisonData.detailedAnalysis.comparison.physicalEdge && (
+                              <div className="text-center p-3 bg-athlete-gray-800 rounded-lg">
+                                <div className="text-xs text-gray-400 mb-1">Physical Edge</div>
+                                <div className="font-semibold text-yellow-400">
+                                  {comparisonData.detailedAnalysis.comparison.physicalEdge === 'athlete1' ? 
+                                    comparisonData.detailedAnalysis.athlete1.name : 
+                                    comparisonData.detailedAnalysis.athlete2.name}
+                                </div>
+                              </div>
+                            )}
+                            {comparisonData.detailedAnalysis.comparison.experienceEdge && (
+                              <div className="text-center p-3 bg-athlete-gray-800 rounded-lg">
+                                <div className="text-xs text-gray-400 mb-1">Experience Edge</div>
+                                <div className="font-semibold text-blue-400">
+                                  {comparisonData.detailedAnalysis.comparison.experienceEdge === 'athlete1' ? 
+                                    comparisonData.detailedAnalysis.athlete1.name : 
+                                    comparisonData.detailedAnalysis.athlete2.name}
+                                </div>
+                              </div>
+                            )}
+                            {comparisonData.detailedAnalysis.comparison.formEdge && (
+                              <div className="text-center p-3 bg-athlete-gray-800 rounded-lg">
+                                <div className="text-xs text-gray-400 mb-1">Form Edge</div>
+                                <div className="font-semibold text-purple-400">
+                                  {comparisonData.detailedAnalysis.comparison.formEdge === 'athlete1' ? 
+                                    comparisonData.detailedAnalysis.athlete1.name : 
+                                    comparisonData.detailedAnalysis.athlete2.name}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                ) : (
+                  <Card className="bg-yellow-900/30 border-yellow-600/50">
+                    <CardContent className="p-4">
+                      <p className="text-yellow-300">
+                        Detailed analysis powered by Gemini-2.5-pro is not available for this comparison.
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
               </TabsContent>
 
               <TabsContent value="strengths" className="space-y-4">
@@ -696,6 +1022,67 @@ export function AthleteComparison() {
                        comparisonData.headToHead.scenario.includes("temporarily unavailable") && (
                         <div className="mt-4 p-3 bg-yellow-900/30 border border-yellow-600/50 rounded-lg">
                           <p className="text-yellow-300 text-sm">GPT-5 analysis temporarily unavailable</p>
+                        </div>
+                      )}
+
+                      {/* Gemini-2.5-pro Enhanced Head-to-Head Data */}
+                      {comparisonData.headToHead?.tacticalAdvice && (
+                        <div className="mt-6">
+                          <h5 className="font-semibold text-purple-400 mb-3">Tactical Advice (Gemini-2.5-pro)</h5>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {comparisonData.headToHead.tacticalAdvice.forAthlete1 && (
+                              <Card className="bg-athlete-gray-800 border-gray-600">
+                                <CardHeader className="pb-2">
+                                  <CardTitle className="text-sm text-blue-400">For {comparisonData.athlete1.name}</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <p className="text-xs text-gray-300">{comparisonData.headToHead.tacticalAdvice.forAthlete1}</p>
+                                </CardContent>
+                              </Card>
+                            )}
+                            {comparisonData.headToHead.tacticalAdvice.forAthlete2 && (
+                              <Card className="bg-athlete-gray-800 border-gray-600">
+                                <CardHeader className="pb-2">
+                                  <CardTitle className="text-sm text-red-400">For {comparisonData.athlete2.name}</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <p className="text-xs text-gray-300">{comparisonData.headToHead.tacticalAdvice.forAthlete2}</p>
+                                </CardContent>
+                              </Card>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {comparisonData.headToHead?.historicalContext && 
+                       !comparisonData.headToHead.historicalContext.includes("Information not found") && (
+                        <div className="mt-4">
+                          <h5 className="font-medium text-yellow-400 mb-2">Historical Context</h5>
+                          <p className="text-gray-300 text-sm bg-athlete-gray-800 p-3 rounded-lg">
+                            {comparisonData.headToHead.historicalContext}
+                          </p>
+                        </div>
+                      )}
+
+                      {comparisonData.headToHead?.expertPredictions && 
+                       !comparisonData.headToHead.expertPredictions.includes("No expert predictions found") && (
+                        <div className="mt-4">
+                          <h5 className="font-medium text-green-400 mb-2">Expert Predictions</h5>
+                          <p className="text-gray-300 text-sm bg-athlete-gray-800 p-3 rounded-lg">
+                            {comparisonData.headToHead.expertPredictions}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* AI Model Attribution */}
+                      {comparisonData.aiModels && (
+                        <div className="mt-6 pt-4 border-t border-gray-600">
+                          <div className="flex items-center gap-2 text-xs text-gray-400">
+                            <Brain className="h-3 w-3" />
+                            <span>
+                              Head-to-Head Analysis powered by {comparisonData.aiModels.headToHead}
+                            </span>
+                          </div>
                         </div>
                       )}
                     </div>
