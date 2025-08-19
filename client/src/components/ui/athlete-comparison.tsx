@@ -86,7 +86,8 @@ interface ComparisonData {
 
 export function AthleteComparison() {
   const [selectedSport, setSelectedSport] = useState<string>("");
-  const [selectedCountry, setSelectedCountry] = useState<string>("");
+  const [selectedCountry1, setSelectedCountry1] = useState<string>("");
+  const [selectedCountry2, setSelectedCountry2] = useState<string>("");
   const [selectedAthlete1, setSelectedAthlete1] = useState<string>("");
   const [selectedAthlete2, setSelectedAthlete2] = useState<string>("");
   const { toast } = useToast();
@@ -100,21 +101,59 @@ export function AthleteComparison() {
     queryKey: ["/api/countries"],
   });
 
-  const { data: allAthletes = [] } = useQuery<Athlete[]>({
-    queryKey: ["/api/athletes/by-sport", selectedSport, selectedCountry],
+  // Get athletes for athlete 1 (by sport and country 1)
+  const { data: allAthletes1 = [] } = useQuery<Athlete[]>({
+    queryKey: ["/api/athletes/by-sport", selectedSport, selectedCountry1, "athlete1"],
     enabled: !!selectedSport,
     queryFn: async () => {
       const url = new URL(`/api/athletes/by-sport/${selectedSport}`, window.location.origin);
-      if (selectedCountry) {
-        url.searchParams.set('country', selectedCountry);
+      if (selectedCountry1) {
+        url.searchParams.set('country', selectedCountry1);
       }
       const response = await fetch(url.toString());
       return response.json();
     }
   });
 
-  // Deduplicate athletes by name, keeping the most recent record
-  const athletes = allAthletes.reduce((acc: Athlete[], current) => {
+  // Get athletes for athlete 2 (by sport and country 2)
+  const { data: allAthletes2 = [] } = useQuery<Athlete[]>({
+    queryKey: ["/api/athletes/by-sport", selectedSport, selectedCountry2, "athlete2"],
+    enabled: !!selectedSport,
+    queryFn: async () => {
+      const url = new URL(`/api/athletes/by-sport/${selectedSport}`, window.location.origin);
+      if (selectedCountry2) {
+        url.searchParams.set('country', selectedCountry2);
+      }
+      const response = await fetch(url.toString());
+      return response.json();
+    }
+  });
+
+  // Deduplicate athletes for athlete 1
+  const athletes1 = allAthletes1.reduce((acc: Athlete[], current) => {
+    const existingIndex = acc.findIndex(athlete => 
+      athlete.name.toLowerCase().trim() === current.name.toLowerCase().trim()
+    );
+    
+    if (existingIndex === -1) {
+      acc.push(current);
+    } else {
+      // Keep the more recent record (or the one with more complete data)
+      const existing = acc[existingIndex];
+      const currentDate = new Date(current.updatedAt || current.createdAt || 0);
+      const existingDate = new Date(existing.updatedAt || existing.createdAt || 0);
+      
+      if (currentDate > existingDate || 
+          (current.bio && current.bio.length > (existing.bio?.length || 0))) {
+        acc[existingIndex] = current;
+      }
+    }
+    
+    return acc;
+  }, []);
+
+  // Deduplicate athletes for athlete 2
+  const athletes2 = allAthletes2.reduce((acc: Athlete[], current) => {
     const existingIndex = acc.findIndex(athlete => 
       athlete.name.toLowerCase().trim() === current.name.toLowerCase().trim()
     );
@@ -182,8 +221,8 @@ export function AthleteComparison() {
   };
 
   const comparisonData = comparisonMutation.data as ComparisonData | undefined;
-  const availableAthletes1 = athletes.filter(a => a.id !== selectedAthlete2);
-  const availableAthletes2 = athletes.filter(a => a.id !== selectedAthlete1);
+  const availableAthletes1 = athletes1.filter((a: Athlete) => a.id !== selectedAthlete2);
+  const availableAthletes2 = athletes2.filter((a: Athlete) => a.id !== selectedAthlete1);
 
   return (
     <Card className="bg-athlete-gray-800 border-gray-700">
@@ -195,13 +234,15 @@ export function AthleteComparison() {
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Selection Controls */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+          <div className="space-y-2 md:col-span-2">
             <label className="text-sm font-medium text-gray-300">Sport</label>
             <Select
               value={selectedSport}
               onValueChange={(value) => {
                 setSelectedSport(value);
+                setSelectedCountry1("");
+                setSelectedCountry2("");
                 setSelectedAthlete1("");
                 setSelectedAthlete2("");
               }}
@@ -221,15 +262,14 @@ export function AthleteComparison() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">Country</label>
+            <label className="text-sm font-medium text-gray-300">Country (Athlete 1)</label>
             <Select
-              value={selectedCountry || "all"}
+              value={selectedCountry1 || "all"}
               onValueChange={(value) => {
-                setSelectedCountry(value === "all" ? "" : value);
+                setSelectedCountry1(value === "all" ? "" : value);
                 setSelectedAthlete1("");
-                setSelectedAthlete2("");
               }}
-              data-testid="select-country"
+              data-testid="select-country1"
             >
               <SelectTrigger className="bg-athlete-gray-700 border-gray-600">
                 <SelectValue placeholder="All countries" />
@@ -257,7 +297,7 @@ export function AthleteComparison() {
                 <SelectValue placeholder="Select first athlete..." />
               </SelectTrigger>
               <SelectContent>
-                {availableAthletes1.map((athlete) => (
+                {availableAthletes1.map((athlete: Athlete) => (
                   <SelectItem key={athlete.id} value={athlete.id}>
                     <div className="flex items-center gap-2">
                       <span>{athlete.name}</span>
@@ -275,18 +315,42 @@ export function AthleteComparison() {
           </div>
 
           <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-300">Country (Athlete 2)</label>
+            <Select
+              value={selectedCountry2 || "all"}
+              onValueChange={(value) => {
+                setSelectedCountry2(value === "all" ? "" : value);
+                setSelectedAthlete2("");
+              }}
+              data-testid="select-country2"
+            >
+              <SelectTrigger className="bg-athlete-gray-700 border-gray-600">
+                <SelectValue placeholder="All countries" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All countries</SelectItem>
+                {countries.map((country) => (
+                  <SelectItem key={country} value={country}>
+                    {country}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300">Athlete 2</label>
             <Select
               value={selectedAthlete2}
               onValueChange={setSelectedAthlete2}
-              disabled={!selectedSport || !selectedAthlete1}
+              disabled={!selectedSport}
               data-testid="select-athlete2"
             >
               <SelectTrigger className="bg-athlete-gray-700 border-gray-600">
                 <SelectValue placeholder="Select second athlete..." />
               </SelectTrigger>
               <SelectContent>
-                {availableAthletes2.map((athlete) => (
+                {availableAthletes2.map((athlete: Athlete) => (
                   <SelectItem key={athlete.id} value={athlete.id}>
                     <div className="flex items-center gap-2">
                       <span>{athlete.name}</span>
