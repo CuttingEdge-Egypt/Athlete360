@@ -83,9 +83,13 @@ export function HistoryDropdown() {
   const handleHistoryItemClick = (item: HistoryItem) => {
     setSelectedHistoryItem(item);
     
+    console.log('HistoryDropdown clicked item:', item);
+    
     if (item.serviceType === 'comparison') {
       // Navigate to home with comparison tab and data
-      setLocation("/?tab=comparison&data=" + encodeURIComponent(JSON.stringify(item.resultData)));
+      const encodedData = encodeURIComponent(JSON.stringify(item.resultData));
+      console.log('Navigating to:', "/?tab=comparison&data=" + encodedData);
+      setLocation("/?tab=comparison&data=" + encodedData);
     } else {
       setShowAnalysisPopup(true);
     }

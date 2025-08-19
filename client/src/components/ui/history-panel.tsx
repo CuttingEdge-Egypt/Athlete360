@@ -87,10 +87,15 @@ export function HistoryPanel({ showHeader = true, className = "", onComparisonSe
   const handleHistoryItemClick = (item: HistoryItem) => {
     setSelectedHistoryItem(item);
     
+    console.log('HistoryPanel clicked item:', item);
+    
     if (item.serviceType === 'comparison') {
       // Call the callback to navigate to comparison tab with data
       if (onComparisonSelect) {
+        console.log('HistoryPanel calling onComparisonSelect with:', item.resultData);
         onComparisonSelect(item.resultData);
+      } else {
+        console.log('HistoryPanel: no onComparisonSelect callback provided');
       }
     } else {
       setShowAnalysisPopup(true);
