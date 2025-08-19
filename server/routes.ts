@@ -1783,15 +1783,39 @@ Return only valid JSON with the missing fields.`;
       const { generateDetailedComparison } = await import('./geminiService.js');
       const detailedAnalysisResult = await generateDetailedComparison(athlete1ForComparison, athlete2ForComparison, sportName);
       
+      // Check if GPT-5 overall analysis failed and use Gemini as fallback
+      let finalOverallAnalysis = basicComparisonResult.overallAnalysis;
+      let overallAnalysisModel = "GPT-5";
+      
+      if (basicComparisonResult.overallAnalysis?.summary?.includes('temporarily unavailable') || 
+          basicComparisonResult.overallAnalysis?.summary?.includes('Analysis unavailable')) {
+        console.log(`GPT-5 overall analysis failed, using Gemini-2.5-pro fallback...`);
+        
+        // Use Gemini's detailed analysis as overall analysis fallback
+        if (detailedAnalysisResult.detailedAnalysis && 
+            !detailedAnalysisResult.detailedAnalysis.includes('temporarily unavailable')) {
+          finalOverallAnalysis = {
+            summary: detailedAnalysisResult.detailedAnalysis,
+            betterAthlete: detailedAnalysisResult.advantage || "even",
+            reasonsWhy: detailedAnalysisResult.keyFactors || ["Detailed analysis available"],
+            closeness: "detailed-analysis",
+            recommendation: "Analysis generated using Gemini-2.5-pro advanced capabilities"
+          };
+          overallAnalysisModel = "Gemini-2.5-pro (fallback)";
+        }
+      }
+      
       // Merge the results from both AI models
       const comparisonResult = {
         ...basicComparisonResult,
+        overallAnalysis: finalOverallAnalysis,
         detailedAnalysis: detailedAnalysisResult.detailedAnalysis,
         headToHead: detailedAnalysisResult.headToHead,
         aiModels: {
           basicComparison: "GPT-5",
           detailedAnalysis: "Gemini-2.5-pro",
-          headToHead: "Gemini-2.5-pro"
+          headToHead: "Gemini-2.5-pro",
+          overallAnalysis: overallAnalysisModel
         }
       };
 

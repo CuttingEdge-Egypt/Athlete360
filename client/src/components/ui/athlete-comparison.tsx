@@ -164,7 +164,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
   const [selectedCountry2, setSelectedCountry2] = useState<string>("");
   const [selectedAthlete1, setSelectedAthlete1] = useState<string>("");
   const [selectedAthlete2, setSelectedAthlete2] = useState<string>("");
-  const [comparisonData, setComparisonData] = useState<ComparisonResult | null>(preloadedComparisonData || null);
+  const [comparisonData, setComparisonData] = useState<any>(preloadedComparisonData || null);
   const { toast } = useToast();
 
   // Update comparison data when preloaded data changes
@@ -530,6 +530,11 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                     <div className="flex items-center gap-2 mb-3">
                       <Brain className="h-5 w-5 text-blue-400" />
                       <h4 className="font-semibold text-white">Overall Analysis</h4>
+                      {comparisonData.aiModels?.overallAnalysis && (
+                        <span className="text-xs bg-blue-600/20 text-blue-300 px-2 py-1 rounded">
+                          {comparisonData.aiModels.overallAnalysis}
+                        </span>
+                      )}
                     </div>
                     {comparisonData.error ? (
                       <div className="p-3 bg-red-900/30 border border-red-600/50 rounded-lg">
@@ -543,7 +548,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                     ) : (
                       <div className="p-3 bg-yellow-900/30 border border-yellow-600/50 rounded-lg">
                         <p className="text-yellow-300">
-                          Authentic overall analysis temporarily unavailable. GPT-5 was unable to generate comprehensive comparison data.
+                          Analysis temporarily unavailable. Please try again later.
                         </p>
                       </div>
                     )}
