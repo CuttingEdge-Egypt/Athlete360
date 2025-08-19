@@ -36,7 +36,7 @@ export class PaymobService {
       apiKey: process.env.PAYMOB_API_KEY || '',
       publicKey: process.env.PAYMOB_PUBLIC_KEY || '',
       secretKey: process.env.PAYMOB_SECRET_KEY || '',
-      integrationId: process.env.PAYMOB_INTEGRATION_ID || '',
+      integrationId: process.env.INTEGRATION_ID || '',
       iframeId: process.env.PAYMOB_IFRAME_ID || ''
     };
 
