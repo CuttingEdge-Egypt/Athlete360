@@ -1552,9 +1552,15 @@ MANDATORY: Use ONLY current web search results. Do not use generic descriptions 
       cleanedText = result;
     }
     
-    const parsedData = JSON.parse(cleanedText);
-    
-    console.log(`GPT-5 Comparison Response for ${athlete1.name} vs ${athlete2.name}:`, JSON.stringify(parsedData, null, 2));
+    let parsedData;
+    try {
+      parsedData = JSON.parse(cleanedText);
+      console.log(`GPT-5 Comparison Response for ${athlete1.name} vs ${athlete2.name}:`, JSON.stringify(parsedData, null, 2));
+    } catch (parseError: any) {
+      console.error(`JSON parsing failed for GPT-5 response: ${parseError.message}`);
+      console.log(`Raw response (first 500 chars): ${cleanedText.substring(0, 500)}`);
+      throw parseError;
+    }
     
     // Validate that we received authentic GPT-5 data
     const hasAuthenticOverallAnalysis = parsedData.overallAnalysis?.summary && 

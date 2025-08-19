@@ -1774,9 +1774,55 @@ Return only valid JSON with the missing fields.`;
         profileImageUrl: athlete2.profileImageUrl || ""
       };
       
-      // Generate comparison using GPT-5 with web search capabilities (no pre-existing data)
+      // Try GPT-5 comparison first, fall back to Gemini if it fails
       console.log(`Generating GPT-5 basic comparison...`);
-      const basicComparisonResult = await compareAthletes(athlete1ForComparison, athlete2ForComparison, sportName);
+      let basicComparisonResult;
+      let gptFailed = false;
+      
+      try {
+        basicComparisonResult = await compareAthletes(athlete1ForComparison, athlete2ForComparison, sportName);
+      } catch (gptError: any) {
+        console.error(`GPT-5 comparison failed: ${gptError.message}`);
+        gptFailed = true;
+        
+        // Create fallback structure when GPT-5 completely fails
+        basicComparisonResult = {
+          athlete1: {
+            name: athlete1.name,
+            country: athlete1.country || 'Unknown',
+            rank: 'N/A',
+            profileImageUrl: athlete1.profileImageUrl || ''
+          },
+          athlete2: {
+            name: athlete2.name,
+            country: athlete2.country || 'Unknown',
+            rank: 'N/A',
+            profileImageUrl: athlete2.profileImageUrl || ''
+          },
+          strengths: { athlete1: [], athlete2: [], advantage: "even" },
+          weaknesses: { athlete1: [], athlete2: [], advantage: "even" },
+          ranking: {
+            comparison: "GPT-5 analysis temporarily unavailable",
+            athlete1Trajectory: "Analysis unavailable", 
+            athlete2Trajectory: "Analysis unavailable",
+            competitiveEdge: "even"
+          },
+          headToHead: {
+            prediction: "even",
+            confidence: 50,
+            reasoning: "Analysis temporarily unavailable",
+            keyFactors: ["Analysis unavailable"],
+            scenario: "GPT-5 analysis temporarily unavailable"
+          },
+          overallAnalysis: {
+            summary: "Analysis temporarily unavailable",
+            betterAthlete: "even",
+            reasonsWhy: ["Analysis unavailable"],
+            closeness: "even", 
+            recommendation: "Analysis could not be generated"
+          }
+        };
+      }
       
       // Generate detailed analysis and head-to-head using Gemini-2.5-pro
       console.log(`Generating Gemini-2.5-pro detailed analysis and head-to-head...`);
@@ -1785,9 +1831,10 @@ Return only valid JSON with the missing fields.`;
       
       // Check if GPT-5 overall analysis failed and use Gemini as fallback
       let finalOverallAnalysis = basicComparisonResult.overallAnalysis;
-      let overallAnalysisModel = "GPT-5";
+      let overallAnalysisModel = gptFailed ? "Gemini-2.5-pro (fallback)" : "GPT-5";
       
-      if (basicComparisonResult.overallAnalysis?.summary?.includes('temporarily unavailable') || 
+      if (gptFailed || 
+          basicComparisonResult.overallAnalysis?.summary?.includes('temporarily unavailable') || 
           basicComparisonResult.overallAnalysis?.summary?.includes('Analysis unavailable')) {
         console.log(`GPT-5 overall analysis failed, using Gemini-2.5-pro fallback...`);
         
