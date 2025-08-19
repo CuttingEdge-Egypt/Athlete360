@@ -88,8 +88,17 @@ export function HistoryDropdown() {
     if (item.serviceType === 'comparison') {
       // Navigate to home with comparison tab and data
       const encodedData = encodeURIComponent(JSON.stringify(item.resultData));
-      console.log('Navigating to:', "/?tab=comparison&data=" + encodedData);
-      setLocation("/?tab=comparison&data=" + encodedData);
+      const url = "/?tab=comparison&data=" + encodedData;
+      console.log('Navigating to:', url);
+      
+      // Use both wouter navigation and manual URL update
+      setLocation(url);
+      
+      // Also update the URL directly and trigger event
+      setTimeout(() => {
+        window.history.pushState({}, '', url);
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      }, 100);
     } else {
       setShowAnalysisPopup(true);
     }

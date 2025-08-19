@@ -31,19 +31,54 @@ export default function Home() {
 
   // Check for URL parameters to load comparison data
   useEffect(() => {
+    const checkUrlParams = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tab = urlParams.get('tab');
+      const data = urlParams.get('data');
+      
+      console.log('URL params check:', { tab, data: data ? 'present' : 'null' });
+      
+      if (tab === 'comparison' && data) {
+        try {
+          const parsedData = JSON.parse(decodeURIComponent(data));
+          console.log('Parsed comparison data:', parsedData);
+          setComparisonData(parsedData);
+          setActiveTab("comparison");
+          console.log('Set activeTab to comparison, comparisonData:', parsedData);
+          // Clean up URL after loading data
+          window.history.replaceState({}, '', window.location.pathname);
+        } catch (error) {
+          console.error('Failed to parse comparison data from URL:', error);
+        }
+      }
+    };
+
+    // Check immediately
+    checkUrlParams();
+
+    // Listen for popstate events (back/forward navigation)
+    window.addEventListener('popstate', checkUrlParams);
+    
+    // Clean up listener
+    return () => {
+      window.removeEventListener('popstate', checkUrlParams);
+    };
+  }, [location]);
+
+  // Also check on location changes
+  useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const tab = urlParams.get('tab');
     const data = urlParams.get('data');
     
-    console.log('URL params:', { tab, data: data ? 'present' : 'null' });
+    console.log('Location changed, URL params:', { tab, data: data ? 'present' : 'null' });
     
     if (tab === 'comparison' && data) {
       try {
         const parsedData = JSON.parse(decodeURIComponent(data));
-        console.log('Parsed comparison data:', parsedData);
+        console.log('Location change - Parsed comparison data:', parsedData);
         setComparisonData(parsedData);
         setActiveTab("comparison");
-        console.log('Set activeTab to comparison, comparisonData:', parsedData);
         // Clean up URL after loading data
         window.history.replaceState({}, '', window.location.pathname);
       } catch (error) {
