@@ -33,11 +33,13 @@ export async function generateNutritionPlan(
   nationality: string
 ): Promise<NutritionPlanData> {
   try {
-    const systemPrompt = `You are a professional sports nutritionist specializing in ${nationality} cuisine. Create a 7-day nutrition plan in JSON format only. Do not include any text before or after the JSON. The response must be valid JSON without any markdown formatting.`;
-
+    const nationalityText = nationality === 'International' ? 'international' : nationality;
+    const genderText = gender === 'Unknown' ? 'athlete' : `${age} years old ${gender}`;
+    const systemPrompt = `You are a professional sports nutritionist specializing in ${nationalityText} cuisine. Create a 7-day nutrition plan in JSON format only. Do not include any text before or after the JSON. The response must be valid JSON without any markdown formatting.`;
+    
     const prompt = `Create a personalized 7-day nutrition plan for this athlete:
 
-Athlete: ${name} (${age} years old ${gender} from ${nationality})
+Athlete: ${name} (${genderText} from ${nationalityText})
 Sport: ${sport}
 
 CRITICAL: Return ONLY valid JSON in this EXACT structure with no additional text, no markdown, no explanations:
@@ -53,7 +55,7 @@ CRITICAL: Return ONLY valid JSON in this EXACT structure with no additional text
         {
           "calories_intake": "500 kcal",
           "meal_description": [
-            "Traditional ${nationality} breakfast item 100g",
+            "Traditional ${nationalityText} breakfast item 100g",
             "Another item with quantity"
           ]
         },
@@ -89,7 +91,7 @@ CRITICAL: Return ONLY valid JSON in this EXACT structure with no additional text
 }
 
 Requirements:
-- Use traditional ${nationality} foods appropriate for ${sport} athletes
+- Use traditional ${nationalityText} foods appropriate for ${sport} athletes
 - Include 5 meals per day (breakfast, snack, lunch, snack, dinner)
 - Consider ${sport} training needs (explosive power, agility, recovery)
 - Provide realistic portion sizes

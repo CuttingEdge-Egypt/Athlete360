@@ -1318,16 +1318,23 @@ Return only valid JSON with the missing fields.`;
         }
       }
 
-      // Final check - if still missing critical info, return error
+      // Final check - if still missing critical info, provide reasonable defaults
       if (!athleteAge || !athleteGender || !athleteCountry) {
-        const missing = [];
-        if (!athleteAge) missing.push('age');
-        if (!athleteGender) missing.push('gender');
-        if (!athleteCountry) missing.push('nationality');
+        console.log(`Missing data for ${athlete.name}:`, { age: athleteAge, gender: athleteGender, country: athleteCountry });
         
-        return res.status(400).json({ 
-          message: `Unable to generate nutrition plan. Missing required information: ${missing.join(', ')}. Please update the athlete's profile or try again later.`
-        });
+        // Provide reasonable defaults based on sport and context
+        if (!athleteAge) {
+          athleteAge = 22; // Reasonable default for competitive athletes
+          console.log(`Using default age ${athleteAge} for ${athlete.name}`);
+        }
+        if (!athleteGender) {
+          athleteGender = 'Unknown'; // Will be handled in nutrition plan generation
+          console.log(`Using default gender ${athleteGender} for ${athlete.name}`);
+        }
+        if (!athleteCountry) {
+          athleteCountry = 'International'; // Will use international cuisine
+          console.log(`Using default country ${athleteCountry} for ${athlete.name}`);
+        }
       }
 
       const forceUpdate = req.query.forceUpdate === 'true';
