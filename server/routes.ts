@@ -1972,6 +1972,7 @@ Return only valid JSON with the missing fields.`;
         return res.status(404).json({ message: "User not found" });
       }
 
+      console.log('🚀 ROUTES: Starting payment intent creation...');
       const paymentIntent = await paymobService.createPaymentIntent({
         amount,
         currency: 'EGP',
@@ -1983,6 +1984,7 @@ Return only valid JSON with the missing fields.`;
           lastName: user.lastName || ''
         }
       });
+      console.log('✅ ROUTES: Payment intent created successfully');
 
       res.json({
         paymentToken: paymentIntent.token,
@@ -1990,7 +1992,7 @@ Return only valid JSON with the missing fields.`;
         orderId: paymentIntent.orderId
       });
     } catch (error) {
-      console.error("Error creating payment intent:", error);
+      console.error("❌ ROUTES: Error creating payment intent:", error);
       res.status(500).json({ message: "Failed to create payment intent" });
     }
   });

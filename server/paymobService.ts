@@ -191,12 +191,16 @@ export class PaymobService {
 
   // Method to get available integrations for debugging
   async getAvailableIntegrations(): Promise<any> {
+    console.log('🚨 ENTERING getAvailableIntegrations method...');
+    
     try {
-      console.log('🔄 Getting auth token for integrations fetch...');
+      console.log('🔄 Step 1: Getting auth token for integrations fetch...');
       const authToken = await this.getAuthToken();
-      console.log('✅ Auth token obtained');
+      console.log('✅ Step 1 DONE: Auth token obtained, length:', authToken?.length);
       
-      console.log('🔄 Fetching integrations from Paymob API...');
+      console.log('🔄 Step 2: Making fetch request to Paymob integrations API...');
+      console.log('🔄 API URL:', `${this.baseUrl}/ecommerce/integrations`);
+      
       const response = await fetch(`${this.baseUrl}/ecommerce/integrations`, {
         method: 'GET',
         headers: {
@@ -204,18 +208,26 @@ export class PaymobService {
         },
       });
 
-      console.log(`📡 Integration API response status: ${response.status}`);
+      console.log(`📡 Step 3: Integration API response received`);
+      console.log(`📡 Status: ${response.status}`);
+      console.log(`📡 Status Text: ${response.statusText}`);
+      console.log(`📡 Headers:`, Object.fromEntries(response.headers));
       
       if (!response.ok) {
-        console.error('❌ Failed to fetch integrations, status:', response.status);
+        console.error('❌ FETCH FAILED - Status:', response.status);
         const errorText = await response.text();
-        console.error('Error response:', errorText);
+        console.error('❌ FETCH FAILED - Error response body:', errorText);
         return [];
       }
 
+      console.log('🔄 Step 4: Parsing JSON response...');
       const data = await response.json() as any;
+      console.log('✅ Step 4 DONE: JSON parsed successfully');
       console.log('🔍 RAW Available integrations from your Paymob account:');
-      console.log(JSON.stringify(data, null, 2));
+      console.log('🔍 Type of data:', typeof data);
+      console.log('🔍 Is array:', Array.isArray(data));
+      console.log('🔍 Data length:', data?.length);
+      console.log('🔍 Full data:', JSON.stringify(data, null, 2));
       
       // Store all valid integration IDs for this account
       if (data && Array.isArray(data) && data.length > 0) {
@@ -251,14 +263,19 @@ export class PaymobService {
         }
       } else {
         console.error('❌ No integrations found or invalid response format');
-        console.log('Response data type:', typeof data);
-        console.log('Is array:', Array.isArray(data));
-        console.log('Length:', data?.length);
+        console.error('❌ Response data type:', typeof data);
+        console.error('❌ Is array:', Array.isArray(data));
+        console.error('❌ Length:', data?.length);
+        console.error('❌ Raw data:', data);
       }
       
+      console.log('🚨 EXITING getAvailableIntegrations method with integration ID:', this.config.integrationId);
       return data;
-    } catch (error) {
-      console.error('❌ Critical error fetching integrations:', error);
+    } catch (error: any) {
+      console.error('❌ CRITICAL ERROR in getAvailableIntegrations:', error);
+      console.error('❌ Error name:', error?.name);
+      console.error('❌ Error message:', error?.message);
+      console.error('❌ Error stack:', error?.stack);
       return [];
     }
   }
