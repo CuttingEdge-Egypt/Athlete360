@@ -1,10 +1,6 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
+import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
 import * as schema from "@shared/schema";
-
-// Configure websocket for Neon
-neonConfig.webSocketConstructor = ws;
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
@@ -12,5 +8,11 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle({ client: pool, schema });
+// Use direct neon client instead of Pool to avoid WebSocket issues  
+const client = neon(process.env.DATABASE_URL);
+
+// Correct drizzle configuration for neon-serverless - client as first parameter
+export const db = drizzle(process.env.DATABASE_URL, { schema });
+
+// Export client for direct use if needed
+export { client };
