@@ -291,32 +291,17 @@ export default function PaymentCenter() {
             </div>
           )}
 
-          {/* Debug Integration Testing */}
-          <div className="bg-athlete-gray-800 border border-red-600/30 rounded-lg p-4 mb-8">
+          {/* Integration Status */}
+          <div className="bg-athlete-gray-800 border border-green-600/30 rounded-lg p-4 mb-8">
             <div className="flex items-center gap-4">
               <div>
-                <h3 className="text-sm font-semibold text-red-400">Debug Mode</h3>
-                <p className="text-xs text-gray-400">Test all Paymob integration IDs</p>
+                <h3 className="text-sm font-semibold text-green-400">Payment Integration Status</h3>
+                <p className="text-xs text-gray-400">Using Integration ID: 4723445 (UIG-in_store - Mobile Wallet)</p>
               </div>
-              <Button
-                onClick={async () => {
-                  console.log('🧪 Testing all integration IDs...');
-                  try {
-                    const response = await fetch('/api/payments/test-all-integrations');
-                    const result = await response.json();
-                    console.log('Test results:', result);
-                    alert(`Test completed. Check console for details. Recommended ID: ${result.recommendation}`);
-                  } catch (error) {
-                    console.error('Test failed:', error);
-                    alert('Test failed. Check console for details.');
-                  }
-                }}
-                variant="outline"
-                size="sm"
-                className="border-red-600 text-red-400 hover:bg-red-600/10"
-              >
-                🧪 Test All Integration IDs
-              </Button>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <span className="text-green-400 text-sm font-medium">Active</span>
+              </div>
             </div>
           </div>
 
