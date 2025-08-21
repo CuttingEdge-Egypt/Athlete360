@@ -291,6 +291,35 @@ export default function PaymentCenter() {
             </div>
           )}
 
+          {/* Debug Integration Testing */}
+          <div className="bg-athlete-gray-800 border border-red-600/30 rounded-lg p-4 mb-8">
+            <div className="flex items-center gap-4">
+              <div>
+                <h3 className="text-sm font-semibold text-red-400">Debug Mode</h3>
+                <p className="text-xs text-gray-400">Test all Paymob integration IDs</p>
+              </div>
+              <Button
+                onClick={async () => {
+                  console.log('🧪 Testing all integration IDs...');
+                  try {
+                    const response = await fetch('/api/payments/test-all-integrations');
+                    const result = await response.json();
+                    console.log('Test results:', result);
+                    alert(`Test completed. Check console for details. Recommended ID: ${result.recommendation}`);
+                  } catch (error) {
+                    console.error('Test failed:', error);
+                    alert('Test failed. Check console for details.');
+                  }
+                }}
+                variant="outline"
+                size="sm"
+                className="border-red-600 text-red-400 hover:bg-red-600/10"
+              >
+                🧪 Test All Integration IDs
+              </Button>
+            </div>
+          </div>
+
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             {tokenPackages.map((pkg) => {
               const IconComponent = pkg.icon;

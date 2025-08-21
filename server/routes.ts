@@ -1696,6 +1696,84 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
+  // Test all integration IDs endpoint
+  app.get('/api/payments/test-all-integrations', isAuthenticated, async (req, res) => {
+    try {
+      const integrationIds = [4723445, 4723444, 4723443, 4279357, 4279356];
+      const results = [];
+      
+      for (const integrationId of integrationIds) {
+        console.log(`\n🧪 Testing Integration ID: ${integrationId}`);
+        
+        try {
+          // Create a temporary paymob service with this integration ID
+          const testConfig = {
+            apiKey: process.env.PAYMOB_API_KEY!,
+            integrationId: integrationId,
+            iframeUrl: process.env.IFRAME_URL!,
+            secretKey: process.env.PAYMOB_SECRET_KEY!,
+          };
+          
+          const testPaymob = new (paymobService.constructor as any)(testConfig);
+          
+          // Test authentication
+          await testPaymob.authenticate();
+          console.log(`✅ Auth successful for ${integrationId}`);
+          
+          // Test order creation
+          const testOrder = await testPaymob.createOrder({
+            amount: 100, // 1 EGP test
+            currency: 'EGP',
+            customerEmail: 'test@example.com',
+            customerFirstName: 'Test',
+            customerLastName: 'User',
+            customerPhone: '+201234567890',
+          });
+          console.log(`✅ Order creation successful for ${integrationId}: ${testOrder.id}`);
+          
+          // Test payment key generation
+          const testPaymentKey = await testPaymob.generatePaymentKey(
+            testOrder.id.toString(),
+            100,
+            {
+              email: 'test@example.com',
+              firstName: 'Test',
+              lastName: 'User',
+              phone: '+201234567890',
+            }
+          );
+          console.log(`✅ Payment key generation successful for ${integrationId}`);
+          
+          results.push({
+            integrationId,
+            status: 'success',
+            orderId: testOrder.id,
+            paymentToken: testPaymentKey.token,
+            message: 'All steps completed successfully'
+          });
+          
+        } catch (error: any) {
+          console.log(`❌ Failed for ${integrationId}: ${error.message}`);
+          results.push({
+            integrationId,
+            status: 'failed',
+            error: error.message
+          });
+        }
+      }
+      
+      res.json({
+        success: true,
+        results,
+        recommendation: results.find(r => r.status === 'success')?.integrationId || 'None working'
+      });
+      
+    } catch (error: any) {
+      console.error('Test integration IDs error:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
   // Paymob processed callback (server-to-server)
   app.post('/api/payments/paymob-processed', async (req, res) => {
     try {
