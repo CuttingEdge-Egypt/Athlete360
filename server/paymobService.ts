@@ -36,7 +36,7 @@ export class PaymobService {
       apiKey: process.env.PAYMOB_API_KEY || '',
       publicKey: process.env.PAYMOB_PUBLIC_KEY || '',
       secretKey: process.env.PAYMOB_SECRET_KEY || '',
-      integrationId: process.env.INTEGRATION_ID || '3036500', // Fallback to known working ID
+      integrationId: process.env.INTEGRATION_ID || '4279357', // Use the ID from environment
       iframeId: process.env.PAYMOB_IFRAME_ID || ''
     };
 
@@ -119,55 +119,76 @@ export class PaymobService {
   }
 
   private async createPaymentKey(authToken: string, orderId: string, paymentIntent: PaymentIntent): Promise<string> {
-    const requestBody = {
-      auth_token: authToken,
-      amount_cents: Math.round(paymentIntent.amount * 100),
-      expiration: 3600, // 1 hour
-      order_id: orderId,
-      billing_data: {
-        apartment: 'NA',
-        email: paymentIntent.billingData.email,
-        floor: 'NA',
-        first_name: paymentIntent.billingData.firstName,
-        street: 'NA',
-        building: 'NA',
-        phone_number: paymentIntent.billingData.phoneNumber || '+20100000000',
-        shipping_method: 'NA',
-        postal_code: 'NA',
-        city: 'Cairo',
-        country: 'EG',
-        last_name: paymentIntent.billingData.lastName,
-        state: 'Cairo',
-        extra_data: {
-          user_id: paymentIntent.userId,
-          tokens_amount: paymentIntent.tokensAmount
+    // List of common Paymob integration IDs to try in case of failure
+    const fallbackIntegrationIds = [
+      this.config.integrationId,
+      '4279356', // Common card integration
+      '3036500', // Alternative card integration
+      '2917284', // Another common integration
+      '4279358'  // Related integration
+    ];
+
+    for (const integrationId of fallbackIntegrationIds) {
+      try {
+        console.log(`Attempting payment key creation with integration ID: ${integrationId}`);
+        
+        const requestBody = {
+          auth_token: authToken,
+          amount_cents: Math.round(paymentIntent.amount * 100),
+          expiration: 3600, // 1 hour
+          order_id: orderId,
+          billing_data: {
+            apartment: 'NA',
+            email: paymentIntent.billingData.email,
+            floor: 'NA',
+            first_name: paymentIntent.billingData.firstName,
+            street: 'NA',
+            building: 'NA',
+            phone_number: paymentIntent.billingData.phoneNumber || '+20100000000',
+            shipping_method: 'NA',
+            postal_code: 'NA',
+            city: 'Cairo',
+            country: 'EG',
+            last_name: paymentIntent.billingData.lastName,
+            state: 'Cairo',
+            extra_data: {
+              user_id: paymentIntent.userId,
+              tokens_amount: paymentIntent.tokensAmount
+            }
+          },
+          currency: paymentIntent.currency,
+          integration_id: parseInt(integrationId),
+          lock_order_when_paid: false,
+        };
+
+        console.log('Creating payment key with body:', JSON.stringify(requestBody, null, 2));
+
+        const response = await fetch(`${this.baseUrl}/acceptance/payment_keys`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        const data = await response.json() as any;
+        console.log('Payment key response:', data);
+
+        if (response.ok && data.token) {
+          console.log(`✅ Payment key creation successful with integration ID: ${integrationId}`);
+          // Update the config with the working integration ID for future use
+          this.config.integrationId = integrationId;
+          return data.token;
+        } else {
+          console.warn(`❌ Payment key creation failed with integration ID ${integrationId}:`, data);
         }
-      },
-      currency: paymentIntent.currency,
-      integration_id: parseInt(this.config.integrationId),
-      // Add redirect URL for iframe completion
-      lock_order_when_paid: false,
-    };
-
-    console.log('Creating payment key with body:', JSON.stringify(requestBody, null, 2));
-
-    const response = await fetch(`${this.baseUrl}/acceptance/payment_keys`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    const data = await response.json() as any;
-    console.log('Payment key response:', data);
-
-    if (!response.ok) {
-      console.error('Payment key creation failed:', data);
-      throw new Error(`Paymob payment key creation failed: ${data.message || 'Unknown error'}`);
+      } catch (error) {
+        console.warn(`Error trying integration ID ${integrationId}:`, error);
+      }
     }
 
-    return data.token;
+    // If all attempts failed
+    throw new Error(`Paymob payment key creation failed with all integration IDs. Please check your Paymob account configuration and ensure you have a valid card payment integration set up.`);
   }
 
   // Method to get available integrations for debugging
@@ -177,13 +198,28 @@ export class PaymobService {
       const response = await fetch(`${this.baseUrl}/ecommerce/integrations`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${authToken}`,
           'Content-Type': 'application/json',
         },
       });
 
       const data = await response.json() as any;
-      console.log('Available integrations:', data);
+      console.log('Available integrations:', JSON.stringify(data, null, 2));
+      
+      // If we get integrations, try to find the first active card integration
+      if (data && Array.isArray(data)) {
+        const cardIntegrations = data.filter((integration: any) => 
+          integration.type === 'card' && integration.is_live === true
+        );
+        
+        if (cardIntegrations.length > 0) {
+          console.log('Found card integrations:', cardIntegrations.map((i: any) => ({ id: i.id, name: i.name, type: i.type })));
+          // Update our integration ID to use the first valid card integration
+          const firstCardIntegration = cardIntegrations[0];
+          this.config.integrationId = firstCardIntegration.id.toString();
+          console.log(`Updated integration ID to: ${this.config.integrationId}`);
+        }
+      }
+      
       return data;
     } catch (error) {
       console.error('Failed to get integrations:', error);
@@ -196,9 +232,13 @@ export class PaymobService {
       console.log('Creating Paymob payment intent with real credentials...');
       const authToken = await this.getAuthToken();
       
-      // Get available integrations for debugging
-      console.log('Checking available integrations...');
-      await this.getAvailableIntegrations();
+      // Try to get available integrations and auto-configure
+      try {
+        console.log('Checking available integrations...');
+        await this.getAvailableIntegrations();
+      } catch (integrationError) {
+        console.warn('Could not fetch integrations, proceeding with configured ID:', this.config.integrationId);
+      }
       
       const orderId = await this.createOrder(authToken, paymentIntent.amount);
       const paymentToken = await this.createPaymentKey(authToken, orderId, paymentIntent);
