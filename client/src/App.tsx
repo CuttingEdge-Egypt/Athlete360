@@ -27,7 +27,16 @@ function Router() {
         <Route path="/signup" component={SignupPage} />
         <Route path="/login" component={LoginPage} />
         
-        {isLoading || !isAuthenticated ? (
+        {isLoading ? (
+          <Route path="/" component={() => (
+            <div className="min-h-screen bg-athlete-primary flex items-center justify-center">
+              <div className="text-white text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                <p>Loading...</p>
+              </div>
+            </div>
+          )} />
+        ) : !isAuthenticated ? (
           <Route path="/" component={Landing} />
         ) : (
           <AuthenticatedLayout>
