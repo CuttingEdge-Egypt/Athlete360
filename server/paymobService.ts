@@ -150,41 +150,50 @@ export class PaymobService {
       await this.authenticate();
     }
 
+    const requestPayload = {
+      auth_token: this.authToken,
+      amount_cents: amount,
+      expiration: 3600, // 1 hour expiration
+      order_id: orderId,
+      billing_data: {
+        apartment: 'NA',
+        email: customerData.email,
+        floor: 'NA',
+        first_name: customerData.firstName,
+        street: 'NA',
+        building: 'NA',
+        phone_number: customerData.phone || '+201000000000',
+        shipping_method: 'NA',
+        postal_code: 'NA',
+        city: 'NA',
+        country: 'EG',
+        last_name: customerData.lastName,
+        state: 'NA',
+      },
+      currency: 'EGP',
+      integration_id: parseInt(this.config.integrationId),
+    };
+
+    console.log('📤 Payment key request:', JSON.stringify(requestPayload, null, 2));
+
     try {
       const response = await fetch('https://accept.paymob.com/api/acceptance/payment_keys', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          auth_token: this.authToken,
-          amount_cents: amount,
-          expiration: 3600, // 1 hour expiration
-          order_id: orderId,
-          billing_data: {
-            apartment: 'NA',
-            email: customerData.email,
-            floor: 'NA',
-            first_name: customerData.firstName,
-            street: 'NA',
-            building: 'NA',
-            phone_number: customerData.phone || 'NA',
-            shipping_method: 'NA',
-            postal_code: 'NA',
-            city: 'NA',
-            country: 'NA',
-            last_name: customerData.lastName,
-            state: 'NA',
-          },
-          currency: 'EGP',
-          integration_id: this.config.integrationId,
-        }),
+        body: JSON.stringify(requestPayload),
       });
 
       const data: any = await response.json();
       
       if (!response.ok) {
-        throw new Error(`Payment key generation failed: ${data.message || 'Unknown error'}`);
+        console.error('Payment key generation failed. Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          data: data
+        });
+        throw new Error(`Payment key generation failed: ${data.message || data.detail || 'Unknown error'}`);
       }
 
       return data as PaymobPaymentKeyResponse;

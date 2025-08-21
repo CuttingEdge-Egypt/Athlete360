@@ -1751,11 +1751,11 @@ Return only valid JSON with the missing fields.`;
               userId,
               receiptNumber: `PAY-${Date.now().toString()}`,
               amount: amount.toString(),
-              tokensPurchased: tokensToAdd,
+              tokensAmount: tokensToAdd,
               paymentMethod: obj.source_data_sub_type || 'card',
               cardLast4: obj.source_data_pan ? obj.source_data_pan.slice(-4) : 'N/A',
               cardBrand: obj.source_data_sub_type || 'Unknown',
-              transactionId: obj.id?.toString() || 'unknown',
+              paymobTransactionId: obj.id?.toString() || 'unknown',
               status: 'completed'
             });
 
@@ -1854,6 +1854,34 @@ Return only valid JSON with the missing fields.`;
     } catch (error) {
       console.error("Error purchasing tokens:", error);
       res.status(500).json({ message: "Failed to purchase tokens" });
+    }
+  });
+
+  // Test Paymob configuration endpoint
+  app.get('/api/payments/test-paymob', isAuthenticated, async (req, res) => {
+    try {
+      console.log('🧪 Testing Paymob configuration...');
+      
+      // Test authentication
+      const authToken = await paymobService.authenticate();
+      console.log('✅ Paymob authentication successful');
+      
+      res.json({
+        success: true,
+        message: 'Paymob configuration test successful',
+        authTokenLength: authToken?.length || 0,
+        integrationId: process.env.INTEGRATION_ID,
+        hasApiKey: !!process.env.PAYMOB_API_KEY,
+        hasSecretKey: !!process.env.PAYMOB_SECRET_KEY,
+        hasIframeUrl: !!process.env.IFRAME_URL,
+      });
+    } catch (error: any) {
+      console.error('❌ Paymob configuration test failed:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Paymob configuration test failed',
+        error: error.message
+      });
     }
   });
 
