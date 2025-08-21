@@ -121,72 +121,55 @@ export class PaymobService {
   private actualIntegrationIds: string[] = [];
 
   private async createPaymentKey(authToken: string, orderId: string, paymentIntent: PaymentIntent): Promise<string> {
-    // Use the actual integration IDs from the user's account
-    const integrationIdsToTry = this.actualIntegrationIds.length > 0 
-      ? this.actualIntegrationIds 
-      : [this.config.integrationId];
-
-    for (const integrationId of integrationIdsToTry) {
-      try {
-        console.log(`Attempting payment key creation with integration ID: ${integrationId}`);
-        
-        const requestBody = {
-          auth_token: authToken,
-          amount_cents: Math.round(paymentIntent.amount * 100),
-          expiration: 3600,
-          order_id: parseInt(orderId),
-          billing_data: {
-            apartment: 'NA',
-            email: paymentIntent.billingData.email,
-            floor: 'NA',
-            first_name: paymentIntent.billingData.firstName,
-            street: 'NA',
-            building: 'NA',
-            phone_number: paymentIntent.billingData.phoneNumber || '+20100000000',
-            shipping_method: 'PKG',
-            postal_code: 'NA',
-            city: 'Cairo',
-            country: 'EG',
-            last_name: paymentIntent.billingData.lastName,
-            state: 'Cairo',
-            extra_data: {
-              user_id: paymentIntent.userId,
-              tokens_amount: paymentIntent.tokensAmount
-            }
-          },
-          currency: paymentIntent.currency,
-          integration_id: parseInt(integrationId),
-          lock_order_when_paid: false,
-        };
-
-        console.log('Creating payment key with body:', JSON.stringify(requestBody, null, 2));
-
-        const response = await fetch(`${this.baseUrl}/acceptance/payment_keys`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestBody),
-        });
-
-        const data = await response.json() as any;
-        console.log('Payment key response:', data);
-
-        if (response.ok && data.token) {
-          console.log(`✅ Payment key creation successful with integration ID: ${integrationId}`);
-          // Update the config with the working integration ID for future use
-          this.config.integrationId = integrationId;
-          return data.token;
-        } else {
-          console.warn(`❌ Payment key creation failed with integration ID ${integrationId}:`, data);
+    const requestBody = {
+      auth_token: authToken,
+      amount_cents: Math.round(paymentIntent.amount * 100),
+      expiration: 3600,
+      order_id: parseInt(orderId),
+      billing_data: {
+        apartment: 'NA',
+        email: paymentIntent.billingData.email,
+        floor: 'NA',
+        first_name: paymentIntent.billingData.firstName,
+        street: 'NA',
+        building: 'NA',
+        phone_number: paymentIntent.billingData.phoneNumber || '+20100000000',
+        shipping_method: 'PKG',
+        postal_code: 'NA',
+        city: 'Cairo',
+        country: 'EG',
+        last_name: paymentIntent.billingData.lastName,
+        state: 'Cairo',
+        extra_data: {
+          user_id: paymentIntent.userId,
+          tokens_amount: paymentIntent.tokensAmount
         }
-      } catch (error) {
-        console.warn(`Error trying integration ID ${integrationId}:`, error);
-      }
+      },
+      currency: paymentIntent.currency,
+      integration_id: parseInt(this.config.integrationId),
+      lock_order_when_paid: false,
+    };
+
+    console.log(`🔑 Creating payment key with integration ID: ${this.config.integrationId}`);
+    console.log('🔑 Request body:', JSON.stringify(requestBody, null, 2));
+
+    const response = await fetch(`${this.baseUrl}/acceptance/payment_keys`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    const data = await response.json() as any;
+    console.log('🔑 Payment key response:', data);
+
+    if (!response.ok || data.message || !data.token) {
+      console.error(`❌ Payment key creation failed:`, data);
+      throw new Error(`Payment key creation failed: ${data.message || JSON.stringify(data)}`);
     }
 
-    // If all attempts failed, provide specific guidance
-    throw new Error(`Payment setup incomplete. Please check your Paymob dashboard for the correct Integration ID under your payment methods (Card integration) and update the INTEGRATION_ID environment variable.`);
+    return data.token;
   }
 
   // Method to get available integrations for debugging
@@ -289,30 +272,31 @@ export class PaymobService {
       const authToken = await this.getAuthToken();
       console.log('✅ STEP 1: Authentication successful');
 
-      // STEP 2: Create order with proper amount formatting
-      console.log('📦 STEP 2: Creating order...');
-      const amountCents = Math.round(paymentIntent.amount * 100); // Convert to cents
+      // STEP 2: Get available integrations and set correct integration ID
+      console.log('🔍 STEP 2: Fetching available integrations...');
+      await this.getAvailableIntegrations(); // This updates this.config.integrationId
+      console.log('✅ STEP 2: Integration ID set to:', this.config.integrationId);
+
+      // STEP 3: Create order with proper amount formatting
+      console.log('📦 STEP 3: Creating order...');
       const orderId = await this.createOrder(authToken, paymentIntent.amount);
-      console.log('✅ STEP 2: Order created with ID:', orderId);
+      console.log('✅ STEP 3: Order created with ID:', orderId);
 
-      // STEP 3: Create payment key with complete billing data
-      console.log('🔑 STEP 3: Creating payment key with integration ID:', this.config.integrationId);
+      // STEP 4: Create payment key with complete billing data
+      console.log('🔑 STEP 4: Creating payment key...');
       const paymentToken = await this.createPaymentKey(authToken, orderId, paymentIntent);
-      console.log('✅ STEP 3: Payment key created successfully');
+      console.log('✅ STEP 4: Payment key created successfully');
 
-      // STEP 4: Construct proper iframe URL using IFRAME_URL template
-      console.log('🖼️ STEP 4: Constructing iframe URL...');
-      let iframeUrl;
+      // STEP 5: Construct proper iframe URL
+      console.log('🖼️ STEP 5: Constructing iframe URL...');
+      let iframeUrl: string;
       
-      if (process.env.IFRAME_URL) {
-        // Use IFRAME_URL template which matches integration ID 4279357
-        iframeUrl = process.env.IFRAME_URL.replace('{payment_key_obtained_previously}', paymentToken);
-        console.log('✅ Using IFRAME_URL template:', iframeUrl);
+      if (this.config.iframeId.startsWith('http')) {
+        iframeUrl = `${this.config.iframeId}?payment_token=${paymentToken}`;
       } else {
-        // Fallback construction
-        iframeUrl = `https://accept.paymob.com/api/acceptance/iframes/789693?payment_token=${paymentToken}`;
-        console.log('✅ Using fallback iframe construction:', iframeUrl);
+        iframeUrl = `https://accept.paymob.com/api/acceptance/iframes/${this.config.iframeId}?payment_token=${paymentToken}`;
       }
+      console.log('✅ STEP 5: Iframe URL constructed:', iframeUrl);
 
       console.log('🎉 Payment intent created successfully');
       return {
