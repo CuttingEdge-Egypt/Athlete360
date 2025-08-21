@@ -281,15 +281,20 @@ export class PaymobService {
   }
 
   async createPaymentIntent(paymentIntent: PaymentIntent): Promise<PaymentResponse> {
-    console.log('🚀 Creating Paymob payment intent with real credentials...');
+    console.log('🚀 PAYMOB SERVICE: Creating payment intent...');
+    console.log('🚀 PAYMOB SERVICE: Current integration ID BEFORE fetch:', this.config.integrationId);
+    
     const authToken = await this.getAuthToken();
     
     // CRITICAL: Must fetch actual integrations for this account BEFORE creating payment key
-    console.log('🔄 FORCE FETCHING available integrations for this account...');
-    await this.getAvailableIntegrations();
-    console.log('✅ Integration fetch completed, current integration ID:', this.config.integrationId);
+    console.log('🔄 PAYMOB SERVICE: CALLING getAvailableIntegrations() now...');
+    const integrations = await this.getAvailableIntegrations();
+    console.log('✅ PAYMOB SERVICE: Integration fetch returned:', integrations?.length, 'integrations');
+    console.log('✅ PAYMOB SERVICE: Current integration ID AFTER fetch:', this.config.integrationId);
     
     const orderId = await this.createOrder(authToken, paymentIntent.amount);
+    
+    console.log('🔄 PAYMOB SERVICE: About to create payment key with integration ID:', this.config.integrationId);
     const paymentToken = await this.createPaymentKey(authToken, orderId, paymentIntent);
 
     // Handle iframe URL - check if it's already a full URL or just an ID
