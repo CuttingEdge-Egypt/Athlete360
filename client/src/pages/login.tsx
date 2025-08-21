@@ -58,10 +58,14 @@ export function LoginPage() {
           title: "Welcome back!",
           description: `Successfully logged in as ${result.user?.firstName || formData.email}`,
         });
-        // Force page reload to update authentication state and redirect to dashboard
+        // Navigate to home page and refresh auth state
         setTimeout(() => {
-          window.location.href = '/';
-        }, 1500);
+          setLocation('/');
+          // Small delay then reload to ensure clean authentication state
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
+        }, 1000);
       } else {
         toast({
           title: "Login failed",
