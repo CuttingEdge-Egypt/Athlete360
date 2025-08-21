@@ -296,7 +296,7 @@ export default function PaymentCenter() {
             <div className="flex items-center gap-4">
               <div>
                 <h3 className="text-sm font-semibold text-green-400">Payment Integration Status</h3>
-                <p className="text-xs text-gray-400">Using Integration ID: 4723444 (MIGS-tap_on_phone - Online Card)</p>
+                <p className="text-xs text-gray-400">Using Integration ID: 4279357 (Online Card)</p>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-400 rounded-full"></div>
