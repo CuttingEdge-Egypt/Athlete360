@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus, Gift, UserPlus, TrendingDown, Target, Calendar, Video, Users } from "lucide-react";
+import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus, Gift, UserPlus, TrendingDown, Target, Calendar, Video, Users, Twitter, Instagram, Linkedin, Mail, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 
@@ -305,16 +305,43 @@ export default function Landing() {
             </div>
             <div>
               <h5 className="font-semibold mb-4 text-white">Connect</h5>
-              <div className="flex space-x-3">
-                <Button variant="ghost" size="sm" className="text-gray-400 hover:text-athlete-accent p-2">
-                  <i className="fab fa-twitter"></i>
-                </Button>
-                <Button variant="ghost" size="sm" className="text-gray-400 hover:text-athlete-accent p-2">
-                  <i className="fab fa-instagram"></i>
-                </Button>
-                <Button variant="ghost" size="sm" className="text-gray-400 hover:text-athlete-accent p-2">
-                  <i className="fab fa-linkedin"></i>
-                </Button>
+              <div className="space-y-3">
+                <div className="flex space-x-3">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-gray-400 hover:text-blue-400 p-2"
+                    data-testid="link-twitter"
+                  >
+                    <Twitter size={18} />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-gray-400 hover:text-pink-400 p-2"
+                    data-testid="link-instagram"
+                  >
+                    <Instagram size={18} />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-gray-400 hover:text-blue-600 p-2"
+                    data-testid="link-linkedin"
+                  >
+                    <Linkedin size={18} />
+                  </Button>
+                </div>
+                <div className="text-sm text-gray-400 space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Mail size={14} />
+                    <span>support@athlete360.ai</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <MessageCircle size={14} />
+                    <span>Live Chat Support</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
