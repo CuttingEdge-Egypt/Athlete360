@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus, Gift, UserPlus } from "lucide-react";
+import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus, Gift, UserPlus, TrendingDown, Target, Calendar, Video, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 
@@ -164,8 +164,8 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Service Examples */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* First Row - Core Analysis */}
             <Card className="bg-athlete-gray-700 border-gray-600">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
@@ -202,11 +202,72 @@ export default function Landing() {
             <Card className="bg-athlete-gray-700 border-gray-600">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
+                  <TrendingDown className="text-2xl text-red-400" size={32} />
+                  <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">50 tokens</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-2 text-white">Weaknesses</h3>
+                <p className="text-gray-400 text-sm">In-depth analysis of areas needing improvement and targeted solutions</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Second Row - Advanced Features */}
+            <Card className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <Target className="text-2xl text-purple-400" size={32} />
+                  <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">80 tokens</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-2 text-white">How to Beat</h3>
+                <p className="text-gray-400 text-sm">Strategic insights on how to defeat specific opponents or improve matchups</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <Calendar className="text-2xl text-blue-400" size={32} />
+                  <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">80 tokens</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-2 text-white">Development Plan</h3>
+                <p className="text-gray-400 text-sm">Personalized training roadmap with specific goals and timelines</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-4">
                   <Dumbbell className="text-2xl text-green-400" size={32} />
                   <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">90 tokens</span>
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-white">Nutrition Plan</h3>
                 <p className="text-gray-400 text-sm">Comprehensive meal planning based on body composition and goals</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <Video className="text-2xl text-orange-400" size={32} />
+                  <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">120 tokens</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-2 text-white">Video Analysis</h3>
+                <p className="text-gray-400 text-sm">Frame-by-frame performance breakdown with AI-powered insights</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Comparison Feature Highlight */}
+          <div className="mt-12 max-w-2xl mx-auto">
+            <Card className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 border-purple-400/30">
+              <CardContent className="p-8 text-center">
+                <div className="flex justify-center mb-4">
+                  <Users className="text-4xl text-purple-400" size={48} />
+                </div>
+                <h3 className="text-2xl font-semibold mb-3 text-white">Compare Athletes</h3>
+                <p className="text-gray-300 mb-4">Head-to-head analysis comparing any two athletes across all performance metrics</p>
+                <span className="bg-purple-500 text-white text-sm px-4 py-2 rounded-full font-semibold">150 tokens</span>
               </CardContent>
             </Card>
           </div>
