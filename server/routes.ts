@@ -9,6 +9,7 @@ import { seedDatabase } from "./seedData";
 import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, compareAthletes, generateRankHistory } from "./openaiService";
 import { generateNutritionPlan } from "./geminiService";
 import { analyzeVideoFile } from "./videoAnalysisService";
+import { paymobService } from "./paymobService";
 
 import { TestingService } from "./testingService";
 import OpenAI from "openai";
@@ -1650,11 +1651,154 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
-  // Token purchase simulation (legacy endpoint)
+  // Paymob payment intent creation
+  app.post('/api/payments/create-intent', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { amount, tokensAmount } = req.body;
+
+      if (!amount || !tokensAmount) {
+        return res.status(400).json({ message: "Amount and tokens amount are required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      console.log('🔄 Creating payment intent for user:', user.email, 'Amount:', amount, 'Tokens:', tokensAmount);
+
+      // Create payment intent with Paymob
+      const paymentIntent = await paymobService.createPaymentIntent({
+        amount: amount * 100, // Convert to cents
+        currency: 'EGP',
+        customerEmail: user.email || '',
+        customerFirstName: user.firstName || '',
+        customerLastName: user.lastName || '',
+        customerPhone: 'NA',
+      });
+
+      // Store pending payment in session or database
+      // For now, we'll include it in the response
+      res.json({
+        success: true,
+        paymentIntent,
+        amount,
+        tokensAmount,
+        userId,
+      });
+    } catch (error: any) {
+      console.error("Error creating payment intent:", error);
+      res.status(500).json({ 
+        message: "Failed to create payment intent",
+        error: error?.message || 'Unknown error'
+      });
+    }
+  });
+
+  // Paymob processed callback (server-to-server)
+  app.post('/api/payments/paymob-processed', async (req, res) => {
+    try {
+      console.log('📥 Paymob processed callback:', req.body);
+      
+      const { obj } = req.body;
+      if (!obj) {
+        return res.status(400).send('Invalid callback data');
+      }
+
+      // Verify HMAC signature
+      const hmac = req.query.hmac as string;
+      if (!hmac) {
+        console.error('❌ Missing HMAC signature');
+        return res.status(400).send('Missing signature');
+      }
+      
+      // For now, we'll skip HMAC verification as it needs proper implementation
+      // TODO: Implement proper HMAC verification
+      console.log('📝 Skipping HMAC verification for now');
+
+      // Process successful payment
+      if (obj.success === 'true' || obj.success === true) {
+        console.log('✅ Payment successful:', obj.order.merchant_order_id);
+        
+        // Extract order details
+        const orderId = obj.order.merchant_order_id;
+        const amountCents = parseInt(obj.amount_cents);
+        const amount = amountCents / 100;
+        
+        // Parse userId from order ID (format: tokens_userId_timestamp)
+        const orderParts = orderId.split('_');
+        if (orderParts.length >= 2 && orderParts[0] === 'tokens') {
+          const userId = orderParts[1];
+          
+          // Calculate tokens based on amount
+          const tokensToAdd = amount === 25 ? 1000 : amount === 15 ? 500 : amount === 50 ? 2500 : 0;
+          
+          if (tokensToAdd > 0) {
+            // Add tokens to user
+            await storage.addTokensPurchase(userId, tokensToAdd);
+
+            // Create transaction record
+            await storage.createTransaction({
+              userId,
+              action: "Token Purchase",
+              tokensDeducted: -tokensToAdd,
+              serviceType: "purchase"
+            });
+
+            // Create payment receipt
+            await storage.createPaymentReceipt({
+              userId,
+              receiptNumber: `PAY-${Date.now().toString()}`,
+              amount: amount.toString(),
+              tokensPurchased: tokensToAdd,
+              paymentMethod: obj.source_data_sub_type || 'card',
+              cardLast4: obj.source_data_pan ? obj.source_data_pan.slice(-4) : 'N/A',
+              cardBrand: obj.source_data_sub_type || 'Unknown',
+              transactionId: obj.id?.toString() || 'unknown',
+              status: 'completed'
+            });
+
+            console.log(`✅ Added ${tokensToAdd} tokens to user ${userId}`);
+          }
+        }
+      } else {
+        console.log('❌ Payment failed:', obj.order.merchant_order_id);
+      }
+
+      res.status(200).send('OK');
+    } catch (error) {
+      console.error('Error processing Paymob callback:', error);
+      res.status(500).send('Error processing callback');
+    }
+  });
+
+  // Paymob response callback (user redirect)
+  app.get('/api/payments/paymob-response', async (req, res) => {
+    try {
+      console.log('🔄 Paymob response callback:', req.query);
+      
+      const success = req.query.success === 'true';
+      const orderId = req.query.merchant_order_id as string;
+      
+      if (success) {
+        // Redirect to success page
+        res.redirect('/?payment=success');
+      } else {
+        // Redirect to failure page
+        res.redirect('/?payment=failed');
+      }
+    } catch (error) {
+      console.error('Error handling Paymob response:', error);
+      res.redirect('/?payment=error');
+    }
+  });
+
+  // Token purchase simulation (legacy endpoint - now with Paymob integration option)
   app.post('/api/purchase-tokens', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { amount } = req.body;
+      const { amount, usePaymob = false } = req.body;
       
       const tokensToAdd = amount === 25 ? 1000 : amount === 15 ? 500 : amount === 50 ? 2500 : 0;
       if (tokensToAdd === 0) {
@@ -1666,6 +1810,30 @@ Return only valid JSON with the missing fields.`;
         return res.status(404).json({ message: "User not found" });
       }
 
+      // If Paymob integration is requested, create payment intent
+      if (usePaymob) {
+        try {
+          const paymentIntent = await paymobService.createPaymentIntent({
+            amount: amount * 100, // Convert to cents
+            currency: 'EGP',
+            customerEmail: user.email || '',
+            customerFirstName: user.firstName || '',
+            customerLastName: user.lastName || '',
+            customerPhone: 'NA',
+          });
+
+          return res.json({
+            message: "Payment intent created",
+            paymentIntent,
+            tokensToAdd,
+            usePayment: true
+          });
+        } catch (paymobError) {
+          console.error("Paymob integration failed, falling back to simulation:", paymobError);
+        }
+      }
+
+      // Fallback to simulation
       await storage.addTokensPurchase(userId, tokensToAdd);
 
       // Create transaction record

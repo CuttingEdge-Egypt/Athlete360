@@ -12,6 +12,7 @@ import Subscribe from "@/pages/subscribe";
 import AthleteAnalysis from "@/pages/athlete-analysis";
 import Account from "@/pages/account";
 import VideoAnalysis from "@/pages/video-analysis";
+import PaymentCenter from "@/pages/payment-center";
 import TestAuthPage from "@/pages/test-auth";
 import { SignupPage } from "@/pages/signup";
 import { LoginPage } from "@/pages/login";
@@ -33,6 +34,7 @@ function Router() {
             <Route path="/" component={Home} />
             <Route path="/dashboard" component={Home} />
             <Route path="/subscribe" component={Subscribe} />
+            <Route path="/payment-center" component={PaymentCenter} />
             <Route path="/athlete/:id" component={AthleteAnalysis} />
             <Route path="/account" component={Account} />
             <Route path="/video-analysis" component={VideoAnalysis} />
