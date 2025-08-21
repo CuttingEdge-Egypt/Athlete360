@@ -1,7 +1,7 @@
 # Athlete360 - AI-Powered Athletic Performance Analysis Platform
 
 ## Overview
-Athlete360 is a subscription-based web application providing AI-powered athletic performance analysis and insights. It enables users to analyze any athlete's performance through various analytical services, consuming tokens from their subscription balance. The platform operates on a token-based economy where users purchase subscriptions to acquire tokens, which are then used to access services such as athlete biographies, ranking analysis, strengths/weaknesses evaluation, development plans, nutrition guidance, and strategic analysis. The business vision is to provide comprehensive, authentic, and real-time athletic insights, leveraging AI to offer personalized performance development and strategic advantages.
+Athlete360 is an AI-powered athletic performance analysis platform that enables users to analyze any athlete's performance through various analytical services. The platform provides comprehensive athlete insights including biographies, ranking analysis, strengths/weaknesses evaluation, development plans, nutrition guidance, and strategic analysis. The business vision is to provide comprehensive, authentic, and real-time athletic insights, leveraging AI to offer personalized performance development and strategic advantages.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -36,11 +36,10 @@ Preferred communication style: Simple, everyday language.
 - **Authorization**: Route-level protection with `isAuthenticated` middleware.
 - **User Management**: Automatic user creation/updates with token balance tracking.
 
-### Token Economy System
-- **Subscription Model**: Token-based with pay-as-you-go options.
-- **Token Deduction**: Automatic consumption per analytical service.
-- **Balance Tracking**: Real-time token balance display with transaction history.
-- **Insufficient Funds**: Modal-based token recharge system.
+### Analysis System  
+- **Service Architecture**: Multiple analytical services for comprehensive athlete insights.
+- **AI-Powered Analysis**: Real-time athlete performance evaluation and insights.
+- **Data Management**: Comprehensive athlete data storage and retrieval.
 
 ### Service Architecture
 - **Analysis Services**: Eight distinct analytical services (Bio, Rank, Strengths, Weaknesses, Development Plans, Nutrition, Beat Strategies, Video Analysis).
@@ -71,8 +70,7 @@ Preferred communication style: Simple, everyday language.
 - **Replit OIDC**: OpenID Connect authentication provider.
 - **Passport.js**: Authentication middleware.
 
-### Payment Processing
-- **Stripe**: Payment processing integration for token purchases and subscription management.
+
 
 ### UI and Styling
 - **Radix UI**: Headless UI primitives.
