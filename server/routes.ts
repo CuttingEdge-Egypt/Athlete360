@@ -34,17 +34,6 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Debug endpoint to check available integrations (placed before auth setup)
-  app.get('/api/debug/integrations', async (req: any, res) => {
-    try {
-      const integrations = await paymobService.getAvailableIntegrations();
-      res.json({ integrations, success: true });
-    } catch (error: any) {
-      console.error("Error getting integrations:", error);
-      res.status(500).json({ message: "Failed to get integrations", error: error.message });
-    }
-  });
-
   // Auth middleware - setup both Replit OIDC and local auth
   await setupAuth(app);
   await setupLocalAuth(app);

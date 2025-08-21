@@ -192,7 +192,11 @@ export class PaymobService {
   // Method to get available integrations for debugging
   async getAvailableIntegrations(): Promise<any> {
     try {
+      console.log('🔄 Getting auth token for integrations fetch...');
       const authToken = await this.getAuthToken();
+      console.log('✅ Auth token obtained');
+      
+      console.log('🔄 Fetching integrations from Paymob API...');
       const response = await fetch(`${this.baseUrl}/ecommerce/integrations`, {
         method: 'GET',
         headers: {
@@ -200,24 +204,30 @@ export class PaymobService {
         },
       });
 
+      console.log(`📡 Integration API response status: ${response.status}`);
+      
       if (!response.ok) {
-        console.error('Failed to fetch integrations, status:', response.status);
+        console.error('❌ Failed to fetch integrations, status:', response.status);
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
         return [];
       }
 
       const data = await response.json() as any;
-      console.log('🔍 Available integrations from your Paymob account:');
+      console.log('🔍 RAW Available integrations from your Paymob account:');
       console.log(JSON.stringify(data, null, 2));
       
       // Store all valid integration IDs for this account
-      if (data && Array.isArray(data)) {
+      if (data && Array.isArray(data) && data.length > 0) {
         this.actualIntegrationIds = data.map((integration: any) => integration.id.toString());
-        console.log('📋 Available integration IDs for this account:', this.actualIntegrationIds);
+        console.log('📋 ALL Available integration IDs for this account:', this.actualIntegrationIds);
         
         // Prioritize card integrations
         const cardIntegrations = data.filter((integration: any) => 
-          integration.type === 'card'
+          integration.type === 'card' || integration.type === 'CARD'
         );
+        
+        console.log(`🔍 Found ${cardIntegrations.length} card integrations out of ${data.length} total`);
         
         if (cardIntegrations.length > 0) {
           console.log('💳 Found card integrations:', cardIntegrations.map((i: any) => ({ 
@@ -230,19 +240,25 @@ export class PaymobService {
           // Use the first card integration
           const firstCardIntegration = cardIntegrations[0];
           this.config.integrationId = firstCardIntegration.id.toString();
-          console.log(`✅ Updated integration ID to: ${this.config.integrationId}`);
+          console.log(`✅ UPDATED integration ID from ${process.env.INTEGRATION_ID} to: ${this.config.integrationId}`);
         } else {
           // If no card integrations, use the first available one
           if (data.length > 0) {
-            this.config.integrationId = data[0].id.toString();
-            console.log(`⚠️  No card integrations found, using first available: ${this.config.integrationId}`);
+            const firstIntegration = data[0];
+            this.config.integrationId = firstIntegration.id.toString();
+            console.log(`⚠️  No card integrations found, using first available (${firstIntegration.type}): ${this.config.integrationId}`);
           }
         }
+      } else {
+        console.error('❌ No integrations found or invalid response format');
+        console.log('Response data type:', typeof data);
+        console.log('Is array:', Array.isArray(data));
+        console.log('Length:', data?.length);
       }
       
       return data;
     } catch (error) {
-      console.error('Failed to get integrations:', error);
+      console.error('❌ Critical error fetching integrations:', error);
       return [];
     }
   }
@@ -253,8 +269,14 @@ export class PaymobService {
       const authToken = await this.getAuthToken();
       
       // First, fetch the actual integrations for this account
-      console.log('Fetching available integrations for this account...');
-      const integrations = await this.getAvailableIntegrations();
+      console.log('🔄 Fetching available integrations for this account...');
+      try {
+        const integrations = await this.getAvailableIntegrations();
+        console.log('✅ Successfully fetched integrations');
+      } catch (integrationError) {
+        console.error('❌ Failed to fetch integrations:', integrationError);
+        // Continue with environment variable if API fails
+      }
       
       const orderId = await this.createOrder(authToken, paymentIntent.amount);
       const paymentToken = await this.createPaymentKey(authToken, orderId, paymentIntent);
