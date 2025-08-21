@@ -246,7 +246,9 @@ export class PaymobService {
       console.log('✅ Payment key generated');
 
       // Step 4: Construct iframe URL
-      const iframeUrl = `${this.config.iframeUrl}?payment_token=${paymentKey.token}`;
+      const iframeUrl = `${this.config.iframeUrl}${paymentKey.token}`;
+      
+      console.log('🔗 Constructed iframe URL:', iframeUrl);
 
       return {
         orderId: order.id.toString(),
