@@ -184,7 +184,7 @@ export default function PaymentCenter() {
                   Complete Payment
                 </h1>
                 <p className="text-gray-400" data-testid="text-payment-subtitle">
-                  {selectedPackage?.name} - {selectedPackage?.tokens} tokens for ${selectedPackage?.price}
+                  {selectedPackage?.name} - {selectedPackage?.tokens} tokens for {selectedPackage?.price} EGP
                 </p>
               </div>
             </div>
@@ -217,7 +217,7 @@ export default function PaymentCenter() {
                     <div className="flex justify-between items-center">
                       <span className="text-gray-300">Total:</span>
                       <span className="text-white font-bold text-lg" data-testid="text-total-amount">
-                        ${selectedPackage?.price}
+                        {selectedPackage?.price} EGP
                       </span>
                     </div>
                   </div>
@@ -333,7 +333,7 @@ export default function PaymentCenter() {
                       {pkg.name}
                     </CardTitle>
                     <div className="text-3xl font-bold text-white" data-testid={`text-package-price-${pkg.id}`}>
-                      ${pkg.price}
+                      {pkg.price} EGP
                     </div>
                     <p className="text-athlete-accent font-semibold" data-testid={`text-package-tokens-${pkg.id}`}>
                       {pkg.tokens.toLocaleString()} Tokens
