@@ -118,17 +118,15 @@ export class PaymobService {
     return data.id;
   }
 
-  private async createPaymentKey(authToken: string, orderId: string, paymentIntent: PaymentIntent): Promise<string> {
-    // List of common Paymob integration IDs to try in case of failure
-    const fallbackIntegrationIds = [
-      this.config.integrationId,
-      '4279356', // Common card integration
-      '3036500', // Alternative card integration
-      '2917284', // Another common integration
-      '4279358'  // Related integration
-    ];
+  private actualIntegrationIds: string[] = [];
 
-    for (const integrationId of fallbackIntegrationIds) {
+  private async createPaymentKey(authToken: string, orderId: string, paymentIntent: PaymentIntent): Promise<string> {
+    // Use the actual integration IDs from the user's account
+    const integrationIdsToTry = this.actualIntegrationIds.length > 0 
+      ? this.actualIntegrationIds 
+      : [this.config.integrationId];
+
+    for (const integrationId of integrationIdsToTry) {
       try {
         console.log(`Attempting payment key creation with integration ID: ${integrationId}`);
         
@@ -187,8 +185,8 @@ export class PaymobService {
       }
     }
 
-    // If all attempts failed
-    throw new Error(`Paymob payment key creation failed with all integration IDs. Please check your Paymob account configuration and ensure you have a valid card payment integration set up.`);
+    // If all attempts failed, provide specific guidance
+    throw new Error(`Payment setup incomplete. Please check your Paymob dashboard for the correct Integration ID under your payment methods (Card integration) and update the INTEGRATION_ID environment variable.`);
   }
 
   // Method to get available integrations for debugging
@@ -202,28 +200,50 @@ export class PaymobService {
         },
       });
 
+      if (!response.ok) {
+        console.error('Failed to fetch integrations, status:', response.status);
+        return [];
+      }
+
       const data = await response.json() as any;
-      console.log('Available integrations:', JSON.stringify(data, null, 2));
+      console.log('🔍 Available integrations from your Paymob account:');
+      console.log(JSON.stringify(data, null, 2));
       
-      // If we get integrations, try to find the first active card integration
+      // Store all valid integration IDs for this account
       if (data && Array.isArray(data)) {
+        this.actualIntegrationIds = data.map((integration: any) => integration.id.toString());
+        console.log('📋 Available integration IDs for this account:', this.actualIntegrationIds);
+        
+        // Prioritize card integrations
         const cardIntegrations = data.filter((integration: any) => 
-          integration.type === 'card' && integration.is_live === true
+          integration.type === 'card'
         );
         
         if (cardIntegrations.length > 0) {
-          console.log('Found card integrations:', cardIntegrations.map((i: any) => ({ id: i.id, name: i.name, type: i.type })));
-          // Update our integration ID to use the first valid card integration
+          console.log('💳 Found card integrations:', cardIntegrations.map((i: any) => ({ 
+            id: i.id, 
+            name: i.name, 
+            type: i.type, 
+            is_live: i.is_live 
+          })));
+          
+          // Use the first card integration
           const firstCardIntegration = cardIntegrations[0];
           this.config.integrationId = firstCardIntegration.id.toString();
-          console.log(`Updated integration ID to: ${this.config.integrationId}`);
+          console.log(`✅ Updated integration ID to: ${this.config.integrationId}`);
+        } else {
+          // If no card integrations, use the first available one
+          if (data.length > 0) {
+            this.config.integrationId = data[0].id.toString();
+            console.log(`⚠️  No card integrations found, using first available: ${this.config.integrationId}`);
+          }
         }
       }
       
       return data;
     } catch (error) {
       console.error('Failed to get integrations:', error);
-      throw error;
+      return [];
     }
   }
 
@@ -232,13 +252,9 @@ export class PaymobService {
       console.log('Creating Paymob payment intent with real credentials...');
       const authToken = await this.getAuthToken();
       
-      // Try to get available integrations and auto-configure
-      try {
-        console.log('Checking available integrations...');
-        await this.getAvailableIntegrations();
-      } catch (integrationError) {
-        console.warn('Could not fetch integrations, proceeding with configured ID:', this.config.integrationId);
-      }
+      // First, fetch the actual integrations for this account
+      console.log('Fetching available integrations for this account...');
+      const integrations = await this.getAvailableIntegrations();
       
       const orderId = await this.createOrder(authToken, paymentIntent.amount);
       const paymentToken = await this.createPaymentKey(authToken, orderId, paymentIntent);
