@@ -51,8 +51,10 @@ export default function Landing() {
       <section className="pt-20 min-h-screen gradient-bg flex items-center">
         <div className="container mx-auto px-4 py-20">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-athlete-accent to-athlete-success bg-clip-text text-transparent">
-              Athlete360
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-white">
+              <span className="bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">
+                Athlete360
+              </span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-300 mb-8">
               AI-Powered Athlete Analytics & Performance Optimization Platform
