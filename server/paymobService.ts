@@ -133,8 +133,8 @@ export class PaymobService {
         const requestBody = {
           auth_token: authToken,
           amount_cents: Math.round(paymentIntent.amount * 100),
-          expiration: 3600, // 1 hour
-          order_id: orderId,
+          expiration: 3600,
+          order_id: parseInt(orderId),
           billing_data: {
             apartment: 'NA',
             email: paymentIntent.billingData.email,
@@ -143,7 +143,7 @@ export class PaymobService {
             street: 'NA',
             building: 'NA',
             phone_number: paymentIntent.billingData.phoneNumber || '+20100000000',
-            shipping_method: 'NA',
+            shipping_method: 'PKG',
             postal_code: 'NA',
             city: 'Cairo',
             country: 'EG',
@@ -281,42 +281,49 @@ export class PaymobService {
   }
 
   async createPaymentIntent(paymentIntent: PaymentIntent): Promise<PaymentResponse> {
-    console.log('🚀 PAYMOB SERVICE: Creating payment intent...');
-    console.log('🚀 PAYMOB SERVICE: Current integration ID BEFORE fetch:', this.config.integrationId);
+    console.log('🚀 PAYMOB SERVICE: Starting complete 3-step Paymob flow...');
     
-    const authToken = await this.getAuthToken();
-    
-    // CRITICAL: Must fetch actual integrations for this account BEFORE creating payment key
-    console.log('🔄 PAYMOB SERVICE: CALLING getAvailableIntegrations() now...');
-    const integrations = await this.getAvailableIntegrations();
-    console.log('✅ PAYMOB SERVICE: Integration fetch returned:', integrations?.length, 'integrations');
-    console.log('✅ PAYMOB SERVICE: Current integration ID AFTER fetch:', this.config.integrationId);
-    
-    const orderId = await this.createOrder(authToken, paymentIntent.amount);
-    
-    console.log('🔄 PAYMOB SERVICE: About to create payment key with integration ID:', this.config.integrationId);
-    const paymentToken = await this.createPaymentKey(authToken, orderId, paymentIntent);
+    try {
+      // STEP 1: Get authentication token
+      console.log('📝 STEP 1: Getting authentication token...');
+      const authToken = await this.getAuthToken();
+      console.log('✅ STEP 1: Authentication successful');
 
-    // Handle iframe URL - check if it's already a full URL or just an ID
-    let iframeUrl;
-    
-    // First try to use IFRAME_URL template if available
-    if (process.env.IFRAME_URL) {
-      iframeUrl = process.env.IFRAME_URL.replace('{payment_key_obtained_previously}', paymentToken);
-      console.log('✅ Using IFRAME_URL template:', iframeUrl);
-    } else if (this.config.iframeId.startsWith('https://')) {
-      iframeUrl = `${this.config.iframeId}?payment_token=${paymentToken}`;
-      console.log('✅ Using full PAYMOB_IFRAME_ID:', iframeUrl);
-    } else {
-      iframeUrl = `https://accept.paymob.com/api/acceptance/iframes/${this.config.iframeId}?payment_token=${paymentToken}`;
-      console.log('✅ Building iframe URL from ID:', iframeUrl);
+      // STEP 2: Create order with proper amount formatting
+      console.log('📦 STEP 2: Creating order...');
+      const amountCents = Math.round(paymentIntent.amount * 100); // Convert to cents
+      const orderId = await this.createOrder(authToken, paymentIntent.amount);
+      console.log('✅ STEP 2: Order created with ID:', orderId);
+
+      // STEP 3: Create payment key with complete billing data
+      console.log('🔑 STEP 3: Creating payment key with integration ID:', this.config.integrationId);
+      const paymentToken = await this.createPaymentKey(authToken, orderId, paymentIntent);
+      console.log('✅ STEP 3: Payment key created successfully');
+
+      // STEP 4: Construct proper iframe URL using IFRAME_URL template
+      console.log('🖼️ STEP 4: Constructing iframe URL...');
+      let iframeUrl;
+      
+      if (process.env.IFRAME_URL) {
+        // Use IFRAME_URL template which matches integration ID 4279357
+        iframeUrl = process.env.IFRAME_URL.replace('{payment_key_obtained_previously}', paymentToken);
+        console.log('✅ Using IFRAME_URL template:', iframeUrl);
+      } else {
+        // Fallback construction
+        iframeUrl = `https://accept.paymob.com/api/acceptance/iframes/789693?payment_token=${paymentToken}`;
+        console.log('✅ Using fallback iframe construction:', iframeUrl);
+      }
+
+      console.log('🎉 Payment intent created successfully');
+      return {
+        token: paymentToken,
+        iframeUrl: iframeUrl,
+        orderId: orderId.toString(),
+      };
+    } catch (error) {
+      console.error('❌ Payment intent creation failed:', error);
+      throw error;
     }
-
-    return {
-      token: paymentToken,
-      iframeUrl: iframeUrl,
-      orderId,
-    };
   }
 
   async verifyPayment(transactionId: string): Promise<any> {
