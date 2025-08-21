@@ -36,7 +36,7 @@ export class PaymobService {
       apiKey: process.env.PAYMOB_API_KEY || '',
       publicKey: process.env.PAYMOB_PUBLIC_KEY || '',
       secretKey: process.env.PAYMOB_SECRET_KEY || '',
-      integrationId: process.env.INTEGRATION_ID || '4279357', // Use the ID from environment
+      integrationId: process.env.PAYMOB_INTEGRATION_ID || process.env.INTEGRATION_ID || '3036500', // Use the correct integration ID
       iframeId: process.env.PAYMOB_IFRAME_ID || ''
     };
 
@@ -299,10 +299,17 @@ export class PaymobService {
 
     // Handle iframe URL - check if it's already a full URL or just an ID
     let iframeUrl;
-    if (this.config.iframeId.startsWith('https://')) {
+    
+    // First try to use IFRAME_URL template if available
+    if (process.env.IFRAME_URL) {
+      iframeUrl = process.env.IFRAME_URL.replace('{payment_key_obtained_previously}', paymentToken);
+      console.log('✅ Using IFRAME_URL template:', iframeUrl);
+    } else if (this.config.iframeId.startsWith('https://')) {
       iframeUrl = `${this.config.iframeId}?payment_token=${paymentToken}`;
+      console.log('✅ Using full PAYMOB_IFRAME_ID:', iframeUrl);
     } else {
       iframeUrl = `https://accept.paymob.com/api/acceptance/iframes/${this.config.iframeId}?payment_token=${paymentToken}`;
+      console.log('✅ Building iframe URL from ID:', iframeUrl);
     }
 
     return {
