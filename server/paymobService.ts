@@ -264,40 +264,30 @@ export class PaymobService {
   }
 
   async createPaymentIntent(paymentIntent: PaymentIntent): Promise<PaymentResponse> {
-    try {
-      console.log('Creating Paymob payment intent with real credentials...');
-      const authToken = await this.getAuthToken();
-      
-      // First, fetch the actual integrations for this account
-      console.log('🔄 Fetching available integrations for this account...');
-      try {
-        const integrations = await this.getAvailableIntegrations();
-        console.log('✅ Successfully fetched integrations');
-      } catch (integrationError) {
-        console.error('❌ Failed to fetch integrations:', integrationError);
-        // Continue with environment variable if API fails
-      }
-      
-      const orderId = await this.createOrder(authToken, paymentIntent.amount);
-      const paymentToken = await this.createPaymentKey(authToken, orderId, paymentIntent);
+    console.log('🚀 Creating Paymob payment intent with real credentials...');
+    const authToken = await this.getAuthToken();
+    
+    // CRITICAL: Must fetch actual integrations for this account BEFORE creating payment key
+    console.log('🔄 FORCE FETCHING available integrations for this account...');
+    await this.getAvailableIntegrations();
+    console.log('✅ Integration fetch completed, current integration ID:', this.config.integrationId);
+    
+    const orderId = await this.createOrder(authToken, paymentIntent.amount);
+    const paymentToken = await this.createPaymentKey(authToken, orderId, paymentIntent);
 
-      // Handle iframe URL - check if it's already a full URL or just an ID
-      let iframeUrl;
-      if (this.config.iframeId.startsWith('https://')) {
-        iframeUrl = `${this.config.iframeId}?payment_token=${paymentToken}`;
-      } else {
-        iframeUrl = `https://accept.paymob.com/api/acceptance/iframes/${this.config.iframeId}?payment_token=${paymentToken}`;
-      }
-
-      return {
-        token: paymentToken,
-        iframeUrl: iframeUrl,
-        orderId,
-      };
-    } catch (error) {
-      console.error('Paymob payment intent creation error:', error);
-      throw error;
+    // Handle iframe URL - check if it's already a full URL or just an ID
+    let iframeUrl;
+    if (this.config.iframeId.startsWith('https://')) {
+      iframeUrl = `${this.config.iframeId}?payment_token=${paymentToken}`;
+    } else {
+      iframeUrl = `https://accept.paymob.com/api/acceptance/iframes/${this.config.iframeId}?payment_token=${paymentToken}`;
     }
+
+    return {
+      token: paymentToken,
+      iframeUrl: iframeUrl,
+      orderId,
+    };
   }
 
   async verifyPayment(transactionId: string): Promise<any> {
