@@ -246,7 +246,16 @@ export class PaymobService {
       console.log('✅ Payment key generated');
 
       // Step 4: Construct iframe URL
-      const iframeUrl = `${this.config.iframeUrl}${paymentKey.token}`;
+      // Replace the placeholder in IFRAME_URL with the actual payment token
+      let iframeUrl = this.config.iframeUrl;
+      if (iframeUrl.includes('{payment_key_obtained_previously}')) {
+        iframeUrl = iframeUrl.replace('{payment_key_obtained_previously}', paymentKey.token);
+      } else if (iframeUrl.includes('{payment_token}')) {
+        iframeUrl = iframeUrl.replace('{payment_token}', paymentKey.token);
+      } else {
+        // Fallback: append as query parameter
+        iframeUrl = `${iframeUrl}?payment_token=${paymentKey.token}`;
+      }
       
       console.log('🔗 Constructed iframe URL:', iframeUrl);
 
