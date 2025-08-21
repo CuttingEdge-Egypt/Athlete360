@@ -188,12 +188,20 @@ export class PaymobService {
       const data: any = await response.json();
       
       if (!response.ok) {
-        console.error('Payment key generation failed. Response:', {
+        console.error('❌ Payment key generation failed. Response:', {
           status: response.status,
           statusText: response.statusText,
-          data: data
+          data: data,
+          integrationId: this.config.integrationId,
+          requestPayload: JSON.stringify(requestPayload, null, 2)
         });
-        throw new Error(`Payment key generation failed: ${data.message || data.detail || 'Unknown error'}`);
+        
+        // Provide specific error message for integration ID issues
+        if (data && Array.isArray(data) && data.includes('Invalid Payment method integration')) {
+          throw new Error(`Invalid Integration ID: ${this.config.integrationId}. Please check your Paymob dashboard for the correct Integration ID for your payment method.`);
+        }
+        
+        throw new Error(`Payment key generation failed: ${data.message || data.detail || data[0] || 'Unknown error'}`);
       }
 
       return data as PaymobPaymentKeyResponse;
