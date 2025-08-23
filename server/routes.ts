@@ -1923,9 +1923,9 @@ Return only valid JSON with the missing fields.`;
       if (errorOccurred && errorMessage) {
         console.error('❌ Paymob integration error:', errorMessage);
         
-        // Handle specific "TOP Integration is not allowed" error
-        if (errorMessage.includes('TOP Integration is not allowed')) {
-          console.error('🚨 CRITICAL: Wrong Integration ID being used! Should be 4233746, not 4723444');
+        // Handle specific integration errors
+        if (errorMessage.includes('TOP Integration is not allowed') || errorMessage.includes('Integration is not allowed')) {
+          console.error('🚨 CRITICAL: Integration ID error:', errorMessage);
           return res.redirect('/payment-center?payment=error&message=integration_error');
         }
         
