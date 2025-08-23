@@ -212,16 +212,46 @@ export class PaymobService {
   }
 
   /**
-   * Create complete payment intent
+   * Verify payment using transaction ID
+   */
+  async verifyPayment(transactionId: string): Promise<any> {
+    if (!this.authToken) {
+      await this.authenticate();
+    }
+
+    try {
+      const response = await fetch(`https://accept.paymob.com/api/acceptance/transactions/${transactionId}?token=${this.authToken}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data: any = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(`Payment verification failed: ${data.message || 'Unknown error'}`);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Paymob payment verification error:', error);
+      throw new Error('Failed to verify payment');
+    }
+  }
+
+  /**
+   * Create complete payment intent following Paymob guide
    */
   async createPaymentIntent(paymentData: PaymentIntent) {
     try {
       console.log('🔄 Creating Paymob payment intent...', { amount: paymentData.amount });
 
-      // Step 1: Authenticate
+      // Step 1: Authentication (Get API Token)
       await this.authenticate();
+      console.log('✅ Auth token obtained');
       
-      // Step 2: Create order
+      // Step 2: Create an Order
       const order = await this.createOrder({
         amount: paymentData.amount,
         currency: paymentData.currency,
@@ -245,17 +275,9 @@ export class PaymobService {
       );
       console.log('✅ Payment key generated');
 
-      // Step 4: Construct iframe URL
-      // Replace the placeholder in IFRAME_URL with the actual payment token
-      let iframeUrl = this.config.iframeUrl;
-      if (iframeUrl.includes('{payment_key_obtained_previously}')) {
-        iframeUrl = iframeUrl.replace('{payment_key_obtained_previously}', paymentKey.token);
-      } else if (iframeUrl.includes('{payment_token}')) {
-        iframeUrl = iframeUrl.replace('{payment_token}', paymentKey.token);
-      } else {
-        // Fallback: append as query parameter
-        iframeUrl = `${iframeUrl}?payment_token=${paymentKey.token}`;
-      }
+      // Step 4: Load Iframe / Redirect to Paymob Checkout
+      // Use iframe ID 789693 as specified in the guide
+      const iframeUrl = `https://accept.paymob.com/api/acceptance/iframes/789693?payment_token=${paymentKey.token}`;
       
       console.log('🔗 Constructed iframe URL:', iframeUrl);
 
@@ -263,10 +285,34 @@ export class PaymobService {
         orderId: order.id.toString(),
         paymentToken: paymentKey.token,
         iframeUrl,
+        amount: paymentData.amount,
+        currency: paymentData.currency,
+        integrationId: this.config.integrationId,
         success: true,
       };
     } catch (error) {
       console.error('Failed to create payment intent:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Handle 3DS callback processing (Step 6 in Paymob guide)
+   */
+  async process3DSCallback(callbackData: any) {
+    try {
+      console.log('🔄 Processing 3DS callback:', callbackData);
+      
+      // Step 7: Verify Payment (Optional but Recommended)
+      if (callbackData.id) {
+        const verificationResult = await this.verifyPayment(callbackData.id);
+        console.log('✅ Payment verification result:', verificationResult);
+        return verificationResult;
+      }
+      
+      return callbackData;
+    } catch (error) {
+      console.error('3DS callback processing error:', error);
       throw error;
     }
   }
