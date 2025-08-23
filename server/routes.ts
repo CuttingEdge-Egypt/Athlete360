@@ -1655,7 +1655,7 @@ Return only valid JSON with the missing fields.`;
   app.post('/api/payments/create-intent', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { amount, tokensAmount } = req.body;
+      const { amount, tokensAmount, customerInfo } = req.body;
 
       if (!amount || !tokensAmount) {
         return res.status(400).json({ message: "Amount and tokens amount are required" });
@@ -1675,7 +1675,7 @@ Return only valid JSON with the missing fields.`;
         customerEmail: user.email || '',
         customerFirstName: user.firstName || '',
         customerLastName: user.lastName || '',
-        customerPhone: 'NA',
+        customerPhone: customerInfo?.phone || '+201234567890', // Use proper Egyptian phone for bank validation
         // userId will be included in merchant_order_id for callback processing
       });
 

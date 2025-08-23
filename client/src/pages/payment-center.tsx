@@ -110,29 +110,51 @@ export default function PaymentCenter() {
 
     // Listen for iframe messages (for 3DS redirection)
     const handleIframeMessage = (event: MessageEvent) => {
-      if (event.origin !== 'https://accept.paymob.com' && event.origin !== 'https://accept.paymobsolutions.com') {
+      // Accept messages from Paymob domains and bank domains
+      const allowedOrigins = [
+        'https://accept.paymob.com',
+        'https://accept.paymobsolutions.com',
+        'https://paymob.com',
+        'https://paymobsolutions.com'
+      ];
+      
+      // Also allow bank domains (they vary by bank)
+      const isBankDomain = event.origin && (
+        event.origin.includes('.bank.') || 
+        event.origin.includes('banking.') ||
+        event.origin.includes('secure.')
+      );
+      
+      if (!allowedOrigins.some(origin => event.origin.startsWith(origin)) && !isBankDomain) {
+        console.log('Message from unauthorized origin:', event.origin);
         return;
       }
       
-      console.log('Iframe message received:', event.data);
+      console.log('Iframe message received from:', event.origin, 'Data:', event.data);
       
       if (event.data && typeof event.data === 'object') {
-        // Handle 3DS redirection - check for various possible formats
-        if ((event.data.pending === 'true' || event.data.pending === true) && 
-            (event.data.use_redirection === 'true' || event.data.use_redirection === true) && 
-            event.data.redirection_url) {
-          console.log('3DS redirection detected:', event.data.redirection_url);
-          setRedirectionUrl(event.data.redirection_url);
+        // Enhanced 3DS detection - check all possible format variations
+        const isPending = event.data.pending === 'true' || event.data.pending === true || event.data.pending === 1;
+        const useRedirection = event.data.use_redirection === 'true' || event.data.use_redirection === true || 
+                              event.data.useRedirection === 'true' || event.data.useRedirection === true;
+        const hasRedirectUrl = event.data.redirection_url || event.data.redirectionUrl || event.data.redirect_url;
+        
+        if (isPending && (useRedirection || hasRedirectUrl)) {
+          const redirectUrl = hasRedirectUrl;
+          console.log('🔴 3DS redirection detected:', redirectUrl);
+          setRedirectionUrl(redirectUrl);
           setPaymentStatus('pending_3ds');
           
-          // Force top-level redirect for 3DS authentication
-          console.log('Force redirecting to 3DS authentication page');
-          window.location.href = event.data.redirection_url;
+          // Force immediate top-level redirect for 3DS authentication
+          console.log('🔴 Force redirecting to bank 3DS page');
+          setTimeout(() => {
+            window.location.href = redirectUrl;
+          }, 500); // Small delay to ensure state is set
         }
         
-        // Handle successful payment
-        if (event.data.success === 'true' || event.data.success === true) {
-          console.log('Payment successful from iframe');
+        // Enhanced success detection
+        if (event.data.success === 'true' || event.data.success === true || event.data.success === 1) {
+          console.log('✅ Payment successful from iframe');
           setPaymentStatus('processing');
           toast({
             title: "Payment Successful!",
@@ -140,15 +162,29 @@ export default function PaymentCenter() {
           });
         }
         
-        // Handle failed payment
-        if (event.data.success === 'false' && event.data.pending !== 'true') {
-          console.log('Payment failed from iframe');
+        // Enhanced failure detection
+        if ((event.data.success === 'false' || event.data.success === false) && !isPending) {
+          console.log('❌ Payment failed from iframe');
           setPaymentStatus('processing');
           toast({
-            title: "Payment Failed",
+            title: "Payment Failed", 
             description: "Your payment could not be processed. Please try again.",
             variant: "destructive",
           });
+        }
+        
+        // Handle iframe ready state
+        if (event.data.type === 'IFRAME_READY' || event.data.ready) {
+          console.log('💡 Payment iframe is ready');
+        }
+      }
+      
+      // Handle string messages (some banks send string responses)
+      if (typeof event.data === 'string') {
+        console.log('String message received:', event.data);
+        if (event.data.includes('3ds') || event.data.includes('redirect')) {
+          console.log('🔴 3DS string message detected');
+          setPaymentStatus('pending_3ds');
         }
       }
     };
@@ -175,7 +211,11 @@ export default function PaymentCenter() {
       
       const response = await apiRequest('POST', '/api/payments/create-intent', {
         amount: pkg.price,
-        tokensAmount: pkg.tokens
+        tokensAmount: pkg.tokens,
+        // Add proper customer data for Egyptian banking requirements  
+        customerInfo: {
+          phone: user.phone || '+201234567890' // Use user's phone or default
+        }
       });
 
       const result = await response.json();
@@ -306,16 +346,16 @@ export default function PaymentCenter() {
                       <iframe
                         src={paymentIntent.iframeUrl}
                         width="100%"
-                        height="600"
+                        height="650"
                         frameBorder="0"
                         title="Paymob Payment"
-                        className="w-full"
+                        className="w-full min-h-[650px]"
                         data-testid="iframe-payment"
                         onLoad={() => {
                           console.log('Payment iframe loaded');
                         }}
-                        allow="payment"
-                        sandbox="allow-forms allow-scripts allow-same-origin allow-top-navigation allow-popups"
+                        allow="payment *; geolocation *; camera *; microphone *; fullscreen *"
+                        sandbox="allow-forms allow-scripts allow-same-origin allow-top-navigation allow-popups allow-top-navigation-by-user-activation allow-storage-access-by-user-activation"
                       />
                     )}
                   </div>
