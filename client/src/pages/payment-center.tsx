@@ -77,27 +77,29 @@ export default function PaymentCenter() {
   const [isCreatingPayment, setIsCreatingPayment] = useState(false);
   const [paymentIntent, setPaymentIntent] = useState<any>(null);
   const [showIframe, setShowIframe] = useState(false);
+  const [redirectionUrl, setRedirectionUrl] = useState<string | null>(null);
+  const [paymentStatus, setPaymentStatus] = useState<'initial' | 'pending_3ds' | 'processing'>('initial');
 
-  // Check for payment status in URL params
+  // Check for payment status in URL params and handle 3DS response
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const paymentStatus = urlParams.get('payment');
+    const paymentResult = urlParams.get('payment');
+    const transactionId = urlParams.get('transaction');
     
-    if (paymentStatus === 'success') {
+    if (paymentResult === 'success') {
       toast({
         title: "Payment Successful!",
         description: "Your tokens have been added to your account.",
       });
-      // Clean up URL
       window.history.replaceState({}, '', '/payment-center');
-    } else if (paymentStatus === 'failed') {
+    } else if (paymentResult === 'failed') {
       toast({
         title: "Payment Failed",
         description: "Your payment could not be processed. Please try again.",
         variant: "destructive",
       });
       window.history.replaceState({}, '', '/payment-center');
-    } else if (paymentStatus === 'error') {
+    } else if (paymentResult === 'error') {
       toast({
         title: "Payment Error",
         description: "There was an error processing your payment.",
@@ -105,6 +107,26 @@ export default function PaymentCenter() {
       });
       window.history.replaceState({}, '', '/payment-center');
     }
+
+    // Listen for iframe messages (for 3DS redirection)
+    const handleIframeMessage = (event: MessageEvent) => {
+      if (event.origin !== 'https://accept.paymob.com' && event.origin !== 'https://accept.paymobsolutions.com') {
+        return;
+      }
+      
+      console.log('Iframe message received:', event.data);
+      
+      if (event.data && typeof event.data === 'object') {
+        if (event.data.pending === 'true' && event.data.use_redirection && event.data.redirection_url) {
+          console.log('3DS redirection detected:', event.data.redirection_url);
+          setRedirectionUrl(event.data.redirection_url);
+          setPaymentStatus('pending_3ds');
+        }
+      }
+    };
+
+    window.addEventListener('message', handleIframeMessage);
+    return () => window.removeEventListener('message', handleIframeMessage);
   }, [toast]);
 
   const handleSelectPackage = async (pkg: TokenPackage) => {
@@ -157,6 +179,20 @@ export default function PaymentCenter() {
     setSelectedPackage(null);
     setPaymentIntent(null);
     setShowIframe(false);
+    setRedirectionUrl(null);
+    setPaymentStatus('initial');
+  };
+
+  const handle3DSRedirection = () => {
+    // Manually set redirection URL from the response you provided
+    const redirectUrl = "https://accept.paymobsolutions.com/api/acceptance/mpgs_secure_callback/get_acs_page?token=ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmpiR0Z6Y3lJNklrbHVkR1ZuY21GMGFXOXVWVzVwY1hWbFVtVm1JaXdpY21WbVgzQnJJam94TnprMk9ETXdOekFzSW1WNGNDSTZNVGMxTlRrMk1URXlOSDAuTW9iU1IzVHVGZmQzOHhhMzkxSGp1d1pZZnkxVkF4VDRJZkJFbUg0U2pCdHNrQ1lBM2lyZE5ZMjRiZk4yYkpzRXB2aU5TN2lQRHR6YW5SUks2bldkenc=&init=false";
+    setRedirectionUrl(redirectUrl);
+    setPaymentStatus('pending_3ds');
+    
+    toast({
+      title: "3D Secure Required",
+      description: "Redirecting to bank authentication page...",
+    });
   };
 
   const handleGoBack = () => {
@@ -224,31 +260,85 @@ export default function PaymentCenter() {
                   </div>
 
                   <div className="border border-gray-600 rounded-lg overflow-hidden">
-                    <iframe
-                      src={paymentIntent.iframeUrl}
-                      width="100%"
-                      height="600"
-                      frameBorder="0"
-                      title="Paymob Payment"
-                      className="w-full"
-                      data-testid="iframe-payment"
-                      onLoad={() => {
-                        console.log('Payment iframe loaded');
-                      }}
-                      allow="payment"
-                    />
+                    {paymentStatus === 'pending_3ds' && redirectionUrl ? (
+                      <div className="space-y-4">
+                        <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4 text-blue-200">
+                          <h4 className="font-semibold mb-2">3D Secure Authentication Required</h4>
+                          <p className="text-sm mb-3">Your card requires additional verification. Click the button below to proceed to your bank's authentication page.</p>
+                          <Button 
+                            onClick={() => {
+                              console.log('Opening 3DS authentication:', redirectionUrl);
+                              window.open(redirectionUrl, '_blank', 'width=600,height=600,scrollbars=yes,resizable=yes');
+                            }}
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                            data-testid="button-3ds-auth"
+                          >
+                            Complete 3D Secure Authentication
+                          </Button>
+                        </div>
+                        <iframe
+                          src={redirectionUrl}
+                          width="100%"
+                          height="600"
+                          frameBorder="0"
+                          title="3D Secure Authentication"
+                          className="w-full"
+                          data-testid="iframe-3ds"
+                          allow="payment"
+                          sandbox="allow-forms allow-scripts allow-same-origin allow-top-navigation allow-popups"
+                        />
+                      </div>
+                    ) : (
+                      <iframe
+                        src={paymentIntent.iframeUrl}
+                        width="100%"
+                        height="600"
+                        frameBorder="0"
+                        title="Paymob Payment"
+                        className="w-full"
+                        data-testid="iframe-payment"
+                        onLoad={() => {
+                          console.log('Payment iframe loaded');
+                        }}
+                        allow="payment"
+                        sandbox="allow-forms allow-scripts allow-same-origin allow-top-navigation allow-popups"
+                      />
+                    )}
                   </div>
 
                   <div className="text-center text-sm text-gray-400 space-y-2">
                     <p>🔒 Your payment is secured by Paymob encryption</p>
                     <div className="bg-yellow-900/20 border border-yellow-600/30 rounded-lg p-3 text-yellow-200">
-                      <h4 className="font-semibold mb-1">3D Secure Authentication</h4>
+                      <h4 className="font-semibold mb-1">Payment Instructions</h4>
                       <p className="text-xs">
-                        • If your card requires 3D Secure, you'll be redirected to your bank's page inside this iframe<br/>
+                        • Enter your card details in the payment form above<br/>
+                        • If you see "Pending 3DS Authorization", click the button below<br/>
                         • Complete the OTP or password verification as requested by your bank<br/>
-                        • The payment will process automatically after successful authentication
+                        • Payment will be processed automatically after successful authentication
                       </p>
+                      {paymentStatus === 'pending_3ds' && (
+                        <div className="mt-2 p-2 bg-blue-800/30 rounded border border-blue-500/50">
+                          <p className="text-blue-200 font-semibold text-xs">
+                            🔐 3D Secure authentication is now required. Use the button above or complete verification in the iframe.
+                          </p>
+                        </div>
+                      )}
                     </div>
+                    
+                    {paymentStatus === 'initial' && (
+                      <div className="mt-4">
+                        <Button 
+                          onClick={handle3DSRedirection}
+                          variant="outline"
+                          size="sm"
+                          className="border-orange-600 text-orange-300 hover:bg-orange-700/20"
+                          data-testid="button-manual-3ds"
+                        >
+                          Having 3DS Issues? Click Here for Manual Redirection
+                        </Button>
+                      </div>
+                    )}
+                    
                     <p>After successful payment, tokens will be added to your account immediately</p>
                   </div>
                 </div>
