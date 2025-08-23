@@ -1668,7 +1668,7 @@ Return only valid JSON with the missing fields.`;
 
       console.log('🔄 Creating payment intent for user:', user.email, 'Amount:', amount, 'Tokens:', tokensAmount);
 
-      // Create payment intent with Paymob - include userId in order for callback processing
+      // Create payment intent with Paymob
       const paymentIntent = await paymobService.createPaymentIntent({
         amount: amount * 100, // Convert to cents
         currency: 'EGP',
@@ -1676,7 +1676,6 @@ Return only valid JSON with the missing fields.`;
         customerFirstName: user.firstName || '',
         customerLastName: user.lastName || '',
         customerPhone: 'NA',
-        // userId will be included in merchant_order_id for callback processing
       });
 
       // Store pending payment in session or database
@@ -1806,7 +1805,7 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
-  // Paymob processed callback (server-to-server)
+  // Paymob processed callback (server-to-server) - Handle both obj format and direct format
   app.post('/api/payments/paymob-processed', async (req, res) => {
     try {
       console.log('📥 Paymob processed callback:', JSON.stringify(req.body, null, 2));
