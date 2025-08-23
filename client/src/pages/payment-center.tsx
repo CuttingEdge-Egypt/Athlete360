@@ -196,7 +196,8 @@ export default function PaymentCenter() {
                   Secure Payment
                 </CardTitle>
                 <CardDescription className="text-gray-400">
-                  Complete your payment using the secure Paymob payment gateway
+                  Complete your payment using the secure Paymob payment gateway.<br/>
+                  <span className="text-yellow-400">Note: Cards requiring 3D Secure will show "pending" until bank authentication is completed.</span>
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -231,11 +232,15 @@ export default function PaymentCenter() {
                       title="Paymob Payment"
                       className="w-full"
                       data-testid="iframe-payment"
+                      onLoad={() => {
+                        console.log('Payment iframe loaded');
+                      }}
                     />
                   </div>
 
                   <div className="text-center text-sm text-gray-400">
                     <p>🔒 Your payment is secured by Paymob encryption</p>
+                    <p>✅ If your card requires 3D Secure, you'll see your bank's authentication page</p>
                     <p>After successful payment, you'll be redirected automatically</p>
                   </div>
                 </div>

@@ -1774,6 +1774,90 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
+  // Handle payment processing (3DS, pending, success)
+  app.post('/api/payments/process-payment', isAuthenticated, async (req: any, res) => {
+    try {
+      const { paymentToken, amount, tokensAmount } = req.body;
+      
+      if (!paymentToken || !amount || !tokensAmount) {
+        return res.status(400).json({ message: "Missing required payment data" });
+      }
+
+      console.log('🔄 Processing payment with token:', paymentToken.substring(0, 50) + '...');
+
+      // Simulate payment processing by checking the token
+      // In a real scenario, this would verify the payment with Paymob
+      const response = await fetch('https://accept.paymob.com/api/acceptance/payments/pay', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          source: {
+            identifier: "AGGREGATOR",
+            subtype: "AGGREGATOR"
+          },
+          payment_token: paymentToken
+        })
+      });
+
+      const paymentResult = await response.json();
+      console.log('💳 Payment result:', paymentResult);
+
+      // Handle different payment states
+      if (paymentResult.success === true) {
+        // Payment successful immediately
+        const userId = req.user.claims.sub;
+        
+        // Add tokens to user
+        await storage.addTokensPurchase(userId, tokensAmount);
+
+        // Create transaction record
+        await storage.createTransaction({
+          userId,
+          action: "Token Purchase",
+          tokensDeducted: -tokensAmount,
+          serviceType: "purchase"
+        });
+
+        res.json({
+          success: true,
+          status: 'completed',
+          message: 'Payment completed successfully',
+          tokensAdded: tokensAmount
+        });
+
+      } else if (paymentResult.pending === true && paymentResult.redirection_url) {
+        // 3D Secure required - return redirect URL
+        console.log('🔐 3D Secure required, redirect URL:', paymentResult.redirection_url);
+        
+        res.json({
+          success: false,
+          status: 'pending_3ds',
+          requires3DS: true,
+          redirectionUrl: paymentResult.redirection_url,
+          message: 'Please complete 3D Secure authentication'
+        });
+
+      } else {
+        // Payment failed
+        res.json({
+          success: false,
+          status: 'failed',
+          message: paymentResult.data?.message || 'Payment failed'
+        });
+      }
+
+    } catch (error: any) {
+      console.error('Error processing payment:', error);
+      res.status(500).json({ 
+        success: false,
+        message: 'Failed to process payment',
+        error: error.message 
+      });
+    }
+  });
+
   // Paymob processed callback (server-to-server)
   app.post('/api/payments/paymob-processed', async (req, res) => {
     try {
