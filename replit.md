@@ -56,12 +56,12 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Critical Fixes (August 2025)
 
-### Paymob Integration ID Issue
-- **Problem**: JSON display in payment responses due to wrong Integration ID
-- **Testing**: Systematically tested Integration IDs 4723440-4723450  
-- **Results**: Found IDs 4723444 and 4723445 both work correctly
-- **Solution**: Hard-coded verified working Integration ID 4723444
-- **Status**: Fixed - system now uses confirmed working integration ID
+### Paymob Integration ID Configuration
+- **Updated**: Now uses Integration ID 4279357 from environment variable
+- **Implementation**: Removed all hard-coded Integration IDs per user request
+- **Configuration**: System reads INTEGRATION_ID environment variable only
+- **Validation**: Added error handling for missing environment variable
+- **Status**: Flexible configuration allowing easy ID changes via secrets
 
 ### Egyptian Bank Validation Fix
 - **Problem**: Bank recognition failures with "unrecognized bank" errors

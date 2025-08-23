@@ -1700,8 +1700,8 @@ Return only valid JSON with the missing fields.`;
   // Test all integration IDs endpoint
   app.get('/api/payments/test-all-integrations', isAuthenticated, async (req, res) => {
     try {
-      // FIXED: Only test the correct integration ID for Online Card payments
-      const integrationIds = [4233746]; // Only test the verified working Online Card integration
+      // Test the current integration ID from environment variable
+      const integrationIds = [parseInt(process.env.INTEGRATION_ID || '0')]; // Use environment variable only
       const results = [];
       
       for (const integrationId of integrationIds) {

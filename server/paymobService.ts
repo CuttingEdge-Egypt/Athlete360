@@ -150,8 +150,11 @@ export class PaymobService {
       await this.authenticate();
     }
 
-    // Use verified working integration ID - 4723444 is confirmed working
-    const CORRECT_INTEGRATION_ID = 4723444; // Verified working integration ID from testing
+    // Use integration ID from environment variable only
+    const INTEGRATION_ID = parseInt(process.env.INTEGRATION_ID || '0');
+    if (!INTEGRATION_ID) {
+      throw new Error('INTEGRATION_ID environment variable is required');
+    }
     
     // Always use production domain for callbacks to match Paymob dashboard config
     const baseUrl = 'https://athlete360.ai';
@@ -177,7 +180,7 @@ export class PaymobService {
         state: 'Cairo',
       },
       currency: 'EGP',
-      integration_id: CORRECT_INTEGRATION_ID, // Using hardcoded correct ID
+      integration_id: INTEGRATION_ID, // Using environment variable
       lock_order_when_paid: false,
       // Add redirect URLs for 3DS
       redirection_url: `${baseUrl}/api/payments/paymob-response`,
@@ -202,13 +205,13 @@ export class PaymobService {
           status: response.status,
           statusText: response.statusText,
           data: data,
-          integrationId: '4233746 (hardcoded)',
+          integrationId: INTEGRATION_ID,
           requestPayload: JSON.stringify(requestPayload, null, 2)
         });
         
         // Provide specific error message for integration ID issues
         if (data && Array.isArray(data) && data.includes('Invalid Payment method integration')) {
-          throw new Error(`Invalid Integration ID. The system is configured to use 4233746 (Online Card) but it's not working. Please verify this ID in your Paymob dashboard.`);
+          throw new Error(`Invalid Integration ID: ${INTEGRATION_ID}. Please verify this ID in your Paymob dashboard.`);
         }
         
         throw new Error(`Payment key generation failed: ${data.message || data.detail || data[0] || 'Unknown error'}`);
