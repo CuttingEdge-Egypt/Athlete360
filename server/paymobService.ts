@@ -153,10 +153,10 @@ export class PaymobService {
     // FIXED: Force correct Integration ID 4233746 for Online Card payments
     const CORRECT_INTEGRATION_ID = 4233746; // Online Card integration - verified working
     
-    // Get the base URL for callbacks
+    // Get the base URL for callbacks - use deployed domain
     const baseUrl = process.env.REPLIT_DEV_DOMAIN 
-      ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-      : 'https://7a39e49f-f0e4-4a38-b983-657e85e5de90-00-24ejenwpt1nmi.riker.replit.dev';
+      ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+      : 'https://athlete360.ziadelsharkawy.repl.co';
     
     const requestPayload = {
       auth_token: this.authToken,

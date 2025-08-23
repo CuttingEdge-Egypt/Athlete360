@@ -1,47 +1,57 @@
-# Paymob Callback Configuration Fix
+# Update Paymob Callback URLs to Production Domain
 
-## Current Status ✅
-- Authentication: WORKING
-- Order Creation: WORKING (Order ID: 369573232) 
-- Payment Key Generation: WORKING
-- All credentials configured correctly
+## Issue Identified
+The payment system is currently using development URLs instead of your deployed production domain.
 
-## Issue 🔧
-Callback URLs in Paymob dashboard are pointing to Paymob's own endpoints instead of your application.
+## Current URLs (WRONG)
+- Development: `https://7a39e49f-f0e4-4a38-b983-657e85e5de90-00-24ejenwpt1nmi.riker.replit.dev`
 
-## Fix Required
-Update your Paymob dashboard with these callback URLs:
+## New URLs (CORRECT)
+- Production: `https://athlete360.ziadelsharkawy.repl.co`
 
-### 1. Login to Paymob Dashboard
-https://accept.paymobsolutions.com/portal2/en/PaymentIntegrations
+## Required Action in Paymob Dashboard
 
-### 2. Find Integration ID: 3036500
+You need to update the callback URLs in your Paymob Dashboard:
 
-### 3. Replace Current URLs With These:
+1. Go to: https://accept.paymobsolutions.com/portal2/en/PaymentIntegrations
+2. Find Integration ID: **4233746**
+3. Update these URLs:
 
-**CHANGE FROM (Current Wrong URLs):**
+**Transaction processed callback:**
 ```
-Transaction processed callback: https://accept.paymobsolutions.com/api/acceptance/post_pay
-Transaction response callback: https://accept.paymobsolutions.com/api/acceptance/post_pay
+https://athlete360.ziadelsharkawy.repl.co/api/payments/paymob-processed
 ```
 
-**⚠️ CRITICAL**: These URLs are Paymob's own endpoints, NOT your application! This is why payments fail after card entry.
-
-**CHANGE TO (Correct URLs):**
+**Transaction response callback:**
 ```
-Transaction processed callback: https://7a39e49f-f0e4-4a38-b983-657e85e5de90-00-24ejenwpt1nmi.riker.replit.dev/api/payments/paymob-processed
-Transaction response callback: https://7a39e49f-f0e4-4a38-b983-657e85e5de90-00-24ejenwpt1nmi.riker.replit.dev/api/payments/paymob-response
+https://athlete360.ziadelsharkawy.repl.co/api/payments/paymob-response
 ```
 
-## Why This Happens
-The URLs currently set (`https://accept.paymobsolutions.com/api/acceptance/post_pay`) are **Paymob's internal endpoints**, not your application URLs. When customers complete OTP verification, Paymob tries to send the results to these internal endpoints instead of your app, causing payment completion to fail.
+## Why This Matters
 
-## Testing After Fix
-Once callbacks are updated to point to YOUR application URLs:
-1. Payments will redirect properly after OTP verification
-2. Your backend will receive payment confirmations
-3. Tokens will be automatically added to user accounts
-4. Users will see success/failure pages
-5. Receipts will be generated
+The payment flow gets to the OTP stage but fails to complete because:
+1. User completes 3DS/OTP verification ✅
+2. Bank confirms payment to Paymob ✅  
+3. Paymob tries to notify the old development URL ❌
+4. Development URL may be inactive or different ❌
+5. Your production app never receives the completion notification ❌
 
-The server logs show perfect integration - just need the dashboard callback configuration.
+## After Updating
+
+Once you update these URLs in Paymob dashboard to use `athlete360.ziadelsharkawy.repl.co`, the 3DS flow will work correctly:
+
+1. User enters card details ✅
+2. 3DS/OTP verification ✅
+3. Paymob notifies your production app ✅
+4. Tokens are added to user account ✅
+5. User sees success message ✅
+
+## Current Payment Status
+
+Your latest payment shows:
+- `"pending": "true"` - Payment initiated
+- `"is_3d_secure": "true"` - 3DS required  
+- `"redirection_url"` present - OTP page ready
+- Waiting for completion callback to production URL
+
+Update the URLs and test again!
