@@ -117,10 +117,40 @@ export default function PaymentCenter() {
       console.log('Iframe message received:', event.data);
       
       if (event.data && typeof event.data === 'object') {
-        if (event.data.pending === 'true' && event.data.use_redirection && event.data.redirection_url) {
+        // Handle 3DS redirection - check for various possible formats
+        if ((event.data.pending === 'true' || event.data.pending === true) && 
+            (event.data.use_redirection === 'true' || event.data.use_redirection === true) && 
+            event.data.redirection_url) {
           console.log('3DS redirection detected:', event.data.redirection_url);
           setRedirectionUrl(event.data.redirection_url);
           setPaymentStatus('pending_3ds');
+          
+          // Auto-redirect to 3DS page for better UX
+          setTimeout(() => {
+            console.log('Auto-redirecting to 3DS authentication page');
+            window.location.href = event.data.redirection_url;
+          }, 1000);
+        }
+        
+        // Handle successful payment
+        if (event.data.success === 'true' || event.data.success === true) {
+          console.log('Payment successful from iframe');
+          setPaymentStatus('success');
+          toast({
+            title: "Payment Successful!",
+            description: "Your tokens have been added to your account.",
+          });
+        }
+        
+        // Handle failed payment
+        if (event.data.success === 'false' && event.data.pending !== 'true') {
+          console.log('Payment failed from iframe');
+          setPaymentStatus('failed');
+          toast({
+            title: "Payment Failed",
+            description: "Your payment could not be processed. Please try again.",
+            variant: "destructive",
+          });
         }
       }
     };
@@ -155,6 +185,39 @@ export default function PaymentCenter() {
       if (result.success) {
         setPaymentIntent(result.paymentIntent);
         setShowIframe(true);
+        
+        // Start polling payment status for 3DS detection
+        const pollInterval = setInterval(async () => {
+          try {
+            const statusResponse = await apiRequest('GET', `/api/payments/status/${result.paymentIntent.orderId}`);
+            const statusResult = await statusResponse.json();
+            
+            if (statusResult.pending === 'true' && statusResult.is_3d_secure === 'true' && statusResult.redirection_url) {
+              console.log('3DS detected via polling:', statusResult.redirection_url);
+              clearInterval(pollInterval);
+              setRedirectionUrl(statusResult.redirection_url);
+              setPaymentStatus('pending_3ds');
+              
+              // Auto-redirect to 3DS page
+              setTimeout(() => {
+                console.log('Auto-redirecting to 3DS authentication page');
+                window.location.href = statusResult.redirection_url;
+              }, 1000);
+            } else if (statusResult.success === 'true') {
+              clearInterval(pollInterval);
+              setPaymentStatus('success');
+              toast({
+                title: "Payment Successful!",
+                description: "Your tokens have been added to your account.",
+              });
+            }
+          } catch (error) {
+            console.log('Status polling error:', error);
+          }
+        }, 2000);
+        
+        // Clear polling after 5 minutes
+        setTimeout(() => clearInterval(pollInterval), 300000);
         
         toast({
           title: "Payment Ready",
