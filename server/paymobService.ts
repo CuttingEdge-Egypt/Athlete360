@@ -153,28 +153,37 @@ export class PaymobService {
     // FIXED: Force correct Integration ID 4233746 for Online Card payments
     const CORRECT_INTEGRATION_ID = 4233746; // Online Card integration - verified working
     
+    // Get the base URL for callbacks
+    const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+      ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+      : 'https://7a39e49f-f0e4-4a38-b983-657e85e5de90-00-24ejenwpt1nmi.riker.replit.dev';
+    
     const requestPayload = {
       auth_token: this.authToken,
       amount_cents: amount,
       expiration: 3600, // 1 hour expiration
       order_id: orderId,
       billing_data: {
-        apartment: '123',
+        apartment: 'NA',
         email: customerData.email,
-        floor: '1',
+        floor: 'NA',
         first_name: customerData.firstName,
-        street: 'Main Street',
-        building: 'Building 1', 
-        phone_number: customerData.phone || 'NA',
-        shipping_method: 'PKG',
-        postal_code: '12345',
+        street: 'NA',
+        building: 'NA', 
+        phone_number: 'NA',
+        shipping_method: 'NA',
+        postal_code: 'NA',
         city: 'Cairo',
         country: 'EG',
         last_name: customerData.lastName,
-        state: 'Cairo',
+        state: 'NA',
       },
       currency: 'EGP',
       integration_id: CORRECT_INTEGRATION_ID, // Using hardcoded correct ID
+      lock_order_when_paid: false,
+      // Add redirect URLs for 3DS
+      redirection_url: `${baseUrl}/api/payments/paymob-response`,
+      callback_url: `${baseUrl}/api/payments/paymob-processed`,
     };
 
     console.log('📤 Payment key request:', JSON.stringify(requestPayload, null, 2));
