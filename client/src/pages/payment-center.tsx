@@ -133,7 +133,7 @@ export default function PaymentCenter() {
         // Handle successful payment
         if (event.data.success === 'true' || event.data.success === true) {
           console.log('Payment successful from iframe');
-          setPaymentStatus('success');
+          setPaymentStatus('processing');
           toast({
             title: "Payment Successful!",
             description: "Your tokens have been added to your account.",
@@ -143,7 +143,7 @@ export default function PaymentCenter() {
         // Handle failed payment
         if (event.data.success === 'false' && event.data.pending !== 'true') {
           console.log('Payment failed from iframe');
-          setPaymentStatus('failed');
+          setPaymentStatus('processing');
           toast({
             title: "Payment Failed",
             description: "Your payment could not be processed. Please try again.",
