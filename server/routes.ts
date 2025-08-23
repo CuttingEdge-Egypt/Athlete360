@@ -1699,7 +1699,8 @@ Return only valid JSON with the missing fields.`;
   // Test all integration IDs endpoint
   app.get('/api/payments/test-all-integrations', isAuthenticated, async (req, res) => {
     try {
-      const integrationIds = [4723445, 4723444, 4723443, 4279357, 4279356];
+      // FIXED: Only test the correct integration ID for Online Card payments
+      const integrationIds = [4233746]; // Only test the verified working Online Card integration
       const results = [];
       
       for (const integrationId of integrationIds) {
