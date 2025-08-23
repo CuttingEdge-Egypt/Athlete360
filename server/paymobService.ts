@@ -150,8 +150,8 @@ export class PaymobService {
       await this.authenticate();
     }
 
-    // FIXED: Use the integration ID from environment for flexibility
-    const CORRECT_INTEGRATION_ID = parseInt(process.env.INTEGRATION_ID || '4233746'); // Online Card integration
+    // FIXED: Use the verified working integration ID - 4233746 is the only working Online Card integration
+    const CORRECT_INTEGRATION_ID = 4233746; // Verified working Online Card integration (NOT 4723444)
     
     // Always use production domain for callbacks to match Paymob dashboard config
     const baseUrl = 'https://athlete360.ai';

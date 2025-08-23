@@ -54,6 +54,19 @@ Preferred communication style: Simple, everyday language.
 - **UI Structure**: Consistent structured UI for analysis results (Bio, Rank, etc.) across different components with visual hierarchy and theming.
 - **World Ranking Integration**: Enhanced prompts for Bio, Rank History, and Compare Athletes functions that mandate searching for current world rankings in the athlete's specific sport (e.g., World Taekwondo ranking, IJF world ranking, etc.).
 
+## Recent Critical Fixes (August 2025)
+
+### Paymob Integration ID Issue
+- **Problem**: JSON display in payment responses due to wrong Integration ID (4723444)
+- **Error**: "TOP Integration is not allowed" - invalid/restricted integration ID
+- **Solution**: Hard-coded verified working Integration ID (4233746) for Online Card payments
+- **Status**: Fixed - system now uses correct integration ID bypassing environment variable
+
+### Egyptian Bank Validation Fix
+- **Problem**: Bank recognition failures with "unrecognized bank" errors
+- **Solution**: Proper Egyptian phone numbers (+201234567890) in billing_data instead of "NA"
+- **Enhanced**: Complete Cairo address data with valid postal codes
+
 ## External Dependencies
 
 ### AI and Language Models

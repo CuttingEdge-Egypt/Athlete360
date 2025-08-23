@@ -1914,8 +1914,23 @@ Return only valid JSON with the missing fields.`;
       const success = req.query.success === 'true';
       const orderId = req.query.merchant_order_id as string;
       const transactionId = req.query.id as string;
+      const errorOccurred = req.query.error_occured === 'true';
+      const errorMessage = req.query['data.message'] as string;
       
-      console.log('Response details:', { success, orderId, transactionId });
+      console.log('Response details:', { success, orderId, transactionId, errorOccurred, errorMessage });
+      
+      // Check for integration errors first
+      if (errorOccurred && errorMessage) {
+        console.error('❌ Paymob integration error:', errorMessage);
+        
+        // Handle specific "TOP Integration is not allowed" error
+        if (errorMessage.includes('TOP Integration is not allowed')) {
+          console.error('🚨 CRITICAL: Wrong Integration ID being used! Should be 4233746, not 4723444');
+          return res.redirect('/payment-center?payment=error&message=integration_error');
+        }
+        
+        return res.redirect('/payment-center?payment=failed&error=' + encodeURIComponent(errorMessage));
+      }
       
       if (success) {
         // Payment successful - redirect to success page with transaction details
