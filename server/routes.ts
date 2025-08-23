@@ -1776,28 +1776,38 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
-  // Payment status check endpoint
-  app.get('/api/payments/status/:transactionId', isAuthenticated, async (req, res) => {
+  // Payment status check endpoint - Query Paymob for order status by order ID
+  app.get('/api/payments/status/:orderId', isAuthenticated, async (req, res) => {
     try {
-      const { transactionId } = req.params;
+      const { orderId } = req.params;
       
-      // Query Paymob for transaction status
-      const response = await fetch(`https://accept.paymob.com/api/acceptance/transactions/${transactionId}`, {
+      // Get auth token first
+      const paymobService = new PaymobService();
+      const authToken = await paymobService.getAuthToken();
+      
+      // Query Paymob for order status - use orders endpoint instead of transactions
+      const response = await fetch(`https://accept.paymob.com/api/ecommerce/orders/${orderId}`, {
         headers: {
-          'Authorization': `Bearer ${process.env.PAYMOB_API_KEY}`
+          'Authorization': `Bearer ${authToken}`
         }
       });
       
       if (response.ok) {
-        const transaction = await response.json();
+        const order = await response.json();
+        console.log('Order status response:', order);
+        
+        // Check if order has transactions and get the latest one
+        const latestTransaction = order.transactions?.[0];
+        
         res.json({
-          success: transaction.success,
-          pending: transaction.pending,
-          is_3d_secure: transaction.is_3d_secure,
-          message: transaction.data?.message || 'Status retrieved'
+          success: latestTransaction?.success || false,
+          pending: latestTransaction?.pending || false,
+          is_3d_secure: latestTransaction?.is_3d_secure || false,
+          redirection_url: latestTransaction?.redirection_url || null,
+          message: 'Order status retrieved'
         });
       } else {
-        res.status(404).json({ message: 'Transaction not found' });
+        res.status(404).json({ message: 'Order not found' });
       }
       
     } catch (error: any) {

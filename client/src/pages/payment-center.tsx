@@ -125,11 +125,9 @@ export default function PaymentCenter() {
           setRedirectionUrl(event.data.redirection_url);
           setPaymentStatus('pending_3ds');
           
-          // Auto-redirect to 3DS page for better UX
-          setTimeout(() => {
-            console.log('Auto-redirecting to 3DS authentication page');
-            window.location.href = event.data.redirection_url;
-          }, 1000);
+          // Force top-level redirect for 3DS authentication
+          console.log('Force redirecting to 3DS authentication page');
+          window.location.href = event.data.redirection_url;
         }
         
         // Handle successful payment
@@ -186,38 +184,8 @@ export default function PaymentCenter() {
         setPaymentIntent(result.paymentIntent);
         setShowIframe(true);
         
-        // Start polling payment status for 3DS detection
-        const pollInterval = setInterval(async () => {
-          try {
-            const statusResponse = await apiRequest('GET', `/api/payments/status/${result.paymentIntent.orderId}`);
-            const statusResult = await statusResponse.json();
-            
-            if (statusResult.pending === 'true' && statusResult.is_3d_secure === 'true' && statusResult.redirection_url) {
-              console.log('3DS detected via polling:', statusResult.redirection_url);
-              clearInterval(pollInterval);
-              setRedirectionUrl(statusResult.redirection_url);
-              setPaymentStatus('pending_3ds');
-              
-              // Auto-redirect to 3DS page
-              setTimeout(() => {
-                console.log('Auto-redirecting to 3DS authentication page');
-                window.location.href = statusResult.redirection_url;
-              }, 1000);
-            } else if (statusResult.success === 'true') {
-              clearInterval(pollInterval);
-              setPaymentStatus('success');
-              toast({
-                title: "Payment Successful!",
-                description: "Your tokens have been added to your account.",
-              });
-            }
-          } catch (error) {
-            console.log('Status polling error:', error);
-          }
-        }, 2000);
-        
-        // Clear polling after 5 minutes
-        setTimeout(() => clearInterval(pollInterval), 300000);
+        // Payment status polling disabled - rely on iframe messages for 3DS detection
+        // and callback URLs for final payment completion
         
         toast({
           title: "Payment Ready",
@@ -323,33 +291,16 @@ export default function PaymentCenter() {
                   </div>
 
                   <div className="border border-gray-600 rounded-lg overflow-hidden">
-                    {paymentStatus === 'pending_3ds' && redirectionUrl ? (
+                    {paymentStatus === 'pending_3ds' ? (
                       <div className="space-y-4">
                         <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4 text-blue-200">
-                          <h4 className="font-semibold mb-2">3D Secure Authentication Required</h4>
-                          <p className="text-sm mb-3">Your card requires additional verification. Click the button below to proceed to your bank's authentication page.</p>
-                          <Button 
-                            onClick={() => {
-                              console.log('Opening 3DS authentication:', redirectionUrl);
-                              window.open(redirectionUrl, '_blank', 'width=600,height=600,scrollbars=yes,resizable=yes');
-                            }}
-                            className="bg-blue-600 hover:bg-blue-700 text-white"
-                            data-testid="button-3ds-auth"
-                          >
-                            Complete 3D Secure Authentication
-                          </Button>
+                          <h4 className="font-semibold mb-2">Redirecting to 3D Secure Authentication</h4>
+                          <p className="text-sm mb-3">You are being redirected to your bank's secure authentication page to complete the payment.</p>
+                          <div className="flex items-center gap-2">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span className="text-sm">Redirecting...</span>
+                          </div>
                         </div>
-                        <iframe
-                          src={redirectionUrl}
-                          width="100%"
-                          height="600"
-                          frameBorder="0"
-                          title="3D Secure Authentication"
-                          className="w-full"
-                          data-testid="iframe-3ds"
-                          allow="payment"
-                          sandbox="allow-forms allow-scripts allow-same-origin allow-top-navigation allow-popups"
-                        />
                       </div>
                     ) : (
                       <iframe
