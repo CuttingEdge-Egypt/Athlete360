@@ -147,9 +147,18 @@ export default function PaymentCenter() {
           
           // Force immediate top-level redirect for 3DS authentication
           console.log('🔴 Force redirecting to bank 3DS page');
-          setTimeout(() => {
+          window.location.href = redirectUrl;
+        }
+        
+        // Also handle direct 3DS responses from payment creation
+        if (event.data.is_3d_secure === 'true' || event.data.is_3d_secure === true) {
+          console.log('🔴 Direct 3DS response detected');
+          const redirectUrl = event.data.redirection_url || event.data.redirectionUrl;
+          if (redirectUrl) {
+            console.log('🔴 Redirecting to 3DS authentication:', redirectUrl);
+            setPaymentStatus('pending_3ds');
             window.location.href = redirectUrl;
-          }, 500); // Small delay to ensure state is set
+          }
         }
         
         // Enhanced success detection

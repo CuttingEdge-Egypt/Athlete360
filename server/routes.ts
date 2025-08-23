@@ -1916,8 +1916,11 @@ Return only valid JSON with the missing fields.`;
       const transactionId = req.query.id as string;
       const errorOccurred = req.query.error_occured === 'true';
       const errorMessage = req.query['data.message'] as string;
+      const isPending = req.query.pending === 'true';
+      const is3DS = req.query.is_3d_secure === 'true';
+      const redirectionUrl = req.query.redirection_url as string;
       
-      console.log('Response details:', { success, orderId, transactionId, errorOccurred, errorMessage });
+      console.log('Response details:', { success, orderId, transactionId, errorOccurred, errorMessage, isPending, is3DS, redirectionUrl });
       
       // Check for integration errors first
       if (errorOccurred && errorMessage) {
@@ -1930,6 +1933,13 @@ Return only valid JSON with the missing fields.`;
         }
         
         return res.redirect('/payment-center?payment=failed&error=' + encodeURIComponent(errorMessage));
+      }
+      
+      // Handle 3DS pending state first
+      if (isPending && is3DS && redirectionUrl) {
+        console.log('🔴 3DS authentication required, redirecting to bank page:', redirectionUrl);
+        // Direct redirect to bank 3DS page instead of showing JSON
+        return res.redirect(redirectionUrl);
       }
       
       if (success) {
