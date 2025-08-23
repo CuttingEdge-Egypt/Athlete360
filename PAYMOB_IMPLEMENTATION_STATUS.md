@@ -1,79 +1,55 @@
 # Paymob Implementation Status
 
-## ✅ Current Configuration (Working)
-- **Integration ID**: 4233746 (VERIFIED VALID)
-- **Iframe ID**: 789693 (from URL)
-- **Currency**: EGP
-- **API Key**: Configured and working
+## Current Configuration
 
-## ✅ Implemented Paymob Flow (Following Guide)
+### URLs Made Generic
+✅ **Fixed**: Changed hardcoded URLs to use Replit environment variables:
+- `REPL_SLUG` + `REPL_OWNER` for automatic URL generation
+- Works for any Replit account/deployment
+- Format: `https://{REPL_SLUG}.{REPL_OWNER}.repl.co`
 
-### Step 1: Authentication (Get API Token) ✅
-- Implemented in `paymobService.authenticate()`
-- Uses PAYMOB_API_KEY from environment
-- Caches auth token for reuse
+### Integration Details
+- **Integration ID**: 4233746 (Online Card)
+- **Iframe ID**: 789693
+- **Currency**: EGP (Egyptian Pound)
+- **Payment Method**: Credit/Debit Cards with 3D Secure
 
-### Step 2: Create an Order ✅  
-- Implemented in `paymobService.createOrder()`
-- Creates order with amount in cents
-- Generates unique merchant_order_id
+## What Works
+✅ Token generation and iframe loading  
+✅ Card details entry  
+✅ 3D Secure initiation  
+✅ OTP redirection  
 
-### Step 3: Generate a Payment Key ✅
-- Implemented in `paymobService.generatePaymentKey()`
-- Includes billing data and integration ID 4233746
-- Returns payment token for iframe
+## Current Issue
+❌ Payment completion after OTP - needs correct callback URLs in Paymob Dashboard
 
-### Step 4: Load Iframe / Redirect to Paymob Checkout ✅
-- Constructs iframe URL with payment token
-- Uses correct iframe ID 789693
-- Enhanced iframe permissions for 3DS
+## Required Paymob Dashboard Updates
 
-### Step 5: Customer Completes 3DS ⚠️ ISSUE
-- **Problem**: Iframe shows "Pending 3DS Authorization" but doesn't auto-redirect
-- **Solution**: Manual redirection button implemented
-- **Status**: Functional but requires user action
+The callback URLs in Paymob Dashboard must match your deployment:
 
-### Step 6: Paymob Sends Callbacks ✅
-- Processed callback: `/api/payments/paymob-processed`
-- Response callback: `/api/payments/paymob-response`
-- 3DS callback: `/api/payments/3ds-callback` (newly added)
+**For Development:**
+```
+https://{current-dev-domain}/api/payments/paymob-processed
+https://{current-dev-domain}/api/payments/paymob-response
+```
 
-### Step 7: Verify Payment ✅
-- Implemented `paymobService.verifyPayment()`
-- Can verify transactions by ID
+**For Production/Deployment:**
+```
+https://{REPL_SLUG}.{REPL_OWNER}.repl.co/api/payments/paymob-processed
+https://{REPL_SLUG}.{REPL_OWNER}.repl.co/api/payments/paymob-response
+```
 
-### Step 8: Deliver Service ✅
-- Token addition logic in place
-- Success/failure redirects working
+## Payment Flow
+1. User selects token package ✅
+2. Payment intent created with correct URLs ✅
+3. Iframe loads with payment form ✅
+4. User enters card details ✅
+5. 3DS authentication initiated ✅
+6. User completes OTP ✅
+7. **Paymob tries to notify callback URL** ← This is where it fails
+8. If URLs match deployment → Success ✅
+9. If URLs don't match → Payment stays pending ❌
 
-## 🔧 3DS Redirection Solution
-
-The main issue is that **3DS redirection requires manual trigger**:
-
-1. User enters 3DS card details
-2. Paymob returns "Pending 3DS Authorization" 
-3. User clicks "Having 3DS Issues? Click Here for Manual Redirection"
-4. System shows 3DS authentication iframe/popup
-5. User completes OTP verification
-6. Payment processes normally
-
-## 📋 Test Results
-
-### Integration ID Tests:
-- ❌ 4723443: Invalid Payment method integration
-- ✅ 4233746: Valid and working
-- ❌ 4279357: Invalid Payment method integration
-
-### Current Status:
-- Payment flow: ✅ Working
-- 3DS detection: ✅ Working  
-- 3DS redirection: ⚠️ Manual trigger required
-- Callbacks: ✅ Working
-- Token distribution: ✅ Working
-
-## 🎯 Next Steps
-
-1. Test complete payment flow with 3DS card
-2. Verify manual 3DS redirection works
-3. Confirm token addition after successful payment
-4. Optional: Investigate automatic 3DS redirection
+## Solution
+Update Paymob Dashboard callback URLs to match your current deployment URL.
+The system will automatically use the correct URL format for any Replit account.
