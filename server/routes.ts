@@ -1774,87 +1774,33 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
-  // Handle payment processing (3DS, pending, success)
-  app.post('/api/payments/process-payment', isAuthenticated, async (req: any, res) => {
+  // Payment status check endpoint
+  app.get('/api/payments/status/:transactionId', isAuthenticated, async (req, res) => {
     try {
-      const { paymentToken, amount, tokensAmount } = req.body;
+      const { transactionId } = req.params;
       
-      if (!paymentToken || !amount || !tokensAmount) {
-        return res.status(400).json({ message: "Missing required payment data" });
-      }
-
-      console.log('🔄 Processing payment with token:', paymentToken.substring(0, 50) + '...');
-
-      // Simulate payment processing by checking the token
-      // In a real scenario, this would verify the payment with Paymob
-      const response = await fetch('https://accept.paymob.com/api/acceptance/payments/pay', {
-        method: 'POST',
+      // Query Paymob for transaction status
+      const response = await fetch(`https://accept.paymob.com/api/acceptance/transactions/${transactionId}`, {
         headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          source: {
-            identifier: "AGGREGATOR",
-            subtype: "AGGREGATOR"
-          },
-          payment_token: paymentToken
-        })
+          'Authorization': `Bearer ${process.env.PAYMOB_API_KEY}`
+        }
       });
-
-      const paymentResult = await response.json();
-      console.log('💳 Payment result:', paymentResult);
-
-      // Handle different payment states
-      if (paymentResult.success === true) {
-        // Payment successful immediately
-        const userId = req.user.claims.sub;
-        
-        // Add tokens to user
-        await storage.addTokensPurchase(userId, tokensAmount);
-
-        // Create transaction record
-        await storage.createTransaction({
-          userId,
-          action: "Token Purchase",
-          tokensDeducted: -tokensAmount,
-          serviceType: "purchase"
-        });
-
+      
+      if (response.ok) {
+        const transaction = await response.json();
         res.json({
-          success: true,
-          status: 'completed',
-          message: 'Payment completed successfully',
-          tokensAdded: tokensAmount
+          success: transaction.success,
+          pending: transaction.pending,
+          is_3d_secure: transaction.is_3d_secure,
+          message: transaction.data?.message || 'Status retrieved'
         });
-
-      } else if (paymentResult.pending === true && paymentResult.redirection_url) {
-        // 3D Secure required - return redirect URL
-        console.log('🔐 3D Secure required, redirect URL:', paymentResult.redirection_url);
-        
-        res.json({
-          success: false,
-          status: 'pending_3ds',
-          requires3DS: true,
-          redirectionUrl: paymentResult.redirection_url,
-          message: 'Please complete 3D Secure authentication'
-        });
-
       } else {
-        // Payment failed
-        res.json({
-          success: false,
-          status: 'failed',
-          message: paymentResult.data?.message || 'Payment failed'
-        });
+        res.status(404).json({ message: 'Transaction not found' });
       }
-
+      
     } catch (error: any) {
-      console.error('Error processing payment:', error);
-      res.status(500).json({ 
-        success: false,
-        message: 'Failed to process payment',
-        error: error.message 
-      });
+      console.error('Error checking payment status:', error);
+      res.status(500).json({ message: 'Failed to check payment status' });
     }
   });
 
@@ -1935,20 +1881,25 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
-  // Paymob response callback (user redirect)
+  // Paymob response callback (user redirect after payment)
   app.get('/api/payments/paymob-response', async (req, res) => {
     try {
-      console.log('🔄 Paymob response callback:', req.query);
+      console.log('🔄 Paymob response callback (user redirect):', req.query);
       
       const success = req.query.success === 'true';
       const orderId = req.query.merchant_order_id as string;
+      const transactionId = req.query.id as string;
+      
+      console.log('Response details:', { success, orderId, transactionId });
       
       if (success) {
-        // Redirect to success page
-        res.redirect('/?payment=success');
+        // Payment successful - redirect to success page with transaction details
+        console.log('✅ Payment successful, redirecting to success page');
+        res.redirect(`/?payment=success&transaction=${transactionId}&order=${orderId}`);
       } else {
-        // Redirect to failure page
-        res.redirect('/?payment=failed');
+        // Payment failed - redirect to failure page
+        console.log('❌ Payment failed, redirecting to failure page');
+        res.redirect(`/?payment=failed&transaction=${transactionId}&order=${orderId}`);
       }
     } catch (error) {
       console.error('Error handling Paymob response:', error);

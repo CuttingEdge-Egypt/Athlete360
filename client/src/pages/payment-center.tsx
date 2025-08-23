@@ -235,13 +235,21 @@ export default function PaymentCenter() {
                       onLoad={() => {
                         console.log('Payment iframe loaded');
                       }}
+                      allow="payment"
                     />
                   </div>
 
-                  <div className="text-center text-sm text-gray-400">
+                  <div className="text-center text-sm text-gray-400 space-y-2">
                     <p>🔒 Your payment is secured by Paymob encryption</p>
-                    <p>✅ If your card requires 3D Secure, you'll see your bank's authentication page</p>
-                    <p>After successful payment, you'll be redirected automatically</p>
+                    <div className="bg-yellow-900/20 border border-yellow-600/30 rounded-lg p-3 text-yellow-200">
+                      <h4 className="font-semibold mb-1">3D Secure Authentication</h4>
+                      <p className="text-xs">
+                        • If your card requires 3D Secure, you'll be redirected to your bank's page inside this iframe<br/>
+                        • Complete the OTP or password verification as requested by your bank<br/>
+                        • The payment will process automatically after successful authentication
+                      </p>
+                    </div>
+                    <p>After successful payment, tokens will be added to your account immediately</p>
                   </div>
                 </div>
               </CardContent>
