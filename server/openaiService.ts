@@ -487,14 +487,24 @@ export async function refreshAthleteBiographyWithSearch(name: string, sport: str
     - Latest news and achievements
     - Current world ranking status
     - 2024-2025 season performance
+    
+    CRITICAL WORLD RANKING REQUIREMENT:
+    You MUST search for and include the athlete's current world ranking position in their sport:
+    - For Taekwondo: Search "World Taekwondo ranking" or "WT ranking" for their weight category
+    - For Boxing: Search "world boxing rankings" for their weight division  
+    - For Judo: Search "IJF world ranking" for their weight category
+    - For Wrestling: Search "United World Wrestling ranking" for their category
+    - For other sports: Search "[sport name] world ranking" or official federation rankings
+    
+    Include the specific ranking number (e.g., "#5 in world", "Ranked 12th globally") or state "Unranked at world level" if no official ranking exists.
 
 Don't include the references in the biography. 
     
     Create an updated biography with fresh information, structured as:
-    - Introduction with current status
-    - Players' overall story and what they're known for in Taekwondo.
+    - Introduction with current status and world ranking position
+    - Players' overall story and what they're known for in their sport
     - "Recent Competitions:" (2024-2025 results)
-    - "Career Record and Rankings:" (current rankings and record)
+    - "Career Record and Rankings:" (current world ranking position and competitive record)
     - "Notable Achievements:" (career highlights)
 
     Only mention information that is 100% accurate and verifiable.
@@ -816,51 +826,70 @@ Create a plan for the full duration specified. Use authentic data and personaliz
 
 // GPT-5 implementation of enhanced rank history generation with competition-by-competition tracking
 export async function generateRankHistory(athleteName: string, sport: string, nationality?: string): Promise<any> {
-  const prompt = `You are an expert ${sport} analyst. Research "${athleteName}" from ${nationality || 'unknown nationality'} and provide a comprehensive ranking analysis.
+  const currentDate = new Date().toISOString().split('T')[0];
+  
+  // Enhanced prompt focused on authentic ranking data with better guidance for incomplete data
+  const prompt = `Search the web for detailed competition history and ranking progression for athlete "${athleteName}" from ${nationality || 'unknown nationality'} in ${sport}.
 
-CRITICAL: You must return valid JSON only. No extra text, explanations, or markdown formatting.
+CRITICAL REQUIREMENTS:
+1. Find REAL competition results from 2022-2025 with specific dates
+2. Search for official world rankings, federation rankings, or national rankings
+3. Look for tournament results that affected their ranking position
+4. Only include competitions with verified dates and outcomes
+5. If exact numerical rankings are not available, use descriptive terms like "Unranked", "Regional level", "National level", "International competitor"
 
-Search for:
-1. Competition history with exact dates and results
-2. World ranking changes after each major tournament
-3. Official competitive record (wins/losses)
-4. Current activity status (active/retired)
-5. Peak ranking achieved and date
+MANDATORY WORLD RANKING SEARCH:
+You MUST search for the athlete's current world ranking position in their sport:
+- For Taekwondo: Search "World Taekwondo ranking" or "WT ranking" for their weight category
+- For Boxing: Search "world boxing rankings" for their weight division
+- For Judo: Search "IJF world ranking" for their weight category
+- For Wrestling: Search "United World Wrestling ranking" for their category
+- For other sports: Search "[sport name] world ranking" or official federation rankings
 
-Return this exact JSON structure:
+Include the specific ranking number (e.g., "#5 in world", "Ranked 12th globally") in currentRanking field, or state "Unranked at world level" if no official ranking exists.
+
+RANKING DATA STRATEGY:
+- For established athletes: Search for official world rankings, federation rankings
+- For emerging athletes: Look for regional rankings, national team status, competition level progression
+- Use "Unranked" instead of "N/A" for athletes without official rankings
+- Estimate competitive level based on tournament results (e.g., "National level competitor", "Regional champion")
+
+For ${sport === 'taekwondo' ? 'Taekwondo athletes, check World Taekwondo (WT) official rankings, Olympic results, World Championships, Grand Prix series, and continental championships.' : sport + ' athletes, search official federation websites and competition databases.'}
+
+Return ONLY this JSON structure with authentic data:
 {
   "athlete": {
     "name": "${athleteName}",
     "nationality": "${nationality || 'N/A'}",
     "sport": "${sport}",
     "isActive": true,
-    "officialRecord": "W-L (XX%)",
-    "peakRanking": "#X",
-    "peakRankingDate": "YYYY-MM-DD",
-    "currentRanking": "#X",
-    "lastUpdated": "2025-08-12"
+    "officialRecord": "Based on competition results if available, or 'Developing athlete'",
+    "peakRanking": "Highest verified ranking or 'Unranked' or competitive level description",
+    "peakRankingDate": "YYYY-MM-DD or 'N/A'",
+    "currentRanking": "Current verified ranking or 'Unranked' or competitive level",
+    "lastUpdated": "${currentDate}"
   },
   "rankingProgression": [
     {
-      "competition": "Competition Name",
+      "competition": "Official Competition Name (verified)",
       "date": "YYYY-MM-DD",
-      "result": "Result",
-      "rankingBefore": "#X",
-      "rankingAfter": "#X",
-      "points": "Points info",
-      "significance": "Impact description"
+      "result": "Specific result (gold/silver/bronze/eliminated in round X)",
+      "rankingBefore": "Ranking or competitive level before",
+      "rankingAfter": "Ranking or competitive level after",
+      "points": "Ranking points if available or 'N/A'",
+      "significance": "How this result impacted their career progression"
     }
   ],
   "careerSummary": {
-    "totalCompetitions": 0,
-    "majorTitles": 0,
-    "rankingTrend": "upward",
-    "notableAchievements": ["Achievement 1"],
-    "currentForm": "Form description"
+    "totalCompetitions": "Count of verified competitions",
+    "majorTitles": "Count of significant titles",
+    "rankingTrend": "upward/downward/stable based on competition progression",
+    "notableAchievements": ["Only verified achievements from search results"],
+    "currentForm": "Recent performance analysis based on 2024-2025 results"
   }
 }
 
-Use "N/A" for unavailable data. Return only valid JSON.`;
+IMPORTANT: Focus on authentic data but provide meaningful analysis even for emerging athletes. Use competition level progression to show career development.`;
 
   try {
     const response = await openai.responses.create({
@@ -871,15 +900,41 @@ Use "N/A" for unavailable data. Return only valid JSON.`;
     });
 
     let cleanedText = response.output_text.trim();
+    console.log(`Raw GPT-5 rank response for ${athleteName}:`, cleanedText.substring(0, 500) + '...');
+    
+    // Remove markdown formatting
     cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
     cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
     
+    // Extract JSON from response
     const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       cleanedText = jsonMatch[0];
     }
     
-    return JSON.parse(cleanedText);
+    // Aggressive JSON cleanup for GPT-5 responses
+    let attempts = 0;
+    while (attempts < 3) {
+      try {
+        // Try different cleanup strategies
+        if (attempts === 1) {
+          // Replace problematic commas in strings
+          cleanedText = cleanedText.replace(/("(?:[^"\\]|\\.)*"),(\s*[}\]])/g, '$1$2');
+          cleanedText = cleanedText.replace(/,(\s*[}\]])/g, '$1');
+        } else if (attempts === 2) {
+          // More aggressive comma cleanup
+          cleanedText = cleanedText.replace(/,(\s*[}\]])/g, '$1');
+          cleanedText = cleanedText.replace(/("[^"]*"),(\s*"[^"]*"\s*:)/g, '$1$2');
+        }
+        
+        return JSON.parse(cleanedText);
+      } catch (parseError: any) {
+        console.log(`JSON parse attempt ${attempts + 1} failed:`, parseError.message);
+        attempts++;
+      }
+    }
+    
+    throw new Error("Failed to parse JSON after 3 attempts");
   } catch (error) {
     console.error(`Error generating rank history for ${athleteName}:`, error);
     return {
@@ -1145,6 +1200,42 @@ Use authentic data only - base analysis on real competition results and verified
         };
       }
       
+      // For strengths analysis, return a structured fallback
+      if (analysisType === 'strengths') {
+        return {
+          error: 'JSON parsing failed - response may be incomplete',
+          message: 'Unable to generate authentic strengths analysis due to parsing error',
+          strengths: []
+        };
+      }
+      
+      // For weaknesses analysis, return a structured fallback  
+      if (analysisType === 'weaknesses') {
+        return {
+          error: 'JSON parsing failed - response may be incomplete',
+          message: 'Unable to generate authentic weaknesses analysis due to parsing error',
+          weaknesses: []
+        };
+      }
+      
+      // For development analysis, return a structured fallback
+      if (analysisType === 'development') {
+        return {
+          error: 'JSON parsing failed - response may be incomplete', 
+          message: 'Unable to generate authentic development plan due to parsing error',
+          plan: []
+        };
+      }
+      
+      // For beat strategies analysis, return a structured fallback
+      if (analysisType === 'beat') {
+        return {
+          error: 'JSON parsing failed - response may be incomplete',
+          message: 'Unable to generate authentic strategic analysis due to parsing error', 
+          strategies: []
+        };
+      }
+      
       throw parseError;
     }
   } catch (error) {
@@ -1278,41 +1369,50 @@ export async function searchAthleteImage(athleteName: string, sport?: string): P
 // Export the taekwondo data search function for use in routes
 export { searchTaekwondoDataProfilePicture };
 
-// GPT-5 powered athlete comparison with comprehensive analysis
+// GPT-5 powered athlete comparison with comprehensive web search analysis
 export async function compareAthletes(athlete1: any, athlete2: any, sport: string): Promise<any> {
   const timestamp = new Date().toISOString();
   const sessionId = Math.random().toString(36).substring(7);
 
-  const prompt = `You are an expert ${sport} analyst and coach. Create a comprehensive comparison between two professional athletes in ${sport}.
+  const prompt = `You are an expert ${sport} analyst and coach. Use your web search capabilities to find current, authentic information about these two athletes and create a comprehensive comparison.
 
 Session ID: ${sessionId} - Generation Time: ${timestamp}
 
-CRITICAL: Return only valid JSON. No extra text or explanations. Each comparison must be completely unique and based on authentic athlete data.
+CRITICAL INSTRUCTIONS:
+1. Use web search to find current competition records, rankings, recent matches, and performance data
+2. Find authentic biographical information, achievements, and career statistics  
+3. Return only valid JSON with no extra text or explanations
+4. Base ALL analysis on current web search results, not pre-existing data
 
-Athlete 1 Profile:
-- Name: ${athlete1.name}
-- Country: ${athlete1.country || 'Unknown'}
-- Current Rank: ${athlete1.rank || 'N/A'}
-- Biography: ${athlete1.bio?.substring(0, 500) || 'Professional athlete'}
-- Achievements: ${athlete1.achievements?.join(', ') || 'N/A'}
-- Competition Record: ${athlete1.competitionRecord || 'N/A'}
+ATHLETES TO RESEARCH:
+Athlete 1: ${athlete1.name} from ${athlete1.country || 'Unknown country'} (${sport})
+Athlete 2: ${athlete2.name} from ${athlete2.country || 'Unknown country'} (${sport})
 
-Athlete 2 Profile:
-- Name: ${athlete2.name}
-- Country: ${athlete2.country || 'Unknown'}  
-- Current Rank: ${athlete2.rank || 'N/A'}
-- Biography: ${athlete2.bio?.substring(0, 500) || 'Professional athlete'}
-- Achievements: ${athlete2.achievements?.join(', ') || 'N/A'}
-- Competition Record: ${athlete2.competitionRecord || 'N/A'}
+SEARCH AND ANALYZE:
+- Current world rankings and recent competition results
+- Technical skills, fighting style, and signature techniques
+- Physical attributes and athletic performance metrics
+- Career achievements, major titles, and competition history
+- Head-to-head records if they've competed against each other
+- Recent performance trends and current form
+- Expert analysis and commentary about each athlete
 
-Search the web for recent competition footage, match results, head-to-head records, and expert analysis of both athletes to provide authentic comparison data.
+CRITICAL WORLD RANKING REQUIREMENT:
+You MUST search for and include both athletes' current world ranking positions:
+- For Taekwondo: Search "World Taekwondo ranking" or "WT ranking" for their weight categories
+- For Boxing: Search "world boxing rankings" for their weight divisions
+- For Judo: Search "IJF world ranking" for their weight categories  
+- For Wrestling: Search "United World Wrestling ranking" for their categories
+- For other sports: Search "[sport name] world ranking" or official federation rankings
 
-ANALYSIS REQUIREMENTS:
-1. Technical Skills Comparison - Compare specific techniques, tactical approaches, and sport-specific abilities
-2. Physical Attributes - Strength, speed, endurance, and physical advantages
-3. Mental Game - Competition psychology, pressure handling, and strategic thinking
-4. Performance Metrics - Recent results, ranking progression, and competitive consistency
-5. Head-to-Head Analysis - Direct matchup prediction with detailed reasoning
+Include specific ranking numbers (e.g., "#3 vs #7", "Ranked 5th vs 12th globally") or state "Unranked" if no official ranking exists.
+
+ANALYSIS REQUIREMENTS (use web search for ALL sections):
+1. Strengths Analysis - Find specific technical and tactical strengths from recent competitions
+2. Weaknesses Analysis - Identify areas for improvement based on competition footage and expert analysis
+3. Ranking Analysis - Research current standings, ranking trajectories, and competitive records
+4. Head-to-Head Prediction - Predict matchup outcome based on fighting styles and recent form
+5. Overall Analysis - Comprehensive comparison summary based on web research
 
 Return this exact JSON structure:
 {
@@ -1395,7 +1495,7 @@ Return this exact JSON structure:
   }
 }
 
-Use only authentic data from web search. Do not include generic content or placeholder information.`;
+MANDATORY: Use ONLY current web search results. Do not use generic descriptions or placeholder content. If you cannot find specific information about an athlete through web search, clearly state "Information not found through web search" in the relevant sections.`;
 
   try {
     const response = await openai.responses.create({
@@ -1452,9 +1552,15 @@ Use only authentic data from web search. Do not include generic content or place
       cleanedText = result;
     }
     
-    const parsedData = JSON.parse(cleanedText);
-    
-    console.log(`GPT-5 Comparison Response for ${athlete1.name} vs ${athlete2.name}:`, JSON.stringify(parsedData, null, 2));
+    let parsedData;
+    try {
+      parsedData = JSON.parse(cleanedText);
+      console.log(`GPT-5 Comparison Response for ${athlete1.name} vs ${athlete2.name}:`, JSON.stringify(parsedData, null, 2));
+    } catch (parseError: any) {
+      console.error(`JSON parsing failed for GPT-5 response: ${parseError.message}`);
+      console.log(`Raw response (first 500 chars): ${cleanedText.substring(0, 500)}`);
+      throw parseError;
+    }
     
     // Validate that we received authentic GPT-5 data
     const hasAuthenticOverallAnalysis = parsedData.overallAnalysis?.summary && 

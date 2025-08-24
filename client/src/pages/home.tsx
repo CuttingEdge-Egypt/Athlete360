@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,9 +9,10 @@ import { useAuth } from "@/hooks/useAuth";
 
 import { ServiceCard } from "@/components/ui/service-card";
 import { TokenModal } from "@/components/ui/token-modal";
-import { TestingPanel } from "@/components/ui/testing-panel";
+
 import { AnalysisPopup } from "@/components/ui/analysis-popup";
 import { AthleteComparison } from "@/components/ui/athlete-comparison";
+import { VideoAnalysisResults } from "@/components/ui/video-analysis-results";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Star, User, Loader2 } from "lucide-react";
@@ -24,6 +26,97 @@ export default function Home() {
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [searchName, setSearchName] = useState<string>("");
   const [isSearching, setIsSearching] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("analysis");
+  const [comparisonData, setComparisonData] = useState<any>(null);
+  const [videoAnalysisData, setVideoAnalysisData] = useState<any>(null);
+  const [location] = useLocation();
+
+  // Check for URL parameters to load comparison data
+  useEffect(() => {
+    const checkUrlParams = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tab = urlParams.get('tab');
+      const data = urlParams.get('data');
+      
+      console.log('URL params check:', { tab, data: data ? 'present' : 'null' });
+      
+      if (tab === 'comparison' && data) {
+        try {
+          const parsedData = JSON.parse(decodeURIComponent(data));
+          console.log('Parsed comparison data:', parsedData);
+          setComparisonData(parsedData);
+          setActiveTab("comparison");
+          console.log('Set activeTab to comparison, comparisonData:', parsedData);
+          // Clean up URL after loading data
+          window.history.replaceState({}, '', window.location.pathname);
+        } catch (error) {
+          console.error('Failed to parse comparison data from URL:', error);
+        }
+      } else if (tab === 'video' && data) {
+        try {
+          const parsedData = JSON.parse(decodeURIComponent(data));
+          console.log('Parsed video analysis data:', parsedData);
+          // Store data temporarily in sessionStorage and redirect to dedicated video analysis page
+          sessionStorage.setItem('videoAnalysisData', JSON.stringify(parsedData));
+          window.location.href = '/video-analysis';
+        } catch (error) {
+          console.error('Failed to parse video analysis data from URL:', error);
+        }
+      }
+    };
+
+    // Check immediately
+    checkUrlParams();
+
+    // Listen for popstate events (back/forward navigation)
+    window.addEventListener('popstate', checkUrlParams);
+    
+    // Clean up listener
+    return () => {
+      window.removeEventListener('popstate', checkUrlParams);
+    };
+  }, [location]);
+
+  // Also check on location changes
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+    const data = urlParams.get('data');
+    
+    console.log('Location changed, URL params:', { tab, data: data ? 'present' : 'null' });
+    
+    if (tab === 'comparison' && data) {
+      try {
+        const parsedData = JSON.parse(decodeURIComponent(data));
+        console.log('Location change - Parsed comparison data:', parsedData);
+        setComparisonData(parsedData);
+        setActiveTab("comparison");
+        // Clean up URL after loading data
+        window.history.replaceState({}, '', window.location.pathname);
+      } catch (error) {
+        console.error('Failed to parse comparison data from URL:', error);
+      }
+    } else if (tab === 'video' && data) {
+      try {
+        const parsedData = JSON.parse(decodeURIComponent(data));
+        console.log('Location change - Parsed video analysis data:', parsedData);
+        // Store data temporarily in sessionStorage and redirect to dedicated video analysis page
+        sessionStorage.setItem('videoAnalysisData', JSON.stringify(parsedData));
+        window.location.href = '/video-analysis';
+        setActiveTab("video");
+        // Clean up URL after loading data
+        window.history.replaceState({}, '', window.location.pathname);
+      } catch (error) {
+        console.error('Failed to parse video analysis data from URL:', error);
+      }
+    }
+  }, [location]);
+
+  // Callback function to handle comparison loading from history
+  const handleComparisonFromHistory = (historyComparisonData: any) => {
+    setComparisonData(historyComparisonData);
+    setActiveTab("comparison");
+  };
 
   // Get all countries
   const { data: countries = [] } = useQuery<string[]>({
@@ -290,8 +383,8 @@ export default function Home() {
           </div>
 
           {/* Main Content Tabs */}
-          <Tabs defaultValue="analysis" className="max-w-6xl mx-auto">
-            <TabsList className="grid w-full grid-cols-3 bg-athlete-gray-800 mb-8">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-6xl mx-auto">
+            <TabsList className="grid w-full grid-cols-2 bg-athlete-gray-800 mb-8">
               <TabsTrigger 
                 value="analysis" 
                 data-testid="tab-analysis"
@@ -305,13 +398,6 @@ export default function Home() {
                 className="data-[state=active]:bg-athlete-accent"
               >
                 Compare Athletes
-              </TabsTrigger>
-              <TabsTrigger 
-                value="testing" 
-                data-testid="tab-testing"
-                className="data-[state=active]:bg-athlete-accent"
-              >
-                🧪 Testing Panel
               </TabsTrigger>
             </TabsList>
 
@@ -507,12 +593,10 @@ export default function Home() {
             </TabsContent>
 
             <TabsContent value="comparison" className="space-y-8">
-              <AthleteComparison />
+              <AthleteComparison preloadedComparisonData={comparisonData} />
             </TabsContent>
 
-            <TabsContent value="testing" className="space-y-8">
-              <TestingPanel />
-            </TabsContent>
+
           </Tabs>
 
           <TokenModal 

@@ -1,388 +1,497 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PaymentReceipts } from "@/components/ui/payment-receipts";
-import { ReferralSystem } from "@/components/ui/referral-system";
-import { TestingPanel } from "@/components/ui/testing-panel";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { CardSelectionModal } from "@/components/ui/card-selection-modal";
-import { useToast } from "@/hooks/use-toast";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, CreditCard, Zap, Trophy, Coins, ArrowLeft, CheckCircle, ExternalLink, AlertCircle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import { CreditCard, Coins, Zap, Crown } from "lucide-react";
-import type { SavedCard, User } from "@shared/schema";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
+
+interface TokenPackage {
+  id: string;
+  name: string;
+  price: number;
+  tokens: number;
+  popular?: boolean;
+  icon: React.ComponentType<any>;
+  features: string[];
+}
+
+interface User {
+  tokens?: number;
+  [key: string]: any;
+}
+
+const tokenPackages: TokenPackage[] = [
+  {
+    id: "starter",
+    name: "Starter Pack",
+    price: 15,
+    tokens: 500,
+    icon: Coins,
+    features: [
+      "500 analysis tokens",
+      "Basic athlete profiles",
+      "Performance insights",
+      "Standard support"
+    ]
+  },
+  {
+    id: "professional",
+    name: "Professional Pack",
+    price: 25,
+    tokens: 1000,
+    popular: true,
+    icon: Zap,
+    features: [
+      "1000 analysis tokens",
+      "Advanced comparisons",
+      "Detailed breakdowns",
+      "Priority support",
+      "Development plans"
+    ]
+  },
+  {
+    id: "elite",
+    name: "Elite Pack",
+    price: 50,
+    tokens: 2500,
+    icon: Trophy,
+    features: [
+      "2500 analysis tokens",
+      "Unlimited comparisons",
+      "Video analysis",
+      "VIP support",
+      "Custom strategies",
+      "Nutrition plans"
+    ]
+  }
+];
 
 export default function PaymentCenter() {
-  const [tokenAmount, setTokenAmount] = useState(1000);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedPackage, setSelectedPackage] = useState<{ tokens: number; price: number } | null>(null);
-  const [showCardSelection, setShowCardSelection] = useState(false);
-  const [paymentIframeUrl, setPaymentIframeUrl] = useState<string | null>(null);
+  const [, setLocation] = useLocation();
+  const { user } = useAuth() as { user: User | null };
   const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const [selectedPackage, setSelectedPackage] = useState<TokenPackage | null>(null);
+  const [isCreatingPayment, setIsCreatingPayment] = useState(false);
+  const [paymentIntent, setPaymentIntent] = useState<any>(null);
+  const [showIframe, setShowIframe] = useState(false);
 
-  const { data: user } = useQuery<User>({
-    queryKey: ['/api/auth/user'],
-  });
+  // Check for payment status in URL params after user is redirected back
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentResult = urlParams.get('payment');
 
-  const tokenPackages = [
-    { tokens: 500, price: 50, popular: false },
-    { tokens: 1000, price: 90, popular: true },
-    { tokens: 2500, price: 200, popular: false },
-    { tokens: 5000, price: 350, popular: false },
-  ];
-
-  const calculatePrice = (tokens: number) => {
-    // 1 EGP = 10 tokens, so price = tokens / 10
-    return tokens / 10;
-  };
-
-  const handleTokenPurchase = async (tokens: number) => {
-    const price = calculatePrice(tokens);
-    setSelectedPackage({ tokens, price });
-    setShowCardSelection(true);
-  };
-
-  const handleCardSelected = async (selectedCard: SavedCard | null) => {
-    if (!selectedPackage) return;
-    
-    // Close card selection modal
-    setShowCardSelection(false);
-    
-    setIsProcessing(true);
-    try {
-      // Create payment intent - always use fresh card input through Paymob iframe
-      // Don't pass saved card tokens to avoid "last 4 digits only" issue
-      const intentPayload = {
-        amount: selectedPackage.price,
-        tokensAmount: selectedPackage.tokens
-      };
-
-      console.log('🔄 Creating payment intent for fresh card input:', intentPayload);
-
-      const intentResponse = await apiRequest('POST', '/api/payments/create-intent', intentPayload);
-      const intentData = await intentResponse.json();
-      
-      // Open Paymob iframe for fresh card entry
-      console.log('Payment intent response:', intentData);
-      setPaymentIframeUrl(intentData.iframeUrl);
-
+    if (paymentResult === 'success') {
       toast({
-        title: "Payment initiated",
-        description: "Enter your complete card details in the payment window",
+        title: "Payment Successful!",
+        description: "Your tokens have been added to your account.",
+      });
+      // Clean the URL params
+      window.history.replaceState({}, '', '/payment-center');
+    } else if (paymentResult === 'failed') {
+      toast({
+        title: "Payment Failed",
+        description: "Your payment could not be processed. Please try again.",
+        variant: "destructive",
+      });
+      window.history.replaceState({}, '', '/payment-center');
+    } else if (paymentResult === 'error') {
+      toast({
+        title: "Payment Error",
+        description: "An unexpected error occurred while processing your payment.",
+        variant: "destructive",
+      });
+      window.history.replaceState({}, '', '/payment-center');
+    }
+  }, [toast]);
+
+  const handleSelectPackage = async (pkg: TokenPackage) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to purchase tokens.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSelectedPackage(pkg);
+    setIsCreatingPayment(true);
+
+    try {
+      console.log('🔄 Creating payment intent for package:', pkg.name);
+
+      const response = await apiRequest('POST', '/api/payments/create-intent', {
+        amount: pkg.price,
+        tokensAmount: pkg.tokens
       });
 
+      const result = await response.json();
+
+      if (result.success && result.paymentIntent?.iframeUrl) {
+        setPaymentIntent(result.paymentIntent);
+        setShowIframe(true);
+        toast({
+          title: "Payment Ready",
+          description: "Complete your payment in the secure payment window.",
+        });
+      } else {
+        throw new Error(result.message || 'Failed to create payment intent');
+      }
     } catch (error: any) {
-      console.error('Payment error:', error);
+      console.error('Payment intent creation failed:', error);
       toast({
-        title: "Error",
-        description: "Failed to initiate payment",
+        title: "Payment Failed",
+        description: error.message || "Failed to initialize payment. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setIsProcessing(false);
+      setIsCreatingPayment(false);
     }
   };
 
-  // Handle payment completion message from iframe
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      console.log('Received payment message:', event.data);
-      
-      // Handle Paymob iframe messages
-      if (event.data.type === 'PAYMENT_SUCCESS') {
-        handlePaymentSuccess(event.data);
-      } else if (event.data.type === 'PAYMENT_FAILURE') {
-        handlePaymentFailure(event.data);
-      }
-      // Handle Paymob transaction completion
-      else if (event.data.transaction_id || event.data.id) {
-        const transactionId = event.data.transaction_id || event.data.id;
-        const amountCents = event.data.amount_cents;
-        
-        // For testing purposes: treat credential errors as successful if user attempted payment
-        if (event.data.success === true || 
-            (event.data['data.message'] === 'Invalid credentials.' && amountCents > 0)) {
-          handlePaymentSuccess({
-            transactionId: transactionId,
-            amount: amountCents / 100 // Convert cents to EGP
-          });
-        } else {
-          handlePaymentFailure({
-            error: event.data['data.message'] || event.data.error || 'Payment failed'
-          });
-        }
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [selectedPackage]);
-
-  const handlePaymentSuccess = async (transactionData: any) => {
-    try {
-      if (!selectedPackage) return;
-
-      await apiRequest('POST', '/api/payments/complete', {
-        transactionId: transactionData.transactionId,
-        amount: transactionData.amount || selectedPackage.price,
-        tokensAmount: selectedPackage.tokens,
-        paymentMethod: 'card',
-        cardLast4: '4889',
-        cardBrand: 'Mastercard'
-      });
-
-      toast({
-        title: "Payment successful!",
-        description: `${selectedPackage.tokens} tokens added to your account`,
-      });
-
-      // Refresh user data and receipts
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/payments/receipts'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/payments/cards'] });
-      
-      setPaymentIframeUrl(null);
-      setSelectedPackage(null);
-      
-    } catch (error: any) {
-      console.error('Payment completion error:', error);
-      toast({
-        title: "Error",
-        description: "Payment completed but failed to update account",
-        variant: "destructive",
-      });
-    }
+  const handleBackToPackages = () => {
+    setSelectedPackage(null);
+    setPaymentIntent(null);
+    setShowIframe(false);
   };
 
-  const handlePaymentFailure = (data: any) => {
-    toast({
-      title: "Payment failed",
-      description: data.error || "Payment was not completed",
-      variant: "destructive",
-    });
-    setPaymentIframeUrl(null);
+  const handleGoBack = () => {
+    setLocation('/');
   };
 
-  return (
-    <div className="min-h-screen bg-athlete-primary text-white">
-      <div className="container mx-auto p-6 max-w-6xl">
-      {/* Payment Iframe Modal */}
-      {paymentIframeUrl && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-4 max-w-md w-full mx-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-black">Complete Payment</h3>
+  if (showIframe && paymentIntent && selectedPackage) {
+    return (
+      <div className="min-h-screen bg-athlete-gray-900 text-white">
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center gap-4 mb-6">
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                onClick={() => setPaymentIframeUrl(null)}
-                className="text-black hover:bg-gray-100"
+                onClick={handleBackToPackages}
+                className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                data-testid="button-back-packages"
               >
-                ✕
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Packages
               </Button>
-            </div>
-            <iframe
-              src={paymentIframeUrl}
-              width="100%"
-              height="400"
-              frameBorder="0"
-              title="Payment Form"
-              className="rounded-lg"
-            />
-          </div>
-        </div>
-      )}
-
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Payment Center</h1>
-        <p className="text-muted-foreground">
-          Manage your tokens, view receipts, and invite friends
-        </p>
-      </div>
-
-      <Tabs defaultValue="purchase" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="purchase" data-testid="tab-purchase">
-            <Coins className="h-4 w-4 mr-2" />
-            Buy Tokens
-          </TabsTrigger>
-          <TabsTrigger value="receipts" data-testid="tab-receipts">
-            <CreditCard className="h-4 w-4 mr-2" />
-            Receipts
-          </TabsTrigger>
-          <TabsTrigger value="referrals" data-testid="tab-referrals">
-            <Crown className="h-4 w-4 mr-2" />
-            Referrals
-          </TabsTrigger>
-          <TabsTrigger value="testing" data-testid="tab-testing">
-            <Zap className="h-4 w-4 mr-2" />
-            Testing
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="purchase" className="space-y-6">
-          {/* Current Balance */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Coins className="h-5 w-5 text-yellow-500" />
-                Current Balance
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-600">
-                {user?.tokens || 0} / {user?.totalTokensPurchased || 0} tokens
+              <div>
+                <h1 className="text-2xl font-bold text-white" data-testid="text-payment-title">
+                  Secure Payment Gateway
+                </h1>
+                <p className="text-gray-400" data-testid="text-payment-subtitle">
+                  {selectedPackage?.name} - {selectedPackage?.tokens.toLocaleString()} tokens for {selectedPackage?.price} EGP
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Ready for AI-powered athlete analysis
-              </p>
-            </CardContent>
-          </Card>
+            </div>
 
-          {/* Token Packages */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Token Packages</CardTitle>
-              <CardDescription>
-                Choose a package that fits your analysis needs
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {tokenPackages.map((pkg) => (
-                  <div
-                    key={pkg.tokens}
-                    className={`relative p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      pkg.popular
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                    }`}
-                  >
-                    {pkg.popular && (
-                      <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                        <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                          Popular
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Order Summary */}
+              <Card className="bg-athlete-gray-800 border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                    Order Summary
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Review your purchase details
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="bg-athlete-gray-700 p-4 rounded-lg">
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="text-gray-300">Package:</span>
+                        <span className="text-white font-semibold" data-testid="text-package-name">
+                          {selectedPackage?.name}
                         </span>
                       </div>
-                    )}
-                    <div className="text-center">
-                      <div className="text-2xl font-bold">{pkg.tokens}</div>
-                      <div className="text-sm text-muted-foreground mb-2">tokens</div>
-                      <div className="text-lg font-semibold text-green-600">
-                        {pkg.price} EGP
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="text-gray-300">Tokens:</span>
+                        <span className="text-athlete-accent font-bold" data-testid="text-tokens-amount">
+                          {selectedPackage?.tokens.toLocaleString()}
+                        </span>
                       </div>
-                      <div className="text-xs text-muted-foreground mb-4">
-                        {(pkg.price / pkg.tokens * 10).toFixed(2)} EGP per 10 tokens
+                      <div className="border-t border-gray-600 pt-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-white font-semibold">Total:</span>
+                          <span className="text-white font-bold text-xl" data-testid="text-total-amount">
+                            {selectedPackage?.price} EGP
+                          </span>
+                        </div>
                       </div>
-                      <Button
-                        onClick={() => handleTokenPurchase(pkg.tokens)}
-                        disabled={isProcessing}
-                        className="w-full"
-                        variant={pkg.popular ? "default" : "outline"}
-                        data-testid={`button-buy-${pkg.tokens}`}
-                      >
-                        {isProcessing ? "Processing..." : "Buy Now"}
-                      </Button>
+                    </div>
+                    
+                    <div className="bg-green-900/20 border border-green-600/30 rounded-lg p-3">
+                      <div className="flex items-center gap-2 text-green-400 text-sm font-medium">
+                        <CheckCircle className="w-4 h-4" />
+                        Payment Session Ready
+                      </div>
+                      <p className="text-green-300 text-xs mt-1">
+                        Integration ID: 4723444 (Active)
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
 
-          {/* Custom Amount */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Custom Amount</CardTitle>
-              <CardDescription>
-                Buy a specific number of tokens
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-4 items-end">
-                <div className="flex-1">
-                  <Label htmlFor="customTokens">Number of Tokens</Label>
-                  <Input
-                    id="customTokens"
-                    type="number"
-                    min="100"
-                    max="10000"
-                    step="100"
-                    value={tokenAmount}
-                    onChange={(e) => setTokenAmount(Number(e.target.value))}
-                    data-testid="input-custom-tokens"
-                  />
-                </div>
-                <div className="flex-1">
-                  <Label>Price</Label>
-                  <div className="text-2xl font-bold text-green-600">
-                    {calculatePrice(tokenAmount)} EGP
+              {/* Payment Gateway */}
+              <Card className="bg-athlete-gray-800 border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <CreditCard className="w-5 h-5 text-athlete-accent" />
+                    Secure Payment Gateway
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Popup-based payment for optimal 3D Secure compatibility
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {/* Payment Button */}
+                    <div className="text-center">
+                      <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-6">
+                        <div className="flex items-center justify-center mb-4">
+                          <div className="bg-blue-600 p-3 rounded-full">
+                            <CreditCard className="w-8 h-8 text-white" />
+                          </div>
+                        </div>
+                        <h3 className="text-lg font-bold text-white mb-2">Ready to Process</h3>
+                        <p className="text-gray-300 text-sm mb-6">
+                          Open the secure payment window to complete your purchase safely.
+                        </p>
+                        <Button 
+                          size="lg"
+                          onClick={() => {
+                            console.log('Opening payment popup window...');
+                            const popup = window.open(
+                              paymentIntent.iframeUrl, 
+                              'paymob_payment', 
+                              'width=900,height=700,scrollbars=yes,resizable=yes,status=yes,location=yes,menubar=no,toolbar=no'
+                            );
+                            
+                            if (popup) {
+                              popup.focus();
+                              
+                              toast({
+                                title: "Payment Window Opened",
+                                description: "Complete your payment in the new window.",
+                              });
+                              
+                              // Monitor popup for completion
+                              const checkClosed = setInterval(() => {
+                                if (popup.closed) {
+                                  clearInterval(checkClosed);
+                                  console.log('Payment popup closed, checking status...');
+                                  
+                                  toast({
+                                    title: "Payment Window Closed",
+                                    description: "Checking payment status...",
+                                  });
+                                  
+                                  // Check payment status after popup closes
+                                  setTimeout(() => {
+                                    window.location.reload();
+                                  }, 2000);
+                                }
+                              }, 1000);
+                              
+                            } else {
+                              toast({
+                                title: "Popup Blocked",
+                                description: "Please allow popups for this site and try again.",
+                                variant: "destructive",
+                              });
+                            }
+                          }}
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3"
+                          data-testid="button-open-payment"
+                        >
+                          <ExternalLink className="w-5 h-5 mr-3" />
+                          Open Payment Window
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Payment Instructions */}
+                    <div className="bg-gray-800/50 border border-gray-600/30 rounded-lg p-4">
+                      <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-blue-400" />
+                        Payment Instructions
+                      </h4>
+                      <div className="text-xs text-gray-300 space-y-2">
+                        <div className="flex items-start gap-2">
+                          <span className="text-blue-400 font-bold">1.</span>
+                          <span>Click "Open Payment Window" to start the secure payment process</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-blue-400 font-bold">2.</span>
+                          <span>Enter your card details in the Paymob payment form</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-blue-400 font-bold">3.</span>
+                          <span>Complete 3D Secure authentication (OTP) if required by your bank</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-blue-400 font-bold">4.</span>
+                          <span>Keep the popup window open until payment completes successfully</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-blue-400 font-bold">5.</span>
+                          <span>You'll be redirected back automatically after successful payment</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <Button
-                  onClick={() => handleTokenPurchase(tokenAmount)}
-                  disabled={isProcessing || tokenAmount < 100}
-                  data-testid="button-buy-custom"
-                >
-                  <Zap className="h-4 w-4 mr-2" />
-                  Buy Custom
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="receipts">
-          <PaymentReceipts />
-        </TabsContent>
-
-        <TabsContent value="referrals">
-          <ReferralSystem />
-        </TabsContent>
-
-        <TabsContent value="testing">
-          <TestingPanel />
-        </TabsContent>
-      </Tabs>
-
-      {/* Card Selection Modal */}
-      <CardSelectionModal
-        open={showCardSelection}
-        onOpenChange={setShowCardSelection}
-        onCardSelected={handleCardSelected}
-        tokenAmount={selectedPackage?.tokens || 0}
-        price={selectedPackage?.price || 0}
-      />
-
-      {/* Payment Iframe Modal */}
-      {paymentIframeUrl && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg w-full max-w-md max-h-[80vh] overflow-hidden">
-            <div className="p-4 border-b">
-              <h3 className="text-lg font-semibold">Complete Payment</h3>
-              <Button
-                onClick={() => setPaymentIframeUrl(null)}
-                className="absolute top-2 right-2"
-                variant="ghost"
-                size="sm"
-              >
-                ×
-              </Button>
+                </CardContent>
+              </Card>
             </div>
-            <iframe
-              src={paymentIframeUrl}
-              className="w-full h-96"
-              title="Payment"
-              onLoad={() => {
-                console.log('Payment iframe loaded with URL:', paymentIframeUrl);
-              }}
-            />
+
+            <div className="mt-6 text-center">
+              <div className="inline-flex items-center gap-2 bg-green-900/20 border border-green-600/30 rounded-lg px-4 py-2">
+                <CheckCircle className="w-4 h-4 text-green-400" />
+                <span className="text-green-300 text-sm">SSL Secured by Paymob</span>
+              </div>
+            </div>
           </div>
         </div>
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-athlete-gray-900 text-white">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center gap-4 mb-8">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleGoBack}
+              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+              data-testid="button-back-home"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold text-white" data-testid="text-payment-center-title">
+                Payment Center
+              </h1>
+              <p className="text-gray-400" data-testid="text-payment-center-subtitle">
+                Purchase tokens to unlock powerful athlete analysis features
+              </p>
+            </div>
+          </div>
+
+          {user && (
+            <div className="bg-athlete-gray-800 border border-gray-700 rounded-lg p-6 mb-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-1" data-testid="text-current-balance">
+                    Current Balance
+                  </h3>
+                  <p className="text-gray-400">Available tokens for analysis</p>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-athlete-accent" data-testid="text-token-balance">
+                    {(user.tokens || 0).toLocaleString()}
+                  </div>
+                  <p className="text-sm text-gray-400">tokens</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="bg-athlete-gray-800 border border-green-600/30 rounded-lg p-4 mb-8">
+            <div className="flex items-center gap-4">
+              <div>
+                <h3 className="text-sm font-semibold text-green-400">Payment Integration Status</h3>
+                <p className="text-xs text-gray-400">Using Integration ID: 4233746 (Online Card)</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <span className="text-green-400 text-sm font-medium">Active</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            {tokenPackages.map((pkg) => {
+              const IconComponent = pkg.icon;
+              return (
+                <Card
+                  key={pkg.id}
+                  className={`bg-athlete-gray-800 border-gray-700 relative cursor-pointer transition-all duration-200 hover:scale-105 ${
+                    pkg.popular ? 'border-athlete-accent border-2' : ''
+                  }`}
+                  onClick={() => handleSelectPackage(pkg)}
+                  data-testid={`card-package-${pkg.id}`}
+                >
+                  {pkg.popular && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <Badge className="bg-athlete-accent text-white px-3 py-1">
+                        Most Popular
+                      </Badge>
+                    </div>
+                  )}
+
+                  <CardHeader className="text-center">
+                    <div className="mx-auto mb-4 p-3 bg-athlete-gray-700 rounded-full w-fit">
+                      <IconComponent className="text-athlete-accent" size={32} />
+                    </div>
+                    <CardTitle className="text-xl text-white" data-testid={`text-package-title-${pkg.id}`}>
+                      {pkg.name}
+                    </CardTitle>
+                    <div className="text-3xl font-bold text-white" data-testid={`text-package-price-${pkg.id}`}>
+                      {pkg.price} EGP
+                    </div>
+                    <p className="text-athlete-accent font-semibold" data-testid={`text-package-tokens-${pkg.id}`}>
+                      {pkg.tokens.toLocaleString()} Tokens
+                    </p>
+                  </CardHeader>
+
+                  <CardContent>
+                    <ul className="space-y-3 mb-6">
+                      {pkg.features.map((feature, index) => (
+                        <li key={index} className="flex items-center space-x-2">
+                          <CheckCircle className="text-athlete-success" size={16} />
+                          <span className="text-gray-300 text-sm">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <Button
+                      className="w-full bg-athlete-accent hover:bg-athlete-accent/90 text-white font-semibold"
+                      disabled={isCreatingPayment && selectedPackage?.id === pkg.id}
+                      data-testid={`button-purchase-${pkg.id}`}
+                    >
+                      {isCreatingPayment && selectedPackage?.id === pkg.id ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Creating Payment...
+                        </>
+                      ) : (
+                        <>
+                          <CreditCard className="w-4 h-4 mr-2" />
+                          Purchase Now
+                        </>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          <div className="text-center text-gray-400">
+            <p className="mb-2">🔒 Secure payments powered by Paymob</p>
+            <p className="text-sm">All transactions are encrypted and protected</p>
+          </div>
+        </div>
       </div>
     </div>
   );

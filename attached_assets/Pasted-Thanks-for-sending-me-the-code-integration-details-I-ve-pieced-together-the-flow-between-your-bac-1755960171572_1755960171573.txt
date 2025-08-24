@@ -1,0 +1,74 @@
+Thanks for sending me the code + integration details. I’ve pieced together the flow between your backend (`routes.ts`), your service (`paymobService.ts`), and the frontend (`payment-center.tsx`). Based on that, here’s what’s happening and why you’re hitting the OTP/3DS error screen:
+
+---
+
+### 🔎 Key Findings
+
+1. **Integration ID mismatch**
+
+   * In `payment-center.tsx` you display:
+     `Using Integration ID: 4233746 (Online Card)` ✅
+   * But in your backend test endpoint (`/api/payments/test-all-integrations`), you’re looping over *other IDs* like `4723445, 4723444, ...` — not **4233746**.
+   * If the frontend sends card details to the wrong iframe (tied to a non-card integration), Paymob rejects it at the OTP stage.
+
+2. **Iframe URL vs. Token mismatch**
+
+   * The Paymob flow is very strict:
+
+     1. Authenticate → get auth token
+     2. Create order
+     3. Generate **payment key** using the correct `integration_id`
+     4. Render iframe with that token
+   * If the `iframeUrl` you’re embedding (`paymentIntent.iframeUrl`) is not **exactly the one linked to 4233746** (the Online Card integration), the card entry → OTP redirect will always fail.
+
+3. **Callbacks are fine, but HMAC is skipped**
+
+   * In `routes.ts` you’re skipping HMAC verification in `/api/payments/paymob-processed`. That’s not the root of your current issue (OTP page failure), but it means even if payments succeed you’re not validating callbacks securely yet.
+
+4. **Frontend 3DS handling**
+
+   * Your `PaymentCenter` listens for iframe messages and handles `pending_3ds`.
+   * But you also have a **manual override** (`handle3DSRedirection`) with a hardcoded URL. That’s probably just for debugging. In production, the redirection must come from Paymob’s response.
+
+---
+
+### ✅ What you need to fix
+
+1. **Force backend to use the correct Integration ID**
+
+   * In `paymobService.ts` → `generatePaymentKey`, ensure you pass `integration_id: 4233746` (not from env/test loop).
+   * Example:
+
+     ```ts
+     const paymentKeyPayload = {
+       amount_cents: amount.toString(),
+       currency: 'EGP',
+       order_id: orderId,
+       integration_id: 4233746, // must match Online Card integration
+       billing_data: { ... }
+     }
+     ```
+
+2. **Check your Iframe URL**
+
+   * It should look like:
+     `https://accept.paymob.com/api/acceptance/iframes/<IFRAME_ID>?payment_token=<PAYMENT_KEY>`
+   * Make sure `paymentIntent.iframeUrl` is being built in `paymobService.ts` with the correct `IFRAME_ID` tied to integration 4233746.
+
+3. **Remove test integrations from production**
+
+   * Right now your `/api/payments/test-all-integrations` is misleading — it loops over integrations that are unrelated to your frontend.
+   * Stick to **only 4233746** (the one Paymob confirmed as active in your dashboard).
+
+---
+
+### 🚦 Debugging checklist
+
+* [ ] In `paymobService.ts`, log the payload when generating a payment key and confirm `integration_id: 4233746`.
+* [ ] Check `iframeUrl` returned to frontend — does it have the right iframe ID from Paymob dashboard?
+* [ ] In `payment-center.tsx`, verify `src={paymentIntent.iframeUrl}` resolves to Paymob’s hosted checkout page with the token.
+* [ ] Try a **test card** from Paymob’s documentation. If OTP page still fails, it means iframe/token mismatch.
+
+---
+
+👉 I can update your `paymobService.ts` with the correct integration ID + iframe builder if you send me the current code for `createPaymentIntent` and `generatePaymentKey`. Would you like me to rewrite those functions so you can just drop them in?

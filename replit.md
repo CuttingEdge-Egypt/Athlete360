@@ -1,7 +1,7 @@
 # Athlete360 - AI-Powered Athletic Performance Analysis Platform
 
 ## Overview
-Athlete360 is a subscription-based web application providing AI-powered athletic performance analysis and insights. It enables users to analyze any athlete's performance through various analytical services, consuming tokens from their subscription balance. The platform operates on a token-based economy where users purchase subscriptions to acquire tokens, which are then used to access services such as athlete biographies, ranking analysis, strengths/weaknesses evaluation, development plans, nutrition guidance, and strategic analysis. The business vision is to provide comprehensive, authentic, and real-time athletic insights, leveraging AI to offer personalized performance development and strategic advantages.
+Athlete360 is an AI-powered athletic performance analysis platform that enables users to analyze any athlete's performance through various analytical services. The platform provides comprehensive athlete insights including biographies, ranking analysis, strengths/weaknesses evaluation, development plans, nutrition guidance, and strategic analysis. The business vision is to provide comprehensive, authentic, and real-time athletic insights, leveraging AI to offer personalized performance development and strategic advantages.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -36,26 +36,43 @@ Preferred communication style: Simple, everyday language.
 - **Authorization**: Route-level protection with `isAuthenticated` middleware.
 - **User Management**: Automatic user creation/updates with token balance tracking.
 
-### Token Economy System
-- **Subscription Model**: Token-based with pay-as-you-go options.
-- **Token Deduction**: Automatic consumption per analytical service.
-- **Balance Tracking**: Real-time token balance display with transaction history.
-- **Insufficient Funds**: Modal-based token recharge system.
+### Analysis System  
+- **Service Architecture**: Multiple analytical services for comprehensive athlete insights.
+- **AI-Powered Analysis**: Real-time athlete performance evaluation and insights.
+- **Data Management**: Comprehensive athlete data storage and retrieval.
 
 ### Service Architecture
 - **Analysis Services**: Eight distinct analytical services (Bio, Rank, Strengths, Weaknesses, Development Plans, Nutrition, Beat Strategies, Video Analysis).
-- **Athlete Comparison**: AI-powered one-click comparison system.
+- **Athlete Comparison**: AI-powered one-click comparison system with dual AI model architecture (GPT-5 and Gemini-2.5-pro for enhanced analysis).
 - **Smart Data Extraction**: Intelligent fallback system that automatically extracts missing athlete data (age, gender, nationality) from existing biographies using pattern matching and AI analysis.
 - **Cost Structure**: Predefined token costs per service.
 - **Data Seeding**: Automatic database seeding with sample data.
 - **CRUD Operations**: Full capabilities for sports, athletes, and analysis data.
 - **Deduplication Logic**: Smart athlete deduplication by name.
+- **Video Analysis System**: Independent video analysis with synchronized player, timeline navigation, real-time event display, and live scoreboard layout.
+- **AI Response Handling**: Robust JSON parsing and retry mechanisms for AI model responses.
+- **UI Structure**: Consistent structured UI for analysis results (Bio, Rank, etc.) across different components with visual hierarchy and theming.
+- **World Ranking Integration**: Enhanced prompts for Bio, Rank History, and Compare Athletes functions that mandate searching for current world rankings in the athlete's specific sport (e.g., World Taekwondo ranking, IJF world ranking, etc.).
+
+## Recent Critical Fixes (August 2025)
+
+### Paymob Integration Fully Working
+- **Integration ID**: 4233746 confirmed working for card payments
+- **3DS Authentication**: System properly detects and handles 3D Secure requirements
+- **Bank Validation**: Egyptian phone numbers and address data correctly formatted
+- **Response Handling**: Enhanced redirection logic prevents JSON display
+- **Status**: Complete payment flow functional including OTP authentication
+
+### Egyptian Bank Validation Fix
+- **Problem**: Bank recognition failures with "unrecognized bank" errors
+- **Solution**: Proper Egyptian phone numbers (+201234567890) in billing_data instead of "NA"
+- **Enhanced**: Complete Cairo address data with valid postal codes
 
 ## External Dependencies
 
 ### AI and Language Models
-- **OpenAI GPT-5**: Exclusive LLM provider for all athlete analysis, biography generation, comparison analysis, and sports insights. Uses web search capabilities (`responses.create()` API with `web_search_preview` tool).
-- **Google Gemini 2.5 Pro**: Specialized AI model for nutrition plan generation, providing culturally-aware meal recommendations based on athlete nationality, sport, age, and gender.
+- **OpenAI GPT-5**: Exclusive LLM provider for all athlete analysis, biography generation, comparison analysis, and sports insights. Uses web search capabilities.
+- **Google Gemini 2.5 Pro**: Specialized AI model for nutrition plan generation, video analysis, and enhanced athlete comparison providing culturally-aware meal recommendations and detailed tactical advice.
 - **OpenAI SDK**: Official OpenAI JavaScript SDK for GPT-5 integration.
 - **Google Generative AI SDK**: Official Google SDK for Gemini integration.
 
@@ -67,8 +84,7 @@ Preferred communication style: Simple, everyday language.
 - **Replit OIDC**: OpenID Connect authentication provider.
 - **Passport.js**: Authentication middleware.
 
-### Payment Processing
-- **Stripe**: Payment processing integration for token purchases and subscription management.
+
 
 ### UI and Styling
 - **Radix UI**: Headless UI primitives.
@@ -80,37 +96,3 @@ Preferred communication style: Simple, everyday language.
 - **Vite**: Fast build tool.
 - **ESBuild**: Fast JavaScript bundler.
 - **TypeScript**: Static type checking.
-
-## Recent Changes
-
-### Video Analysis System Implementation (August 12, 2025)
-- **Removed athlete_id dependency**: Video analysis now works independently without requiring athlete profiles
-- **Fixed API integration**: Switched from failed file upload API to working base64 encoding approach for Google Gemini
-- **Cleaned up duplicate routes**: Removed conflicting video analysis endpoints, keeping only the standalone `/api/analysis/video` route
-- **Fixed TypeScript errors**: Resolved all 12 TypeScript compilation errors in routes.ts
-- **Enhanced error handling**: Improved error messages and proper null/undefined handling throughout the codebase
-- **Interactive Video Player**: Created synchronized video player with timeline-based analysis events
-- **Timestamp Synchronization**: Analysis events (kicks, scores, punches, penalties) automatically highlight during video playback
-- **Timeline Navigation**: Users can click on timeline events to jump to specific moments in the video
-- **Real-time Analysis Display**: Live events show within 3 seconds of current video time
-- **Complete Match Analysis**: Non-timestamped overall match analysis displayed separately for reference
-- **Updated Gemini Model**: Now using `gemini-2.5-pro` for all video analysis operations
-- **Live Scoreboard Layout**: Video centered with Blue/Red player stats on sides showing live-updating scores, kicks, and yellow cards
-- **Enhanced Analysis Accuracy**: Round-specific prompts, proper score summation (1+1+2=4), consistent kick counting, and timestamped warnings
-
-### Nutrition Plan JSON Parsing Enhancements (August 13, 2025)
-- **Comprehensive JSON cleanup**: Implemented multiple fallback strategies for handling malformed JSON responses from GPT-5
-- **Comma handling**: Added aggressive comma replacement in string values to prevent JSON parsing failures
-- **Enhanced prompt instructions**: Updated GPT-5 prompts with strict JSON formatting rules to prevent commas in string values
-- **Multiple retry mechanism**: Implemented 3-attempt retry system with progressive cleanup strategies
-- **Full response logging**: Added comprehensive logging to capture complete GPT-5 responses for debugging
-- **Pattern-based fixes**: Created specific regex patterns to handle common JSON formatting issues in AI responses
-- **Robust error handling**: Improved error messages and fallback data structures for failed parsing attempts
-- **UI visibility improvements**: Removed problematic background colors from nutrition plan display for better text readability
-- **Video analysis color field integration**: Updated video player analysis to use "color" field from JSON for accurate score and yellow card attribution to blue/red players
-
-### Video Analysis Kick Count Fix (August 14, 2025)
-- **Fixed frontend/backend property mismatch**: Changed frontend from `kick_analysis` to `kick_count_analysis` to match backend response
-- **Enhanced kick count parsing**: Updated frontend to handle actual JSON structure with `players[].kicks[].total_kick_number` format
-- **Improved player identification**: Added player name-based fallback for color detection in kick count analysis
-- **Maintained backward compatibility**: Kept fallback parsing for direct `total_kicks` property

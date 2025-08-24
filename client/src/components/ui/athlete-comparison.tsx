@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -72,6 +72,12 @@ interface ComparisonData {
     reasoning: string;
     keyFactors: string[];
     scenario: string;
+    tacticalAdvice?: {
+      forAthlete1: string;
+      forAthlete2: string;
+    };
+    historicalContext?: string;
+    expertPredictions?: string;
   };
   overallAnalysis?: {
     summary: string;
@@ -80,16 +86,93 @@ interface ComparisonData {
     closeness: string;
     recommendation: string;
   };
+  detailedAnalysis?: {
+    athlete1: {
+      name: string;
+      country: string;
+      currentForm: string;
+      technicalSkills: Array<{
+        skill: string;
+        proficiency: number;
+        description: string;
+        evidence: string;
+      }>;
+      physicalAttributes: {
+        height?: string;
+        weight?: string;
+        reach?: string;
+        stance?: string;
+        strengths?: string[];
+      };
+      recentPerformance: {
+        wins?: string;
+        losses?: string;
+        lastCompetition?: string;
+        rankingChange?: string;
+        form?: string;
+      };
+    };
+    athlete2: {
+      name: string;
+      country: string;
+      currentForm: string;
+      technicalSkills: Array<{
+        skill: string;
+        proficiency: number;
+        description: string;
+        evidence: string;
+      }>;
+      physicalAttributes: {
+        height?: string;
+        weight?: string;
+        reach?: string;
+        stance?: string;
+        strengths?: string[];
+      };
+      recentPerformance: {
+        wins?: string;
+        losses?: string;
+        lastCompetition?: string;
+        rankingChange?: string;
+        form?: string;
+      };
+    };
+    comparison: {
+      technicalEdge?: string;
+      physicalEdge?: string;
+      experienceEdge?: string;
+      formEdge?: string;
+    };
+  };
+  aiModels?: {
+    basicComparison: string;
+    detailedAnalysis: string;
+    headToHead: string;
+  };
   error?: boolean;
   message?: string;
 }
 
-export function AthleteComparison() {
+interface AthleteComparisonProps {
+  preloadedComparisonData?: any;
+}
+
+export function AthleteComparison({ preloadedComparisonData }: AthleteComparisonProps) {
+  console.log('AthleteComparison received preloadedComparisonData:', preloadedComparisonData);
   const [selectedSport, setSelectedSport] = useState<string>("");
-  const [selectedCountry, setSelectedCountry] = useState<string>("");
+  const [selectedCountry1, setSelectedCountry1] = useState<string>("");
+  const [selectedCountry2, setSelectedCountry2] = useState<string>("");
   const [selectedAthlete1, setSelectedAthlete1] = useState<string>("");
   const [selectedAthlete2, setSelectedAthlete2] = useState<string>("");
+  const [comparisonData, setComparisonData] = useState<any>(preloadedComparisonData || null);
   const { toast } = useToast();
+
+  // Update comparison data when preloaded data changes
+  useEffect(() => {
+    if (preloadedComparisonData) {
+      setComparisonData(preloadedComparisonData);
+    }
+  }, [preloadedComparisonData]);
 
   const { data: sports = [] } = useQuery<Sport[]>({
     queryKey: ["/api/sports"],
@@ -100,21 +183,59 @@ export function AthleteComparison() {
     queryKey: ["/api/countries"],
   });
 
-  const { data: allAthletes = [] } = useQuery<Athlete[]>({
-    queryKey: ["/api/athletes/by-sport", selectedSport, selectedCountry],
+  // Get athletes for athlete 1 (by sport and country 1)
+  const { data: allAthletes1 = [] } = useQuery<Athlete[]>({
+    queryKey: ["/api/athletes/by-sport", selectedSport, selectedCountry1, "athlete1"],
     enabled: !!selectedSport,
     queryFn: async () => {
       const url = new URL(`/api/athletes/by-sport/${selectedSport}`, window.location.origin);
-      if (selectedCountry) {
-        url.searchParams.set('country', selectedCountry);
+      if (selectedCountry1) {
+        url.searchParams.set('country', selectedCountry1);
       }
       const response = await fetch(url.toString());
       return response.json();
     }
   });
 
-  // Deduplicate athletes by name, keeping the most recent record
-  const athletes = allAthletes.reduce((acc: Athlete[], current) => {
+  // Get athletes for athlete 2 (by sport and country 2)
+  const { data: allAthletes2 = [] } = useQuery<Athlete[]>({
+    queryKey: ["/api/athletes/by-sport", selectedSport, selectedCountry2, "athlete2"],
+    enabled: !!selectedSport,
+    queryFn: async () => {
+      const url = new URL(`/api/athletes/by-sport/${selectedSport}`, window.location.origin);
+      if (selectedCountry2) {
+        url.searchParams.set('country', selectedCountry2);
+      }
+      const response = await fetch(url.toString());
+      return response.json();
+    }
+  });
+
+  // Deduplicate athletes for athlete 1
+  const athletes1 = allAthletes1.reduce((acc: Athlete[], current) => {
+    const existingIndex = acc.findIndex(athlete => 
+      athlete.name.toLowerCase().trim() === current.name.toLowerCase().trim()
+    );
+    
+    if (existingIndex === -1) {
+      acc.push(current);
+    } else {
+      // Keep the more recent record (or the one with more complete data)
+      const existing = acc[existingIndex];
+      const currentDate = new Date(current.updatedAt || current.createdAt || 0);
+      const existingDate = new Date(existing.updatedAt || existing.createdAt || 0);
+      
+      if (currentDate > existingDate || 
+          (current.bio && current.bio.length > (existing.bio?.length || 0))) {
+        acc[existingIndex] = current;
+      }
+    }
+    
+    return acc;
+  }, []);
+
+  // Deduplicate athletes for athlete 2
+  const athletes2 = allAthletes2.reduce((acc: Athlete[], current) => {
     const existingIndex = acc.findIndex(athlete => 
       athlete.name.toLowerCase().trim() === current.name.toLowerCase().trim()
     );
@@ -144,7 +265,8 @@ export function AthleteComparison() {
       });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setComparisonData(data);
       toast({
         title: "Comparison Complete",
         description: "AI-powered athlete comparison generated successfully!",
@@ -181,9 +303,9 @@ export function AthleteComparison() {
     comparisonMutation.mutate();
   };
 
-  const comparisonData = comparisonMutation.data as ComparisonData | undefined;
-  const availableAthletes1 = athletes.filter(a => a.id !== selectedAthlete2);
-  const availableAthletes2 = athletes.filter(a => a.id !== selectedAthlete1);
+  // Use comparisonData state that is initialized with preloaded data
+  const availableAthletes1 = athletes1.filter((a: Athlete) => a.id !== selectedAthlete2);
+  const availableAthletes2 = athletes2.filter((a: Athlete) => a.id !== selectedAthlete1);
 
   return (
     <Card className="bg-athlete-gray-800 border-gray-700">
@@ -195,13 +317,15 @@ export function AthleteComparison() {
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Selection Controls */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+          <div className="space-y-2 md:col-span-2">
             <label className="text-sm font-medium text-gray-300">Sport</label>
             <Select
               value={selectedSport}
               onValueChange={(value) => {
                 setSelectedSport(value);
+                setSelectedCountry1("");
+                setSelectedCountry2("");
                 setSelectedAthlete1("");
                 setSelectedAthlete2("");
               }}
@@ -221,15 +345,14 @@ export function AthleteComparison() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">Country</label>
+            <label className="text-sm font-medium text-gray-300">Country (Athlete 1)</label>
             <Select
-              value={selectedCountry || "all"}
+              value={selectedCountry1 || "all"}
               onValueChange={(value) => {
-                setSelectedCountry(value === "all" ? "" : value);
+                setSelectedCountry1(value === "all" ? "" : value);
                 setSelectedAthlete1("");
-                setSelectedAthlete2("");
               }}
-              data-testid="select-country"
+              data-testid="select-country1"
             >
               <SelectTrigger className="bg-athlete-gray-700 border-gray-600">
                 <SelectValue placeholder="All countries" />
@@ -257,7 +380,7 @@ export function AthleteComparison() {
                 <SelectValue placeholder="Select first athlete..." />
               </SelectTrigger>
               <SelectContent>
-                {availableAthletes1.map((athlete) => (
+                {availableAthletes1.map((athlete: Athlete) => (
                   <SelectItem key={athlete.id} value={athlete.id}>
                     <div className="flex items-center gap-2">
                       <span>{athlete.name}</span>
@@ -275,18 +398,42 @@ export function AthleteComparison() {
           </div>
 
           <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-300">Country (Athlete 2)</label>
+            <Select
+              value={selectedCountry2 || "all"}
+              onValueChange={(value) => {
+                setSelectedCountry2(value === "all" ? "" : value);
+                setSelectedAthlete2("");
+              }}
+              data-testid="select-country2"
+            >
+              <SelectTrigger className="bg-athlete-gray-700 border-gray-600">
+                <SelectValue placeholder="All countries" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All countries</SelectItem>
+                {countries.map((country) => (
+                  <SelectItem key={country} value={country}>
+                    {country}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300">Athlete 2</label>
             <Select
               value={selectedAthlete2}
               onValueChange={setSelectedAthlete2}
-              disabled={!selectedSport || !selectedAthlete1}
+              disabled={!selectedSport}
               data-testid="select-athlete2"
             >
               <SelectTrigger className="bg-athlete-gray-700 border-gray-600">
                 <SelectValue placeholder="Select second athlete..." />
               </SelectTrigger>
               <SelectContent>
-                {availableAthletes2.map((athlete) => (
+                {availableAthletes2.map((athlete: Athlete) => (
                   <SelectItem key={athlete.id} value={athlete.id}>
                     <div className="flex items-center gap-2">
                       <span>{athlete.name}</span>
@@ -369,8 +516,9 @@ export function AthleteComparison() {
 
             {/* Detailed Comparison */}
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 bg-athlete-gray-700">
+              <TabsList className="grid w-full grid-cols-5 bg-athlete-gray-700">
                 <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
+                <TabsTrigger value="detailed" data-testid="tab-detailed">Detailed</TabsTrigger>
                 <TabsTrigger value="strengths" data-testid="tab-strengths">Strengths</TabsTrigger>
                 <TabsTrigger value="weaknesses" data-testid="tab-weaknesses">Weaknesses</TabsTrigger>
                 <TabsTrigger value="prediction" data-testid="tab-prediction">Head-to-Head</TabsTrigger>
@@ -382,12 +530,28 @@ export function AthleteComparison() {
                     <div className="flex items-center gap-2 mb-3">
                       <Brain className="h-5 w-5 text-blue-400" />
                       <h4 className="font-semibold text-white">Overall Analysis</h4>
+                      {comparisonData.aiModels?.overallAnalysis && (
+                        <span className="text-xs bg-blue-600/20 text-blue-300 px-2 py-1 rounded">
+                          {comparisonData.aiModels.overallAnalysis}
+                        </span>
+                      )}
                     </div>
-                    <p className="text-gray-300 leading-relaxed">
-                      {comparisonData.error ? 
-                        comparisonData.message : 
-                        comparisonData.overallAnalysis?.summary || "Analysis not available"}
-                    </p>
+                    {comparisonData.error ? (
+                      <div className="p-3 bg-red-900/30 border border-red-600/50 rounded-lg">
+                        <p className="text-red-300">{comparisonData.message}</p>
+                      </div>
+                    ) : comparisonData.overallAnalysis?.summary && 
+                         !comparisonData.overallAnalysis.summary.includes('temporarily unavailable') ? (
+                      <p className="text-gray-300 leading-relaxed">
+                        {comparisonData.overallAnalysis.summary}
+                      </p>
+                    ) : (
+                      <div className="p-3 bg-yellow-900/30 border border-yellow-600/50 rounded-lg">
+                        <p className="text-yellow-300">
+                          Analysis temporarily unavailable. Please try again later.
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -425,6 +589,262 @@ export function AthleteComparison() {
                     </CardContent>
                   </Card>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="detailed" className="space-y-4">
+                {comparisonData.detailedAnalysis ? (
+                  <div className="space-y-6">
+                    {/* AI Models Info */}
+                    {comparisonData.aiModels && (
+                      <Card className="bg-blue-900/30 border-blue-600/50">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Brain className="h-4 w-4 text-blue-400" />
+                            <span className="text-sm font-medium text-blue-300">Powered by AI Models</span>
+                          </div>
+                          <div className="text-xs text-blue-200">
+                            Basic Analysis: {comparisonData.aiModels.basicComparison} • 
+                            Detailed Analysis: {comparisonData.aiModels.detailedAnalysis} • 
+                            Head-to-Head: {comparisonData.aiModels.headToHead}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Athletes Side-by-Side Analysis */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Athlete 1 Detailed Analysis */}
+                      <Card className="bg-athlete-gray-900 border-gray-600">
+                        <CardHeader>
+                          <CardTitle className="text-white flex items-center gap-2">
+                            <User className="h-5 w-5" />
+                            {comparisonData.detailedAnalysis.athlete1.name}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          {/* Current Form */}
+                          <div>
+                            <h5 className="font-semibold text-blue-400 mb-2">Current Form</h5>
+                            <p className="text-sm text-gray-300">{comparisonData.detailedAnalysis.athlete1.currentForm}</p>
+                          </div>
+
+                          {/* Technical Skills */}
+                          {comparisonData.detailedAnalysis.athlete1.technicalSkills?.length > 0 && (
+                            <div>
+                              <h5 className="font-semibold text-green-400 mb-2">Technical Skills</h5>
+                              <div className="space-y-2">
+                                {comparisonData.detailedAnalysis.athlete1.technicalSkills.map((skill: any, index: number) => (
+                                  <div key={index} className="bg-athlete-gray-800 p-3 rounded-lg">
+                                    <div className="flex justify-between items-center mb-1">
+                                      <span className="font-medium text-white">{skill.skill}</span>
+                                      <Badge variant="outline" className="text-xs">
+                                        {skill.proficiency}%
+                                      </Badge>
+                                    </div>
+                                    <p className="text-xs text-gray-400">{skill.description}</p>
+                                    {skill.evidence && (
+                                      <p className="text-xs text-blue-300 mt-1">Evidence: {skill.evidence}</p>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Physical Attributes */}
+                          {comparisonData.detailedAnalysis.athlete1.physicalAttributes && (
+                            <div>
+                              <h5 className="font-semibold text-yellow-400 mb-2">Physical Attributes</h5>
+                              <div className="bg-athlete-gray-800 p-3 rounded-lg space-y-1">
+                                {comparisonData.detailedAnalysis.athlete1.physicalAttributes.height && (
+                                  <div className="text-sm text-gray-300">
+                                    <span className="text-gray-400">Height:</span> {comparisonData.detailedAnalysis.athlete1.physicalAttributes.height}
+                                  </div>
+                                )}
+                                {comparisonData.detailedAnalysis.athlete1.physicalAttributes.weight && (
+                                  <div className="text-sm text-gray-300">
+                                    <span className="text-gray-400">Weight:</span> {comparisonData.detailedAnalysis.athlete1.physicalAttributes.weight}
+                                  </div>
+                                )}
+                                {comparisonData.detailedAnalysis.athlete1.physicalAttributes.stance && (
+                                  <div className="text-sm text-gray-300">
+                                    <span className="text-gray-400">Stance:</span> {comparisonData.detailedAnalysis.athlete1.physicalAttributes.stance}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Recent Performance */}
+                          {comparisonData.detailedAnalysis.athlete1.recentPerformance && (
+                            <div>
+                              <h5 className="font-semibold text-purple-400 mb-2">Recent Performance</h5>
+                              <div className="bg-athlete-gray-800 p-3 rounded-lg space-y-1">
+                                {comparisonData.detailedAnalysis.athlete1.recentPerformance.lastCompetition && (
+                                  <div className="text-sm text-gray-300">
+                                    <span className="text-gray-400">Last Competition:</span> {comparisonData.detailedAnalysis.athlete1.recentPerformance.lastCompetition}
+                                  </div>
+                                )}
+                                {comparisonData.detailedAnalysis.athlete1.recentPerformance.form && (
+                                  <div className="text-sm text-gray-300">
+                                    <span className="text-gray-400">Form:</span> {comparisonData.detailedAnalysis.athlete1.recentPerformance.form}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+
+                      {/* Athlete 2 Detailed Analysis */}
+                      <Card className="bg-athlete-gray-900 border-gray-600">
+                        <CardHeader>
+                          <CardTitle className="text-white flex items-center gap-2">
+                            <User className="h-5 w-5" />
+                            {comparisonData.detailedAnalysis.athlete2.name}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          {/* Current Form */}
+                          <div>
+                            <h5 className="font-semibold text-blue-400 mb-2">Current Form</h5>
+                            <p className="text-sm text-gray-300">{comparisonData.detailedAnalysis.athlete2.currentForm}</p>
+                          </div>
+
+                          {/* Technical Skills */}
+                          {comparisonData.detailedAnalysis.athlete2.technicalSkills?.length > 0 && (
+                            <div>
+                              <h5 className="font-semibold text-green-400 mb-2">Technical Skills</h5>
+                              <div className="space-y-2">
+                                {comparisonData.detailedAnalysis.athlete2.technicalSkills.map((skill: any, index: number) => (
+                                  <div key={index} className="bg-athlete-gray-800 p-3 rounded-lg">
+                                    <div className="flex justify-between items-center mb-1">
+                                      <span className="font-medium text-white">{skill.skill}</span>
+                                      <Badge variant="outline" className="text-xs">
+                                        {skill.proficiency}%
+                                      </Badge>
+                                    </div>
+                                    <p className="text-xs text-gray-400">{skill.description}</p>
+                                    {skill.evidence && (
+                                      <p className="text-xs text-blue-300 mt-1">Evidence: {skill.evidence}</p>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Physical Attributes */}
+                          {comparisonData.detailedAnalysis.athlete2.physicalAttributes && (
+                            <div>
+                              <h5 className="font-semibold text-yellow-400 mb-2">Physical Attributes</h5>
+                              <div className="bg-athlete-gray-800 p-3 rounded-lg space-y-1">
+                                {comparisonData.detailedAnalysis.athlete2.physicalAttributes.height && (
+                                  <div className="text-sm text-gray-300">
+                                    <span className="text-gray-400">Height:</span> {comparisonData.detailedAnalysis.athlete2.physicalAttributes.height}
+                                  </div>
+                                )}
+                                {comparisonData.detailedAnalysis.athlete2.physicalAttributes.weight && (
+                                  <div className="text-sm text-gray-300">
+                                    <span className="text-gray-400">Weight:</span> {comparisonData.detailedAnalysis.athlete2.physicalAttributes.weight}
+                                  </div>
+                                )}
+                                {comparisonData.detailedAnalysis.athlete2.physicalAttributes.stance && (
+                                  <div className="text-sm text-gray-300">
+                                    <span className="text-gray-400">Stance:</span> {comparisonData.detailedAnalysis.athlete2.physicalAttributes.stance}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Recent Performance */}
+                          {comparisonData.detailedAnalysis.athlete2.recentPerformance && (
+                            <div>
+                              <h5 className="font-semibold text-purple-400 mb-2">Recent Performance</h5>
+                              <div className="bg-athlete-gray-800 p-3 rounded-lg space-y-1">
+                                {comparisonData.detailedAnalysis.athlete2.recentPerformance.lastCompetition && (
+                                  <div className="text-sm text-gray-300">
+                                    <span className="text-gray-400">Last Competition:</span> {comparisonData.detailedAnalysis.athlete2.recentPerformance.lastCompetition}
+                                  </div>
+                                )}
+                                {comparisonData.detailedAnalysis.athlete2.recentPerformance.form && (
+                                  <div className="text-sm text-gray-300">
+                                    <span className="text-gray-400">Form:</span> {comparisonData.detailedAnalysis.athlete2.recentPerformance.form}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    {/* Comparison Summary */}
+                    {comparisonData.detailedAnalysis.comparison && (
+                      <Card className="bg-athlete-gray-900 border-gray-600">
+                        <CardHeader>
+                          <CardTitle className="text-white flex items-center gap-2">
+                            <Target className="h-5 w-5" />
+                            Comparison Summary
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {comparisonData.detailedAnalysis.comparison.technicalEdge && (
+                              <div className="text-center p-3 bg-athlete-gray-800 rounded-lg">
+                                <div className="text-xs text-gray-400 mb-1">Technical Edge</div>
+                                <div className="font-semibold text-green-400">
+                                  {comparisonData.detailedAnalysis.comparison.technicalEdge === 'athlete1' ? 
+                                    comparisonData.detailedAnalysis.athlete1.name : 
+                                    comparisonData.detailedAnalysis.athlete2.name}
+                                </div>
+                              </div>
+                            )}
+                            {comparisonData.detailedAnalysis.comparison.physicalEdge && (
+                              <div className="text-center p-3 bg-athlete-gray-800 rounded-lg">
+                                <div className="text-xs text-gray-400 mb-1">Physical Edge</div>
+                                <div className="font-semibold text-yellow-400">
+                                  {comparisonData.detailedAnalysis.comparison.physicalEdge === 'athlete1' ? 
+                                    comparisonData.detailedAnalysis.athlete1.name : 
+                                    comparisonData.detailedAnalysis.athlete2.name}
+                                </div>
+                              </div>
+                            )}
+                            {comparisonData.detailedAnalysis.comparison.experienceEdge && (
+                              <div className="text-center p-3 bg-athlete-gray-800 rounded-lg">
+                                <div className="text-xs text-gray-400 mb-1">Experience Edge</div>
+                                <div className="font-semibold text-blue-400">
+                                  {comparisonData.detailedAnalysis.comparison.experienceEdge === 'athlete1' ? 
+                                    comparisonData.detailedAnalysis.athlete1.name : 
+                                    comparisonData.detailedAnalysis.athlete2.name}
+                                </div>
+                              </div>
+                            )}
+                            {comparisonData.detailedAnalysis.comparison.formEdge && (
+                              <div className="text-center p-3 bg-athlete-gray-800 rounded-lg">
+                                <div className="text-xs text-gray-400 mb-1">Form Edge</div>
+                                <div className="font-semibold text-purple-400">
+                                  {comparisonData.detailedAnalysis.comparison.formEdge === 'athlete1' ? 
+                                    comparisonData.detailedAnalysis.athlete1.name : 
+                                    comparisonData.detailedAnalysis.athlete2.name}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                ) : (
+                  <Card className="bg-yellow-900/30 border-yellow-600/50">
+                    <CardContent className="p-4">
+                      <p className="text-yellow-300">
+                        Detailed analysis powered by Gemini-2.5-pro is not available for this comparison.
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
               </TabsContent>
 
               <TabsContent value="strengths" className="space-y-4">
@@ -583,10 +1003,11 @@ export function AthleteComparison() {
                     <div>
                       <h4 className="font-semibold text-white mb-2">Analysis Reasoning</h4>
                       <p className="text-gray-300 leading-relaxed">
-                        {comparisonData.headToHead?.reasoning || "Analysis reasoning not available"}
+                        {comparisonData.headToHead?.reasoning || "Authentic head-to-head analysis temporarily unavailable. GPT-5 was unable to generate detailed comparison data."}
                       </p>
                       
-                      {comparisonData.headToHead?.keyFactors && comparisonData.headToHead.keyFactors.length > 0 && (
+                      {comparisonData.headToHead?.keyFactors && comparisonData.headToHead.keyFactors.length > 0 && 
+                       !comparisonData.headToHead.keyFactors.includes("Analysis unavailable") && (
                         <div className="mt-4">
                           <h5 className="font-medium text-white mb-2">Key Factors</h5>
                           <ul className="space-y-1">
@@ -600,12 +1021,87 @@ export function AthleteComparison() {
                         </div>
                       )}
                       
-                      {comparisonData.headToHead?.scenario && (
+                      {comparisonData.headToHead?.keyFactors && comparisonData.headToHead.keyFactors.includes("Analysis unavailable") && (
+                        <div className="mt-4 p-3 bg-yellow-900/30 border border-yellow-600/50 rounded-lg">
+                          <p className="text-yellow-300 text-sm">• Analysis unavailable</p>
+                        </div>
+                      )}
+                      
+                      {comparisonData.headToHead?.scenario && 
+                       !comparisonData.headToHead.scenario.includes("temporarily unavailable") && (
                         <div className="mt-4">
                           <h5 className="font-medium text-white mb-2">Competition Scenario</h5>
                           <p className="text-gray-300 text-sm">
                             {comparisonData.headToHead.scenario}
                           </p>
+                        </div>
+                      )}
+                      
+                      {comparisonData.headToHead?.scenario && 
+                       comparisonData.headToHead.scenario.includes("temporarily unavailable") && (
+                        <div className="mt-4 p-3 bg-yellow-900/30 border border-yellow-600/50 rounded-lg">
+                          <p className="text-yellow-300 text-sm">GPT-5 analysis temporarily unavailable</p>
+                        </div>
+                      )}
+
+                      {/* Gemini-2.5-pro Enhanced Head-to-Head Data */}
+                      {comparisonData.headToHead?.tacticalAdvice && (
+                        <div className="mt-6">
+                          <h5 className="font-semibold text-purple-400 mb-3">Tactical Advice (Gemini-2.5-pro)</h5>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {comparisonData.headToHead.tacticalAdvice.forAthlete1 && (
+                              <Card className="bg-athlete-gray-800 border-gray-600">
+                                <CardHeader className="pb-2">
+                                  <CardTitle className="text-sm text-blue-400">For {comparisonData.athlete1.name}</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <p className="text-xs text-gray-300">{comparisonData.headToHead.tacticalAdvice.forAthlete1}</p>
+                                </CardContent>
+                              </Card>
+                            )}
+                            {comparisonData.headToHead.tacticalAdvice.forAthlete2 && (
+                              <Card className="bg-athlete-gray-800 border-gray-600">
+                                <CardHeader className="pb-2">
+                                  <CardTitle className="text-sm text-red-400">For {comparisonData.athlete2.name}</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <p className="text-xs text-gray-300">{comparisonData.headToHead.tacticalAdvice.forAthlete2}</p>
+                                </CardContent>
+                              </Card>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {comparisonData.headToHead?.historicalContext && 
+                       !comparisonData.headToHead.historicalContext.includes("Information not found") && (
+                        <div className="mt-4">
+                          <h5 className="font-medium text-yellow-400 mb-2">Historical Context</h5>
+                          <p className="text-gray-300 text-sm bg-athlete-gray-800 p-3 rounded-lg">
+                            {comparisonData.headToHead.historicalContext}
+                          </p>
+                        </div>
+                      )}
+
+                      {comparisonData.headToHead?.expertPredictions && 
+                       !comparisonData.headToHead.expertPredictions.includes("No expert predictions found") && (
+                        <div className="mt-4">
+                          <h5 className="font-medium text-green-400 mb-2">Expert Predictions</h5>
+                          <p className="text-gray-300 text-sm bg-athlete-gray-800 p-3 rounded-lg">
+                            {comparisonData.headToHead.expertPredictions}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* AI Model Attribution */}
+                      {comparisonData.aiModels && (
+                        <div className="mt-6 pt-4 border-t border-gray-600">
+                          <div className="flex items-center gap-2 text-xs text-gray-400">
+                            <Brain className="h-3 w-3" />
+                            <span>
+                              Head-to-Head Analysis powered by {comparisonData.aiModels.headToHead}
+                            </span>
+                          </div>
                         </div>
                       )}
                     </div>

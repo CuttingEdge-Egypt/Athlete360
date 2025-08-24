@@ -16,10 +16,10 @@ Transaction processed callback: https://[YOUR-PRODUCTION-URL]/api/payments/paymo
 Transaction response callback: https://[YOUR-PRODUCTION-URL]/api/payments/paymob-response
 ```
 
-### Current Development URLs (Will Change):
+### Current Development URLs:
 ```
-https://workspace--CuttingMo.replit.app/api/payments/paymob-processed
-https://workspace--CuttingMo.replit.app/api/payments/paymob-response
+https://7a39e49f-f0e4-4a38-b983-657e85e5de90-00-24ejenwpt1nmi.riker.replit.dev/api/payments/paymob-processed
+https://7a39e49f-f0e4-4a38-b983-657e85e5de90-00-24ejenwpt1nmi.riker.replit.dev/api/payments/paymob-response
 ```
 
 ## Why This Fixes Payment Completion:

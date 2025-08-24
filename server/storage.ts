@@ -43,7 +43,30 @@ import { eq, desc, and, asc, sql, ilike } from "drizzle-orm";
 export interface IStorage {
   // User operations (required for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  createLocalUser(userData: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    passwordHash: string;
+    authProvider: string;
+    emailVerified: boolean;
+    referralCode?: string;
+  }): Promise<string>;
+  createLocalUserWithCard(userData: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    passwordHash: string;
+    authProvider: string;
+    emailVerified: boolean;
+    referralCode?: string;
+    cardToken: string;
+    cardLast4: string;
+    cardBrand: string;
+    paymobCustomerId: string;
+  }): Promise<string>;
   updateUserTokens(userId: string, tokens: number): Promise<User>;
   deductTokens(userId: string, amount: number): Promise<User>;
   updateUserPaymentCard(userId: string, cardData: { cardToken: string, cardLast4: string, cardBrand: string, paymobCustomerId?: string }): Promise<User>;
@@ -125,6 +148,76 @@ export class DatabaseStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async createLocalUser(userData: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    passwordHash: string;
+    authProvider: string;
+    emailVerified: boolean;
+    referralCode?: string;
+  }): Promise<string> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        passwordHash: userData.passwordHash,
+        authProvider: userData.authProvider,
+        emailVerified: userData.emailVerified,
+        referredBy: userData.referralCode,
+        tokens: 1000, // Start with 1000 free tokens
+        totalTokensPurchased: 1000,
+      })
+      .returning();
+    
+    // Generate a unique referral code for the new user
+    await this.generateReferralCode(user.id);
+    
+    return user.id;
+  }
+
+  async createLocalUserWithCard(userData: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    passwordHash: string;
+    authProvider: string;
+    emailVerified: boolean;
+    referralCode?: string;
+    cardToken: string;
+    cardLast4: string;
+    cardBrand: string;
+    paymobCustomerId: string;
+  }): Promise<string> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        passwordHash: userData.passwordHash,
+        authProvider: userData.authProvider,
+        emailVerified: userData.emailVerified,
+        referredBy: userData.referralCode,
+        cardToken: userData.cardToken,
+        cardLast4: userData.cardLast4,
+        cardBrand: userData.cardBrand,
+        paymobCustomerId: userData.paymobCustomerId,
+        tokens: 1000, // Start with 1000 free tokens
+        totalTokensPurchased: 1000,
+      })
+      .returning();
+    
+    return user.id;
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {

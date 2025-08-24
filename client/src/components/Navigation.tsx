@@ -6,18 +6,36 @@ import { ProfileDropdown } from "@/components/ui/profile-dropdown";
 import { Trophy, Coins, Plus, LogOut, User as UserIcon, Video } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
+import { useLocation } from "wouter";
+import { apiRequest } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
 
 export function Navigation() {
   const { user: authUser } = useAuth();
+  const [, setLocation] = useLocation();
   
   const { data: user } = useQuery<User>({
     queryKey: ["/api/auth/user"],
     enabled: !!authUser,
   });
 
-  const handleLogout = () => {
-    window.location.href = "/api/logout";
+  const handleLogout = async () => {
+    try {
+      await apiRequest('POST', '/api/logout', {});
+      // Clear all cached data
+      queryClient.clear();
+      // Navigate to landing page
+      setLocation('/');
+      // Force a small delay then reload to ensure clean state
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Fallback to direct navigation
+      window.location.href = "/api/logout";
+    }
   };
 
   return (

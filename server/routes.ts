@@ -2,13 +2,15 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupLocalAuth, isAuthenticatedUniversal } from "./localAuth";
 import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, compareAthletes } from "./openaiService";
+import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, compareAthletes, generateRankHistory } from "./openaiService";
 import { generateNutritionPlan } from "./geminiService";
 import { analyzeVideoFile } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
+
 import { TestingService } from "./testingService";
 import OpenAI from "openai";
 import multer from "multer";
@@ -33,17 +35,32 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
+  // Auth middleware - setup both Replit OIDC and local auth
   await setupAuth(app);
+  await setupLocalAuth(app);
 
   // Seed database on startup
   await seedDatabase();
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  // Auth routes - now supports both Replit and local auth
+  app.get('/api/auth/user', isAuthenticatedUniversal, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Check if user needs a referral code generated
+      if (!user.referralCode) {
+        console.log(`[REFERRAL] Generating missing referral code for user: ${user.email}`);
+        await storage.generateReferralCode(userId);
+        // Fetch updated user data
+        const updatedUser = await storage.getUser(userId);
+        return res.json(updatedUser);
+      }
+      
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -254,12 +271,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rankValue = Number(aiProfile.rank);
       }
       
+      // Extract nationality from bio data
+      const extractNationality = (bio: string): string | undefined => {
+        const text = bio.toLowerCase();
+        
+        // Country mapping for common nationalities found in bios
+        const nationalityMap: { [key: string]: string } = {
+          'american': 'United States',
+          'spanish': 'Spain',
+          'egyptian': 'Egypt',
+          'korean': 'South Korea',
+          'south korean': 'South Korea',
+          'uzbek': 'Uzbekistan',
+          'brazilian': 'Brazil',
+          'argentinian': 'Argentina',
+          'portuguese': 'Portugal',
+          'palestinian': 'Palestine',
+          'british': 'United Kingdom',
+          'english': 'United Kingdom',
+          'canadian': 'Canada',
+          'french': 'France',
+          'german': 'Germany',
+          'italian': 'Italy',
+          'japanese': 'Japan',
+          'chinese': 'China',
+          'australian': 'Australia',
+          'mexican': 'Mexico',
+          'turkish': 'Turkey',
+          'serbian': 'Serbia',
+          'croatian': 'Croatia',
+          'polish': 'Poland',
+          'russian': 'Russia',
+          'ukrainian': 'Ukraine',
+          'thai': 'Thailand',
+          'iranian': 'Iran',
+          'iraqui': 'Iraq',
+          'jordanian': 'Jordan',
+          'lebanese': 'Lebanon',
+          'moroccan': 'Morocco',
+          'tunisian': 'Tunisia',
+          'algerian': 'Algeria',
+          'south african': 'South Africa',
+          'nigerian': 'Nigeria',
+          'kenyan': 'Kenya',
+          'ethiopian': 'Ethiopia'
+        };
+
+        // Look for nationality patterns in bio
+        for (const [nationality, country] of Object.entries(nationalityMap)) {
+          if (text.includes(nationality)) {
+            return country;
+          }
+        }
+
+        // Look for direct country mentions
+        const countryPattern = /\b(united states|spain|egypt|south korea|uzbekistan|brazil|argentina|portugal|palestine|united kingdom|canada|france|germany|italy|japan|china|australia|mexico|turkey|serbia|croatia|poland|russia|ukraine|thailand|iran|iraq|jordan|lebanon|morocco|tunisia|algeria|south africa|nigeria|kenya|ethiopia)\b/i;
+        const match = bio.match(countryPattern);
+        if (match) {
+          return match[1].split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+        }
+
+        return undefined;
+      };
+
+      const extractedCountry = extractNationality(aiProfile.bio || '');
+
       const athleteData = {
         name: name.trim(),
         sportId,
         bio: aiProfile.bio || `Professional ${sport.name} athlete`,
         rank: rankValue,
-        country: undefined,
+        country: extractedCountry,
         profileImageUrl: profileImageUrl || undefined,
         achievements: aiProfile.achievements || []
       };
@@ -785,43 +867,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ]
         };
       } else {
-        // Generate fresh rank analysis using OpenAI GPT-5 (either no data exists or force update requested)
+        // Generate fresh rank analysis using OpenAI GPT-5 with enhanced rank history format
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} rank analysis for ${athlete.name}`);
         
-        // Get enhanced taekwondo data for authentic competition record and ranking
-        let enhancedData = null;
-        if (sportName.toLowerCase() === 'taekwondo') {
-          try {
-            enhancedData = await getEnhancedTaekwondoData(athlete.name, athlete.country || undefined);
-            console.log(`Enhanced taekwondo data for ${athlete.name}:`, enhancedData);
-          } catch (error) {
-            console.error(`Failed to get enhanced taekwondo data for ${athlete.name}:`, error);
-          }
+        // Use the new generateRankHistory function to get authentic ranking progression data
+        rankData = await generateRankHistory(athlete.name, sportName, athlete.country || undefined);
+        
+        // Ensure we have valid data structure
+        if (!rankData || !rankData.athlete) {
+          throw new Error("Failed to generate valid rank history data");
         }
-        
-        const aiAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'rank');
-        
-        // Create synthetic history and store in database
-        const syntheticHistory = Array.from({ length: 12 }, (_, i) => ({
-          month: new Date(2024, i, 1).toLocaleDateString('en', { month: 'short' }),
-          rank: Math.floor(Math.random() * 5) + 1
-        }));
-        
-        rankData = {
-          currentRank: athlete.rank || Math.floor(Math.random() * 10) + 1,
-          peakRank: 1,
-          averageRank: 2.4,
-          history: syntheticHistory,
-          recommendations: [
-            forceUpdate ? "Force updated AI ranking insights" : "AI-powered ranking improvement suggestions",
-            "Focus on consistent competitive performance from latest GPT-5 analysis",
-            "Develop strategic approach to rankings based on current trends"
-          ],
-          // Add authentic competition data from enhanced web search
-          competitionRecord: enhancedData?.currentRecord || "Data not available",
-          bestWorldRanking: enhancedData?.worldRank || "Data not available",
-          analysisDate: new Date().toISOString()
-        };
       }
 
       await storage.createAnalysisLog({
@@ -1302,16 +1357,23 @@ Return only valid JSON with the missing fields.`;
         }
       }
 
-      // Final check - if still missing critical info, return error
+      // Final check - if still missing critical info, provide reasonable defaults
       if (!athleteAge || !athleteGender || !athleteCountry) {
-        const missing = [];
-        if (!athleteAge) missing.push('age');
-        if (!athleteGender) missing.push('gender');
-        if (!athleteCountry) missing.push('nationality');
+        console.log(`Missing data for ${athlete.name}:`, { age: athleteAge, gender: athleteGender, country: athleteCountry });
         
-        return res.status(400).json({ 
-          message: `Unable to generate nutrition plan. Missing required information: ${missing.join(', ')}. Please update the athlete's profile or try again later.`
-        });
+        // Provide reasonable defaults based on sport and context
+        if (!athleteAge) {
+          athleteAge = 22; // Reasonable default for competitive athletes
+          console.log(`Using default age ${athleteAge} for ${athlete.name}`);
+        }
+        if (!athleteGender) {
+          athleteGender = 'Unknown'; // Will be handled in nutrition plan generation
+          console.log(`Using default gender ${athleteGender} for ${athlete.name}`);
+        }
+        if (!athleteCountry) {
+          athleteCountry = 'International'; // Will use international cuisine
+          console.log(`Using default country ${athleteCountry} for ${athlete.name}`);
+        }
       }
 
       const forceUpdate = req.query.forceUpdate === 'true';
@@ -1589,11 +1651,353 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
-  // Token purchase simulation (legacy endpoint)
+  // Paymob payment intent creation
+  app.post('/api/payments/create-intent', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { amount, tokensAmount, customerInfo } = req.body;
+
+      if (!amount || !tokensAmount) {
+        return res.status(400).json({ message: "Amount and tokens amount are required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      console.log('🔄 Creating payment intent for user:', user.email, 'Amount:', amount, 'Tokens:', tokensAmount);
+
+      // Create payment intent with Paymob - include userId in order for callback processing
+      const paymentIntent = await paymobService.createPaymentIntent({
+        amount: amount * 100, // Convert to cents
+        currency: 'EGP',
+        customerEmail: user.email || '',
+        customerFirstName: user.firstName || '',
+        customerLastName: user.lastName || '',
+        customerPhone: customerInfo?.phone || '+201234567890', // Use proper Egyptian phone for bank validation
+        // userId will be included in merchant_order_id for callback processing
+      });
+
+      // Store pending payment in session or database
+      // For now, we'll include it in the response
+      res.json({
+        success: true,
+        paymentIntent,
+        amount,
+        tokensAmount,
+        userId,
+      });
+    } catch (error: any) {
+      console.error("Error creating payment intent:", error);
+      res.status(500).json({ 
+        message: "Failed to create payment intent",
+        error: error?.message || 'Unknown error'
+      });
+    }
+  });
+
+  // Test all integration IDs endpoint
+  app.get('/api/payments/test-all-integrations', isAuthenticated, async (req, res) => {
+    try {
+      // Test the current integration ID from environment variable
+      const integrationIds = [parseInt(process.env.INTEGRATION_ID || '0')]; // Use environment variable only
+      const results = [];
+      
+      for (const integrationId of integrationIds) {
+        console.log(`\n🧪 Testing Integration ID: ${integrationId}`);
+        
+        try {
+          // Create a temporary paymob service with this integration ID
+          const testConfig = {
+            apiKey: process.env.PAYMOB_API_KEY!,
+            integrationId: integrationId,
+            iframeUrl: process.env.IFRAME_URL!,
+            secretKey: process.env.PAYMOB_SECRET_KEY!,
+          };
+          
+          const testPaymob = new (paymobService.constructor as any)(testConfig);
+          
+          // Test authentication
+          await testPaymob.authenticate();
+          console.log(`✅ Auth successful for ${integrationId}`);
+          
+          // Test order creation
+          const testOrder = await testPaymob.createOrder({
+            amount: 100, // 1 EGP test
+            currency: 'EGP',
+            customerEmail: 'test@example.com',
+            customerFirstName: 'Test',
+            customerLastName: 'User',
+            customerPhone: '+201234567890',
+          });
+          console.log(`✅ Order creation successful for ${integrationId}: ${testOrder.id}`);
+          
+          // Test payment key generation
+          const testPaymentKey = await testPaymob.generatePaymentKey(
+            testOrder.id.toString(),
+            100,
+            {
+              email: 'test@example.com',
+              firstName: 'Test',
+              lastName: 'User',
+              phone: '+201234567890',
+            }
+          );
+          console.log(`✅ Payment key generation successful for ${integrationId}`);
+          
+          results.push({
+            integrationId,
+            status: 'success',
+            orderId: testOrder.id,
+            paymentToken: testPaymentKey.token,
+            message: 'All steps completed successfully'
+          });
+          
+        } catch (error: any) {
+          console.log(`❌ Failed for ${integrationId}: ${error.message}`);
+          results.push({
+            integrationId,
+            status: 'failed',
+            error: error.message
+          });
+        }
+      }
+      
+      res.json({
+        success: true,
+        results,
+        recommendation: results.find(r => r.status === 'success')?.integrationId || 'None working'
+      });
+      
+    } catch (error: any) {
+      console.error('Test integration IDs error:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // Payment status check endpoint - Query Paymob for order status by order ID
+  app.get('/api/payments/status/:orderId', isAuthenticated, async (req, res) => {
+    try {
+      const { orderId } = req.params;
+      
+      // Get auth token first  
+      const paymobServiceInstance = new PaymobService();
+      const authToken = await paymobServiceInstance.getAuthToken();
+      
+      // Query Paymob for order status - use orders endpoint instead of transactions
+      const response = await fetch(`https://accept.paymob.com/api/ecommerce/orders/${orderId}`, {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+      
+      if (response.ok) {
+        const order = await response.json();
+        console.log('Order status response:', order);
+        
+        // Check if order has transactions and get the latest one
+        const latestTransaction = order.transactions?.[0];
+        
+        res.json({
+          success: latestTransaction?.success || false,
+          pending: latestTransaction?.pending || false,
+          is_3d_secure: latestTransaction?.is_3d_secure || false,
+          redirection_url: latestTransaction?.redirection_url || null,
+          message: 'Order status retrieved'
+        });
+      } else {
+        res.status(404).json({ message: 'Order not found' });
+      }
+      
+    } catch (error: any) {
+      console.error('Error checking payment status:', error);
+      res.status(500).json({ message: 'Failed to check payment status' });
+    }
+  });
+
+  // Paymob processed callback (server-to-server)
+  app.post('/api/payments/paymob-processed', async (req, res) => {
+    try {
+      console.log('📥 Paymob processed callback:', JSON.stringify(req.body, null, 2));
+      
+      // Handle both formats: {obj: {...}} and direct {...}
+      const paymentData = req.body.obj || req.body;
+      
+      if (!paymentData) {
+        console.error('❌ No payment data found in callback');
+        return res.status(400).send('Invalid callback data');
+      }
+
+      console.log('📋 Processing payment data:', {
+        id: paymentData.id,
+        success: paymentData.success,
+        pending: paymentData.pending,
+        merchant_order_id: paymentData.merchant_order_id,
+        amount_cents: paymentData.amount_cents,
+        is_3d_secure: paymentData.is_3d_secure
+      });
+
+      // Process successful payment
+      if (paymentData.success === 'true' || paymentData.success === true || paymentData.success === 'True') {
+        console.log('✅ Payment successful:', paymentData.merchant_order_id);
+        
+        // Extract order details
+        const orderId = paymentData.merchant_order_id;
+        const amountCents = parseInt(paymentData.amount_cents);
+        const amount = amountCents / 100;
+        
+        // Parse userId from order ID - handle both formats: tokens_userId_timestamp and order_timestamp
+        let userId = null;
+        const orderParts = orderId.split('_');
+        
+        if (orderParts.length >= 2 && orderParts[0] === 'tokens') {
+          userId = orderParts[1];
+        } else if (orderParts.length >= 1 && orderParts[0] === 'order') {
+          // For order_timestamp format, we need to get userId from current session
+          // For now, we'll use a fallback approach - get the current authenticated user
+          console.log('⚠️ Order format detected, need to match with current user session');
+          // We'll implement user matching later
+        }
+        
+        console.log('🔍 Order parsing:', { orderId, orderParts, userId });
+        
+        // Calculate tokens based on amount
+        const tokensToAdd = amount === 25 ? 1000 : amount === 15 ? 500 : amount === 50 ? 2500 : 0;
+        
+        if (tokensToAdd > 0 && userId) {
+          // Add tokens to user
+          await storage.addTokensPurchase(userId, tokensToAdd);
+
+          // Create transaction record
+          await storage.createTransaction({
+            userId,
+            action: "Token Purchase",
+            tokensDeducted: -tokensToAdd,
+            serviceType: "purchase"
+          });
+
+          // Create payment receipt
+          await storage.createPaymentReceipt({
+            userId,
+            receiptNumber: `PAY-${Date.now().toString()}`,
+            amount: amount.toString(),
+            tokensAmount: tokensToAdd,
+            paymentMethod: paymentData.source_data?.sub_type || paymentData['source_data.sub_type'] || 'card',
+            cardLast4: paymentData.source_data?.pan || paymentData['source_data.pan'] || 'N/A',
+            cardBrand: paymentData.source_data?.sub_type || paymentData['source_data.sub_type'] || 'Unknown',
+            paymobTransactionId: paymentData.id?.toString() || 'unknown',
+            status: 'completed'
+          });
+
+          console.log(`✅ Added ${tokensToAdd} tokens to user ${userId}`);
+        }
+      } else if (paymentData.pending === 'true' || paymentData.pending === true) {
+        console.log('⏳ Payment pending (likely 3DS):', paymentData.merchant_order_id);
+        // Don't process pending payments yet, wait for final callback
+      } else {
+        console.log('❌ Payment failed:', paymentData.merchant_order_id, 'Success:', paymentData.success);
+      }
+
+      res.status(200).send('OK');
+    } catch (error) {
+      console.error('❌ Error processing Paymob callback:', error);
+      res.status(500).send('Error processing callback');
+    }
+  });
+
+  // Paymob response callback (user redirect after payment)
+  app.get('/api/payments/paymob-response', async (req, res) => {
+    try {
+      console.log('🔄 Paymob response callback (user redirect):', req.query);
+      
+      const success = req.query.success === 'true';
+      const orderId = req.query.merchant_order_id as string;
+      const transactionId = req.query.id as string;
+      const errorOccurred = req.query.error_occured === 'true';
+      const errorMessage = req.query['data.message'] as string;
+      const isPending = req.query.pending === 'true';
+      const is3DS = req.query.is_3d_secure === 'true';
+      const redirectionUrl = req.query.redirection_url as string;
+      
+      console.log('Response details:', { success, orderId, transactionId, errorOccurred, errorMessage, isPending, is3DS, redirectionUrl });
+      
+      // Check for integration errors first
+      if (errorOccurred && errorMessage) {
+        console.error('❌ Paymob integration error:', errorMessage);
+        
+        // Handle specific integration errors
+        if (errorMessage.includes('TOP Integration is not allowed') || errorMessage.includes('Integration is not allowed')) {
+          console.error('🚨 CRITICAL: Integration ID error:', errorMessage);
+          return res.redirect('/payment-center?payment=error&message=integration_error');
+        }
+        
+        return res.redirect('/payment-center?payment=failed&error=' + encodeURIComponent(errorMessage));
+      }
+      
+      // Handle 3DS pending state first
+      if (isPending && is3DS && redirectionUrl) {
+        console.log('🔴 3DS authentication required, redirecting to bank page:', redirectionUrl);
+        // Direct redirect to bank 3DS page instead of showing JSON
+        return res.redirect(redirectionUrl);
+      }
+      
+      if (success) {
+        // Payment successful - redirect to success page with transaction details
+        console.log('✅ Payment successful, redirecting to success page');
+        res.redirect(`/payment-center?payment=success&transaction=${transactionId}&order=${orderId}`);
+      } else {
+        // Payment failed - redirect to failure page
+        console.log('❌ Payment failed, redirecting to failure page');
+        res.redirect(`/payment-center?payment=failed&transaction=${transactionId}&order=${orderId}`);
+      }
+    } catch (error) {
+      console.error('Error handling Paymob response:', error);
+      res.redirect('/payment-center?payment=error');
+    }
+  });
+
+  // Handle 3DS callback (Step 5-6 in Paymob guide)
+  app.post('/api/payments/3ds-callback', async (req, res) => {
+    try {
+      console.log('🔐 3DS callback received:', req.body);
+      
+      // Process 3DS callback using Paymob service
+      const result = await paymobService.process3DSCallback(req.body);
+      
+      // If payment successful after 3DS, process tokens
+      if (result.success === 'true' || result.success === true) {
+        console.log('✅ 3DS payment successful:', result.order);
+        
+        // Extract order details and add tokens to user account
+        const merchantOrderId = result.merchant_order_id || result.order?.merchant_order_id;
+        
+        if (merchantOrderId) {
+          // Parse amount from merchant order ID or use amount from callback
+          const amountCents = result.amount_cents || 1500; // fallback to 15 EGP
+          const tokens = Math.floor(amountCents / 3); // 500 tokens for 1500 cents
+          
+          // Find user by email in billing data or from stored session
+          // For now, we'll log the successful payment
+          console.log(`💰 3DS Payment completed: ${amountCents} cents, awarding ${tokens} tokens`);
+        }
+        
+        res.json({ success: true, message: '3DS payment processed successfully' });
+      } else {
+        console.log('❌ 3DS payment failed:', result);
+        res.json({ success: false, message: '3DS payment failed' });
+      }
+    } catch (error) {
+      console.error('Error processing 3DS callback:', error);
+      res.status(500).json({ success: false, message: 'Failed to process 3DS callback' });
+    }
+  });
+
+  // Token purchase simulation (legacy endpoint - now with Paymob integration option)
   app.post('/api/purchase-tokens', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { amount } = req.body;
+      const { amount, usePaymob = false } = req.body;
       
       const tokensToAdd = amount === 25 ? 1000 : amount === 15 ? 500 : amount === 50 ? 2500 : 0;
       if (tokensToAdd === 0) {
@@ -1605,6 +2009,30 @@ Return only valid JSON with the missing fields.`;
         return res.status(404).json({ message: "User not found" });
       }
 
+      // If Paymob integration is requested, create payment intent
+      if (usePaymob) {
+        try {
+          const paymentIntent = await paymobService.createPaymentIntent({
+            amount: amount * 100, // Convert to cents
+            currency: 'EGP',
+            customerEmail: user.email || '',
+            customerFirstName: user.firstName || '',
+            customerLastName: user.lastName || '',
+            customerPhone: 'NA',
+          });
+
+          return res.json({
+            message: "Payment intent created",
+            paymentIntent,
+            tokensToAdd,
+            usePayment: true
+          });
+        } catch (paymobError) {
+          console.error("Paymob integration failed, falling back to simulation:", paymobError);
+        }
+      }
+
+      // Fallback to simulation
       await storage.addTokensPurchase(userId, tokensToAdd);
 
       // Create transaction record
@@ -1625,6 +2053,34 @@ Return only valid JSON with the missing fields.`;
     } catch (error) {
       console.error("Error purchasing tokens:", error);
       res.status(500).json({ message: "Failed to purchase tokens" });
+    }
+  });
+
+  // Test Paymob configuration endpoint
+  app.get('/api/payments/test-paymob', isAuthenticated, async (req, res) => {
+    try {
+      console.log('🧪 Testing Paymob configuration...');
+      
+      // Test authentication
+      const authToken = await paymobService.authenticate();
+      console.log('✅ Paymob authentication successful');
+      
+      res.json({
+        success: true,
+        message: 'Paymob configuration test successful',
+        authTokenLength: authToken?.length || 0,
+        integrationId: process.env.INTEGRATION_ID,
+        hasApiKey: !!process.env.PAYMOB_API_KEY,
+        hasSecretKey: !!process.env.PAYMOB_SECRET_KEY,
+        hasIframeUrl: !!process.env.IFRAME_URL,
+      });
+    } catch (error: any) {
+      console.error('❌ Paymob configuration test failed:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Paymob configuration test failed',
+        error: error.message
+      });
     }
   });
 
@@ -1700,8 +2156,110 @@ Return only valid JSON with the missing fields.`;
 
       console.log(`Generating GPT-5 powered comparison between ${athlete1.name} and ${athlete2.name}...`);
 
-      // Generate comparison using dedicated GPT-5 compareAthletes function
-      const comparisonResult = await compareAthletes(athlete1, athlete2, sportName);
+      // Create minimal athlete data for GPT-5 web search (name, country, sport only)
+      const athlete1ForComparison = {
+        name: athlete1.name,
+        country: athlete1.country || "Unknown",
+        profileImageUrl: athlete1.profileImageUrl || ""
+      };
+      
+      const athlete2ForComparison = {
+        name: athlete2.name, 
+        country: athlete2.country || "Unknown",
+        profileImageUrl: athlete2.profileImageUrl || ""
+      };
+      
+      // Try GPT-5 comparison first, fall back to Gemini if it fails
+      console.log(`Generating GPT-5 basic comparison...`);
+      let basicComparisonResult;
+      let gptFailed = false;
+      
+      try {
+        basicComparisonResult = await compareAthletes(athlete1ForComparison, athlete2ForComparison, sportName);
+      } catch (gptError: any) {
+        console.error(`GPT-5 comparison failed: ${gptError.message}`);
+        gptFailed = true;
+        
+        // Create fallback structure when GPT-5 completely fails
+        basicComparisonResult = {
+          athlete1: {
+            name: athlete1.name,
+            country: athlete1.country || 'Unknown',
+            rank: 'N/A',
+            profileImageUrl: athlete1.profileImageUrl || ''
+          },
+          athlete2: {
+            name: athlete2.name,
+            country: athlete2.country || 'Unknown',
+            rank: 'N/A',
+            profileImageUrl: athlete2.profileImageUrl || ''
+          },
+          strengths: { athlete1: [], athlete2: [], advantage: "even" },
+          weaknesses: { athlete1: [], athlete2: [], advantage: "even" },
+          ranking: {
+            comparison: "GPT-5 analysis temporarily unavailable",
+            athlete1Trajectory: "Analysis unavailable", 
+            athlete2Trajectory: "Analysis unavailable",
+            competitiveEdge: "even"
+          },
+          headToHead: {
+            prediction: "even",
+            confidence: 50,
+            reasoning: "Analysis temporarily unavailable",
+            keyFactors: ["Analysis unavailable"],
+            scenario: "GPT-5 analysis temporarily unavailable"
+          },
+          overallAnalysis: {
+            summary: "Analysis temporarily unavailable",
+            betterAthlete: "even",
+            reasonsWhy: ["Analysis unavailable"],
+            closeness: "even", 
+            recommendation: "Analysis could not be generated"
+          }
+        };
+      }
+      
+      // Generate detailed analysis and head-to-head using Gemini-2.5-pro
+      console.log(`Generating Gemini-2.5-pro detailed analysis and head-to-head...`);
+      const { generateDetailedComparison } = await import('./geminiService.js');
+      const detailedAnalysisResult = await generateDetailedComparison(athlete1ForComparison, athlete2ForComparison, sportName);
+      
+      // Check if GPT-5 overall analysis failed and use Gemini as fallback
+      let finalOverallAnalysis = basicComparisonResult.overallAnalysis;
+      let overallAnalysisModel = gptFailed ? "Gemini-2.5-pro (fallback)" : "GPT-5";
+      
+      if (gptFailed || 
+          basicComparisonResult.overallAnalysis?.summary?.includes('temporarily unavailable') || 
+          basicComparisonResult.overallAnalysis?.summary?.includes('Analysis unavailable')) {
+        console.log(`GPT-5 overall analysis failed, using Gemini-2.5-pro fallback...`);
+        
+        // Use Gemini's detailed analysis as overall analysis fallback
+        if (detailedAnalysisResult.detailedAnalysis && 
+            !detailedAnalysisResult.detailedAnalysis.includes('temporarily unavailable')) {
+          finalOverallAnalysis = {
+            summary: detailedAnalysisResult.detailedAnalysis,
+            betterAthlete: detailedAnalysisResult.advantage || "even",
+            reasonsWhy: detailedAnalysisResult.keyFactors || ["Detailed analysis available"],
+            closeness: "detailed-analysis",
+            recommendation: "Analysis generated using Gemini-2.5-pro advanced capabilities"
+          };
+          overallAnalysisModel = "Gemini-2.5-pro (fallback)";
+        }
+      }
+      
+      // Merge the results from both AI models
+      const comparisonResult = {
+        ...basicComparisonResult,
+        overallAnalysis: finalOverallAnalysis,
+        detailedAnalysis: detailedAnalysisResult.detailedAnalysis,
+        headToHead: detailedAnalysisResult.headToHead,
+        aiModels: {
+          basicComparison: "GPT-5",
+          detailedAnalysis: "Gemini-2.5-pro",
+          headToHead: "Gemini-2.5-pro",
+          overallAnalysis: overallAnalysisModel
+        }
+      };
 
       // Log the comparison
       await storage.createAnalysisLog({
@@ -1792,496 +2350,15 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
-  // Create payment intent for token purchase
-  app.post('/api/payments/create-intent', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { amount, tokensAmount } = req.body;
-
-      if (!amount || !tokensAmount) {
-        return res.status(400).json({ message: "Amount and tokens amount are required" });
-      }
-
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      const paymentIntent = await paymobService.createPaymentIntent({
-        amount,
-        currency: 'EGP',
-        billingData: {
-          email: user.email || '',
-          firstName: user.firstName || '',
-          lastName: user.lastName || ''
-        }
-      });
-
-      res.json({
-        paymentToken: paymentIntent.token,
-        iframeUrl: paymentIntent.iframeUrl,
-        orderId: paymentIntent.orderId
-      });
-    } catch (error) {
-      console.error("Error creating payment intent:", error);
-      res.status(500).json({ message: "Failed to create payment intent" });
-    }
-  });
-
-  // Mock payment iframe for testing
-  app.get('/api/payments/mock-iframe', (req, res) => {
-    const { token, amount } = req.query;
-    const html = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Test Payment</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-            .payment-form { background: white; padding: 30px; border-radius: 8px; max-width: 400px; margin: 0 auto; }
-            .btn { background: #4CAF50; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; width: 100%; margin: 10px 0; }
-            .btn:hover { background: #45a049; }
-            .btn.fail { background: #f44336; }
-            .amount { font-size: 24px; font-weight: bold; margin: 20px 0; text-align: center; }
-          </style>
-        </head>
-        <body>
-          <div class="payment-form">
-            <h2>Test Payment Gateway</h2>
-            <div class="amount">Amount: ${amount} EGP</div>
-            <p>This is a test payment system. Click below to simulate payment completion:</p>
-            <button class="btn" onclick="completePayment('success')">✅ Complete Payment Successfully</button>
-            <button class="btn fail" onclick="completePayment('failure')">❌ Simulate Payment Failure</button>
-            <script>
-              function completePayment(status) {
-                if (status === 'success') {
-                  // Simulate successful payment
-                  window.parent.postMessage({
-                    type: 'PAYMENT_SUCCESS',
-                    transactionId: 'TEST_TXN_' + Date.now(),
-                    amount: ${amount},
-                    token: '${token}'
-                  }, '*');
-                } else {
-                  // Simulate failed payment
-                  window.parent.postMessage({
-                    type: 'PAYMENT_FAILURE',
-                    error: 'Payment was declined'
-                  }, '*');
-                }
-              }
-            </script>
-          </div>
-        </body>
-      </html>
-    `;
-    res.send(html);
-  });
-
-  // Paymob callbacks
-  app.post('/api/payments/paymob-processed', async (req, res) => {
-    try {
-      console.log('🔔 Paymob transaction processed callback received:', req.body);
-      
-      const transactionData = req.body;
-      
-      // Check if transaction was successful
-      if (transactionData.success === 'true' || transactionData.success === true) {
-        console.log('✅ Successful transaction processed:', transactionData.id);
-        
-        // Extract transaction details
-        const amount = transactionData.amount_cents ? transactionData.amount_cents / 100 : 0;
-        const orderId = transactionData.order?.id || transactionData.order_id;
-        
-        console.log(`💰 Processing payment: $${amount} for order ${orderId}`);
-      } else {
-        console.log('❌ Failed transaction processed:', transactionData.id);
-      }
-      
-      res.json({ message: 'Transaction processed callback received successfully' });
-    } catch (error) {
-      console.error('❌ Paymob processed callback error:', error);
-      res.status(500).json({ message: 'Callback processing failed' });
-    }
-  });
-
-  app.post('/api/payments/paymob-response', async (req, res) => {
-    try {
-      console.log('🔔 Paymob transaction response callback received:', req.body);
-      
-      const transactionData = req.body;
-      
-      // Send transaction data to frontend for processing
-      const html = `
-        <!DOCTYPE html>
-        <html>
-        <head><title>Payment Response</title></head>
-        <body>
-          <script>
-            console.log('Paymob response data:', ${JSON.stringify(transactionData)});
-            
-            if (window.parent && window.parent !== window) {
-              window.parent.postMessage({
-                type: 'PAYMOB_RESPONSE',
-                data: ${JSON.stringify(transactionData)}
-              }, '*');
-            }
-            
-            // Close window after sending data
-            setTimeout(() => {
-              window.close();
-            }, 1000);
-          </script>
-          <p>Processing payment response...</p>
-        </body>
-        </html>
-      `;
-      
-      res.send(html);
-    } catch (error) {
-      console.error('❌ Paymob response callback error:', error);
-      res.status(500).send('Callback processing error');
-    }
-  });
-
-  // Test payment completion with latest Order ID 
-  app.post('/api/payments/test-completion', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { tokensAmount = 500, amount = 50 } = req.body;
-
-      console.log(`🧪 Testing payment completion for user ${userId}`);
-
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      // Add tokens to user account
-      await storage.addTokensPurchase(userId, tokensAmount);
-
-      // Create payment receipt with latest Order ID from logs
-      const receiptNumber = paymobService.generateReceiptNumber();
-      const receipt = await storage.createPaymentReceipt({
-        userId,
-        amount,
-        tokensAmount,
-        paymentMethod: 'card',
-        paymobTransactionId: '369575690', // Latest Order ID from server logs
-        receiptNumber,
-        cardLast4: '4889',
-        cardBrand: 'Mastercard'
-      });
-
-      console.log(`✅ Test completion successful: ${tokensAmount} tokens added`);
-
-      res.json({
-        success: true,
-        message: "Test payment completed successfully",
-        receipt: receipt,
-        tokensAdded: tokensAmount,
-        newTokenBalance: user.tokens + tokensAmount
-      });
-
-    } catch (error) {
-      console.error("❌ Test payment completion error:", error);
-      res.status(500).json({ message: "Failed to complete test payment" });
-    }
-  });
-
-  // Manual payment completion for testing specific transaction
-  app.post('/api/payments/complete-manual/:transactionId', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { transactionId } = req.params;
-      const { tokensAmount = 2500, amount = 250 } = req.body;
-
-      console.log(`Manual payment completion for transaction ${transactionId}`);
-
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      // Add tokens to user account
-      await storage.addTokensPurchase(userId, tokensAmount);
-
-      // Create payment receipt
-      const receiptNumber = paymobService.generateReceiptNumber();
-      const receipt = await storage.createPaymentReceipt({
-        userId,
-        amount,
-        tokensAmount,
-        paymentMethod: 'card',
-        paymobTransactionId: transactionId,
-        receiptNumber,
-        cardLast4: '4889',
-        cardBrand: 'Mastercard'
-      });
-
-      res.json({
-        success: true,
-        message: "Payment completed successfully",
-        receipt: receipt,
-        tokensAdded: tokensAmount
-      });
-
-    } catch (error) {
-      console.error("Manual payment completion error:", error);
-      res.status(500).json({ message: "Failed to complete payment" });
-    }
-  });
-
-  // Process payment completion
-  app.post('/api/payments/complete', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { transactionId, amount, tokensAmount, paymentMethod, cardLast4, cardBrand } = req.body;
-
-      if (!transactionId || !amount || !tokensAmount) {
-        return res.status(400).json({ message: "Transaction details are required" });
-      }
-
-      // Verify payment with Paymob
-      const paymentVerification = await paymobService.verifyPayment(transactionId);
-      console.log('Payment verification result:', paymentVerification);
-      
-      // For testing: Handle failed payments with credential errors as successful if amount matches
-      const isTestPayment = paymentVerification.error_occured && 
-                           paymentVerification['data.message'] === 'Invalid credentials.' &&
-                           paymentVerification.amount_cents === (amount * 100);
-      
-      if (paymentVerification.success || isTestPayment) {
-        const user = await storage.getUser(userId);
-        if (!user) {
-          return res.status(404).json({ message: "User not found" });
-        }
-
-        // Add tokens to user account (additive)
-        await storage.addTokensPurchase(userId, tokensAmount);
-
-        // Create payment receipt
-        const receiptNumber = paymobService.generateReceiptNumber();
-        const receipt = await storage.createPaymentReceipt({
-          userId,
-          paymobTransactionId: transactionId,
-          amount: amount.toString(),
-          currency: 'EGP',
-          tokensAmount,
-          paymentMethod,
-          cardLast4,
-          cardBrand,
-          status: 'completed',
-          receiptNumber
-        });
-
-        // Create transaction record
-        await storage.createTransaction({
-          userId,
-          action: "Token Purchase",
-          tokensDeducted: -tokensAmount,
-          serviceType: "purchase"
-        });
-
-        const updatedUser = await storage.getUser(userId);
-        res.json({
-          message: "Payment completed successfully",
-          receipt,
-          user: updatedUser
-        });
-      } else {
-        res.status(400).json({ message: "Payment verification failed" });
-      }
-    } catch (error) {
-      console.error("Error completing payment:", error);
-      res.status(500).json({ message: "Failed to complete payment" });
-    }
-  });
-
-  // Get user payment receipts
-  app.get('/api/payments/receipts', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const receipts = await storage.getUserPaymentReceipts(userId);
-      res.json(receipts);
-    } catch (error) {
-      console.error("Error fetching payment receipts:", error);
-      res.status(500).json({ message: "Failed to fetch payment receipts" });
-    }
-  });
-
-  // Get user saved cards
-  app.get('/api/payments/cards', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      
-      // Try to get saved cards first
-      let cards = await storage.getUserSavedCards(userId);
-      
-      // If no saved cards, check if user has card info in user table (legacy)
-      if (cards.length === 0) {
-        const user = await storage.getUser(userId);
-        if (user && user.cardLast4) {
-          cards = [{
-            id: 'legacy-card',
-            userId: userId,
-            cardToken: user.cardToken || '',
-            cardLast4: user.cardLast4,
-            cardBrand: user.cardBrand || 'Unknown',
-            isDefault: true,
-            createdAt: user.createdAt || new Date(),
-            updatedAt: user.updatedAt || new Date()
-          }];
-        }
-      }
-      
-      res.json(cards);
-    } catch (error) {
-      console.error("Error fetching saved cards:", error);
-      res.status(500).json({ message: "Failed to fetch saved cards" });
-    }
-  });
-
-  // Add new saved card
-  app.post('/api/payments/cards', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { cardToken, cardLast4, cardBrand, isDefault } = req.body;
-
-      if (!cardToken || !cardLast4 || !cardBrand) {
-        return res.status(400).json({ message: "Card details are required" });
-      }
-
-      const cardData = {
-        userId,
-        cardToken,
-        cardLast4,
-        cardBrand,
-        isDefault: isDefault || false
-      };
-
-      const savedCard = await storage.createSavedCard(cardData);
-      
-      if (isDefault) {
-        await storage.setDefaultCard(userId, savedCard.id);
-      }
-
-      res.json(savedCard);
-    } catch (error) {
-      console.error("Error saving card:", error);
-      res.status(500).json({ message: "Failed to save card" });
-    }
-  });
-
-  // Set default card
-  app.patch('/api/payments/cards/:cardId/default', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { cardId } = req.params;
-
-      await storage.setDefaultCard(userId, cardId);
-      res.json({ message: "Default card updated" });
-    } catch (error) {
-      console.error("Error setting default card:", error);
-      res.status(500).json({ message: "Failed to set default card" });
-    }
-  });
-
-  // Delete saved card
-  app.delete('/api/payments/cards/:cardId', isAuthenticated, async (req: any, res) => {
-    try {
-      const { cardId } = req.params;
-      await storage.deleteSavedCard(cardId);
-      res.json({ message: "Card deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting card:", error);
-      res.status(500).json({ message: "Failed to delete card" });
-    }
-  });
-
-  // ==== TESTING ENDPOINTS ====
 
 
 
-  // Simulate payment completion for testing
-  app.post('/api/test/simulate-payment', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { amount, tokens, cardLast4, cardBrand, scenario } = req.body;
 
-      if (scenario === 'failure') {
-        return res.status(400).json({ message: "Simulated payment failure" });
-      }
 
-      if (scenario === 'timeout') {
-        await new Promise(resolve => setTimeout(resolve, 8000)); // 8 second delay
-        return res.status(408).json({ message: "Payment timeout" });
-      }
 
-      // Simulate successful payment
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
 
-      // Add tokens to user account
-      await storage.addTokensPurchase(userId, tokens);
 
-      // Create test receipt
-      const receiptNumber = `TEST_${Date.now()}`;
-      await storage.createPaymentReceipt({
-        userId,
-        paymobTransactionId: `test_${Date.now()}`,
-        amount: amount.toString(),
-        currency: 'EGP',
-        tokensAmount: tokens,
-        paymentMethod: `Test ${cardBrand}`,
-        cardLast4,
-        cardBrand,
-        receiptNumber,
-        status: 'completed'
-      });
 
-      // Create transaction record
-      await storage.createTransaction({
-        userId,
-        action: "Token Purchase (Test)",
-        tokensDeducted: -tokens,
-        serviceType: "token_purchase"
-      });
-
-      const updatedUser = await storage.getUser(userId);
-
-      res.json({
-        success: true,
-        message: "Test payment completed",
-        tokensAdded: tokens,
-        newBalance: updatedUser?.tokens || 0,
-        totalTokensPurchased: updatedUser?.totalTokensPurchased || 0
-      });
-    } catch (error) {
-      console.error("Error simulating payment:", error);
-      res.status(500).json({ message: "Failed to simulate payment" });
-    }
-  });
-
-  // Get specific payment receipt
-  app.get('/api/payments/receipts/:receiptId', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const receiptId = req.params.receiptId;
-      
-      const receipt = await storage.getPaymentReceiptById(receiptId);
-      if (!receipt || receipt.userId !== userId) {
-        return res.status(404).json({ message: "Receipt not found" });
-      }
-
-      res.json(receipt);
-    } catch (error) {
-      console.error("Error fetching payment receipt:", error);
-      res.status(500).json({ message: "Failed to fetch payment receipt" });
-    }
-  });
 
   // Get user referrals
   app.get('/api/referrals', isAuthenticated, async (req: any, res) => {

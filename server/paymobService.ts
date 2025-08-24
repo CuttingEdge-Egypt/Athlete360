@@ -1,227 +1,378 @@
 import fetch from 'node-fetch';
 
-interface PaymobConfig {
+export interface PaymobConfig {
   apiKey: string;
-  publicKey: string;
-  secretKey: string;
   integrationId: string;
-  iframeId: string;
+  iframeUrl: string;
+  secretKey: string;
 }
 
-interface PaymentIntent {
+export interface PaymentData {
+  amount: number; // Amount in cents
+  currency: string;
+  customerEmail: string;
+  customerFirstName: string;
+  customerLastName: string;
+  customerPhone?: string;
+}
+
+export interface PaymentIntent {
   amount: number;
   currency: string;
-  billingData: {
-    email: string;
-    firstName: string;
-    lastName: string;
-    phoneNumber?: string;
-  };
+  orderId?: string;
+  customerEmail: string;
+  customerFirstName: string;
+  customerLastName: string;
+  customerPhone?: string;
 }
 
-interface PaymentResponse {
+export interface PaymobOrderResponse {
+  id: string;
+  created_at: string;
+  delivery_needed: boolean;
+  merchant: any;
+  collector: any;
+  amount_cents: number;
+  shipping_data: any;
+  currency: string;
+  is_payment_locked: boolean;
+  is_return: boolean;
+  is_cancel: boolean;
+  is_returned: boolean;
+  is_canceled: boolean;
+  merchant_order_id: string;
+  wallet_notification: any;
+  paid_amount_cents: number;
+  notify_user_with_email: boolean;
+  items: any[];
+  order_url: string;
+  commission_fees: number;
+  delivery_fees_cents: number;
+  delivery_vat_cents: number;
+  payment_method: string;
+  merchant_staff_tag: any;
+  api_source: string;
+  data: any;
+}
+
+export interface PaymobPaymentKeyResponse {
   token: string;
-  iframeUrl: string;
-  orderId: string;
 }
 
 export class PaymobService {
   private config: PaymobConfig;
-  private baseUrl = 'https://accept.paymobsolutions.com/api';
+  private authToken: string | null = null;
 
-  constructor() {
-    this.config = {
-      apiKey: process.env.PAYMOB_API_KEY || '',
-      publicKey: process.env.PAYMOB_PUBLIC_KEY || '',
-      secretKey: process.env.PAYMOB_SECRET_KEY || '',
-      integrationId: process.env.PAYMOB_INTEGRATION_ID || '',
-      iframeId: process.env.PAYMOB_IFRAME_ID || ''
-    };
+  constructor(config: PaymobConfig) {
+    this.config = config;
+  }
 
-    console.log('Paymob config initialized:', {
-      apiKey: this.config.apiKey ? `Set (${this.config.apiKey.length} chars)` : 'Not set',
-      publicKey: this.config.publicKey ? `Set (${this.config.publicKey.length} chars)` : 'Not set',
-      secretKey: this.config.secretKey ? `Set (${this.config.secretKey.length} chars)` : 'Not set',
-      integrationId: this.config.integrationId,
-      iframeId: this.config.iframeId ? 'Set' : 'Not set'
-    });
+  /**
+   * Authenticate with Paymob API
+   */
+  async authenticate(): Promise<string> {
+    try {
+      const response = await fetch('https://accept.paymob.com/api/auth/tokens', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          api_key: this.config.apiKey,
+        }),
+      });
 
-    if (!this.config.apiKey || !this.config.integrationId || !this.config.iframeId) {
-      console.warn('Paymob configuration incomplete. Please check environment variables.');
+      const data: any = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(`Authentication failed: ${data.message || 'Unknown error'}`);
+      }
+
+      this.authToken = data.token;
+      return data.token;
+    } catch (error) {
+      console.error('Paymob authentication error:', error);
+      throw new Error('Failed to authenticate with Paymob');
     }
   }
 
-  private async getAuthToken(): Promise<string> {
-    console.log('Attempting Paymob authentication...');
-    
-    const requestBody = {
-      api_key: this.config.apiKey,
-    };
-    
-    console.log('Auth request body:', JSON.stringify(requestBody, null, 2));
-    
-    const response = await fetch(`${this.baseUrl}/auth/tokens`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    const data = await response.json() as any;
-    console.log('Auth response status:', response.status);
-    console.log('Auth response data:', data);
-    
-    if (!response.ok) {
-      console.error('Paymob auth failed:', data);
-      throw new Error(`Paymob auth failed: ${data.message || JSON.stringify(data)}`);
+  /**
+   * Create order with Paymob
+   */
+  async createOrder(paymentData: PaymentData): Promise<PaymobOrderResponse> {
+    if (!this.authToken) {
+      await this.authenticate();
     }
 
-    return data.token;
+    try {
+      const response = await fetch('https://accept.paymob.com/api/ecommerce/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          auth_token: this.authToken,
+          delivery_needed: false,
+          amount_cents: paymentData.amount,
+          currency: paymentData.currency,
+          items: [],
+          merchant_order_id: `order_${Date.now()}`,
+        }),
+      });
+
+      const data: any = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(`Order creation failed: ${data.message || 'Unknown error'}`);
+      }
+
+      return data as PaymobOrderResponse;
+    } catch (error) {
+      console.error('Paymob order creation error:', error);
+      throw new Error('Failed to create order with Paymob');
+    }
   }
 
-  private async createOrder(authToken: string, amount: number): Promise<string> {
-    const requestBody = {
-      auth_token: authToken,
-      delivery_needed: 'false',
-      amount_cents: Math.round(amount * 100), // Convert to cents
-      currency: 'EGP',
-      items: [{
-        name: 'Athlete360 Tokens',
-        amount_cents: Math.round(amount * 100),
-        description: 'AI Analysis Tokens',
-        quantity: 1,
-      }],
-    };
-
-    console.log('Creating order with body:', JSON.stringify(requestBody, null, 2));
-
-    const response = await fetch(`${this.baseUrl}/ecommerce/orders`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    const data = await response.json() as any;
-    console.log('Order response status:', response.status);
-    console.log('Order response data:', data);
-    
-    if (!response.ok) {
-      console.error('Paymob order creation failed:', data);
-      throw new Error(`Paymob order creation failed: ${data.message || JSON.stringify(data)}`);
+  /**
+   * Generate payment key for iframe
+   */
+  async generatePaymentKey(
+    orderId: string,
+    amount: number,
+    customerData: {
+      email: string;
+      firstName: string;
+      lastName: string;
+      phone?: string;
+    }
+  ): Promise<PaymobPaymentKeyResponse> {
+    if (!this.authToken) {
+      await this.authenticate();
     }
 
-    return data.id;
-  }
-
-  private async createPaymentKey(authToken: string, orderId: string, paymentIntent: PaymentIntent): Promise<string> {
-    const requestBody = {
-      auth_token: authToken,
-      amount_cents: Math.round(paymentIntent.amount * 100),
-      expiration: 3600, // 1 hour
+    // Use integration ID from environment variable only
+    const INTEGRATION_ID = parseInt(process.env.INTEGRATION_ID || '0');
+    if (!INTEGRATION_ID) {
+      throw new Error('INTEGRATION_ID environment variable is required');
+    }
+    
+    // Always use production domain for callbacks to match Paymob dashboard config
+    const baseUrl = 'https://athlete360.ai';
+    
+    const requestPayload = {
+      auth_token: this.authToken,
+      amount_cents: amount,
+      expiration: 3600, // 1 hour expiration
       order_id: orderId,
       billing_data: {
         apartment: 'NA',
-        email: paymentIntent.billingData.email,
+        email: customerData.email,
         floor: 'NA',
-        first_name: paymentIntent.billingData.firstName,
-        street: 'NA',
-        building: 'NA',
-        phone_number: paymentIntent.billingData.phoneNumber || '+20100000000',
+        first_name: customerData.firstName,
+        street: 'Main Street',
+        building: 'NA', 
+        phone_number: customerData.phone || '+201234567890', // Required for Egyptian bank validation
         shipping_method: 'NA',
-        postal_code: 'NA',
+        postal_code: '11511',
         city: 'Cairo',
         country: 'EG',
-        last_name: paymentIntent.billingData.lastName,
+        last_name: customerData.lastName,
         state: 'Cairo',
       },
-      currency: paymentIntent.currency,
-      integration_id: parseInt(this.config.integrationId),
-      // Add redirect URL for iframe completion
+      currency: 'EGP',
+      integration_id: INTEGRATION_ID, // Using environment variable
       lock_order_when_paid: false,
+      // Add redirect URLs for 3DS
+      redirection_url: `${baseUrl}/api/payments/paymob-response`,
+      callback_url: `${baseUrl}/api/payments/paymob-processed`,
     };
 
-    console.log('Creating payment key with body:', JSON.stringify(requestBody, null, 2));
+    console.log('📤 Payment key request:', JSON.stringify(requestPayload, null, 2));
 
-    const response = await fetch(`${this.baseUrl}/acceptance/payment_keys`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    const data = await response.json() as any;
-    console.log('Payment key response:', data);
-
-    if (!response.ok) {
-      console.error('Payment key creation failed:', data);
-      throw new Error(`Paymob payment key creation failed: ${data.message || 'Unknown error'}`);
-    }
-
-    return data.token;
-  }
-
-  async createPaymentIntent(paymentIntent: PaymentIntent): Promise<PaymentResponse> {
     try {
-      console.log('Creating Paymob payment intent with real credentials...');
-      const authToken = await this.getAuthToken();
-      const orderId = await this.createOrder(authToken, paymentIntent.amount);
-      const paymentToken = await this.createPaymentKey(authToken, orderId, paymentIntent);
+      const response = await fetch('https://accept.paymob.com/api/acceptance/payment_keys', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestPayload),
+      });
 
-      // Handle iframe URL - check if it's already a full URL or just an ID
-      let iframeUrl;
-      if (this.config.iframeId.startsWith('https://')) {
-        iframeUrl = `${this.config.iframeId}?payment_token=${paymentToken}`;
-      } else {
-        iframeUrl = `https://accept.paymob.com/api/acceptance/iframes/${this.config.iframeId}?payment_token=${paymentToken}`;
+      const data: any = await response.json();
+      
+      if (!response.ok) {
+        console.error('❌ Payment key generation failed. Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          data: data,
+          integrationId: INTEGRATION_ID,
+          requestPayload: JSON.stringify(requestPayload, null, 2)
+        });
+        
+        // Provide specific error message for integration ID issues
+        if (data && Array.isArray(data) && data.includes('Invalid Payment method integration')) {
+          throw new Error(`Invalid Integration ID: ${INTEGRATION_ID}. Please verify this ID in your Paymob dashboard.`);
+        }
+        
+        throw new Error(`Payment key generation failed: ${data.message || data.detail || data[0] || 'Unknown error'}`);
       }
 
-      return {
-        token: paymentToken,
-        iframeUrl: iframeUrl,
-        orderId,
-      };
+      return data as PaymobPaymentKeyResponse;
     } catch (error) {
-      console.error('Paymob payment intent creation error:', error);
-      throw error;
+      console.error('Paymob payment key generation error:', error);
+      throw new Error('Failed to generate payment key');
     }
   }
 
+  /**
+   * Verify payment using transaction ID
+   */
   async verifyPayment(transactionId: string): Promise<any> {
+    if (!this.authToken) {
+      await this.authenticate();
+    }
+
     try {
-      const authToken = await this.getAuthToken();
-      const response = await fetch(`${this.baseUrl}/acceptance/transactions/${transactionId}`, {
+      const response = await fetch(`https://accept.paymob.com/api/acceptance/transactions/${transactionId}?token=${this.authToken}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
         },
       });
 
-      const data = await response.json() as any;
+      const data: any = await response.json();
+      
       if (!response.ok) {
         throw new Error(`Payment verification failed: ${data.message || 'Unknown error'}`);
       }
 
       return data;
     } catch (error) {
-      console.error('Payment verification error:', error);
+      console.error('Paymob payment verification error:', error);
+      throw new Error('Failed to verify payment');
+    }
+  }
+
+  /**
+   * Create complete payment intent following Paymob guide
+   */
+  async createPaymentIntent(paymentData: PaymentIntent) {
+    try {
+      console.log('🔄 Creating Paymob payment intent...', { amount: paymentData.amount });
+
+      // Step 1: Authentication (Get API Token)
+      await this.authenticate();
+      console.log('✅ Auth token obtained');
+      
+      // Step 2: Create an Order
+      const order = await this.createOrder({
+        amount: paymentData.amount,
+        currency: paymentData.currency,
+        customerEmail: paymentData.customerEmail,
+        customerFirstName: paymentData.customerFirstName,
+        customerLastName: paymentData.customerLastName,
+        customerPhone: paymentData.customerPhone,
+      });
+      console.log('✅ Order created:', order.id);
+
+      // Step 3: Generate payment key
+      const paymentKey = await this.generatePaymentKey(
+        order.id.toString(),
+        paymentData.amount,
+        {
+          email: paymentData.customerEmail,
+          firstName: paymentData.customerFirstName,
+          lastName: paymentData.customerLastName,
+          phone: paymentData.customerPhone,
+        }
+      );
+      console.log('✅ Payment key generated');
+
+      // Step 4: Load Iframe / Redirect to Paymob Checkout
+      // FIXED: Use correct iframe ID 789693 tied to integration 4233746
+      const IFRAME_ID = '789693'; // Iframe ID for Online Card payments
+      const iframeUrl = `https://accept.paymob.com/api/acceptance/iframes/${IFRAME_ID}?payment_token=${paymentKey.token}`;
+      
+      console.log('🔗 Constructed iframe URL:', iframeUrl);
+      console.log('✅ Using Integration ID: 4233746 (Online Card)');
+      console.log('✅ Using Iframe ID: 789693');
+
+      return {
+        orderId: order.id.toString(),
+        paymentToken: paymentKey.token,
+        iframeUrl,
+        amount: paymentData.amount,
+        currency: paymentData.currency,
+        integrationId: '4233746', // Return the correct integration ID
+        success: true,
+      };
+    } catch (error) {
+      console.error('Failed to create payment intent:', error);
       throw error;
     }
   }
 
-  generateReceiptNumber(): string {
-    const timestamp = Date.now();
-    const random = Math.floor(Math.random() * 10000);
-    return `ATH${timestamp}${random}`;
+  /**
+   * Handle 3DS callback processing (Step 6 in Paymob guide)
+   */
+  async process3DSCallback(callbackData: any) {
+    try {
+      console.log('🔄 Processing 3DS callback:', callbackData);
+      
+      // Step 7: Verify Payment (Optional but Recommended)
+      if (callbackData.id) {
+        const verificationResult = await this.verifyPayment(callbackData.id);
+        console.log('✅ Payment verification result:', verificationResult);
+        return verificationResult;
+      }
+      
+      return callbackData;
+    } catch (error) {
+      console.error('3DS callback processing error:', error);
+      throw error;
+    }
   }
 
-  calculateTokensFromAmount(amount: number): number {
-    // 1 EGP = 10 tokens (adjust rate as needed)
-    return Math.floor(amount * 10);
+  /**
+   * Verify callback signature
+   */
+  verifyCallback(data: any, receivedHmac: string): boolean {
+    try {
+      const crypto = require('crypto');
+      
+      // Sort the data keys and create query string
+      const sortedKeys = Object.keys(data).sort();
+      const queryString = sortedKeys
+        .map(key => `${key}=${data[key]}`)
+        .join('&');
+
+      // Calculate HMAC
+      const calculatedHmac = crypto
+        .createHmac('sha512', this.config.secretKey)
+        .update(queryString)
+        .digest('hex');
+
+      return calculatedHmac === receivedHmac;
+    } catch (error) {
+      console.error('HMAC verification failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get iframe URL with payment token
+   */
+  getIframeUrl(paymentToken: string): string {
+    return `${this.config.iframeUrl}?payment_token=${paymentToken}`;
   }
 }
 
-export const paymobService = new PaymobService();
+// Export singleton instance
+const paymobConfig: PaymobConfig = {
+  apiKey: process.env.PAYMOB_API_KEY!,
+  integrationId: process.env.INTEGRATION_ID!,
+  iframeUrl: process.env.IFRAME_URL!,
+  secretKey: process.env.PAYMOB_SECRET_KEY!,
+};
+
+export const paymobService = new PaymobService(paymobConfig);

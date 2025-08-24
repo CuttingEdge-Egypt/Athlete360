@@ -1,0 +1,97 @@
+Problems I see in your integration
+
+Missing full Paymob flow inside createPaymentIntent
+In routes.ts, you rely on:
+
+const paymentIntent = await paymobService.createPaymentIntent({ ... });
+
+
+But when I checked paymobService.ts, the function does not fully implement Paymob’s 3-step flow:
+
+Correct Paymob Flow (per docs):
+
+Get an authentication token → POST /auth/tokens
+
+Create an order → POST /ecommerce/orders
+
+Generate a payment key → POST /acceptance/payment_keys
+
+Inject that payment key into your iframe URL:
+https://accept.paymobsolutions.com/api/acceptance/iframes/<iframe_id>?payment_token=<payment_key>
+
+In your service, you’re only preparing partial data and returning a token/iframe URL without properly creating the order and payment key first.
+→ This explains the “failed to initiate payment”.
+
+Amount format issue
+Paymob requires amount_cents (integer, e.g. 5000 for 50 EGP).
+In your code you’re passing amount directly from request (probably as 50). That will get rejected.
+
+You should be sending:
+
+amount_cents: (amount * 100).toString()
+
+
+Billing data incomplete
+Paymob requires full billing data (first/last name, email, phone, street, city, country, etc.).
+Your code only passes email, firstName, lastName. That’s not enough → Paymob rejects the request.
+
+Iframe URL construction
+You are directly returning:
+
+iframeUrl: paymentIntent.iframeUrl
+
+
+But unless you manually append ?payment_token=<key> to your iframe URL, the iframe won’t know which payment key to use → it fails with “Failed to initiate payment”.
+
+Example (correct):
+
+<iframe 
+  src="https://accept.paymob.com/api/acceptance/iframes/<IFRAME_ID>?payment_token=<PAYMENT_KEY>"
+  width="100%"
+  height="600"
+  frameborder="0">
+</iframe>
+
+✅ Fix Recommendations
+
+In paymobService.createPaymentIntent:
+
+Call POST /auth/tokens with your PAYMOB_API_KEY.
+
+Create an order with amount_cents and merchant_id.
+
+Generate a payment key with the order_id and full billing data.
+
+Return that payment key + properly constructed iframe URL.
+
+Update your amount handling:
+
+const amountCents = (amount * 100).toString();
+
+
+Pass full billing data as required by Paymob:
+
+billing_data: {
+  apartment: "NA",
+  email: user.email,
+  floor: "NA",
+  first_name: user.firstName,
+  last_name: user.lastName,
+  street: "NA",
+  building: "NA",
+  phone_number: user.phone || "NA",
+  shipping_method: "PKG",
+  postal_code: "NA",
+  city: "Cairo",
+  country: "EG",
+  state: "NA"
+}
+
+
+Construct iframe URL correctly:
+
+iframeUrl: `https://accept.paymob.com/api/acceptance/iframes/${process.env.PAYMOB_IFRAME_ID}?payment_token=${paymentKey}`
+
+
+⚡ In short:
+Right now your backend skips order + payment key creation and gives Paymob incomplete data. That’s why you always get “Failed to initiate payment”.

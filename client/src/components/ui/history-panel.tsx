@@ -5,8 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AnalysisPopup } from "@/components/ui/analysis-popup";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AthleteComparison } from "@/components/ui/athlete-comparison";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { History, Clock, User, TrendingUp, Target, Utensils, Zap, Video, GitCompare, Coins, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -52,12 +50,12 @@ const serviceLabels = {
 interface HistoryPanelProps {
   showHeader?: boolean;
   className?: string;
+  onComparisonSelect?: (comparisonData: any) => void;
 }
 
-export function HistoryPanel({ showHeader = true, className = "" }: HistoryPanelProps) {
+export function HistoryPanel({ showHeader = true, className = "", onComparisonSelect }: HistoryPanelProps) {
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<HistoryItem | null>(null);
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
-  const [showComparisonPopup, setShowComparisonPopup] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -88,8 +86,16 @@ export function HistoryPanel({ showHeader = true, className = "" }: HistoryPanel
   const handleHistoryItemClick = (item: HistoryItem) => {
     setSelectedHistoryItem(item);
     
+    console.log('HistoryPanel clicked item:', item);
+    
     if (item.serviceType === 'comparison') {
-      setShowComparisonPopup(true);
+      // Call the callback to navigate to comparison tab with data
+      if (onComparisonSelect) {
+        console.log('HistoryPanel calling onComparisonSelect with:', item.resultData);
+        onComparisonSelect(item.resultData);
+      } else {
+        console.log('HistoryPanel: no onComparisonSelect callback provided');
+      }
     } else {
       setShowAnalysisPopup(true);
     }
@@ -240,25 +246,6 @@ export function HistoryPanel({ showHeader = true, className = "" }: HistoryPanel
         />
       )}
 
-      {/* Comparison Popup for revisiting comparisons */}
-      <Dialog open={showComparisonPopup} onOpenChange={setShowComparisonPopup}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto bg-athlete-primary text-white">
-          <DialogHeader>
-            <DialogTitle className="text-white">Athlete Comparison</DialogTitle>
-          </DialogHeader>
-          {selectedHistoryItem && selectedHistoryItem.serviceType === 'comparison' && (
-            <div className="mt-4 p-6 bg-athlete-gray-900 rounded-lg">
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-white">Comparison Results</h3>
-                <p className="text-gray-400">View previously generated comparison analysis</p>
-              </div>
-              <pre className="whitespace-pre-wrap text-sm text-gray-300 bg-black p-4 rounded overflow-auto max-h-96">
-                {JSON.stringify(selectedHistoryItem.resultData, null, 2)}
-              </pre>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

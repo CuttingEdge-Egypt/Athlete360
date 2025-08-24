@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus, Gift, UserPlus } from "lucide-react";
+import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus, Gift, UserPlus, TrendingDown, Target, Calendar, Video, Users, Twitter, Instagram, Linkedin, Mail, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-import { SignupFlow } from "@/components/ui/signup-flow";
+import { useLocation } from "wouter";
 
 export default function Landing() {
   const [referralCode, setReferralCode] = useState<string | null>(null);
-  const [showSignupModal, setShowSignupModal] = useState(false);
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     // Check if there's a referral code in the URL
@@ -16,16 +16,6 @@ export default function Landing() {
       setReferralCode(refCode);
     }
   }, []);
-
-  const handleLogin = () => {
-    window.location.href = "/api/login";
-  };
-
-  const handleSignupComplete = (user: any) => {
-    setShowSignupModal(false);
-    // Redirect to app after signup
-    window.location.href = "/";
-  };
 
   return (
     <div className="min-h-screen bg-athlete-primary text-white">
@@ -38,7 +28,7 @@ export default function Landing() {
           </div>
           <div className="flex items-center gap-3">
             <Button 
-              onClick={() => setShowSignupModal(true)}
+              onClick={() => setLocation('/signup')}
               data-testid="button-signup"
               className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white"
             >
@@ -46,7 +36,7 @@ export default function Landing() {
               Sign Up
             </Button>
             <Button 
-              onClick={handleLogin}
+              onClick={() => setLocation('/login')}
               data-testid="button-login"
               variant="outline"
               className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white"
@@ -61,8 +51,10 @@ export default function Landing() {
       <section className="pt-20 min-h-screen gradient-bg flex items-center">
         <div className="container mx-auto px-4 py-20">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-athlete-accent to-athlete-success bg-clip-text text-transparent">
-              Athlete360
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-white">
+              <span className="bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">
+                Athlete360
+              </span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-300 mb-8">
               AI-Powered Athlete Analytics & Performance Optimization Platform
@@ -74,7 +66,7 @@ export default function Landing() {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Button 
-                onClick={() => setShowSignupModal(true)}
+                onClick={() => setLocation('/signup')}
                 data-testid="button-hero-signup"
                 size="lg"
                 className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white px-8 py-4 text-lg font-semibold"
@@ -83,7 +75,7 @@ export default function Landing() {
                 Start Free Trial - 1000 Tokens
               </Button>
               <Button 
-                onClick={handleLogin}
+                onClick={() => setLocation('/login')}
                 data-testid="button-hero-signin"
                 size="lg"
                 variant="outline"
@@ -140,7 +132,7 @@ export default function Landing() {
                 <p className="text-gray-300 mb-6">Get 1,000 tokens to analyze any athlete</p>
                 <div className="space-y-3">
                   <Button 
-                    onClick={() => setShowSignupModal(true)}
+                    onClick={() => setLocation('/signup')}
                     data-testid="button-start-free-trial"
                     className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 py-4 text-lg font-semibold"
                   >
@@ -148,7 +140,7 @@ export default function Landing() {
                     Start Free Trial
                   </Button>
                   <Button 
-                    onClick={handleLogin}
+                    onClick={() => setLocation('/login')}
                     data-testid="button-start-now"
                     variant="outline"
                     className="w-full border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white py-4 text-lg font-semibold"
@@ -172,8 +164,8 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Service Examples */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* First Row - Core Analysis */}
             <Card className="bg-athlete-gray-700 border-gray-600">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
@@ -210,11 +202,72 @@ export default function Landing() {
             <Card className="bg-athlete-gray-700 border-gray-600">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
+                  <TrendingDown className="text-2xl text-red-400" size={32} />
+                  <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">50 tokens</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-2 text-white">Weaknesses</h3>
+                <p className="text-gray-400 text-sm">In-depth analysis of areas needing improvement and targeted solutions</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Second Row - Advanced Features */}
+            <Card className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <Target className="text-2xl text-purple-400" size={32} />
+                  <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">80 tokens</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-2 text-white">How to Beat</h3>
+                <p className="text-gray-400 text-sm">Strategic insights on how to defeat specific opponents or improve matchups</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <Calendar className="text-2xl text-blue-400" size={32} />
+                  <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">80 tokens</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-2 text-white">Development Plan</h3>
+                <p className="text-gray-400 text-sm">Personalized training roadmap with specific goals and timelines</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-4">
                   <Dumbbell className="text-2xl text-green-400" size={32} />
                   <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">90 tokens</span>
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-white">Nutrition Plan</h3>
                 <p className="text-gray-400 text-sm">Comprehensive meal planning based on body composition and goals</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <Video className="text-2xl text-orange-400" size={32} />
+                  <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">120 tokens</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-2 text-white">Video Analysis</h3>
+                <p className="text-gray-400 text-sm">Frame-by-frame performance breakdown with AI-powered insights</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Comparison Feature Highlight */}
+          <div className="mt-12 max-w-2xl mx-auto">
+            <Card className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 border-purple-400/30">
+              <CardContent className="p-8 text-center">
+                <div className="flex justify-center mb-4">
+                  <Users className="text-4xl text-purple-400" size={48} />
+                </div>
+                <h3 className="text-2xl font-semibold mb-3 text-white">Compare Athletes</h3>
+                <p className="text-gray-300 mb-4">Head-to-head analysis comparing any two athletes across all performance metrics</p>
+                <span className="bg-purple-500 text-white text-sm px-4 py-2 rounded-full font-semibold">150 tokens</span>
               </CardContent>
             </Card>
           </div>
@@ -252,16 +305,43 @@ export default function Landing() {
             </div>
             <div>
               <h5 className="font-semibold mb-4 text-white">Connect</h5>
-              <div className="flex space-x-3">
-                <Button variant="ghost" size="sm" className="text-gray-400 hover:text-athlete-accent p-2">
-                  <i className="fab fa-twitter"></i>
-                </Button>
-                <Button variant="ghost" size="sm" className="text-gray-400 hover:text-athlete-accent p-2">
-                  <i className="fab fa-instagram"></i>
-                </Button>
-                <Button variant="ghost" size="sm" className="text-gray-400 hover:text-athlete-accent p-2">
-                  <i className="fab fa-linkedin"></i>
-                </Button>
+              <div className="space-y-3">
+                <div className="flex space-x-3">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-gray-400 hover:text-blue-400 p-2"
+                    data-testid="link-twitter"
+                  >
+                    <Twitter size={18} />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-gray-400 hover:text-pink-400 p-2"
+                    data-testid="link-instagram"
+                  >
+                    <Instagram size={18} />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-gray-400 hover:text-blue-600 p-2"
+                    data-testid="link-linkedin"
+                  >
+                    <Linkedin size={18} />
+                  </Button>
+                </div>
+                <div className="text-sm text-gray-400 space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Mail size={14} />
+                    <span>support@athlete360.ai</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <MessageCircle size={14} />
+                    <span>Live Chat Support</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -271,12 +351,6 @@ export default function Landing() {
         </div>
       </footer>
 
-      {/* Signup Modal */}
-      <SignupFlow
-        isOpen={showSignupModal}
-        onClose={() => setShowSignupModal(false)}
-        onComplete={handleSignupComplete}
-      />
     </div>
   );
 }

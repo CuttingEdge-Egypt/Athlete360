@@ -1,0 +1,53 @@
+success: false + pending: true → The transaction is waiting for the user to finish 3DS (OTP / secure authentication).
+
+is_3d_secure: true → The card requires OTP flow (normal for most debit/credit cards in Egypt).
+
+redirection_url → This is the page where the customer must be redirected to enter their OTP. Paymob gives you this URL because your integration is using MIGS (Mastercard Internet Gateway Service) under the hood.
+
+Why it stays stuck: If your frontend never redirects the user to this redirection_url, the transaction stays in pending and never flips to success.
+
+✅ Why you keep seeing this
+
+Your frontend (payment-center.tsx) is not handling the redirection.
+
+You display the iframe, but once Paymob says pending_3ds, you need to either:
+
+Auto-redirect the user to redirection_url, OR
+
+Pop it in an iframe/modal so they can complete OTP.
+
+Callbacks don’t finalize until 3DS is completed.
+
+Your /api/payments/paymob-processed won’t get a success:true callback until the OTP step is done.
+
+💡 How to fix
+
+In your frontend (payment-center.tsx), when you detect a pending 3DS transaction, you must redirect the user:
+
+if (paymentIntent.use_redirection && paymentIntent.redirection_url) {
+  // Option A: full redirect
+  window.location.href = paymentIntent.redirection_url;
+
+  // Option B: open inside an iframe/modal
+  // setRedirectUrl(paymentIntent.redirection_url);
+}
+
+
+⚠️ Right now you have a placeholder handle3DSRedirection function that hardcodes the URL. Instead, you should use the redirection_url Paymob returns for each transaction.
+
+🚦 Correct Flow
+
+User enters card → Paymob starts transaction.
+
+Paymob responds with pending:true, success:false, and redirection_url.
+
+Your frontend redirects the user to redirection_url.
+
+User completes OTP.
+
+Paymob updates transaction → calls your backend /api/payments/paymob-processed.
+
+Transaction flips to success:true.
+
+👉 So the reason you’re stuck at Pending 3DS Authorization is simply:
+Your frontend isn’t redirecting users to the redirection_url returned by Paymob.
