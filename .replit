@@ -1,4 +1,10 @@
 modules = ["nodejs-20"]
+[deployment]
+run = ["npm", "start"]
+build = ["npm", "run", "build"]
+deploymentTarget = "cloudrun"
+
+
 [agent]
 integrations = ["javascript_gemini==1.0.0", "javascript_database==1.0.0", "javascript_object_storage==1.0.0"]
 
