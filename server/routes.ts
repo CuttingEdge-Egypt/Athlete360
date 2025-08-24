@@ -34,6 +34,66 @@ const upload = multer({
   }
 });
 
+// Helper function to detect failed AI analyses
+function isAnalysisFailed(data: any): boolean {
+  if (!data) return true;
+  
+  // Check for common failure indicators
+  const failureIndicators = [
+    'Unable to generate',
+    'Analysis unavailable',
+    'temporarily unavailable', 
+    'Analysis Unavailable',
+    'could not be generated',
+    'failed to generate',
+    'error generating',
+    'analysis failed'
+  ];
+  
+  // Check if data has error property
+  if (data.error) return true;
+  
+  // Check message field for failure indicators
+  if (data.message && typeof data.message === 'string') {
+    return failureIndicators.some(indicator => 
+      data.message.toLowerCase().includes(indicator.toLowerCase())
+    );
+  }
+  
+  // Check if analysis data is empty or invalid
+  if (data.bio && data.bio.length < 10) return true;
+  if (data.strengths && Array.isArray(data.strengths) && data.strengths.length === 0) return true;
+  if (data.weaknesses && Array.isArray(data.weaknesses) && data.weaknesses.length === 0) return true;
+  if (data.plan && Array.isArray(data.plan) && data.plan.length === 0) return true;
+  if (data.strategies && Array.isArray(data.strategies) && data.strategies.length === 0) return true;
+  
+  // Check for typical AI failure responses in nested objects
+  const dataString = JSON.stringify(data).toLowerCase();
+  return failureIndicators.some(indicator => dataString.includes(indicator.toLowerCase()));
+}
+
+// Helper function to refund tokens and create refund transaction
+async function refundTokensForFailedAnalysis(userId: string, athleteId: string | null, tokenCost: number, serviceType: string, originalAction: string) {
+  try {
+    // Refund the tokens
+    await storage.refundTokens(userId, tokenCost);
+    console.log(`🔄 REFUNDED ${tokenCost} tokens to user ${userId} for failed ${serviceType} analysis`);
+    
+    // Create a refund transaction record
+    await storage.createTransaction({
+      userId,
+      action: `${originalAction} - REFUND (Analysis Failed)`,
+      tokensDeducted: -tokenCost, // Negative value indicates refund
+      athleteId,
+      serviceType: `${serviceType}-refund`
+    });
+    
+    console.log(`📝 Created refund transaction for ${tokenCost} tokens`);
+  } catch (error) {
+    console.error(`❌ Failed to refund tokens for user ${userId}:`, error);
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware - setup both Replit OIDC and local auth
   await setupAuth(app);
@@ -700,9 +760,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Analysis service routes
   app.post('/api/analysis/:athleteId/bio', isAuthenticated, async (req: any, res) => {
     const tokenCost = 50;
+    const userId = req.user.claims.sub;
+    const athleteId = req.params.athleteId;
     try {
-      const userId = req.user.claims.sub;
-      const athleteId = req.params.athleteId;
       const forceUpdate = req.query.forceUpdate === 'true'; // Check for force update parameter
 
       // Check if user has enough tokens
@@ -793,11 +853,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
         } catch (gptError) {
           console.error(`GPT-5 biography failed for ${athlete.name}:`, gptError);
+          // Refund tokens for failed AI generation
+          await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "bio", "Bio Analysis");
           return res.status(500).json({ 
-            message: "Failed to generate GPT-5 biography analysis",
+            message: "Failed to generate GPT-5 biography analysis. Your tokens have been refunded.",
             error: gptError instanceof Error ? gptError.message : String(gptError)
           });
         }
+      }
+
+      // Check if the bio analysis failed and refund tokens if needed
+      if (isAnalysisFailed(bioAnalysis)) {
+        console.log(`❌ Bio analysis failed for ${athlete.name}, refunding tokens`);
+        await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "bio", "Bio Analysis");
+        return res.status(500).json({
+          message: "Unable to generate authentic bio analysis at this time. Please try again later. Your tokens have been refunded.",
+          error: "AI analysis failed"
+        });
       }
 
       // Save analysis log
@@ -811,7 +883,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(bioAnalysis);
     } catch (error) {
       console.error("Error generating bio analysis:", error);
-      res.status(500).json({ message: "Failed to generate bio analysis" });
+      // Refund tokens for unexpected errors
+      await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "bio", "Bio Analysis");
+      res.status(500).json({ message: "Failed to generate bio analysis. Your tokens have been refunded." });
     }
   });
 
@@ -895,9 +969,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/analysis/:athleteId/strengths', isAuthenticated, async (req: any, res) => {
     const tokenCost = 50;
+    const userId = req.user.claims.sub;
+    const athleteId = req.params.athleteId;
     try {
-      const userId = req.user.claims.sub;
-      const athleteId = req.params.athleteId;
 
       const user = await storage.getUser(userId);
       if (!user || (user.tokens || 0) < tokenCost) {
@@ -1009,6 +1083,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Check if the strengths analysis failed and refund tokens if needed
+      if (isAnalysisFailed(strengthsData)) {
+        console.log(`❌ Strengths analysis failed for ${athlete.name}, refunding tokens`);
+        await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "strengths", "Strengths Analysis");
+        return res.status(500).json({
+          message: "Unable to generate authentic strengths analysis at this time. Please try again later. Your tokens have been refunded.",
+          error: "AI analysis failed"
+        });
+      }
+
       await storage.createAnalysisLog({
         userId,
         athleteId,
@@ -1019,15 +1103,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(strengthsData);
     } catch (error) {
       console.error("Error generating strengths analysis:", error);
-      res.status(500).json({ message: "Failed to generate strengths analysis" });
+      // Refund tokens for unexpected errors
+      await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "strengths", "Strengths Analysis");
+      res.status(500).json({ message: "Failed to generate strengths analysis. Your tokens have been refunded." });
     }
   });
 
   app.post('/api/analysis/:athleteId/weaknesses', isAuthenticated, async (req: any, res) => {
     const tokenCost = 50;
+    const userId = req.user.claims.sub;
+    const athleteId = req.params.athleteId;
     try {
-      const userId = req.user.claims.sub;
-      const athleteId = req.params.athleteId;
 
       const user = await storage.getUser(userId);
       if (!user || (user.tokens || 0) < tokenCost) {
@@ -1141,6 +1227,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Check if the weaknesses analysis failed and refund tokens if needed
+      if (isAnalysisFailed(weaknessesData)) {
+        console.log(`❌ Weaknesses analysis failed for ${athlete.name}, refunding tokens`);
+        await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "weaknesses", "Weaknesses Analysis");
+        return res.status(500).json({
+          message: "Unable to generate authentic weaknesses analysis at this time. Please try again later. Your tokens have been refunded.",
+          error: "AI analysis failed"
+        });
+      }
+
       await storage.createAnalysisLog({
         userId,
         athleteId,
@@ -1151,15 +1247,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(weaknessesData);
     } catch (error) {
       console.error("Error generating weaknesses analysis:", error);
-      res.status(500).json({ message: "Failed to generate weaknesses analysis" });
+      // Refund tokens for unexpected errors
+      await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "weaknesses", "Weaknesses Analysis");
+      res.status(500).json({ message: "Failed to generate weaknesses analysis. Your tokens have been refunded." });
     }
   });
 
   app.post('/api/analysis/:athleteId/development-plan', isAuthenticated, async (req: any, res) => {
     const tokenCost = 80;
+    const userId = req.user.claims.sub;
+    const athleteId = req.params.athleteId;
     try {
-      const userId = req.user.claims.sub;
-      const athleteId = req.params.athleteId;
       
       // Extract user preferences from request body
       const { duration = "4 weeks", goal = "Improve overall performance" } = req.body;
@@ -1448,9 +1546,9 @@ Return only valid JSON with the missing fields.`;
 
   app.post('/api/analysis/:athleteId/beat-strategies', isAuthenticated, async (req: any, res) => {
     const tokenCost = 100;
+    const userId = req.user.claims.sub;
+    const athleteId = req.params.athleteId;
     try {
-      const userId = req.user.claims.sub;
-      const athleteId = req.params.athleteId;
 
       const user = await storage.getUser(userId);
       if (!user || (user.tokens || 0) < tokenCost) {
@@ -1516,21 +1614,27 @@ Return only valid JSON with the missing fields.`;
           keyWeaknesses: strategiesAnalysis.keyWeaknesses || []
         };
       } else {
-        // If AI analysis fails, inform user that analysis couldn't be generated
-        beatStrategies = {
-          strategies: [{
-            strategy: "Analysis Unavailable",
-            description: `Unable to generate authentic strategic analysis for ${athlete.name} at this time. Please try again later or contact support if the issue persists.`,
-            execution: "N/A",
-            success_probability: "N/A",
-            risk_level: "N/A"
-          }],
-          keyWeaknesses: []
-        };
+        // If AI analysis fails, refund tokens and inform user
+        console.log(`❌ Beat strategies analysis failed for ${athlete.name}, refunding tokens`);
+        await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "beat", "Beat Strategies");
+        return res.status(500).json({
+          message: "Unable to generate authentic strategic analysis at this time. Please try again later. Your tokens have been refunded.",
+          error: "AI analysis failed"
+        });
       }
       
+      // Check if the beat strategies analysis failed and refund tokens if needed
+      if (isAnalysisFailed(beatStrategies)) {
+        console.log(`❌ Beat strategies analysis failed for ${athlete.name}, refunding tokens`);
+        await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "beat", "Beat Strategies");
+        return res.status(500).json({
+          message: "Unable to generate authentic strategic analysis at this time. Please try again later. Your tokens have been refunded.",
+          error: "AI analysis failed"
+        });
+      }
+
       // Store AI beat strategies in database for future reference
-      if (beatStrategies.strategies && beatStrategies.strategies.length > 0 && beatStrategies.strategies[0].strategy !== "Analysis Unavailable") {
+      if (beatStrategies.strategies && beatStrategies.strategies.length > 0) {
         for (const strategy of beatStrategies.strategies) {
           try {
             await storage.createBeatStrategy({
@@ -1554,8 +1658,10 @@ Return only valid JSON with the missing fields.`;
       res.json(beatStrategies);
     } catch (error) {
       console.error("Error generating beat strategies:", error);
+      // Refund tokens for unexpected errors
+      await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "beat", "Beat Strategies");
       res.status(500).json({ 
-        message: "Unable to generate authentic beat strategies at this time. Please try again later.",
+        message: "Unable to generate authentic beat strategies at this time. Please try again later. Your tokens have been refunded.",
         error: error instanceof Error ? error.message : String(error)
       });
     }

@@ -69,6 +69,7 @@ export interface IStorage {
   }): Promise<string>;
   updateUserTokens(userId: string, tokens: number): Promise<User>;
   deductTokens(userId: string, amount: number): Promise<User>;
+  refundTokens(userId: string, amount: number): Promise<User>;
   updateUserPaymentCard(userId: string, cardData: { cardToken: string, cardLast4: string, cardBrand: string, paymobCustomerId?: string }): Promise<User>;
   generateReferralCode(userId: string): Promise<string>;
   getUserByReferralCode(referralCode: string): Promise<User | undefined>;
@@ -290,6 +291,27 @@ export class DatabaseStorage implements IStorage {
       .set({ 
         tokens: newTokens,
         totalTokensPurchased: newTotalPurchased,
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    return updatedUser;
+  }
+
+  async refundTokens(userId: string, tokensToRefund: number): Promise<User> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error("User not found");
+    
+    const currentTokens = user.tokens || 0;
+    const newTokens = currentTokens + tokensToRefund;
+    
+    console.log(`REFUNDING ${tokensToRefund} tokens to user ${userId}: ${currentTokens} → ${newTokens}`);
+    
+    const [updatedUser] = await db
+      .update(users)
+      .set({ 
+        tokens: newTokens,
         updatedAt: new Date() 
       })
       .where(eq(users.id, userId))
