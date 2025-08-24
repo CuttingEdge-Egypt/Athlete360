@@ -1282,24 +1282,135 @@ export async function generateThreadedBiography(athleteName: string, sport: stri
   return bioData.bio;
 }
 
-// GPT-5 implementation of athlete image search (moved from geminiService)
-export async function searchAthleteImage(athleteName: string, sport?: string): Promise<string | null> {
+// Enhanced AI-powered athlete image search with multiple sources and better sport context
+export async function searchAthleteImage(athleteName: string, sport?: string, nationality?: string): Promise<string | null> {
   try {
-    // Search TheSportsDB for athlete images
-    const searchUrl = `https://www.thesportsdb.com/api/v1/json/3/searchplayers.php?p=${encodeURIComponent(athleteName)}`;
-    console.log(`Searching for profile image for ${athleteName}...`);
+    console.log(`🔍 Starting comprehensive image search for ${athleteName} (${sport || 'Unknown Sport'})`);
     
+    // Strategy 1: AI-powered web search with GPT-5 (primary method)
+    const aiImageUrl = await searchAthleteImageWithAI(athleteName, sport, nationality);
+    if (aiImageUrl) {
+      console.log(`✅ Found image via AI web search: ${aiImageUrl}`);
+      return aiImageUrl;
+    }
+    
+    // Strategy 2: Sport-specific database search (secondary method)
+    const sportSpecificUrl = await searchSportSpecificDatabase(athleteName, sport, nationality);
+    if (sportSpecificUrl) {
+      console.log(`✅ Found image via sport-specific database: ${sportSpecificUrl}`);
+      return sportSpecificUrl;
+    }
+    
+    // Strategy 3: TheSportsDB fallback (tertiary method)
+    const theSportsDBUrl = await searchTheSportsDB(athleteName, sport);
+    if (theSportsDBUrl) {
+      console.log(`✅ Found image via TheSportsDB: ${theSportsDBUrl}`);
+      return theSportsDBUrl;
+    }
+    
+    console.log(`❌ No profile image found for ${athleteName} across all sources`);
+    return null;
+    
+  } catch (error) {
+    console.error(`Error in comprehensive athlete image search:`, error);
+    return null;
+  }
+}
+
+// AI-powered web search for athlete images using GPT-5
+async function searchAthleteImageWithAI(athleteName: string, sport?: string, nationality?: string): Promise<string | null> {
+  try {
+    console.log(`🤖 Using AI web search for ${athleteName}...`);
+    
+    const sportContext = sport ? ` ${sport}` : '';
+    const nationalityContext = nationality ? ` from ${nationality}` : '';
+    
+    const response = await openai.responses.create({
+      model: "gpt-5",
+      input: `Search the web for a high-quality profile photo of the${sportContext} athlete "${athleteName}"${nationalityContext}.
+
+Find ONLY official, professional photos from credible sources such as:
+- Official sport federation websites
+- Olympic committee pages
+- Major sports news outlets (ESPN, BBC Sport, etc.)
+- Competition organizer websites
+- Official athlete social media profiles
+
+REQUIREMENTS:
+- The image must be a clear headshot or upper body professional photo
+- Must be the EXACT athlete (${athleteName}) competing in ${sport || 'their sport'}
+- Must be from a credible, verifiable source
+- Minimum resolution 200x200 pixels
+- Direct image URL (ending in .jpg, .png, .jpeg, .webp)
+
+AVOID:
+- Team photos or group shots
+- Logos or graphics
+- Unofficial fan photos
+- Social media screenshots
+- Blurry or low-quality images
+
+If you find a suitable image, provide ONLY the direct image URL. If no suitable image is found, respond with "NO_IMAGE_FOUND".`,
+      tools: [{ type: "web_search_preview" }],
+      max_output_tokens: 1000
+    });
+
+    const aiResponse = response.output?.toString()?.trim();
+    console.log(`🤖 AI search response: ${aiResponse}`);
+    
+    if (aiResponse && aiResponse !== "NO_IMAGE_FOUND" && aiResponse.includes('http')) {
+      // Extract URL from response
+      const urlMatch = aiResponse.match(/(https?:\/\/[^\s\)]+\.(?:jpg|jpeg|png|webp))/i);
+      if (urlMatch) {
+        const imageUrl = urlMatch[1];
+        
+        // Validate the image
+        if (await validateImageUrl(imageUrl)) {
+          return imageUrl;
+        }
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.error(`Error in AI web search for ${athleteName}:`, error);
+    return null;
+  }
+}
+
+// Sport-specific database search
+async function searchSportSpecificDatabase(athleteName: string, sport?: string, nationality?: string): Promise<string | null> {
+  if (!sport) return null;
+  
+  const sportLower = sport.toLowerCase();
+  
+  // Taekwondo: Use existing TaekwondoData.com search
+  if (sportLower === 'taekwondo') {
+    return await searchTaekwondoDataProfilePicture(athleteName, nationality);
+  }
+  
+  // Future: Add more sport-specific databases here
+  // if (sportLower === 'boxing') return await searchBoxingDatabase(athleteName);
+  // if (sportLower === 'tennis') return await searchTennisDatabase(athleteName);
+  
+  return null;
+}
+
+// Enhanced TheSportsDB search with better validation
+async function searchTheSportsDB(athleteName: string, sport?: string): Promise<string | null> {
+  try {
+    console.log(`🏃 Searching TheSportsDB for ${athleteName}...`);
+    
+    const searchUrl = `https://www.thesportsdb.com/api/v1/json/3/searchplayers.php?p=${encodeURIComponent(athleteName)}`;
     const response = await fetch(searchUrl);
     const data = await response.json();
     
     if (data.player && data.player.length > 0) {
-      // Check all players to find the best match, not just the first one
       for (const player of data.player) {
-        // Enhanced name matching - require more precise match
+        // Enhanced name matching
         const athleteNameParts = athleteName.toLowerCase().split(' ');
         const playerNameParts = player.strPlayer ? player.strPlayer.toLowerCase().split(' ') : [];
         
-        // Require at least 2 name parts to match (first name + last name)
         const matchingParts = athleteNameParts.filter(part => 
           part.length > 2 && playerNameParts.some((playerPart: string) => 
             playerPart.includes(part) || part.includes(playerPart)
@@ -1308,13 +1419,13 @@ export async function searchAthleteImage(athleteName: string, sport?: string): P
         
         const isNameMatch = matchingParts.length >= Math.min(2, athleteNameParts.length);
         
-        // Enhanced sport validation - completely avoid cross-sport matches
+        // Sport conflict validation
         let isSportConflict = false;
         if (sport && player.strSport) {
           const playerSport = player.strSport.toLowerCase();
           const requestedSport = sport.toLowerCase();
           
-          // For taekwondo, reject any non-combat sport
+          // Strict sport matching to avoid cross-sport issues
           if (requestedSport === 'taekwondo') {
             const nonCombatSports = [
               'basketball', 'football', 'soccer', 'tennis', 'baseball', 
@@ -1324,18 +1435,6 @@ export async function searchAthleteImage(athleteName: string, sport?: string): P
             isSportConflict = nonCombatSports.some(nonCombat => 
               playerSport.includes(nonCombat)
             );
-          }
-          
-          // General rule: must be exact sport match or martial arts related
-          if (!isSportConflict && requestedSport === 'taekwondo') {
-            const isCombatSport = playerSport.includes('taekwondo') || 
-                                 playerSport.includes('martial') || 
-                                 playerSport.includes('karate') ||
-                                 playerSport.includes('judo') ||
-                                 playerSport.includes('combat');
-            if (!isCombatSport && playerSport !== 'unknown') {
-              isSportConflict = true;
-            }
           }
         }
         
@@ -1349,20 +1448,83 @@ export async function searchAthleteImage(athleteName: string, sport?: string): P
             isNameMatch &&
             !isSportConflict) {
           
-          console.log(`Found verified profile image for ${athleteName}: ${player.strThumb}`);
-          console.log(`Player details: Name: ${player.strPlayer}, Sport: ${player.strSport}`);
-          return player.strThumb;
-        } else {
-          console.log(`Image found but failed validation for ${athleteName} - Name: ${player.strPlayer}, Sport: ${player.strSport}, Image: ${player.strThumb}, Conflict: ${isSportConflict}`);
+          // Additional validation
+          if (await validateImageUrl(player.strThumb)) {
+            console.log(`✅ Validated TheSportsDB image for ${athleteName}: ${player.strThumb}`);
+            return player.strThumb;
+          }
         }
       }
     }
     
-    console.log(`No valid profile image found for ${athleteName} in TheSportsDB`);
     return null;
   } catch (error) {
-    console.error(`Error searching for athlete image:`, error);
+    console.error(`Error searching TheSportsDB:`, error);
     return null;
+  }
+}
+
+// Enhanced image validation function
+async function validateImageUrl(imageUrl: string): Promise<boolean> {
+  try {
+    console.log(`🔍 Validating image: ${imageUrl}`);
+    
+    // Check URL format
+    if (!imageUrl.startsWith('http') || imageUrl.length < 20) {
+      console.log(`❌ Invalid URL format: ${imageUrl}`);
+      return false;
+    }
+    
+    // Check file extension
+    const validExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+    const hasValidExtension = validExtensions.some(ext => 
+      imageUrl.toLowerCase().includes(ext)
+    );
+    
+    if (!hasValidExtension) {
+      console.log(`❌ Invalid file extension: ${imageUrl}`);
+      return false;
+    }
+    
+    // Test image accessibility with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    
+    const response = await fetch(imageUrl, { 
+      method: 'HEAD',
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      console.log(`❌ Image not accessible (${response.status}): ${imageUrl}`);
+      return false;
+    }
+    
+    // Check content type
+    const contentType = response.headers.get('content-type');
+    if (!contentType?.startsWith('image/')) {
+      console.log(`❌ Invalid content type (${contentType}): ${imageUrl}`);
+      return false;
+    }
+    
+    // Check image size (should be reasonable for profile photo)
+    const contentLength = response.headers.get('content-length');
+    if (contentLength) {
+      const sizeKB = parseInt(contentLength) / 1024;
+      if (sizeKB < 5 || sizeKB > 5000) { // Between 5KB and 5MB
+        console.log(`❌ Image size out of range (${sizeKB.toFixed(1)}KB): ${imageUrl}`);
+        return false;
+      }
+    }
+    
+    console.log(`✅ Image validation passed: ${imageUrl}`);
+    return true;
+    
+  } catch (error) {
+    console.error(`Error validating image ${imageUrl}:`, error);
+    return false;
   }
 }
 

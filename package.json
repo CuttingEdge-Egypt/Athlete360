@@ -11,7 +11,7 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "@google-cloud/storage": "^7.16.0",
+    "@google-cloud/storage": "^7.17.0",
     "@google/genai": "^1.13.0",
     "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^3.10.0",
@@ -54,7 +54,7 @@
     "@types/multer": "^2.0.0",
     "@types/node-fetch": "^2.6.13",
     "@uppy/aws-s3": "^4.3.2",
-    "@uppy/core": "^4.5.2",
+    "@uppy/core": "^4.5.3",
     "@uppy/dashboard": "^4.4.3",
     "@uppy/drag-drop": "^4.2.2",
     "@uppy/file-input": "^4.2.2",

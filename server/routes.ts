@@ -304,34 +304,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Creating athlete ${name} for sport ${sport.name} using OpenAI GPT-5...`);
       const aiProfile = await generateAthleteBiography(name, sport.name, req.body.nationality);
 
-      // Search for athlete profile image
-      console.log(`Searching for profile image for ${name}...`);
-      let profileImageUrl = null;
-      
-      // For taekwondo athletes, try TaekwondoData.com first
-      if (sport.name.toLowerCase() === 'taekwondo') {
-        console.log(`Trying TaekwondoData.com for ${name}...`);
-        profileImageUrl = await searchTaekwondoDataProfilePicture(name, req.body.nationality);
-      }
-      
-      // For taekwondo, ONLY use TaekwondoData.com - NO fallback to prevent basketball player images
-      if (!profileImageUrl && sport.name.toLowerCase() !== 'taekwondo') {
-        console.log(`Searching general sources for ${name} (non-taekwondo)...`);
-        profileImageUrl = await searchAthleteImage(name, sport.name);
-      } else if (!profileImageUrl && sport.name.toLowerCase() === 'taekwondo') {
-        console.log(`No image found for taekwondo athlete ${name} - TaekwondoData.com search complete, no fallback used to prevent wrong sport images`);
-      }
-
-      // Create athlete in database
-      // Handle rank - convert to number if possible, otherwise store as undefined
-      let rankValue = undefined;
-      if (typeof aiProfile.rank === 'number') {
-        rankValue = aiProfile.rank;
-      } else if (typeof aiProfile.rank === 'string' && !isNaN(Number(aiProfile.rank)) && aiProfile.rank !== 'N/A') {
-        rankValue = Number(aiProfile.rank);
-      }
-      
-      // Extract nationality from bio data
+      // Extract nationality from bio data first
       const extractNationality = (bio: string): string | undefined => {
         const text = bio.toLowerCase();
         
@@ -365,36 +338,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'ukrainian': 'Ukraine',
           'thai': 'Thailand',
           'iranian': 'Iran',
-          'iraqui': 'Iraq',
-          'jordanian': 'Jordan',
-          'lebanese': 'Lebanon',
-          'moroccan': 'Morocco',
-          'tunisian': 'Tunisia',
-          'algerian': 'Algeria',
-          'south african': 'South Africa',
-          'nigerian': 'Nigeria',
-          'kenyan': 'Kenya',
-          'ethiopian': 'Ethiopia'
+          'iraqi': 'Iraq',
         };
-
-        // Look for nationality patterns in bio
-        for (const [nationality, country] of Object.entries(nationalityMap)) {
-          if (text.includes(nationality)) {
+        
+        // Check for nationality keywords
+        for (const [adjective, country] of Object.entries(nationalityMap)) {
+          if (text.includes(adjective)) {
             return country;
           }
         }
-
-        // Look for direct country mentions
-        const countryPattern = /\b(united states|spain|egypt|south korea|uzbekistan|brazil|argentina|portugal|palestine|united kingdom|canada|france|germany|italy|japan|china|australia|mexico|turkey|serbia|croatia|poland|russia|ukraine|thailand|iran|iraq|jordan|lebanon|morocco|tunisia|algeria|south africa|nigeria|kenya|ethiopia)\b/i;
-        const match = bio.match(countryPattern);
-        if (match) {
-          return match[1].split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
-        }
-
+        
         return undefined;
       };
 
-      const extractedCountry = extractNationality(aiProfile.bio || '');
+      const extractedCountry = extractNationality(aiProfile.bio);
+
+      // Search for athlete profile image using enhanced AI-powered search
+      console.log(`🔍 Searching for profile image for ${name} in ${sport.name}...`);
+      let profileImageUrl = await searchAthleteImage(name, sport.name, req.body.nationality || extractedCountry);
+
+      // Create athlete in database
+      // Handle rank - convert to number if possible, otherwise store as undefined
+      let rankValue = undefined;
+      if (typeof aiProfile.rank === 'number') {
+        rankValue = aiProfile.rank;
+      } else if (typeof aiProfile.rank === 'string' && !isNaN(Number(aiProfile.rank)) && aiProfile.rank !== 'N/A') {
+        rankValue = Number(aiProfile.rank);
+      }
 
       const athleteData = {
         name: name.trim(),

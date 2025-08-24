@@ -1,7 +1,10 @@
 modules = ["nodejs-20"]
 [agent]
-integrations = ["javascript_gemini==1.0.0", "javascript_database==1.0.0"]
+integrations = ["javascript_gemini==1.0.0", "javascript_database==1.0.0", "javascript_object_storage==1.0.0"]
 
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[nix]
+channel = "stable-25_05"
