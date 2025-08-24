@@ -242,14 +242,14 @@ export function formatExpiry(value: string): string {
 export function getCardBrandInfo(brand: string) {
   switch (brand) {
     case 'Visa':
-      return { color: '#1A1F71', textColor: 'text-blue-700' };
+      return { name: 'VISA', color: '#1A1F71', textColor: 'text-blue-700', bgColor: 'bg-blue-700' };
     case 'Mastercard':
-      return { color: '#EB001B', textColor: 'text-red-600' };
+      return { name: 'MC', color: '#EB001B', textColor: 'text-red-600', bgColor: 'bg-red-600' };
     case 'American Express':
-      return { color: '#006FCF', textColor: 'text-blue-600' };
+      return { name: 'AMEX', color: '#006FCF', textColor: 'text-blue-600', bgColor: 'bg-blue-600' };
     case 'Discover':
-      return { color: '#FF6000', textColor: 'text-orange-600' };
+      return { name: 'DISC', color: '#FF6000', textColor: 'text-orange-600', bgColor: 'bg-orange-600' };
     default:
-      return { color: '#6B7280', textColor: 'text-gray-500' };
+      return { name: 'CARD', color: '#6B7280', textColor: 'text-gray-500', bgColor: 'bg-gray-500' };
   }
 }

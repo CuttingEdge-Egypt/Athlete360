@@ -1782,8 +1782,7 @@ Return only valid JSON with the missing fields.`;
       const { orderId } = req.params;
       
       // Get auth token first  
-      const paymobServiceInstance = new PaymobService();
-      const authToken = await paymobServiceInstance.getAuthToken();
+      const authToken = await paymobService.authenticate();
       
       // Query Paymob for order status - use orders endpoint instead of transactions
       const response = await fetch(`https://accept.paymob.com/api/ecommerce/orders/${orderId}`, {
