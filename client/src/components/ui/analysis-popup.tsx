@@ -36,6 +36,9 @@ import {
   Flame,
   ChevronRight,
   RefreshCw,
+  PlayCircle,
+  CheckCircle,
+  BarChart,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -324,39 +327,165 @@ export function AnalysisPopup({
     }
 
     return (
-      <div>
+      <div className="space-y-6">
+        {/* Header Section with Duration and Overview */}
         {parsedData.duration && (
-          <div className="mb-6">
-            <Badge variant="secondary" className="bg-athlete-accent text-white">
-              {parsedData.duration}
-            </Badge>
+          <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-lg p-4 border border-purple-500/30">
+            <div className="flex items-center gap-3 mb-2">
+              <Calendar className="w-5 h-5 text-purple-400" />
+              <h3 className="text-lg font-semibold text-white">Development Program</h3>
+            </div>
+            <div className="flex items-center gap-4">
+              <Badge variant="secondary" className="bg-purple-600 text-white px-3 py-1">
+                <Clock className="w-3 h-3 mr-1" />
+                {parsedData.duration}
+              </Badge>
+              {planItems.length > 0 && (
+                <span className="text-sm text-purple-300">
+                  {planItems.length} Phase{planItems.length !== 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
           </div>
         )}
-        <div className="grid gap-4">
-          {planItems.length > 0 ? planItems.map((item: any, index: number) => (
-            <Card key={index} className="bg-athlete-gray-700 border-gray-600">
-              <CardContent className="p-4">
-                <h5 className="font-semibold text-white mb-2">
-                  {item.title || item.focus || item.phase || item.name || "Development Phase"}
-                </h5>
-                {item.description && (
-                  <p className="text-sm text-gray-300 mb-3 italic">
-                    {item.description}
-                  </p>
-                )}
-                <ul className="text-sm text-gray-300 space-y-1">
-                  {(item.activities || item.details || item.exercises || []).map((activity: string, idx: number) => (
-                    <li key={idx}>• {activity}</li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          )) : (
-            <div className="text-gray-400 text-center py-8">
-              No development plan data available
+
+        {/* Progress Timeline */}
+        {planItems.length > 0 && (
+          <div className="relative">
+            <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-purple-500 to-blue-500 opacity-30"></div>
+            
+            <div className="space-y-6">
+              {planItems.map((item: any, index: number) => {
+                const isCurrentPhase = index === 0; // You can add logic to determine current phase
+                const phaseNumber = index + 1;
+                
+                return (
+                  <Card 
+                    key={index} 
+                    className={`relative ml-8 ${
+                      isCurrentPhase 
+                        ? 'bg-gradient-to-br from-purple-900/50 to-blue-900/50 border-purple-500' 
+                        : 'bg-athlete-gray-700 border-gray-600'
+                    } hover:border-purple-400 transition-colors`}
+                  >
+                    {/* Phase Number Indicator */}
+                    <div className={`absolute -left-12 top-6 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                      isCurrentPhase 
+                        ? 'bg-purple-600 text-white ring-4 ring-purple-600/30' 
+                        : 'bg-gray-600 text-gray-300'
+                    }`}>
+                      {phaseNumber}
+                    </div>
+
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg text-white flex items-center gap-2">
+                          <Target className="w-5 h-5 text-purple-400" />
+                          {item.title || item.focus || item.phase || item.name || `Phase ${phaseNumber}`}
+                        </CardTitle>
+                        {isCurrentPhase && (
+                          <Badge variant="secondary" className="bg-green-600 text-white">
+                            <PlayCircle className="w-3 h-3 mr-1" />
+                            Current
+                          </Badge>
+                        )}
+                      </div>
+                      {item.description && (
+                        <p className="text-purple-200 bg-purple-900/30 p-3 rounded-lg italic border-l-4 border-purple-500">
+                          {item.description}
+                        </p>
+                      )}
+                    </CardHeader>
+
+                    <CardContent className="space-y-4">
+                      {/* Activities Section */}
+                      {(item.activities || item.details || item.exercises || []).length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-purple-300 mb-3 flex items-center gap-2">
+                            <Zap className="w-4 h-4" />
+                            Training Activities
+                          </h4>
+                          <div className="grid gap-2">
+                            {(item.activities || item.details || item.exercises || []).map((activity: string, idx: number) => (
+                              <div key={idx} className="flex items-start gap-3 p-2 bg-gray-800/50 rounded-lg">
+                                <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
+                                <span className="text-sm text-gray-300 leading-relaxed">{activity}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Objectives Section */}
+                      {item.objectives && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-blue-300 mb-3 flex items-center gap-2">
+                            <Shield className="w-4 h-4" />
+                            Key Objectives
+                          </h4>
+                          <div className="grid gap-2">
+                            {Array.isArray(item.objectives) ? item.objectives.map((objective: string, idx: number) => (
+                              <div key={idx} className="flex items-start gap-3 p-2 bg-blue-900/20 rounded-lg border-l-2 border-blue-500">
+                                <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-blue-100">{objective}</span>
+                              </div>
+                            )) : (
+                              <div className="flex items-start gap-3 p-2 bg-blue-900/20 rounded-lg border-l-2 border-blue-500">
+                                <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-blue-100">{item.objectives}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Metrics Section */}
+                      {item.metrics && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-green-300 mb-3 flex items-center gap-2">
+                            <TrendingUp className="w-4 h-4" />
+                            Success Metrics
+                          </h4>
+                          <div className="grid gap-2">
+                            {Array.isArray(item.metrics) ? item.metrics.map((metric: string, idx: number) => (
+                              <div key={idx} className="flex items-start gap-3 p-2 bg-green-900/20 rounded-lg border-l-2 border-green-500">
+                                <BarChart className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-green-100">{metric}</span>
+                              </div>
+                            )) : (
+                              <div className="flex items-start gap-3 p-2 bg-green-900/20 rounded-lg border-l-2 border-green-500">
+                                <BarChart className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-green-100">{item.metrics}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Duration for individual phases */}
+                      {item.duration && (
+                        <div className="pt-2 border-t border-gray-600">
+                          <div className="flex items-center gap-2 text-xs text-gray-400">
+                            <Clock className="w-3 h-3" />
+                            Duration: {item.duration}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {planItems.length === 0 && (
+          <div className="text-gray-400 text-center py-12">
+            <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-500" />
+            <p className="text-lg font-medium mb-2">No development plan data available</p>
+            <p className="text-sm">Generate a new analysis to see your personalized development program.</p>
+          </div>
+        )}
       </div>
     );
   };
