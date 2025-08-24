@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, CreditCard, Zap, Trophy, Coins, ArrowLeft, CheckCircle } from "lucide-react";
+import { Loader2, CreditCard, Zap, Trophy, Coins, ArrowLeft, CheckCircle, ExternalLink, AlertCircle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -162,7 +162,7 @@ export default function PaymentCenter() {
     setLocation('/');
   };
 
-  if (showIframe && paymentIntent) {
+  if (showIframe && paymentIntent && selectedPackage) {
     return (
       <div className="min-h-screen bg-athlete-gray-900 text-white">
         <div className="container mx-auto px-4 py-8">
@@ -180,116 +180,182 @@ export default function PaymentCenter() {
               </Button>
               <div>
                 <h1 className="text-2xl font-bold text-white" data-testid="text-payment-title">
-                  Complete Payment
+                  Secure Payment Gateway
                 </h1>
                 <p className="text-gray-400" data-testid="text-payment-subtitle">
-                  {selectedPackage?.name} - {selectedPackage?.tokens} tokens for {selectedPackage?.price} EGP
+                  {selectedPackage?.name} - {selectedPackage?.tokens.toLocaleString()} tokens for {selectedPackage?.price} EGP
                 </p>
               </div>
             </div>
 
-            <Card className="bg-athlete-gray-800 border-gray-700">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-athlete-accent" />
-                  Secure Payment
-                </CardTitle>
-                <CardDescription className="text-gray-400">
-                  Complete your payment using the secure Paymob payment gateway.<br/>
-                  <span className="text-yellow-400">You may be redirected to your bank to authorize the payment.</span>
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="bg-athlete-gray-700 p-4 rounded-lg">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-300">Package:</span>
-                      <span className="text-white font-semibold" data-testid="text-package-name">
-                        {selectedPackage?.name}
-                      </span>
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Order Summary */}
+              <Card className="bg-athlete-gray-800 border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                    Order Summary
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Review your purchase details
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="bg-athlete-gray-700 p-4 rounded-lg">
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="text-gray-300">Package:</span>
+                        <span className="text-white font-semibold" data-testid="text-package-name">
+                          {selectedPackage?.name}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="text-gray-300">Tokens:</span>
+                        <span className="text-athlete-accent font-bold" data-testid="text-tokens-amount">
+                          {selectedPackage?.tokens.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="border-t border-gray-600 pt-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-white font-semibold">Total:</span>
+                          <span className="text-white font-bold text-xl" data-testid="text-total-amount">
+                            {selectedPackage?.price} EGP
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-300">Tokens:</span>
-                      <span className="text-athlete-accent font-semibold" data-testid="text-tokens-amount">
-                        {selectedPackage?.tokens.toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-300">Total:</span>
-                      <span className="text-white font-bold text-lg" data-testid="text-total-amount">
-                        {selectedPackage?.price} EGP
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="border border-gray-600 rounded-lg overflow-hidden relative">
-                    {/* 
-                      ENHANCED: Updated iframe permissions for better 3DS support
-                      Added popup escape sandbox and top navigation by user activation
-                      These are essential for Egyptian bank 3DS authentication flows
-                    */}
-                    <iframe
-                      src={paymentIntent.iframeUrl}
-                      title="Paymob Payment"
-                      frameBorder="0"
-                      width="100%"
-                      height="650"
-                      className="w-full min-h-[650px]"
-                      data-testid="iframe-payment"
-                      allow="payment *; fullscreen *; autoplay *; camera *; microphone *; geolocation *; top-navigation *; popups *; forms *; scripts *"
-                      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation allow-top-navigation-by-user-activation allow-downloads"
-                      onLoad={() => console.log('Payment iframe loaded')}
-                      referrerPolicy="no-referrer-when-downgrade"
-                    />
                     
-                    {/* Manual 3DS Fallback Button */}
-                    <div className="absolute top-4 right-4">
-                      <Button 
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          console.log('Opening 3DS popup window...');
-                          const popup = window.open(
-                            paymentIntent.iframeUrl, 
-                            '3ds_auth', 
-                            'width=600,height=700,scrollbars=yes,resizable=yes,status=yes,location=yes'
-                          );
-                          if (popup) {
-                            // Monitor popup for completion
-                            const checkClosed = setInterval(() => {
-                              if (popup.closed) {
-                                clearInterval(checkClosed);
-                                console.log('3DS popup closed, refreshing payment status...');
-                                // Force page refresh to check payment status
-                                setTimeout(() => window.location.reload(), 1000);
-                              }
-                            }, 1000);
-                          }
-                        }}
-                        className="bg-orange-600 hover:bg-orange-700 text-white text-xs border-orange-500"
-                        data-testid="button-3ds-popup"
-                      >
-                        🔐 Open in New Window
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="text-center text-sm text-gray-400 space-y-2">
-                    <p>🔒 Your payment is secured by Paymob encryption</p>
-                    <div className="bg-yellow-900/20 border border-yellow-600/30 rounded-lg p-3 text-yellow-200">
-                      <h4 className="font-semibold mb-1">Payment Instructions</h4>
-                      <p className="text-xs">
-                        • Enter your card details in the payment form above.<br/>
-                        • If the OTP window doesn't appear, click "🔐 Open in New Window" button.<br/>
-                        • Complete the security verification (OTP) if requested by your bank.<br/>
-                        • You will be redirected back to our site after completion.
+                    <div className="bg-green-900/20 border border-green-600/30 rounded-lg p-3">
+                      <div className="flex items-center gap-2 text-green-400 text-sm font-medium">
+                        <CheckCircle className="w-4 h-4" />
+                        Payment Session Ready
+                      </div>
+                      <p className="text-green-300 text-xs mt-1">
+                        Integration ID: 4723444 (Active)
                       </p>
                     </div>
-                    <p>After successful payment, tokens will be added to your account immediately.</p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+
+              {/* Payment Gateway */}
+              <Card className="bg-athlete-gray-800 border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <CreditCard className="w-5 h-5 text-athlete-accent" />
+                    Secure Payment Gateway
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Popup-based payment for optimal 3D Secure compatibility
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {/* Payment Button */}
+                    <div className="text-center">
+                      <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-6">
+                        <div className="flex items-center justify-center mb-4">
+                          <div className="bg-blue-600 p-3 rounded-full">
+                            <CreditCard className="w-8 h-8 text-white" />
+                          </div>
+                        </div>
+                        <h3 className="text-lg font-bold text-white mb-2">Ready to Process</h3>
+                        <p className="text-gray-300 text-sm mb-6">
+                          Open the secure payment window to complete your purchase safely.
+                        </p>
+                        <Button 
+                          size="lg"
+                          onClick={() => {
+                            console.log('Opening payment popup window...');
+                            const popup = window.open(
+                              paymentIntent.iframeUrl, 
+                              'paymob_payment', 
+                              'width=900,height=700,scrollbars=yes,resizable=yes,status=yes,location=yes,menubar=no,toolbar=no'
+                            );
+                            
+                            if (popup) {
+                              popup.focus();
+                              
+                              toast({
+                                title: "Payment Window Opened",
+                                description: "Complete your payment in the new window.",
+                              });
+                              
+                              // Monitor popup for completion
+                              const checkClosed = setInterval(() => {
+                                if (popup.closed) {
+                                  clearInterval(checkClosed);
+                                  console.log('Payment popup closed, checking status...');
+                                  
+                                  toast({
+                                    title: "Payment Window Closed",
+                                    description: "Checking payment status...",
+                                  });
+                                  
+                                  // Check payment status after popup closes
+                                  setTimeout(() => {
+                                    window.location.reload();
+                                  }, 2000);
+                                }
+                              }, 1000);
+                              
+                            } else {
+                              toast({
+                                title: "Popup Blocked",
+                                description: "Please allow popups for this site and try again.",
+                                variant: "destructive",
+                              });
+                            }
+                          }}
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3"
+                          data-testid="button-open-payment"
+                        >
+                          <ExternalLink className="w-5 h-5 mr-3" />
+                          Open Payment Window
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Payment Instructions */}
+                    <div className="bg-gray-800/50 border border-gray-600/30 rounded-lg p-4">
+                      <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-blue-400" />
+                        Payment Instructions
+                      </h4>
+                      <div className="text-xs text-gray-300 space-y-2">
+                        <div className="flex items-start gap-2">
+                          <span className="text-blue-400 font-bold">1.</span>
+                          <span>Click "Open Payment Window" to start the secure payment process</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-blue-400 font-bold">2.</span>
+                          <span>Enter your card details in the Paymob payment form</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-blue-400 font-bold">3.</span>
+                          <span>Complete 3D Secure authentication (OTP) if required by your bank</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-blue-400 font-bold">4.</span>
+                          <span>Keep the popup window open until payment completes successfully</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-blue-400 font-bold">5.</span>
+                          <span>You'll be redirected back automatically after successful payment</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="mt-6 text-center">
+              <div className="inline-flex items-center gap-2 bg-green-900/20 border border-green-600/30 rounded-lg px-4 py-2">
+                <CheckCircle className="w-4 h-4 text-green-400" />
+                <span className="text-green-300 text-sm">SSL Secured by Paymob</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
