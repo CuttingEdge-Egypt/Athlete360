@@ -22,7 +22,7 @@ export function Navigation() {
 
   const handleLogout = async () => {
     try {
-      await apiRequest('POST', '/api/logout', {});
+      await apiRequest('GET', '/api/logout', null);
       // Clear all cached data
       queryClient.clear();
       // Navigate to landing page
