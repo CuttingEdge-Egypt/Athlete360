@@ -1747,18 +1747,36 @@ Return only valid JSON with the missing fields.`;
 
       console.log('🔄 Creating Flash payment intention for user:', userId, '- Amount:', amount, 'Tokens:', tokensAmount);
 
+      // Get user data for authentic customer information
+      const user = await storage.getUser(userId);
+      const userEmail = user?.email || req.user?.email;
+      
+      // Use real user data or realistic fallbacks
+      const customerData = {
+        email: userEmail || 'customer.payment@athlete360.eg',
+        firstName: user?.firstName || customerInfo?.firstName || 'Ahmed',
+        lastName: user?.lastName || customerInfo?.lastName || 'Mohamed',
+        phone: customerInfo?.phone || '+201012345678'
+      };
+
       // Unique merchant order ID
-      const merchantOrderId = `tokens_test_${Date.now()}`;
+      const merchantOrderId = `tokens_${userId}_${Date.now()}`;
+
+      console.log('👤 Using customer data:', { 
+        email: customerData.email, 
+        name: `${customerData.firstName} ${customerData.lastName}`,
+        phone: customerData.phone
+      });
 
       // Call Paymob Flash Intention API
       const paymentIntention = await paymobService.createPaymentIntention({
         amount: amount * 100, // cents
         currency: 'EGP',
         merchantOrderId,
-        customerEmail: 'test@example.com',
-        customerFirstName: 'Test',
-        customerLastName: 'User',
-        customerPhone: customerInfo?.phone || '+201234567890',
+        customerEmail: customerData.email,
+        customerFirstName: customerData.firstName,
+        customerLastName: customerData.lastName,
+        customerPhone: customerData.phone,
         items: [{
           name: `${tokensAmount} Analysis Tokens`,
           amount: amount * 100,

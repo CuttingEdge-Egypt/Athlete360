@@ -120,12 +120,12 @@ export class PaymobService {
         expiration: 3600,
         order_id: orderData.id,
         billing_data: {
-          email: paymentData.customerEmail || 'customer@example.com',
-          first_name: paymentData.customerFirstName || 'Customer',
-          last_name: paymentData.customerLastName || 'User',
-          phone_number: paymentData.customerPhone || '+201234567890',
+          email: paymentData.customerEmail || 'customer.payment@athlete360.eg',
+          first_name: paymentData.customerFirstName || 'Ahmed',
+          last_name: paymentData.customerLastName || 'Mohamed',
+          phone_number: paymentData.customerPhone || '+201012345678',
           apartment: '6', floor: '1', building: '939',
-          street: '938, Al-Jadeed Bldg', city: 'Cairo', state: 'Cairo', 
+          street: '938 Al-Jadeed Bldg', city: 'Cairo', state: 'Cairo', 
           country: 'EGY', postal_code: '11511'
         },
         currency: paymentData.currency || 'EGP',
