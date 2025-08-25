@@ -52,106 +52,90 @@ export class PaymobService {
   }
 
   /**
-   * Create Payment Intention using the new Paymob Flash API
+   * Create Payment Intention using v1/intention API (Direct Flash Integration)
    */
   async createPaymentIntention(paymentData: PaymentIntentRequest): Promise<PaymentIntentResponse> {
     try {
-      console.log('🔄 Creating Paymob payment intention with Flash API...', { 
+      console.log('🔄 Creating Paymob payment intention with v1/intention API...', { 
         amount: paymentData.amount,
         merchantOrderId: paymentData.merchantOrderId 
       });
 
-      // Step 1: Authenticate to get token
-      const authResponse = await fetch('https://accept.paymob.com/api/auth/tokens', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ api_key: process.env.PAYMOB_API_KEY })
-      });
-
-      if (!authResponse.ok) {
-        throw new Error('Failed to authenticate with Paymob');
-      }
-
-      const authData: any = await authResponse.json();
-      const token = authData.token;
-
-      console.log('✅ Authenticated with Paymob, got token');
-
-      // Step 2: Create order
-      const orderPayload = {
-        auth_token: token,
-        delivery_needed: "false",
-        amount_cents: paymentData.amount,
+      // Use v1/intention API directly as per Paymob documentation
+      const intentionPayload = {
+        amount: Math.round(paymentData.amount / 100), // Convert from cents to EGP
         currency: paymentData.currency || 'EGP',
-        merchant_order_id: paymentData.merchantOrderId,
+        payment_methods: [
+          process.env.PAYMOB_INTEGRATION_ID ? parseInt(process.env.PAYMOB_INTEGRATION_ID) : 4233746,
+          "card"
+        ],
         items: paymentData.items?.length ? paymentData.items.map(item => ({
           name: item.name,
-          amount_cents: item.amount,
+          amount: Math.round(item.amount / 100),
           description: item.name,
           quantity: item.quantity || 1
         })) : [{
-          name: `${paymentData.merchantOrderId}`,
-          amount_cents: paymentData.amount,
+          name: 'Athlete360 Tokens',
+          amount: Math.round(paymentData.amount / 100),
           description: 'Token purchase',
           quantity: 1
-        }]
-      };
-
-      const orderResponse = await fetch('https://accept.paymob.com/api/ecommerce/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderPayload)
-      });
-
-      if (!orderResponse.ok) {
-        const orderError = await orderResponse.json();
-        throw new Error(`Failed to create order: ${JSON.stringify(orderError)}`);
-      }
-
-      const orderData: any = await orderResponse.json();
-      console.log('✅ Order created:', orderData.id);
-
-      // Step 3: Generate payment key for integration
-      const integrationId = process.env.PAYMOB_INTEGRATION_ID;
-      const paymentKeyPayload = {
-        auth_token: token,
-        amount_cents: paymentData.amount,
-        expiration: 3600,
-        order_id: orderData.id,
+        }],
         billing_data: {
-          email: paymentData.customerEmail || '',
-          first_name: paymentData.customerFirstName || '',
-          last_name: paymentData.customerLastName || '',
+          apartment: '6',
+          first_name: paymentData.customerFirstName || 'Customer',
+          last_name: paymentData.customerLastName || 'User',
+          street: '938, Al-Jadeed Bldg',
+          building: '939',
           phone_number: paymentData.customerPhone || '+201234567890',
-          apartment: 'NA', floor: 'NA', building: 'NA',
-          street: 'NA', city: 'Cairo', state: 'Cairo', country: 'EG', postal_code: '11511'
+          country: 'EGY',
+          email: paymentData.customerEmail || 'customer@example.com',
+          floor: '1',
+          state: 'Cairo'
         },
-        currency: paymentData.currency || 'EGP',
-        integration_id: integrationId
+        customer: {
+          first_name: paymentData.customerFirstName || 'Customer',
+          last_name: paymentData.customerLastName || 'User',
+          email: paymentData.customerEmail || 'customer@example.com',
+          extras: {
+            merchant_order_id: paymentData.merchantOrderId
+          }
+        },
+        extras: {
+          merchant_order_id: paymentData.merchantOrderId
+        }
       };
 
-      const paymentKeyResponse = await fetch('https://accept.paymob.com/api/acceptance/payment_keys', {
+      console.log('📤 Sending v1/intention request:', JSON.stringify(intentionPayload, null, 2));
+
+      const intentionResponse = await fetch('https://accept.paymob.com/v1/intention/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(paymentKeyPayload)
+        headers: {
+          'Authorization': `Token ${this.config.secretKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(intentionPayload)
       });
 
-      if (!paymentKeyResponse.ok) {
-        const keyError = await paymentKeyResponse.json();
-        throw new Error(`Failed to create payment key: ${JSON.stringify(keyError)}`);
+      if (!intentionResponse.ok) {
+        const errorData = await intentionResponse.json();
+        console.error('❌ v1/intention API error:', errorData);
+        throw new Error(`Failed to create payment intention: ${JSON.stringify(errorData)}`);
       }
 
-      const paymentKeyData: any = await paymentKeyResponse.json();
-      console.log('✅ Payment key generated');
+      const intentionData: any = await intentionResponse.json();
+      console.log('✅ Payment intention created:', {
+        client_secret: intentionData.client_secret?.substring(0, 20) + '...',
+        payment_methods: intentionData.payment_methods?.length
+      });
 
-      // Step 4: Create Flash checkout URL using the public key and payment token
-      const checkoutUrl = `https://accept.paymob.com/unifiedcheckout/?publicKey=${this.config.publicKey}&clientSecret=${paymentKeyData.token}`;
+      // Create unified checkout URL with publicKey and client_secret
+      const checkoutUrl = `https://accept.paymob.com/unifiedcheckout/?publicKey=${this.config.publicKey}&clientSecret=${intentionData.client_secret}`;
       
-      console.log('🔗 Constructed checkout URL:', checkoutUrl);
+      console.log('🔗 Constructed unified checkout URL');
 
       return {
-        id: orderData.id.toString(),
-        client_secret: paymentKeyData.token,
+        id: intentionData.id?.toString() || paymentData.merchantOrderId,
+        client_secret: intentionData.client_secret,
         redirect_url: checkoutUrl
       };
     } catch (error) {
