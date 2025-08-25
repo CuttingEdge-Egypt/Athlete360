@@ -66,7 +66,7 @@ export class PaymobService {
         amount: Math.round(paymentData.amount / 100), // Convert from cents to EGP
         currency: paymentData.currency || 'EGP',
         payment_methods: [
-          process.env.PAYMOB_INTEGRATION_ID ? parseInt(process.env.PAYMOB_INTEGRATION_ID) : 4233746,
+          process.env.INTEGRATION_ID ? parseInt(process.env.INTEGRATION_ID) : 4723443,
           "card"
         ],
         items: paymentData.items?.length ? paymentData.items.map(item => ({
