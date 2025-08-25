@@ -116,7 +116,7 @@ export class PaymobService {
       const integrationId = process.env.INTEGRATION_ID;
       const paymentKeyPayload = {
         auth_token: token,
-        amount_cents: paymentData.amount,
+        amount_cents: parseInt(String(paymentData.amount), 10), // FIX: Ensure amount is integer
         expiration: 3600,
         order_id: parseInt(orderData.id), // Convert to integer as required by Paymob
         billing_data: {
