@@ -155,11 +155,11 @@ export class PaymobService {
 
       console.log('📤 Payment intention request:', JSON.stringify(requestPayload, null, 2));
 
-      const response = await fetch('https://accept.paymob.com/v1/intention/', {
+      const response = await fetch('https://accept.paymob.com/v2/intention/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Token ${this.config.apiKey}`, // Use API key as bearer token
+          'Authorization': `Token ${this.config.apiKey}`, // Use API key as token
         },
         body: JSON.stringify(requestPayload),
       });
