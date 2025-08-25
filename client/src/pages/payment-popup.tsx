@@ -148,7 +148,7 @@ export function PaymentPopup({ selectedPackage, paymentIntent, onBack }: Payment
                   Payment Gateway
                 </CardTitle>
                 <CardDescription className="text-gray-400">
-                  Secure popup-based payment for optimal compatibility
+                  Secure payment with Paymob Flash - supports all Egyptian payment methods
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -161,18 +161,22 @@ export function PaymentPopup({ selectedPackage, paymentIntent, onBack }: Payment
                             <CreditCard className="w-8 h-8 text-white" />
                           </div>
                         </div>
-                        <h3 className="text-lg font-bold text-white mb-2">Ready to Process</h3>
+                        <h3 className="text-lg font-bold text-white mb-2">Secure Checkout</h3>
                         <p className="text-gray-300 text-sm mb-6">
-                          Click below to open the secure payment window and complete your purchase.
+                          Proceed to Paymob's secure checkout to complete your purchase.
                         </p>
                         <Button 
                           size="lg"
-                          onClick={openPaymentPopup}
+                          onClick={() => {
+                            if (paymentIntent?.redirect_url) {
+                              window.location.href = paymentIntent.redirect_url;
+                            }
+                          }}
                           className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3"
-                          data-testid="button-open-payment"
+                          data-testid="button-proceed-payment"
                         >
-                          <ExternalLink className="w-5 h-5 mr-3" />
-                          Open Payment Window
+                          <CreditCard className="w-5 h-5 mr-3" />
+                          Proceed to Checkout
                         </Button>
                       </div>
                     </div>
@@ -222,23 +226,23 @@ export function PaymentPopup({ selectedPackage, paymentIntent, onBack }: Payment
                     <div className="text-xs text-gray-300 space-y-2">
                       <div className="flex items-start gap-2">
                         <span className="text-blue-400 font-bold">1.</span>
-                        <span>Click "Open Payment Window" to start the secure payment process</span>
+                        <span>Click "Proceed to Checkout" to go to Paymob's secure payment page</span>
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="text-blue-400 font-bold">2.</span>
-                        <span>Enter your card details in the Paymob payment form</span>
+                        <span>Choose your payment method (cards, wallets, Valu, etc.)</span>
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="text-blue-400 font-bold">3.</span>
-                        <span>Complete 3D Secure authentication (OTP) if required by your bank</span>
+                        <span>Enter your payment details and complete 3D Secure (OTP) if required</span>
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="text-blue-400 font-bold">4.</span>
-                        <span>Keep the popup window open until payment completes successfully</span>
+                        <span>After successful payment, you'll be redirected back to our site</span>
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="text-blue-400 font-bold">5.</span>
-                        <span>You'll be redirected back automatically after successful payment</span>
+                        <span>Your tokens will be added automatically to your account</span>
                       </div>
                     </div>
                   </div>

@@ -1,0 +1,116 @@
+Got it 👍 — Rana from Paymob is basically telling you:
+
+1. You’re still using **old iframe integration**, which is deprecated.
+2. You need to **switch to the new “Unified Checkout”** (called **Flash**) that works with the **Create Intention API**.
+3. They gave you credentials info + Postman collection to test.
+
+Here’s what you need to do step by step to fully integrate Paymob on your website now:
+
+---
+
+### 🔹 1. Get Your Credentials from Paymob Dashboard
+
+Log in to your [Paymob dashboard](https://accept.paymobsolutions.com/portal2/en/login) and copy:
+
+* **API Key (Secret key)**
+* **Public Key**
+* **HMAC Secret**
+* **Integration ID** (make sure it’s **online**, not “non-online” like they found in your test)
+
+---
+
+### 🔹 2. Understand the New Flow (Flash / Unified Checkout)
+
+Instead of multiple steps with iframe tokens, now you only:
+
+1. **Call the “Create Intention” API**
+   → This will define the amount, currency, integration ID, and payment method.
+2. **Redirect user to Paymob’s checkout page (Flash)**
+   → Paymob handles OTP, 3DS, cards, wallets, etc. automatically.
+3. **Receive a callback/webhook from Paymob**
+   → Confirms payment success/failure on your backend.
+
+Docs: [Create Intention API](https://developers.paymob.com/egypt/api-reference-guide/create-intention-payment-api)
+
+---
+
+### 🔹 3. Backend Setup (Server Side)
+
+* Create an API route on your backend (e.g., `/create-payment-intent`)
+* From your backend, call Paymob’s `POST /v2/intention/` API:
+
+  ```json
+  {
+    "amount": 10000,        // in cents (e.g. 100.00 EGP)
+    "currency": "EGP",
+    "payment_methods": [your_integration_id],
+    "merchant_order_id": "unique_order_id_123",
+    "items": [
+      {
+        "name": "Product Name",
+        "amount": 10000,
+        "quantity": 1
+      }
+    ]
+  }
+  ```
+* Paymob will return a `redirect_url`.
+
+---
+
+### 🔹 4. Frontend Setup
+
+* From your frontend checkout flow, when the user confirms the order:
+
+  * Call your backend `/create-payment-intent`
+  * Get the **`redirect_url`** from Paymob’s response
+  * Redirect the user there
+  * Example:
+
+    ```js
+    window.location.href = response.redirect_url;
+    ```
+
+---
+
+### 🔹 5. Handle Webhooks (Very Important ✅)
+
+* Configure a webhook endpoint in your backend (e.g., `/payment/callback`)
+* In Paymob dashboard → add your webhook URL
+* Verify webhook with **HMAC secret** (they mentioned it in the email)
+* Update your database:
+
+  * Mark order as **Paid** if success
+  * Or handle **Failed/Cancelled** payments
+
+---
+
+### 🔹 6. Test the Integration
+
+* Use the **Postman collection** Rana attached (import into Postman)
+* Test with your **test Integration ID** (make sure it’s “online” type)
+* Verify: OTP screen, card payment, wallet, etc.
+* Once confirmed → switch to **live Integration ID**
+
+---
+
+### 🔹 7. Go Live
+
+* Replace test Integration ID with live one
+* Enable production webhook URL
+* Double-check supported [payment methods](https://developers.paymob.com/egypt/payment-methods-1) you want to allow (cards, Meeza, wallets, Valu, etc.)
+
+---
+
+✅ Final Checklist for Full Paymob Integration:
+
+* [ ] Get credentials (API Key, Public Key, HMAC, Integration ID)
+* [ ] Implement **Create Intention API** on backend
+* [ ] Redirect user to `redirect_url` on frontend
+* [ ] Setup webhook + HMAC validation
+* [ ] Test all flows (card, wallet, OTP, etc.) with Postman
+* [ ] Switch to production Integration ID
+
+---
+
+Do you want me to **draft the actual backend code (Node.js or PHP)** for the new `Create Intention` flow so you can drop it into your project directly?

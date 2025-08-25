@@ -237,7 +237,7 @@ export default function PaymentCenter() {
                     Secure Payment Gateway
                   </CardTitle>
                   <CardDescription className="text-gray-400">
-                    Popup-based payment for optimal 3D Secure compatibility
+                    Secure payment with Paymob Flash - supports all Egyptian payment methods
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -250,59 +250,36 @@ export default function PaymentCenter() {
                             <CreditCard className="w-8 h-8 text-white" />
                           </div>
                         </div>
-                        <h3 className="text-lg font-bold text-white mb-2">Ready to Process</h3>
+                        <h3 className="text-lg font-bold text-white mb-2">Secure Checkout</h3>
                         <p className="text-gray-300 text-sm mb-6">
-                          Open the secure payment window to complete your purchase safely.
+                          Proceed to Paymob's secure checkout to complete your purchase.
                         </p>
                         <Button 
                           size="lg"
                           onClick={() => {
-                            console.log('Opening payment popup window...');
-                            const popup = window.open(
-                              paymentIntent.iframeUrl, 
-                              'paymob_payment', 
-                              'width=900,height=700,scrollbars=yes,resizable=yes,status=yes,location=yes,menubar=no,toolbar=no'
-                            );
+                            console.log('Redirecting to Paymob Flash checkout...');
                             
-                            if (popup) {
-                              popup.focus();
-                              
+                            if (paymentIntent?.redirect_url) {
                               toast({
-                                title: "Payment Window Opened",
-                                description: "Complete your payment in the new window.",
+                                title: "Redirecting to Payment",
+                                description: "Taking you to the secure checkout page...",
                               });
                               
-                              // Monitor popup for completion
-                              const checkClosed = setInterval(() => {
-                                if (popup.closed) {
-                                  clearInterval(checkClosed);
-                                  console.log('Payment popup closed, checking status...');
-                                  
-                                  toast({
-                                    title: "Payment Window Closed",
-                                    description: "Checking payment status...",
-                                  });
-                                  
-                                  // Check payment status after popup closes
-                                  setTimeout(() => {
-                                    window.location.reload();
-                                  }, 2000);
-                                }
-                              }, 1000);
-                              
+                              // Redirect directly to Paymob Flash
+                              window.location.href = paymentIntent.redirect_url;
                             } else {
                               toast({
-                                title: "Popup Blocked",
-                                description: "Please allow popups for this site and try again.",
+                                title: "Payment Error",
+                                description: "Payment checkout URL not available. Please try again.",
                                 variant: "destructive",
                               });
                             }
                           }}
                           className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3"
-                          data-testid="button-open-payment"
+                          data-testid="button-proceed-payment"
                         >
-                          <ExternalLink className="w-5 h-5 mr-3" />
-                          Open Payment Window
+                          <CreditCard className="w-5 h-5 mr-3" />
+                          Proceed to Checkout
                         </Button>
                       </div>
                     </div>
@@ -316,23 +293,23 @@ export default function PaymentCenter() {
                       <div className="text-xs text-gray-300 space-y-2">
                         <div className="flex items-start gap-2">
                           <span className="text-blue-400 font-bold">1.</span>
-                          <span>Click "Open Payment Window" to start the secure payment process</span>
+                          <span>Click "Proceed to Checkout" to go to Paymob's secure payment page</span>
                         </div>
                         <div className="flex items-start gap-2">
                           <span className="text-blue-400 font-bold">2.</span>
-                          <span>Enter your card details in the Paymob payment form</span>
+                          <span>Choose your payment method (cards, wallets, Valu, etc.)</span>
                         </div>
                         <div className="flex items-start gap-2">
                           <span className="text-blue-400 font-bold">3.</span>
-                          <span>Complete 3D Secure authentication (OTP) if required by your bank</span>
+                          <span>Enter your payment details and complete 3D Secure (OTP) if required</span>
                         </div>
                         <div className="flex items-start gap-2">
                           <span className="text-blue-400 font-bold">4.</span>
-                          <span>Keep the popup window open until payment completes successfully</span>
+                          <span>After successful payment, you'll be redirected back to our site</span>
                         </div>
                         <div className="flex items-start gap-2">
                           <span className="text-blue-400 font-bold">5.</span>
-                          <span>You'll be redirected back automatically after successful payment</span>
+                          <span>Your tokens will be added automatically to your account</span>
                         </div>
                       </div>
                     </div>

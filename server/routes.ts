@@ -1727,7 +1727,7 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
-  // Paymob payment intent creation
+  // New Paymob Flash payment intention creation
   app.post('/api/payments/create-intent', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -1742,32 +1742,51 @@ Return only valid JSON with the missing fields.`;
         return res.status(404).json({ message: "User not found" });
       }
 
-      console.log('🔄 Creating payment intent for user:', user.email, 'Amount:', amount, 'Tokens:', tokensAmount);
+      console.log('🔄 Creating payment intention with Flash API for user:', user.email, 'Amount:', amount, 'Tokens:', tokensAmount);
 
-      // Create payment intent with Paymob - include userId in order for callback processing
-      const paymentIntent = await paymobService.createPaymentIntent({
+      // Generate unique merchant order ID with user context
+      const merchantOrderId = `tokens_${userId}_${Date.now()}`;
+
+      // Create payment intention with Paymob Flash API
+      const paymentIntention = await paymobService.createPaymentIntention({
         amount: amount * 100, // Convert to cents
         currency: 'EGP',
+        merchantOrderId,
         customerEmail: user.email || '',
         customerFirstName: user.firstName || '',
         customerLastName: user.lastName || '',
-        customerPhone: customerInfo?.phone || '+201234567890', // Use proper Egyptian phone for bank validation
-        // userId will be included in merchant_order_id for callback processing
+        customerPhone: customerInfo?.phone || '+201234567890',
+        items: [
+          {
+            name: `${tokensAmount} Analysis Tokens`,
+            amount: amount * 100,
+            quantity: 1
+          }
+        ]
       });
 
-      // Store pending payment in session or database
-      // For now, we'll include it in the response
+      // Store payment intent details for webhook processing
+      // In a real app, you'd store this in a database
+      console.log('💾 Storing payment context:', {
+        intentionId: paymentIntention.id,
+        merchantOrderId,
+        userId,
+        amount,
+        tokensAmount
+      });
+
       res.json({
         success: true,
-        paymentIntent,
+        paymentIntention,
         amount,
         tokensAmount,
         userId,
+        merchantOrderId
       });
     } catch (error: any) {
-      console.error("Error creating payment intent:", error);
+      console.error("Error creating payment intention:", error);
       res.status(500).json({ 
-        message: "Failed to create payment intent",
+        message: "Failed to create payment intention",
         error: error?.message || 'Unknown error'
       });
     }
@@ -1891,56 +1910,54 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
-  // Paymob processed callback (server-to-server)
-  app.post('/api/payments/paymob-processed', async (req, res) => {
+  // New Paymob Flash webhook handler with HMAC verification
+  app.post('/api/payments/webhook', async (req, res) => {
     try {
-      console.log('📥 Paymob processed callback:', JSON.stringify(req.body, null, 2));
+      console.log('📥 Paymob Flash webhook received');
       
-      // Handle both formats: {obj: {...}} and direct {...}
-      const paymentData = req.body.obj || req.body;
+      // Get raw body for HMAC verification
+      const rawBody = JSON.stringify(req.body);
+      const hmacSignature = req.get('hmac') || req.get('x-hmac-signature') || '';
       
-      if (!paymentData) {
-        console.error('❌ No payment data found in callback');
-        return res.status(400).send('Invalid callback data');
+      // Verify webhook signature
+      const isValidSignature = paymobService.verifyWebhookSignature(rawBody, hmacSignature);
+      
+      if (!isValidSignature) {
+        console.error('❌ Invalid webhook signature');
+        return res.status(401).send('Unauthorized: Invalid signature');
       }
-
-      console.log('📋 Processing payment data:', {
-        id: paymentData.id,
-        success: paymentData.success,
-        pending: paymentData.pending,
-        merchant_order_id: paymentData.merchant_order_id,
-        amount_cents: paymentData.amount_cents,
-        is_3d_secure: paymentData.is_3d_secure
-      });
-
-      // Process successful payment
-      if (paymentData.success === 'true' || paymentData.success === true || paymentData.success === 'True') {
-        console.log('✅ Payment successful:', paymentData.merchant_order_id);
+      
+      console.log('✅ Webhook signature verified');
+      console.log('📋 Webhook data:', JSON.stringify(req.body, null, 2));
+      
+      // Process webhook data
+      const paymentResult = paymobService.processWebhookData(req.body);
+      
+      console.log('📊 Processed payment result:', paymentResult);
+      
+      // Handle successful payment
+      if (paymentResult.isSuccess && !paymentResult.isPending && !paymentResult.errorOccurred) {
+        console.log('✅ Payment successful:', paymentResult.merchantOrderId);
         
-        // Extract order details
-        const orderId = paymentData.merchant_order_id;
-        const amountCents = parseInt(paymentData.amount_cents);
-        const amount = amountCents / 100;
-        
-        // Parse userId from order ID - handle both formats: tokens_userId_timestamp and order_timestamp
+        // Parse userId from merchant order ID
+        const orderParts = paymentResult.merchantOrderId.split('_');
         let userId = null;
-        const orderParts = orderId.split('_');
         
         if (orderParts.length >= 2 && orderParts[0] === 'tokens') {
           userId = orderParts[1];
-        } else if (orderParts.length >= 1 && orderParts[0] === 'order') {
-          // For order_timestamp format, we need to get userId from current session
-          // For now, we'll use a fallback approach - get the current authenticated user
-          console.log('⚠️ Order format detected, need to match with current user session');
-          // We'll implement user matching later
         }
         
-        console.log('🔍 Order parsing:', { orderId, orderParts, userId });
+        if (!userId) {
+          console.error('❌ Could not extract userId from order ID:', paymentResult.merchantOrderId);
+          return res.status(400).send('Invalid order ID format');
+        }
         
-        // Calculate tokens based on amount
+        const amount = paymentResult.amountCents / 100;
+        
+        // Calculate tokens based on amount (matching your token packages)
         const tokensToAdd = amount === 25 ? 1000 : amount === 15 ? 500 : amount === 50 ? 2500 : 0;
         
-        if (tokensToAdd > 0 && userId) {
+        if (tokensToAdd > 0) {
           // Add tokens to user
           await storage.addTokensPurchase(userId, tokensToAdd);
 
@@ -1958,30 +1975,61 @@ Return only valid JSON with the missing fields.`;
             receiptNumber: `PAY-${Date.now().toString()}`,
             amount: amount.toString(),
             tokensAmount: tokensToAdd,
-            paymentMethod: paymentData.source_data?.sub_type || paymentData['source_data.sub_type'] || 'card',
-            cardLast4: paymentData.source_data?.pan || paymentData['source_data.pan'] || 'N/A',
-            cardBrand: paymentData.source_data?.sub_type || paymentData['source_data.sub_type'] || 'Unknown',
-            paymobTransactionId: paymentData.id?.toString() || 'unknown',
+            paymentMethod: 'card', // Flash supports multiple methods
+            cardLast4: 'N/A', // Not available in Flash webhook
+            cardBrand: 'Unknown',
+            paymobTransactionId: paymentResult.transactionId.toString(),
             status: 'completed'
           });
 
           console.log(`✅ Added ${tokensToAdd} tokens to user ${userId}`);
         }
-      } else if (paymentData.pending === 'true' || paymentData.pending === true) {
-        console.log('⏳ Payment pending (likely 3DS):', paymentData.merchant_order_id);
-        // Don't process pending payments yet, wait for final callback
+      } else if (paymentResult.isPending) {
+        console.log('⏳ Payment pending:', paymentResult.merchantOrderId);
       } else {
-        console.log('❌ Payment failed:', paymentData.merchant_order_id, 'Success:', paymentData.success);
+        console.log('❌ Payment failed:', paymentResult.merchantOrderId);
       }
 
       res.status(200).send('OK');
     } catch (error) {
-      console.error('❌ Error processing Paymob callback:', error);
-      res.status(500).send('Error processing callback');
+      console.error('❌ Error processing Paymob webhook:', error);
+      res.status(500).send('Webhook processing error');
     }
   });
 
-  // Paymob response callback (user redirect after payment)
+  // Paymob Flash success redirect page
+  app.get('/payment-success', async (req, res) => {
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Payment Successful</title>
+        <style>
+          body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f5f5f5; }
+          .container { background: white; padding: 40px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+          .success { color: #10b981; font-size: 24px; margin-bottom: 20px; }
+          .message { font-size: 18px; color: #374151; margin-bottom: 30px; }
+          .button { background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="success">✅ Payment Successful!</div>
+          <div class="message">Your tokens have been added to your account.</div>
+          <a href="/" class="button">Return to Dashboard</a>
+        </div>
+        <script>
+          // Auto-redirect after 5 seconds
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 5000);
+        </script>
+      </body>
+      </html>
+    `);
+  });
+
+  // Legacy Paymob response callback (keep for backward compatibility)
   app.get('/api/payments/paymob-response', async (req, res) => {
     try {
       console.log('🔄 Paymob response callback (user redirect):', req.query);
@@ -2037,31 +2085,13 @@ Return only valid JSON with the missing fields.`;
     try {
       console.log('🔐 3DS callback received:', req.body);
       
-      // Process 3DS callback using Paymob service
-      const result = await paymobService.process3DSCallback(req.body);
+      // Legacy 3DS callback - now handled by webhook
+      console.log('Legacy 3DS callback received - use webhook instead');
       
-      // If payment successful after 3DS, process tokens
-      if (result.success === 'true' || result.success === true) {
-        console.log('✅ 3DS payment successful:', result.order);
-        
-        // Extract order details and add tokens to user account
-        const merchantOrderId = result.merchant_order_id || result.order?.merchant_order_id;
-        
-        if (merchantOrderId) {
-          // Parse amount from merchant order ID or use amount from callback
-          const amountCents = result.amount_cents || 1500; // fallback to 15 EGP
-          const tokens = Math.floor(amountCents / 3); // 500 tokens for 1500 cents
-          
-          // Find user by email in billing data or from stored session
-          // For now, we'll log the successful payment
-          console.log(`💰 3DS Payment completed: ${amountCents} cents, awarding ${tokens} tokens`);
-        }
-        
-        res.json({ success: true, message: '3DS payment processed successfully' });
-      } else {
-        console.log('❌ 3DS payment failed:', result);
-        res.json({ success: false, message: '3DS payment failed' });
-      }
+      res.json({ 
+        success: true, 
+        message: 'Legacy callback received - payments now processed via webhook' 
+      });
     } catch (error) {
       console.error('Error processing 3DS callback:', error);
       res.status(500).json({ success: false, message: 'Failed to process 3DS callback' });
@@ -2087,18 +2117,26 @@ Return only valid JSON with the missing fields.`;
       // If Paymob integration is requested, create payment intent
       if (usePaymob) {
         try {
-          const paymentIntent = await paymobService.createPaymentIntent({
+          const merchantOrderId = `tokens_${userId}_${Date.now()}`;
+          
+          const paymentIntention = await paymobService.createPaymentIntention({
             amount: amount * 100, // Convert to cents
             currency: 'EGP',
+            merchantOrderId,
             customerEmail: user.email || '',
             customerFirstName: user.firstName || '',
             customerLastName: user.lastName || '',
-            customerPhone: 'NA',
+            customerPhone: '+201234567890',
+            items: [{
+              name: `${tokensToAdd} Analysis Tokens`,
+              amount: amount * 100,
+              quantity: 1
+            }]
           });
 
           return res.json({
-            message: "Payment intent created",
-            paymentIntent,
+            message: "Payment intention created",
+            paymentIntention,
             tokensToAdd,
             usePayment: true
           });
