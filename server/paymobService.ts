@@ -237,7 +237,7 @@ export class PaymobService {
 const paymobConfig: PaymobConfig = {
   secretKey: process.env.PAYMOB_SECRET_KEY!,
   publicKey: process.env.PAYMOB_PUBLIC_KEY!,
-  hmacSecret: process.env.PAYMOB_HMAC_SECRET!,
+  hmacSecret: process.env.HMAC!,
 };
 
 export const paymobService = new PaymobService(paymobConfig);
