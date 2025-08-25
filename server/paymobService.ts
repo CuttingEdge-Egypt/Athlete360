@@ -109,7 +109,9 @@ export class PaymobService {
           requestPayload: JSON.stringify(requestPayload, null, 2)
         });
         
-        throw new Error(`Payment intention failed: ${data.message || data.detail || 'Unknown error'}`);
+        throw new Error(
+          `Payment intention failed: ${data.message || data.detail || data.non_field_errors?.[0] || 'Unknown error'}`
+        );
       }
 
       console.log('✅ Payment intention created successfully:', data);
@@ -207,7 +209,7 @@ export class PaymobService {
 const paymobConfig: PaymobConfig = {
   secretKey: process.env.PAYMOB_SECRET_KEY!,
   publicKey: process.env.PAYMOB_PUBLIC_KEY!,
-  hmacSecret: process.env.HMAC || process.env.PAYMOB_HMAC_SECRET || 'default-secret',
+  hmacSecret: process.env.PAYMOB_HMAC_SECRET!,
 };
 
 export const paymobService = new PaymobService(paymobConfig);

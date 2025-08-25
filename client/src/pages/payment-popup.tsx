@@ -1,9 +1,6 @@
-import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, CreditCard, ExternalLink, CheckCircle, AlertCircle } from 'lucide-react';
+import { AlertCircle, ArrowLeft, CheckCircle, CreditCard } from 'lucide-react';
 
 interface PaymentPopupProps {
   selectedPackage: any;
@@ -12,68 +9,6 @@ interface PaymentPopupProps {
 }
 
 export function PaymentPopup({ selectedPackage, paymentIntent, onBack }: PaymentPopupProps) {
-  const { toast } = useToast();
-  const [popupWindow, setPopupWindow] = useState<Window | null>(null);
-  const [paymentStatus, setPaymentStatus] = useState<'ready' | 'processing' | 'completed' | 'failed'>('ready');
-  const [isMonitoring, setIsMonitoring] = useState(false);
-
-  const openPaymentPopup = () => {
-    console.log('Opening payment popup window...');
-    
-    const popup = window.open(
-      paymentIntent.redirect_url, 
-      'paymob_payment', 
-      'width=900,height=700,scrollbars=yes,resizable=yes,status=yes,location=yes,menubar=no,toolbar=no,directories=no,copyhistory=no'
-    );
-    
-    if (popup) {
-      setPopupWindow(popup);
-      setPaymentStatus('processing');
-      setIsMonitoring(true);
-      
-      // Focus the popup
-      popup.focus();
-      
-      toast({
-        title: "Payment Window Opened",
-        description: "Complete your payment in the new window.",
-      });
-      
-      // Monitor popup for completion
-      const checkClosed = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(checkClosed);
-          setIsMonitoring(false);
-          setPopupWindow(null);
-          console.log('Payment popup closed, checking status...');
-          
-          toast({
-            title: "Payment Window Closed",
-            description: "Checking payment status...",
-          });
-          
-          // Check payment status after popup closes
-          setTimeout(() => {
-            window.location.reload();
-          }, 2000);
-        }
-      }, 1000);
-      
-    } else {
-      toast({
-        title: "Popup Blocked",
-        description: "Please allow popups for this site and try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const focusPopup = () => {
-    if (popupWindow && !popupWindow.closed) {
-      popupWindow.focus();
-    }
-  };
-
   return (
     <div className="min-h-screen bg-athlete-gray-900 text-white">
       <div className="container mx-auto px-4 py-8">
@@ -91,7 +26,7 @@ export function PaymentPopup({ selectedPackage, paymentIntent, onBack }: Payment
             </Button>
             <div>
               <h1 className="text-2xl font-bold text-white" data-testid="text-payment-title">
-                Secure Payment
+                Secure Checkout
               </h1>
               <p className="text-gray-400" data-testid="text-payment-subtitle">
                 {selectedPackage?.name} - {selectedPackage?.tokens} tokens for {selectedPackage?.price} EGP
@@ -135,87 +70,49 @@ export function PaymentPopup({ selectedPackage, paymentIntent, onBack }: Payment
                       </div>
                     </div>
                   </div>
-                  
                 </div>
               </CardContent>
             </Card>
 
-            {/* Payment Controls */}
+            {/* Payment Gateway */}
             <Card className="bg-athlete-gray-800 border-gray-700">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <CreditCard className="w-5 h-5 text-athlete-accent" />
-                  Payment Gateway
+                  Secure Checkout
                 </CardTitle>
                 <CardDescription className="text-gray-400">
-                  Secure payment with Paymob Flash - supports all Egyptian payment methods
+                  Complete your payment through Paymob's hosted checkout
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  {paymentStatus === 'ready' && (
-                    <div className="text-center">
-                      <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-6">
-                        <div className="flex items-center justify-center mb-4">
-                          <div className="bg-blue-600 p-3 rounded-full">
-                            <CreditCard className="w-8 h-8 text-white" />
-                          </div>
-                        </div>
-                        <h3 className="text-lg font-bold text-white mb-2">Secure Checkout</h3>
-                        <p className="text-gray-300 text-sm mb-6">
-                          Proceed to Paymob's secure checkout to complete your purchase.
-                        </p>
-                        <Button 
-                          size="lg"
-                          onClick={() => {
-                            if (paymentIntent?.redirect_url) {
-                              window.location.href = paymentIntent.redirect_url;
-                            }
-                          }}
-                          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3"
-                          data-testid="button-proceed-payment"
-                        >
-                          <CreditCard className="w-5 h-5 mr-3" />
-                          Proceed to Checkout
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {paymentStatus === 'processing' && (
-                    <div className="text-center">
-                      <div className="bg-orange-900/20 border border-orange-600/30 rounded-lg p-6">
-                        <div className="flex items-center justify-center mb-4">
-                          <div className="bg-orange-600 p-3 rounded-full animate-pulse">
-                            <CreditCard className="w-8 h-8 text-white" />
-                          </div>
-                        </div>
-                        <h3 className="text-lg font-bold text-white mb-2">Payment in Progress</h3>
-                        <p className="text-gray-300 text-sm mb-4">
-                          Complete your payment in the popup window. If you don't see it, check for popup blockers.
-                        </p>
-                        <div className="space-y-3">
-                          <Button 
-                            variant="outline"
-                            onClick={focusPopup}
-                            className="border-orange-600 text-orange-400 hover:bg-orange-600 hover:text-white"
-                            data-testid="button-focus-popup"
-                          >
-                            <ExternalLink className="w-4 h-4 mr-2" />
-                            Focus Payment Window
-                          </Button>
-                          <Button 
-                            variant="outline"
-                            onClick={openPaymentPopup}
-                            className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                            data-testid="button-reopen-payment"
-                          >
-                            Open New Payment Window
-                          </Button>
+                  <div className="text-center">
+                    <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-6">
+                      <div className="flex items-center justify-center mb-4">
+                        <div className="bg-blue-600 p-3 rounded-full">
+                          <CreditCard className="w-8 h-8 text-white" />
                         </div>
                       </div>
+                      <h3 className="text-lg font-bold text-white mb-2">Secure Checkout</h3>
+                      <p className="text-gray-300 text-sm mb-6">
+                        Proceed to Paymob's secure checkout to complete your purchase.
+                      </p>
+                      <Button
+                        size="lg"
+                        onClick={() => {
+                          if (paymentIntent?.redirect_url) {
+                            window.location.href = paymentIntent.redirect_url;
+                          }
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3"
+                        data-testid="button-proceed-payment"
+                      >
+                        <CreditCard className="w-5 h-5 mr-3" />
+                        Proceed to Checkout
+                      </Button>
                     </div>
-                  )}
+                  </div>
 
                   {/* Payment Instructions */}
                   <div className="bg-gray-800/50 border border-gray-600/30 rounded-lg p-4">
@@ -224,26 +121,11 @@ export function PaymentPopup({ selectedPackage, paymentIntent, onBack }: Payment
                       Payment Instructions
                     </h4>
                     <div className="text-xs text-gray-300 space-y-2">
-                      <div className="flex items-start gap-2">
-                        <span className="text-blue-400 font-bold">1.</span>
-                        <span>Click "Proceed to Checkout" to go to Paymob's secure payment page</span>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <span className="text-blue-400 font-bold">2.</span>
-                        <span>Choose your payment method (cards, wallets, Valu, etc.)</span>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <span className="text-blue-400 font-bold">3.</span>
-                        <span>Enter your payment details and complete 3D Secure (OTP) if required</span>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <span className="text-blue-400 font-bold">4.</span>
-                        <span>After successful payment, you'll be redirected back to our site</span>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <span className="text-blue-400 font-bold">5.</span>
-                        <span>Your tokens will be added automatically to your account</span>
-                      </div>
+                      <p>1. Click "Proceed to Checkout"</p>
+                      <p>2. Choose your payment method (cards, wallets, Valu, etc.)</p>
+                      <p>3. Enter your payment details & complete OTP if required</p>
+                      <p>4. You'll be redirected back after successful payment</p>
+                      <p>5. Tokens will be added automatically to your account</p>
                     </div>
                   </div>
                 </div>

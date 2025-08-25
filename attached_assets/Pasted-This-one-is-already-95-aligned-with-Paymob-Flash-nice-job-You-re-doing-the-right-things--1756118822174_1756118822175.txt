@@ -1,0 +1,85 @@
+This one is already **95% aligned with Paymob Flash** 🎉 — nice job.
+You’re doing the right things:
+
+* `POST /v2/intention/` ✅
+* Using `secretKey` in Authorization ✅
+* Constructing the **unified checkout URL** with `publicKey + client_secret` ✅
+* Verifying webhook with `hmacSecret` ✅
+* Processing webhook fields correctly ✅
+
+---
+
+### 🔧 Recommended Adjustments
+
+1. **Environment Variable Naming**
+
+   * You’re mixing `HMAC` and `PAYMOB_HMAC_SECRET`. I’d standardize to just:
+
+     ```ts
+     hmacSecret: process.env.PAYMOB_HMAC_SECRET!,
+     ```
+   * Otherwise, someone might forget and put it only in `PAYMOB_HMAC_SECRET`.
+
+---
+
+2. **Payment Methods**
+   Right now you’re reading `PAYMOB_PAYMENT_METHOD_IDS` as a CSV list. That’s good — but note:
+
+   * If empty, you send `undefined`. That’s fine, Paymob will then show *all available methods* for that integration.
+   * If you want to restrict (cards only, wallets only, etc.) you must keep this populated.
+
+   ✅ No code change needed unless you want to force defaults.
+
+---
+
+3. **Response Types**
+   Your `PaymentIntentResponse` has `id`, `client_secret`, and `redirect_url`.
+
+   * The API also returns `amount`, `currency`, etc. If you want those available, extend your type.
+
+---
+
+4. **Error Messages**
+   When intention creation fails you throw:
+
+   ```ts
+   throw new Error(`Payment intention failed: ${data.message || data.detail || 'Unknown error'}`);
+   ```
+
+   That’s good, but sometimes Paymob sends errors under `non_field_errors`.
+   → I’d expand the message fallback:
+
+   ```ts
+   throw new Error(`Payment intention failed: ${data.message || data.detail || data.non_field_errors?.[0] || 'Unknown error'}`);
+   ```
+
+---
+
+5. **Optional: Verify Webhook Amount**
+   In `processFlashWebhookData`, after extracting `amountCents`, you may want to **cross-check with your DB order amount** to prevent tampering.
+
+---
+
+### ✅ Minimal Adjusted Version
+
+```ts
+const paymobConfig: PaymobConfig = {
+  secretKey: process.env.PAYMOB_SECRET_KEY!,
+  publicKey: process.env.PAYMOB_PUBLIC_KEY!,
+  hmacSecret: process.env.PAYMOB_HMAC_SECRET!, // unified
+};
+```
+
+and in the error throw:
+
+```ts
+throw new Error(
+  `Payment intention failed: ${data.message || data.detail || data.non_field_errors?.[0] || 'Unknown error'}`
+);
+```
+
+---
+
+📌 With these tweaks, your `paymobService.ts` is **production-ready for Flash Unified Checkout**.
+
+Do you want me to also add a **helper method** that verifies a webhook event end-to-end (signature check + DB order match + status extraction) so your backend handler can just call one function? That would keep your controller super clean.
