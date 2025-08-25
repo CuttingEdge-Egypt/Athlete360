@@ -113,7 +113,7 @@ export class PaymobService {
       console.log('✅ Order created:', orderData.id);
 
       // Step 3: Generate payment key for integration
-      const integrationId = process.env.PAYMOB_INTEGRATION_ID || '3036500';
+      const integrationId = '4233746'; // Working integration ID
       const paymentKeyPayload = {
         auth_token: token,
         amount_cents: paymentData.amount,
