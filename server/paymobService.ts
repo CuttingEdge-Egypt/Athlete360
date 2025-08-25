@@ -82,17 +82,17 @@ export class PaymobService {
       const orderPayload = {
         auth_token: token,
         delivery_needed: "false",
-        amount_cents: paymentData.amount,
+        amount_cents: parseInt(String(paymentData.amount), 10), // FIX: Ensure amount is integer
         currency: paymentData.currency || 'EGP',
         merchant_order_id: paymentData.merchantOrderId,
         items: paymentData.items?.length ? paymentData.items.map(item => ({
           name: item.name,
-          amount_cents: item.amount,
+          amount_cents: parseInt(String(item.amount), 10), // FIX: Ensure item amount is integer
           description: item.name,
           quantity: item.quantity || 1
         })) : [{
           name: `${paymentData.merchantOrderId}`,
-          amount_cents: paymentData.amount,
+          amount_cents: parseInt(String(paymentData.amount), 10), // FIX: Ensure amount is integer
           description: 'Token purchase',
           quantity: 1
         }]
