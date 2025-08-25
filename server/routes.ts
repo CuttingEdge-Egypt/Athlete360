@@ -1777,7 +1777,7 @@ Return only valid JSON with the missing fields.`;
 
       res.json({
         success: true,
-        paymentIntention,
+        paymentIntent: paymentIntention, // Frontend expects paymentIntent
         amount,
         tokensAmount,
         userId,
