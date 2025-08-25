@@ -126,7 +126,7 @@ export class PaymobService {
           phone_number: paymentData.customerPhone || '+201012345678',
           apartment: '6', floor: '1', building: '939',
           street: '938 Al-Jadeed Bldg', city: 'Cairo', state: 'Cairo', 
-          country: 'EGY', postal_code: '11511'
+          country: 'EG', postal_code: '11511'
         },
         currency: paymentData.currency || 'EGP',
         integration_id: integrationId
