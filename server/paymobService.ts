@@ -159,7 +159,7 @@ export class PaymobService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Token ${this.config.apiKey}`, // Use API key as token
+          'Authorization': `Token ${this.config.secretKey}`, // Use secret key for authentication
         },
         body: JSON.stringify(requestPayload),
       });
@@ -264,7 +264,7 @@ export class PaymobService {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Token ${this.config.apiKey}`,
+          'Authorization': `Token ${this.config.secretKey}`,
         },
       });
 
