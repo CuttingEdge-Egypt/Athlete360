@@ -1934,18 +1934,14 @@ Return only valid JSON with the missing fields.`;
       // Parse JSON body now that signature is verified
       const payload = JSON.parse(rawBody);
 
-      // Normalize a minimal contract from Flash webhook
-      const isSuccess = payload?.obj?.success ?? payload?.success ?? false;
-      const isPending = payload?.obj?.pending ?? payload?.pending ?? false;
-      const merchantOrderId = payload?.obj?.merchant_order_id ?? payload?.merchant_order_id;
-      const transactionId = String(payload?.obj?.id ?? payload?.id ?? '');
-      const amountCents = Number(payload?.obj?.amount_cents ?? payload?.amount_cents ?? 0);
+      // Process Flash webhook data using the service method
+      const webhookResult = paymobService.processFlashWebhookData(payload);
+      
+      console.log('Webhook OK:', webhookResult);
 
-      console.log('Webhook OK:', { isSuccess, isPending, merchantOrderId, transactionId, amountCents });
-
-      if (isSuccess && !isPending && merchantOrderId?.startsWith('tokens_')) {
-        const userId = merchantOrderId.split('_')[1];
-        const amount = amountCents / 100;
+      if (webhookResult.isSuccess && !webhookResult.isPending && webhookResult.merchantOrderId?.startsWith('tokens_')) {
+        const userId = webhookResult.merchantOrderId.split('_')[1];
+        const amount = webhookResult.amountCents / 100;
 
         // Map your packages (you already have this)
         const tokensToAdd = amount === 25 ? 1000 : amount === 15 ? 500 : amount === 50 ? 2500 : 0;
@@ -1963,7 +1959,7 @@ Return only valid JSON with the missing fields.`;
             paymentMethod: 'flash',
             cardLast4: 'N/A',
             cardBrand: 'N/A',
-            paymobTransactionId: transactionId,
+            paymobTransactionId: webhookResult.transactionId,
             status: 'completed'
           });
         }

@@ -26,60 +26,22 @@ export interface PaymentIntentResponse {
   id: string;
   client_secret: string;
   redirect_url: string;
-  iframe_url?: string;
-  payment_methods: any[];
 }
 
-export interface WebhookData {
-  amount_cents: number;
-  created_at: string;
-  currency: string;
-  error_occurred: boolean;
-  has_parent_transaction: boolean;
-  id: number;
-  integration_id: number;
-  is_3d_secure: boolean;
-  is_auth: boolean;
-  is_capture: boolean;
-  is_refunded: boolean;
-  is_standalone_payment: boolean;
-  is_voided: boolean;
-  order: {
-    id: number;
-    created_at: string;
-    delivery_needed: boolean;
-    merchant: any;
-    collector: any;
-    amount_cents: number;
-    shipping_data: any;
-    currency: string;
-    is_payment_locked: boolean;
-    is_return: boolean;
-    is_cancel: boolean;
-    is_returned: boolean;
-    is_canceled: boolean;
-    merchant_order_id: string;
-    wallet_notification: any;
-    paid_amount_cents: number;
-    notify_user_with_email: boolean;
-    items: any[];
-    order_url: string;
-    commission_fees: number;
-    delivery_fees_cents: number;
-    delivery_vat_cents: number;
-    payment_method: string;
-    merchant_staff_tag: any;
-    api_source: string;
-    data: any;
+// Flash webhook interface - simplified
+export interface FlashWebhookData {
+  obj?: {
+    success?: boolean;
+    pending?: boolean;
+    merchant_order_id?: string;
+    id?: string | number;
+    amount_cents?: number;
   };
-  owner: number;
-  pending: boolean;
-  source_data: any;
-  success: boolean;
-  terminal_id: any;
-  transaction_processed_callback_responses: any[];
-  type: string;
-  updated_at: string;
+  success?: boolean;
+  pending?: boolean;
+  merchant_order_id?: string;
+  id?: string | number;
+  amount_cents?: number;
 }
 
 export class PaymobService {
@@ -98,10 +60,6 @@ export class PaymobService {
         amount: paymentData.amount,
         merchantOrderId: paymentData.merchantOrderId 
       });
-
-      const baseUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://athlete360.ai' 
-        : 'https://7a39e49f-f0e4-4a38-b983-657e85e5de90-00-24ejenwpt1nmi.riker.replit.dev';
 
       const paymentMethods = (process.env.PAYMOB_PAYMENT_METHOD_IDS || '')
         .split(',')
@@ -164,9 +122,7 @@ export class PaymobService {
       return {
         id: data.id,
         client_secret: data.client_secret,
-        redirect_url: checkoutUrl, // This is our constructed checkout URL
-        iframe_url: data.iframe_url,
-        payment_methods: data.payment_methods || []
+        redirect_url: checkoutUrl
       };
     } catch (error) {
       console.error('Paymob payment intention creation error:', error);
@@ -191,29 +147,29 @@ export class PaymobService {
   }
 
   /**
-   * Process webhook data and determine payment status
+   * Process Flash webhook data (simplified)
    */
-  processWebhookData(webhookData: WebhookData): {
+  processFlashWebhookData(webhookData: FlashWebhookData): {
     isSuccess: boolean;
-    transactionId: number;
-    orderId: number;
-    merchantOrderId: string;
-    amountCents: number;
-    currency: string;
     isPending: boolean;
-    errorOccurred: boolean;
+    merchantOrderId: string;
+    transactionId: string;
+    amountCents: number;
   } {
-    console.log('📊 Processing webhook data:', JSON.stringify(webhookData, null, 2));
+    console.log('📊 Processing Flash webhook data:', JSON.stringify(webhookData, null, 2));
+
+    const isSuccess = webhookData?.obj?.success ?? webhookData?.success ?? false;
+    const isPending = webhookData?.obj?.pending ?? webhookData?.pending ?? false;
+    const merchantOrderId = webhookData?.obj?.merchant_order_id ?? webhookData?.merchant_order_id ?? '';
+    const transactionId = String(webhookData?.obj?.id ?? webhookData?.id ?? '');
+    const amountCents = Number(webhookData?.obj?.amount_cents ?? webhookData?.amount_cents ?? 0);
 
     return {
-      isSuccess: webhookData.success && !webhookData.error_occurred && !webhookData.pending,
-      transactionId: webhookData.id,
-      orderId: webhookData.order.id,
-      merchantOrderId: webhookData.order.merchant_order_id,
-      amountCents: webhookData.amount_cents,
-      currency: webhookData.currency,
-      isPending: webhookData.pending,
-      errorOccurred: webhookData.error_occurred,
+      isSuccess,
+      isPending,
+      merchantOrderId,
+      transactionId,
+      amountCents
     };
   }
 
@@ -251,7 +207,7 @@ export class PaymobService {
 const paymobConfig: PaymobConfig = {
   secretKey: process.env.PAYMOB_SECRET_KEY!,
   publicKey: process.env.PAYMOB_PUBLIC_KEY!,
-  hmacSecret: process.env.PAYMOB_HMAC_SECRET!,   // was HMAC -> rename to PAYMOB_HMAC_SECRET
+  hmacSecret: process.env.HMAC || process.env.PAYMOB_HMAC_SECRET || 'default-secret',
 };
 
 export const paymobService = new PaymobService(paymobConfig);
