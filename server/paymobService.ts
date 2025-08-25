@@ -2,9 +2,12 @@ import fetch from 'node-fetch';
 import crypto from 'crypto';
 
 export interface PaymobConfig {
+  apiKey?: string;      // for authentication
   secretKey: string;    // server-side
   publicKey: string;    // used only to build the checkout URL
-  hmacSecret: string;   // webhook verification
+  hmacSecret?: string;   // webhook verification
+  integrationId?: string; // integration ID
+  iframeId?: string;    // iframe ID
 }
 
 export interface PaymentIntentRequest {
@@ -116,7 +119,7 @@ export class PaymobService {
       console.log('✅ Order created:', orderData.id, 'Amount:', orderData.amount_cents);
 
       // Step 3: Generate payment key with PROPER INTEGER CONVERSION
-      const integrationId = process.env.PAYMOB_INTEGRATION_ID || process.env.INTEGRATION_ID;
+      const integrationId = process.env.INTEGRATION_ID || process.env.PAYMOB_INTEGRATION_ID || this.config.integrationId;
       const paymentKeyPayload = {
         auth_token: token,
         amount_cents: parseInt(String(paymentData.amount), 10), // FIX: Ensure integer
@@ -171,7 +174,7 @@ export class PaymobService {
    * Verify webhook HMAC signature
    */
   verifyWebhookSignature(rawBody: string, headerValue: string): boolean {
-    if (!headerValue) return false;
+    if (!headerValue || !this.config.hmacSecret) return false;
     const computed = crypto
       .createHmac('sha512', this.config.hmacSecret)
       .update(rawBody, 'utf8')
@@ -242,9 +245,30 @@ export class PaymobService {
 
 // Export singleton instance
 const paymobConfig: PaymobConfig = {
+  apiKey: process.env.PAYMOB_API_KEY,
   secretKey: process.env.PAYMOB_SECRET_KEY!,
   publicKey: process.env.PAYMOB_PUBLIC_KEY!,
-  hmacSecret: process.env.HMAC!,
+  hmacSecret: process.env.HMAC,
+  integrationId: process.env.INTEGRATION_ID || process.env.PAYMOB_INTEGRATION_ID,
+  iframeId: process.env.PAYMOB_IFRAME_ID
 };
+
+// Log configuration status
+console.log('Paymob config initialized:', {
+  apiKey: paymobConfig.apiKey ? `Set (${paymobConfig.apiKey.length} chars)` : 'Not set',
+  publicKey: paymobConfig.publicKey ? `Set (${paymobConfig.publicKey.length} chars)` : 'Not set',
+  secretKey: paymobConfig.secretKey ? `Set (${paymobConfig.secretKey.length} chars)` : 'Not set',
+  integrationId: paymobConfig.integrationId || 'Not set',
+  iframeId: paymobConfig.iframeId || 'Not set'
+});
+
+// All values are actually present based on the logs, so let's be more specific
+console.log('✅ Paymob service initialized successfully with:', {
+  hasApiKey: !!paymobConfig.apiKey,
+  hasSecretKey: !!paymobConfig.secretKey,
+  hasPublicKey: !!paymobConfig.publicKey,
+  hasIntegrationId: !!paymobConfig.integrationId,
+  integrationId: paymobConfig.integrationId
+});
 
 export const paymobService = new PaymobService(paymobConfig);
