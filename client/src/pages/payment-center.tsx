@@ -397,18 +397,6 @@ export default function PaymentCenter() {
             </div>
           )}
 
-          <div className="bg-athlete-gray-800 border border-green-600/30 rounded-lg p-4 mb-8">
-            <div className="flex items-center gap-4">
-              <div>
-                <h3 className="text-sm font-semibold text-green-400">Payment Integration Status</h3>
-                <p className="text-xs text-gray-400">Using Integration ID: 4233746 (Online Card)</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                <span className="text-green-400 text-sm font-medium">Active</span>
-              </div>
-            </div>
-          </div>
 
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             {tokenPackages.map((pkg) => {
