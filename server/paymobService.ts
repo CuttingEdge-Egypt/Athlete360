@@ -58,8 +58,11 @@ export class PaymobService {
     try {
       console.log('🔄 Creating Paymob payment using traditional 3-step process...', { 
         amount: paymentData.amount,
+        amountType: typeof paymentData.amount,
         merchantOrderId: paymentData.merchantOrderId 
       });
+      
+      console.log('🔍 DEBUGGING - Raw paymentData:', JSON.stringify(paymentData, null, 2));
 
       // Step 1: Authenticate to get token
       const authResponse = await fetch('https://accept.paymob.com/api/auth/tokens', {
