@@ -113,7 +113,7 @@ export class PaymobService {
       console.log('✅ Order created:', orderData.id);
 
       // Step 3: Generate payment key for integration  
-      const integrationId = process.env.PAYMOB_INTEGRATION_ID || '4233746'; // Use env integration ID
+      const integrationId = process.env.INTEGRATION_ID;
       const paymentKeyPayload = {
         auth_token: token,
         amount_cents: paymentData.amount,
@@ -129,7 +129,7 @@ export class PaymobService {
           country: 'EG', postal_code: '11511'
         },
         currency: paymentData.currency || 'EGP',
-        integration_id: parseInt(integrationId) // Convert to integer
+        integration_id: parseInt(integrationId!) // Convert to integer
       };
 
       const paymentKeyResponse = await fetch('https://accept.paymob.com/api/acceptance/payment_keys', {
