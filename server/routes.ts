@@ -1805,7 +1805,8 @@ Return only valid JSON with the missing fields.`;
         merchantOrderId
       });
     } catch (error: any) {
-      console.error("Error creating payment intention:", error);
+      console.error("💥 Error creating payment intention:", error);
+      console.error("💥 Error stack:", error?.stack);
       res.status(500).json({
         message: "Failed to create payment intention",
         error: error?.message || 'Unknown error'

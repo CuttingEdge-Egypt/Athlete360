@@ -61,6 +61,12 @@ export class PaymobService {
         amountType: typeof paymentData.amount,
         merchantOrderId: paymentData.merchantOrderId 
       });
+      
+      console.log('🔍 Environment check:', {
+        hasApiKey: !!process.env.PAYMOB_API_KEY,
+        hasIntegrationId: !!process.env.INTEGRATION_ID,
+        integrationId: process.env.INTEGRATION_ID
+      });
 
       // Step 1: Authenticate to get token
       const authResponse = await fetch('https://accept.paymob.com/api/auth/tokens', {
