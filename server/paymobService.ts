@@ -2,12 +2,9 @@ import fetch from 'node-fetch';
 import crypto from 'crypto';
 
 export interface PaymobConfig {
-  apiKey?: string;      // for authentication
   secretKey: string;    // server-side
   publicKey: string;    // used only to build the checkout URL
-  hmacSecret?: string;   // webhook verification
-  integrationId?: string; // integration ID
-  iframeId?: string;    // iframe ID
+  hmacSecret: string;   // webhook verification
 }
 
 export interface PaymentIntentRequest {
@@ -55,113 +52,84 @@ export class PaymobService {
   }
 
   /**
-   * Create Payment Intention using traditional 3-step process with proper integer conversion
+   * Create Payment Intention using modern Intention API (v1)
    */
   async createPaymentIntention(paymentData: PaymentIntentRequest): Promise<PaymentIntentResponse> {
     try {
-      console.log('🔄 Creating Paymob payment using traditional 3-step process...', { 
+      console.log('🔄 Creating Paymob payment using modern Intention API...', { 
         amount: paymentData.amount,
         amountType: typeof paymentData.amount,
         merchantOrderId: paymentData.merchantOrderId 
       });
 
-      // Step 1: Authenticate to get token
-      const authResponse = await fetch('https://accept.paymob.com/api/auth/tokens', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          api_key: process.env.PAYMOB_API_KEY 
-        })
-      });
-
-      if (!authResponse.ok) {
-        throw new Error('Failed to authenticate with Paymob');
-      }
-
-      const authData: any = await authResponse.json();
-      const token = authData.token;
-      console.log('✅ Authenticated with Paymob');
-
-      // Step 2: Create order with PROPER INTEGER CONVERSION
-      const orderPayload = {
-        auth_token: token,
-        delivery_needed: "false",
-        amount_cents: parseInt(String(paymentData.amount), 10), // FIX: Ensure integer
+      const integrationId = process.env.INTEGRATION_ID;
+      
+      // Modern Intention API payload
+      const intentionPayload = {
+        amount: parseInt(String(paymentData.amount), 10), // Amount in cents
         currency: paymentData.currency || 'EGP',
-        merchant_order_id: paymentData.merchantOrderId,
+        payment_methods: [parseInt(integrationId!)], // Integration ID as payment method
         items: paymentData.items?.length ? paymentData.items.map(item => ({
           name: item.name,
-          amount_cents: parseInt(String(item.amount), 10), // FIX: Ensure integer
+          amount: parseInt(String(item.amount), 10),
           description: item.name,
           quantity: item.quantity || 1
         })) : [{
           name: `${paymentData.merchantOrderId}`,
-          amount_cents: parseInt(String(paymentData.amount), 10), // FIX: Ensure integer
+          amount: parseInt(String(paymentData.amount), 10),
           description: 'Token purchase',
           quantity: 1
-        }]
-      };
-
-      console.log('📤 Creating order with payload:', { amount_cents: orderPayload.amount_cents });
-
-      const orderResponse = await fetch('https://accept.paymob.com/api/ecommerce/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderPayload)
-      });
-
-      if (!orderResponse.ok) {
-        const orderError = await orderResponse.json();
-        throw new Error(`Failed to create order: ${JSON.stringify(orderError)}`);
-      }
-
-      const orderData: any = await orderResponse.json();
-      console.log('✅ Order created:', orderData.id, 'Amount:', orderData.amount_cents);
-
-      // Step 3: Generate payment key with PROPER INTEGER CONVERSION
-      const integrationId = process.env.INTEGRATION_ID || process.env.PAYMOB_INTEGRATION_ID || this.config.integrationId;
-      const paymentKeyPayload = {
-        auth_token: token,
-        amount_cents: parseInt(String(paymentData.amount), 10), // FIX: Ensure integer
-        expiration: 3600,
-        order_id: parseInt(orderData.id), // FIX: Ensure integer
+        }],
         billing_data: {
-          email: paymentData.customerEmail || 'customer.payment@athlete360.eg',
+          apartment: '6',
           first_name: paymentData.customerFirstName || 'Ahmed',
           last_name: paymentData.customerLastName || 'Mohamed',
+          street: '938 Al-Jadeed Bldg',
+          building: '939',
           phone_number: paymentData.customerPhone || '+201012345678',
-          apartment: '6', floor: '1', building: '939',
-          street: '938 Al-Jadeed Bldg', city: 'Cairo', state: 'Cairo', 
-          country: 'EG', postal_code: '11511'
+          city: 'Cairo',
+          country: 'EG',
+          email: paymentData.customerEmail || 'customer.payment@athlete360.eg',
+          floor: '1',
+          state: 'Cairo'
         },
-        currency: paymentData.currency || 'EGP',
-        integration_id: parseInt(integrationId!) // FIX: Ensure integer
+        extras: {
+          merchant_order_id: paymentData.merchantOrderId
+        },
+        special_reference: paymentData.merchantOrderId,
+        expiration: 3600,
+        notification_url: `${process.env.BASE_URL || 'http://localhost:5000'}/api/payments/webhook`,
+        redirection_url: `${process.env.BASE_URL || 'http://localhost:5000'}/?payment=success`
       };
 
-      console.log('📤 Creating payment key with amount:', paymentKeyPayload.amount_cents);
+      console.log('📤 Sending Intention API request:', JSON.stringify(intentionPayload, null, 2));
 
-      const paymentKeyResponse = await fetch('https://accept.paymob.com/api/acceptance/payment_keys', {
+      const intentionResponse = await fetch('https://accept.paymob.com/v1/intention/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(paymentKeyPayload)
+        headers: { 
+          'Authorization': `Token ${process.env.PAYMOB_SECRET_KEY}`,
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify(intentionPayload)
       });
 
-      if (!paymentKeyResponse.ok) {
-        const keyError = await paymentKeyResponse.json();
-        throw new Error(`Failed to create payment key: ${JSON.stringify(keyError)}`);
+      if (!intentionResponse.ok) {
+        const intentionError = await intentionResponse.json();
+        console.error('❌ Intention API error:', JSON.stringify(intentionError, null, 2));
+        throw new Error(`Failed to create intention: ${JSON.stringify(intentionError)}`);
       }
 
-      const paymentKeyData: any = await paymentKeyResponse.json();
-      console.log('✅ Payment key generated successfully');
+      const intentionData: any = await intentionResponse.json();
+      console.log('✅ Payment intention created:', intentionData.id);
 
-      // Create unified checkout URL with both publicKey and clientSecret
-      const checkoutUrl = `https://accept.paymob.com/unifiedcheckout/?publicKey=${this.config.publicKey}&clientSecret=${paymentKeyData.token}`;
+      // Create unified checkout URL using the client_secret from intention
+      const checkoutUrl = `https://accept.paymob.com/unifiedcheckout/?publicKey=${this.config.publicKey}&clientSecret=${intentionData.client_secret}`;
       
       console.log('🔗 Constructed checkout URL');
 
       return {
-        id: orderData.id.toString(),
-        client_secret: paymentKeyData.token,
+        id: intentionData.id.toString(),
+        client_secret: intentionData.client_secret,
         redirect_url: checkoutUrl
       };
     } catch (error) {
@@ -174,7 +142,7 @@ export class PaymobService {
    * Verify webhook HMAC signature
    */
   verifyWebhookSignature(rawBody: string, headerValue: string): boolean {
-    if (!headerValue || !this.config.hmacSecret) return false;
+    if (!headerValue) return false;
     const computed = crypto
       .createHmac('sha512', this.config.hmacSecret)
       .update(rawBody, 'utf8')
@@ -245,30 +213,9 @@ export class PaymobService {
 
 // Export singleton instance
 const paymobConfig: PaymobConfig = {
-  apiKey: process.env.PAYMOB_API_KEY,
   secretKey: process.env.PAYMOB_SECRET_KEY!,
   publicKey: process.env.PAYMOB_PUBLIC_KEY!,
-  hmacSecret: process.env.HMAC,
-  integrationId: process.env.INTEGRATION_ID || process.env.PAYMOB_INTEGRATION_ID,
-  iframeId: process.env.PAYMOB_IFRAME_ID
+  hmacSecret: process.env.HMAC!,
 };
-
-// Log configuration status
-console.log('Paymob config initialized:', {
-  apiKey: paymobConfig.apiKey ? `Set (${paymobConfig.apiKey.length} chars)` : 'Not set',
-  publicKey: paymobConfig.publicKey ? `Set (${paymobConfig.publicKey.length} chars)` : 'Not set',
-  secretKey: paymobConfig.secretKey ? `Set (${paymobConfig.secretKey.length} chars)` : 'Not set',
-  integrationId: paymobConfig.integrationId || 'Not set',
-  iframeId: paymobConfig.iframeId || 'Not set'
-});
-
-// All values are actually present based on the logs, so let's be more specific
-console.log('✅ Paymob service initialized successfully with:', {
-  hasApiKey: !!paymobConfig.apiKey,
-  hasSecretKey: !!paymobConfig.secretKey,
-  hasPublicKey: !!paymobConfig.publicKey,
-  hasIntegrationId: !!paymobConfig.integrationId,
-  integrationId: paymobConfig.integrationId
-});
 
 export const paymobService = new PaymobService(paymobConfig);
