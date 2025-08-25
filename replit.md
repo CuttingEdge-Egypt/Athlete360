@@ -57,7 +57,7 @@ Preferred communication style: Simple, everyday language.
 ## Recent Critical Fixes (August 2025)
 
 ### Paymob Integration Fully Working
-- **Integration ID**: 4233746 confirmed working for card payments
+- **Integration ID**: 4723444 confirmed working for online card payments
 - **3DS Authentication**: System properly detects and handles 3D Secure requirements
 - **Bank Validation**: Egyptian phone numbers and address data correctly formatted
 - **Response Handling**: Enhanced redirection logic prevents JSON display
