@@ -179,10 +179,15 @@ export class PaymobService {
 
       console.log('✅ Payment intention created successfully:', data);
 
+      // Construct the unified checkout URL as per Paymob documentation
+      const checkoutUrl = `https://accept.paymob.com/unifiedcheckout/?publicKey=${this.config.publicKey}&clientSecret=${data.client_secret}`;
+      
+      console.log('🔗 Constructed checkout URL:', checkoutUrl);
+
       return {
         id: data.id,
         client_secret: data.client_secret,
-        redirect_url: data.redirect_url,
+        redirect_url: checkoutUrl, // This is our constructed checkout URL
         iframe_url: data.iframe_url,
         payment_methods: data.payment_methods || []
       };
