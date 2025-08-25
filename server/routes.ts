@@ -1736,7 +1736,7 @@ Return only valid JSON with the missing fields.`;
   // ====================== Paymob Flash (Unified Checkout) ======================
 
   // Create payment intention (Flash)
-  app.post('/api/payments/create-intent', isAuthenticated, async (req: any, res) => {
+  app.post('/api/payments/create-intent', isAuthenticatedUniversal, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { amount, tokensAmount, customerInfo } = req.body;
