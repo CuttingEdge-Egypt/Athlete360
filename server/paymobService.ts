@@ -69,8 +69,8 @@ export class PaymobService {
         integrationId: process.env.INTEGRATION_ID
       });
 
-      // Try using "card" as payment method name instead of integration ID
-      const paymentMethods = ["card"]; // As shown in documentation examples
+      // Use integration ID as number (from template)
+      const paymentMethods = [parseInt(process.env.INTEGRATION_ID!) || 4723444];
 
       console.log('🎯 Using integration method:', paymentMethods);
       
@@ -102,17 +102,14 @@ export class PaymobService {
               floor: "1",
               state: "Cairo"
             },
-            customer: {
-              first_name: paymentData.customerFirstName || "Ahmed",
-              last_name: paymentData.customerLastName || "Mohamed",
-              email: paymentData.customerEmail || "customer.payment@athlete360.eg",
-              extras: {
-                merchant_order_id: paymentData.merchantOrderId
-              }
-            },
             extras: {
-              merchant_order_id: paymentData.merchantOrderId
-            }
+              merchant_order_id: paymentData.merchantOrderId,
+              package_type: "token_package"
+            },
+            special_reference: paymentData.merchantOrderId,
+            expiration: 3600,
+            notification_url: `${process.env.REPLIT_DOMAINS?.split(',')[0] || 'http://localhost:5000'}/api/payment/webhook`,
+            redirection_url: `${process.env.REPLIT_DOMAINS?.split(',')[0] || 'http://localhost:5000'}/payment-center?status=success`
           };
 
           console.log('📤 Creating intention with payload:', JSON.stringify(intentionPayload, null, 2));
