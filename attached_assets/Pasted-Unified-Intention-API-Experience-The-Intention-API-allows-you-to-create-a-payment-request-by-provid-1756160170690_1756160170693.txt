@@ -1,0 +1,201 @@
+Unified Intention API Experience
+The Intention API allows you to create a payment request by providing all the required parameters. Please ensure that all steps and parameters are accurately included to successfully initiate the payment request.
+Download the Postman collection from this 
+link.
+Step 1: You can create your payment request by intention API by adding a "secret key" in the authorization box in the header section. For the secret key please refer to this section.
+
+
+Step 2: Please send a POST request to the URL below after adding the request parameters in the body mentioned in the below screenshot.
+
+URL: https://accept.paymob.com/v1/intention/
+
+Method: POST
+
+Source: Merchant's server
+
+Recipient: Accept's server
+
+Request:
+
+Response:
+
+Important Notes:
+
+⇒Please make sure to use the configured integration ID while creating the intention.
+
+⇒It's important to maintain separate integration IDs for each environment, whether testing or live. This is because the implemented keys (secret/public keys) differ between environments.
+
+⇒Please be aware that you can customize the intention API setup by including the necessary URLs to override the callback of the notification and redirection URL in your request. This allows you to distinguish between the URLs used for both actions and their callbacks. Use the provided parameters, "notification_url" and "redirection_url," as outlined in the screenshot sample.
+
+⇒Please note that setting the notification URL will only send callback information related to the transaction. If the user clicks the "save card" button, the card token details will not be sent to the notification URL provided in the intention API. Instead, these details will be sent to the updated processed callback configured under the dashboard integration IDs, specifically referencing the Transaction Processed Callback URL set for that integration ID.
+
+⇒Please note that the item array is not mandatory. However, if the merchant provides the item array, then both the items_name and items_amount fields are required.
+
+⇒Please note that the redirection_url functions properly only with the Card payment method. Therefore, you can rely on the URL specified in the integration ID for this method.
+
+You will receive a unique webhook URL from the webhook site which you used in the notification url for testing as illustrated in the image below.
+
+To set your webhook URL for the 3DS ID, follow these steps:
+
+Navigate to the Developers section and set your webhook URL.
+Then, go to the Payment Integration section.
+Click on the integration ID.
+In the lower section of the page, you can edit the integration details. Add your webhook URL in the "Transaction Processed Callback" section, as shown in the image below.
+
+Step 3: Once you are done with the Intention you need to call below url in the browser's window to access the checkout page as shown below. https://accept.paymob.com/unifiedcheckout/?publicKey=<add your public key here>&clientSecret=<add your client secret key here>
+
+Obtaining Your Keys
+To access your Public Key and Client Secret Key, please follow these instructions:
+
+Public Key: You can retrieve your Public Key from your Dashboard. For detailed steps, refer to the section on accessing your Public Key.
+Client Secret Key: Your Client Secret Key will be included in the response from the Intention API, as demonstrated in the example below.
+
+Step 4: Please enter your card details. For test credentials, refer to this section.
+
+
+Step 5: The approval message will be displayed on the screen if the transaction is successful.
+
+
+Webhook Responses:
+Response 1: Callback Response
+
+
+Response 2: Token
+
+You will receive the token response only if the user selects the "Save Card" option on the checkout page as shown in the below image.
+
+
+
+Title
+Description
+Mandatory
+Total Amount
+
+(amount)
+
+Pass the total amount in cents in this parameter.
+
+ 
+
+Yes
+
+Payment Methods
+
+(payment_methods)
+
+Provide the configured Integration ID here. Merchants can use the ID as an integer or the name. If the Integration ID is integer, you can pass it without quotes (e.g., 1256). If it includes a name, enclose it in quotes (e.g., "card").
+
+Yes
+
+Currency
+
+(currency)
+
+Specify the currency for the specific region in this parameter. It should be similar to the currency of the integration ID being used. The currency for Egypt is “EGP”.
+
+Yes
+
+Items Description
+
+(description)
+
+It's under the “Items” array and you need to pass a description of the item in this parameter. The description field must not exceed 255 characters.
+
+No.
+
+Items Quantity
+
+(quantity)
+
+It's under the “Items” array and you need to pass the quantity of the item in this parameter.
+
+No
+
+Items Amount
+
+(amount)
+
+Pass the amount of the item in cents in this parameter. In case of passing multiple items, the total amount must be equal to the sum of the amount of the items.
+
+Yes
+
+Items Name
+
+(name)
+
+It's under the “Items” array and you need to pass the name of the item in this parameter. The name field must not exceed 50 characters.
+
+Yes
+
+First Name
+
+(first_name)
+
+Enter your first name in this parameter. It's under the billing data object. The first name field must not exceed 50 characters.
+
+Yes
+
+Last Name
+
+(last_name)
+
+Enter your last name in this parameter. It's under the billing data object. The name field must not exceed 50 characters.
+
+Yes
+
+Email
+
+(email)
+
+Provide your email address in this parameter. It's under the billing data object.
+
+Yes
+
+Country
+
+(country)
+
+Specify your country name in this parameter. It's under the billing data object.
+
+No
+
+Phone Number
+
+(phone_number)
+
+Include your phone number in this parameter. It's under the billing data object. Please note that you can use both international and domestic number formats. For the country code, you can use the alpha-2 or standard format.
+
+Yes
+
+Extras(extras)
+
+You can include any additional parameters in the extras parameter. This can be used by the merchants to send their own parameters and receive it in the callbacks.It will be found in the payment key claims object in the callback.
+
+No
+
+Expiration
+
+(expiration)
+
+The intention duration is in seconds in which the payment intention will remain valid. Once this period elapses, the intention will expire and can no longer be paid.
+
+No
+
+Special Reference(special_reference)
+
+Pass a unique special reference number in this parameter. Refer to a unique or special identifier or reference associated with a transaction or order. It can be used for tracking or categorizing specific types of transactions and it returns within the transaction callback under merchant_order_id.
+
+No
+
+Notification URL(notification_url)
+
+This refers to the URL that will receive the transaction-processed callback POST request after the transaction succeeds or fails, with all transaction details in the body of the request and this only works with card integration ID.
+
+No
+
+Redirection URL(redirection_url)
+
+This refers to the transaction response callback URL that the customer will be redirected to after the transaction succeeds or fails, with most transaction details included as query parameters and this only works with card integration ID.
+
+No
+

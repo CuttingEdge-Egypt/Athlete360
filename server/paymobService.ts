@@ -63,14 +63,13 @@ export class PaymobService {
       });
       
       console.log('🔍 Environment check:', {
-        hasApiKey: !!process.env.PAYMOB_API_KEY,
+        hasSecretKey: !!process.env.PAYMOB_SECRET_KEY,
         hasPublicKey: !!process.env.PAYMOB_PUBLIC_KEY,
         hasIntegrationId: !!process.env.INTEGRATION_ID,
         integrationId: process.env.INTEGRATION_ID
       });
 
-      // Use the correct integration method as per Paymob documentation
-      // For Intention API, use "card" as the integration name
+      // Try using "card" as payment method name instead of integration ID
       const paymentMethods = ["card"]; // As shown in documentation examples
 
       console.log('🎯 Using integration method:', paymentMethods);
@@ -118,12 +117,12 @@ export class PaymobService {
 
           console.log('📤 Creating intention with payload:', JSON.stringify(intentionPayload, null, 2));
 
-          // Call modern Intention API with API key authorization
+          // Call modern Intention API with SECRET key authorization (as per documentation)
           const intentionResponse = await fetch('https://accept.paymob.com/v1/intention/', {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json',
-              'Authorization': `Token ${process.env.PAYMOB_API_KEY}`
+              'Authorization': `Token ${process.env.PAYMOB_SECRET_KEY}`
             },
             body: JSON.stringify(intentionPayload)
           });
@@ -232,7 +231,7 @@ export class PaymobService {
 
 // Export singleton instance
 const paymobConfig: PaymobConfig = {
-  secretKey: process.env.PAYMOB_API_KEY!,
+  secretKey: process.env.PAYMOB_SECRET_KEY!,
   publicKey: process.env.PAYMOB_PUBLIC_KEY!,
   hmacSecret: process.env.HMAC!,
 };
