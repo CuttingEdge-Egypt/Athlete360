@@ -118,7 +118,7 @@ export class PaymobService {
         auth_token: token,
         amount_cents: paymentData.amount,
         expiration: 3600,
-        order_id: orderData.id,
+        order_id: parseInt(orderData.id), // Convert to integer as required by Paymob
         billing_data: {
           email: paymentData.customerEmail || 'customer.payment@athlete360.eg',
           first_name: paymentData.customerFirstName || 'Ahmed',
@@ -129,7 +129,7 @@ export class PaymobService {
           country: 'EG', postal_code: '11511'
         },
         currency: paymentData.currency || 'EGP',
-        integration_id: integrationId
+        integration_id: parseInt(integrationId) // Convert to integer
       };
 
       const paymentKeyResponse = await fetch('https://accept.paymob.com/api/acceptance/payment_keys', {
