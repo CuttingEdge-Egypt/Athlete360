@@ -225,15 +225,6 @@ export default function PaymentCenter() {
                       </div>
                     </div>
                     
-                    <div className="bg-green-900/20 border border-green-600/30 rounded-lg p-3">
-                      <div className="flex items-center gap-2 text-green-400 text-sm font-medium">
-                        <CheckCircle className="w-4 h-4" />
-                        Payment Session Ready
-                      </div>
-                      <p className="text-green-300 text-xs mt-1">
-                        Integration ID: 4723444 (Active)
-                      </p>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
