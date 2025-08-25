@@ -74,7 +74,7 @@ export class PaymobService {
         amount: parseInt(String(paymentData.amount), 10), // Amount in cents
         currency: paymentData.currency || 'EGP',
         payment_methods: [
-          4723444, // Valid online card integration ID  
+          parseInt(process.env.INTEGRATION_ID!, 10), // Use environment variable
           "card"
         ],
         items: paymentData.items?.length ? paymentData.items.map(item => ({
