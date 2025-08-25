@@ -69,28 +69,14 @@ export class PaymobService {
         integrationId: process.env.INTEGRATION_ID
       });
 
-      // Try multiple integration configurations as per documentation
-      const paymentMethodConfigs = [
-        // Config 1: Use integration name "card" as shown in documentation
-        ["card"],
-        // Config 2: Try with integer integration ID and "card"
-        [parseInt(process.env.INTEGRATION_ID!, 10), "card"],
-        // Config 3: Just the integration ID
-        [parseInt(process.env.INTEGRATION_ID!, 10)],
-        // Config 4: Try some common integration IDs that might work with Intention API
-        [104, "card"], // From documentation example
-        [114, "card"], // From documentation example
-      ];
+      // Use the correct integration method as per Paymob documentation
+      // For Intention API, use "card" as the integration name
+      const paymentMethods = ["card"]; // As shown in documentation examples
 
-      let lastError = null;
-
-      for (let i = 0; i < paymentMethodConfigs.length; i++) {
-        const paymentMethods = paymentMethodConfigs[i];
-        console.log(`🧪 Trying payment method config ${i + 1}:`, paymentMethods);
-
-        try {
-          // Modern Intention API payload as per documentation
-          const intentionPayload = {
+      console.log('🎯 Using integration method:', paymentMethods);
+      
+      // Modern Intention API payload as per documentation
+      const intentionPayload = {
             amount: parseInt(String(paymentData.amount), 10), // Amount in cents
             currency: paymentData.currency || 'EGP',
             payment_methods: paymentMethods,
@@ -142,40 +128,29 @@ export class PaymobService {
             body: JSON.stringify(intentionPayload)
           });
 
-          if (!intentionResponse.ok) {
-            const intentionError = await intentionResponse.json();
-            console.log(`❌ Config ${i + 1} failed:`, intentionError);
-            lastError = intentionError;
-            continue; // Try next configuration
-          }
-
-          const intentionData: any = await intentionResponse.json();
-          console.log('✅ Intention created successfully with config', i + 1, ':', {
-            id: intentionData.id,
-            status: intentionData.status,
-            client_secret: intentionData.client_secret ? 'present' : 'missing'
-          });
-
-          // Create unified checkout URL with publicKey and clientSecret as per documentation
-          const checkoutUrl = `https://accept.paymob.com/unifiedcheckout/?publicKey=${this.config.publicKey}&clientSecret=${intentionData.client_secret}`;
-          
-          console.log('🔗 Constructed checkout URL with publicKey and clientSecret');
-
-          return {
-            id: intentionData.id,
-            client_secret: intentionData.client_secret,
-            redirect_url: checkoutUrl
-          };
-        } catch (error) {
-          console.log(`❌ Config ${i + 1} threw error:`, error);
-          lastError = error;
-          continue; // Try next configuration
-        }
+      if (!intentionResponse.ok) {
+        const intentionError = await intentionResponse.json();
+        console.error('❌ Intention API error:', intentionError);
+        throw new Error(`Failed to create intention: ${JSON.stringify(intentionError)}`);
       }
 
-      // If all configurations failed
-      console.error('💥 All payment method configurations failed. Last error:', lastError);
-      throw new Error(`Failed to create payment intention: ${lastError instanceof Error ? lastError.message : JSON.stringify(lastError)}`);
+      const intentionData: any = await intentionResponse.json();
+      console.log('✅ Intention created successfully:', {
+        id: intentionData.id,
+        status: intentionData.status,
+        client_secret: intentionData.client_secret ? 'present' : 'missing'
+      });
+
+      // Create unified checkout URL with publicKey and clientSecret as per documentation
+      const checkoutUrl = `https://accept.paymob.com/unifiedcheckout/?publicKey=${this.config.publicKey}&clientSecret=${intentionData.client_secret}`;
+      
+      console.log('🔗 Constructed checkout URL with publicKey and clientSecret');
+
+      return {
+        id: intentionData.id,
+        client_secret: intentionData.client_secret,
+        redirect_url: checkoutUrl
+      };
     } catch (error) {
       console.error('💥 Paymob intention creation error:', error);
       throw new Error(`Failed to create payment intention: ${error instanceof Error ? error.message : 'Unknown error'}`);
