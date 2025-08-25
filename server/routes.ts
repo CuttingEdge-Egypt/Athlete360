@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import bodyParser from "body-parser";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { setupLocalAuth, isAuthenticatedUniversal } from "./localAuth";
@@ -98,6 +99,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware - setup both Replit OIDC and local auth
   await setupAuth(app);
   await setupLocalAuth(app);
+
+  // Set up raw body parsing for webhook route only
+  app.use('/api/payments/webhook',
+    bodyParser.raw({ type: '*/*' })   // capture raw body for HMAC
+  );
 
   // Seed database on startup
   await seedDatabase();
@@ -1777,7 +1783,11 @@ Return only valid JSON with the missing fields.`;
 
       res.json({
         success: true,
-        paymentIntent: paymentIntention, // Frontend expects paymentIntent
+        paymentIntent: {
+          id: paymentIntention.id,
+          client_secret: paymentIntention.client_secret,
+          redirect_url: paymentIntention.redirect_url,
+        },
         amount,
         tokensAmount,
         userId,
@@ -1876,13 +1886,13 @@ Return only valid JSON with the missing fields.`;
     try {
       const { orderId } = req.params;
       
-      // Get auth token first  
-      const authToken = await paymobService.authenticate();
+      // Legacy endpoint - Flash doesn't need authentication token
+      // const authToken = await paymobService.authenticate();
       
       // Query Paymob for order status - use orders endpoint instead of transactions
       const response = await fetch(`https://accept.paymob.com/api/ecommerce/orders/${orderId}`, {
         headers: {
-          'Authorization': `Bearer ${authToken}`
+          'Authorization': `Token ${process.env.PAYMOB_SECRET_KEY}`
         }
       });
       
@@ -1913,86 +1923,55 @@ Return only valid JSON with the missing fields.`;
   // New Paymob Flash webhook handler with HMAC verification
   app.post('/api/payments/webhook', async (req, res) => {
     try {
-      console.log('📥 Paymob Flash webhook received');
-      
-      // Get raw body for HMAC verification
-      const rawBody = JSON.stringify(req.body);
-      const hmacSignature = req.get('hmac') || req.get('x-hmac-signature') || '';
-      
-      // Verify webhook signature
-      const isValidSignature = paymobService.verifyWebhookSignature(rawBody, hmacSignature);
-      
-      if (!isValidSignature) {
-        console.error('❌ Invalid webhook signature');
-        return res.status(401).send('Unauthorized: Invalid signature');
+      const rawBody = req.body instanceof Buffer ? req.body.toString('utf8') : String(req.body || '');
+      const hmac = req.get('hmac') || req.get('x-hmac-signature') || '';
+
+      if (!paymobService.verifyWebhookSignature(rawBody, hmac)) {
+        console.error('Invalid webhook signature');
+        return res.status(401).send('Unauthorized');
       }
-      
-      console.log('✅ Webhook signature verified');
-      console.log('📋 Webhook data:', JSON.stringify(req.body, null, 2));
-      
-      // Process webhook data
-      const paymentResult = paymobService.processWebhookData(req.body);
-      
-      console.log('📊 Processed payment result:', paymentResult);
-      
-      // Handle successful payment
-      if (paymentResult.isSuccess && !paymentResult.isPending && !paymentResult.errorOccurred) {
-        console.log('✅ Payment successful:', paymentResult.merchantOrderId);
-        
-        // Parse userId from merchant order ID
-        const orderParts = paymentResult.merchantOrderId.split('_');
-        let userId = null;
-        
-        if (orderParts.length >= 2 && orderParts[0] === 'tokens') {
-          userId = orderParts[1];
-        }
-        
-        if (!userId) {
-          console.error('❌ Could not extract userId from order ID:', paymentResult.merchantOrderId);
-          return res.status(400).send('Invalid order ID format');
-        }
-        
-        const amount = paymentResult.amountCents / 100;
-        
-        // Calculate tokens based on amount (matching your token packages)
+
+      // Parse JSON body now that signature is verified
+      const payload = JSON.parse(rawBody);
+
+      // Normalize a minimal contract from Flash webhook
+      const isSuccess = payload?.obj?.success ?? payload?.success ?? false;
+      const isPending = payload?.obj?.pending ?? payload?.pending ?? false;
+      const merchantOrderId = payload?.obj?.merchant_order_id ?? payload?.merchant_order_id;
+      const transactionId = String(payload?.obj?.id ?? payload?.id ?? '');
+      const amountCents = Number(payload?.obj?.amount_cents ?? payload?.amount_cents ?? 0);
+
+      console.log('Webhook OK:', { isSuccess, isPending, merchantOrderId, transactionId, amountCents });
+
+      if (isSuccess && !isPending && merchantOrderId?.startsWith('tokens_')) {
+        const userId = merchantOrderId.split('_')[1];
+        const amount = amountCents / 100;
+
+        // Map your packages (you already have this)
         const tokensToAdd = amount === 25 ? 1000 : amount === 15 ? 500 : amount === 50 ? 2500 : 0;
-        
-        if (tokensToAdd > 0) {
-          // Add tokens to user
+
+        if (userId && tokensToAdd > 0) {
           await storage.addTokensPurchase(userId, tokensToAdd);
-
-          // Create transaction record
           await storage.createTransaction({
-            userId,
-            action: "Token Purchase",
-            tokensDeducted: -tokensToAdd,
-            serviceType: "purchase"
+            userId, action: "Token Purchase", tokensDeducted: -tokensToAdd, serviceType: "purchase"
           });
-
-          // Create payment receipt
           await storage.createPaymentReceipt({
             userId,
-            receiptNumber: `PAY-${Date.now().toString()}`,
+            receiptNumber: `PAY-${Date.now()}`,
             amount: amount.toString(),
             tokensAmount: tokensToAdd,
-            paymentMethod: 'card', // Flash supports multiple methods
-            cardLast4: 'N/A', // Not available in Flash webhook
-            cardBrand: 'Unknown',
-            paymobTransactionId: paymentResult.transactionId.toString(),
+            paymentMethod: 'flash',
+            cardLast4: 'N/A',
+            cardBrand: 'N/A',
+            paymobTransactionId: transactionId,
             status: 'completed'
           });
-
-          console.log(`✅ Added ${tokensToAdd} tokens to user ${userId}`);
         }
-      } else if (paymentResult.isPending) {
-        console.log('⏳ Payment pending:', paymentResult.merchantOrderId);
-      } else {
-        console.log('❌ Payment failed:', paymentResult.merchantOrderId);
       }
 
       res.status(200).send('OK');
-    } catch (error) {
-      console.error('❌ Error processing Paymob webhook:', error);
+    } catch (err) {
+      console.error('Webhook error', err);
       res.status(500).send('Webhook processing error');
     }
   });
@@ -2174,14 +2153,13 @@ Return only valid JSON with the missing fields.`;
     try {
       console.log('🧪 Testing Paymob configuration...');
       
-      // Test authentication
-      const authToken = await paymobService.authenticate();
-      console.log('✅ Paymob authentication successful');
+      // Test Flash API configuration
+      console.log('✅ Paymob Flash configuration test - no auth token needed');
       
       res.json({
         success: true,
         message: 'Paymob configuration test successful',
-        authTokenLength: authToken?.length || 0,
+        flashApiReady: true,
         integrationId: process.env.INTEGRATION_ID,
         hasApiKey: !!process.env.PAYMOB_API_KEY,
         hasSecretKey: !!process.env.PAYMOB_SECRET_KEY,

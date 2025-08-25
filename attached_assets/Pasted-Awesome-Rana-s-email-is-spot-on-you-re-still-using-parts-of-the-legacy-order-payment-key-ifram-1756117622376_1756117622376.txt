@@ -1,0 +1,325 @@
+Awesome—Rana’s email is spot-on: you’re still using parts of the legacy “order → payment key → iframe” flow. Below are the concrete fixes to fully move you to Paymob’s **Unified Checkout (Flash)** “single step” flow (Create Intention API), plus cleanups to your backend routes and both React files you shared.
+
+I made the changes laser-focused on Paymob’s new keys model (Secret/Public), Intention endpoint, Unified Checkout URL, and the Flash webhook HMAC. Where I cite docs, I’ve used Paymob’s developer hub + the Unified Checkout URL behavior. ([Paymob Developer Portal][1], [accept.paymob.com][2])
+
+---
+
+# 1) Environment: use the right keys & config
+
+Add/update these in your `.env` (names used below in code):
+
+```bash
+# Paymob Flash / Unified Checkout
+PAYMOB_PUBLIC_KEY=pk_test_xxx           # Dashboard → Developers → API Keys (Public)
+PAYMOB_SECRET_KEY=sk_test_xxx           # Dashboard → Developers → API Keys (Secret)
+PAYMOB_HMAC_SECRET=xxxxxxxxxxxxxxxx     # Dashboard → Settings → HMAC secret
+
+# Optional: restrict payment methods shown (IDs from Dashboard > Developers > Payment Integrations)
+# Comma-separated numbers, leave empty to let Paymob show all configured methods on your account.
+PAYMOB_PAYMENT_METHOD_IDS=              # e.g. 6002,6004 (if you want to limit)
+```
+
+> Flash Unified Checkout is driven by **Secret key (server)** to create an Intention and **Public key (client)** to construct the checkout URL. The redirect/checkout URL is:
+> `https://accept.paymob.com/unifiedcheckout/?publicKey=<PUBLIC_KEY>&clientSecret=<CLIENT_SECRET>` (Paymob’s page renders when you hit that URL). ([accept.paymob.com][2])
+
+---
+
+# 2) `paymobService.ts` — keep the Flash Intention flow, tighten it
+
+You already did most of this right 🎉. Apply the small fixes below:
+
+## a) Normalize env names & stop using the old API key/integration id
+
+* Replace the config shape so it uses only the new Flash keys.
+* Don’t carry `apiKey` or `integrationId` any more.
+
+```ts
+// paymobService.ts (top)
+export interface PaymobConfig {
+  secretKey: string;    // server-side
+  publicKey: string;    // used only to build the checkout URL
+  hmacSecret: string;   // webhook verification
+}
+```
+
+```ts
+// paymobService.ts (bottom) – build from env
+const paymobConfig: PaymobConfig = {
+  secretKey: process.env.PAYMOB_SECRET_KEY!,
+  publicKey: process.env.PAYMOB_PUBLIC_KEY!,
+  hmacSecret: process.env.PAYMOB_HMAC_SECRET!,   // was HMAC -> rename to PAYMOB_HMAC_SECRET
+};
+export const paymobService = new PaymobService(paymobConfig);
+```
+
+## b) Create Intention (Flash) – keep what you have, just minor hardening
+
+* Use `Authorization: Token <SECRET_KEY>` (correct for server calls).
+* If you want to filter payment methods, pass numbers from `PAYMOB_PAYMENT_METHOD_IDS`.
+* Always return `redirect_url` (our constructed Unified Checkout URL).
+
+```ts
+// Inside createPaymentIntention(...)
+const paymentMethods = (process.env.PAYMOB_PAYMENT_METHOD_IDS || '')
+  .split(',')
+  .map(s => parseInt(s.trim(), 10))
+  .filter(n => Number.isFinite(n));
+
+const requestPayload: any = {
+  amount: paymentData.amount,            // cents
+  currency: paymentData.currency || 'EGP',
+  payment_methods: paymentMethods.length ? paymentMethods : undefined,
+  items: paymentData.items?.length ? paymentData.items : [{
+    name: `${paymentData.merchantOrderId}`,
+    amount: paymentData.amount,
+    quantity: 1
+  }],
+  billing_data: {
+    email: paymentData.customerEmail || '',
+    first_name: paymentData.customerFirstName || '',
+    last_name: paymentData.customerLastName || '',
+    phone_number: paymentData.customerPhone || '',
+    apartment: 'NA', floor: 'NA', building: 'NA',
+    street: 'NA', city: 'Cairo', state: 'Cairo', country: 'EG', postal_code: '11511'
+  },
+  extras: {
+    merchant_order_id: paymentData.merchantOrderId,
+  }
+};
+
+const response = await fetch('https://accept.paymob.com/v2/intention/', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Token ${this.config.secretKey}`,
+  },
+  body: JSON.stringify(requestPayload),
+});
+const data = await response.json();
+if (!response.ok) {
+  throw new Error(data?.message || 'Paymob intention failed');
+}
+
+const checkoutUrl = `https://accept.paymob.com/unifiedcheckout/?publicKey=${this.config.publicKey}&clientSecret=${data.client_secret}`;
+
+return {
+  id: data.id,
+  client_secret: data.client_secret,
+  redirect_url: checkoutUrl,    // use this in frontend
+};
+```
+
+## c) Webhook signature – use raw body, HMAC-SHA512, constant-time compare
+
+```ts
+verifyWebhookSignature(rawBody: string, headerValue: string) {
+  if (!headerValue) return false;
+  const computed = crypto
+    .createHmac('sha512', this.config.hmacSecret)
+    .update(rawBody, 'utf8')
+    .digest('hex');
+  // constant-time compare
+  const a = Buffer.from(computed, 'hex');
+  const b = Buffer.from(headerValue, 'hex');
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+}
+```
+
+> Flash webhook uses an `hmac` header of the raw JSON body with your HMAC secret (SHA-512). Using `JSON.stringify(req.body)` can break verification because Express reorders/normalizes—**use the raw body**. (See Paymob “API Setup / HMAC” and “Manage Callback/HMAC” sections.) ([Paymob Developer Portal][3])
+
+---
+
+# 3) `server/routes.ts` — modernize endpoints & secure the webhook
+
+## a) Set up Express to capture **raw body** for the webhook route only
+
+Put this **before** the routes:
+
+```ts
+// server/app.ts or wherever you configure middleware:
+import express from 'express';
+import bodyParser from 'body-parser';
+
+app.use('/api/payments/webhook',
+  bodyParser.raw({ type: '*/*' })   // capture raw body for HMAC
+);
+
+// For everything else:
+app.use(express.json());
+```
+
+> Using `bodyParser.raw` for just the webhook keeps the rest of your app on normal JSON parsing.
+
+## b) `/api/payments/create-intent` — keep, but ensure it only returns `redirect_url`
+
+Replace the check in your route response to ensure the frontend doesn’t look for legacy `iframeUrl`.
+
+```ts
+// POST /api/payments/create-intent
+res.json({
+  success: true,
+  paymentIntent: {
+    id: paymentIntention.id,
+    client_secret: paymentIntention.client_secret,
+    redirect_url: paymentIntention.redirect_url,
+  },
+  amount,
+  tokensAmount,
+  userId,
+  merchantOrderId
+});
+```
+
+## c) Remove legacy “test all integration IDs” & old order/status code (optional)
+
+* The “test-all-integrations” endpoint is legacy. You don’t need `integrationId`, `createOrder` or `payment key` in the Flash flow. Delete or hide behind `NODE_ENV === 'development'` if you still want it for reference.
+
+* If you keep `/api/payments/status/:orderId`, note it belongs to the legacy flow. For Flash, rely on the **webhook** to finalize purchases (or add a “transaction inquiry” if you must poll). ([Paymob Developer Portal][3])
+
+## d) Webhook route — verify HMAC, parse JSON, then credit tokens
+
+```ts
+// POST /api/payments/webhook
+app.post('/api/payments/webhook', async (req, res) => {
+  try {
+    const rawBody = req.body instanceof Buffer ? req.body.toString('utf8') : String(req.body || '');
+    const hmac = req.get('hmac') || req.get('x-hmac-signature') || '';
+
+    if (!paymobService.verifyWebhookSignature(rawBody, hmac)) {
+      console.error('Invalid webhook signature');
+      return res.status(401).send('Unauthorized');
+    }
+
+    // Parse JSON body now that signature is verified
+    const payload = JSON.parse(rawBody);
+
+    // Normalize a minimal contract from Flash webhook
+    const isSuccess = payload?.obj?.success ?? payload?.success ?? false;
+    const isPending = payload?.obj?.pending ?? payload?.pending ?? false;
+    const merchantOrderId = payload?.obj?.merchant_order_id ?? payload?.merchant_order_id;
+    const transactionId = String(payload?.obj?.id ?? payload?.id ?? '');
+    const amountCents = Number(payload?.obj?.amount_cents ?? payload?.amount_cents ?? 0);
+
+    console.log('Webhook OK:', { isSuccess, isPending, merchantOrderId, transactionId, amountCents });
+
+    if (isSuccess && !isPending && merchantOrderId?.startsWith('tokens_')) {
+      const userId = merchantOrderId.split('_')[1];
+      const amount = amountCents / 100;
+
+      // Map your packages (you already have this)
+      const tokensToAdd = amount === 25 ? 1000 : amount === 15 ? 500 : amount === 50 ? 2500 : 0;
+
+      if (userId && tokensToAdd > 0) {
+        await storage.addTokensPurchase(userId, tokensToAdd);
+        await storage.createTransaction({
+          userId, action: "Token Purchase", tokensDeducted: -tokensToAdd, serviceType: "purchase"
+        });
+        await storage.createPaymentReceipt({
+          userId,
+          receiptNumber: `PAY-${Date.now()}`,
+          amount: amount.toString(),
+          tokensAmount: tokensToAdd,
+          paymentMethod: 'flash',
+          cardLast4: 'N/A',
+          cardBrand: 'N/A',
+          paymobTransactionId: transactionId,
+          status: 'completed'
+        });
+      }
+    }
+
+    res.status(200).send('OK');
+  } catch (err) {
+    console.error('Webhook error', err);
+    res.status(500).send('Webhook processing error');
+  }
+});
+```
+
+---
+
+# 4) `payment-center.tsx` — stop checking `iframeUrl`, use `redirect_url`
+
+Replace the check after creating the intent:
+
+```ts
+// Before:
+if (result.success && result.paymentIntent?.iframeUrl) {
+
+// After:
+if (result.success && result.paymentIntent?.redirect_url) {
+```
+
+And anywhere you show a “Continue to Pay” button, ensure it points to `redirect_url`.
+
+---
+
+# 5) `payment-popup.tsx` — use `redirect_url` + safe window\.open flags
+
+Update both spots:
+
+```ts
+// A) When opening the Paymob window:
+const popup = window.open(
+  paymentIntent.redirect_url,
+  'paymob_payment',
+  'width=900,height=700,scrollbars=yes,resizable=yes,status=no,location=no,menubar=no,toolbar=no'
+);
+
+// B) Any direct navigation / fallback:
+if (paymentIntent?.redirect_url) {
+  window.location.href = paymentIntent.redirect_url;
+}
+```
+
+(You had one reference to `iframeUrl`—switch that to `redirect_url`.)
+
+---
+
+# 6) Frontend flow sanity
+
+* You already reload after closing the popup; that’s fine, because the **webhook** is the source of truth that credits the user. If you want to be fancy, you can hit a “/me” endpoint to refetch the user after a small delay instead of a full reload.
+
+* Keep the “Payment Success” page `/payment-success` as a friendly UX, but it’s not required for Flash.
+
+---
+
+# 7) What you can delete (or mark as legacy)
+
+* `createOrder`, `generatePaymentKey`, **any** `integrationId` usage, `iframeUrl` usage, and “3DS callback” handlers. Flash/Unified Checkout abstracts all of that.
+
+---
+
+# 8) Quick test checklist
+
+1. **Create Intention**
+   `POST /api/payments/create-intent` with `{amount: 1500, tokensAmount: 500}` → you get a `redirect_url`.
+
+2. **Open redirect\_url**
+   You should see Paymob’s hosted checkout (Unified Checkout). ([accept.paymob.com][2])
+
+3. **Pay**
+   Complete a test payment on Paymob’s page.
+
+4. **Webhook arrives**
+   Your server logs “Webhook OK…” and the user is credited.
+
+5. **UI refresh**
+   Close window → your app reloads and shows the new token balance.
+
+---
+
+## Why these changes match the new docs
+
+* **API Setup (Secret & Public Keys)**: Server calls (Create Intention) use your **Secret key** in the `Authorization: Token` header. Client-side uses the **Public key** only to construct the Unified Checkout URL alongside `client_secret`. ([Paymob Developer Portal][1])
+* **Unified Checkout URL**: `https://accept.paymob.com/unifiedcheckout/?publicKey=...&clientSecret=...` renders Paymob’s checkout page directly. ([accept.paymob.com][2])
+* **Webhook + HMAC**: Flash webhooks sign the **raw JSON body** with your HMAC secret using SHA-512; verify the `hmac` header using a constant-time compare and only then parse JSON. (Covered in “Manage Callback / HMAC” areas of the docs site index.) ([Paymob Developer Portal][3])
+
+---
+
+If you want, paste me your current `server/routes.ts` (1730-2200) and I’ll return an exact diff patch with the changes above already applied.
+
+[1]: https://developers.paymob.com/guides/accept-dashboard?utm_source=chatgpt.com "Paymob Documentation"
+[2]: https://accept.paymob.com/unifiedcheckout/?publicKey=&utm_source=chatgpt.com "Paymob checkout"
+[3]: https://developers.paymob.com/egypt/payment-methods-1 "Paymob Documentation"

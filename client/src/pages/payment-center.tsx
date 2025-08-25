@@ -130,7 +130,7 @@ export default function PaymentCenter() {
 
       const result = await response.json();
 
-      if (result.success && result.paymentIntent?.iframeUrl) {
+      if (result.success && result.paymentIntent?.redirect_url) {
         setPaymentIntent(result.paymentIntent);
         setShowIframe(true);
         toast({

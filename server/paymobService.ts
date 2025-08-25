@@ -2,10 +2,9 @@ import fetch from 'node-fetch';
 import crypto from 'crypto';
 
 export interface PaymobConfig {
-  apiKey: string;
-  secretKey: string;
-  publicKey: string;
-  hmacSecret: string;
+  secretKey: string;    // server-side
+  publicKey: string;    // used only to build the checkout URL
+  hmacSecret: string;   // webhook verification
 }
 
 export interface PaymentIntentRequest {
@@ -104,53 +103,31 @@ export class PaymobService {
         ? 'https://athlete360.ai' 
         : 'https://7a39e49f-f0e4-4a38-b983-657e85e5de90-00-24ejenwpt1nmi.riker.replit.dev';
 
-      const requestPayload = {
-        amount: paymentData.amount,
-        currency: paymentData.currency,
-        payment_methods: [parseInt(process.env.INTEGRATION_ID || '0')], // Use integration ID from env
-        merchant_order_id: paymentData.merchantOrderId,
-        items: paymentData.items,
-        customer: {
-          first_name: paymentData.customerFirstName,
-          last_name: paymentData.customerLastName,
-          email: paymentData.customerEmail,
-          phone: paymentData.customerPhone || '+201234567890',
-        },
+      const paymentMethods = (process.env.PAYMOB_PAYMENT_METHOD_IDS || '')
+        .split(',')
+        .map(s => parseInt(s.trim(), 10))
+        .filter(n => Number.isFinite(n));
+
+      const requestPayload: any = {
+        amount: paymentData.amount,            // cents
+        currency: paymentData.currency || 'EGP',
+        payment_methods: paymentMethods.length ? paymentMethods : undefined,
+        items: paymentData.items?.length ? paymentData.items : [{
+          name: `${paymentData.merchantOrderId}`,
+          amount: paymentData.amount,
+          quantity: 1
+        }],
         billing_data: {
-          apartment: 'NA',
-          email: paymentData.customerEmail,
-          floor: 'NA',
-          first_name: paymentData.customerFirstName,
-          street: 'Main Street',
-          building: 'NA',
-          phone_number: paymentData.customerPhone || '+201234567890',
-          shipping_method: 'NA',
-          postal_code: '11511',
-          city: 'Cairo',
-          country: 'EG',
-          last_name: paymentData.customerLastName,
-          state: 'Cairo',
-        },
-        shipping_data: {
-          apartment: 'NA',
-          email: paymentData.customerEmail,
-          floor: 'NA',
-          first_name: paymentData.customerFirstName,
-          street: 'Main Street',
-          building: 'NA',
-          phone_number: paymentData.customerPhone || '+201234567890',
-          postal_code: '11511',
-          city: 'Cairo',
-          country: 'EG',
-          last_name: paymentData.customerLastName,
-          state: 'Cairo',
+          email: paymentData.customerEmail || '',
+          first_name: paymentData.customerFirstName || '',
+          last_name: paymentData.customerLastName || '',
+          phone_number: paymentData.customerPhone || '',
+          apartment: 'NA', floor: 'NA', building: 'NA',
+          street: 'NA', city: 'Cairo', state: 'Cairo', country: 'EG', postal_code: '11511'
         },
         extras: {
-          ee: 3 // Enable 3D Secure
-        },
-        // Webhook and callback URLs
-        redirection_url: `${baseUrl}/payment-success`,
-        callback_url: `${baseUrl}/api/payments/webhook`,
+          merchant_order_id: paymentData.merchantOrderId,
+        }
       };
 
       console.log('📤 Payment intention request:', JSON.stringify(requestPayload, null, 2));
@@ -200,30 +177,17 @@ export class PaymobService {
   /**
    * Verify webhook HMAC signature
    */
-  verifyWebhookSignature(payload: string, receivedSignature: string): boolean {
-    try {
-      console.log('🔐 Verifying webhook HMAC signature...');
-      
-      // Remove any whitespace from the signature
-      const cleanSignature = receivedSignature.trim();
-      
-      // Calculate expected signature
-      const expectedSignature = crypto
-        .createHmac('sha512', this.config.hmacSecret)
-        .update(payload)
-        .digest('hex');
-
-      console.log('Received signature:', cleanSignature);
-      console.log('Expected signature:', expectedSignature);
-      
-      const isValid = expectedSignature === cleanSignature;
-      console.log('Signature verification:', isValid ? '✅ Valid' : '❌ Invalid');
-      
-      return isValid;
-    } catch (error) {
-      console.error('HMAC verification error:', error);
-      return false;
-    }
+  verifyWebhookSignature(rawBody: string, headerValue: string): boolean {
+    if (!headerValue) return false;
+    const computed = crypto
+      .createHmac('sha512', this.config.hmacSecret)
+      .update(rawBody, 'utf8')
+      .digest('hex');
+    // constant-time compare
+    const a = Buffer.from(computed, 'hex');
+    const b = Buffer.from(headerValue, 'hex');
+    if (a.length !== b.length) return false;
+    return crypto.timingSafeEqual(a, b);
   }
 
   /**
@@ -285,10 +249,9 @@ export class PaymobService {
 
 // Export singleton instance
 const paymobConfig: PaymobConfig = {
-  apiKey: process.env.PAYMOB_API_KEY!,
   secretKey: process.env.PAYMOB_SECRET_KEY!,
   publicKey: process.env.PAYMOB_PUBLIC_KEY!,
-  hmacSecret: process.env.HMAC!,
+  hmacSecret: process.env.PAYMOB_HMAC_SECRET!,   // was HMAC -> rename to PAYMOB_HMAC_SECRET
 };
 
 export const paymobService = new PaymobService(paymobConfig);

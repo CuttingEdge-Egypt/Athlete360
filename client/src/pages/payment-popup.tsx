@@ -21,7 +21,7 @@ export function PaymentPopup({ selectedPackage, paymentIntent, onBack }: Payment
     console.log('Opening payment popup window...');
     
     const popup = window.open(
-      paymentIntent.iframeUrl, 
+      paymentIntent.redirect_url, 
       'paymob_payment', 
       'width=900,height=700,scrollbars=yes,resizable=yes,status=yes,location=yes,menubar=no,toolbar=no,directories=no,copyhistory=no'
     );
