@@ -52,126 +52,132 @@ export class PaymobService {
   }
 
   /**
-   * Create Payment Intention using traditional 3-step process that works with integration ID 4723444
+   * Create Payment Intention using modern Intention API as per Paymob documentation
    */
   async createPaymentIntention(paymentData: PaymentIntentRequest): Promise<PaymentIntentResponse> {
     try {
-      console.log('🔄 Creating Paymob payment using traditional 3-step process...', { 
+      console.log('🔄 Creating Paymob payment using modern Intention API...', { 
         amount: paymentData.amount,
         amountType: typeof paymentData.amount,
         merchantOrderId: paymentData.merchantOrderId 
       });
       
       console.log('🔍 Environment check:', {
-        hasApiKey: !!process.env.PAYMOB_API_KEY,
+        hasSecretKey: !!process.env.PAYMOB_SECRET_KEY,
         hasPublicKey: !!process.env.PAYMOB_PUBLIC_KEY,
         hasIntegrationId: !!process.env.INTEGRATION_ID,
         integrationId: process.env.INTEGRATION_ID
       });
 
-      // Step 1: Authenticate to get token
-      const authResponse = await fetch('https://accept.paymob.com/api/auth/tokens', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          api_key: process.env.PAYMOB_API_KEY 
-        })
-      });
+      // Try multiple integration configurations as per documentation
+      const paymentMethodConfigs = [
+        // Config 1: Use integration name "card" as shown in documentation
+        ["card"],
+        // Config 2: Try with integer integration ID and "card"
+        [parseInt(process.env.INTEGRATION_ID!, 10), "card"],
+        // Config 3: Just the integration ID
+        [parseInt(process.env.INTEGRATION_ID!, 10)],
+        // Config 4: Try some common integration IDs that might work with Intention API
+        [104, "card"], // From documentation example
+        [114, "card"], // From documentation example
+      ];
 
-      if (!authResponse.ok) {
-        throw new Error('Failed to authenticate with Paymob');
+      let lastError = null;
+
+      for (let i = 0; i < paymentMethodConfigs.length; i++) {
+        const paymentMethods = paymentMethodConfigs[i];
+        console.log(`🧪 Trying payment method config ${i + 1}:`, paymentMethods);
+
+        try {
+          // Modern Intention API payload as per documentation
+          const intentionPayload = {
+            amount: parseInt(String(paymentData.amount), 10), // Amount in cents
+            currency: paymentData.currency || 'EGP',
+            payment_methods: paymentMethods,
+            items: paymentData.items?.length ? paymentData.items.map(item => ({
+              name: item.name,
+              amount: parseInt(String(item.amount), 10), // Amount in cents
+              description: item.name,
+              quantity: item.quantity || 1
+            })) : [{
+              name: `${paymentData.merchantOrderId}`,
+              amount: parseInt(String(paymentData.amount), 10), // Amount in cents
+              description: 'Token purchase',
+              quantity: 1
+            }],
+            billing_data: {
+              apartment: "6",
+              first_name: paymentData.customerFirstName || "Ahmed",
+              last_name: paymentData.customerLastName || "Mohamed",
+              street: "938, Al-Jadeed Bldg",
+              building: "939",
+              phone_number: paymentData.customerPhone || "+201012345678",
+              country: "EG",
+              email: paymentData.customerEmail || "customer.payment@athlete360.eg",
+              floor: "1",
+              state: "Cairo"
+            },
+            customer: {
+              first_name: paymentData.customerFirstName || "Ahmed",
+              last_name: paymentData.customerLastName || "Mohamed",
+              email: paymentData.customerEmail || "customer.payment@athlete360.eg",
+              extras: {
+                merchant_order_id: paymentData.merchantOrderId
+              }
+            },
+            extras: {
+              merchant_order_id: paymentData.merchantOrderId
+            }
+          };
+
+          console.log('📤 Creating intention with payload:', JSON.stringify(intentionPayload, null, 2));
+
+          // Call modern Intention API with secret key authorization
+          const intentionResponse = await fetch('https://accept.paymob.com/v1/intention/', {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Token ${process.env.PAYMOB_SECRET_KEY}`
+            },
+            body: JSON.stringify(intentionPayload)
+          });
+
+          if (!intentionResponse.ok) {
+            const intentionError = await intentionResponse.json();
+            console.log(`❌ Config ${i + 1} failed:`, intentionError);
+            lastError = intentionError;
+            continue; // Try next configuration
+          }
+
+          const intentionData: any = await intentionResponse.json();
+          console.log('✅ Intention created successfully with config', i + 1, ':', {
+            id: intentionData.id,
+            status: intentionData.status,
+            client_secret: intentionData.client_secret ? 'present' : 'missing'
+          });
+
+          // Create unified checkout URL with publicKey and clientSecret as per documentation
+          const checkoutUrl = `https://accept.paymob.com/unifiedcheckout/?publicKey=${this.config.publicKey}&clientSecret=${intentionData.client_secret}`;
+          
+          console.log('🔗 Constructed checkout URL with publicKey and clientSecret');
+
+          return {
+            id: intentionData.id,
+            client_secret: intentionData.client_secret,
+            redirect_url: checkoutUrl
+          };
+        } catch (error) {
+          console.log(`❌ Config ${i + 1} threw error:`, error);
+          lastError = error;
+          continue; // Try next configuration
+        }
       }
 
-      const authData: any = await authResponse.json();
-      const token = authData.token;
-      console.log('✅ Authenticated with Paymob');
-
-      // Step 2: Create order - ALL amounts as integers
-      const orderPayload = {
-        auth_token: token,
-        delivery_needed: "false",
-        amount_cents: parseInt(String(paymentData.amount), 10), // FIX: Ensure amount is integer
-        currency: paymentData.currency || 'EGP',
-        merchant_order_id: paymentData.merchantOrderId,
-        items: paymentData.items?.length ? paymentData.items.map(item => ({
-          name: item.name,
-          amount_cents: parseInt(String(item.amount), 10), // FIX: Ensure item amount is integer
-          description: item.name,
-          quantity: item.quantity || 1
-        })) : [{
-          name: `${paymentData.merchantOrderId}`,
-          amount_cents: parseInt(String(paymentData.amount), 10), // FIX: Ensure amount is integer
-          description: 'Token purchase',
-          quantity: 1
-        }]
-      };
-
-      console.log('📤 Creating order with payload:', JSON.stringify(orderPayload, null, 2));
-
-      const orderResponse = await fetch('https://accept.paymob.com/api/ecommerce/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderPayload)
-      });
-
-      if (!orderResponse.ok) {
-        const orderError = await orderResponse.json();
-        throw new Error(`Failed to create order: ${JSON.stringify(orderError)}`);
-      }
-
-      const orderData: any = await orderResponse.json();
-      console.log('✅ Order created:', orderData.id);
-
-      // Step 3: Generate payment key with working integration ID
-      const integrationId = process.env.INTEGRATION_ID; // Use environment variable
-      console.log('🔑 Using Integration ID:', integrationId);
-      
-      const paymentKeyPayload = {
-        auth_token: token,
-        amount_cents: parseInt(String(paymentData.amount), 10), // FIX: Ensure amount is integer
-        expiration: 3600,
-        order_id: parseInt(orderData.id), // Convert to integer as required by Paymob
-        billing_data: {
-          email: paymentData.customerEmail || 'customer.payment@athlete360.eg',
-          first_name: paymentData.customerFirstName || 'Ahmed',
-          last_name: paymentData.customerLastName || 'Mohamed',
-          phone_number: paymentData.customerPhone || '+201012345678',
-          apartment: '6', floor: '1', building: '939',
-          street: '938 Al-Jadeed Bldg', city: 'Cairo', state: 'Cairo', 
-          country: 'EG', postal_code: '11511'
-        },
-        currency: paymentData.currency || 'EGP',
-        integration_id: parseInt(integrationId!) // Convert to integer - USE INTEGRATION_ID
-      };
-
-      console.log('📤 Creating payment key with payload:', JSON.stringify(paymentKeyPayload, null, 2));
-
-      const paymentKeyResponse = await fetch('https://accept.paymob.com/api/acceptance/payment_keys', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(paymentKeyPayload)
-      });
-
-      if (!paymentKeyResponse.ok) {
-        const keyError = await paymentKeyResponse.json();
-        throw new Error(`Failed to create payment key: ${JSON.stringify(keyError)}`);
-      }
-
-      const paymentKeyData: any = await paymentKeyResponse.json();
-      console.log('✅ Payment key generated');
-
-      // Create unified checkout URL with both publicKey and clientSecret
-      const checkoutUrl = `https://accept.paymob.com/unifiedcheckout/?publicKey=${this.config.publicKey}&clientSecret=${paymentKeyData.token}`;
-      
-      console.log('🔗 Constructed checkout URL');
-
-      return {
-        id: orderData.id.toString(),
-        client_secret: paymentKeyData.token,
-        redirect_url: checkoutUrl
-      };
+      // If all configurations failed
+      console.error('💥 All payment method configurations failed. Last error:', lastError);
+      throw new Error(`Failed to create payment intention: ${lastError instanceof Error ? lastError.message : JSON.stringify(lastError)}`);
     } catch (error) {
-      console.error('💥 Paymob payment creation error:', error);
+      console.error('💥 Paymob intention creation error:', error);
       throw new Error(`Failed to create payment intention: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
