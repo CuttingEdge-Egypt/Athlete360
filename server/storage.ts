@@ -350,11 +350,24 @@ export class DatabaseStorage implements IStorage {
 
   async getUserIdFromOrder(orderId: string): Promise<string | null> {
     try {
-      const [receipt] = await db
+      // Try to extract from merchant order format first
+      if (orderId && orderId.includes('_')) {
+        const parts = orderId.split('_');
+        if (parts.length >= 3 && parts[0] === 'tokens') {
+          const userId = parts.slice(1, -1).join('_'); // Handle UUIDs with underscores
+          console.log(`📦 Extracted user ID from order format: ${userId}`);
+          return userId;
+        }
+      }
+      
+      // Fallback to database lookup
+      const receipts = await db
         .select()
         .from(paymentReceipts)
         .where(eq(paymentReceipts.orderId, orderId))
         .limit(1);
+      
+      const receipt = receipts[0];
       
       if (receipt) {
         return receipt.userId;

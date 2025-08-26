@@ -1925,16 +1925,29 @@ Return only valid JSON with the missing fields.`;
         error_occured
       } = req.query;
       
+      // Debug logging to understand the issue
+      console.log('🔍 Payment status check:', {
+        success,
+        pending,
+        error_occured,
+        dataMessage,
+        txnResponseCode,
+        acqResponseCode,
+        amount_cents
+      });
+      
       // Check if payment is approved based on multiple indicators
       const isPaymentApproved = (
         success === 'true' && 
         pending === 'false' && 
-        error_occured === 'false' &&
+        (error_occured === 'false' || error_occured === undefined) && 
         (dataMessage === 'Approved' || txnResponseCode === 'APPROVED' || acqResponseCode === '00')
       );
       
       const amount = amount_cents ? parseInt(amount_cents as string) / 100 : 0;
       const tokensToAdd = amount === 25 ? 1000 : amount === 15 ? 500 : amount === 50 ? 2500 : 0;
+      
+      console.log(`📊 Payment approval result: ${isPaymentApproved}`);
       
       if (isPaymentApproved && amount_cents) {
         console.log(`✅ Payment APPROVED: ${amount} EGP = ${tokensToAdd} tokens`);
