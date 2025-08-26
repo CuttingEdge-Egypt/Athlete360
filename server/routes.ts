@@ -1927,20 +1927,164 @@ Return only valid JSON with the missing fields.`;
         // For now, log the order info for debugging
         console.log('🔍 Order info for user identification:', { order, id, amount });
         
-        // Payment successful - redirect to custom success page with cache busting
-        const redirectUrl = `/payment/success?status=completed&transaction=${id}&amount=${amount}&t=${Date.now()}`;
-        console.log(`🔄 Redirecting to success page: ${redirectUrl}`);
-        res.redirect(redirectUrl);
+        // Payment successful - serve immediate redirect HTML
+        console.log(`🔄 Serving immediate redirect for successful payment: ${amount} EGP`);
+        return res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment Successful - Redirecting...</title>
+    <meta charset="UTF-8">
+    <style>
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            background: #f8fafc;
+        }
+        .container { 
+            text-align: center; 
+            padding: 2rem; 
+            background: white; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .success { color: #16a34a; font-size: 1.5rem; margin-bottom: 1rem; }
+        .spinner { 
+            width: 32px; 
+            height: 32px; 
+            border: 3px solid #e5e7eb; 
+            border-top: 3px solid #3b82f6; 
+            border-radius: 50%; 
+            animation: spin 1s linear infinite; 
+            margin: 1rem auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success">✅ Payment Successful!</div>
+        <p>Amount: ${amount} EGP | Transaction: ${id}</p>
+        <div class="spinner"></div>
+        <p>Redirecting to dashboard...</p>
+    </div>
+    <script>
+        // Store payment success data
+        sessionStorage.setItem('paymentSuccess', JSON.stringify({
+            status: 'completed',
+            transactionId: '${id}',
+            amount: '${amount}',
+            timestamp: Date.now()
+        }));
+        
+        // Immediate redirect to dashboard
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 2000);
+    </script>
+</body>
+</html>`);
       } else if (pending === 'true') {
-        // Payment pending (3DS or OTP) - redirect to custom success page
-        res.redirect('/payment/success?status=pending&transaction=' + id);
+        // Payment pending - serve immediate redirect HTML
+        console.log(`⏳ Serving redirect for pending payment: ${id}`);
+        res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment Pending - Redirecting...</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f8fafc; }
+        .container { text-align: center; padding: 2rem; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .pending { color: #d97706; font-size: 1.5rem; margin-bottom: 1rem; }
+        .spinner { width: 32px; height: 32px; border: 3px solid #e5e7eb; border-top: 3px solid #d97706; border-radius: 50%; animation: spin 1s linear infinite; margin: 1rem auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pending">⏳ Payment Pending</div>
+        <p>Transaction: ${id}</p>
+        <div class="spinner"></div>
+        <p>Redirecting to dashboard...</p>
+    </div>
+    <script>
+        sessionStorage.setItem('paymentPending', JSON.stringify({
+            status: 'pending',
+            transactionId: '${id}',
+            timestamp: Date.now()
+        }));
+        setTimeout(() => { window.location.href = '/'; }, 3000);
+    </script>
+</body>
+</html>`);
       } else {
-        // Payment failed - redirect to custom success page
-        res.redirect('/payment/success?status=failed&transaction=' + id);
+        // Payment failed - serve immediate redirect HTML
+        console.log(`❌ Serving redirect for failed payment: ${id}`);
+        res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment Failed - Redirecting...</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f8fafc; }
+        .container { text-align: center; padding: 2rem; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .failed { color: #dc2626; font-size: 1.5rem; margin-bottom: 1rem; }
+        .spinner { width: 32px; height: 32px; border: 3px solid #e5e7eb; border-top: 3px solid #dc2626; border-radius: 50%; animation: spin 1s linear infinite; margin: 1rem auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="failed">❌ Payment Failed</div>
+        <p>Transaction: ${id}</p>
+        <div class="spinner"></div>
+        <p>Redirecting to payment center...</p>
+    </div>
+    <script>
+        sessionStorage.setItem('paymentFailed', JSON.stringify({
+            status: 'failed',
+            transactionId: '${id}',
+            timestamp: Date.now()
+        }));
+        setTimeout(() => { window.location.href = '/payment-center'; }, 3000);
+    </script>
+</body>
+</html>`);
       }
     } catch (error) {
       console.error('❌ Error handling Paymob response:', error);
-      res.redirect('/payment/success?status=error');
+      res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment Error - Redirecting...</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f8fafc; }
+        .container { text-align: center; padding: 2rem; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .error { color: #dc2626; font-size: 1.5rem; margin-bottom: 1rem; }
+        .spinner { width: 32px; height: 32px; border: 3px solid #e5e7eb; border-top: 3px solid #dc2626; border-radius: 50%; animation: spin 1s linear infinite; margin: 1rem auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error">⚠️ Payment Error</div>
+        <p>Something went wrong processing your payment.</p>
+        <div class="spinner"></div>
+        <p>Redirecting to payment center...</p>
+    </div>
+    <script>
+        setTimeout(() => { window.location.href = '/payment-center'; }, 3000);
+    </script>
+</body>
+</html>`);
     }
   });
 
