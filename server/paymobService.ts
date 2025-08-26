@@ -68,8 +68,10 @@ export class PaymobService {
         integrationId: this.config.integrationId
       });
 
-      // Get base URL for callbacks - use athlete360.ai to match integration settings
-      const baseUrl = 'https://athlete360.ai';
+      // Get base URL for callbacks - use current Replit workspace
+      const baseUrl = process.env.REPL_SLUG && process.env.REPL_OWNER
+        ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`
+        : 'https://workspace.CuttingMo.repl.co';
       
       console.log(`🌐 Using callback base URL: ${baseUrl}`);
 
