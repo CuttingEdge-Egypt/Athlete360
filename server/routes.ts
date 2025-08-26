@@ -1908,8 +1908,9 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
-  // Paymob transaction response callback (redirect)
+  // Paymob transaction response callback (redirect) - MUST be handled before Vite
   app.get('/api/payments/paymob-response', async (req, res) => {
+    console.log('🎯 CALLBACK ROUTE HIT - Backend handling this request');
     try {
       console.log('🔄 Paymob response callback received:', req.query);
       
@@ -1981,10 +1982,10 @@ Return only valid JSON with the missing fields.`;
           }
         }
         
-        // Payment successful - serve immediate redirect HTML
-        console.log(`🔄 Serving success redirect page`);
-        return res.send(`
-<!DOCTYPE html>
+        // Payment successful - redirect to frontend success page
+        console.log(`🔄 Redirecting to frontend success page`);
+        const successUrl = `/payment/success?status=completed&transaction=${id}&amount=${amount}&tokens=${tokensToAdd}`;
+        return res.redirect(successUrl);
 <html>
 <head>
     <title>Payment Successful - Redirecting...</title>
@@ -2043,9 +2044,10 @@ Return only valid JSON with the missing fields.`;
 </body>
 </html>`);
       } else if (pending === 'true' || (success === 'true' && dataMessage !== 'Approved')) {
-        // Payment pending - serve immediate redirect HTML
-        console.log(`⏳ Serving redirect for pending payment: ${id}`);
-        res.send(`
+        // Payment pending - redirect to frontend pending page
+        console.log(`⏳ Redirecting to frontend pending page: ${id}`);
+        const pendingUrl = `/payment/success?status=pending&transaction=${id}`;
+        return res.redirect(pendingUrl);
 <!DOCTYPE html>
 <html>
 <head>
@@ -2077,9 +2079,10 @@ Return only valid JSON with the missing fields.`;
 </body>
 </html>`);
       } else {
-        // Payment failed - serve immediate redirect HTML
+        // Payment failed - redirect to frontend failure page
         console.log(`❌ Payment FAILED or ERROR: success=${success}, pending=${pending}, error_occured=${error_occured}, data.message=${dataMessage}`);
-        res.send(`
+        const failureUrl = `/payment/success?status=failed&transaction=${id}`;
+        return res.redirect(failureUrl);
 <!DOCTYPE html>
 <html>
 <head>
