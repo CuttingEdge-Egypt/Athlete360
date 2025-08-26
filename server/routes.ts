@@ -1772,6 +1772,7 @@ Return only valid JSON with the missing fields.`;
       const paymentIntention = await paymobService.createPaymentIntention({
         amount, // Amount in EGP (will be converted to cents in service)
         currency: 'EGP',
+        userId: userId,
         customerEmail: customerData.email,
         customerFirstName: customerData.firstName,
         customerLastName: customerData.lastName,
@@ -1866,7 +1867,32 @@ Return only valid JSON with the missing fields.`;
         
         if (tokensToAdd > 0) {
           console.log(`💰 Processing payment: ${amount} EGP = ${tokensToAdd} tokens`);
-          // Note: Token crediting would be implemented here based on user identification
+          
+          // Extract user ID from merchant_order_id format: tokens_USER_ID_TIMESTAMP
+          const merchantOrderId = transaction.merchant_order_id || transaction.order?.merchant_order_id;
+          if (merchantOrderId && merchantOrderId.startsWith('tokens_')) {
+            const userId = merchantOrderId.split('_')[1];
+            console.log(`🔍 Extracted user ID: ${userId} from merchant order: ${merchantOrderId}`);
+            
+            try {
+              // Credit tokens to user account
+              await storage.addTokensPurchase(userId, tokensToAdd);
+              
+              // Create transaction record
+              await storage.createTransaction({
+                userId,
+                action: `Token Purchase - ${amount} EGP`,
+                tokensDeducted: -tokensToAdd,
+                serviceType: "purchase"
+              });
+              
+              console.log(`✅ Successfully credited ${tokensToAdd} tokens to user ${userId}`);
+            } catch (error) {
+              console.error(`❌ Error crediting tokens to user ${userId}:`, error);
+            }
+          } else {
+            console.error('❌ Could not extract user ID from merchant_order_id:', merchantOrderId);
+          }
         }
       }
       

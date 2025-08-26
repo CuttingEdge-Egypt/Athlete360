@@ -11,6 +11,7 @@ export interface PaymobConfig {
 export interface PaymentData {
   amount: number;
   currency: string;
+  userId: string;
   customerEmail: string;
   customerFirstName: string;
   customerLastName: string;
@@ -77,9 +78,14 @@ export class PaymobService {
       const amountInCents = Math.round(paymentData.amount * 100);
       console.log(`💰 Converting ${paymentData.amount} EGP to ${amountInCents} cents`);
       
+      // Create merchant order ID with user identification
+      const merchantOrderId = `tokens_${paymentData.userId}_${Date.now()}`;
+      console.log(`🏷️ Created merchant order ID: ${merchantOrderId}`);
+
       const requestPayload = {
         amount: amountInCents,
         currency: paymentData.currency,
+        merchant_order_id: merchantOrderId,
         payment_methods: [
           parseInt(this.config.integrationId)
         ],
