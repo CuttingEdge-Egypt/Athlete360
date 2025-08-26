@@ -16,7 +16,8 @@ import PaymentCenter from "@/pages/payment-center";
 import TestAuthPage from "@/pages/test-auth";
 import { SignupPage } from "@/pages/signup";
 import { LoginPage } from "@/pages/login";
-import PaymentSuccess from "@/pages/payment-success";
+import PaymentSuccessOld from "@/pages/payment-success";
+import PaymentSuccess from "@/pages/PaymentSuccess";
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
 
@@ -27,7 +28,8 @@ function Router() {
         <Route path="/test-auth" component={TestAuthPage} />
         <Route path="/signup" component={SignupPage} />
         <Route path="/login" component={LoginPage} />
-        <Route path="/payment-success" component={PaymentSuccess} />
+        <Route path="/payment-success" component={PaymentSuccessOld} />
+        <Route path="/payment/success" component={PaymentSuccess} />
         
         {isLoading ? (
           <Route path="/" component={() => (

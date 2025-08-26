@@ -1927,18 +1927,18 @@ Return only valid JSON with the missing fields.`;
         // For now, log the order info for debugging
         console.log('🔍 Order info for user identification:', { order, id, amount });
         
-        // Payment successful - redirect to success page
-        res.redirect('/payment-success?status=success&transaction=' + id);
+        // Payment successful - redirect to custom success page
+        res.redirect('/payment/success?status=completed&transaction=' + id + '&amount=' + amount);
       } else if (pending === 'true') {
-        // Payment pending (3DS or OTP) - redirect to pending page
-        res.redirect('/payment-success?status=pending&transaction=' + id);
+        // Payment pending (3DS or OTP) - redirect to custom success page
+        res.redirect('/payment/success?status=pending&transaction=' + id);
       } else {
-        // Payment failed - redirect to failure page
-        res.redirect('/payment-success?status=failed&transaction=' + id);
+        // Payment failed - redirect to custom success page
+        res.redirect('/payment/success?status=failed&transaction=' + id);
       }
     } catch (error) {
       console.error('❌ Error handling Paymob response:', error);
-      res.redirect('/payment-success?status=error');
+      res.redirect('/payment/success?status=error');
     }
   });
 
