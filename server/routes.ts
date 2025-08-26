@@ -1908,9 +1908,20 @@ Return only valid JSON with the missing fields.`;
     try {
       console.log('🔄 Paymob response callback received:', req.query);
       
-      const { success, pending, id } = req.query;
+      const { success, pending, id, amount_cents, order } = req.query;
       
-      if (success === 'true' && pending === 'false') {
+      // Process payment if successful and not pending
+      if (success === 'true' && pending === 'false' && amount_cents) {
+        const amount = parseInt(amount_cents as string) / 100;
+        const tokensToAdd = amount === 25 ? 1000 : amount === 15 ? 500 : amount === 50 ? 2500 : 0;
+        
+        console.log(`💰 Processing successful payment redirect: ${amount} EGP = ${tokensToAdd} tokens`);
+        
+        // Note: Since merchant_order_id is not in URL params, 
+        // we'll need to implement user identification differently
+        // For now, log the order info for debugging
+        console.log('🔍 Order info for user identification:', { order, id, amount });
+        
         // Payment successful - redirect to success page
         res.redirect('/payment-success?status=success&transaction=' + id);
       } else if (pending === 'true') {
