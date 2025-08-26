@@ -68,10 +68,10 @@ export class PaymobService {
         integrationId: this.config.integrationId
       });
 
-      // Get base URL for callbacks - use current Replit workspace
-      const baseUrl = process.env.REPL_SLUG && process.env.REPL_OWNER
-        ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`
-        : 'https://workspace.CuttingMo.repl.co';
+      // Get base URL for callbacks - use actual Replit external domain
+      const baseUrl = process.env.REPLIT_DOMAINS 
+        ? `https://${process.env.REPLIT_DOMAINS}`
+        : `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`;
       
       console.log(`🌐 Using callback base URL: ${baseUrl}`);
 
