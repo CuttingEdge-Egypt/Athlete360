@@ -70,15 +70,16 @@ Preferred communication style: Simple, everyday language.
 - **Deployed URLs**: Using athlete360-cuttingmo.replit.app for production callbacks
 - **Custom Redirect URL**: Clean `/payment/success?status=completed&transaction=ID&amount=15` format replacing technical callback URLs
 
-### Callback Redirect System Completely Fixed (August 26, 2025)
-- **Root Problem Solved**: Eliminated routing conflicts between Vite middleware and Express API routes causing "Not Found" errors
-- **Clean Redirects**: Replaced problematic HTML response system with proper 302 redirects to frontend routes
-- **Payment Status Detection**: Comprehensive parsing of `data.message=Approved`, `txn_response_code=APPROVED`, and `acq_response_code=00` parameters
-- **Seamless Flow**: Backend processes payment status and redirects to `/payment/success?status=completed&amount=15&tokens=500`
-- **Frontend Handling**: PaymentRedirectHandler component processes redirect parameters and shows appropriate success/failure states
+### Paymob Callback Architecture Completely Restructured (August 26, 2025)
+- **Dual Callback System**: Implemented proper Paymob architecture with separate notification_url (webhook) and redirection_url (user redirect)
+- **Research-Based Solution**: Extensive Paymob documentation research revealed need for two distinct callback types
+- **Webhook Endpoint**: `/api/payments/paymob-processed` handles server-to-server POST requests with JSON data
+- **Redirect Endpoint**: `/api/payments/paymob-response` handles browser redirects with query parameters using `app.all()` for flexible GET/POST support
+- **Enhanced Debugging**: Comprehensive request logging for production troubleshooting including method, headers, body, and query parameters
+- **HMAC Ready**: Security validation structure implemented for production webhook authentication
 - **Token Credit Flow**: Automatic token crediting upon payment approval with transaction logging
-- **Production Ready**: Clean URL structure eliminates technical callback URLs for better user experience
-- **Development Verified**: Local testing confirms callback route works with 302 redirects to frontend pages
+- **Production Status**: Local development fully functional, production deployment requires verification of callback URL configuration in Paymob dashboard
+- **Architecture Compliance**: Follows official Paymob integration requirements for reliable payment processing
 
 ### Egyptian Bank Validation Fix
 - **Problem**: Bank recognition failures with "unrecognized bank" errors

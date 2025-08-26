@@ -1908,11 +1908,20 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
-  // Paymob transaction response callback (redirect) - MUST be handled before Vite
-  app.get('/api/payments/paymob-response', async (req, res) => {
+  // Paymob transaction response callback (redirect) - Handle both GET and POST
+  app.all('/api/payments/paymob-response', async (req, res) => {
     console.log('🎯 CALLBACK ROUTE HIT - Backend handling this request');
+    console.log('📊 Request details:', {
+      method: req.method,
+      query: req.query,
+      body: req.body,
+      headers: req.headers
+    });
+    
     try {
-      console.log('🔄 Paymob response callback received:', req.query);
+      // Handle both GET (with query params) and POST (with body) requests
+      const data = req.method === 'POST' ? req.body : req.query;
+      console.log('🔄 Paymob response callback received:', data);
       
       const { 
         success, 
@@ -1924,7 +1933,7 @@ Return only valid JSON with the missing fields.`;
         'txn_response_code': txnResponseCode,
         'acq_response_code': acqResponseCode,
         error_occured
-      } = req.query;
+      } = data;
       
       // Debug logging to understand the issue
       console.log('🔍 Payment status check:', {
