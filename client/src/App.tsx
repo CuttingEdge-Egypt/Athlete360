@@ -20,6 +20,7 @@ import PaymentSuccessOld from "@/pages/payment-success";
 import PaymentSuccess from "@/pages/PaymentSuccess";
 import PaymentSuccessSimple from "@/pages/PaymentSuccessSimple";
 import TestPaymentPage from "@/pages/TestPaymentPage";
+import PaymentRedirectHandler from "@/pages/PaymentRedirectHandler";
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
 
@@ -27,7 +28,7 @@ function Router() {
     <>
       <Switch>
         {/* Payment success routes - accessible from external redirects */}
-        <Route path="/payment/success" component={PaymentSuccessSimple} />
+        <Route path="/payment/success" component={PaymentRedirectHandler} />
         <Route path="/payment-success" component={PaymentSuccessOld} />
         
         {/* Public auth routes */}

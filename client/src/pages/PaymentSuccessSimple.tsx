@@ -1,12 +1,27 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { CheckCircle } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function PaymentSuccessSimple() {
+  const [, setLocation] = useLocation();
   const searchParams = new URLSearchParams(window.location.search);
   const status = searchParams.get("status");
   const transactionId = searchParams.get("transaction");
   const amount = searchParams.get("amount");
+
+  // Immediate redirect if this is a fresh external redirect
+  useEffect(() => {
+    console.log("Payment success page loaded:", { status, transactionId, amount });
+    
+    // If we have success status but user came from external redirect, ensure we're on the right page
+    if (status === "completed" && transactionId && amount) {
+      // Small delay to ensure the page renders before any potential redirects
+      setTimeout(() => {
+        console.log("Payment success confirmed - staying on page");
+      }, 100);
+    }
+  }, [status, transactionId, amount]);
 
   return (
     <div className="min-h-screen bg-background">

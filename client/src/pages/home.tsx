@@ -31,6 +31,23 @@ export default function Home() {
   const [videoAnalysisData, setVideoAnalysisData] = useState<any>(null);
   const [location] = useLocation();
 
+  // Check for payment success notification
+  useEffect(() => {
+    const paymentSuccess = sessionStorage.getItem('paymentSuccess');
+    if (paymentSuccess) {
+      try {
+        const paymentData = JSON.parse(paymentSuccess);
+        toast({
+          title: "Payment Successful!",
+          description: `Successfully purchased tokens for ${paymentData.amount} EGP. Transaction: ${paymentData.transactionId}`,
+        });
+        sessionStorage.removeItem('paymentSuccess');
+      } catch (error) {
+        console.error('Error parsing payment success data:', error);
+      }
+    }
+  }, [toast]);
+
   // Check for URL parameters to load comparison data
   useEffect(() => {
     const checkUrlParams = () => {

@@ -1927,8 +1927,10 @@ Return only valid JSON with the missing fields.`;
         // For now, log the order info for debugging
         console.log('🔍 Order info for user identification:', { order, id, amount });
         
-        // Payment successful - redirect to custom success page
-        res.redirect('/payment/success?status=completed&transaction=' + id + '&amount=' + amount);
+        // Payment successful - redirect to custom success page with cache busting
+        const redirectUrl = `/payment/success?status=completed&transaction=${id}&amount=${amount}&t=${Date.now()}`;
+        console.log(`🔄 Redirecting to success page: ${redirectUrl}`);
+        res.redirect(redirectUrl);
       } else if (pending === 'true') {
         // Payment pending (3DS or OTP) - redirect to custom success page
         res.redirect('/payment/success?status=pending&transaction=' + id);
