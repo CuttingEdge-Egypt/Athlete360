@@ -1942,69 +1942,6 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
-  // Success redirect page (optional UX, webhook is source of truth)
-  app.get('/payment-success', async (req, res) => {
-    const { status, transaction } = req.query;
-    
-    let title, icon, message, buttonText;
-    
-    switch (status) {
-      case 'success':
-        title = 'Payment Successful!';
-        icon = '✅';
-        message = 'Your tokens have been added to your account.';
-        buttonText = 'Return to Dashboard';
-        break;
-      case 'pending':
-        title = 'Payment Pending';
-        icon = '⏳';
-        message = 'Your payment is being processed. This may take a few minutes.';
-        buttonText = 'Return to Dashboard';
-        break;
-      case 'failed':
-        title = 'Payment Failed';
-        icon = '❌';
-        message = 'Your payment could not be processed. Please try again.';
-        buttonText = 'Try Again';
-        break;
-      default:
-        title = 'Payment Complete';
-        icon = 'ℹ️';
-        message = 'Thank you for your payment.';
-        buttonText = 'Return to Dashboard';
-    }
-    
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>${title}</title>
-        <style>
-          body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f5f5f5; }
-          .container { background: white; padding: 40px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-          .icon { font-size: 48px; margin-bottom: 20px; }
-          .title { font-size: 24px; margin-bottom: 20px; color: #374151; }
-          .message { font-size: 18px; color: #6b7280; margin-bottom: 30px; }
-          .button { background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; }
-          .transaction { font-size: 12px; color: #9ca3af; margin-top: 20px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="icon">${icon}</div>
-          <div class="title">${title}</div>
-          <div class="message">${message}</div>
-          <a href="/" class="button">${buttonText}</a>
-          ${transaction ? `<div class="transaction">Transaction: ${transaction}</div>` : ''}
-        </div>
-        <script>
-          ${status === 'success' ? "setTimeout(() => { window.location.href = '/'; }, 5000);" : ""}
-        </script>
-      </body>
-      </html>
-    `);
-  });
-
   // Simple config test endpoint
   app.get('/api/payments/test-paymob', isAuthenticated, async (_req, res) => {
     try {

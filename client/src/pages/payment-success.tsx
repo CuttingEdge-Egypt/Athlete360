@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { CheckCircle, Clock, XCircle, AlertCircle } from "lucide-react";
+import { Navigation } from "@/components/Navigation";
 
 export default function PaymentSuccess() {
   const [location] = useLocation();
@@ -62,49 +63,50 @@ export default function PaymentSuccess() {
   const StatusIcon = config.icon;
 
   return (
-    <div className="min-h-screen bg-athlete-primary flex items-center justify-center p-4">
-      <Card className={`w-full max-w-md ${config.bgColor}`}>
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <StatusIcon className={`h-16 w-16 ${config.color}`} />
-          </div>
-          <CardTitle className={`text-2xl ${config.color}`}>
-            {config.title}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-center space-y-4">
-          <p className="text-gray-700 dark:text-gray-300">
-            {config.message}
-          </p>
-          
-          {transactionId && (
-            <p className="text-sm text-gray-500">
-              Transaction ID: {transactionId}
+    <div className="min-h-screen bg-athlete-primary text-white">
+      <Navigation />
+      <div className="pt-20 pb-20 flex items-center justify-center p-4">
+        <Card className={`w-full max-w-md ${config.bgColor}`}>
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <StatusIcon className={`h-16 w-16 ${config.color}`} />
+            </div>
+            <CardTitle className={`text-2xl ${config.color}`}>
+              {config.title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-gray-700 dark:text-gray-300">
+              {config.message}
             </p>
-          )}
-
-          <div className="space-y-2">
-            <Button 
-              onClick={() => window.location.href = '/dashboard'}
-              className="w-full"
-              data-testid="button-dashboard"
-            >
-              Go to Dashboard
-            </Button>
             
-            {status === 'failed' && (
+            {transactionId && (
+              <p className="text-sm text-gray-500">
+                Transaction ID: {transactionId}
+              </p>
+            )}
+
+            <div className="space-y-2">
+              <Button 
+                onClick={() => window.location.href = '/dashboard'}
+                className="w-full"
+                data-testid="button-dashboard"
+              >
+                Go to Dashboard
+              </Button>
+              
               <Button 
                 variant="outline"
                 onClick={() => window.location.href = '/payment-center'}
                 className="w-full"
-                data-testid="button-retry-payment"
+                data-testid="button-payment-center"
               >
-                Try Again
+                {status === 'failed' ? 'Try Again' : 'Buy More Tokens'}
               </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
