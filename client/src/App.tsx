@@ -19,18 +19,21 @@ import { LoginPage } from "@/pages/login";
 import PaymentSuccessOld from "@/pages/payment-success";
 import PaymentSuccess from "@/pages/PaymentSuccess";
 import PaymentSuccessSimple from "@/pages/PaymentSuccessSimple";
+import TestPaymentPage from "@/pages/TestPaymentPage";
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
 
   return (
     <>
       <Switch>
-        {/* Public routes - accessible without authentication */}
+        {/* Payment success routes - accessible from external redirects */}
+        <Route path="/payment/success" component={PaymentSuccessSimple} />
+        <Route path="/payment-success" component={PaymentSuccessOld} />
+        
+        {/* Public auth routes */}
         <Route path="/test-auth" component={TestAuthPage} />
         <Route path="/signup" component={SignupPage} />
         <Route path="/login" component={LoginPage} />
-        <Route path="/payment-success" component={PaymentSuccessOld} />
-        <Route path="/payment/success" component={PaymentSuccessSimple} />
         
         {isLoading ? (
           <Route path="/" component={() => (
