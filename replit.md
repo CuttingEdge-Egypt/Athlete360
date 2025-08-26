@@ -70,13 +70,15 @@ Preferred communication style: Simple, everyday language.
 - **Deployed URLs**: Using athlete360-cuttingmo.replit.app for production callbacks
 - **Custom Redirect URL**: Clean `/payment/success?status=completed&transaction=ID&amount=15` format replacing technical callback URLs
 
-### Callback Redirect System Fixed (August 26, 2025)
-- **Problem Solved**: Eliminated "Not Found" errors after Paymob payment completion
+### Callback Redirect System Completely Fixed (August 26, 2025)
+- **Root Problem Solved**: Eliminated routing conflicts between Vite middleware and Express API routes causing "Not Found" errors
+- **Clean Redirects**: Replaced problematic HTML response system with proper 302 redirects to frontend routes
 - **Payment Status Detection**: Comprehensive parsing of `data.message=Approved`, `txn_response_code=APPROVED`, and `acq_response_code=00` parameters
-- **HTML Response System**: Server-side HTML redirect pages replace problematic 302 redirects
-- **User Experience**: Beautiful success/pending/failure pages with auto-redirect to dashboard
+- **Seamless Flow**: Backend processes payment status and redirects to `/payment/success?status=completed&amount=15&tokens=500`
+- **Frontend Handling**: PaymentRedirectHandler component processes redirect parameters and shows appropriate success/failure states
 - **Token Credit Flow**: Automatic token crediting upon payment approval with transaction logging
-- **Approval Logic**: Multi-factor payment verification using success, pending, error_occured, and approval message checks
+- **Production Ready**: Clean URL structure eliminates technical callback URLs for better user experience
+- **Development Verified**: Local testing confirms callback route works with 302 redirects to frontend pages
 
 ### Egyptian Bank Validation Fix
 - **Problem**: Bank recognition failures with "unrecognized bank" errors
