@@ -389,6 +389,9 @@ export async function setupLocalAuth(app: Express) {
 export const isAuthenticatedUniversal: RequestHandler = async (req, res, next) => {
   console.log(`[AUTH DEBUG] Universal auth check for ${req.path}`);
   console.log(`[AUTH DEBUG] req.isAuthenticated(): ${req.isAuthenticated()}`);
+  console.log(`[AUTH DEBUG] Session ID:`, req.sessionID);
+  console.log(`[AUTH DEBUG] Session:`, req.session);
+  console.log(`[AUTH DEBUG] Headers:`, req.headers.cookie);
 
   if (!req.isAuthenticated()) {
     console.log(`[AUTH DEBUG] Not authenticated`);

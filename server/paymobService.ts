@@ -61,6 +61,12 @@ export class PaymobService {
   async createPaymentIntention(paymentData: PaymentData): Promise<PaymobIntentionResponse> {
     try {
       console.log('🔄 Creating Paymob payment intention using new API...', { amount: paymentData.amount });
+      console.log('🔍 PaymobService config check:', {
+        hasSecretKey: !!this.config.secretKey,
+        hasPublicKey: !!this.config.publicKey,
+        hasIntegrationId: !!this.config.integrationId,
+        integrationId: this.config.integrationId
+      });
 
       // Get base URL for callbacks - prioritize development environment
       const baseUrl = process.env.REPL_SLUG && process.env.REPL_OWNER

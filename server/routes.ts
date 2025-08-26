@@ -1800,10 +1800,13 @@ Return only valid JSON with the missing fields.`;
       });
     } catch (error: any) {
       console.error("💥 Error creating payment intention:", error);
+      console.error("💥 Error message:", error?.message);
       console.error("💥 Error stack:", error?.stack);
+      console.error("💥 Error response:", error?.response?.data || 'No response data');
       res.status(500).json({
         message: "Failed to create payment intention",
-        error: error?.message || 'Unknown error'
+        error: error?.message || 'Unknown error',
+        details: error?.response?.data || null
       });
     }
   });
