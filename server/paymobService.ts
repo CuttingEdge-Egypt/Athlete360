@@ -68,8 +68,10 @@ export class PaymobService {
         integrationId: this.config.integrationId
       });
 
-      // Get base URL for callbacks - use actual Replit external domain
-      const baseUrl = process.env.REPLIT_DOMAINS 
+      // Get base URL for callbacks - use deployment domain or environment variable
+      const baseUrl = process.env.DEPLOYED_DOMAIN 
+        ? process.env.DEPLOYED_DOMAIN
+        : process.env.REPLIT_DOMAINS 
         ? `https://${process.env.REPLIT_DOMAINS}`
         : `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`;
       
