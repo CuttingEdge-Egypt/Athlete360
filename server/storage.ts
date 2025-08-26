@@ -70,6 +70,8 @@ export interface IStorage {
   updateUserTokens(userId: string, tokens: number): Promise<User>;
   deductTokens(userId: string, amount: number): Promise<User>;
   refundTokens(userId: string, amount: number): Promise<User>;
+  addTokensToUser(userId: string, amount: number): Promise<User>;
+  getUserIdFromOrder(orderId: string): Promise<string | null>;
   updateUserPaymentCard(userId: string, cardData: { cardToken: string, cardLast4: string, cardBrand: string, paymobCustomerId?: string }): Promise<User>;
   generateReferralCode(userId: string): Promise<string>;
   getUserByReferralCode(referralCode: string): Promise<User | undefined>;
@@ -318,6 +320,60 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return updatedUser;
+  }
+
+  async addTokensToUser(userId: string, amount: number): Promise<User> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const newTokenBalance = user.tokens + amount;
+    const newTotalTokensPurchased = (user.totalTokensPurchased || 0) + amount;
+
+    const [updatedUser] = await db
+      .update(users)
+      .set({
+        tokens: newTokenBalance,
+        totalTokensPurchased: newTotalTokensPurchased,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+
+    if (!updatedUser) {
+      throw new Error("Failed to add tokens");
+    }
+
+    return updatedUser;
+  }
+
+  async getUserIdFromOrder(orderId: string): Promise<string | null> {
+    try {
+      const [receipt] = await db
+        .select()
+        .from(paymentReceipts)
+        .where(eq(paymentReceipts.orderId, orderId))
+        .limit(1);
+      
+      if (receipt) {
+        return receipt.userId;
+      }
+      
+      // If no receipt found, try to extract from merchant order format
+      if (orderId.startsWith('tokens_')) {
+        const parts = orderId.split('_');
+        if (parts.length >= 3) {
+          const userId = parts.slice(1, -1).join('_'); // Handle UUIDs with underscores
+          return userId;
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error getting user ID from order:', error);
+      return null;
+    }
   }
 
   // User profile management

@@ -1913,22 +1913,63 @@ Return only valid JSON with the missing fields.`;
     try {
       console.log('🔄 Paymob response callback received:', req.query);
       
-      const { success, pending, id, amount_cents, order } = req.query;
+      const { 
+        success, 
+        pending, 
+        id, 
+        amount_cents, 
+        order,
+        'data.message': dataMessage,
+        'txn_response_code': txnResponseCode,
+        'acq_response_code': acqResponseCode,
+        error_occured
+      } = req.query;
       
-      // Process payment if successful and not pending
-      if (success === 'true' && pending === 'false' && amount_cents) {
-        const amount = parseInt(amount_cents as string) / 100;
-        const tokensToAdd = amount === 25 ? 1000 : amount === 15 ? 500 : amount === 50 ? 2500 : 0;
+      // Check if payment is approved based on multiple indicators
+      const isPaymentApproved = (
+        success === 'true' && 
+        pending === 'false' && 
+        error_occured === 'false' &&
+        (dataMessage === 'Approved' || txnResponseCode === 'APPROVED' || acqResponseCode === '00')
+      );
+      
+      const amount = amount_cents ? parseInt(amount_cents as string) / 100 : 0;
+      const tokensToAdd = amount === 25 ? 1000 : amount === 15 ? 500 : amount === 50 ? 2500 : 0;
+      
+      if (isPaymentApproved && amount_cents) {
+        console.log(`✅ Payment APPROVED: ${amount} EGP = ${tokensToAdd} tokens`);
+        console.log(`📋 Approval indicators: data.message=${dataMessage}, txn_response_code=${txnResponseCode}, acq_response_code=${acqResponseCode}`);
         
-        console.log(`💰 Processing successful payment redirect: ${amount} EGP = ${tokensToAdd} tokens`);
-        
-        // Note: Since merchant_order_id is not in URL params, 
-        // we'll need to implement user identification differently
-        // For now, log the order info for debugging
-        console.log('🔍 Order info for user identification:', { order, id, amount });
+        // Extract user ID from order to credit tokens
+        if (order) {
+          try {
+            // Try to get user ID from merchant_order_id stored during payment creation
+            const userId = await storage.getUserIdFromOrder(order as string);
+            if (userId) {
+              console.log(`👤 Found user ID for token crediting: ${userId}`);
+              
+              // Credit tokens to user account
+              await storage.addTokensToUser(userId, tokensToAdd);
+              
+              // Create transaction record
+              await storage.createTransaction({
+                userId,
+                action: `Token Purchase - ${amount} EGP (Order: ${order})`,
+                tokensDeducted: -tokensToAdd,
+                serviceType: "purchase"
+              });
+              
+              console.log(`✅ Successfully credited ${tokensToAdd} tokens to user ${userId}`);
+            } else {
+              console.log(`⚠️ Could not find user ID for order: ${order}`);
+            }
+          } catch (error) {
+            console.error(`❌ Error crediting tokens for order ${order}:`, error);
+          }
+        }
         
         // Payment successful - serve immediate redirect HTML
-        console.log(`🔄 Serving immediate redirect for successful payment: ${amount} EGP`);
+        console.log(`🔄 Serving success redirect page`);
         return res.send(`
 <!DOCTYPE html>
 <html>
@@ -1988,7 +2029,7 @@ Return only valid JSON with the missing fields.`;
     </script>
 </body>
 </html>`);
-      } else if (pending === 'true') {
+      } else if (pending === 'true' || (success === 'true' && dataMessage !== 'Approved')) {
         // Payment pending - serve immediate redirect HTML
         console.log(`⏳ Serving redirect for pending payment: ${id}`);
         res.send(`
@@ -2024,7 +2065,7 @@ Return only valid JSON with the missing fields.`;
 </html>`);
       } else {
         // Payment failed - serve immediate redirect HTML
-        console.log(`❌ Serving redirect for failed payment: ${id}`);
+        console.log(`❌ Payment FAILED or ERROR: success=${success}, pending=${pending}, error_occured=${error_occured}, data.message=${dataMessage}`);
         res.send(`
 <!DOCTYPE html>
 <html>
