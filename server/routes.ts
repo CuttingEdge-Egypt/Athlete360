@@ -105,8 +105,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     bodyParser.raw({ type: '*/*' })   // capture raw body for HMAC
   );
 
-  // Seed database on startup
-  await seedDatabase();
+  // Seed database on startup (non-blocking)
+  seedDatabase().then(() => {
+    console.log('Database seeded successfully');
+  }).catch(error => {
+    console.error('Failed to seed database:', error);
+    console.log('Continuing without seeding...');
+  });
 
   // Auth routes - now supports both Replit and local auth
   app.get('/api/auth/user', isAuthenticatedUniversal, async (req: any, res) => {
