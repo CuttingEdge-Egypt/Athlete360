@@ -159,7 +159,14 @@ Instead of redirecting to client-side routes, the API endpoint now **serves comp
 - **JavaScript**: Countdown timer and automatic redirect functionality
 - **Fallback**: Manual "Continue" button for user control
 
-**Status**: ✅ **PRODUCTION READY** - Complete solution resolves SPA routing issue with proper HTML page serving.
+**Status**: ✅ **DEPLOYMENT READY** - Dynamic URL configuration ensures callback works in both development and production environments.
+
+### Deployment Configuration
+- **Dynamic URL**: Automatically uses correct domain based on environment
+- **Production**: Uses `${REPL_SLUG}.replit.app` format  
+- **Development**: Uses current workspace domain
+- **HTML Response**: Complete pages served for all payment states
+- **Paymob Integration**: Fully configured for live payments
 
 ## Technical Benefits
 

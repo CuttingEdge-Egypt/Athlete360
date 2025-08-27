@@ -69,8 +69,10 @@ export class PaymobService {
         integrationId: this.config.integrationId
       });
 
-      // Get base URL for callbacks - use current Replit workspace domain
-      const baseUrl = 'https://workspace-CuttingMo.replit.app';
+      // Get base URL for callbacks - dynamically determine based on environment
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? `https://${process.env.REPL_SLUG}.replit.app` 
+        : 'https://workspace-CuttingMo.replit.app';
       
       console.log(`🌐 Using callback base URL: ${baseUrl}`);
 
