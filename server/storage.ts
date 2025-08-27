@@ -328,7 +328,7 @@ export class DatabaseStorage implements IStorage {
       throw new Error("User not found");
     }
 
-    const newTokenBalance = user.tokens + amount;
+    const newTokenBalance = (user.tokens || 0) + amount;
     const newTotalTokensPurchased = (user.totalTokensPurchased || 0) + amount;
 
     const [updatedUser] = await db
@@ -364,7 +364,7 @@ export class DatabaseStorage implements IStorage {
       const receipts = await db
         .select()
         .from(paymentReceipts)
-        .where(eq(paymentReceipts.orderId, orderId))
+        .where(eq(paymentReceipts.id, orderId))
         .limit(1);
       
       const receipt = receipts[0];
