@@ -16,6 +16,95 @@ import { TestingService } from "./testingService";
 import OpenAI from "openai";
 import multer from "multer";
 
+// HTML generation function for payment result pages
+interface PaymentResultData {
+  status: string;
+  title: string;
+  message: string;
+  tokenMessage: string;
+  transactionId: string;
+  redirectUrl: string;
+  bgColor: string;
+  textColor: string;
+  icon: string;
+}
+
+function generatePaymentResultHTML(data: PaymentResultData): string {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment ${data.status} - Athlete360</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .countdown-progress {
+            animation: progress 5s linear forwards;
+        }
+        @keyframes progress {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div class="max-w-md w-full ${data.bgColor} rounded-lg border shadow-lg p-8 text-center">
+        <div class="text-6xl mb-4">${data.icon}</div>
+        <h1 class="text-2xl font-bold mb-4 ${data.textColor}">
+            ${data.title}
+        </h1>
+        <p class="mb-4 ${data.textColor}">
+            ${data.message}
+        </p>
+        ${data.tokenMessage ? `
+        <p class="mb-4 font-semibold ${data.textColor}">
+            ${data.tokenMessage}
+        </p>
+        ` : ''}
+        ${data.transactionId !== 'undefined' && data.transactionId ? `
+        <p class="text-sm mb-6 ${data.textColor} opacity-75">
+            Transaction ID: ${data.transactionId}
+        </p>
+        ` : ''}
+        <div class="text-lg font-semibold mb-2 ${data.textColor}">
+            Redirecting to dashboard in <span id="countdown">5</span> seconds...
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
+            <div class="bg-blue-600 h-2 rounded-full countdown-progress"></div>
+        </div>
+        <a href="${data.redirectUrl}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded transition-colors">
+            Continue to Dashboard
+        </a>
+    </div>
+    
+    <script>
+        // Countdown timer
+        let count = 5;
+        const countdownElement = document.getElementById('countdown');
+        
+        const timer = setInterval(() => {
+            count--;
+            if (countdownElement) {
+                countdownElement.textContent = count;
+            }
+            
+            if (count <= 0) {
+                clearInterval(timer);
+                window.location.href = '${data.redirectUrl}';
+            }
+        }, 1000);
+        
+        // Add click handler for manual continue
+        document.querySelector('a[href="${data.redirectUrl}"]').addEventListener('click', (e) => {
+            clearInterval(timer);
+        });
+    </script>
+</body>
+</html>
+  `;
+}
+
 // All LLM implementations now use GPT-5 with temperature 1.0 (default minimum)
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -1991,27 +2080,64 @@ Return only valid JSON with the missing fields.`;
           }
         }
         
-        // Payment successful - redirect to frontend success page
-        console.log(`🔄 Redirecting to frontend success page`);
-        const successUrl = `/payment/success?status=completed&transaction=${id}&amount=${amount}&tokens=${tokensToAdd}`;
-        return res.redirect(successUrl);
+        // Payment successful - serve HTML success page directly
+        console.log(`🔄 Serving HTML success page directly`);
+        return res.send(generatePaymentResultHTML({
+          status: 'completed',
+          title: 'Payment Successful!',
+          message: `Your payment of ${amount} EGP has been processed successfully.`,
+          tokenMessage: `${tokensToAdd} tokens have been added to your account.`,
+          transactionId: id as string,
+          redirectUrl: '/',
+          bgColor: 'bg-green-50',
+          textColor: 'text-green-800',
+          icon: '✅'
+        }));
         
       } else if (pending === 'true' || (success === 'true' && dataMessage !== 'Approved')) {
-        // Payment pending - redirect to frontend pending page
-        console.log(`⏳ Redirecting to frontend pending page: ${id}`);
-        const pendingUrl = `/payment/success?status=pending&transaction=${id}`;
-        return res.redirect(pendingUrl);
+        // Payment pending - serve HTML pending page directly
+        console.log(`⏳ Serving HTML pending page: ${id}`);
+        return res.send(generatePaymentResultHTML({
+          status: 'pending',
+          title: 'Payment Pending',
+          message: 'Your payment is being processed. This may take a few minutes.',
+          tokenMessage: '',
+          transactionId: id as string,
+          redirectUrl: '/',
+          bgColor: 'bg-yellow-50',
+          textColor: 'text-yellow-800',
+          icon: '⏳'
+        }));
         
       } else {
-        // Payment failed - redirect to frontend failure page
+        // Payment failed - serve HTML failure page directly
         console.log(`❌ Payment FAILED or ERROR: success=${success}, pending=${pending}, error_occured=${error_occured}, data.message=${dataMessage}`);
-        const failureUrl = `/payment/success?status=failed&transaction=${id}`;
-        return res.redirect(failureUrl);
+        return res.send(generatePaymentResultHTML({
+          status: 'failed',
+          title: 'Payment Failed',
+          message: 'There was an issue processing your payment. Please try again.',
+          tokenMessage: '',
+          transactionId: id as string,
+          redirectUrl: '/payment-center',
+          bgColor: 'bg-red-50',
+          textColor: 'text-red-800',
+          icon: '❌'
+        }));
       }
     } catch (error) {
       console.error('❌ Error handling Paymob response:', error);
-      // Redirect to payment center on any errors
-      return res.redirect('/payment-center?error=processing');
+      // Serve HTML error page on any errors
+      return res.send(generatePaymentResultHTML({
+        status: 'error',
+        title: 'Payment Processing Error',
+        message: 'There was an error processing your payment response. Please contact support if this issue persists.',
+        tokenMessage: '',
+        transactionId: '',
+        redirectUrl: '/payment-center',
+        bgColor: 'bg-red-50',
+        textColor: 'text-red-800',
+        icon: '⚠️'
+      }));
     }
   });
 
