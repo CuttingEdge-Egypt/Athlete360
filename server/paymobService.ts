@@ -69,8 +69,8 @@ export class PaymobService {
         integrationId: this.config.integrationId
       });
 
-      // Get base URL for callbacks - use deployed Replit app domain
-      const baseUrl = 'https://athlete360-CuttingMo.replit.app';
+      // Get base URL for callbacks - use current Replit workspace domain
+      const baseUrl = 'https://workspace-CuttingMo.replit.app';
       
       console.log(`🌐 Using callback base URL: ${baseUrl}`);
 
