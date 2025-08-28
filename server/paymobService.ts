@@ -69,8 +69,9 @@ export class PaymobService {
         integrationId: this.config.integrationId
       });
 
-      // Get base URL for callbacks - use the deployed Replit app domain
-      const baseUrl = 'https://athlete-360-CuttingMo.replit.app';
+      // Get base URL for callbacks - use the domain that Paymob actually redirects to
+      // Note: Paymob seems to transform URLs by removing hyphens regardless of dashboard configuration
+      const baseUrl = 'https://athlete360-cuttingmo.replit.app';
       
       console.log(`🌐 Using callback base URL: ${baseUrl}`);
 
