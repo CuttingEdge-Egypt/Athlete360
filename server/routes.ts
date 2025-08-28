@@ -2053,31 +2053,47 @@ Return only valid JSON with the missing fields.`;
         console.log(`📋 Approval indicators: data.message=${dataMessage}, txn_response_code=${txnResponseCode}, acq_response_code=${acqResponseCode}`);
         
         // Extract user ID from order to credit tokens
+        let userId: string | null = null;
+        
         if (order) {
           try {
             // Try to get user ID from merchant_order_id stored during payment creation
-            const userId = await storage.getUserIdFromOrder(order as string);
+            userId = await storage.getUserIdFromOrder(order as string);
             if (userId) {
-              console.log(`👤 Found user ID for token crediting: ${userId}`);
-              
-              // Credit tokens to user account
-              await storage.addTokensToUser(userId, tokensToAdd);
-              
-              // Create transaction record
-              await storage.createTransaction({
-                userId,
-                action: `Token Purchase - ${amount} EGP (Order: ${order})`,
-                tokensDeducted: -tokensToAdd,
-                serviceType: "purchase"
-              });
-              
-              console.log(`✅ Successfully credited ${tokensToAdd} tokens to user ${userId}`);
+              console.log(`👤 Found user ID from order format: ${userId}`);
             } else {
-              console.log(`⚠️ Could not find user ID for order: ${order}`);
+              console.log(`⚠️ Could not extract user ID from order: ${order}`);
             }
           } catch (error) {
-            console.error(`❌ Error crediting tokens for order ${order}:`, error);
+            console.error(`❌ Error getting user ID from order ${order}:`, error);
           }
+        }
+        
+        // Fallback: If we couldn't get user ID from order, check if user is authenticated
+        if (!userId && (req as any).user?.claims?.sub) {
+          userId = (req as any).user.claims.sub;
+          console.log(`🔄 Using authenticated user ID as fallback: ${userId}`);
+        }
+        
+        if (userId) {
+          try {
+            // Credit tokens to user account
+            await storage.addTokensToUser(userId, tokensToAdd);
+            
+            // Create transaction record
+            await storage.createTransaction({
+              userId,
+              action: `Token Purchase - ${amount} EGP (Order: ${order})`,
+              tokensDeducted: -tokensToAdd,
+              serviceType: "purchase"
+            });
+            
+            console.log(`✅ Successfully credited ${tokensToAdd} tokens to user ${userId}`);
+          } catch (error) {
+            console.error(`❌ Error crediting tokens to user ${userId}:`, error);
+          }
+        } else {
+          console.log(`⚠️ Could not determine user ID for token crediting - no order info and no authenticated user`);
         }
         
         // Payment successful - serve HTML success page directly

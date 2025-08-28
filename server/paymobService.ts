@@ -70,7 +70,7 @@ export class PaymobService {
       });
 
       // Get base URL for callbacks - use the deployed Replit app domain
-      const baseUrl = 'https://athlete360-cuttingmo.replit.app';
+      const baseUrl = 'https://athlete-360-CuttingMo.replit.app';
       
       console.log(`🌐 Using callback base URL: ${baseUrl}`);
 

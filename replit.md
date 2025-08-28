@@ -67,7 +67,7 @@ Preferred communication style: Simple, everyday language.
 - **Token Crediting**: Automatic token addition to user accounts upon successful payment
 - **User Identification**: merchant_order_id format `tokens_USER_ID_TIMESTAMP` implemented
 - **Payment Success Page**: Enhanced custom success page at `/payment/success` with full app navigation header, real-time token balance display, and intuitive user experience
-- **Deployed URLs**: Using athlete360-cuttingmo.replit.app for production callbacks
+- **Deployed URLs**: Using athlete-360-CuttingMo.replit.app for production callbacks
 - **Custom Redirect URL**: Clean `/payment/success?status=completed&transaction=ID&amount=15` format replacing technical callback URLs
 
 ### Paymob Callback Architecture Completely Restructured (August 26, 2025)
@@ -78,7 +78,7 @@ Preferred communication style: Simple, everyday language.
 - **Enhanced Debugging**: Comprehensive request logging for production troubleshooting including method, headers, body, and query parameters
 - **HMAC Ready**: Security validation structure implemented for production webhook authentication
 - **Token Credit Flow**: Automatic token crediting upon payment approval with transaction logging
-- **Production Status**: ✅ **DEPLOYMENT READY** - HTML callback pages working in development, configured for `athlete360-cuttingmo.replit.app`. Ready for deployment to fix production "Not Found" issue
+- **Production Status**: ✅ **DEPLOYMENT READY** - HTML callback pages working, configured for `athlete-360-CuttingMo.replit.app`. Token crediting enhanced with fallback mechanism for authenticated users
 - **Architecture Compliance**: Follows official Paymob integration requirements for reliable payment processing
 
 ### Egyptian Bank Validation Fix
