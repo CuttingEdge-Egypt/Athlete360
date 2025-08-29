@@ -239,7 +239,8 @@ export default function Home() {
         },
         body: JSON.stringify({
           searchQuery: athleteName.trim(),
-          sport: sports.find(s => s.id === selectedSport)?.name || 'Unknown'
+          sport: sports.find(s => s.id === selectedSport)?.name || 'Unknown',
+          country: selectedCountry // Pass selected country for accurate athlete identification
         }),
       });
       
@@ -253,21 +254,43 @@ export default function Home() {
       
       // Step 2: Handle suggestions
       if (searchResults.requiresSelection && searchResults.suggestions.length > 1) {
-        // Show selection UI for multiple matches
+        // Show suggestions with country information for user selection
+        const suggestionList = searchResults.suggestions.map((s: any, i: number) => 
+          `${i + 1}. ${s.fullName} (${s.country}, born ${s.dateOfBirth})`
+        ).join('\n');
+        
         toast({
-          title: "Multiple Athletes Found",
-          description: `Found ${searchResults.suggestions.length} athletes matching "${athleteName}". Please select the correct one.`,
+          title: `Found ${searchResults.suggestions.length} Athletes Named "${athleteName}"`,
+          description: `Select the correct athlete:\n${suggestionList}`,
+          duration: 10000, // Longer duration for selection
         });
         
-        // TODO: Implement suggestion selection UI
-        // For now, auto-select the first suggestion
-        const selectedSuggestion = searchResults.suggestions[0];
+        console.log('Multiple suggestions found:', searchResults.suggestions);
+        
+        // For now, prioritize athlete from selected country if available
+        let selectedSuggestion = searchResults.suggestions[0];
+        if (selectedCountry) {
+          const countryMatch = searchResults.suggestions.find((s: any) => 
+            s.country.toLowerCase().includes(selectedCountry.toLowerCase())
+          );
+          if (countryMatch) {
+            selectedSuggestion = countryMatch;
+            console.log(`Found country match for ${selectedCountry}:`, selectedSuggestion);
+          }
+        }
+        
         await createAthleteFromSuggestion(selectedSuggestion);
         
       } else if (searchResults.suggestions.length === 1) {
         // Single match - auto-proceed
-        console.log('Single match found, auto-proceeding...');
         const selectedSuggestion = searchResults.suggestions[0];
+        console.log('Single match found, auto-proceeding with:', selectedSuggestion);
+        
+        toast({
+          title: "Athlete Found",
+          description: `Creating profile for ${selectedSuggestion.fullName} (${selectedSuggestion.country})`,
+        });
+        
         await createAthleteFromSuggestion(selectedSuggestion);
         
       } else {

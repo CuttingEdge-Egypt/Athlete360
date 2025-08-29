@@ -369,18 +369,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Multi-step AI athlete search with suggestions
   app.post('/api/athletes/search-suggestions', isAuthenticated, async (req: any, res) => {
     try {
-      const { searchQuery, sport } = req.body;
+      const { searchQuery, sport, country } = req.body;
       
       if (!searchQuery || !sport) {
         return res.status(400).json({ message: "Search query and sport are required" });
       }
 
-      console.log(`🔍 Step 1: Searching for athlete suggestions - "${searchQuery}" in ${sport}`);
+      console.log(`🔍 Step 1: Searching for athlete suggestions - "${searchQuery}" in ${sport}${country ? ` from ${country}` : ''}`);
       
       // Import the search function
       const { searchAthletesSuggestions } = await import('./openaiService.js');
       
-      const searchResults = await searchAthletesSuggestions(searchQuery, sport);
+      const searchResults = await searchAthletesSuggestions(searchQuery, sport, country);
       
       console.log(`✅ Found ${searchResults.suggestions.length} suggestions, requires selection: ${searchResults.requiresSelection}`);
       

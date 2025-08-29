@@ -6,15 +6,17 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 // Multi-step AI player search with suggestions and enhanced user feedback
 export async function searchAthletesSuggestions(
   searchQuery: string, 
-  sport: string
+  sport: string,
+  country?: string
 ): Promise<{ suggestions: Array<{ fullName: string; dateOfBirth: string; age: number; country: string; sport: string }>, requiresSelection: boolean }> {
   try {
-    const prompt = `You are an expert sports database search assistant. Search for athletes matching the query "${searchQuery}" in ${sport}.
+    const countryContext = country ? ` from ${country}` : '';
+    const prompt = `You are an expert sports database search assistant. Search for athletes matching the query "${searchQuery}"${countryContext} in ${sport}.
 
 SEARCH INSTRUCTIONS:
-1. Use web search to find multiple athletes that could match "${searchQuery}"
+1. Use web search to find multiple athletes that could match "${searchQuery}"${country ? ` with priority given to athletes from ${country}` : ''}
 2. Look for current active athletes as well as retired legends
-3. Include athletes from different countries/eras if multiple exist
+3. Include athletes from different countries/eras if multiple exist${country ? ` but prioritize ${country} athletes` : ''}
 4. Focus on finding exact full names, dates of birth, and current countries
 
 CRITICAL REQUIREMENTS:
@@ -42,7 +44,7 @@ Return this EXACT JSON structure:
 If only one athlete clearly matches, set "requiresSelection": false.
 If no athletes found through web search, respond with: {"error": "no_athletes_found", "success": false}
 
-SEARCH QUERY: "${searchQuery}"
+SEARCH QUERY: "${searchQuery}"${countryContext}
 SPORT: ${sport}`;
 
     const response = await openai.responses.create({
@@ -64,11 +66,33 @@ SPORT: ${sport}`;
     let cleanedResponse = responseText.trim();
     cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
     
-    const parsedResponse = JSON.parse(cleanedResponse);
+    console.log('Raw GPT-5 response:', responseText);
+    console.log('Cleaned response:', cleanedResponse);
+    
+    let parsedResponse;
+    try {
+      parsedResponse = JSON.parse(cleanedResponse);
+    } catch (parseError) {
+      console.error('JSON parsing failed:', parseError);
+      console.log('Failed to parse response:', cleanedResponse);
+      throw new Error('AI returned invalid JSON format');
+    }
     
     // Validate the response structure
+    if (!parsedResponse || typeof parsedResponse !== 'object') {
+      console.log('Invalid parsedResponse object:', parsedResponse);
+      throw new Error('AI returned invalid response structure');
+    }
+    
     if (!parsedResponse.suggestions || !Array.isArray(parsedResponse.suggestions)) {
-      throw new Error('Invalid response structure from AI search');
+      console.log('Invalid suggestions array:', parsedResponse.suggestions);
+      
+      // If AI returned an error, handle it appropriately
+      if (parsedResponse.error) {
+        throw new Error('AI_SEARCH_FAILED: ' + parsedResponse.error);
+      }
+      
+      throw new Error('AI returned response without suggestions array');
     }
 
     // Ensure all suggestions have required fields
