@@ -3,6 +3,97 @@ import OpenAI from "openai";
 // GPT-5 is now available and is the latest OpenAI model with default temperature 1.0 (cannot go under)
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Multi-step AI player search with suggestions and enhanced user feedback
+export async function searchAthletesSuggestions(
+  searchQuery: string, 
+  sport: string
+): Promise<{ suggestions: Array<{ fullName: string; dateOfBirth: string; age: number; country: string; sport: string }>, requiresSelection: boolean }> {
+  try {
+    const prompt = `You are an expert sports database search assistant. Search for athletes matching the query "${searchQuery}" in ${sport}.
+
+SEARCH INSTRUCTIONS:
+1. Use web search to find multiple athletes that could match "${searchQuery}"
+2. Look for current active athletes as well as retired legends
+3. Include athletes from different countries/eras if multiple exist
+4. Focus on finding exact full names, dates of birth, and current countries
+
+CRITICAL REQUIREMENTS:
+- Return ONLY valid JSON with no additional text
+- Include full official names (not nicknames unless part of official name)
+- Must include accurate date of birth or age
+- Include current nationality/country
+- If only ONE clear match exists, return that single result
+- If multiple possible matches exist, return up to 5 most relevant suggestions
+
+Return this EXACT JSON structure:
+{
+  "suggestions": [
+    {
+      "fullName": "Complete official athlete name",
+      "dateOfBirth": "YYYY-MM-DD or Month DD, YYYY", 
+      "age": 25,
+      "country": "Full country name",
+      "sport": "${sport}"
+    }
+  ],
+  "requiresSelection": true
+}
+
+If only one athlete clearly matches, set "requiresSelection": false.
+If no athletes found through web search, respond with: {"error": "no_athletes_found", "success": false}
+
+SEARCH QUERY: "${searchQuery}"
+SPORT: ${sport}`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.1,
+      max_tokens: 2000
+    });
+
+    const responseText = response.choices[0]?.message?.content || "{}";
+    
+    // Check for error responses indicating no data found
+    if (responseText.includes('"error": "no_athletes_found"') || 
+        responseText.includes('"success": false')) {
+      throw new Error('AI_SEARCH_FAILED: No athletes found through web search');
+    }
+
+    // Clean and parse the JSON response
+    let cleanedResponse = responseText.trim();
+    cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
+    
+    const parsedResponse = JSON.parse(cleanedResponse);
+    
+    // Validate the response structure
+    if (!parsedResponse.suggestions || !Array.isArray(parsedResponse.suggestions)) {
+      throw new Error('Invalid response structure from AI search');
+    }
+
+    // Ensure all suggestions have required fields
+    const validSuggestions = parsedResponse.suggestions.filter((suggestion: any) => 
+      suggestion.fullName && 
+      (suggestion.dateOfBirth || suggestion.age) && 
+      suggestion.country
+    );
+
+    return {
+      suggestions: validSuggestions,
+      requiresSelection: validSuggestions.length > 1
+    };
+
+  } catch (error) {
+    console.error("Error searching for athlete suggestions:", error);
+    
+    if (error instanceof Error && error.message.includes('AI_SEARCH_FAILED')) {
+      throw error; // Re-throw search failures
+    }
+    
+    throw new Error(`Failed to search for athletes: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
 // Helper function to search for athlete profile picture from taekwondodata.com
 async function searchTaekwondoDataProfilePicture(athleteName: string, nationality?: string): Promise<string | null> {
   try {
@@ -1843,5 +1934,88 @@ MANDATORY: Use ONLY current web search results. Do not use generic descriptions 
     console.error(`Error generating athlete comparison for ${athlete1.name} vs ${athlete2.name}:`, error);
     // Throw error instead of returning fallback data
     throw new Error(`Athlete comparison failed for ${athlete1.name} vs ${athlete2.name}: ${error.message}`);
+  }
+}
+
+// Enhanced athlete profile creation with selected suggestion data
+export async function createAthleteFromSuggestion(
+  suggestion: { fullName: string; dateOfBirth: string; age: number; country: string; sport: string }
+): Promise<any> {
+  try {
+    console.log(`🤖 Creating athlete profile for selected suggestion: ${suggestion.fullName}`);
+    
+    const prompt = `You are an expert sports analyst. Create a comprehensive athlete profile using the selected athlete information.
+
+SELECTED ATHLETE:
+- Full Name: ${suggestion.fullName}
+- Date of Birth: ${suggestion.dateOfBirth}  
+- Age: ${suggestion.age}
+- Country: ${suggestion.country}
+- Sport: ${suggestion.sport}
+
+SEARCH INSTRUCTIONS:
+1. Use web search to find detailed information about this SPECIFIC athlete
+2. Find current competition data, rankings, achievements, and biographical details
+3. Look for recent photos and profile images
+4. Gather technical information about their playing style and career highlights
+
+CRITICAL REQUIREMENTS:
+- Return ONLY valid JSON with no additional text
+- Use authentic data found through web search
+- Include comprehensive biographical information
+- If specific data cannot be found, clearly indicate "Not found through web search"
+
+Return this EXACT JSON structure:
+{
+  "name": "${suggestion.fullName}",
+  "bio": "Detailed biography based on web search findings",
+  "age": ${suggestion.age},
+  "country": "${suggestion.country}", 
+  "achievements": ["Achievement 1 from web search", "Achievement 2 from web search"],
+  "rank": "Current ranking if found or null",
+  "profileImageUrl": "Direct image URL if found or null",
+  "recentNews": ["Recent news item 1", "Recent news item 2"]
+}
+
+If no authentic data found through web search, respond with: {"error": "no_data_found", "success": false}
+
+ATHLETE TO RESEARCH: ${suggestion.fullName} (${suggestion.country}, ${suggestion.sport})`;
+
+    const response = await openai.responses.create({
+      model: "gpt-5",
+      input: prompt,
+      tools: [{ type: "web_search_preview" }],
+      max_output_tokens: 3000
+    });
+
+    const responseText = response.output_text || "{}";
+    
+    // Check for error responses
+    if (responseText.includes('"error": "no_data_found"') || 
+        responseText.includes('"success": false')) {
+      throw new Error('AI_WEB_SEARCH_FAILED: No authentic athlete data found through web search');
+    }
+
+    // Clean and parse the JSON response
+    let cleanedResponse = responseText.trim();
+    cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
+    
+    const athleteProfile = JSON.parse(cleanedResponse);
+    
+    // Validate required fields
+    if (!athleteProfile.name || !athleteProfile.bio) {
+      throw new Error('Invalid athlete profile structure returned');
+    }
+
+    return athleteProfile;
+
+  } catch (error) {
+    console.error(`Error creating athlete profile for ${suggestion.fullName}:`, error);
+    
+    if (error instanceof Error && error.message.includes('AI_WEB_SEARCH_FAILED')) {
+      throw error; // Re-throw to prevent token deduction
+    }
+    
+    throw new Error(`Failed to create athlete profile: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
