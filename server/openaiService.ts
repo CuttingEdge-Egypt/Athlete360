@@ -671,7 +671,7 @@ IMPORTANT: Use the EXACT heading format with double asterisks: **Introduction**,
 Please respond in valid JSON format with these exact fields:
 {
   "name": "athlete's full name",
-  "bio": "updated biography without any links or citations",
+  "bio": "Structured biography with the exact headings: **Introduction**\\n[content]\\n\\n**Players' Overall Story**\\n[content]\\n\\n**Recent Competitions**\\n[content]\\n\\n**Career Record and Rankings**\\n[content]\\n\\n**Notable Achievements**\\n[content]",
   "rank": "current world ranking or N/A", 
   "achievements": ["array of key achievements"],
   "recentNews": ["array of recent news or competition results"]
