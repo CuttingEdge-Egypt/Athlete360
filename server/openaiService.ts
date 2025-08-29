@@ -47,14 +47,14 @@ If no athletes found through web search, respond with: {"error": "no_athletes_fo
 SEARCH QUERY: "${searchQuery}"${countryContext}
 SPORT: ${sport}`;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.1,
-      max_tokens: 4000
+    const response = await openai.responses.create({
+      model: "gpt-5",
+      input: prompt,
+      tools: [{ type: "web_search_preview" }],
+      max_output_tokens: 4000
     });
 
-    const responseText = response.choices[0]?.message?.content || "{}";
+    const responseText = response.output_text || "{}";
     
     // Check for error responses indicating no data found
     if (responseText.includes('"error": "no_athletes_found"') || 
@@ -527,10 +527,10 @@ IMPORTANT: Do not include any links, URLs, citations, or references in your resp
     `;
 
   try {
-    // Use GPT-4o for profile generation
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [{ role: "user", content: `${isTaekwondo ? 'For taekwondo athletes, provide comprehensive information based on your knowledge of competition records, rankings, and profiles. ' : ''}${prompt}
+    // Use GPT-5 with web search for profile generation
+    const response = await openai.responses.create({
+      model: "gpt-5",
+      input: `${isTaekwondo ? 'For taekwondo athletes, use web search to find comprehensive information from competition records, rankings, and profiles from sources like https://www.taekwondodata.com/. ' : ''}${prompt}
 
 Please respond in valid JSON format with these exact fields:
 {
@@ -539,17 +539,17 @@ Please respond in valid JSON format with these exact fields:
   "rank": "current world ranking or N/A",
   "achievements": ["array of key achievements"],
   "recentNews": ["array of recent news or competition results"]
-}` }],
-      temperature: 0.1,
-      max_tokens: 3000
+}`,
+      tools: [{ type: "web_search_preview" }],
+      max_output_tokens: 3000
     });
 
     console.log("Full OpenAI Response:", JSON.stringify(response, null, 2));
     
-    const content = response.choices[0]?.message?.content;
+    const content = response.output_text;
     if (!content) {
       console.log("OpenAI Response Details:", {
-        content: response.choices[0]?.message?.content,
+        content: response.output_text,
         usage: response.usage
       });
       throw new Error("No content received from OpenAI");

@@ -92,9 +92,9 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### AI and Language Models
-- **OpenAI GPT-5**: Exclusive LLM provider for all athlete analysis, biography generation, comparison analysis, and sports insights. Uses web search capabilities.
+- **OpenAI GPT-5**: Primary LLM provider for all athlete analysis, biography generation, comparison analysis, and sports insights. Fully integrated with web search capabilities using `openai.responses.create()` and `web_search_preview` tools for authentic, real-time data retrieval.
 - **Google Gemini 2.5 Pro**: Specialized AI model for nutrition plan generation, video analysis, and enhanced athlete comparison providing culturally-aware meal recommendations and detailed tactical advice.
-- **OpenAI SDK**: Official OpenAI JavaScript SDK for GPT-5 integration.
+- **OpenAI SDK**: Official OpenAI JavaScript SDK for GPT-5 integration with web search.
 - **Google Generative AI SDK**: Official Google SDK for Gemini integration.
 
 ### Database and Storage
