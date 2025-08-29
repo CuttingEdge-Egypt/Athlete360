@@ -923,10 +923,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
         } catch (gptError) {
           console.error(`GPT-5 biography failed for ${athlete.name}:`, gptError);
-          // Refund tokens for failed AI generation
+          
+          // Check if this is a web search failure that should refund tokens
+          if (gptError instanceof Error && gptError.message.includes('AI_WEB_SEARCH_FAILED')) {
+            await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "bio", "Bio Analysis");
+            return res.status(404).json({ 
+              message: "AI web search could not find reliable data for this athlete. Please try again later. Your tokens have been refunded.",
+              error: "web_search_failed",
+              shouldRetry: true
+            });
+          }
+          
+          // For other errors, also refund tokens
           await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "bio", "Bio Analysis");
           return res.status(500).json({ 
-            message: "Failed to generate GPT-5 biography analysis. Your tokens have been refunded.",
+            message: "Failed to generate biography analysis. Your tokens have been refunded.",
             error: gptError instanceof Error ? gptError.message : String(gptError)
           });
         }
@@ -1014,12 +1025,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Generate fresh rank analysis using OpenAI GPT-5 with enhanced rank history format
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} rank analysis for ${athlete.name}`);
         
-        // Use the new generateRankHistory function to get authentic ranking progression data
-        rankData = await generateRankHistory(athlete.name, sportName, athlete.country || undefined);
-        
-        // Ensure we have valid data structure
-        if (!rankData || !rankData.athlete) {
-          throw new Error("Failed to generate valid rank history data");
+        try {
+          // Use the new generateRankHistory function to get authentic ranking progression data
+          rankData = await generateRankHistory(athlete.name, sportName, athlete.country || undefined);
+          
+          // Ensure we have valid data structure
+          if (!rankData || !rankData.athlete) {
+            throw new Error("Failed to generate valid rank history data");
+          }
+        } catch (rankError) {
+          console.error(`Rank analysis failed for ${athlete.name}:`, rankError);
+          
+          // Check if this is a web search failure that should refund tokens
+          if (rankError instanceof Error && rankError.message.includes('AI_WEB_SEARCH_FAILED')) {
+            await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "rank", "Rank Analysis");
+            return res.status(404).json({ 
+              message: "AI web search could not find reliable ranking data for this athlete. Please try again later. Your tokens have been refunded.",
+              error: "web_search_failed",
+              shouldRetry: true
+            });
+          }
+          
+          // For other errors, also refund tokens
+          await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "rank", "Rank Analysis");
+          return res.status(500).json({ 
+            message: "Failed to generate ranking analysis. Your tokens have been refunded.",
+            error: rankError instanceof Error ? rankError.message : String(rankError)
+          });
         }
       }
 
@@ -1104,8 +1136,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           competitionRecord: enhancedData?.currentRecord || "N/A"
         };
         
-        // Generate athlete-specific strengths analysis
-        const strengthsAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'strengths', athleteDataForAnalysis);
+        try {
+          // Generate athlete-specific strengths analysis
+          const strengthsAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'strengths', athleteDataForAnalysis);
         
         const aiStrengths = strengthsAnalysis.strengths?.length > 0 
           ? strengthsAnalysis.strengths.map((strength: any, index: number) => ({
@@ -1139,17 +1172,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
           lastUpdated: forceUpdate ? "Force updated with GPT-5" : "Fresh GPT-5 analysis"
         };
         
-        // Store strengths in database for future use
-        for (const strength of aiStrengths) {
-          try {
-            await storage.createAthleteStrength({
-              athleteId,
-              title: strength.title,
-              description: strength.description
-            });
-          } catch (error) {
-            console.log(`Could not store strength: ${error}`);
+          // Store strengths in database for future use
+          for (const strength of aiStrengths) {
+            try {
+              await storage.createAthleteStrength({
+                athleteId,
+                title: strength.title,
+                description: strength.description
+              });
+            } catch (error) {
+              console.log(`Could not store strength: ${error}`);
+            }
           }
+        } catch (strengthsError) {
+          console.error(`Strengths analysis failed for ${athlete.name}:`, strengthsError);
+          
+          // Check if this is a web search failure that should refund tokens
+          if (strengthsError instanceof Error && strengthsError.message.includes('AI_WEB_SEARCH_FAILED')) {
+            await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "strengths", "Strengths Analysis");
+            return res.status(404).json({ 
+              message: "AI web search could not find reliable data for this athlete's strengths. Please try again later. Your tokens have been refunded.",
+              error: "web_search_failed",
+              shouldRetry: true
+            });
+          }
+          
+          // For other errors, also refund tokens
+          await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "strengths", "Strengths Analysis");
+          return res.status(500).json({ 
+            message: "Failed to generate strengths analysis. Your tokens have been refunded.",
+            error: strengthsError instanceof Error ? strengthsError.message : String(strengthsError)
+          });
         }
       }
 
@@ -1247,8 +1300,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           competitionRecord: enhancedData?.currentRecord || "N/A"
         };
         
-        // Generate personalized weaknesses analysis
-        const weaknessesAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'weaknesses', athleteDataForAnalysis);
+        try {
+          // Generate personalized weaknesses analysis
+          const weaknessesAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'weaknesses', athleteDataForAnalysis);
         
         const aiWeaknesses = weaknessesAnalysis.weaknesses?.length > 0 
           ? weaknessesAnalysis.weaknesses.map((weakness: any, index: number) => ({
@@ -1277,10 +1331,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 impact: "Medium",
                 improvement: "Strategic analysis training and game plan development"
               }
-            ];
+          ];
         
         weaknessesData = {
-          weaknesses: aiWeaknesses
+          weaknesses: aiWeaknesses,
+          aiGenerated: true,
+          lastUpdated: forceUpdate ? "Force updated with GPT-5" : "Fresh GPT-5 analysis"
         };
         
         // Store weaknesses in database for future use
@@ -1295,10 +1351,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`Could not store weakness: ${error}`);
           }
         }
+      } catch (weaknessesError) {
+        console.error(`Weaknesses analysis failed for ${athlete.name}:`, weaknessesError);
+        
+        // Check if this is a web search failure that should refund tokens
+        if (weaknessesError instanceof Error && weaknessesError.message.includes('AI_WEB_SEARCH_FAILED')) {
+          await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "weaknesses", "Weaknesses Analysis");
+          return res.status(404).json({ 
+            message: "AI web search could not find reliable data for this athlete's weaknesses. Please try again later. Your tokens have been refunded.",
+            error: "web_search_failed",
+            shouldRetry: true
+          });
+        }
+        
+        // For other errors, also refund tokens
+        await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "weaknesses", "Weaknesses Analysis");
+        return res.status(500).json({ 
+          message: "Failed to generate weaknesses analysis. Your tokens have been refunded.",
+          error: weaknessesError instanceof Error ? weaknessesError.message : String(weaknessesError)
+        });
       }
+    }
 
-      // Check if the weaknesses analysis failed and refund tokens if needed
-      if (isAnalysisFailed(weaknessesData)) {
+    // Check if the weaknesses analysis failed and refund tokens if needed
+    if (isAnalysisFailed(weaknessesData)) {
         console.log(`❌ Weaknesses analysis failed for ${athlete.name}, refunding tokens`);
         await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "weaknesses", "Weaknesses Analysis");
         return res.status(500).json({
@@ -1593,8 +1669,21 @@ Return only valid JSON with the missing fields.`;
           nutritionPlanData = generatedPlan;
         } catch (aiError) {
           console.error(`Error generating nutrition plan for ${athlete.name}:`, aiError);
+          
+          // Check if this is a web search failure that should refund tokens
+          if (aiError instanceof Error && aiError.message.includes('AI_WEB_SEARCH_FAILED')) {
+            await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "nutrition", "Nutrition Plan");
+            return res.status(404).json({ 
+              message: "AI web search could not find reliable nutrition data for this athlete. Please try again later. Your tokens have been refunded.",
+              error: "web_search_failed",
+              shouldRetry: true
+            });
+          }
+          
+          // For other errors, also refund tokens
+          await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "nutrition", "Nutrition Plan");
           return res.status(500).json({ 
-            message: "Failed to generate nutrition plan using AI",
+            message: "Failed to generate nutrition plan. Your tokens have been refunded.",
             error: aiError instanceof Error ? aiError.message : String(aiError)
           });
         }

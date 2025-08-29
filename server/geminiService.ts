@@ -98,7 +98,13 @@ Requirements:
 - Consider ${sport} training needs (explosive power, agility, recovery)
 - Provide realistic portion sizes
 - Generate 7 complete days
-- Each meal should have 2-4 food items with quantities`;
+- Each meal should have 2-4 food items with quantities
+
+CRITICAL ERROR HANDLING:
+- If you cannot find any reliable nutrition data through web search, respond with exactly: {"error": "no_data_found", "success": false}
+- If web search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
+- If the athlete/information does not exist, respond with exactly: {"error": "not_found", "success": false}
+- Only provide nutrition plans if you can find authentic dietary information for the athlete's sport and nationality`;
 
     const result = await genAI.models.generateContent({
       model: "gemini-2.5-pro",
@@ -149,6 +155,14 @@ Requirements:
     });
 
     const responseText = result.text || "{}";
+    
+    // Check for error responses indicating no data found
+    if (responseText.includes('"error": "no_data_found"') || 
+        responseText.includes('"error": "search_failed"') || 
+        responseText.includes('"error": "not_found"') ||
+        responseText.includes('"success": false')) {
+      throw new Error('AI_WEB_SEARCH_FAILED: No authentic nutrition data found through web search');
+    }
     
     // Clean and parse the JSON response
     let cleanedResponse = responseText.trim();
@@ -204,7 +218,14 @@ Requirements:
     };
   } catch (error) {
     console.error("Error generating nutrition plan:", error);
-    throw new Error(`Failed to generate nutrition plan: ${error instanceof Error ? error.message : String(error)}`);
+    
+    // Check if this is a web search failure that should prevent token deduction
+    if (error instanceof Error && error.message.includes('AI_WEB_SEARCH_FAILED')) {
+      throw error; // Re-throw to prevent token deduction
+    }
+    
+    // For other errors, also prevent token deduction by throwing
+    throw new Error(`Failed to generate authentic nutrition plan: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
@@ -332,7 +353,13 @@ Return this EXACT JSON structure:
   }
 }
 
-MANDATORY: Use ONLY current web search results from 2024-2025. If specific information cannot be found through web search, clearly state "Information not found through web search" rather than using generic descriptions.`;
+MANDATORY: Use ONLY current web search results from 2024-2025. If specific information cannot be found through web search, clearly state "Information not found through web search" rather than using generic descriptions.
+
+CRITICAL ERROR HANDLING:
+- If you cannot find any reliable comparison data through web search, respond with exactly: {"error": "no_data_found", "success": false}
+- If web search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
+- If either athlete's information does not exist, respond with exactly: {"error": "not_found", "success": false}
+- Only provide comparison data if you can find authentic, verifiable information about both athletes through web search`;
 
     const response = await model.generateContent(prompt);
     const responseText = response.response.text();

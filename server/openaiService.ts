@@ -116,6 +116,11 @@ Sources to prioritize:
 
 Provide ONLY factual data found through web search. If no specific ranking or record data is found, respond with "N/A".
 
+CRITICAL ERROR HANDLING:
+- If you cannot find any reliable data through web search, respond with exactly: {"error": "no_data_found", "success": false}
+- If web search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
+- If the athlete/information does not exist, respond with exactly: {"error": "not_found", "success": false}
+
 Response format:
 {
   "worldRank": "#X" (where X is the ranking number, or "N/A" if not found),
@@ -129,6 +134,16 @@ Response format:
     
     try {
       const rankingData = JSON.parse(response.output_text);
+      
+      // Check for error responses
+      if (rankingData.error && (rankingData.error === 'no_data_found' || rankingData.error === 'search_failed' || rankingData.error === 'not_found')) {
+        throw new Error(`AI_WEB_SEARCH_FAILED: ${rankingData.error}`);
+      }
+      
+      if (rankingData.success === false) {
+        throw new Error('AI_WEB_SEARCH_FAILED: No authentic ranking data found through web search');
+      }
+      
       return {
         worldRank: rankingData.worldRank || "N/A",
         currentRecord: rankingData.currentRecord || "N/A"
@@ -413,6 +428,11 @@ IMPORTANT: Do not include any links, URLs, citations, or references in your resp
       model: "gpt-5", // Using GPT-5 as requested by the user
       input: `${isTaekwondo ? 'For taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference for competition records, rankings, and profiles. ' : ''}${prompt}
 
+CRITICAL ERROR HANDLING:
+- If you cannot find any reliable data through web search, respond with exactly: {"error": "no_data_found", "success": false}
+- If web search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
+- If the athlete/information does not exist, respond with exactly: {"error": "not_found", "success": false}
+
 Please respond in valid JSON format with these exact fields:
 {
   "name": "athlete's full name",
@@ -440,6 +460,15 @@ Please respond in valid JSON format with these exact fields:
 
     try {
       const athleteData = JSON.parse(content) as AthleteData;
+      
+      // Check for error responses
+      if (athleteData.error && (athleteData.error === 'no_data_found' || athleteData.error === 'search_failed' || athleteData.error === 'not_found')) {
+        throw new Error(`AI_WEB_SEARCH_FAILED: ${athleteData.error}`);
+      }
+      
+      if (athleteData.success === false) {
+        throw new Error('AI_WEB_SEARCH_FAILED: No authentic athlete data found through web search');
+      }
       
       // Validate required fields
       if (!athleteData.name || !athleteData.bio) {
@@ -598,6 +627,13 @@ export async function getAthleteProfile(name: string, sport: string, nationality
     Provide specific, factual, authentic information about athletes. NEVER use placeholder text or bracketed templates like [City, State], [Year], [Championship Name]. Consider the specified sport and nationality when identifying the correct athlete.
     ${sportSpecificGuidance}
 
+    CRITICAL ERROR HANDLING:
+    - If you cannot find any reliable data through web search, respond with exactly: {"error": "no_data_found", "success": false}
+    - If web search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
+    - If the athlete/information does not exist, respond with exactly: {"error": "not_found", "success": false}
+    - Only provide data if you find authentic, verifiable information through web search
+    - Do not use placeholder or generic data when real information is unavailable
+
     Format the response as a JSON object with these fields:
     - name: string (athlete's full name)
     - sport: string (the sport they compete in)
@@ -619,9 +655,23 @@ export async function getAthleteProfile(name: string, sport: string, nationality
 
     const result = JSON.parse(response.output_text);
     
+    // Check for error responses indicating no data found
+    if (result.error && (result.error === 'no_data_found' || result.error === 'search_failed' || result.error === 'not_found')) {
+      throw new Error(`AI_WEB_SEARCH_FAILED: ${result.error}`);
+    }
+    
+    if (result.success === false) {
+      throw new Error('AI_WEB_SEARCH_FAILED: No authentic data found through web search');
+    }
+    
+    // Validate that we have meaningful data
+    if (!result.bio || result.bio.includes('not available') || result.bio.includes('requires web search')) {
+      throw new Error('AI_WEB_SEARCH_FAILED: No authentic biography data found');
+    }
+    
     return {
       name: result.name || name,
-      bio: result.bio || "Professional athlete biography not available.",
+      bio: result.bio,
       rank: result.rank || Math.floor(Math.random() * 50) + 1,
       country: result.country || nationality || "Unknown",
       achievements: result.achievements || [],
@@ -631,17 +681,14 @@ export async function getAthleteProfile(name: string, sport: string, nationality
     };
   } catch (error) {
     console.error(`Error getting athlete profile for ${name}:`, error);
-    // Fallback
-    return {
-      name,
-      bio: `${name} is a professional ${sport} athlete${nationalityContext}. Detailed biography requires web search capabilities.`,
-      rank: Math.floor(Math.random() * 50) + 1,
-      country: nationality || "Unknown",
-      achievements: [`Professional ${sport} athlete`, "International competitor"],
-      recentNews: ["Recent news not available."],
-      profileImageDescription: `${name} ${sport} athlete profile picture`,
-      referenceLinks: []
-    };
+    
+    // Check if this is a web search failure that should prevent token deduction
+    if (error instanceof Error && error.message.includes('AI_WEB_SEARCH_FAILED')) {
+      throw error; // Re-throw to prevent token deduction
+    }
+    
+    // For other errors, throw a generic failure
+    throw new Error(`Failed to generate authentic athlete profile for ${name}: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
@@ -1004,7 +1051,13 @@ Return this exact JSON structure:
   ]
 }
 
-Use authentic data only - base analysis on real competition results and verified performance data.`;
+Use authentic data only - base analysis on real competition results and verified performance data.
+
+CRITICAL ERROR HANDLING:
+- If you cannot find any reliable data through web search, respond with exactly: {"error": "no_data_found", "success": false}
+- If web search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
+- If the athlete/information does not exist, respond with exactly: {"error": "not_found", "success": false}
+- Only provide data if you find authentic, verifiable information through web search`;
   } else if (analysisType === 'weaknesses' && athleteData) {
     prompt = `You are an expert ${sport} coach and analyst. Research and analyze the specific weaknesses and areas for improvement for athlete "${athleteName}" from ${athleteData.country || 'unknown country'}.
 
@@ -1040,7 +1093,13 @@ Return this exact JSON structure:
   ]
 }
 
-Use authentic data only - base analysis on real competition results and verified performance data.`;
+Use authentic data only - base analysis on real competition results and verified performance data.
+
+CRITICAL ERROR HANDLING:
+- If you cannot find any reliable data through web search, respond with exactly: {"error": "no_data_found", "success": false}
+- If web search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
+- If the athlete/information does not exist, respond with exactly: {"error": "not_found", "success": false}
+- Only provide data if you find authentic, verifiable information through web search`;
   } else if (analysisType === 'beat-strategies' && athleteData) {
     prompt = `As an expert ${sport} coach specializing in tactical analysis, develop specific strategies to defeat athlete "${athleteName}".
 
@@ -1072,7 +1131,13 @@ Use authentic data only - base analysis on real competition results and verified
           "risk_level": "high|medium|low"
         }
       ]
-    }`;
+    }
+
+CRITICAL ERROR HANDLING:
+- If you cannot find any reliable data through web search, respond with exactly: {"error": "no_data_found", "success": false}
+- If web search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
+- If the athlete/information does not exist, respond with exactly: {"error": "not_found", "success": false}
+- Only provide data if you find authentic, verifiable information through web search`;
   } else if (customPrompt) {
     prompt = customPrompt;
   } else {
@@ -1080,7 +1145,13 @@ Use authentic data only - base analysis on real competition results and verified
     
     Provide detailed, professional analysis specific to ${analysisType}.
     Format the response as a JSON object appropriate for ${analysisType} analysis.
-    Include practical, actionable insights based on ${sport} expertise.`;
+    Include practical, actionable insights based on ${sport} expertise.
+    
+CRITICAL ERROR HANDLING:
+- If you cannot find any reliable data through web search, respond with exactly: {"error": "no_data_found", "success": false}
+- If web search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
+- If the athlete/information does not exist, respond with exactly: {"error": "not_found", "success": false}
+- Only provide data if you find authentic, verifiable information through web search`;
   }
 
   try {
@@ -1094,6 +1165,14 @@ Use authentic data only - base analysis on real competition results and verified
 
     // Clean and validate the JSON response
     let cleanedText = response.output_text.trim();
+    
+    // Check for error responses indicating no data found
+    if (cleanedText.includes('"error": "no_data_found"') || 
+        cleanedText.includes('"error": "search_failed"') || 
+        cleanedText.includes('"error": "not_found"') ||
+        cleanedText.includes('"success": false')) {
+      throw new Error('AI_WEB_SEARCH_FAILED: No authentic data found through web search');
+    }
     
     // Remove any markdown formatting that might wrap the JSON
     cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
@@ -1238,41 +1317,16 @@ Use authentic data only - base analysis on real competition results and verified
       
       throw parseError;
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error generating ${analysisType} analysis for ${athleteName}:`, error);
     
-    // For rank analysis, return structured error response
-    if (analysisType === 'rank') {
-      return {
-        athlete: {
-          name: athleteName,
-          nationality: 'Unknown',
-          sport: sport,
-          isActive: true,
-          officialRecord: 'Service unavailable',
-          peakRanking: 'N/A',
-          peakRankingDate: 'N/A',
-          currentRanking: 'N/A',
-          lastUpdated: new Date().toISOString().split('T')[0]
-        },
-        rankingProgression: [],
-        careerSummary: {
-          totalCompetitions: 'N/A',
-          majorTitles: 'N/A',
-          rankingTrend: 'N/A',
-          notableAchievements: [],
-          currentForm: 'GPT-5 service temporarily unavailable'
-        },
-        error: 'Analysis generation failed'
-      };
+    // Check if this is a web search failure that should prevent token deduction
+    if (error.message && error.message.includes('AI_WEB_SEARCH_FAILED')) {
+      throw error; // Re-throw to prevent token deduction
     }
     
-    return {
-      analysisType,
-      athlete: athleteName,
-      sport,
-      data: "Analysis generation failed - GPT-5 service unavailable"
-    };
+    // For other errors, also prevent token deduction by throwing
+    throw new Error(`Failed to generate authentic ${analysisType} analysis for ${athleteName}: ${error.message || String(error)}`);
   }
 }
 
