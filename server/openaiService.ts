@@ -505,20 +505,33 @@ export async function generateAthleteBiography(name: string, sport: string, nati
     
     Using web search capabilities, find factual, up-to-date information about the athlete "${name}"${nationalityContext}, who competes in ${sport}.
     
-    Create a detailed biography structured with the following headings:
-    - An introductory paragraph
-    - Players' overall story and what they're known for in ${sport}.
-    - A heading "Recent Competitions:"
-    - A heading "Career Record and Rankings:"
-    - A heading "Notable Achievements:"
+    Create a detailed biography with this EXACT structure using proper headings:
 
-Only mention information that is 100% accurate and verifiable.
+**Introduction**
+[Comprehensive introduction paragraph about the athlete]
 
-IMPORTANT: Do not include any links, URLs, citations, or references in your response. Provide clean text without any reference links or citations.
+**Players' Overall Story**
+[Detailed story about what they're known for in ${sport}, their background, playing style, and career journey]
+
+**Recent Competitions**
+[Information about their most recent competitions and results]
+
+**Career Record and Rankings**
+[Current rankings, competition record, and career statistics]
+
+**Notable Achievements**
+[List of major titles, medals, and career highlights]
+
+Only mention information that is 100% accurate and verifiable from web search.
+
+IMPORTANT: 
+- Use the EXACT heading format with double asterisks: **Introduction**, **Players' Overall Story**, **Recent Competitions**, **Career Record and Rankings**, **Notable Achievements**
+- Do not include any links, URLs, citations, or references in your response
+- Provide comprehensive information under each section
 
     Provide the response as a JSON object with these fields:
     - name: athlete's full name
-    - bio: the detailed biography without any links or citations
+    - bio: the detailed biography with the structured headings format
     - rank: current world ranking if available (as number or "N/A")
     - achievements: array of key achievements
     - recentNews: array of recent news or competition results
@@ -626,12 +639,24 @@ export async function refreshAthleteBiographyWithSearch(name: string, sport: str
 
 Don't include the references in the biography. 
     
-    Create an updated biography with fresh information, structured as:
-    - Introduction with current status and world ranking position
-    - Players' overall story and what they're known for in their sport
-    - "Recent Competitions:" (2024-2025 results)
-    - "Career Record and Rankings:" (current world ranking position and competitive record)
-    - "Notable Achievements:" (career highlights)
+    Create an updated biography with fresh information using this EXACT structure:
+
+**Introduction**
+[Comprehensive introduction paragraph about the athlete with current status and world ranking position]
+
+**Players' Overall Story**
+[Detailed story about what they're known for in ${sport}, their background, playing style, and career journey]
+
+**Recent Competitions**
+[Information about their most recent competitions and 2024-2025 results]
+
+**Career Record and Rankings**
+[Current world ranking position, competition record, and career statistics]
+
+**Notable Achievements**
+[List of major titles, medals, and career highlights]
+
+IMPORTANT: Use the EXACT heading format with double asterisks: **Introduction**, **Players' Overall Story**, **Recent Competitions**, **Career Record and Rankings**, **Notable Achievements**
 
     Only mention information that is 100% accurate and verifiable.
     IMPORTANT: Do not include any links, URLs, citations, or references in your response. Provide clean text without any reference links or citations.
