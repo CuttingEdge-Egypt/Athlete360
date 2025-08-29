@@ -48,9 +48,8 @@ SEARCH QUERY: "${searchQuery}"${countryContext}
 SPORT: ${sport}`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-5",
+      model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
-      tools: [{ type: "web_search" }],
       temperature: 0.1,
       max_tokens: 4000
     });
@@ -216,40 +215,29 @@ export async function getEnhancedTaekwondoData(athleteName: string, nationality?
     
     const nationalityContext = nationality ? ` from ${nationality}` : '';
     
-    // Use GPT-5 with web search to get specific ranking and record data (no timeout)
-    const response = await openai.responses.create({
-      model: "gpt-5",
-      input: `Search the web for current World Taekwondo (WT) ranking and competition record information for the athlete "${athleteName}"${nationalityContext}.
+    // Use GPT-4o to get general ranking and record data
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: `Provide general information about current World Taekwondo (WT) ranking and competition record for the athlete "${athleteName}"${nationalityContext}.
 
-Focus specifically on finding:
-1. Current World Taekwondo (WT) world ranking position
-2. Career competition record (wins-losses or bout statistics)
-
-Sources to prioritize:
-- https://www.taekwondodata.com/ 
-- World Taekwondo official rankings
-- Recent competition results and databases
-
-Provide ONLY factual data found through web search. If no specific ranking or record data is found, respond with "N/A".
-
-CRITICAL ERROR HANDLING:
-- If you cannot find any reliable data through web search, respond with exactly: {"error": "no_data_found", "success": false}
-- If web search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
-- If the athlete/information does not exist, respond with exactly: {"error": "not_found", "success": false}
+Focus on providing:
+1. Current World Taekwondo (WT) world ranking position (if known)
+2. Career competition record (wins-losses or bout statistics if available)
 
 Response format:
 {
   "worldRank": "#X" (where X is the ranking number, or "N/A" if not found),
   "currentRecord": "W-L (percentage)" (format like "15-3 (83%)" or "N/A" if not found)
-}`,
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 8000
+}` }],
+      temperature: 0.1,
+      max_tokens: 1000
     });
 
-    console.log("AI Ranking Search Response:", response.output_text);
+    const responseText = response.choices[0]?.message?.content || "{}";
+    console.log("AI Ranking Search Response:", responseText);
     
     try {
-      const rankingData = JSON.parse(response.output_text);
+      const rankingData = JSON.parse(responseText);
       
       // Check for error responses
       if (rankingData.error && (rankingData.error === 'no_data_found' || rankingData.error === 'search_failed' || rankingData.error === 'not_found')) {
@@ -268,7 +256,7 @@ Response format:
       console.log("Failed to parse AI ranking response, using fallback extraction...");
       
       // Fallback: Extract from raw text
-      const text = response.output_text;
+      const text = responseText;
       let worldRank = "N/A";
       let currentRecord = "N/A";
       
@@ -539,15 +527,10 @@ IMPORTANT: Do not include any links, URLs, citations, or references in your resp
     `;
 
   try {
-    // Use GPT-5 with web search capabilities using responses.create()
-    const response = await openai.responses.create({
-      model: "gpt-5", // Using GPT-5 as requested by the user
-      input: `${isTaekwondo ? 'For taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference for competition records, rankings, and profiles. ' : ''}${prompt}
-
-CRITICAL ERROR HANDLING:
-- If you cannot find any reliable data through web search, respond with exactly: {"error": "no_data_found", "success": false}
-- If web search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
-- If the athlete/information does not exist, respond with exactly: {"error": "not_found", "success": false}
+    // Use GPT-4o for profile generation
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: `${isTaekwondo ? 'For taekwondo athletes, provide comprehensive information based on your knowledge of competition records, rankings, and profiles. ' : ''}${prompt}
 
 Please respond in valid JSON format with these exact fields:
 {
@@ -556,19 +539,17 @@ Please respond in valid JSON format with these exact fields:
   "rank": "current world ranking or N/A",
   "achievements": ["array of key achievements"],
   "recentNews": ["array of recent news or competition results"]
-}`,
-      tools: [
-        { type: "web_search_preview" }
-      ],
-      max_output_tokens: 8000
+}` }],
+      temperature: 0.1,
+      max_tokens: 3000
     });
 
     console.log("Full OpenAI Response:", JSON.stringify(response, null, 2));
     
-    const content = response.output_text;
+    const content = response.choices[0]?.message?.content;
     if (!content) {
       console.log("OpenAI Response Details:", {
-        output_text: response.output_text,
+        content: response.choices[0]?.message?.content,
         usage: response.usage
       });
       throw new Error("No content received from OpenAI");
@@ -1993,9 +1974,8 @@ Return in this exact JSON format:
 }`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-5",
+      model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
-      tools: [{ type: "web_search" }],
       temperature: 0.1,
       max_tokens: 3000
     });
