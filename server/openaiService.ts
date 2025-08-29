@@ -668,10 +668,11 @@ IMPORTANT: Use the EXACT heading format with double asterisks: **Introduction**,
       model: "gpt-5", // Using GPT-5 as requested by the user
       input: `${prompt}
 
-Please respond in valid JSON format with these exact fields:
+CRITICAL: The bio field MUST contain ALL 5 sections with exact markdown headings. Example format:
+
 {
   "name": "athlete's full name",
-  "bio": "Structured biography with the exact headings: **Introduction**\\n[content]\\n\\n**Players' Overall Story**\\n[content]\\n\\n**Recent Competitions**\\n[content]\\n\\n**Career Record and Rankings**\\n[content]\\n\\n**Notable Achievements**\\n[content]",
+  "bio": "**Introduction**\\n[Comprehensive introduction paragraph]\\n\\n**Players' Overall Story**\\n[Detailed background and career journey]\\n\\n**Recent Competitions**\\n[2024-2025 competition results]\\n\\n**Career Record and Rankings**\\n[Current rankings and competition record]\\n\\n**Notable Achievements**\\n[Major titles and career highlights]",
   "rank": "current world ranking or N/A", 
   "achievements": ["array of key achievements"],
   "recentNews": ["array of recent news or competition results"]
@@ -740,12 +741,24 @@ export async function getAthleteProfile(name: string, sport: string, nationality
   const prompt = `Today's date is ${currentDate}.
     Search the web for factual, up-to-date information about the athlete "${name}"${nationalityContext}, who competes in ${sport}.
     
-    Create a detailed biography structured with the following headings:
-    - An introductory paragraph
-    - A heading "Recent Competitions:"
-    - A heading "Career Record and Rankings:"
-    - A heading "Notable Achievements:"
+    Create a detailed biography with this EXACT structure using proper headings:
 
+**Introduction**
+[Comprehensive introduction paragraph about the athlete]
+
+**Players' Overall Story**
+[Detailed story about what they're known for in ${sport}, their background, playing style, and career journey]
+
+**Recent Competitions**
+[Information about their most recent competitions and results]
+
+**Career Record and Rankings**
+[Current rankings, competition record, and career statistics]
+
+**Notable Achievements**
+[List of major titles, medals, and career highlights]
+
+    CRITICAL: Use the EXACT heading format with double asterisks and include ALL 5 sections.
     Provide specific, factual, authentic information about athletes. NEVER use placeholder text or bracketed templates like [City, State], [Year], [Championship Name]. Consider the specified sport and nationality when identifying the correct athlete.
     ${sportSpecificGuidance}
 
@@ -756,10 +769,14 @@ export async function getAthleteProfile(name: string, sport: string, nationality
     - Only provide data if you find authentic, verifiable information through web search
     - Do not use placeholder or generic data when real information is unavailable
 
+    CRITICAL: The bio field MUST contain ALL 5 sections with exact markdown headings. Example format:
+    
+    "bio": "**Introduction**\\n[content]\\n\\n**Players' Overall Story**\\n[content]\\n\\n**Recent Competitions**\\n[content]\\n\\n**Career Record and Rankings**\\n[content]\\n\\n**Notable Achievements**\\n[content]"
+
     Format the response as a JSON object with these fields:
     - name: string (athlete's full name)
     - sport: string (the sport they compete in)
-    - bio: string (detailed biography with the headings mentioned above)
+    - bio: string (structured biography with ALL 5 headings)
     - rank: number (current world ranking if available, otherwise estimate)
     - country: string (athlete's country)
     - achievements: array of strings (notable achievements)
