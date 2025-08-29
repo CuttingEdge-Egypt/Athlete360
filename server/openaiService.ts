@@ -47,14 +47,14 @@ If no athletes found through web search, respond with: {"error": "no_athletes_fo
 SEARCH QUERY: "${searchQuery}"${countryContext}
 SPORT: ${sport}`;
 
-    const response = await openai.responses.create({
-      model: "gpt-5", // Upgraded to GPT-5 with web search as requested
-      input: prompt,
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 4000
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.1,
+      max_tokens: 4000
     });
 
-    const responseText = response.output_text || "{}";
+    const responseText = response.choices[0]?.message?.content || "{}";
     
     // Check for error responses indicating no data found
     if (responseText.includes('"error": "no_athletes_found"') || 
@@ -2005,14 +2005,14 @@ If no authentic data found through web search, respond with: {"error": "no_data_
 
 ATHLETE TO RESEARCH: ${suggestion.fullName} (${suggestion.country}, ${suggestion.sport})`;
 
-    const response = await openai.responses.create({
-      model: "gpt-5",
-      input: prompt,
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 3000
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.1,
+      max_tokens: 3000
     });
 
-    const responseText = response.output_text || "{}";
+    const responseText = response.choices[0]?.message?.content || "{}";
     
     // Check for error responses
     if (responseText.includes('"error": "no_data_found"') || 
@@ -2024,11 +2024,30 @@ ATHLETE TO RESEARCH: ${suggestion.fullName} (${suggestion.country}, ${suggestion
     let cleanedResponse = responseText.trim();
     cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
     
-    const athleteProfile = JSON.parse(cleanedResponse);
+    console.log('Raw GPT-5 profile response:', responseText);
+    console.log('Cleaned profile response:', cleanedResponse);
+    
+    let athleteProfile;
+    try {
+      athleteProfile = JSON.parse(cleanedResponse);
+    } catch (parseError) {
+      console.error('Failed to parse athlete profile JSON:', parseError);
+      console.log('Problematic response:', cleanedResponse);
+      throw new Error('AI returned invalid JSON format for athlete profile');
+    }
+    
+    console.log('Parsed athlete profile:', athleteProfile);
     
     // Validate required fields
+    if (!athleteProfile || typeof athleteProfile !== 'object') {
+      console.log('Invalid athleteProfile object:', athleteProfile);
+      throw new Error('AI returned invalid athlete profile structure');
+    }
+    
     if (!athleteProfile.name || !athleteProfile.bio) {
-      throw new Error('Invalid athlete profile structure returned');
+      console.log('Missing required fields - name:', athleteProfile.name, 'bio:', athleteProfile.bio);
+      console.log('Full response object keys:', Object.keys(athleteProfile || {}));
+      throw new Error('AI response missing required name or bio fields');
     }
 
     return athleteProfile;
