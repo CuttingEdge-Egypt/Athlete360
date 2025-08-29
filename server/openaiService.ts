@@ -45,14 +45,14 @@ If no athletes found through web search, respond with: {"error": "no_athletes_fo
 SEARCH QUERY: "${searchQuery}"
 SPORT: ${sport}`;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.1,
-      max_tokens: 2000
+    const response = await openai.responses.create({
+      model: "gpt-5", // Upgraded to GPT-5 with web search as requested
+      input: prompt,
+      tools: [{ type: "web_search_preview" }],
+      max_output_tokens: 4000
     });
 
-    const responseText = response.choices[0]?.message?.content || "{}";
+    const responseText = response.output_text || "{}";
     
     // Check for error responses indicating no data found
     if (responseText.includes('"error": "no_athletes_found"') || 
@@ -2019,3 +2019,4 @@ ATHLETE TO RESEARCH: ${suggestion.fullName} (${suggestion.country}, ${suggestion
     throw new Error(`Failed to create athlete profile: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
+

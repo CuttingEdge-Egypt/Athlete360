@@ -224,49 +224,111 @@ export default function Home() {
     queryKey: ["/api/sports"],
   });
 
-  // Handle creating athlete with AI
+  // Multi-step AI athlete search with suggestions
   const handleCreateAthleteWithAI = async (athleteName: string) => {
     if (!selectedSport || !athleteName.trim()) return;
     
     setIsSearching(true);
+    
     try {
-      const response = await fetch('/api/athletes/create-with-ai', {
+      // Step 1: Search for athlete suggestions
+      const searchResponse = await fetch('/api/athletes/search-suggestions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: athleteName.trim(),
-          sportId: selectedSport,
-          nationality: selectedCountry // Pass selected nationality to improve AI search accuracy
+          searchQuery: athleteName.trim(),
+          sport: sports.find(s => s.id === selectedSport)?.name || 'Unknown'
         }),
       });
       
-      if (response.ok) {
-        const newAthlete = await response.json();
-        setSelectedAthlete(newAthlete);
-        setSearchName(newAthlete.name);
-        toast({
-          title: "Athlete Created",
-          description: `${newAthlete.name} has been added to our database with AI-powered insights.`,
-        });
-      } else {
-        const error = await response.json();
-        toast({
-          title: "Creation Failed",
-          description: error.message || "Failed to create athlete with AI",
-          variant: "destructive",
-        });
+      if (!searchResponse.ok) {
+        const error = await searchResponse.json();
+        throw new Error(error.message || "Search failed");
       }
+      
+      const searchResults = await searchResponse.json();
+      console.log('Search suggestions:', searchResults);
+      
+      // Step 2: Handle suggestions
+      if (searchResults.requiresSelection && searchResults.suggestions.length > 1) {
+        // Show selection UI for multiple matches
+        toast({
+          title: "Multiple Athletes Found",
+          description: `Found ${searchResults.suggestions.length} athletes matching "${athleteName}". Please select the correct one.`,
+        });
+        
+        // TODO: Implement suggestion selection UI
+        // For now, auto-select the first suggestion
+        const selectedSuggestion = searchResults.suggestions[0];
+        await createAthleteFromSuggestion(selectedSuggestion);
+        
+      } else if (searchResults.suggestions.length === 1) {
+        // Single match - auto-proceed
+        console.log('Single match found, auto-proceeding...');
+        const selectedSuggestion = searchResults.suggestions[0];
+        await createAthleteFromSuggestion(selectedSuggestion);
+        
+      } else {
+        throw new Error("No athletes found matching your search");
+      }
+      
     } catch (error) {
-      console.error('Error creating athlete:', error);
+      console.error('Error in multi-step athlete search:', error);
       toast({
-        title: "Error",
-        description: "Something went wrong while creating the athlete",
+        title: "Search Failed",
+        description: error instanceof Error ? error.message : "Failed to search for athletes",
         variant: "destructive",
       });
     } finally {
       setIsSearching(false);
+    }
+  };
+
+  // Create athlete from selected suggestion
+  const createAthleteFromSuggestion = async (suggestion: any) => {
+    try {
+      console.log('Creating athlete from suggestion:', suggestion);
+      
+      const createResponse = await fetch('/api/athletes/create-from-suggestion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          suggestion: suggestion,
+          sportId: selectedSport
+        }),
+      });
+      
+      if (createResponse.ok) {
+        const newAthlete = await createResponse.json();
+        setSelectedAthlete(newAthlete);
+        setSearchName(newAthlete.name);
+        
+        // Refresh athlete lists
+        queryClient.invalidateQueries({ queryKey: ["/api/athletes/by-sport"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/athletes/search-by-name"] });
+        
+        toast({
+          title: "Athlete Created Successfully",
+          description: `${newAthlete.name} has been added with comprehensive AI-powered insights.`,
+        });
+      } else {
+        const error = await createResponse.json();
+        if (error.error === 'insufficient_data') {
+          throw new Error("Could not find enough data to create athlete profile. Try a different athlete.");
+        } else if (createResponse.status === 409) {
+          throw new Error(error.message || "Athlete already exists in database");
+        } else {
+          throw new Error(error.message || "Failed to create athlete profile");
+        }
+      }
+      
+    } catch (error) {
+      console.error('Error creating athlete from suggestion:', error);
+      throw error; // Re-throw to be handled by parent function
     }
   };
 
