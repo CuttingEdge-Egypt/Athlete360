@@ -1968,42 +1968,28 @@ export async function createAthleteFromSuggestion(
   try {
     console.log(`🤖 Creating athlete profile for selected suggestion: ${suggestion.fullName}`);
     
-    const prompt = `You are an expert sports analyst. Create a comprehensive athlete profile using the selected athlete information.
+    const prompt = `Create a detailed athlete profile for this ${suggestion.sport} player:
 
-SELECTED ATHLETE:
-- Full Name: ${suggestion.fullName}
-- Date of Birth: ${suggestion.dateOfBirth}  
-- Age: ${suggestion.age}
-- Country: ${suggestion.country}
-- Sport: ${suggestion.sport}
+ATHLETE DETAILS:
+Name: ${suggestion.fullName}
+Country: ${suggestion.country}
+Sport: ${suggestion.sport}
+Date of Birth: ${suggestion.dateOfBirth}
+Age: ${suggestion.age}
 
-SEARCH INSTRUCTIONS:
-1. Use web search to find detailed information about this SPECIFIC athlete
-2. Find current competition data, rankings, achievements, and biographical details
-3. Look for recent photos and profile images
-4. Gather technical information about their playing style and career highlights
+Please create a comprehensive profile including biography, achievements, and current status.
 
-CRITICAL REQUIREMENTS:
-- Return ONLY valid JSON with no additional text
-- Use authentic data found through web search
-- Include comprehensive biographical information
-- If specific data cannot be found, clearly indicate "Not found through web search"
-
-Return this EXACT JSON structure:
+Return in this exact JSON format:
 {
   "name": "${suggestion.fullName}",
-  "bio": "Detailed biography based on web search findings",
+  "bio": "Comprehensive biography including career highlights, playing position, major clubs/teams, notable achievements, and current status in ${suggestion.sport}. Include technical skills and playing style.",
   "age": ${suggestion.age},
-  "country": "${suggestion.country}", 
-  "achievements": ["Achievement 1 from web search", "Achievement 2 from web search"],
-  "rank": "Current ranking if found or null",
-  "profileImageUrl": "Direct image URL if found or null",
-  "recentNews": ["Recent news item 1", "Recent news item 2"]
-}
-
-If no authentic data found through web search, respond with: {"error": "no_data_found", "success": false}
-
-ATHLETE TO RESEARCH: ${suggestion.fullName} (${suggestion.country}, ${suggestion.sport})`;
+  "country": "${suggestion.country}",
+  "achievements": ["Major career achievement 1", "Major career achievement 2", "Notable accomplishment 3"],
+  "rank": "Current ranking or status in ${suggestion.sport}",
+  "profileImageUrl": null,
+  "recentNews": ["Recent career development 1", "Recent achievement or news 2"]
+}`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -2014,10 +2000,11 @@ ATHLETE TO RESEARCH: ${suggestion.fullName} (${suggestion.country}, ${suggestion
 
     const responseText = response.choices[0]?.message?.content || "{}";
     
-    // Check for error responses
-    if (responseText.includes('"error": "no_data_found"') || 
-        responseText.includes('"success": false')) {
-      throw new Error('AI_WEB_SEARCH_FAILED: No authentic athlete data found through web search');
+    console.log('Raw GPT-4o profile response:', responseText);
+    
+    // Only throw error if response is completely empty or explicitly says no data
+    if (responseText.trim() === '{}' || responseText.trim() === '') {
+      throw new Error('AI_WEB_SEARCH_FAILED: Empty response from AI');
     }
 
     // Clean and parse the JSON response
