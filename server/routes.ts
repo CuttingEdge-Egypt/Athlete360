@@ -426,9 +426,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create detailed athlete profile from suggestion
       const athleteProfile = await createAthleteFromSuggestion(suggestion);
       
-      // Check if athlete already exists by getting all athletes and filtering
-      const allAthletes = await storage.getAllAthletes();
-      const existingAthlete = allAthletes.find(a => a.name.toLowerCase() === athleteProfile.name.toLowerCase());
+      // Check if athlete already exists by searching for athletes with similar name
+      const existingAthletes = await storage.searchAthletesByName(athleteProfile.name, sportId);
+      const existingAthlete = existingAthletes.find(a => a.name.toLowerCase() === athleteProfile.name.toLowerCase());
       
       if (existingAthlete) {
         console.log(`Athlete ${athleteProfile.name} already exists`);

@@ -48,8 +48,9 @@ SEARCH QUERY: "${searchQuery}"${countryContext}
 SPORT: ${sport}`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       messages: [{ role: "user", content: prompt }],
+      tools: [{ type: "web_search" }],
       temperature: 0.1,
       max_tokens: 4000
     });
@@ -66,7 +67,7 @@ SPORT: ${sport}`;
     let cleanedResponse = responseText.trim();
     cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
     
-    console.log('Raw GPT-5 response:', responseText);
+    console.log('Raw GPT-5 search response:', responseText);
     console.log('Cleaned response:', cleanedResponse);
     
     let parsedResponse;
@@ -1992,15 +1993,16 @@ Return in this exact JSON format:
 }`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       messages: [{ role: "user", content: prompt }],
+      tools: [{ type: "web_search" }],
       temperature: 0.1,
       max_tokens: 3000
     });
 
     const responseText = response.choices[0]?.message?.content || "{}";
     
-    console.log('Raw GPT-4o profile response:', responseText);
+    console.log('Raw GPT-5 profile response:', responseText);
     
     // Only throw error if response is completely empty or explicitly says no data
     if (responseText.trim() === '{}' || responseText.trim() === '') {
