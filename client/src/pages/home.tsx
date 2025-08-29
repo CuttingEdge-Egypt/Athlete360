@@ -219,6 +219,8 @@ export default function Home() {
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [showBioPopup, setShowBioPopup] = useState(false);
   const [bioData, setBioData] = useState(null);
+  const [athleteSuggestions, setAthleteSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const { data: sports = [] } = useQuery<Sport[]>({
     queryKey: ["/api/sports"],
@@ -254,32 +256,16 @@ export default function Home() {
       
       // Step 2: Handle suggestions
       if (searchResults.requiresSelection && searchResults.suggestions.length > 1) {
-        // Show suggestions with country information for user selection
-        const suggestionList = searchResults.suggestions.map((s: any, i: number) => 
-          `${i + 1}. ${s.fullName} (${s.country}, born ${s.dateOfBirth})`
-        ).join('\n');
+        // Show suggestions UI for user selection
+        console.log('Multiple suggestions found:', searchResults.suggestions);
+        setAthleteSuggestions(searchResults.suggestions);
+        setShowSuggestions(true);
         
         toast({
           title: `Found ${searchResults.suggestions.length} Athletes Named "${athleteName}"`,
-          description: `Select the correct athlete:\n${suggestionList}`,
-          duration: 10000, // Longer duration for selection
+          description: "Please select the correct athlete from the options below.",
+          duration: 8000,
         });
-        
-        console.log('Multiple suggestions found:', searchResults.suggestions);
-        
-        // For now, prioritize athlete from selected country if available
-        let selectedSuggestion = searchResults.suggestions[0];
-        if (selectedCountry) {
-          const countryMatch = searchResults.suggestions.find((s: any) => 
-            s.country.toLowerCase().includes(selectedCountry.toLowerCase())
-          );
-          if (countryMatch) {
-            selectedSuggestion = countryMatch;
-            console.log(`Found country match for ${selectedCountry}:`, selectedSuggestion);
-          }
-        }
-        
-        await createAthleteFromSuggestion(selectedSuggestion);
         
       } else if (searchResults.suggestions.length === 1) {
         // Single match - auto-proceed
@@ -307,6 +293,13 @@ export default function Home() {
     } finally {
       setIsSearching(false);
     }
+  };
+
+  // Handle athlete suggestion selection
+  const handleSuggestionSelect = async (suggestion: any) => {
+    setShowSuggestions(false);
+    setAthleteSuggestions([]);
+    await createAthleteFromSuggestion(suggestion);
   };
 
   // Create athlete from selected suggestion
@@ -589,7 +582,38 @@ export default function Home() {
                     </div>
                   )}
                   
-                  {searchName.trim() && !isSearchLoading && availableAthletes.length === 0 && (
+                  {/* Athlete Suggestions Selection */}
+                  {showSuggestions && athleteSuggestions.length > 0 && (
+                    <div className="mt-2 bg-athlete-gray-700 border border-gray-600 rounded-md p-4">
+                      <h3 className="text-white font-medium mb-3">Select the correct athlete:</h3>
+                      <div className="space-y-2">
+                        {athleteSuggestions.map((suggestion, index) => (
+                          <button
+                            key={index}
+                            data-testid={`suggestion-${index}`}
+                            onClick={() => handleSuggestionSelect(suggestion)}
+                            className="w-full text-left p-3 bg-athlete-gray-600 hover:bg-athlete-accent/20 border border-gray-500 hover:border-athlete-accent rounded-md transition-colors"
+                          >
+                            <div className="text-white font-medium">{suggestion.fullName}</div>
+                            <div className="text-sm text-gray-400">
+                              {suggestion.country} • Born: {suggestion.dateOfBirth} (Age: {suggestion.age})
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => {
+                          setShowSuggestions(false);
+                          setAthleteSuggestions([]);
+                        }}
+                        className="mt-3 text-sm text-gray-400 hover:text-white transition-colors"
+                      >
+                        Cancel search
+                      </button>
+                    </div>
+                  )}
+
+                  {searchName.trim() && !isSearchLoading && availableAthletes.length === 0 && !showSuggestions && (
                     <div className="mt-2 bg-athlete-gray-700 border border-gray-600 rounded-md p-4 text-center">
                       <p className="text-gray-300 mb-2">Athlete not found</p>
                       <Button
