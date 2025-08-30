@@ -461,12 +461,11 @@ Please respond in valid JSON format with these exact fields:
     try {
       const athleteData = JSON.parse(content) as AthleteData;
       
-      // Check for error responses
-      if (athleteData.error && (athleteData.error === 'no_data_found' || athleteData.error === 'search_failed' || athleteData.error === 'not_found')) {
-        throw new Error(`AI_WEB_SEARCH_FAILED: ${athleteData.error}`);
-      }
-      
-      if (athleteData.success === false) {
+      // Check for error responses in the content
+      if (content.includes('"error": "no_data_found"') || 
+          content.includes('"error": "search_failed"') || 
+          content.includes('"error": "not_found"') ||
+          content.includes('"success": false')) {
         throw new Error('AI_WEB_SEARCH_FAILED: No authentic athlete data found through web search');
       }
       
@@ -936,7 +935,19 @@ Return ONLY this JSON structure with authentic data:
   }
 }
 
-IMPORTANT: Focus on authentic data but provide meaningful analysis even for emerging athletes. Use competition level progression to show career development.`;
+IMPORTANT: Focus on authentic data but provide meaningful analysis even for emerging athletes. Use competition level progression to show career development.
+
+CRITICAL ERROR HANDLING:
+- If you cannot find any reliable ranking data through web search, respond with exactly: {"error": "no_data_found", "success": false}
+- If web search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
+- If the athlete's information does not exist, respond with exactly: {"error": "not_found", "success": false}
+- Only provide ranking data if you can find authentic, verifiable information through web search
+
+RESPONSE FORMAT REQUIREMENTS:
+- Return ONLY valid JSON with no markdown links, URLs, or additional text
+- Do NOT include markdown links like [text](url) in JSON strings
+- Do NOT include parentheses with URLs in JSON values
+- Keep all text content clean and parseable`;
 
   try {
     const response = await openai.responses.create({
@@ -959,29 +970,61 @@ IMPORTANT: Focus on authentic data but provide meaningful analysis even for emer
       cleanedText = jsonMatch[0];
     }
     
-    // Aggressive JSON cleanup for GPT-5 responses
+    // Enhanced JSON cleanup for GPT-5 responses with URLs and markdown links
     let attempts = 0;
-    while (attempts < 3) {
+    while (attempts < 5) {
       try {
-        // Try different cleanup strategies
+        let attemptText = cleanedText;
+        
         if (attempts === 1) {
-          // Replace problematic commas in strings
-          cleanedText = cleanedText.replace(/("(?:[^"\\]|\\.)*"),(\s*[}\]])/g, '$1$2');
-          cleanedText = cleanedText.replace(/,(\s*[}\]])/g, '$1');
+          // Remove markdown links that break JSON: [text](url)
+          attemptText = attemptText.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
         } else if (attempts === 2) {
-          // More aggressive comma cleanup
-          cleanedText = cleanedText.replace(/,(\s*[}\]])/g, '$1');
-          cleanedText = cleanedText.replace(/("[^"]*"),(\s*"[^"]*"\s*:)/g, '$1$2');
+          // Remove all content in parentheses that might be URLs
+          attemptText = attemptText.replace(/\([^)]*\)/g, '');
+          // Remove trailing commas before closing brackets/braces
+          attemptText = attemptText.replace(/,(\s*[}\]])/g, '$1');
+        } else if (attempts === 3) {
+          // More aggressive URL removal and comma cleanup
+          attemptText = attemptText.replace(/https?:\/\/[^\s"]+/g, '');
+          attemptText = attemptText.replace(/www\.[^\s"]+/g, '');
+          attemptText = attemptText.replace(/,(\s*[}\]])/g, '$1');
+          attemptText = attemptText.replace(/("[^"]*"),(\s*"[^"]*"\s*:)/g, '$1$2');
+        } else if (attempts === 4) {
+          // Final attempt: remove all URLs and fix JSON structure
+          attemptText = attemptText.replace(/\[[^\]]*\]/g, ''); // Remove all square brackets
+          attemptText = attemptText.replace(/\([^)]*\)/g, ''); // Remove all parentheses
+          attemptText = attemptText.replace(/https?:\/\/[^\s"]+/g, ''); // Remove URLs
+          attemptText = attemptText.replace(/,(\s*[}\]])/g, '$1'); // Fix trailing commas
+          
+          // Try to balance braces and brackets
+          let braceCount = (attemptText.match(/\{/g) || []).length - (attemptText.match(/\}/g) || []).length;
+          let bracketCount = (attemptText.match(/\[/g) || []).length - (attemptText.match(/\]/g) || []).length;
+          
+          while (braceCount > 0) {
+            attemptText += '}';
+            braceCount--;
+          }
+          while (bracketCount > 0) {
+            attemptText += ']';
+            bracketCount--;
+          }
         }
         
-        return JSON.parse(cleanedText);
+        const parsed = JSON.parse(attemptText);
+        console.log(`✅ JSON parsing successful on attempt ${attempts + 1}`);
+        return parsed;
       } catch (parseError: any) {
         console.log(`JSON parse attempt ${attempts + 1} failed:`, parseError.message);
+        if (attempts < 4) {
+          console.log(`Trying cleanup strategy ${attempts + 2}...`);
+        }
         attempts++;
       }
     }
     
-    throw new Error("Failed to parse JSON after 3 attempts");
+    console.error(`❌ All JSON parsing attempts failed for ${athleteName}. Falling back to error structure.`);
+    throw new Error("AI_WEB_SEARCH_FAILED: Unable to parse ranking data from web search results");
   } catch (error) {
     console.error(`Error generating rank history for ${athleteName}:`, error);
     return {
