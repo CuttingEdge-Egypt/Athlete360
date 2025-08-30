@@ -112,50 +112,30 @@ export function AnalysisPopup({
     
     const sections: any = {};
     
-    // Parse structured bio with markdown headings
-    // Look for **Introduction** section
-    const introMatch = bioText.match(/\*\*Introduction\*\*\s*\n([\s\S]*?)(?=\n\*\*|$)/);
+    // Look for introduction (current status)
+    const introMatch = bioText.match(/^(.*?)\n\n/);
     if (introMatch) {
       sections.introduction = introMatch[1].trim();
     }
     
-    // Look for **Players' Overall Story** section
-    const storyMatch = bioText.match(/\*\*Players' Overall Story\*\*\s*\n([\s\S]*?)(?=\n\*\*|$)/);
+    // Look for overall story section
+    const storyMatch = bioText.match(/Players' overall story and what they're known for[\s\S]*?\n\n([\s\S]*?)(?:\n\n|$)/);
     if (storyMatch) {
       sections.overallStory = storyMatch[1].trim();
-    }
-    
-    // Look for **Recent Competitions** section
-    const recentMatch = bioText.match(/\*\*Recent Competitions\*\*\s*\n([\s\S]*?)(?=\n\*\*|$)/);
-    if (recentMatch) {
-      sections.recentCompetitions = recentMatch[1].trim();
-    }
-    
-    // Look for **Career Record and Rankings** section
-    const careerMatch = bioText.match(/\*\*Career Record and Rankings\*\*\s*\n([\s\S]*?)(?=\n\*\*|$)/);
-    if (careerMatch) {
-      sections.careerRecord = careerMatch[1].trim();
-    }
-    
-    // Look for **Notable Achievements** section
-    const achievementsMatch = bioText.match(/\*\*Notable Achievements\*\*\s*\n([\s\S]*?)(?=\n\*\*|$)/);
-    if (achievementsMatch) {
-      sections.notableAchievements = achievementsMatch[1].trim();
-    }
-    
-    // Fallback: if no structured sections found, try to extract from unstructured bio
-    if (!sections.introduction && !sections.overallStory && !sections.careerRecord) {
-      // If it's a single paragraph bio, use the first part as introduction
-      const paragraphs = bioText.split('\n\n').filter(p => p.trim());
-      if (paragraphs.length > 0) {
-        sections.introduction = paragraphs[0].trim();
-        if (paragraphs.length > 1) {
-          sections.overallStory = paragraphs.slice(1).join('\n\n').trim();
-        }
-      } else {
-        // Single paragraph case
-        sections.introduction = bioText.trim();
+    } else {
+      // Fallback - use the middle portion of bio
+      const parts = bioText.split('\n\n');
+      if (parts.length > 1) {
+        sections.overallStory = parts.slice(1, -1).join('\n\n');
       }
+    }
+    
+    // Look for career record section
+    const careerMatch = bioText.match(/career record|rankings|record/i);
+    if (careerMatch) {
+      const careerText = bioText.substring(careerMatch.index || 0);
+      const endMatch = careerText.match(/\n\n/);
+      sections.careerRecord = endMatch ? careerText.substring(0, endMatch.index) : careerText;
     }
     
     return sections;
@@ -821,21 +801,6 @@ export function AnalysisPopup({
               </h3>
               <div className="prose prose-invert max-w-none">
                 <p className="text-gray-200 leading-relaxed text-lg">{bioSections.overallStory}</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Recent Competitions Section */}
-        {bioSections.recentCompetitions && (
-          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-purple-400 border-gray-600 shadow-xl">
-            <CardContent className="p-8">
-              <h3 className="text-3xl font-bold text-purple-400 mb-6 flex items-center">
-                <Calendar className="mr-4 text-purple-400" size={32} />
-                Recent Competitions
-              </h3>
-              <div className="prose prose-invert max-w-none">
-                <p className="text-gray-200 leading-relaxed text-lg">{bioSections.recentCompetitions}</p>
               </div>
             </CardContent>
           </Card>

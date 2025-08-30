@@ -3,121 +3,6 @@ import OpenAI from "openai";
 // GPT-5 is now available and is the latest OpenAI model with default temperature 1.0 (cannot go under)
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// Multi-step AI player search with suggestions and enhanced user feedback
-export async function searchAthletesSuggestions(
-  searchQuery: string, 
-  sport: string,
-  country?: string
-): Promise<{ suggestions: Array<{ fullName: string; dateOfBirth: string; age: number; country: string; sport: string }>, requiresSelection: boolean }> {
-  try {
-    const countryContext = country ? ` from ${country}` : '';
-    const prompt = `You are an expert sports database search assistant. Search for athletes matching the query "${searchQuery}"${countryContext} in ${sport}.
-
-SEARCH INSTRUCTIONS:
-1. Use web search to find multiple athletes that could match "${searchQuery}"${country ? ` with priority given to athletes from ${country}` : ''}
-2. Look for current active athletes as well as retired legends
-3. Include athletes from different countries/eras if multiple exist${country ? ` but prioritize ${country} athletes` : ''}
-4. Focus on finding exact full names, dates of birth, and current countries
-
-CRITICAL REQUIREMENTS:
-- Return ONLY valid JSON with no additional text
-- Include full official names (not nicknames unless part of official name)
-- Must include accurate date of birth or age
-- Include current nationality/country
-- If only ONE clear match exists, return that single result
-- If multiple possible matches exist, return up to 5 most relevant suggestions
-
-Return this EXACT JSON structure:
-{
-  "suggestions": [
-    {
-      "fullName": "Complete official athlete name",
-      "dateOfBirth": "YYYY-MM-DD or Month DD, YYYY", 
-      "age": 25,
-      "country": "Full country name",
-      "sport": "${sport}"
-    }
-  ],
-  "requiresSelection": true
-}
-
-If only one athlete clearly matches, set "requiresSelection": false.
-If no athletes found through web search, respond with: {"error": "no_athletes_found", "success": false}
-
-SEARCH QUERY: "${searchQuery}"${countryContext}
-SPORT: ${sport}`;
-
-    const response = await openai.responses.create({
-      model: "gpt-5",
-      input: prompt,
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 4000
-    });
-
-    const responseText = response.output_text || "{}";
-    
-    // Check for error responses indicating no data found
-    if (responseText.includes('"error": "no_athletes_found"') || 
-        responseText.includes('"success": false')) {
-      throw new Error('AI_SEARCH_FAILED: No athletes found through web search');
-    }
-
-    // Clean and parse the JSON response
-    let cleanedResponse = responseText.trim();
-    cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
-    
-    console.log('Raw GPT-5 search response:', responseText);
-    console.log('Cleaned response:', cleanedResponse);
-    
-    let parsedResponse;
-    try {
-      parsedResponse = JSON.parse(cleanedResponse);
-    } catch (parseError) {
-      console.error('JSON parsing failed:', parseError);
-      console.log('Failed to parse response:', cleanedResponse);
-      throw new Error('AI returned invalid JSON format');
-    }
-    
-    // Validate the response structure
-    if (!parsedResponse || typeof parsedResponse !== 'object') {
-      console.log('Invalid parsedResponse object:', parsedResponse);
-      throw new Error('AI returned invalid response structure');
-    }
-    
-    if (!parsedResponse.suggestions || !Array.isArray(parsedResponse.suggestions)) {
-      console.log('Invalid suggestions array:', parsedResponse.suggestions);
-      
-      // If AI returned an error, handle it appropriately
-      if (parsedResponse.error) {
-        throw new Error('AI_SEARCH_FAILED: ' + parsedResponse.error);
-      }
-      
-      throw new Error('AI returned response without suggestions array');
-    }
-
-    // Ensure all suggestions have required fields
-    const validSuggestions = parsedResponse.suggestions.filter((suggestion: any) => 
-      suggestion.fullName && 
-      (suggestion.dateOfBirth || suggestion.age) && 
-      suggestion.country
-    );
-
-    return {
-      suggestions: validSuggestions,
-      requiresSelection: validSuggestions.length > 1
-    };
-
-  } catch (error) {
-    console.error("Error searching for athlete suggestions:", error);
-    
-    if (error instanceof Error && error.message.includes('AI_SEARCH_FAILED')) {
-      throw error; // Re-throw search failures
-    }
-    
-    throw new Error(`Failed to search for athletes: ${error instanceof Error ? error.message : String(error)}`);
-  }
-}
-
 // Helper function to search for athlete profile picture from taekwondodata.com
 async function searchTaekwondoDataProfilePicture(athleteName: string, nationality?: string): Promise<string | null> {
   try {
@@ -215,29 +100,40 @@ export async function getEnhancedTaekwondoData(athleteName: string, nationality?
     
     const nationalityContext = nationality ? ` from ${nationality}` : '';
     
-    // Use GPT-4o to get general ranking and record data
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [{ role: "user", content: `Provide general information about current World Taekwondo (WT) ranking and competition record for the athlete "${athleteName}"${nationalityContext}.
+    // Use GPT-5 with web search to get specific ranking and record data (no timeout)
+    const response = await openai.responses.create({
+      model: "gpt-5",
+      input: `Search the web for current World Taekwondo (WT) ranking and competition record information for the athlete "${athleteName}"${nationalityContext}.
 
-Focus on providing:
-1. Current World Taekwondo (WT) world ranking position (if known)
-2. Career competition record (wins-losses or bout statistics if available)
+Focus specifically on finding:
+1. Current World Taekwondo (WT) world ranking position
+2. Career competition record (wins-losses or bout statistics)
+
+Sources to prioritize:
+- https://www.taekwondodata.com/ 
+- World Taekwondo official rankings
+- Recent competition results and databases
+
+Provide ONLY factual data found through web search. If no specific ranking or record data is found, respond with "N/A".
+
+CRITICAL ERROR HANDLING:
+- If you cannot find any reliable data through web search, respond with exactly: {"error": "no_data_found", "success": false}
+- If web search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
+- If the athlete/information does not exist, respond with exactly: {"error": "not_found", "success": false}
 
 Response format:
 {
   "worldRank": "#X" (where X is the ranking number, or "N/A" if not found),
   "currentRecord": "W-L (percentage)" (format like "15-3 (83%)" or "N/A" if not found)
-}` }],
-      temperature: 0.1,
-      max_tokens: 1000
+}`,
+      tools: [{ type: "web_search_preview" }],
+      max_output_tokens: 8000
     });
 
-    const responseText = response.choices[0]?.message?.content || "{}";
-    console.log("AI Ranking Search Response:", responseText);
+    console.log("AI Ranking Search Response:", response.output_text);
     
     try {
-      const rankingData = JSON.parse(responseText);
+      const rankingData = JSON.parse(response.output_text);
       
       // Check for error responses
       if (rankingData.error && (rankingData.error === 'no_data_found' || rankingData.error === 'search_failed' || rankingData.error === 'not_found')) {
@@ -256,7 +152,7 @@ Response format:
       console.log("Failed to parse AI ranking response, using fallback extraction...");
       
       // Fallback: Extract from raw text
-      const text = responseText;
+      const text = response.output_text;
       let worldRank = "N/A";
       let currentRecord = "N/A";
       
@@ -505,33 +401,20 @@ export async function generateAthleteBiography(name: string, sport: string, nati
     
     Using web search capabilities, find factual, up-to-date information about the athlete "${name}"${nationalityContext}, who competes in ${sport}.
     
-    Create a detailed biography with this EXACT structure using proper headings:
+    Create a detailed biography structured with the following headings:
+    - An introductory paragraph
+    - Players' overall story and what they're known for in ${sport}.
+    - A heading "Recent Competitions:"
+    - A heading "Career Record and Rankings:"
+    - A heading "Notable Achievements:"
 
-**Introduction**
-[Comprehensive introduction paragraph about the athlete]
+Only mention information that is 100% accurate and verifiable.
 
-**Players' Overall Story**
-[Detailed story about what they're known for in ${sport}, their background, playing style, and career journey]
-
-**Recent Competitions**
-[Information about their most recent competitions and results]
-
-**Career Record and Rankings**
-[Current rankings, competition record, and career statistics]
-
-**Notable Achievements**
-[List of major titles, medals, and career highlights]
-
-Only mention information that is 100% accurate and verifiable from web search.
-
-IMPORTANT: 
-- Use the EXACT heading format with double asterisks: **Introduction**, **Players' Overall Story**, **Recent Competitions**, **Career Record and Rankings**, **Notable Achievements**
-- Do not include any links, URLs, citations, or references in your response
-- Provide comprehensive information under each section
+IMPORTANT: Do not include any links, URLs, citations, or references in your response. Provide clean text without any reference links or citations.
 
     Provide the response as a JSON object with these fields:
     - name: athlete's full name
-    - bio: the detailed biography with the structured headings format
+    - bio: the detailed biography without any links or citations
     - rank: current world ranking if available (as number or "N/A")
     - achievements: array of key achievements
     - recentNews: array of recent news or competition results
@@ -540,10 +423,15 @@ IMPORTANT:
     `;
 
   try {
-    // Use GPT-5 with web search for profile generation
+    // Use GPT-5 with web search capabilities using responses.create()
     const response = await openai.responses.create({
-      model: "gpt-5",
-      input: `${isTaekwondo ? 'For taekwondo athletes, use web search to find comprehensive information from competition records, rankings, and profiles from sources like https://www.taekwondodata.com/. ' : ''}${prompt}
+      model: "gpt-5", // Using GPT-5 as requested by the user
+      input: `${isTaekwondo ? 'For taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference for competition records, rankings, and profiles. ' : ''}${prompt}
+
+CRITICAL ERROR HANDLING:
+- If you cannot find any reliable data through web search, respond with exactly: {"error": "no_data_found", "success": false}
+- If web search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
+- If the athlete/information does not exist, respond with exactly: {"error": "not_found", "success": false}
 
 Please respond in valid JSON format with these exact fields:
 {
@@ -553,8 +441,10 @@ Please respond in valid JSON format with these exact fields:
   "achievements": ["array of key achievements"],
   "recentNews": ["array of recent news or competition results"]
 }`,
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 3000
+      tools: [
+        { type: "web_search_preview" }
+      ],
+      max_output_tokens: 8000
     });
 
     console.log("Full OpenAI Response:", JSON.stringify(response, null, 2));
@@ -562,7 +452,7 @@ Please respond in valid JSON format with these exact fields:
     const content = response.output_text;
     if (!content) {
       console.log("OpenAI Response Details:", {
-        content: response.output_text,
+        output_text: response.output_text,
         usage: response.usage
       });
       throw new Error("No content received from OpenAI");
@@ -639,24 +529,12 @@ export async function refreshAthleteBiographyWithSearch(name: string, sport: str
 
 Don't include the references in the biography. 
     
-    Create an updated biography with fresh information using this EXACT structure:
-
-**Introduction**
-[Comprehensive introduction paragraph about the athlete with current status and world ranking position]
-
-**Players' Overall Story**
-[Detailed story about what they're known for in ${sport}, their background, playing style, and career journey]
-
-**Recent Competitions**
-[Information about their most recent competitions and 2024-2025 results]
-
-**Career Record and Rankings**
-[Current world ranking position, competition record, and career statistics]
-
-**Notable Achievements**
-[List of major titles, medals, and career highlights]
-
-IMPORTANT: Use the EXACT heading format with double asterisks: **Introduction**, **Players' Overall Story**, **Recent Competitions**, **Career Record and Rankings**, **Notable Achievements**
+    Create an updated biography with fresh information, structured as:
+    - Introduction with current status and world ranking position
+    - Players' overall story and what they're known for in their sport
+    - "Recent Competitions:" (2024-2025 results)
+    - "Career Record and Rankings:" (current world ranking position and competitive record)
+    - "Notable Achievements:" (career highlights)
 
     Only mention information that is 100% accurate and verifiable.
     IMPORTANT: Do not include any links, URLs, citations, or references in your response. Provide clean text without any reference links or citations.
@@ -668,11 +546,10 @@ IMPORTANT: Use the EXACT heading format with double asterisks: **Introduction**,
       model: "gpt-5", // Using GPT-5 as requested by the user
       input: `${prompt}
 
-CRITICAL: The bio field MUST contain ALL 5 sections with exact markdown headings. Example format:
-
+Please respond in valid JSON format with these exact fields:
 {
   "name": "athlete's full name",
-  "bio": "**Introduction**\\n[Comprehensive introduction paragraph]\\n\\n**Players' Overall Story**\\n[Detailed background and career journey]\\n\\n**Recent Competitions**\\n[2024-2025 competition results]\\n\\n**Career Record and Rankings**\\n[Current rankings and competition record]\\n\\n**Notable Achievements**\\n[Major titles and career highlights]",
+  "bio": "updated biography without any links or citations",
   "rank": "current world ranking or N/A", 
   "achievements": ["array of key achievements"],
   "recentNews": ["array of recent news or competition results"]
@@ -741,24 +618,12 @@ export async function getAthleteProfile(name: string, sport: string, nationality
   const prompt = `Today's date is ${currentDate}.
     Search the web for factual, up-to-date information about the athlete "${name}"${nationalityContext}, who competes in ${sport}.
     
-    Create a detailed biography with this EXACT structure using proper headings:
+    Create a detailed biography structured with the following headings:
+    - An introductory paragraph
+    - A heading "Recent Competitions:"
+    - A heading "Career Record and Rankings:"
+    - A heading "Notable Achievements:"
 
-**Introduction**
-[Comprehensive introduction paragraph about the athlete]
-
-**Players' Overall Story**
-[Detailed story about what they're known for in ${sport}, their background, playing style, and career journey]
-
-**Recent Competitions**
-[Information about their most recent competitions and results]
-
-**Career Record and Rankings**
-[Current rankings, competition record, and career statistics]
-
-**Notable Achievements**
-[List of major titles, medals, and career highlights]
-
-    CRITICAL: Use the EXACT heading format with double asterisks and include ALL 5 sections.
     Provide specific, factual, authentic information about athletes. NEVER use placeholder text or bracketed templates like [City, State], [Year], [Championship Name]. Consider the specified sport and nationality when identifying the correct athlete.
     ${sportSpecificGuidance}
 
@@ -769,14 +634,10 @@ export async function getAthleteProfile(name: string, sport: string, nationality
     - Only provide data if you find authentic, verifiable information through web search
     - Do not use placeholder or generic data when real information is unavailable
 
-    CRITICAL: The bio field MUST contain ALL 5 sections with exact markdown headings. Example format:
-    
-    "bio": "**Introduction**\\n[content]\\n\\n**Players' Overall Story**\\n[content]\\n\\n**Recent Competitions**\\n[content]\\n\\n**Career Record and Rankings**\\n[content]\\n\\n**Notable Achievements**\\n[content]"
-
     Format the response as a JSON object with these fields:
     - name: string (athlete's full name)
     - sport: string (the sport they compete in)
-    - bio: string (structured biography with ALL 5 headings)
+    - bio: string (detailed biography with the headings mentioned above)
     - rank: number (current world ranking if available, otherwise estimate)
     - country: string (athlete's country)
     - achievements: array of strings (notable achievements)
@@ -1984,93 +1845,3 @@ MANDATORY: Use ONLY current web search results. Do not use generic descriptions 
     throw new Error(`Athlete comparison failed for ${athlete1.name} vs ${athlete2.name}: ${error.message}`);
   }
 }
-
-// Enhanced athlete profile creation with selected suggestion data
-export async function createAthleteFromSuggestion(
-  suggestion: { fullName: string; dateOfBirth: string; age: number; country: string; sport: string }
-): Promise<any> {
-  try {
-    console.log(`🤖 Creating athlete profile for selected suggestion: ${suggestion.fullName}`);
-    
-    const prompt = `Create a detailed athlete profile for this ${suggestion.sport} player:
-
-ATHLETE DETAILS:
-Name: ${suggestion.fullName}
-Country: ${suggestion.country}
-Sport: ${suggestion.sport}
-Date of Birth: ${suggestion.dateOfBirth}
-Age: ${suggestion.age}
-
-Please create a comprehensive profile including biography, achievements, and current status.
-
-Return in this exact JSON format:
-{
-  "name": "${suggestion.fullName}",
-  "bio": "Comprehensive biography including career highlights, playing position, major clubs/teams, notable achievements, and current status in ${suggestion.sport}. Include technical skills and playing style.",
-  "age": ${suggestion.age},
-  "country": "${suggestion.country}",
-  "achievements": ["Major career achievement 1", "Major career achievement 2", "Notable accomplishment 3"],
-  "rank": "Current ranking or status in ${suggestion.sport}",
-  "profileImageUrl": null,
-  "recentNews": ["Recent career development 1", "Recent achievement or news 2"]
-}`;
-
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.1,
-      max_tokens: 3000
-    });
-
-    const responseText = response.choices[0]?.message?.content || "{}";
-    
-    console.log('Raw GPT-5 profile response:', responseText);
-    
-    // Only throw error if response is completely empty or explicitly says no data
-    if (responseText.trim() === '{}' || responseText.trim() === '') {
-      throw new Error('AI_WEB_SEARCH_FAILED: Empty response from AI');
-    }
-
-    // Clean and parse the JSON response
-    let cleanedResponse = responseText.trim();
-    cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
-    
-    console.log('Raw GPT-5 profile response:', responseText);
-    console.log('Cleaned profile response:', cleanedResponse);
-    
-    let athleteProfile;
-    try {
-      athleteProfile = JSON.parse(cleanedResponse);
-    } catch (parseError) {
-      console.error('Failed to parse athlete profile JSON:', parseError);
-      console.log('Problematic response:', cleanedResponse);
-      throw new Error('AI returned invalid JSON format for athlete profile');
-    }
-    
-    console.log('Parsed athlete profile:', athleteProfile);
-    
-    // Validate required fields
-    if (!athleteProfile || typeof athleteProfile !== 'object') {
-      console.log('Invalid athleteProfile object:', athleteProfile);
-      throw new Error('AI returned invalid athlete profile structure');
-    }
-    
-    if (!athleteProfile.name || !athleteProfile.bio) {
-      console.log('Missing required fields - name:', athleteProfile.name, 'bio:', athleteProfile.bio);
-      console.log('Full response object keys:', Object.keys(athleteProfile || {}));
-      throw new Error('AI response missing required name or bio fields');
-    }
-
-    return athleteProfile;
-
-  } catch (error) {
-    console.error(`Error creating athlete profile for ${suggestion.fullName}:`, error);
-    
-    if (error instanceof Error && error.message.includes('AI_WEB_SEARCH_FAILED')) {
-      throw error; // Re-throw to prevent token deduction
-    }
-    
-    throw new Error(`Failed to create athlete profile: ${error instanceof Error ? error.message : String(error)}`);
-  }
-}
-

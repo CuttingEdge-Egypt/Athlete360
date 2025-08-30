@@ -53,17 +53,8 @@ Preferred communication style: Simple, everyday language.
 - **AI Response Handling**: Robust JSON parsing and retry mechanisms for AI model responses.
 - **UI Structure**: Consistent structured UI for analysis results (Bio, Rank, etc.) across different components with visual hierarchy and theming.
 - **World Ranking Integration**: Enhanced prompts for Bio, Rank History, and Compare Athletes functions that mandate searching for current world rankings in the athlete's specific sport (e.g., World Taekwondo ranking, IJF world ranking, etc.).
-- **Multi-Step AI Player Search**: Advanced athlete discovery system with two-step process: (1) searchAthletesSuggestions() provides preview with full names and birth dates, (2) createAthleteFromSuggestion() creates detailed profiles. Smart disambiguation prevents wrong athlete selection and enhances data accuracy.
 
 ## Recent Critical Fixes (August 2025)
-
-### GPT-5 with Web Search Fully Implemented (August 29, 2025)
-- **Complete Integration**: Successfully upgraded all AI functions to use GPT-5 with `openai.responses.create()` and `web_search_preview` tools
-- **Structured Bio Format**: Restored proper biography structure with "Introduction", "Players' Overall Story", "Recent Competitions", "Career Record and Rankings", and "Notable Achievements" sections
-- **Web Search Enhanced**: All athlete profiles now generated with authentic, real-time data from web sources
-- **2-Step AI Search**: Perfect implementation of suggestion generation followed by detailed profile creation
-- **Country-Aware Search**: Enhanced athlete discovery with country context for accurate identification
-- **Status**: ✅ **FULLY OPERATIONAL** - GPT-5 with web search providing comprehensive, authentic athlete profiles with structured formatting
 
 ### Paymob Integration Fully Working (Updated August 26, 2025)
 - **Integration ID**: 4233746 confirmed working for online card payments
@@ -89,7 +80,6 @@ Preferred communication style: Simple, everyday language.
 - **Token Credit Flow**: Automatic token crediting upon payment approval with transaction logging
 - **Production Status**: ✅ **SOLUTION CONFIRMED** - Token crediting enhanced with authenticated user fallback mechanism. Tested successfully in development with real Paymob callback data. Ready for production deployment to fix token crediting issue
 - **AI Error Handling**: ✅ **IMPLEMENTATION COMPLETE** - Comprehensive error handling system implemented across all AI features. AI web search failures now prevent token deduction and return user-friendly error messages encouraging retry. Automatic token refunds for failed searches ensure fair user experience
-- **Multi-Step AI Search**: ✅ **IMPLEMENTATION COMPLETE** - Advanced player search system with suggestion previews including full names and birth dates. Users can distinguish between athletes (e.g., David Trezeguet vs Mahmoud Trezeguet) before creating profiles. Smart single-match auto-proceed and comprehensive loading feedback enhance user experience
 - **Architecture Compliance**: Follows official Paymob integration requirements for reliable payment processing
 
 ### Egyptian Bank Validation Fix
@@ -100,9 +90,9 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### AI and Language Models
-- **OpenAI GPT-5**: Primary LLM provider for all athlete analysis, biography generation, comparison analysis, and sports insights. Fully integrated with web search capabilities using `openai.responses.create()` and `web_search_preview` tools for authentic, real-time data retrieval.
+- **OpenAI GPT-5**: Exclusive LLM provider for all athlete analysis, biography generation, comparison analysis, and sports insights. Uses web search capabilities.
 - **Google Gemini 2.5 Pro**: Specialized AI model for nutrition plan generation, video analysis, and enhanced athlete comparison providing culturally-aware meal recommendations and detailed tactical advice.
-- **OpenAI SDK**: Official OpenAI JavaScript SDK for GPT-5 integration with web search.
+- **OpenAI SDK**: Official OpenAI JavaScript SDK for GPT-5 integration.
 - **Google Generative AI SDK**: Official Google SDK for Gemini integration.
 
 ### Database and Storage

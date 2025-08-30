@@ -219,132 +219,54 @@ export default function Home() {
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [showBioPopup, setShowBioPopup] = useState(false);
   const [bioData, setBioData] = useState(null);
-  const [athleteSuggestions, setAthleteSuggestions] = useState<any[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const { data: sports = [] } = useQuery<Sport[]>({
     queryKey: ["/api/sports"],
   });
 
-  // Multi-step AI athlete search with suggestions
+  // Handle creating athlete with AI
   const handleCreateAthleteWithAI = async (athleteName: string) => {
     if (!selectedSport || !athleteName.trim()) return;
     
     setIsSearching(true);
-    
     try {
-      // Step 1: Search for athlete suggestions
-      const searchResponse = await fetch('/api/athletes/search-suggestions', {
+      const response = await fetch('/api/athletes/create-with-ai', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          searchQuery: athleteName.trim(),
-          sport: sports.find(s => s.id === selectedSport)?.name || 'Unknown',
-          country: selectedCountry // Pass selected country for accurate athlete identification
+          name: athleteName.trim(),
+          sportId: selectedSport,
+          nationality: selectedCountry // Pass selected nationality to improve AI search accuracy
         }),
       });
       
-      if (!searchResponse.ok) {
-        const error = await searchResponse.json();
-        throw new Error(error.message || "Search failed");
-      }
-      
-      const searchResults = await searchResponse.json();
-      console.log('Search suggestions:', searchResults);
-      
-      // Step 2: Handle suggestions
-      if (searchResults.requiresSelection && searchResults.suggestions.length > 1) {
-        // Show suggestions UI for user selection
-        console.log('Multiple suggestions found:', searchResults.suggestions);
-        setAthleteSuggestions(searchResults.suggestions);
-        setShowSuggestions(true);
-        
+      if (response.ok) {
+        const newAthlete = await response.json();
+        setSelectedAthlete(newAthlete);
+        setSearchName(newAthlete.name);
         toast({
-          title: `Found ${searchResults.suggestions.length} Athletes Named "${athleteName}"`,
-          description: "Please select the correct athlete from the options below.",
-          duration: 8000,
+          title: "Athlete Created",
+          description: `${newAthlete.name} has been added to our database with AI-powered insights.`,
         });
-        
-      } else if (searchResults.suggestions.length === 1) {
-        // Single match - auto-proceed
-        const selectedSuggestion = searchResults.suggestions[0];
-        console.log('Single match found, auto-proceeding with:', selectedSuggestion);
-        
-        toast({
-          title: "Athlete Found",
-          description: `Creating profile for ${selectedSuggestion.fullName} (${selectedSuggestion.country})`,
-        });
-        
-        await createAthleteFromSuggestion(selectedSuggestion);
-        
       } else {
-        throw new Error("No athletes found matching your search");
+        const error = await response.json();
+        toast({
+          title: "Creation Failed",
+          description: error.message || "Failed to create athlete with AI",
+          variant: "destructive",
+        });
       }
-      
     } catch (error) {
-      console.error('Error in multi-step athlete search:', error);
+      console.error('Error creating athlete:', error);
       toast({
-        title: "Search Failed",
-        description: error instanceof Error ? error.message : "Failed to search for athletes",
+        title: "Error",
+        description: "Something went wrong while creating the athlete",
         variant: "destructive",
       });
     } finally {
       setIsSearching(false);
-    }
-  };
-
-  // Handle athlete suggestion selection
-  const handleSuggestionSelect = async (suggestion: any) => {
-    setShowSuggestions(false);
-    setAthleteSuggestions([]);
-    await createAthleteFromSuggestion(suggestion);
-  };
-
-  // Create athlete from selected suggestion
-  const createAthleteFromSuggestion = async (suggestion: any) => {
-    try {
-      console.log('Creating athlete from suggestion:', suggestion);
-      
-      const createResponse = await fetch('/api/athletes/create-from-suggestion', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          suggestion: suggestion,
-          sportId: selectedSport
-        }),
-      });
-      
-      if (createResponse.ok) {
-        const newAthlete = await createResponse.json();
-        setSelectedAthlete(newAthlete);
-        setSearchName(newAthlete.name);
-        
-        // Refresh athlete lists
-        queryClient.invalidateQueries({ queryKey: ["/api/athletes/by-sport"] });
-        queryClient.invalidateQueries({ queryKey: ["/api/athletes/search-by-name"] });
-        
-        toast({
-          title: "Athlete Created Successfully",
-          description: `${newAthlete.name} has been added with comprehensive AI-powered insights.`,
-        });
-      } else {
-        const error = await createResponse.json();
-        if (error.error === 'insufficient_data') {
-          throw new Error("Could not find enough data to create athlete profile. Try a different athlete.");
-        } else if (createResponse.status === 409) {
-          throw new Error(error.message || "Athlete already exists in database");
-        } else {
-          throw new Error(error.message || "Failed to create athlete profile");
-        }
-      }
-      
-    } catch (error) {
-      console.error('Error creating athlete from suggestion:', error);
-      throw error; // Re-throw to be handled by parent function
     }
   };
 
@@ -582,38 +504,7 @@ export default function Home() {
                     </div>
                   )}
                   
-                  {/* Athlete Suggestions Selection */}
-                  {showSuggestions && athleteSuggestions.length > 0 && (
-                    <div className="mt-2 bg-athlete-gray-700 border border-gray-600 rounded-md p-4">
-                      <h3 className="text-white font-medium mb-3">Select the correct athlete:</h3>
-                      <div className="space-y-2">
-                        {athleteSuggestions.map((suggestion, index) => (
-                          <button
-                            key={index}
-                            data-testid={`suggestion-${index}`}
-                            onClick={() => handleSuggestionSelect(suggestion)}
-                            className="w-full text-left p-3 bg-athlete-gray-600 hover:bg-athlete-accent/20 border border-gray-500 hover:border-athlete-accent rounded-md transition-colors"
-                          >
-                            <div className="text-white font-medium">{suggestion.fullName}</div>
-                            <div className="text-sm text-gray-400">
-                              {suggestion.country} • Born: {suggestion.dateOfBirth} (Age: {suggestion.age})
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                      <button
-                        onClick={() => {
-                          setShowSuggestions(false);
-                          setAthleteSuggestions([]);
-                        }}
-                        className="mt-3 text-sm text-gray-400 hover:text-white transition-colors"
-                      >
-                        Cancel search
-                      </button>
-                    </div>
-                  )}
-
-                  {searchName.trim() && !isSearchLoading && availableAthletes.length === 0 && !showSuggestions && (
+                  {searchName.trim() && !isSearchLoading && availableAthletes.length === 0 && (
                     <div className="mt-2 bg-athlete-gray-700 border border-gray-600 rounded-md p-4 text-center">
                       <p className="text-gray-300 mb-2">Athlete not found</p>
                       <Button
