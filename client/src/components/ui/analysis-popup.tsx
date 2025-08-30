@@ -511,26 +511,28 @@ export function AnalysisPopup({
       );
     }
 
-    // Adaptive data extraction for multiple JSON formats
-    let athlete, rankingProgression, careerSummary;
+    // Extract data from new ranking timeline structure
+    const athlete = parsedData.athlete || {};
+    const rankingTimeline = parsedData.rankingTimeline || [];
+    const careerMilestones = parsedData.careerMilestones || {};
     
-    // Format 1: New enhanced structure (athlete, rankingProgression, careerSummary)
-    if (parsedData.athlete && parsedData.rankingProgression !== undefined && parsedData.careerSummary) {
-      athlete = parsedData.athlete;
+    // Handle legacy data formats for backward compatibility
+    let rankingProgression = [];
+    let careerSummary = {};
+    
+    // Format 1: New timeline structure (athlete, rankingTimeline, careerMilestones)
+    if (parsedData.athlete && parsedData.rankingTimeline) {
+      // Use new timeline data
+      rankingProgression = rankingTimeline;
+      careerSummary = careerMilestones;
+    }
+    // Format 2: Old structure (athlete, rankingProgression, careerSummary)
+    else if (parsedData.athlete && parsedData.rankingProgression !== undefined && parsedData.careerSummary) {
       rankingProgression = parsedData.rankingProgression;
       careerSummary = parsedData.careerSummary;
     }
-    // Format 2: Old synthetic structure (currentRank, peakRank, history, recommendations)
+    // Format 3: Legacy synthetic structure (currentRank, peakRank, history, recommendations)
     else if (parsedData.currentRank || parsedData.peakRank || parsedData.history) {
-      athlete = {
-        name: 'Unknown Athlete',
-        nationality: 'N/A',
-        sport: 'N/A',
-        currentRanking: parsedData.currentRank,
-        peakRanking: parsedData.peakRank,
-        officialRecord: parsedData.competitionRecord || 'N/A',
-        isActive: true
-      };
       rankingProgression = parsedData.history || [];
       careerSummary = {
         totalCompetitions: 'N/A',
@@ -577,20 +579,20 @@ export function AnalysisPopup({
             
             <div className="grid md:grid-cols-4 gap-4">
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-blue-500/20">
-                <div className="text-2xl font-bold text-white">{athlete.currentRanking || 'N/A'}</div>
+                <div className="text-2xl font-bold text-white">{athlete.currentWorldRank || athlete.currentRanking || 'Unranked'}</div>
                 <div className="text-sm text-blue-300">Current Rank</div>
               </div>
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-green-500/20">
-                <div className="text-2xl font-bold text-green-400">{athlete.peakRanking || 'N/A'}</div>
+                <div className="text-2xl font-bold text-green-400">{athlete.peakWorldRank || athlete.peakRanking || 'N/A'}</div>
                 <div className="text-sm text-green-300">Peak Rank</div>
               </div>
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-yellow-500/20">
-                <div className="text-2xl font-bold text-yellow-400">{athlete.officialRecord || 'N/A'}</div>
-                <div className="text-sm text-yellow-300">Record</div>
+                <div className="text-2xl font-bold text-yellow-400">{athlete.rankingTrend || 'N/A'}</div>
+                <div className="text-sm text-yellow-300">Trend</div>
               </div>
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-purple-500/20">
-                <div className="text-2xl font-bold text-purple-400">{careerSummary.totalCompetitions || 'N/A'}</div>
-                <div className="text-sm text-purple-300">Competitions</div>
+                <div className="text-2xl font-bold text-purple-400">{athlete.careerSpan || 'Active'}</div>
+                <div className="text-sm text-purple-300">Career Span</div>
               </div>
             </div>
           </CardContent>
@@ -611,17 +613,22 @@ export function AnalysisPopup({
                   <div key={index} className="flex items-center justify-between p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-gray-500 transition-colors">
                     <div className="flex-1">
                       <div className="font-semibold text-gray-100">
-                        {entry.competition || entry.tournament || `Event ${index + 1}`}
+                        {entry.period || entry.competition || entry.tournament || `Period ${index + 1}`}
                       </div>
                       <div className="text-sm text-gray-400">
-                        {entry.date || entry.month || 'Date unknown'} • {entry.result || entry.placement || 'Result unknown'}
+                        {entry.keyEvent || entry.date || entry.month || 'Career milestone'} • {entry.competitionLevel || entry.result || entry.placement || 'Competition level'}
                       </div>
+                      {entry.rankingChange && entry.rankingChange !== 'N/A' && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          Change: {entry.rankingChange}
+                        </div>
+                      )}
                     </div>
                     <div className="text-right">
-                      <div className="text-xl font-bold text-white">#{entry.ranking || entry.rank || 'N/A'}</div>
-                      {entry.rankingChange && (
-                        <div className={`text-sm font-medium ${entry.rankingChange > 0 ? 'text-green-400' : entry.rankingChange < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                          {entry.rankingChange > 0 ? '↑' : entry.rankingChange < 0 ? '↓' : '→'} {Math.abs(entry.rankingChange)}
+                      <div className="text-xl font-bold text-white">{entry.worldRank || entry.ranking || entry.rank || 'Unranked'}</div>
+                      {entry.nationalRank && entry.nationalRank !== 'N/A' && (
+                        <div className="text-xs text-gray-400">
+                          National: {entry.nationalRank}
                         </div>
                       )}
                     </div>
@@ -643,16 +650,20 @@ export function AnalysisPopup({
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center py-2 border-b border-gray-600">
-                <span className="text-gray-300">Major Titles:</span>
-                <span className="text-yellow-400 font-semibold">{careerSummary.majorTitles || 'N/A'}</span>
+                <span className="text-gray-300">First Ranking:</span>
+                <span className="text-yellow-400 font-semibold">{careerSummary.firstRanking || 'N/A'}</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-gray-600">
-                <span className="text-gray-300">Ranking Trend:</span>
-                <span className="text-blue-400 font-semibold">{careerSummary.rankingTrend || 'N/A'}</span>
+                <span className="text-gray-300">Breakthrough:</span>
+                <span className="text-blue-400 font-semibold">{careerSummary.breakthroughMoment || 'N/A'}</span>
               </div>
               <div className="flex justify-between items-center py-2">
-                <span className="text-gray-300">Current Form:</span>
-                <span className="text-green-400 font-semibold">{careerSummary.currentForm || 'Data not available'}</span>
+                <span className="text-gray-300">Peak Period:</span>
+                <span className="text-green-400 font-semibold">{careerSummary.peakPeriod || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-gray-300">Recent Form:</span>
+                <span className="text-purple-400 font-semibold">{careerSummary.recentForm || 'N/A'}</span>
               </div>
             </CardContent>
           </Card>
@@ -665,18 +676,20 @@ export function AnalysisPopup({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {careerSummary.notableAchievements && careerSummary.notableAchievements.length > 0 ? (
-                <ul className="space-y-3">
-                  {careerSummary.notableAchievements.map((achievement: string, index: number) => (
-                    <li key={index} className="flex items-start text-gray-300">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                      <span className="text-sm">{achievement}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-400 text-sm">No specific achievements data available</p>
-              )}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-2 border-b border-gray-600">
+                  <span className="text-gray-300">Peak Rank Date:</span>
+                  <span className="text-purple-400 font-semibold">{athlete.peakRankDate || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-600">
+                  <span className="text-gray-300">Last Updated:</span>
+                  <span className="text-gray-400 font-semibold">{athlete.lastUpdated || new Date().toISOString().split('T')[0]}</span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-gray-300">Timeline Periods:</span>
+                  <span className="text-blue-400 font-semibold">{rankingTimeline.length || 0} recorded</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>

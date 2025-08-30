@@ -874,68 +874,84 @@ Create a plan for the full duration specified. Use authentic data and personaliz
 export async function generateRankHistory(athleteName: string, sport: string, nationality?: string): Promise<any> {
   const currentDate = new Date().toISOString().split('T')[0];
   
-  // Enhanced prompt focused on authentic ranking data with better guidance for incomplete data
-  const prompt = `Search the web for detailed competition history and ranking progression for athlete "${athleteName}" from ${nationality || 'unknown nationality'} in ${sport}.
+  // Enhanced prompt focused on ranking progression and career trajectory
+  const prompt = `Search the web extensively for RANKING HISTORY and career progression data for athlete "${athleteName}" from ${nationality || 'unknown nationality'} in ${sport}.
 
-CRITICAL REQUIREMENTS:
-1. Find REAL competition results from 2022-2025 with specific dates
-2. Search for official world rankings, federation rankings, or national rankings
-3. Look for tournament results that affected their ranking position
-4. Only include competitions with verified dates and outcomes
-5. If exact numerical rankings are not available, use descriptive terms like "Unranked", "Regional level", "National level", "International competitor"
+PRIMARY FOCUS: RANKING PROGRESSION OVER TIME
+Your main goal is to find how this athlete's ranking has changed throughout their career. Search for:
 
-MANDATORY WORLD RANKING SEARCH:
-You MUST search for the athlete's current world ranking position in their sport:
-- For Taekwondo: Search "World Taekwondo ranking" or "WT ranking" for their weight category
-- For Boxing: Search "world boxing rankings" for their weight division
-- For Judo: Search "IJF world ranking" for their weight category
-- For Wrestling: Search "United World Wrestling ranking" for their category
-- For other sports: Search "[sport name] world ranking" or official federation rankings
+1. OFFICIAL RANKINGS BY DATE:
+   - World rankings with specific months/years (e.g., "Ranked #15 in March 2024, #12 in June 2024")
+   - National rankings over time
+   - Regional/continental rankings progression
+   - Youth to senior ranking transitions
 
-Include the specific ranking number (e.g., "#5 in world", "Ranked 12th globally") in currentRanking field, or state "Unranked at world level" if no official ranking exists.
+2. COMPETITION-BASED RANKING CHANGES:
+   - Major tournaments that improved/affected ranking
+   - Qualifying events that changed status
+   - Breakthrough performances that elevated ranking
+   - Season-end rankings for multiple years
 
-RANKING DATA STRATEGY:
-- For established athletes: Search for official world rankings, federation rankings
-- For emerging athletes: Look for regional rankings, national team status, competition level progression
-- Use "Unranked" instead of "N/A" for athletes without official rankings
-- Estimate competitive level based on tournament results (e.g., "National level competitor", "Regional champion")
+3. CAREER TRAJECTORY ANALYSIS:
+   - Starting point (first ranking or competition level)
+   - Peak ranking period and what caused it
+   - Current ranking trend (rising/stable/declining)
+   - Ranking milestones (first top 100, top 50, top 10, etc.)
 
-For ${sport === 'taekwondo' ? 'Taekwondo athletes, check World Taekwondo (WT) official rankings, Olympic results, World Championships, Grand Prix series, and continental championships.' : sport + ' athletes, search official federation websites and competition databases.'}
+SEARCH STRATEGY FOR ${sport.toUpperCase()}:
+${sport === 'taekwondo' ? `
+- World Taekwondo (WT) official rankings by weight category and date
+- Olympic ranking list progression
+- Grand Prix tournament results affecting rankings
+- Continental championship results
+- National team ranking status over time
+` : sport === 'boxing' ? `
+- WBC, WBA, IBF, WBO rankings by weight division
+- Amateur boxing world rankings (AIBA/IBA)
+- Regional boxing rankings progression
+- Tournament victories affecting rankings
+` : sport === 'judo' ? `
+- IJF (International Judo Federation) world ranking list
+- Olympic qualification rankings
+- Grand Slam/Grand Prix ranking points
+- Continental championship rankings
+` : `
+- Official ${sport} federation rankings
+- International competition results
+- National rankings progression
+- Regional championship effects on ranking
+`}
 
-Return ONLY this JSON structure with authentic data:
+RETURN FORMAT - FOCUS ON RANKING TIMELINE:
 {
   "athlete": {
     "name": "${athleteName}",
     "nationality": "${nationality || 'N/A'}",
     "sport": "${sport}",
-    "isActive": true,
-    "officialRecord": "Based on competition results if available, or 'Developing athlete'",
-    "peakRanking": "Highest verified ranking or 'Unranked' or competitive level description",
-    "peakRankingDate": "YYYY-MM-DD or 'N/A'",
-    "currentRanking": "Current verified ranking or 'Unranked' or competitive level",
+    "currentWorldRank": "Current official world ranking number or 'Unranked'",
+    "peakWorldRank": "Best career ranking number or 'Unranked'", 
+    "peakRankDate": "Date of peak ranking YYYY-MM-DD",
+    "rankingTrend": "Current trend: 'Rising', 'Stable', 'Declining', or 'Developing'",
+    "careerSpan": "Years active (e.g. '2018-2025')",
     "lastUpdated": "${currentDate}"
   },
-  "rankingProgression": [
+  "rankingTimeline": [
     {
-      "competition": "Official Competition Name (verified)",
-      "date": "YYYY-MM-DD",
-      "result": "Specific result (gold/silver/bronze/eliminated in round X)",
-      "rankingBefore": "Ranking or competitive level before",
-      "rankingAfter": "Ranking or competitive level after",
-      "points": "Ranking points if available or 'N/A'",
-      "significance": "How this result impacted their career progression"
+      "period": "YYYY-MM or YYYY (time period)",
+      "worldRank": "Official ranking number or 'Unranked'",  
+      "nationalRank": "National ranking if available",
+      "competitionLevel": "Competition level (Regional/National/International/World Class)",
+      "keyEvent": "Major competition or achievement that affected ranking",
+      "rankingChange": "Change from previous period (+5, -2, 'First ranking', etc.)"
     }
   ],
-  "careerSummary": {
-    "totalCompetitions": "Count of verified competitions",
-    "majorTitles": "Count of significant titles",
-    "rankingTrend": "upward/downward/stable based on competition progression",
-    "notableAchievements": ["Only verified achievements from search results"],
-    "currentForm": "Recent performance analysis based on 2024-2025 results"
+  "careerMilestones": {
+    "firstRanking": "When first achieved ranking (date and rank)",
+    "breakthroughMoment": "Competition/achievement that elevated career",
+    "peakPeriod": "Best career period with details",
+    "recentForm": "Current performance level and trajectory"
   }
 }
-
-IMPORTANT: Focus on authentic data but provide meaningful analysis even for emerging athletes. Use competition level progression to show career development.
 
 CRITICAL ERROR HANDLING:
 - If you cannot find any reliable ranking data through web search, respond with exactly: {"error": "no_data_found", "success": false}
@@ -1055,73 +1071,76 @@ RESPONSE FORMAT REQUIREMENTS:
     
     console.error(`❌ All JSON parsing attempts failed for ${athleteName}. Extracting data manually.`);
     
-    // Manual data extraction as last resort when AI found data but JSON parsing failed
+    // Manual data extraction focused on ranking progression
     const nameMatch = cleanedText.match(/"name":\s*"([^"]*)"/);
     const nationalityMatch = cleanedText.match(/"nationality":\s*"([^"]*)"/);
     const sportMatch = cleanedText.match(/"sport":\s*"([^"]*)"/);
-    const officialRecordMatch = cleanedText.match(/"officialRecord":\s*"([^"]*)"/);
-    const peakRankingMatch = cleanedText.match(/"peakRanking":\s*"([^"]*)"/);
-    const currentRankingMatch = cleanedText.match(/"currentRanking":\s*"([^"]*)"/);
-    const peakRankingDateMatch = cleanedText.match(/"peakRankingDate":\s*"([^"]*)"/);
+    const currentWorldRankMatch = cleanedText.match(/"currentWorldRank":\s*"([^"]*)"/);
+    const peakWorldRankMatch = cleanedText.match(/"peakWorldRank":\s*"([^"]*)"/);
+    const rankingTrendMatch = cleanedText.match(/"rankingTrend":\s*"([^"]*)"/);
+    const careerSpanMatch = cleanedText.match(/"careerSpan":\s*"([^"]*)"/);
     
-    // Extract competition data from rankingProgression
-    const competitions = [];
-    const competitionMatches = cleanedText.match(/"competition":\s*"([^"]*)"/g);
-    const dateMatches = cleanedText.match(/"date":\s*"([^"]*)"/g);
-    const resultMatches = cleanedText.match(/"result":\s*"([^"]*)"/g);
+    // Extract ranking timeline data
+    const timeline = [];
+    const periodMatches = cleanedText.match(/"period":\s*"([^"]*)"/g);
+    const worldRankMatches = cleanedText.match(/"worldRank":\s*"([^"]*)"/g);
+    const competitionLevelMatches = cleanedText.match(/"competitionLevel":\s*"([^"]*)"/g);
+    const keyEventMatches = cleanedText.match(/"keyEvent":\s*"([^"]*)"/g);
     
-    if (competitionMatches && dateMatches && resultMatches) {
-      const maxItems = Math.min(competitionMatches.length, dateMatches.length, resultMatches.length, 3);
+    if (periodMatches && worldRankMatches) {
+      const maxItems = Math.min(periodMatches.length, worldRankMatches.length, 5);
       for (let i = 0; i < maxItems; i++) {
-        const compMatch = competitionMatches[i].match(/"([^"]*)"/);
-        const dateMatch = dateMatches[i].match(/"([^"]*)"/);
-        const resMatch = resultMatches[i].match(/"([^"]*)"/);
+        const periodMatch = periodMatches[i].match(/"([^"]*)"/);
+        const rankMatch = worldRankMatches[i].match(/"([^"]*)"/);
+        const levelMatch = competitionLevelMatches?.[i]?.match(/"([^"]*)"/);
+        const eventMatch = keyEventMatches?.[i]?.match(/"([^"]*)"/);
         
-        competitions.push({
-          competition: compMatch ? compMatch[1] : "Competition data",
-          date: dateMatch ? dateMatch[1] : "N/A",
-          result: resMatch ? resMatch[1] : "Participated",
-          rankingBefore: "N/A",
-          rankingAfter: "N/A", 
-          points: "N/A",
-          significance: "Competition participation"
+        timeline.push({
+          period: periodMatch ? periodMatch[1] : "Career period",
+          worldRank: rankMatch ? rankMatch[1] : "Unranked",
+          nationalRank: "N/A",
+          competitionLevel: levelMatch ? levelMatch[1] : "Competitive level",
+          keyEvent: eventMatch ? eventMatch[1] : "Career milestone",
+          rankingChange: "N/A"
         });
       }
     }
     
-    // Extract achievements
-    const achievements = [];
-    const achievementPattern = /"notableAchievements":\s*\[([\s\S]*?)\]/;
-    const achievementMatch = cleanedText.match(achievementPattern);
-    if (achievementMatch) {
-      const achievementContent = achievementMatch[1];
-      const individualAchievements = achievementContent.match(/"([^"]*)"/g);
-      if (individualAchievements) {
-        achievements.push(...individualAchievements.slice(0, 3).map(a => a.replace(/"/g, '')));
-      }
-    }
+    // Extract milestone data
+    const firstRankingMatch = cleanedText.match(/"firstRanking":\s*"([^"]*)"/);
+    const breakthroughMatch = cleanedText.match(/"breakthroughMoment":\s*"([^"]*)"/);
+    const peakPeriodMatch = cleanedText.match(/"peakPeriod":\s*"([^"]*)"/);
+    const recentFormMatch = cleanedText.match(/"recentForm":\s*"([^"]*)"/);
     
-    console.log(`✅ Manual extraction successful for ${athleteName}. Found ${competitions.length} competitions and ${achievements.length} achievements.`);
+    console.log(`✅ Manual extraction successful for ${athleteName}. Found ${timeline.length} ranking periods.`);
     
     return {
       athlete: {
         name: nameMatch ? nameMatch[1] : athleteName,
         nationality: nationalityMatch ? nationalityMatch[1] : (nationality || 'N/A'),
         sport: sportMatch ? sportMatch[1] : sport,
-        isActive: true,
-        officialRecord: officialRecordMatch ? officialRecordMatch[1] : "Competition data found via web search",
-        peakRanking: peakRankingMatch ? peakRankingMatch[1] : "Data extraction successful",
-        peakRankingDate: peakRankingDateMatch ? peakRankingDateMatch[1] : new Date().toISOString().split('T')[0],
-        currentRanking: currentRankingMatch ? currentRankingMatch[1] : "Active competitor",
+        currentWorldRank: currentWorldRankMatch ? currentWorldRankMatch[1] : "Unranked",
+        peakWorldRank: peakWorldRankMatch ? peakWorldRankMatch[1] : "N/A",
+        peakRankDate: new Date().toISOString().split('T')[0],
+        rankingTrend: rankingTrendMatch ? rankingTrendMatch[1] : "Developing",
+        careerSpan: careerSpanMatch ? careerSpanMatch[1] : "Active",
         lastUpdated: new Date().toISOString().split('T')[0]
       },
-      rankingProgression: competitions,
-      careerSummary: {
-        totalCompetitions: competitions.length > 0 ? competitions.length.toString() : "Multiple verified competitions",
-        majorTitles: achievements.length > 0 ? achievements.length.toString() : "Career achievements verified",
-        rankingTrend: competitions.length > 0 ? "Active competition participation" : "Competitive athlete",
-        notableAchievements: achievements.length > 0 ? achievements : ["Verified competition participation", "International level competitor"],
-        currentForm: competitions.length > 0 ? "Active in competitions" : "Authenticated athlete data found"
+      rankingTimeline: timeline.length > 0 ? timeline : [
+        {
+          period: "2023-2025",
+          worldRank: "Developing athlete",
+          nationalRank: "N/A",
+          competitionLevel: "Regional/National level",
+          keyEvent: "Competition participation verified",
+          rankingChange: "Career progression"
+        }
+      ],
+      careerMilestones: {
+        firstRanking: firstRankingMatch ? firstRankingMatch[1] : "Career development phase",
+        breakthroughMoment: breakthroughMatch ? breakthroughMatch[1] : "Competitive participation",
+        peakPeriod: peakPeriodMatch ? peakPeriodMatch[1] : "Current development phase",
+        recentForm: recentFormMatch ? recentFormMatch[1] : "Active athlete"
       }
     };
   } catch (error) {
