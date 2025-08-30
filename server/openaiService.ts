@@ -958,16 +958,25 @@ RESPONSE FORMAT REQUIREMENTS:
     });
 
     let cleanedText = response.output_text.trim();
-    console.log(`Raw GPT-5 rank response for ${athleteName}:`, cleanedText.substring(0, 500) + '...');
+    console.log(`Raw GPT-5 rank response for ${athleteName}:`, cleanedText.substring(0, 800) + '...');
+    
+    // Check for error indicators before processing
+    if (cleanedText.includes('"error": "no_data_found"') || 
+        cleanedText.includes('"error": "search_failed"') || 
+        cleanedText.includes('"error": "not_found"') ||
+        cleanedText.includes('"success": false')) {
+      throw new Error('AI_WEB_SEARCH_FAILED: No authentic ranking data found through web search');
+    }
     
     // Remove markdown formatting
     cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
     cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
     
-    // Extract JSON from response
-    const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      cleanedText = jsonMatch[0];
+    // Extract JSON from response with better bounds detection
+    const jsonStart = cleanedText.indexOf('{');
+    const jsonEnd = cleanedText.lastIndexOf('}');
+    if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+      cleanedText = cleanedText.substring(jsonStart, jsonEnd + 1);
     }
     
     // Enhanced JSON cleanup for GPT-5 responses with URLs and markdown links
@@ -978,36 +987,55 @@ RESPONSE FORMAT REQUIREMENTS:
         
         if (attempts === 1) {
           // Remove markdown links that break JSON: [text](url)
-          attemptText = attemptText.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
+          attemptText = attemptText.replace(/\[([^\]]*)\]\([^)]*\)/g, '"$1"');
+          // Fix common JSON issues
+          attemptText = attemptText.replace(/,(\s*[}\]])/g, '$1');
         } else if (attempts === 2) {
-          // Remove all content in parentheses that might be URLs
+          // More aggressive parentheses and URL removal
           attemptText = attemptText.replace(/\([^)]*\)/g, '');
-          // Remove trailing commas before closing brackets/braces
+          attemptText = attemptText.replace(/https?:\/\/[^\s"]+/g, '""');
           attemptText = attemptText.replace(/,(\s*[}\]])/g, '$1');
         } else if (attempts === 3) {
-          // More aggressive URL removal and comma cleanup
-          attemptText = attemptText.replace(/https?:\/\/[^\s"]+/g, '');
-          attemptText = attemptText.replace(/www\.[^\s"]+/g, '');
+          // Clean up malformed strings and arrays
+          attemptText = attemptText.replace(/\[[^\]]*\]/g, '[]'); // Replace complex arrays with empty arrays
+          attemptText = attemptText.replace(/("[^"]*)"([^",}\]]*)/g, '$1$2"'); // Fix unquoted content after strings
           attemptText = attemptText.replace(/,(\s*[}\]])/g, '$1');
-          attemptText = attemptText.replace(/("[^"]*"),(\s*"[^"]*"\s*:)/g, '$1$2');
         } else if (attempts === 4) {
-          // Final attempt: remove all URLs and fix JSON structure
-          attemptText = attemptText.replace(/\[[^\]]*\]/g, ''); // Remove all square brackets
-          attemptText = attemptText.replace(/\([^)]*\)/g, ''); // Remove all parentheses
-          attemptText = attemptText.replace(/https?:\/\/[^\s"]+/g, ''); // Remove URLs
-          attemptText = attemptText.replace(/,(\s*[}\]])/g, '$1'); // Fix trailing commas
-          
-          // Try to balance braces and brackets
-          let braceCount = (attemptText.match(/\{/g) || []).length - (attemptText.match(/\}/g) || []).length;
-          let bracketCount = (attemptText.match(/\[/g) || []).length - (attemptText.match(/\]/g) || []).length;
-          
-          while (braceCount > 0) {
-            attemptText += '}';
-            braceCount--;
-          }
-          while (bracketCount > 0) {
-            attemptText += ']';
-            bracketCount--;
+          // Create minimal valid structure from available data
+          try {
+            // Extract basic athlete info and create minimal structure
+            const nameMatch = attemptText.match(/"name":\s*"([^"]*)"/);
+            const nationalityMatch = attemptText.match(/"nationality":\s*"([^"]*)"/);
+            const sportMatch = attemptText.match(/"sport":\s*"([^"]*)"/);
+            
+            if (nameMatch) {
+              attemptText = `{
+                "athlete": {
+                  "name": "${nameMatch[1]}",
+                  "nationality": "${nationalityMatch ? nationalityMatch[1] : 'N/A'}",
+                  "sport": "${sportMatch ? sportMatch[1] : 'N/A'}",
+                  "isActive": true,
+                  "officialRecord": "Parsing failed - data available but format issue",
+                  "peakRanking": "N/A",
+                  "peakRankingDate": "N/A",
+                  "currentRanking": "N/A",
+                  "lastUpdated": "${new Date().toISOString().split('T')[0]}"
+                },
+                "rankingProgression": [],
+                "careerSummary": {
+                  "totalCompetitions": "N/A",
+                  "majorTitles": "N/A",
+                  "rankingTrend": "N/A",
+                  "notableAchievements": [],
+                  "currentForm": "Data format issue - please retry"
+                }
+              }`;
+            }
+          } catch (e) {
+            // If extraction fails, continue with original cleanup
+            attemptText = attemptText.replace(/\[[^\]]*\]/g, '[]');
+            attemptText = attemptText.replace(/\([^)]*\)/g, '');
+            attemptText = attemptText.replace(/,(\s*[}\]])/g, '$1');
           }
         }
         
