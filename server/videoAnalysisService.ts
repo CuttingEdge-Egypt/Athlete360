@@ -20,6 +20,21 @@ const model = genai.getGenerativeModel({
   generationConfig,
 });
 
+// Function to clean markdown formatting from match analysis text
+function cleanMarkdownFormatting(text: string): string {
+  if (!text) return '';
+  
+  let cleanedText = text.trim();
+  
+  // Remove markdown headers (###, ##, #)
+  cleanedText = cleanedText.replace(/^#{1,6}\s*/gm, '');
+  
+  // Remove excessive line breaks
+  cleanedText = cleanedText.replace(/\n{3,}/g, '\n\n');
+  
+  return cleanedText;
+}
+
 // Function to clean and fix common JSON formatting issues in AI responses
 function cleanJsonResponse(responseText: string): string {
   if (!responseText) return '{}';
@@ -298,8 +313,9 @@ Return Time in Minutes and Seconds: MM:SS`;
 
     console.log(`[PROCESS_VIDEO_GEMINI] All 5 analysis calls completed`);
 
-    // Extract text responses with JSON cleanup
-    const matchAnalysis = responseMatch.response.text();
+    // Extract text responses with formatting cleanup
+    const rawMatchAnalysis = responseMatch.response.text();
+    const matchAnalysis = cleanMarkdownFormatting(rawMatchAnalysis);
     const rawScoreResponse = responseScore.response.text();
     const rawPunchResponse = responsePunch.response.text();
     const rawKickCountResponse = responseKickNo.response.text();
