@@ -512,32 +512,46 @@ export function AnalysisPopup({
     }
 
     // Extract data from new competition-based ranking structure
-    const athlete = parsedData.athlete || {};
-    const competitionTimeline = parsedData.competitionRankingTimeline || [];
-    const rankingSummary = parsedData.rankingSummary || {};
+    let athlete, rankingProgression, careerSummary;
     
-    // Handle legacy data formats for backward compatibility
-    let rankingProgression = [];
-    let careerSummary: any = {};
-    
-    // Format 1: New competition-based structure (athlete, competitionRankingTimeline, rankingSummary)
-    if (parsedData.athlete && parsedData.competitionRankingTimeline) {
-      // Use new competition timeline data
-      rankingProgression = competitionTimeline;
-      careerSummary = rankingSummary;
+    // Handle different data formats and structures
+    // Format 1: New Gemini structure with success flag
+    if (parsedData.success && parsedData.athlete) {
+      athlete = parsedData.athlete;
+      rankingProgression = parsedData.athlete.competitionRankingTimeline || [];
+      careerSummary = parsedData.athlete.rankingSummary || {};
     }
-    // Format 2: Previous timeline structure (athlete, rankingTimeline, careerMilestones)
+    // Format 2: Direct athlete object with competitionRankingTimeline
+    else if (parsedData.athlete && parsedData.athlete.competitionRankingTimeline) {
+      athlete = parsedData.athlete;
+      rankingProgression = parsedData.athlete.competitionRankingTimeline;
+      careerSummary = parsedData.athlete.rankingSummary || {};
+    }
+    // Format 3: Root level structure (athlete, competitionRankingTimeline, rankingSummary)
+    else if (parsedData.athlete && parsedData.competitionRankingTimeline) {
+      athlete = parsedData.athlete;
+      rankingProgression = parsedData.competitionRankingTimeline;
+      careerSummary = parsedData.rankingSummary || {};
+    }
+    // Format 4: Previous timeline structure (athlete, rankingTimeline, careerMilestones)
     else if (parsedData.athlete && parsedData.rankingTimeline) {
+      athlete = parsedData.athlete;
       rankingProgression = parsedData.rankingTimeline;
       careerSummary = parsedData.careerMilestones || {};
     }
-    // Format 3: Old structure (athlete, rankingProgression, careerSummary)
+    // Format 5: Old structure (athlete, rankingProgression, careerSummary)
     else if (parsedData.athlete && parsedData.rankingProgression !== undefined && parsedData.careerSummary) {
+      athlete = parsedData.athlete;
       rankingProgression = parsedData.rankingProgression;
       careerSummary = parsedData.careerSummary;
     }
-    // Format 4: Legacy synthetic structure (currentRank, peakRank, history, recommendations)
+    // Format 6: Legacy synthetic structure (currentRank, peakRank, history, recommendations)
     else if (parsedData.currentRank || parsedData.peakRank || parsedData.history) {
+      athlete = {
+        name: parsedData.name || "Athlete",
+        currentWorldRank: parsedData.currentRank?.toString() || "N/A",
+        peakWorldRank: parsedData.peakRank?.toString() || "N/A"
+      };
       rankingProgression = parsedData.history || [];
       careerSummary = {
         firstOfficialRanking: 'Legacy data',
@@ -547,7 +561,7 @@ export function AnalysisPopup({
         nextMajorCompetition: 'N/A'
       };
     }
-    // Format 3: Unknown/unrecognized structure - show debug info
+    // Format 7: Unknown/unrecognized structure - show debug info
     else {
       return (
         <div className="p-6">
@@ -601,7 +615,7 @@ export function AnalysisPopup({
                 <div className="text-sm text-yellow-300">Trend</div>
               </div>
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-purple-500/20">
-                <div className="text-2xl font-bold text-purple-400">{competitionTimeline.length || 0}</div>
+                <div className="text-2xl font-bold text-purple-400">{rankingProgression.length || 0}</div>
                 <div className="text-sm text-purple-300">Competitions</div>
               </div>
             </div>
@@ -610,7 +624,12 @@ export function AnalysisPopup({
             {(athlete.currentRanking?.source || athlete.officialSource) && (
               <div className="mt-4 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
                 <div className="text-xs text-blue-300 font-medium">📊 Data Source:</div>
-                <div className="text-sm text-blue-200">{athlete.officialSource}</div>
+                <div className="text-sm text-blue-200">{athlete.currentRanking?.source || athlete.officialSource}</div>
+                {athlete.currentRanking?.lastUpdated && (
+                  <div className="text-xs text-blue-300 mt-1">
+                    Last Updated: {athlete.currentRanking.lastUpdated}
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
