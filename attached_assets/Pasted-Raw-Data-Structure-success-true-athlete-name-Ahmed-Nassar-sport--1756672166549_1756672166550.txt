@@ -1,0 +1,79 @@
+Raw Data Structure:
+{
+  "success": true,
+  "athlete": {
+    "name": "Ahmed Nassar",
+    "sport": "Taekwondo",
+    "country": "Egypt",
+    "currentRanking": {
+      "position": "#101 (Olympic Ranking)",
+      "category": "M-58kg",
+      "lastUpdated": "2024-06-01",
+      "source": "World Taekwondo"
+    },
+    "competitionRankingTimeline": [
+      {
+        "competition": "13th African Games - Accra 2024",
+        "year": "2024",
+        "date": "2024-03-19",
+        "rankingBefore": "#142",
+        "rankingAfter": "#101",
+        "rankingChange": "#142 → #101 (+41)",
+        "competitionLevel": "Continental (G-4)",
+        "result": "Gold Medal",
+        "rankingSource": "World Taekwondo"
+      },
+      {
+        "competition": "African Taekwondo Championships 2023",
+        "year": "2023",
+        "date": "2023-11-05",
+        "rankingBefore": "#168",
+        "rankingAfter": "#150",
+        "rankingChange": "#168 → #150 (+18)",
+        "competitionLevel": "Continental (G-4)",
+        "result": "Bronze Medal",
+        "rankingSource": "World Taekwondo"
+      },
+      {
+        "competition": "Egypt Open 2023",
+        "year": "2023",
+        "date": "2023-02-12",
+        "rankingBefore": "#189",
+        "rankingAfter": "#172",
+        "rankingChange": "#189 → #172 (+17)",
+        "competitionLevel": "International Open (G-1)",
+        "result": "Gold Medal",
+        "rankingSource": "World Taekwondo"
+      },
+      {
+        "competition": "African Taekwondo Championships 2022",
+        "year": "2022",
+        "date": "2022-07-16",
+        "rankingBefore": "Unranked in Top 200",
+        "rankingAfter": "#185",
+        "rankingChange": "Entered Top 200",
+        "competitionLevel": "Continental (G-4)",
+        "result": "Bronze Medal",
+        "rankingSource": "World Taekwondo"
+      },
+      {
+        "competition": "African Taekwondo Championships 2021",
+        "year": "2021",
+        "date": "2021-06-05",
+        "rankingBefore": "Unranked",
+        "rankingAfter": "Unranked (Gained initial points)",
+        "rankingChange": "First major senior result",
+        "competitionLevel": "Continental (G-4)",
+        "result": "Bronze Medal",
+        "rankingSource": "World Taekwondo"
+      }
+    ],
+    "rankingSummary": {
+      "firstOfficialRanking": "First appeared in the World Taekwondo senior rankings after winning a bronze medal at the 2021 African Championships.",
+      "breakthroughCompetition": "Winning the Gold Medal at the 13th African Games in Accra (2024), a G-4 level event. This victory awarded 40.00 ranking points and propelled him over 40 places up the Olympic rankings.",
+      "peakRankingPeriod": "His peak ranking period began in April 2024, following his gold medal at the African Games, where he broke into the top 110 in the M-58kg Olympic category for the first time.",
+      "recentCompetitions": "Most recent significant result is a Gold Medal at the 2024 African Games. Prior to that, he secured a Bronze Medal at the 2023 African Championships.",
+      "nextMajorCompetition": "Not specified in official World Taekwondo schedules."
+    }
+  }
+}
