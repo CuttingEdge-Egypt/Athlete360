@@ -489,7 +489,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                     <User className="w-10 h-10 text-gray-400" />
                   </div>
                 )}
-                <h3 className="text-xl font-bold text-white">{comparisonData.athlete1.name}</h3>
+                <h3 className="text-xl font-bold text-white break-words leading-tight">{comparisonData.athlete1.name}</h3>
                 <Badge variant="outline" className="mt-2">
                   Rank #{comparisonData.athlete1.rank || "TBD"}
                 </Badge>
@@ -507,7 +507,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                     <User className="w-10 h-10 text-gray-400" />
                   </div>
                 )}
-                <h3 className="text-xl font-bold text-white">{comparisonData.athlete2.name}</h3>
+                <h3 className="text-xl font-bold text-white break-words leading-tight">{comparisonData.athlete2.name}</h3>
                 <Badge variant="outline" className="mt-2">
                   Rank #{comparisonData.athlete2.rank || "TBD"}
                 </Badge>

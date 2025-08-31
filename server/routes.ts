@@ -2413,16 +2413,26 @@ Return only valid JSON with the missing fields.`;
         console.log(`GPT-5 overall analysis failed, using Gemini-2.5-pro fallback...`);
         
         // Use Gemini's detailed analysis as overall analysis fallback
-        if (detailedAnalysisResult.detailedAnalysis && 
-            !detailedAnalysisResult.detailedAnalysis.includes('temporarily unavailable')) {
-          finalOverallAnalysis = {
-            summary: detailedAnalysisResult.detailedAnalysis,
-            betterAthlete: detailedAnalysisResult.advantage || "even",
-            reasonsWhy: detailedAnalysisResult.keyFactors || ["Detailed analysis available"],
-            closeness: "detailed-analysis",
-            recommendation: "Analysis generated using Gemini-2.5-pro advanced capabilities"
-          };
-          overallAnalysisModel = "Gemini-2.5-pro (fallback)";
+        if (detailedAnalysisResult && detailedAnalysisResult.detailedAnalysis) {
+          // Handle both string and object types for detailedAnalysis
+          let analysisText = '';
+          if (typeof detailedAnalysisResult.detailedAnalysis === 'string') {
+            analysisText = detailedAnalysisResult.detailedAnalysis;
+          } else if (typeof detailedAnalysisResult.detailedAnalysis === 'object' && 
+                     detailedAnalysisResult.detailedAnalysis.summary) {
+            analysisText = detailedAnalysisResult.detailedAnalysis.summary;
+          }
+          
+          if (analysisText && !analysisText.includes('temporarily unavailable')) {
+            finalOverallAnalysis = {
+              summary: analysisText,
+              betterAthlete: detailedAnalysisResult.advantage || "even",
+              reasonsWhy: detailedAnalysisResult.keyFactors || ["Detailed analysis available"],
+              closeness: "detailed-analysis",
+              recommendation: "Analysis generated using Gemini-2.5-pro advanced capabilities"
+            };
+            overallAnalysisModel = "Gemini-2.5-pro (fallback)";
+          }
         }
       }
       
