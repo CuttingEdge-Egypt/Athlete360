@@ -8,7 +8,7 @@ import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
 import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, compareAthletes, generateRankHistory } from "./openaiService";
-import { generateNutritionPlan } from "./geminiService";
+import { generateNutritionPlan, generateRankHistoryWithGemini } from "./geminiService";
 import { analyzeVideoFile } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
 
@@ -1026,8 +1026,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} rank analysis for ${athlete.name}`);
         
         try {
-          // Use the new generateRankHistory function to get authentic ranking progression data
-          rankData = await generateRankHistory(athlete.name, sportName, athlete.country || undefined);
+          // Use Gemini 2.5 Pro with URL context for enhanced ranking analysis
+          rankData = await generateRankHistoryWithGemini(athlete.name, sportName, athlete.country || undefined);
           
           // Ensure we have valid data structure
           if (!rankData || !rankData.athlete) {
