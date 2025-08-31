@@ -506,8 +506,15 @@ export async function generateRankHistoryWithGemini(
       "firstOfficialRanking": "First recorded federation ranking",
       "breakthroughCompetition": "Most significant competition result", 
       "peakRankingPeriod": "Best ranking period with details",
+      "highestRank": "Highest/best ranking achieved (e.g., '#15')",
+      "stayedAtRankLongest": "Ranking position athlete maintained for the longest period",
       "recentCompetitions": "Recent competition activity",
-      "nextMajorCompetition": "Upcoming events if found"
+      "nextMajorCompetition": "Upcoming events if found",
+      "currentStatus": {
+        "careerSpan": "Active/Retired status",
+        "nextMajorCompetition": "Upcoming competition if found",
+        "lastUpdated": "When this analysis was generated"
+      }
     }
   }
 }
@@ -517,6 +524,9 @@ export async function generateRankHistoryWithGemini(
 - If no world rankings found, use national/regional competition results
 - Include any verified competitive achievements or participation records
 - Create meaningful progression timeline from available authentic data
+- Fill in highestRank field with best ranking achieved (e.g., "#15")
+- Fill in stayedAtRankLongest with ranking position held for longest period
+- Include currentStatus with careerSpan (Active/Retired), nextMajorCompetition, and lastUpdated fields
 - Only fail if absolutely no athletic information exists for this person
 
 Return ONLY valid JSON with no markdown formatting or additional text.`;
