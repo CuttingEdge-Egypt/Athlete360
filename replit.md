@@ -66,6 +66,12 @@ Preferred communication style: Simple, everyday language.
 - **Format**: Displays authentic data like "2024 World Championships: #25 → #18 (+7)" instead of generic periods
 - **Status**: ✅ System enhanced to find authentic ranking data from official federation sources while protecting users from unfair charges
 
+### Critical Token Purchase Fix (August 31, 2025)
+- **Problem**: Token purchases were incorrectly setting total purchased to current balance instead of cumulative total
+- **Impact**: Users purchasing 500 tokens with 3585/6005 balance would get 4085/4085 instead of correct 4085/6505
+- **Solution**: Fixed `addTokensPurchase` function to properly add tokens to existing total purchased
+- **Status**: ✅ Token purchase system now correctly maintains cumulative total purchased tokens
+
 ### Paymob Integration Fully Working (Updated August 26, 2025)
 - **Integration ID**: 4233746 confirmed working for online card payments
 - **Payment Flow**: Successfully tested end-to-end payment processing
