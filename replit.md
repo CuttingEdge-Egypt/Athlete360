@@ -69,6 +69,7 @@ Preferred communication style: Simple, everyday language.
 - **Payment Success Page**: Enhanced custom success page at `/payment/success` with full app navigation header, real-time token balance display, and intuitive user experience
 - **Deployed URLs**: Using athlete-360-CuttingMo.replit.app for production callbacks
 - **Custom Redirect URL**: Clean `/payment/success?status=completed&transaction=ID&amount=15` format replacing technical callback URLs
+- **URL Domain Fix**: ✅ **CRITICAL FIX APPLIED** (August 31, 2025) - Corrected hardcoded domain from `athlete360-cuttingmo` to `athlete-360-cuttingmo` in paymobService.ts to match actual deployment URL. This fixes payment callback redirection issues identified by Paymob support.
 
 ### Paymob Callback Architecture Completely Restructured (August 26, 2025)
 - **Dual Callback System**: Implemented proper Paymob architecture with separate notification_url (webhook) and redirection_url (user redirect)
