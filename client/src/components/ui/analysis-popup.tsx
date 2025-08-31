@@ -511,35 +511,40 @@ export function AnalysisPopup({
       );
     }
 
-    // Extract data from new ranking timeline structure
+    // Extract data from new competition-based ranking structure
     const athlete = parsedData.athlete || {};
-    const rankingTimeline = parsedData.rankingTimeline || [];
-    const careerMilestones = parsedData.careerMilestones || {};
+    const competitionTimeline = parsedData.competitionRankingTimeline || [];
+    const rankingSummary = parsedData.rankingSummary || {};
     
     // Handle legacy data formats for backward compatibility
     let rankingProgression = [];
     let careerSummary = {};
     
-    // Format 1: New timeline structure (athlete, rankingTimeline, careerMilestones)
-    if (parsedData.athlete && parsedData.rankingTimeline) {
-      // Use new timeline data
-      rankingProgression = rankingTimeline;
-      careerSummary = careerMilestones;
+    // Format 1: New competition-based structure (athlete, competitionRankingTimeline, rankingSummary)
+    if (parsedData.athlete && parsedData.competitionRankingTimeline) {
+      // Use new competition timeline data
+      rankingProgression = competitionTimeline;
+      careerSummary = rankingSummary;
     }
-    // Format 2: Old structure (athlete, rankingProgression, careerSummary)
+    // Format 2: Previous timeline structure (athlete, rankingTimeline, careerMilestones)
+    else if (parsedData.athlete && parsedData.rankingTimeline) {
+      rankingProgression = parsedData.rankingTimeline;
+      careerSummary = parsedData.careerMilestones || {};
+    }
+    // Format 3: Old structure (athlete, rankingProgression, careerSummary)
     else if (parsedData.athlete && parsedData.rankingProgression !== undefined && parsedData.careerSummary) {
       rankingProgression = parsedData.rankingProgression;
       careerSummary = parsedData.careerSummary;
     }
-    // Format 3: Legacy synthetic structure (currentRank, peakRank, history, recommendations)
+    // Format 4: Legacy synthetic structure (currentRank, peakRank, history, recommendations)
     else if (parsedData.currentRank || parsedData.peakRank || parsedData.history) {
       rankingProgression = parsedData.history || [];
       careerSummary = {
-        totalCompetitions: 'N/A',
-        majorTitles: 'N/A',
-        rankingTrend: 'N/A',
-        notableAchievements: parsedData.recommendations || [],
-        currentForm: 'Legacy data format'
+        firstOfficialRanking: 'Legacy data',
+        breakthroughCompetition: 'N/A',
+        peakRankingPeriod: 'N/A',
+        recentCompetitions: 'N/A',
+        nextMajorCompetition: 'N/A'
       };
     }
     // Format 3: Unknown/unrecognized structure - show debug info
@@ -591,47 +596,87 @@ export function AnalysisPopup({
                 <div className="text-sm text-yellow-300">Trend</div>
               </div>
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-purple-500/20">
-                <div className="text-2xl font-bold text-purple-400">{athlete.careerSpan || 'Active'}</div>
-                <div className="text-sm text-purple-300">Career Span</div>
+                <div className="text-2xl font-bold text-purple-400">{competitionTimeline.length || 0}</div>
+                <div className="text-sm text-purple-300">Competitions</div>
               </div>
             </div>
+            
+            {/* Official Source Reference */}
+            {athlete.officialSource && (
+              <div className="mt-4 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                <div className="text-xs text-blue-300 font-medium">📊 Data Source:</div>
+                <div className="text-sm text-blue-200">{athlete.officialSource}</div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* Ranking Progression Timeline */}
+        {/* Competition-Based Ranking Timeline */}
         {rankingProgression && rankingProgression.length > 0 && (
           <Card className="bg-athlete-gray-800 border-gray-600">
             <CardHeader>
               <CardTitle className="text-2xl text-gray-100 flex items-center">
-                <TrendingUp className="mr-3 text-blue-400" size={24} />
-                Ranking Progression
+                <Trophy className="mr-3 text-blue-400" size={24} />
+                Competition Ranking History
               </CardTitle>
+              <div className="text-sm text-gray-400">Official federation ranking changes after major competitions</div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3 max-h-64 overflow-y-auto">
+              <div className="space-y-4 max-h-80 overflow-y-auto">
                 {rankingProgression.map((entry: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-gray-500 transition-colors">
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-100">
-                        {entry.period || entry.competition || entry.tournament || `Period ${index + 1}`}
-                      </div>
-                      <div className="text-sm text-gray-400">
-                        {entry.keyEvent || entry.date || entry.month || 'Career milestone'} • {entry.competitionLevel || entry.result || entry.placement || 'Competition level'}
-                      </div>
-                      {entry.rankingChange && entry.rankingChange !== 'N/A' && (
-                        <div className="text-xs text-gray-500 mt-1">
-                          Change: {entry.rankingChange}
+                  <div key={index} className="p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-blue-500/50 transition-colors">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="font-bold text-white text-lg">
+                          {entry.competition || entry.period || `Competition ${index + 1}`}
                         </div>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xl font-bold text-white">{entry.worldRank || entry.ranking || entry.rank || 'Unranked'}</div>
-                      {entry.nationalRank && entry.nationalRank !== 'N/A' && (
-                        <div className="text-xs text-gray-400">
-                          National: {entry.nationalRank}
+                        <div className="text-sm text-gray-400">
+                          {entry.year || entry.date || 'Competition year'} • {entry.competitionLevel || entry.level || 'International'}
                         </div>
-                      )}
+                      </div>
+                      <div className="text-right">
+                        <Badge variant="outline" className="border-blue-400 text-blue-400">
+                          {entry.result || entry.outcome || 'Participation'}
+                        </Badge>
+                      </div>
                     </div>
+                    
+                    {/* Ranking Change Display */}
+                    <div className="flex items-center justify-between bg-athlete-gray-600 p-3 rounded border border-gray-500">
+                      <div className="text-center flex-1">
+                        <div className="text-xs text-gray-400 uppercase tracking-wide">Before</div>
+                        <div className="text-lg font-bold text-red-300">
+                          {entry.rankingBefore || entry.previousRank || 'Unranked'}
+                        </div>
+                      </div>
+                      
+                      <div className="px-4">
+                        <div className="text-2xl text-blue-400">→</div>
+                      </div>
+                      
+                      <div className="text-center flex-1">
+                        <div className="text-xs text-gray-400 uppercase tracking-wide">After</div>
+                        <div className="text-lg font-bold text-green-400">
+                          {entry.rankingAfter || entry.newRank || entry.worldRank || entry.rank || 'Developing'}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Ranking Change Summary */}
+                    {entry.rankingChange && entry.rankingChange !== 'N/A' && (
+                      <div className="mt-2 text-center">
+                        <div className="text-sm font-medium text-yellow-400">
+                          {entry.rankingChange}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Official Source */}
+                    {entry.rankingSource && (
+                      <div className="mt-2 text-xs text-gray-500">
+                        Source: {entry.rankingSource}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -639,31 +684,31 @@ export function AnalysisPopup({
           </Card>
         )}
 
-        {/* Career Summary and Achievements */}
+        {/* Career Milestones and Status */}
         <div className="grid md:grid-cols-2 gap-6">
           <Card className="bg-athlete-gray-800 border-gray-600">
             <CardHeader>
               <CardTitle className="text-xl text-gray-100 flex items-center">
                 <Award className="mr-3 text-yellow-400" size={24} />
-                Career Summary
+                Career Milestones
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center py-2 border-b border-gray-600">
-                <span className="text-gray-300">First Ranking:</span>
-                <span className="text-yellow-400 font-semibold">{careerSummary.firstRanking || 'N/A'}</span>
+                <span className="text-gray-300">First Official Ranking:</span>
+                <span className="text-yellow-400 font-semibold text-sm">{careerSummary.firstOfficialRanking || careerSummary.firstRanking || 'N/A'}</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-gray-600">
-                <span className="text-gray-300">Breakthrough:</span>
-                <span className="text-blue-400 font-semibold">{careerSummary.breakthroughMoment || 'N/A'}</span>
+                <span className="text-gray-300">Breakthrough Competition:</span>
+                <span className="text-blue-400 font-semibold text-sm">{careerSummary.breakthroughCompetition || careerSummary.breakthroughMoment || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-gray-600">
+                <span className="text-gray-300">Peak Ranking Period:</span>
+                <span className="text-green-400 font-semibold text-sm">{careerSummary.peakRankingPeriod || careerSummary.peakPeriod || 'N/A'}</span>
               </div>
               <div className="flex justify-between items-center py-2">
-                <span className="text-gray-300">Peak Period:</span>
-                <span className="text-green-400 font-semibold">{careerSummary.peakPeriod || 'N/A'}</span>
-              </div>
-              <div className="flex justify-between items-center py-2">
-                <span className="text-gray-300">Recent Form:</span>
-                <span className="text-purple-400 font-semibold">{careerSummary.recentForm || 'N/A'}</span>
+                <span className="text-gray-300">Recent Competitions:</span>
+                <span className="text-purple-400 font-semibold text-sm">{careerSummary.recentCompetitions || careerSummary.recentForm || 'N/A'}</span>
               </div>
             </CardContent>
           </Card>
@@ -671,24 +716,26 @@ export function AnalysisPopup({
           <Card className="bg-athlete-gray-800 border-gray-600">
             <CardHeader>
               <CardTitle className="text-xl text-gray-100 flex items-center">
-                <Star className="mr-3 text-purple-400" size={24} />
-                Notable Achievements
+                <Calendar className="mr-3 text-purple-400" size={24} />
+                Current Status
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center py-2 border-b border-gray-600">
-                  <span className="text-gray-300">Peak Rank Date:</span>
-                  <span className="text-purple-400 font-semibold">{athlete.peakRankDate || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-600">
-                  <span className="text-gray-300">Last Updated:</span>
-                  <span className="text-gray-400 font-semibold">{athlete.lastUpdated || new Date().toISOString().split('T')[0]}</span>
-                </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-gray-300">Timeline Periods:</span>
-                  <span className="text-blue-400 font-semibold">{rankingTimeline.length || 0} recorded</span>
-                </div>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center py-2 border-b border-gray-600">
+                <span className="text-gray-300">Peak Rank Date:</span>
+                <span className="text-purple-400 font-semibold">{athlete.peakRankDate || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-gray-600">
+                <span className="text-gray-300">Career Span:</span>
+                <span className="text-blue-400 font-semibold">{athlete.careerSpan || 'Active'}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-gray-600">
+                <span className="text-gray-300">Next Major Competition:</span>
+                <span className="text-green-400 font-semibold text-sm">{careerSummary.nextMajorCompetition || 'TBD'}</span>
+              </div>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-gray-300">Last Updated:</span>
+                <span className="text-gray-400 font-semibold">{athlete.lastUpdated || new Date().toISOString().split('T')[0]}</span>
               </div>
             </CardContent>
           </Card>

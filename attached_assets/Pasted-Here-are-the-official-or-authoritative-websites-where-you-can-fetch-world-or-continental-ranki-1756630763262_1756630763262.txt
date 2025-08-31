@@ -1,0 +1,115 @@
+Here are the **official or authoritative websites** where you can fetch world (or continental) rankings for each sport you listed. These are essential reference sources you can use to integrate into your feature:
+
+---
+
+### Taekwondo
+
+* **World Taekwondo (WT) official athlete rankings**
+  Includes continuous, weight-category-specific rankings (e.g., Olympic Kyorugi). ([worldtaekwondo.org][1])
+* **World Taekwondo Rankings (older listing)**
+  An alternate interface listing current ranking positions. ([worldtaekwondo.org][2])
+* **Taekwondo Data – independent database**
+  Extensive historical and current ranking data on athletes. ([TaekwondoData][3])
+
+---
+
+### Fencing
+
+* **International Fencing Federation (FIE) – Athletes & Rankings**
+  Official world rankings across weapons (foil, épée, sabre). ([fie.org][4])
+* **Eurofencing – Individual and team European rankings**
+  Continental-level reference for European fencers. ([eurofencing.info][5])
+* **British Fencing – national ranking lists**
+  Though national, it can support deeper regional data. ([BRITISH FENCING][6])
+
+---
+
+### Wrestling
+
+* **United World Wrestling (UWW) – official rankings**
+  Covers freestyle, Greco-Roman, and women's categories, by weight class. ([United World Wrestling][7])
+* **FloWrestling – international and championship rankings**
+  Up-to-date rankings, including World Championship & Olympic rankings. ([FloWrestling][8])
+
+---
+
+### Squash
+
+* **PSA Squash Tour official site – World Rankings**
+  Current Men’s and Women’s world rankings maintained weekly. ([psasquashtour.com][9], [worldsquash.org][10])
+* **SquashInfo – PSA World Squash Rankings**
+  Detailed snapshot as of August 2025. ([squashinfo.com][11])
+
+---
+
+### Football (Soccer) – European / African
+
+* **FIFA / Coca-Cola Men's World Ranking (FIFA.com)**
+  The primary international football ranking system for all national teams. ([Inside FIFA][12], [Wikipedia][13])
+* **FIFA Rankings by Confederation (e.g., CAF, UEFA)**
+  Offers region-specific rankings (e.g., African zone). ([Football Ranking][14])
+* **UEFA Club & Association Coefficient Rankings**
+  Useful for European club and country-level strength/ranking context. ([UEFA.com][15])
+* **Football-ranking.com – live and daily-updated FIFA rankings**
+  Independent source with frequent updates. ([Football Ranking][16])
+* **EloRatings.net – alternative ranking model**
+  Based on Elo methodology for national teams. ([eloratings.net][17])
+
+---
+
+### Basketball
+
+* **FIBA Men’s (and Women’s) World Rankings**
+  Official world rankings for national teams, game-based and updated regularly. ([Wikipedia][18], [Olympics][19])
+* **FIBA World Ranking for Boys (Nike-presented)**
+  Youth men's ranking by region and world. ([FIBA Basketball][20])
+* **Eurobasket – Top 100 club/team rankings**
+  Useful for European club-level rankings. ([Eurobasket][21])
+
+---
+
+### Summary Table
+
+| Sport      | Official Ranking Sources                                                                     |
+| ---------- | -------------------------------------------------------------------------------------------- |
+| Taekwondo  | World Taekwondo (WT), Taekwondo Data                                                         |
+| Fencing    | FIE Athletes & Rankings, Eurofencing, British Fencing                                        |
+| Wrestling  | UWW, FloWrestling                                                                            |
+| Squash     | PSA Squash Tour, SquashInfo                                                                  |
+| Football   | FIFA official, FIFA confederation pages, UEFA coefficients, Football-ranking.com, EloRatings |
+| Basketball | FIBA official rankings, FIBA youth rankings, Eurobasket                                      |
+
+---
+
+### How to Use These Sites in Your Rank-History Feature
+
+* **Fetch Current Rankings**: Scrape or integrate via APIs (if available) from the official ranking pages.
+* **Create Timeline Data**: Combine scraped current data with historical snapshots (if you store snapshots over time) to chart rank evolution.
+* **Cite as References**: Store the URLs of the ranking pages in your data as sources for transparency and verification.
+* **Handle Data Differences**: Recognize differences in ranking methods (e.g., points-based, Elo, competition-based) and clarify in your UI.
+
+---
+
+Let me know if you'd like me to draft scraping examples (e.g. using Node.js), or integrate these links into the GPT-5 prompt for Replit to fetch them!
+
+[1]: https://www.worldtaekwondo.org/ranking/rk_index.html?utm_source=chatgpt.com "World Taekwondo ATHLETES"
+[2]: https://www.worldtaekwondo.org/ranking/ranking.html?utm_source=chatgpt.com "World Taekwondo Rankings"
+[3]: https://www.taekwondodata.com/ranking_search.html?utm_source=chatgpt.com "Career ranking - Taekwondo Data"
+[4]: https://fie.org/athletes?utm_source=chatgpt.com "Athletes & Rankings - INTERNATIONAL FENCING FEDERATION"
+[5]: https://www.eurofencing.info/rankings/individual-rankings?utm_source=chatgpt.com "Individual rankings | Eurofencing"
+[6]: https://www.britishfencing.com/rankings/?utm_source=chatgpt.com "Rankings - BRITISH FENCING"
+[7]: https://uww.org/?utm_source=chatgpt.com "United World Wrestling | Official Website"
+[8]: https://www.flowrestling.org/rankings?utm_source=chatgpt.com "Wrestling Highlights & Rankings - FloWrestling"
+[9]: https://www.psasquashtour.com/?utm_source=chatgpt.com "PSA Squash Tour | Home of Professional Squash"
+[10]: https://www.worldsquash.org/?utm_source=chatgpt.com "World Squash – Official site of the World Squash Federation"
+[11]: https://www.squashinfo.com/rankings?utm_source=chatgpt.com "PSA World Squash Rankings (25 August 2025)"
+[12]: https://inside.fifa.com/fifa-world-ranking/men?utm_source=chatgpt.com "FIFA/Coca-Cola Men's World Ranking - Inside FIFA"
+[13]: https://en.wikipedia.org/wiki/FIFA_Men%27s_World_Ranking?utm_source=chatgpt.com "FIFA Men's World Ranking - Wikipedia"
+[14]: https://football-ranking.com/rankByConfederation?period=&zone=CAF&utm_source=chatgpt.com "FIFA football ranking - LIVE - Daily updating - CAF zone"
+[15]: https://www.uefa.com/nationalassociations/uefarankings/?utm_source=chatgpt.com "UEFA rankings"
+[16]: https://football-ranking.com/fifa-world-rankings?utm_source=chatgpt.com "FIFA world rankings - LIVE - Daily updating - 18 September 2025"
+[17]: https://www.eloratings.net/?utm_source=chatgpt.com "World Football Elo Ratings"
+[18]: https://en.wikipedia.org/wiki/FIBA_Men%27s_World_Ranking?utm_source=chatgpt.com "FIBA Men's World Ranking"
+[19]: https://www.olympics.com/en/news/fiba-men-basketball-world-ranking-complete-list?utm_source=chatgpt.com "FIBA men's basketball world ranking: Complete list - Olympics.com"
+[20]: https://www.fiba.basketball/en/ranking/boys?utm_source=chatgpt.com "FIBA World Ranking for Boys presented by NIKE - FIBA Basketball"
+[21]: https://www.eurobasket.com/service/basketball-ranking.aspx?utm_source=chatgpt.com "Top 100 Rankings - Eurobasket"

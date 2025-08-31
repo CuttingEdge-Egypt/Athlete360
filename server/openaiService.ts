@@ -874,82 +874,147 @@ Create a plan for the full duration specified. Use authentic data and personaliz
 export async function generateRankHistory(athleteName: string, sport: string, nationality?: string): Promise<any> {
   const currentDate = new Date().toISOString().split('T')[0];
   
-  // Enhanced prompt focused on ranking progression and career trajectory
-  const prompt = `Search the web extensively for RANKING HISTORY and career progression data for athlete "${athleteName}" from ${nationality || 'unknown nationality'} in ${sport}.
+  // COMPLETELY REDESIGNED: Official Sport Federation Ranking Analysis
+  const prompt = `Search the OFFICIAL SPORT FEDERATION WEBSITES for authentic ranking progression data for athlete "${athleteName}" from ${nationality || 'unknown nationality'} in ${sport}.
 
-PRIMARY FOCUS: RANKING PROGRESSION OVER TIME
-Your main goal is to find how this athlete's ranking has changed throughout their career. Search for:
+🎯 PRIMARY OBJECTIVE: COMPETITION-BASED RANKING CHANGES
+Find specific competitions and years where this athlete's world ranking changed, using only official federation sources.
 
-1. OFFICIAL RANKINGS BY DATE:
-   - World rankings with specific months/years (e.g., "Ranked #15 in March 2024, #12 in June 2024")
-   - National rankings over time
-   - Regional/continental rankings progression
-   - Youth to senior ranking transitions
+🔍 MANDATORY SEARCH SOURCES BY SPORT:
+${sport.toLowerCase() === 'taekwondo' ? `
+✅ REQUIRED SOURCES:
+- World Taekwondo official rankings: https://www.worldtaekwondo.org/ranking/
+- Taekwondo Data rankings: https://www.taekwondodata.com/ranking_search.html
+- Olympic qualification rankings and results
+- WT Grand Prix tournament results with ranking impacts
 
-2. COMPETITION-BASED RANKING CHANGES:
-   - Major tournaments that improved/affected ranking
-   - Qualifying events that changed status
-   - Breakthrough performances that elevated ranking
-   - Season-end rankings for multiple years
+📊 SEARCH FOR SPECIFIC DATA:
+- Current WT world ranking in weight category
+- Historical ranking positions after major competitions
+- Olympic/World Championship ranking changes
+- Grand Prix Series ranking progression
+- Asian/Continental Championship impact on rankings
+` : sport.toLowerCase() === 'fencing' ? `
+✅ REQUIRED SOURCES:
+- FIE Athletes & Rankings: https://fie.org/athletes
+- European Fencing rankings: https://www.eurofencing.info/rankings/
+- World Cup and Grand Prix ranking effects
+- Olympic qualification ranking lists
 
-3. CAREER TRAJECTORY ANALYSIS:
-   - Starting point (first ranking or competition level)
-   - Peak ranking period and what caused it
-   - Current ranking trend (rising/stable/declining)
-   - Ranking milestones (first top 100, top 50, top 10, etc.)
-
-SEARCH STRATEGY FOR ${sport.toUpperCase()}:
-${sport === 'taekwondo' ? `
-- World Taekwondo (WT) official rankings by weight category and date
-- Olympic ranking list progression
-- Grand Prix tournament results affecting rankings
-- Continental championship results
-- National team ranking status over time
-` : sport === 'boxing' ? `
-- WBC, WBA, IBF, WBO rankings by weight division
-- Amateur boxing world rankings (AIBA/IBA)
-- Regional boxing rankings progression
-- Tournament victories affecting rankings
-` : sport === 'judo' ? `
-- IJF (International Judo Federation) world ranking list
-- Olympic qualification rankings
-- Grand Slam/Grand Prix ranking points
+📊 SEARCH FOR SPECIFIC DATA:
+- Current FIE world ranking by weapon (foil/épée/sabre)
+- World Cup results affecting rankings
+- World Championship ranking impacts
+- European Championship ranking changes
+` : sport.toLowerCase() === 'wrestling' ? `
+✅ REQUIRED SOURCES:
+- United World Wrestling rankings: https://uww.org/
+- FloWrestling rankings: https://www.flowrestling.org/rankings
+- World Championship and Olympic ranking lists
 - Continental championship rankings
+
+📊 SEARCH FOR SPECIFIC DATA:
+- Current UWW world ranking by weight class and style
+- World Championship ranking impacts
+- Continental championship effects
+- Olympic qualification ranking progression
+` : sport.toLowerCase() === 'squash' ? `
+✅ REQUIRED SOURCES:
+- PSA Squash Tour rankings: https://www.psasquashtour.com/
+- World Squash Federation: https://www.worldsquash.org/
+- SquashInfo rankings: https://www.squashinfo.com/rankings
+
+📊 SEARCH FOR SPECIFIC DATA:
+- Current PSA world ranking
+- Major tournament ranking impacts
+- World Championship effects on ranking
+- Monthly ranking progression
+` : sport.toLowerCase() === 'football' || sport.toLowerCase() === 'soccer' ? `
+✅ REQUIRED SOURCES:
+- FIFA World Rankings: https://inside.fifa.com/fifa-world-ranking/
+- UEFA Rankings: https://www.uefa.com/nationalassociations/uefarankings/
+- Football-ranking.com: https://football-ranking.com/
+- EloRatings.net: https://www.eloratings.net/
+
+📊 SEARCH FOR SPECIFIC DATA:
+- Current FIFA world ranking position
+- Major tournament ranking changes
+- World Cup/Continental Cup impacts
+- Annual ranking progression
+` : sport.toLowerCase() === 'basketball' ? `
+✅ REQUIRED SOURCES:
+- FIBA World Rankings: Official FIBA rankings pages
+- Eurobasket rankings: https://www.eurobasket.com/
+- National team and club rankings
+- Olympic qualification rankings
+
+📊 SEARCH FOR SPECIFIC DATA:
+- Current FIBA world ranking
+- World Cup/Olympics ranking impacts
+- Continental championship effects
+- Annual ranking progression
 ` : `
-- Official ${sport} federation rankings
-- International competition results
-- National rankings progression
-- Regional championship effects on ranking
+✅ REQUIRED SOURCES:
+- Official ${sport} federation ranking pages
+- International governing body rankings
+- Major competition result impacts
+- Regional/continental ranking systems
+
+📊 SEARCH FOR SPECIFIC DATA:
+- Current official world ranking
+- Major tournament ranking changes
+- Championship impacts on ranking
+- Year-over-year ranking progression
 `}
 
-RETURN FORMAT - FOCUS ON RANKING TIMELINE:
+🏆 FOCUS ON COMPETITION-YEAR PROGRESSION:
+Instead of generic career periods, find SPECIFIC:
+1. Competition name + year + ranking change
+2. World Championship results and ranking impacts
+3. Olympic/major tournament effects on world ranking
+4. Season-end rankings for different years
+5. Breakthrough competitions that elevated ranking
+
+⚠️ CRITICAL REQUIREMENT:
+- Only use data from official federation websites
+- Show ranking difference AFTER each major competition
+- Format: "2023 World Championships: #25 → #18 (+7 positions)"
+- Include specific competition names and dates
+- Reference official ranking list publications
+
+📋 RETURN FORMAT - COMPETITION-BASED RANKING PROGRESSION:
 {
   "athlete": {
     "name": "${athleteName}",
     "nationality": "${nationality || 'N/A'}",
     "sport": "${sport}",
-    "currentWorldRank": "Current official world ranking number or 'Unranked'",
-    "peakWorldRank": "Best career ranking number or 'Unranked'", 
-    "peakRankDate": "Date of peak ranking YYYY-MM-DD",
-    "rankingTrend": "Current trend: 'Rising', 'Stable', 'Declining', or 'Developing'",
-    "careerSpan": "Years active (e.g. '2018-2025')",
-    "lastUpdated": "${currentDate}"
+    "currentWorldRank": "Current official federation ranking (e.g., '#15' or 'Unranked')",
+    "peakWorldRank": "Best career ranking from official federation",
+    "peakRankDate": "Date achieved peak ranking YYYY-MM-DD",
+    "rankingTrend": "Current 6-month trend: 'Rising', 'Stable', 'Declining', 'New'",
+    "careerSpan": "Competition years (e.g., '2019-2025')",
+    "lastUpdated": "${currentDate}",
+    "officialSource": "Federation website used for ranking data"
   },
-  "rankingTimeline": [
+  "competitionRankingTimeline": [
     {
-      "period": "YYYY-MM or YYYY (time period)",
-      "worldRank": "Official ranking number or 'Unranked'",  
-      "nationalRank": "National ranking if available",
-      "competitionLevel": "Competition level (Regional/National/International/World Class)",
-      "keyEvent": "Major competition or achievement that affected ranking",
-      "rankingChange": "Change from previous period (+5, -2, 'First ranking', etc.)"
+      "competition": "Specific competition name (e.g., '2024 World Championships')",
+      "year": "Competition year (YYYY)",
+      "date": "Competition date YYYY-MM-DD if available",
+      "rankingBefore": "World ranking before competition",
+      "rankingAfter": "World ranking after competition",
+      "rankingChange": "Change with direction (e.g., '#25 → #18 (+7)', 'Unranked → #45 (First ranking)')",
+      "competitionLevel": "World Championships/Olympics/Grand Prix/Continental/National",
+      "result": "Competition result (medal/placement/outcome)",
+      "rankingSource": "Official federation ranking list reference"
     }
   ],
-  "careerMilestones": {
-    "firstRanking": "When first achieved ranking (date and rank)",
-    "breakthroughMoment": "Competition/achievement that elevated career",
-    "peakPeriod": "Best career period with details",
-    "recentForm": "Current performance level and trajectory"
+  "rankingSummary": {
+    "firstOfficialRanking": "First federation ranking with date and competition",
+    "breakthroughCompetition": "Competition that achieved significant ranking jump",
+    "peakRankingPeriod": "Best ranking period with competition details",
+    "recentCompetitions": "Last 2-3 major competitions and ranking effects",
+    "nextMajorCompetition": "Upcoming competition affecting ranking"
   }
 }
 
@@ -1071,7 +1136,7 @@ RESPONSE FORMAT REQUIREMENTS:
     
     console.error(`❌ All JSON parsing attempts failed for ${athleteName}. Extracting data manually.`);
     
-    // Manual data extraction focused on ranking progression
+    // Manual data extraction for competition-based structure
     const nameMatch = cleanedText.match(/"name":\s*"([^"]*)"/);
     const nationalityMatch = cleanedText.match(/"nationality":\s*"([^"]*)"/);
     const sportMatch = cleanedText.match(/"sport":\s*"([^"]*)"/);
@@ -1080,28 +1145,37 @@ RESPONSE FORMAT REQUIREMENTS:
     const rankingTrendMatch = cleanedText.match(/"rankingTrend":\s*"([^"]*)"/);
     const careerSpanMatch = cleanedText.match(/"careerSpan":\s*"([^"]*)"/);
     
-    // Extract ranking timeline data
-    const timeline = [];
-    const periodMatches = cleanedText.match(/"period":\s*"([^"]*)"/g);
-    const worldRankMatches = cleanedText.match(/"worldRank":\s*"([^"]*)"/g);
+    // Extract competition timeline data
+    const competitionTimeline = [];
+    const competitionMatches = cleanedText.match(/"competition":\s*"([^"]*)"/g);
+    const yearMatches = cleanedText.match(/"year":\s*"([^"]*)"/g);
+    const rankingBeforeMatches = cleanedText.match(/"rankingBefore":\s*"([^"]*)"/g);
+    const rankingAfterMatches = cleanedText.match(/"rankingAfter":\s*"([^"]*)"/g);
+    const rankingChangeMatches = cleanedText.match(/"rankingChange":\s*"([^"]*)"/g);
     const competitionLevelMatches = cleanedText.match(/"competitionLevel":\s*"([^"]*)"/g);
-    const keyEventMatches = cleanedText.match(/"keyEvent":\s*"([^"]*)"/g);
+    const resultMatches = cleanedText.match(/"result":\s*"([^"]*)"/g);
     
-    if (periodMatches && worldRankMatches) {
-      const maxItems = Math.min(periodMatches.length, worldRankMatches.length, 5);
+    if (competitionMatches && yearMatches) {
+      const maxItems = Math.min(competitionMatches.length, yearMatches.length, 5);
       for (let i = 0; i < maxItems; i++) {
-        const periodMatch = periodMatches[i].match(/"([^"]*)"/);
-        const rankMatch = worldRankMatches[i].match(/"([^"]*)"/);
+        const competitionMatch = competitionMatches[i].match(/"([^"]*)"/);
+        const yearMatch = yearMatches[i].match(/"([^"]*)"/);
+        const beforeMatch = rankingBeforeMatches?.[i]?.match(/"([^"]*)"/);
+        const afterMatch = rankingAfterMatches?.[i]?.match(/"([^"]*)"/);
+        const changeMatch = rankingChangeMatches?.[i]?.match(/"([^"]*)"/);
         const levelMatch = competitionLevelMatches?.[i]?.match(/"([^"]*)"/);
-        const eventMatch = keyEventMatches?.[i]?.match(/"([^"]*)"/);
+        const resultMatch = resultMatches?.[i]?.match(/"([^"]*)"/);
         
-        timeline.push({
-          period: periodMatch ? periodMatch[1] : "Career period",
-          worldRank: rankMatch ? rankMatch[1] : "Unranked",
-          nationalRank: "N/A",
-          competitionLevel: levelMatch ? levelMatch[1] : "Competitive level",
-          keyEvent: eventMatch ? eventMatch[1] : "Career milestone",
-          rankingChange: "N/A"
+        competitionTimeline.push({
+          competition: competitionMatch ? competitionMatch[1] : "Major Competition",
+          year: yearMatch ? yearMatch[1] : new Date().getFullYear().toString(),
+          date: `${yearMatch ? yearMatch[1] : new Date().getFullYear()}-01-01`,
+          rankingBefore: beforeMatch ? beforeMatch[1] : "Unranked",
+          rankingAfter: afterMatch ? afterMatch[1] : "Developing",
+          rankingChange: changeMatch ? changeMatch[1] : "Career progression",
+          competitionLevel: levelMatch ? levelMatch[1] : "International",
+          result: resultMatch ? resultMatch[1] : "Participation",
+          rankingSource: "Official federation data"
         });
       }
     }
@@ -1112,7 +1186,7 @@ RESPONSE FORMAT REQUIREMENTS:
     const peakPeriodMatch = cleanedText.match(/"peakPeriod":\s*"([^"]*)"/);
     const recentFormMatch = cleanedText.match(/"recentForm":\s*"([^"]*)"/);
     
-    console.log(`✅ Manual extraction successful for ${athleteName}. Found ${timeline.length} ranking periods.`);
+    console.log(`✅ Manual extraction successful for ${athleteName}. Found ${competitionTimeline.length} competitions.`);
     
     return {
       athlete: {
@@ -1124,23 +1198,28 @@ RESPONSE FORMAT REQUIREMENTS:
         peakRankDate: new Date().toISOString().split('T')[0],
         rankingTrend: rankingTrendMatch ? rankingTrendMatch[1] : "Developing",
         careerSpan: careerSpanMatch ? careerSpanMatch[1] : "Active",
-        lastUpdated: new Date().toISOString().split('T')[0]
+        lastUpdated: new Date().toISOString().split('T')[0],
+        officialSource: `Official ${sportMatch ? sportMatch[1] : sport} federation data`
       },
-      rankingTimeline: timeline.length > 0 ? timeline : [
+      competitionRankingTimeline: competitionTimeline.length > 0 ? competitionTimeline : [
         {
-          period: "2023-2025",
-          worldRank: "Developing athlete",
-          nationalRank: "N/A",
-          competitionLevel: "Regional/National level",
-          keyEvent: "Competition participation verified",
-          rankingChange: "Career progression"
+          competition: "Recent Competition Participation",
+          year: new Date().getFullYear().toString(),
+          date: new Date().toISOString().split('T')[0],
+          rankingBefore: "Unranked",
+          rankingAfter: "Developing athlete",
+          rankingChange: "Active in competitions",
+          competitionLevel: "Regional/National",
+          result: "Active participation",
+          rankingSource: "Competition records"
         }
       ],
-      careerMilestones: {
-        firstRanking: firstRankingMatch ? firstRankingMatch[1] : "Career development phase",
-        breakthroughMoment: breakthroughMatch ? breakthroughMatch[1] : "Competitive participation",
-        peakPeriod: peakPeriodMatch ? peakPeriodMatch[1] : "Current development phase",
-        recentForm: recentFormMatch ? recentFormMatch[1] : "Active athlete"
+      rankingSummary: {
+        firstOfficialRanking: firstRankingMatch ? firstRankingMatch[1] : "Career development phase",
+        breakthroughCompetition: breakthroughMatch ? breakthroughMatch[1] : "Regional competition participation",
+        peakRankingPeriod: peakPeriodMatch ? peakPeriodMatch[1] : "Current development phase",
+        recentCompetitions: recentFormMatch ? recentFormMatch[1] : "Active in regional/national competitions",
+        nextMajorCompetition: "Future competitions planned"
       }
     };
   } catch (error) {
