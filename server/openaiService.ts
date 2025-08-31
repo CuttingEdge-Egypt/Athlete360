@@ -1039,18 +1039,16 @@ IMPORTANT: Even developing athletes may have competition records - search thorou
   }
 }
 
-📋 FLEXIBLE DATA APPROACH:
-- If you find OFFICIAL world rankings: Use that data with official source references
-- If you find REGIONAL/NATIONAL rankings: Use that data and specify it's regional/national level
-- If you find COMPETITION PARTICIPATION only: Create timeline based on competition participation with development rankings
-- If you find YOUTH/JUNIOR rankings: Include those with transition to senior level
-- Only respond with error if NO competition data or athletic information exists at all
+📋 STRICT DATA REQUIREMENTS:
+- ONLY provide ranking data if you find AUTHENTIC, VERIFIABLE ranking information from official sources
+- Do NOT create generic "development" timelines unless you find actual competition results with specific dates, venues, and results
+- Do NOT use phrases like "developing athlete", "career development phase", or "active participation" unless these come from actual sources
 
 CRITICAL ERROR HANDLING:
-- If you cannot find ANY athletic competition data through web search, respond with exactly: {"error": "no_data_found", "success": false}
+- If you cannot find specific ranking numbers, competition results, or authentic athletic data, respond with exactly: {"error": "no_data_found", "success": false}
 - If web search fails completely, respond with exactly: {"error": "search_failed", "success": false}
 - If the athlete name does not exist in any sports context, respond with exactly: {"error": "not_found", "success": false}
-- IMPORTANT: If athlete competes but has no official world ranking, create development timeline based on their competition participation
+- NEVER create placeholder data - users should only pay for authentic information
 
 RESPONSE FORMAT REQUIREMENTS:
 - Return ONLY valid JSON with no markdown links, URLs, or additional text
@@ -1214,40 +1212,51 @@ RESPONSE FORMAT REQUIREMENTS:
     const peakPeriodMatch = cleanedText.match(/"peakPeriod":\s*"([^"]*)"/);
     const recentFormMatch = cleanedText.match(/"recentForm":\s*"([^"]*)"/);
     
-    console.log(`✅ Manual extraction successful for ${athleteName}. Found ${competitionTimeline.length} competitions.`);
+    // STRICT: If no authentic ranking data found, return error to trigger refund
+    const hasAuthenticCurrentRank = currentWorldRankMatch && currentWorldRankMatch[1] && 
+                                   !currentWorldRankMatch[1].includes('N/A') && 
+                                   !currentWorldRankMatch[1].includes('Unranked') &&
+                                   !currentWorldRankMatch[1].includes('No ') &&
+                                   currentWorldRankMatch[1].match(/^#?\d+$/);
+    
+    const hasAuthenticPeakRank = peakWorldRankMatch && peakWorldRankMatch[1] && 
+                                !peakWorldRankMatch[1].includes('N/A') &&
+                                !peakWorldRankMatch[1].includes('No ') &&
+                                peakWorldRankMatch[1].match(/^#?\d+$/);
+    
+    const hasAuthenticCompetitions = competitionTimeline.length > 0 && 
+                                    competitionTimeline.some(comp => 
+                                      comp.competition && 
+                                      !comp.competition.includes('Recent Competition') &&
+                                      !comp.competition.includes('Major Competition'));
+
+    if (!hasAuthenticCurrentRank && !hasAuthenticPeakRank && !hasAuthenticCompetitions) {
+      console.log(`No authentic ranking data found for ${athleteName} - returning error to protect user from paying for placeholder data`);
+      throw new Error('AI_WEB_SEARCH_FAILED: No authentic ranking data found through web search');
+    }
+
+    console.log(`✅ Manual extraction found some authentic data for ${athleteName}. Found ${competitionTimeline.length} competitions.`);
     
     return {
       athlete: {
         name: nameMatch ? nameMatch[1] : athleteName,
         nationality: nationalityMatch ? nationalityMatch[1] : (nationality || 'N/A'),
         sport: sportMatch ? sportMatch[1] : sport,
-        currentWorldRank: currentWorldRankMatch ? currentWorldRankMatch[1] : "Unranked",
-        peakWorldRank: peakWorldRankMatch ? peakWorldRankMatch[1] : "N/A",
+        currentWorldRank: currentWorldRankMatch ? currentWorldRankMatch[1] : "No current world ranking found",
+        peakWorldRank: peakWorldRankMatch ? peakWorldRankMatch[1] : "No peak ranking data available",
         peakRankDate: new Date().toISOString().split('T')[0],
-        rankingTrend: rankingTrendMatch ? rankingTrendMatch[1] : "Developing",
-        careerSpan: careerSpanMatch ? careerSpanMatch[1] : "Active",
+        rankingTrend: rankingTrendMatch ? rankingTrendMatch[1] : "Trend data not available",
+        careerSpan: careerSpanMatch ? careerSpanMatch[1] : "Competition period unknown",
         lastUpdated: new Date().toISOString().split('T')[0],
-        officialSource: `Official ${sportMatch ? sportMatch[1] : sport} federation data`
+        officialSource: `Search attempted on official ${sport} federation sources`
       },
-      competitionRankingTimeline: competitionTimeline.length > 0 ? competitionTimeline : [
-        {
-          competition: "Recent Competition Participation",
-          year: new Date().getFullYear().toString(),
-          date: new Date().toISOString().split('T')[0],
-          rankingBefore: "Unranked",
-          rankingAfter: "Developing athlete",
-          rankingChange: "Active in competitions",
-          competitionLevel: "Regional/National",
-          result: "Active participation",
-          rankingSource: "Competition records"
-        }
-      ],
+      competitionRankingTimeline: competitionTimeline.length > 0 ? competitionTimeline : [],
       rankingSummary: {
-        firstOfficialRanking: firstRankingMatch ? firstRankingMatch[1] : "Career development phase",
-        breakthroughCompetition: breakthroughMatch ? breakthroughMatch[1] : "Regional competition participation",
-        peakRankingPeriod: peakPeriodMatch ? peakPeriodMatch[1] : "Current development phase",
-        recentCompetitions: recentFormMatch ? recentFormMatch[1] : "Active in regional/national competitions",
-        nextMajorCompetition: "Future competitions planned"
+        firstOfficialRanking: firstRankingMatch ? firstRankingMatch[1] : "No ranking data found",
+        breakthroughCompetition: breakthroughMatch ? breakthroughMatch[1] : "No competition data found",
+        peakRankingPeriod: peakPeriodMatch ? peakPeriodMatch[1] : "No peak period data",
+        recentCompetitions: recentFormMatch ? recentFormMatch[1] : "No recent competition data",
+        nextMajorCompetition: "Competition schedule not available"
       }
     };
   } catch (error) {

@@ -684,6 +684,31 @@ export function AnalysisPopup({
           </Card>
         )}
 
+        {/* No Ranking Data Message */}
+        {(!rankingProgression || rankingProgression.length === 0) && (
+          <Card className="bg-athlete-gray-800 border-gray-600">
+            <CardHeader>
+              <CardTitle className="text-2xl text-gray-100 flex items-center">
+                <AlertTriangle className="mr-3 text-yellow-400" size={24} />
+                No Ranking Data Available
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <div className="text-gray-300 mb-4">
+                  No authentic ranking data was found in official federation sources for this athlete.
+                </div>
+                <div className="text-sm text-gray-400">
+                  This could mean the athlete competes at regional/national level or their ranking data is not publicly available on official federation websites.
+                </div>
+                <div className="mt-4 text-xs text-gray-500">
+                  We only display verified ranking information to ensure data authenticity.
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Career Milestones and Status */}
         <div className="grid md:grid-cols-2 gap-6">
           <Card className="bg-athlete-gray-800 border-gray-600">
