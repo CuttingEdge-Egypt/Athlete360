@@ -74,15 +74,7 @@ export function Navigation() {
             </Button>
           </Link>
           
-          <Link href="/payment-center">
-            <Button 
-              data-testid="button-payment-center"
-              className="bg-athlete-accent hover:bg-blue-600 text-white"
-            >
-              <Plus className="mr-2" size={16} />
-              Buy Tokens
-            </Button>
-          </Link>
+
         </div>
 
         <div className="flex items-center space-x-4">

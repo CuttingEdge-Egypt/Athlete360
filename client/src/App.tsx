@@ -8,29 +8,19 @@ import { AuthenticatedLayout } from "@/components/layouts/AuthenticatedLayout";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
-import Subscribe from "@/pages/subscribe";
+
 import AthleteAnalysis from "@/pages/athlete-analysis";
 import Account from "@/pages/account";
 import VideoAnalysis from "@/pages/video-analysis";
-import PaymentCenter from "@/pages/payment-center";
 import TestAuthPage from "@/pages/test-auth";
 import { SignupPage } from "@/pages/signup";
 import { LoginPage } from "@/pages/login";
-import PaymentSuccessOld from "@/pages/payment-success";
-import PaymentSuccess from "@/pages/PaymentSuccess";
-import PaymentSuccessSimple from "@/pages/PaymentSuccessSimple";
-import TestPaymentPage from "@/pages/TestPaymentPage";
-import PaymentRedirectHandler from "@/pages/PaymentRedirectHandler";
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
 
   return (
     <>
       <Switch>
-        {/* Payment success routes - accessible from external redirects */}
-        <Route path="/payment/success" component={PaymentRedirectHandler} />
-        <Route path="/payment-success" component={PaymentSuccessOld} />
-        
         {/* Public auth routes */}
         <Route path="/test-auth" component={TestAuthPage} />
         <Route path="/signup" component={SignupPage} />
@@ -51,8 +41,8 @@ function Router() {
           <AuthenticatedLayout>
             <Route path="/" component={Home} />
             <Route path="/dashboard" component={Home} />
-            <Route path="/subscribe" component={Subscribe} />
-            <Route path="/payment-center" component={PaymentCenter} />
+
+
             <Route path="/athlete/:id" component={AthleteAnalysis} />
             <Route path="/account" component={Account} />
             <Route path="/video-analysis" component={VideoAnalysis} />
