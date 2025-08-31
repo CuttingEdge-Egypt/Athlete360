@@ -1039,16 +1039,24 @@ IMPORTANT: Even developing athletes may have competition records - search thorou
   }
 }
 
-📋 STRICT DATA REQUIREMENTS:
-- ONLY provide ranking data if you find AUTHENTIC, VERIFIABLE ranking information from official sources
-- Do NOT create generic "development" timelines unless you find actual competition results with specific dates, venues, and results
-- Do NOT use phrases like "developing athlete", "career development phase", or "active participation" unless these come from actual sources
+📋 FLEXIBLE DATA REQUIREMENTS:
+- Provide ranking data if you find ANY authentic, verifiable athletic information from official sources
+- Include competition participation, tournament results, or any verified sporting activities
+- Use actual competition records, championship participation, medal results, or team selections
+- Create meaningful timelines from ANY authentic competitive data found
 
-CRITICAL ERROR HANDLING:
-- If you cannot find specific ranking numbers, competition results, or authentic athletic data, respond with exactly: {"error": "no_data_found", "success": false}
-- If web search fails completely, respond with exactly: {"error": "search_failed", "success": false}
-- If the athlete name does not exist in any sports context, respond with exactly: {"error": "not_found", "success": false}
-- NEVER create placeholder data - users should only pay for authentic information
+ENHANCED SUCCESS CRITERIA:
+- Success = ANY authentic athletic information (rankings, competition results, achievements, participation records)
+- Include youth competitions, national championships, regional tournaments, or development programs if verified
+- Use phrases like "competing at [level]" or "active in [competitions]" only with specific evidence
+- Build progression from actual competition data, not generic development phases
+
+CRITICAL ERROR HANDLING - Only fail if NO authentic data exists:
+- Only respond with {"error": "no_data_found", "success": false} if absolutely NO authentic athletic information exists
+- Only respond with {"error": "search_failed", "success": false} if web search completely fails to function
+- Only respond with {"error": "not_found", "success": false} if athlete name doesn't exist in any sports context
+- If you find SOME authentic data (competitions, results, achievements), always provide a successful response with that data
+- Priority: authentic partial data > complete failure
 
 RESPONSE FORMAT REQUIREMENTS:
 - Return ONLY valid JSON with no markdown links, URLs, or additional text
@@ -1069,12 +1077,25 @@ RESPONSE FORMAT REQUIREMENTS:
     let cleanedText = response.output_text.trim();
     console.log(`Raw GPT-5 rank response for ${athleteName}:`, cleanedText.substring(0, 800) + '...');
     
-    // Check for error indicators before processing
-    if (cleanedText.includes('"error": "no_data_found"') || 
-        cleanedText.includes('"error": "search_failed"') || 
-        cleanedText.includes('"error": "not_found"') ||
-        cleanedText.includes('"success": false')) {
+    // Check for complete failure indicators - only throw if truly no data exists
+    if ((cleanedText.includes('"error": "no_data_found"') || 
+         cleanedText.includes('"error": "search_failed"') || 
+         cleanedText.includes('"error": "not_found"') ||
+         cleanedText.includes('"success": false')) &&
+         !cleanedText.includes('competition') && 
+         !cleanedText.includes('tournament') && 
+         !cleanedText.includes('championship') &&
+         !cleanedText.includes('ranking') &&
+         !cleanedText.includes('result') &&
+         cleanedText.length < 200) {
+      console.log(`Complete failure detected for ${athleteName} - no authentic data found in minimal response`);
       throw new Error('AI_WEB_SEARCH_FAILED: No authentic ranking data found through web search');
+    }
+    
+    // If we have a longer response or mentions of competitions/rankings, continue processing
+    if (cleanedText.includes('"error":') && cleanedText.length > 200) {
+      console.log(`Partial data detected for ${athleteName} - attempting to extract authentic information`);
+      // Continue processing to extract any authentic data that might be present
     }
     
     // Remove markdown formatting
