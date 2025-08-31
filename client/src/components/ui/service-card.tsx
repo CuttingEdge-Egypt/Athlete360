@@ -106,7 +106,10 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         return;
       }
 
-      // Token insufficiency removed - users get free tokens
+      if (error.message.includes("402") || error.message.includes("Insufficient")) {
+        onInsufficientTokens();
+        return;
+      }
 
       if (error.message.includes("Analysis already in progress")) {
         return; // Silent fail for duplicate requests
@@ -126,7 +129,11 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       return;
     }
     
-    // Token checking removed - all users have access
+    // Check if user has enough tokens
+    if (!user || (user.tokens || 0) < service.cost) {
+      onInsufficientTokens();
+      return;
+    }
 
     analysisMutation.mutate(forceUpdate);
   };

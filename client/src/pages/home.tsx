@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 
 import { ServiceCard } from "@/components/ui/service-card";
-
+import { TokenModal } from "@/components/ui/token-modal";
 
 import { AnalysisPopup } from "@/components/ui/analysis-popup";
 import { AthleteComparison } from "@/components/ui/athlete-comparison";
@@ -31,7 +31,22 @@ export default function Home() {
   const [videoAnalysisData, setVideoAnalysisData] = useState<any>(null);
   const [location] = useLocation();
 
-
+  // Check for payment success notification
+  useEffect(() => {
+    const paymentSuccess = sessionStorage.getItem('paymentSuccess');
+    if (paymentSuccess) {
+      try {
+        const paymentData = JSON.parse(paymentSuccess);
+        toast({
+          title: "Payment Successful!",
+          description: `Successfully purchased tokens for ${paymentData.amount} EGP. Transaction: ${paymentData.transactionId}`,
+        });
+        sessionStorage.removeItem('paymentSuccess');
+      } catch (error) {
+        console.error('Error parsing payment success data:', error);
+      }
+    }
+  }, [toast]);
 
   // Check for URL parameters to load comparison data
   useEffect(() => {
@@ -201,7 +216,7 @@ export default function Home() {
     return acc;
   }, []);
   const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null);
-
+  const [showTokenModal, setShowTokenModal] = useState(false);
   const [showBioPopup, setShowBioPopup] = useState(false);
   const [bioData, setBioData] = useState(null);
 
@@ -575,7 +590,7 @@ export default function Home() {
                         key={service.id}
                         service={service}
                         athlete={selectedAthlete}
-                        onInsufficientTokens={() => {}}
+                        onInsufficientTokens={() => setShowTokenModal(true)}
                       />
                     ))}
                   </div>
@@ -601,7 +616,10 @@ export default function Home() {
 
           </Tabs>
 
-
+          <TokenModal 
+            open={showTokenModal} 
+            onOpenChange={setShowTokenModal}
+          />
 
           {showBioPopup && bioData && selectedAthlete && (
             <AnalysisPopup
