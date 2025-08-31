@@ -880,20 +880,37 @@ export async function generateRankHistory(athleteName: string, sport: string, na
 🎯 PRIMARY OBJECTIVE: COMPETITION-BASED RANKING CHANGES
 Find specific competitions and years where this athlete's world ranking changed, using only official federation sources.
 
-🔍 MANDATORY SEARCH SOURCES BY SPORT:
-${sport.toLowerCase() === 'taekwondo' ? `
-✅ REQUIRED SOURCES:
-- World Taekwondo official rankings: https://www.worldtaekwondo.org/ranking/
-- Taekwondo Data rankings: https://www.taekwondodata.com/ranking_search.html
-- Olympic qualification rankings and results
-- WT Grand Prix tournament results with ranking impacts
+🔍 COMPREHENSIVE SEARCH STRATEGY:
+Execute multiple targeted searches to find ANY competition or ranking data for this athlete:
 
-📊 SEARCH FOR SPECIFIC DATA:
-- Current WT world ranking in weight category
-- Historical ranking positions after major competitions
-- Olympic/World Championship ranking changes
-- Grand Prix Series ranking progression
-- Asian/Continental Championship impact on rankings
+MANDATORY SEARCH SEQUENCE:
+1. "${athleteName} ${sport}" - General athletic background
+2. "${athleteName} ${sport} ranking" - Any ranking mentions
+3. "${athleteName} ${sport} competition results" - Competition participation
+4. "${athleteName} ${sport} tournament" - Specific tournaments
+5. "${athleteName} ${sport} championship" - Championship participation
+6. "${athleteName} olympics ${sport}" - Olympic qualification/participation
+7. "${athleteName} world ${sport}" - World-level competitions
+8. "${athleteName} national ${sport}" - National level competitions
+
+${sport.toLowerCase() === 'taekwondo' ? `
+✅ TAEKWONDO-SPECIFIC SEARCHES:
+9. "${athleteName} taekwondo world ranking WT"
+10. "${athleteName} olympic taekwondo ranking qualification"
+11. "${athleteName} world taekwondo championship results"
+12. "${athleteName} WT Grand Prix ranking points"
+13. "${athleteName} taekwondo weight category"
+14. Check: https://www.worldtaekwondo.org/ranking/
+15. Check: https://www.taekwondodata.com/ranking_search.html
+
+📊 SEARCH FOR ANY OF THESE:
+- Current WT world ranking in any weight category
+- Historical ranking positions after competitions
+- Olympic/World Championship results or attempts
+- Grand Prix, Open tournaments, or qualifying events
+- National championships or team selections
+- Youth/junior rankings or transitions
+- Regional championships or continental events
 ` : sport.toLowerCase() === 'fencing' ? `
 ✅ REQUIRED SOURCES:
 - FIE Athletes & Rankings: https://fie.org/athletes
@@ -975,12 +992,16 @@ Instead of generic career periods, find SPECIFIC:
 4. Season-end rankings for different years
 5. Breakthrough competitions that elevated ranking
 
-⚠️ CRITICAL REQUIREMENT:
-- Only use data from official federation websites
-- Show ranking difference AFTER each major competition
-- Format: "2023 World Championships: #25 → #18 (+7 positions)"
-- Include specific competition names and dates
-- Reference official ranking list publications
+⚠️ CRITICAL SEARCH STRATEGY:
+1. Start with broad searches: "${athleteName} ${sport} ranking" and "${athleteName} ${sport} competition results"
+2. Look for ANY mention of rankings, even if not current world ranking
+3. Search for specific competitions the athlete participated in
+4. Check for youth/junior rankings that led to senior rankings
+5. Look for national rankings that indicate competitive level
+6. If no official world ranking found, search for regional/continental rankings
+7. Include qualifying tournaments and development competitions
+
+IMPORTANT: Even developing athletes may have competition records - search thoroughly!
 
 📋 RETURN FORMAT - COMPETITION-BASED RANKING PROGRESSION:
 {
@@ -1018,11 +1039,18 @@ Instead of generic career periods, find SPECIFIC:
   }
 }
 
+📋 FLEXIBLE DATA APPROACH:
+- If you find OFFICIAL world rankings: Use that data with official source references
+- If you find REGIONAL/NATIONAL rankings: Use that data and specify it's regional/national level
+- If you find COMPETITION PARTICIPATION only: Create timeline based on competition participation with development rankings
+- If you find YOUTH/JUNIOR rankings: Include those with transition to senior level
+- Only respond with error if NO competition data or athletic information exists at all
+
 CRITICAL ERROR HANDLING:
-- If you cannot find any reliable ranking data through web search, respond with exactly: {"error": "no_data_found", "success": false}
-- If web search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
-- If the athlete's information does not exist, respond with exactly: {"error": "not_found", "success": false}
-- Only provide ranking data if you can find authentic, verifiable information through web search
+- If you cannot find ANY athletic competition data through web search, respond with exactly: {"error": "no_data_found", "success": false}
+- If web search fails completely, respond with exactly: {"error": "search_failed", "success": false}
+- If the athlete name does not exist in any sports context, respond with exactly: {"error": "not_found", "success": false}
+- IMPORTANT: If athlete competes but has no official world ranking, create development timeline based on their competition participation
 
 RESPONSE FORMAT REQUIREMENTS:
 - Return ONLY valid JSON with no markdown links, URLs, or additional text

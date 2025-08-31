@@ -518,7 +518,7 @@ export function AnalysisPopup({
     
     // Handle legacy data formats for backward compatibility
     let rankingProgression = [];
-    let careerSummary = {};
+    let careerSummary: any = {};
     
     // Format 1: New competition-based structure (athlete, competitionRankingTimeline, rankingSummary)
     if (parsedData.athlete && parsedData.competitionRankingTimeline) {
