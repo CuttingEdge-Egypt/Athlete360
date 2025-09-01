@@ -54,8 +54,11 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
     const handleCancellation = (event: CustomEvent) => {
       const { athleteName, serviceType } = event.detail;
       if (athleteName === athlete.name && serviceType === service.id && isProcessing) {
+        console.log(`🚫 Cancelling ${service.title} for ${athlete.name}`, { abortController, isProcessing });
+        
         // Abort the ongoing request
         if (abortController) {
+          console.log('🚫 Aborting request...');
           abortController.abort();
         }
         
@@ -116,6 +119,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       } catch (error) {
         // Don't update queue with error if request was aborted (cancelled)
         if (error instanceof Error && error.name === 'AbortError') {
+          console.log('🚫 Request was aborted (cancelled)');
           // Request was cancelled, don't show error or update queue
           return null;
         }
