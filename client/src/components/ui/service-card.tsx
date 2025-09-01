@@ -114,10 +114,13 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         
         return result;
       } catch (error) {
-        // Don't update queue with error if request was aborted (cancelled)
+        // For aborted requests, just update queue to remove the item and don't throw
         if (error instanceof Error && error.name === 'AbortError') {
-          // Request was cancelled, don't show error or update queue
-          return null;
+          if (queueId) {
+            (window as any).generationQueue?.remove?.(queueId);
+          }
+          // Return a special cancelled result instead of throwing
+          return { __cancelled: true };
         }
         
         // Update queue with error for other types of errors
@@ -132,6 +135,14 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       }
     },
     onSuccess: (data) => {
+      // Don't show success popup if this was a cancelled request
+      if (data && data.__cancelled) {
+        setIsProcessing(false);
+        setCurrentQueueId(null);
+        setAbortController(null);
+        return;
+      }
+      
       setAnalysisData(data);
       setShowAnalysisPopup(true);
       setIsProcessing(false);
