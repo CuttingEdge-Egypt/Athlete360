@@ -614,9 +614,24 @@ export function AnalysisPopup({
               </div>
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-yellow-500/20">
                 <div className="text-2xl font-bold text-yellow-400">
-                  {careerSummary.stayedAtRankLongest || athlete.rankingTrend || 'N/A'}
+                  {(() => {
+                    const rankText = careerSummary.stayedAtRankLongest || athlete.rankingTrend || 'N/A';
+                    // Extract rank number if it contains parentheses with time period
+                    const match = rankText.match(/^([^(]+)/);
+                    return match ? match[1].trim() : rankText;
+                  })()}
                 </div>
                 <div className="text-sm text-yellow-300">Stayed at this rank the longest</div>
+                {(() => {
+                  const rankText = careerSummary.stayedAtRankLongest || athlete.rankingTrend || '';
+                  // Extract time period in parentheses
+                  const timeMatch = rankText.match(/\(([^)]+)\)/);
+                  return timeMatch ? (
+                    <div className="text-xs text-blue-300 mt-1">
+                      {timeMatch[1]}
+                    </div>
+                  ) : null;
+                })()}
               </div>
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-purple-500/20">
                 <div className="text-2xl font-bold text-purple-400">{rankingProgression.length || 0}</div>
