@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AnalysisPopup } from '@/components/ui/analysis-popup';
+import { CancelConfirmationDialog } from '@/components/ui/cancel-confirmation-dialog';
 import { X, Play, Pause, RotateCcw, Check, Loader2, Eye } from 'lucide-react';
 import { useLocation } from 'wouter';
 
@@ -34,6 +35,8 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
   const [selectedResult, setSelectedResult] = useState<any>(null);
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
   const [, setLocation] = useLocation();
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [itemToCancel, setItemToCancel] = useState<string | null>(null);
 
   // Add new generation to queue and auto-trigger
   const addToQueue = (athleteName: string, serviceType: string, autoTrigger: boolean = true) => {
@@ -84,10 +87,26 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
   // Remove generation from queue or cancel if running
   const removeGeneration = (id: string, showConfirm: boolean = false) => {
     if (showConfirm) {
-      const confirmed = window.confirm("Are you sure you want to cancel this generation?");
-      if (!confirmed) return;
+      setItemToCancel(id);
+      setShowCancelDialog(true);
+      return;
     }
     setQueue(prev => prev.filter(item => item.id !== id));
+  };
+
+  // Handle cancel confirmation
+  const handleCancelConfirm = () => {
+    if (itemToCancel) {
+      setQueue(prev => prev.filter(item => item.id !== itemToCancel));
+      setItemToCancel(null);
+    }
+    setShowCancelDialog(false);
+  };
+
+  // Handle cancel dialog close
+  const handleCancelClose = () => {
+    setItemToCancel(null);
+    setShowCancelDialog(false);
   };
 
   // Retry failed generation
@@ -333,6 +352,15 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
             createdAt={selectedResult.createdAt?.toISOString()}
           />
         )}
+
+        {/* Cancel Confirmation Dialog */}
+        <CancelConfirmationDialog
+          isOpen={showCancelDialog}
+          onConfirm={handleCancelConfirm}
+          onCancel={handleCancelClose}
+          title="Cancel Generation"
+          description="Are you sure you want to cancel this generation? This action cannot be undone."
+        />
       </Card>
     </div>
   );
