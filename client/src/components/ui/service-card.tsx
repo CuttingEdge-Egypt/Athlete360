@@ -45,6 +45,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
   const [analysisData, setAnalysisData] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentQueueId, setCurrentQueueId] = useState<string | null>(null);
+  const [abortController, setAbortController] = useState<AbortController | null>(null);
   
   const IconComponent = iconMap[service.icon as keyof typeof iconMap] || User;
 
@@ -53,9 +54,16 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
     const handleCancellation = (event: CustomEvent) => {
       const { athleteName, serviceType } = event.detail;
       if (athleteName === athlete.name && serviceType === service.id && isProcessing) {
+        // Abort the ongoing request
+        if (abortController) {
+          abortController.abort();
+        }
+        
         // Stop the current processing
         setIsProcessing(false);
         setCurrentQueueId(null);
+        setAbortController(null);
+        
         toast({
           title: "Generation Cancelled",
           description: `${service.title} analysis was cancelled`,
@@ -68,7 +76,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
     return () => {
       window.removeEventListener('cancel-generation', handleCancellation as EventListener);
     };
-  }, [athlete.name, service.id, service.title, isProcessing, toast]);
+  }, [athlete.name, service.id, service.title, isProcessing, abortController, toast]);
 
   const analysisMutation = useMutation({
     mutationFn: async (forceUpdate?: boolean) => {
@@ -76,6 +84,10 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         throw new Error("Analysis already in progress");
       }
       setIsProcessing(true);
+      
+      // Create abort controller for this request
+      const controller = new AbortController();
+      setAbortController(controller);
       
       // Add to generation queue with auto-trigger
       const queueId = (window as any).generationQueue?.add?.(athlete.name, service.id, true);
@@ -89,7 +101,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
           ? `/api/analysis/${athlete.id}/${service.id}?forceUpdate=true`
           : `/api/analysis/${athlete.id}/${service.id}`;
         
-        const response = await apiRequest("POST", url);
+        const response = await apiRequest("POST", url, undefined, { signal: controller.signal });
         const result = await response.json();
         
         // Update queue with success
@@ -102,7 +114,13 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         
         return result;
       } catch (error) {
-        // Update queue with error
+        // Don't update queue with error if request was aborted (cancelled)
+        if (error instanceof Error && error.name === 'AbortError') {
+          // Request was cancelled, don't show error or update queue
+          return null;
+        }
+        
+        // Update queue with error for other types of errors
         if (queueId) {
           (window as any).generationQueue?.update?.(queueId, { 
             status: 'error', 
@@ -118,6 +136,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       setShowAnalysisPopup(true);
       setIsProcessing(false);
       setCurrentQueueId(null);
+      setAbortController(null);
       
       toast({
         title: "Analysis Complete",
@@ -144,6 +163,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
     onError: (error) => {
       setIsProcessing(false);
       setCurrentQueueId(null);
+      setAbortController(null);
       
       if (isUnauthorizedError(error)) {
         toast({
