@@ -54,15 +54,42 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       }
       setIsProcessing(true);
       
-      // For bio service refresh, use the specific bio refresh endpoint
-      const url = service.id === "bio" && forceUpdate 
-        ? `/api/athletes/${athlete.id}/refresh-bio`
-        : forceUpdate 
-        ? `/api/analysis/${athlete.id}/${service.id}?forceUpdate=true`
-        : `/api/analysis/${athlete.id}/${service.id}`;
+      // Add to generation queue
+      const queueId = (window as any).generationQueue?.add?.(athlete.name, service.id);
+      if (queueId) {
+        (window as any).generationQueue?.update?.(queueId, { status: 'running' });
+      }
       
-      const response = await apiRequest("POST", url);
-      return response.json();
+      try {
+        // For bio service refresh, use the specific bio refresh endpoint
+        const url = service.id === "bio" && forceUpdate 
+          ? `/api/athletes/${athlete.id}/refresh-bio`
+          : forceUpdate 
+          ? `/api/analysis/${athlete.id}/${service.id}?forceUpdate=true`
+          : `/api/analysis/${athlete.id}/${service.id}`;
+        
+        const response = await apiRequest("POST", url);
+        const result = await response.json();
+        
+        // Update queue with success
+        if (queueId) {
+          (window as any).generationQueue?.update?.(queueId, { 
+            status: 'completed', 
+            result: { ...result, serviceType: service.id, athleteName: athlete.name }
+          });
+        }
+        
+        return result;
+      } catch (error) {
+        // Update queue with error
+        if (queueId) {
+          (window as any).generationQueue?.update?.(queueId, { 
+            status: 'error', 
+            error: error instanceof Error ? error.message : 'Unknown error'
+          });
+        }
+        throw error;
+      }
     },
     onSuccess: (data) => {
       setAnalysisData(data);
@@ -189,6 +216,25 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
             }}
           >
             🔄 Refresh with AI
+          </Button>
+          
+          <Button 
+            data-testid={`button-${service.id}-queue`}
+            variant="outline"
+            size="sm"
+            className="w-full text-xs border-yellow-500 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-colors mt-1"
+            disabled={analysisMutation.isPending || isProcessing}
+            onClick={(e) => {
+              e.stopPropagation();
+              // Add to queue without running immediately
+              const queueId = (window as any).generationQueue?.add?.(athlete.name, service.id);
+              toast({
+                title: "Added to Queue",
+                description: `${service.title} analysis added to generation queue`,
+              });
+            }}
+          >
+            📋 Add to Queue
           </Button>
         </div>
       </CardContent>

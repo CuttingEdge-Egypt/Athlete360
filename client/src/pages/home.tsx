@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Star, User, Loader2 } from "lucide-react";
 import type { Sport, Athlete } from "@shared/schema";
+import GenerationQueue from "@/components/ui/generation-queue";
 
 export default function Home() {
   const { user } = useAuth();
@@ -632,6 +633,25 @@ export default function Home() {
               createdAt={new Date().toISOString()}
             />
           )}
+
+          {/* Generation Queue */}
+          <GenerationQueue
+            onSelectGeneration={(result) => {
+              // Handle different types of generation results
+              if (result.serviceType === 'compare') {
+                setComparisonData(result);
+                setActiveTab('comparison');
+              } else if (result.serviceType === 'video') {
+                setVideoAnalysisData(result);
+                setActiveTab('video');
+              } else {
+                // Handle other analysis types - they're handled by the AnalysisPopup component
+                console.log('Selected generation result:', result);
+              }
+            }}
+            currentAthlete={selectedAthlete?.name}
+            currentService="rank"
+          />
         </div>
   );
 }
