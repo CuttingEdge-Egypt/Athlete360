@@ -498,6 +498,7 @@ export async function generateRankHistoryWithGemini(
         "rankingBefore": "Rank before competition",
         "rankingAfter": "Rank after competition",
         "rankingChange": "Change description (e.g., '#25 → #18 (+7)')",
+        "rankBoostReason": "Explanation of why this ranking was achieved (e.g., 'Strong performance reaching Round of 16 against higher-ranked opponents')",
         "competitionLevel": "World/Continental/National level",
         "result": "Medal/placement/result",
         "rankingSource": "Federation source"
@@ -536,6 +537,7 @@ export async function generateRankHistoryWithGemini(
 - Include currentStatus with careerSpan (Active/Retired), nextMajorCompetition, and lastUpdated fields
 - Fill rankingProgressionData array with chronological ranking data for chart visualization
 - Add "rank" field to each competitionRankingTimeline entry with final ranking after competition
+- Add "rankBoostReason" field explaining why each ranking improvement was achieved
 - Only fail if absolutely no athletic information exists for this person
 
 Return ONLY valid JSON with no markdown formatting or additional text.`;

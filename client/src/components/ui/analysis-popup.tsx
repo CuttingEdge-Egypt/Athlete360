@@ -718,11 +718,12 @@ export function AnalysisPopup({
                       </div>
                     </div>
                     
-                    {/* Ranking Change Summary */}
-                    {entry.rankingChange && entry.rankingChange !== 'N/A' && (
-                      <div className="mt-2 text-center">
-                        <div className="text-sm font-medium text-yellow-400">
-                          {entry.rankingChange}
+                    {/* Rank Boost Reasoning */}
+                    {entry.rankBoostReason && (
+                      <div className="mt-2 p-3 bg-blue-500/10 rounded-lg border border-blue-500/30">
+                        <div className="text-xs text-blue-300 font-medium mb-1">Why this ranking was achieved:</div>
+                        <div className="text-sm text-blue-200">
+                          {entry.rankBoostReason}
                         </div>
                       </div>
                     )}
