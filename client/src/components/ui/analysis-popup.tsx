@@ -616,6 +616,12 @@ export function AnalysisPopup({
                 <div className="text-2xl font-bold text-yellow-400">
                   {(() => {
                     const rankText = careerSummary.stayedAtRankLongest || athlete.rankingTrend || 'N/A';
+                    // Handle different patterns: "#25 (Maintained...)" or "Maintained the #198..."
+                    if (rankText.toLowerCase().includes('maintained')) {
+                      // Extract rank from "Maintained the #XXX..." or similar patterns
+                      const maintainedMatch = rankText.match(/#(\d+)/);
+                      return maintainedMatch ? `#${maintainedMatch[1]}` : rankText.split(' ')[0];
+                    }
                     // Extract rank number if it contains parentheses with time period
                     const match = rankText.match(/^([^(]+)/);
                     return match ? match[1].trim() : rankText;
@@ -624,7 +630,17 @@ export function AnalysisPopup({
                 <div className="text-sm text-yellow-300">Stayed at this rank the longest</div>
                 {(() => {
                   const rankText = careerSummary.stayedAtRankLongest || athlete.rankingTrend || '';
-                  // Extract time period in parentheses
+                  // Handle "Maintained..." pattern to extract time period
+                  if (rankText.toLowerCase().includes('maintained')) {
+                    // Extract time period from maintained text
+                    const maintainedTimeMatch = rankText.match(/from\s+([^,]+(?:,\s*[^,]+)*)/i);
+                    return maintainedTimeMatch ? (
+                      <div className="text-xs text-blue-300 mt-1">
+                        {maintainedTimeMatch[1]}
+                      </div>
+                    ) : null;
+                  }
+                  // Extract time period in parentheses for other formats
                   const timeMatch = rankText.match(/\(([^)]+)\)/);
                   return timeMatch ? (
                     <div className="text-xs text-blue-300 mt-1">

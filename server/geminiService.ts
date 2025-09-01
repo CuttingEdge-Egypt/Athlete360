@@ -515,7 +515,7 @@ export async function generateRankHistoryWithGemini(
       "breakthroughCompetition": "Most significant competition result", 
       "peakRankingPeriod": "Best ranking period with details",
       "highestRank": "Highest/best ranking achieved (e.g., '#15')",
-      "stayedAtRankLongest": "Ranking position athlete maintained for the longest period",
+      "stayedAtRankLongest": "Ranking position athlete maintained for the longest period (format: '#25 (June 2021 to November 2023)' or just '#25' if no time period available)",
       "recentCompetitions": "Recent competition activity",
       "nextMajorCompetition": "Upcoming events if found",
       "currentStatus": {
@@ -533,11 +533,12 @@ export async function generateRankHistoryWithGemini(
 - Include any verified competitive achievements or participation records
 - Create meaningful progression timeline from available authentic data
 - Fill in highestRank field with best ranking achieved (e.g., "#15")
-- Fill in stayedAtRankLongest with ranking position held for longest period
+- Fill in stayedAtRankLongest with consistent format: "#[NUMBER] ([TIME PERIOD])" e.g., "#25 (June 2021 to November 2023)"
 - Include currentStatus with careerSpan (Active/Retired), nextMajorCompetition, and lastUpdated fields
 - Fill rankingProgressionData array with chronological ranking data for chart visualization
 - Add "rank" field to each competitionRankingTimeline entry with final ranking after competition
 - Add "rankBoostReason" field explaining why each ranking improvement was achieved
+- CONSISTENCY REQUIREMENT: Always use the same weight division and ranking category throughout the response
 - Only fail if absolutely no athletic information exists for this person
 
 Return ONLY valid JSON with no markdown formatting or additional text.`;
@@ -552,6 +553,13 @@ Return ONLY valid JSON with no markdown formatting or additional text.`;
       systemInstruction: `You are an expert sports analyst with access to official federation websites. Use web search capabilities to find authentic ranking and competition data from these federation sources:
 
 ${federationUrls.map(url => `- ${url}`).join('\n')}
+
+CRITICAL CONSISTENCY REQUIREMENTS:
+- Use the SAME weight division/category throughout the entire response
+- If you find the athlete competes in multiple divisions, choose ONE and stick to it
+- Ensure all ranking numbers, competition results, and timeline entries are consistent with the chosen division
+- Double-check that currentRanking.position matches the athlete's final ranking in competitionRankingTimeline
+- Format stayedAtRankLongest as "#[NUMBER] ([TIME PERIOD])" consistently
 
 Focus on finding any authentic competition records, rankings, or athletic achievements from these official sources.`
     });
