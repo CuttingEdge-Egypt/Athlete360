@@ -79,7 +79,9 @@ export function RankChart({ data }: RankChartProps) {
                 return context[0].label;
               },
               label: function(context) {
-                return `Rank: #${context.parsed.y}`;
+                // Convert back from inverted scale to show actual rank
+                const actualRank = 100 - context.parsed.y;
+                return actualRank > 0 ? `Rank: #${actualRank}` : 'No ranking data';
               }
             }
           }
@@ -87,7 +89,7 @@ export function RankChart({ data }: RankChartProps) {
         scales: {
           y: {
             beginAtZero: false,
-            reverse: true, // Lower rank numbers are better
+            reverse: false, // Show chart from bottom up (higher values = better performance)
             ticks: {
               color: 'hsl(215, 20%, 65%)',
               font: {
@@ -95,7 +97,9 @@ export function RankChart({ data }: RankChartProps) {
                 size: 12
               },
               callback: function(value) {
-                return '#' + value;
+                // Show actual rank numbers (inverted scale)
+                const actualRank = 100 - value;
+                return actualRank > 0 ? '#' + actualRank : '';
               },
               stepSize: 1
             },

@@ -492,6 +492,7 @@ export async function generateRankHistoryWithGemini(
     "competitionRankingTimeline": [
       {
         "competition": "Specific competition name",
+        "rank": "Final ranking after this competition (e.g., '#18')",
         "year": "Competition year",
         "date": "Date if available", 
         "rankingBefore": "Rank before competition",
@@ -500,6 +501,12 @@ export async function generateRankHistoryWithGemini(
         "competitionLevel": "World/Continental/National level",
         "result": "Medal/placement/result",
         "rankingSource": "Federation source"
+      }
+    ],
+    "rankingProgressionData": [
+      {
+        "period": "Competition/Year identifier",
+        "rank": "Numerical ranking (lower number = better rank)"
       }
     ],
     "rankingSummary": {
@@ -527,6 +534,8 @@ export async function generateRankHistoryWithGemini(
 - Fill in highestRank field with best ranking achieved (e.g., "#15")
 - Fill in stayedAtRankLongest with ranking position held for longest period
 - Include currentStatus with careerSpan (Active/Retired), nextMajorCompetition, and lastUpdated fields
+- Fill rankingProgressionData array with chronological ranking data for chart visualization
+- Add "rank" field to each competitionRankingTimeline entry with final ranking after competition
 - Only fail if absolutely no athletic information exists for this person
 
 Return ONLY valid JSON with no markdown formatting or additional text.`;
