@@ -52,23 +52,28 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
   // Listen for cancellation events from the queue
   useEffect(() => {
     const handleCancellation = (event: CustomEvent) => {
-      const { athleteName, serviceType } = event.detail;
-      if (athleteName === athlete.name && serviceType === service.id && isProcessing) {
-        // Abort the ongoing request
-        if (abortController) {
-          abortController.abort();
+      try {
+        const { athleteName, serviceType } = event.detail;
+        if (athleteName === athlete.name && serviceType === service.id && isProcessing) {
+          // Abort the ongoing request
+          if (abortController) {
+            abortController.abort();
+          }
+          
+          // Stop the current processing
+          setIsProcessing(false);
+          setCurrentQueueId(null);
+          setAbortController(null);
+          
+          toast({
+            title: "Generation Cancelled",
+            description: `${service.title} analysis was cancelled`,
+            variant: "destructive",
+          });
         }
-        
-        // Stop the current processing
-        setIsProcessing(false);
-        setCurrentQueueId(null);
-        setAbortController(null);
-        
-        toast({
-          title: "Generation Cancelled",
-          description: `${service.title} analysis was cancelled`,
-          variant: "destructive",
-        });
+      } catch (error) {
+        // Silently handle any errors from the cancellation process
+        console.warn('Error in cancellation handler:', error);
       }
     };
 
@@ -114,11 +119,23 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         
         return result;
       } catch (error) {
-        // For aborted requests, just update queue to remove the item and don't throw
+        // For aborted requests, refund tokens and remove from queue
         if (error instanceof Error && error.name === 'AbortError') {
           if (queueId) {
             (window as any).generationQueue?.remove?.(queueId);
           }
+          
+          // Call backend to refund tokens for cancelled request
+          try {
+            await apiRequest("POST", `/api/refund-cancelled-analysis`, {
+              athleteId: athlete.id,
+              serviceType: service.id,
+              reason: "User cancelled generation"
+            });
+          } catch (refundError) {
+            console.warn('Failed to refund tokens for cancelled analysis:', refundError);
+          }
+          
           // Return a special cancelled result instead of throwing
           return { __cancelled: true };
         }

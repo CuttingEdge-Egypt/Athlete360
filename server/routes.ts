@@ -184,6 +184,19 @@ async function refundTokensForFailedAnalysis(userId: string, athleteId: string |
   }
 }
 
+// Service type to token cost mapping
+const SERVICE_TOKEN_COSTS: { [key: string]: number } = {
+  'bio': 20,
+  'rank': 70,
+  'strengths': 50,
+  'weaknesses': 50,
+  'development-plan': 80,
+  'nutrition-plan': 75,
+  'beat-strategies': 100,
+  'video': 200,
+  'comparison': 120
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware - setup both Replit OIDC and local auth
   await setupAuth(app);
@@ -2475,6 +2488,42 @@ Return only valid JSON with the missing fields.`;
         message: "Unable to generate authentic athlete comparison at this time. Please try again later.",
         error: error instanceof Error ? error.message : String(error)
       });
+    }
+  });
+
+  // ==== TOKEN REFUND ROUTE FOR CANCELLED ANALYSES ====
+  
+  app.post('/api/refund-cancelled-analysis', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { athleteId, serviceType, reason } = req.body;
+      
+      // Get token cost for the service type
+      const tokenCost = SERVICE_TOKEN_COSTS[serviceType];
+      if (!tokenCost) {
+        return res.status(400).json({ message: "Invalid service type" });
+      }
+      
+      // Refund tokens using the helper function
+      await refundTokensForFailedAnalysis(
+        userId, 
+        athleteId, 
+        tokenCost, 
+        serviceType, 
+        `${serviceType.charAt(0).toUpperCase() + serviceType.slice(1)} Analysis`
+      );
+      
+      console.log(`🚫 CANCELLED: Refunded ${tokenCost} tokens for ${serviceType} analysis cancelled by user`);
+      
+      res.json({ 
+        success: true, 
+        refunded: tokenCost, 
+        message: "Tokens refunded for cancelled analysis" 
+      });
+      
+    } catch (error) {
+      console.error('Error refunding tokens for cancelled analysis:', error);
+      res.status(500).json({ message: "Failed to refund tokens" });
     }
   });
 
