@@ -54,11 +54,8 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       }
       setIsProcessing(true);
       
-      // Add to generation queue
-      const queueId = (window as any).generationQueue?.add?.(athlete.name, service.id);
-      if (queueId) {
-        (window as any).generationQueue?.update?.(queueId, { status: 'running' });
-      }
+      // Add to generation queue with auto-trigger
+      const queueId = (window as any).generationQueue?.add?.(athlete.name, service.id, true);
       
       try {
         // For bio service refresh, use the specific bio refresh endpoint
@@ -226,11 +223,24 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
             disabled={analysisMutation.isPending || isProcessing}
             onClick={(e) => {
               e.stopPropagation();
-              // Add to queue without running immediately
-              const queueId = (window as any).generationQueue?.add?.(athlete.name, service.id);
+              
+              // Check if user has enough tokens first
+              if (!user || (user.tokens || 0) < service.cost) {
+                onInsufficientTokens();
+                return;
+              }
+              
+              // Add to queue and auto-trigger generation
+              const queueId = (window as any).generationQueue?.add?.(athlete.name, service.id, true);
+              
+              // Start the analysis immediately
+              if (queueId) {
+                handleServiceClick(false);
+              }
+              
               toast({
                 title: "Added to Queue",
-                description: `${service.title} analysis added to generation queue`,
+                description: `${service.title} analysis started and added to queue`,
               });
             }}
           >

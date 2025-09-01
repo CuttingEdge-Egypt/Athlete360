@@ -100,7 +100,10 @@ Preferred communication style: Simple, everyday language.
 - **Result Selection**: Click completed items to view results, enabling easy comparison between multiple generations
 - **Add to Queue Button**: New button on service cards to queue analyses without running immediately
 - **Global Queue Management**: Exposed queue functions globally for integration across all analysis components
-- **Status**: ✅ Complete queue system for managing multiple simultaneous AI generations with intuitive UI
+- **Auto-Trigger Generations**: All queue additions automatically start generation immediately instead of staying pending
+- **Completion Notifications**: Toast notifications appear when queue items complete, preventing overflow of current view
+- **History Integration**: "View Result" button behaves exactly like clicking history items, opening AnalysisPopup or navigating to comparison/video tabs
+- **Status**: ✅ Complete queue system with auto-triggering, proper notifications, and seamless history integration
 
 ### Paymob Integration Fully Working (Updated August 26, 2025)
 - **Integration ID**: 4233746 confirmed working for online card payments

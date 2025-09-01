@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { AnalysisPopup } from '@/components/ui/analysis-popup';
 import { X, Play, Pause, RotateCcw, Check, Loader2, Eye } from 'lucide-react';
+import { useLocation } from 'wouter';
 
 interface GenerationItem {
   id: string;
@@ -28,14 +30,17 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
   const [queue, setQueue] = useState<GenerationItem[]>([]);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [selectedResult, setSelectedResult] = useState<any>(null);
+  const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
+  const [, setLocation] = useLocation();
 
-  // Add new generation to queue
-  const addToQueue = (athleteName: string, serviceType: string) => {
+  // Add new generation to queue and auto-trigger
+  const addToQueue = (athleteName: string, serviceType: string, autoTrigger: boolean = true) => {
     const newItem: GenerationItem = {
       id: `gen_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       athleteName,
       serviceType,
-      status: 'pending',
+      status: autoTrigger ? 'running' : 'pending',
       createdAt: new Date()
     };
     
@@ -44,11 +49,35 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
     return newItem.id;
   };
 
-  // Update generation status
+  // Update generation status with notification
   const updateGeneration = (id: string, updates: Partial<GenerationItem>) => {
-    setQueue(prev => prev.map(item => 
-      item.id === id ? { ...item, ...updates } : item
-    ));
+    setQueue(prev => {
+      const updated = prev.map(item => {
+        if (item.id === id) {
+          const updatedItem = { ...item, ...updates };
+          
+          // Show notification when generation completes
+          if (updates.status === 'completed' && item.status !== 'completed') {
+            // Use toast or custom notification
+            setTimeout(() => {
+              if ((window as any).showToast) {
+                (window as any).showToast({
+                  title: "Generation Complete",
+                  description: `${updatedItem.serviceType} analysis for ${updatedItem.athleteName} is ready to view`,
+                });
+              } else {
+                // Fallback notification
+                alert(`${updatedItem.serviceType} analysis for ${updatedItem.athleteName} is complete! Click "View" in the queue to see results.`);
+              }
+            }, 100);
+          }
+          
+          return updatedItem;
+        }
+        return item;
+      });
+      return updated;
+    });
   };
 
   // Remove generation from queue
@@ -59,6 +88,41 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
   // Clear completed generations
   const clearCompleted = () => {
     setQueue(prev => prev.filter(item => item.status !== 'completed' && item.status !== 'error'));
+  };
+
+  // Handle viewing a generation result (same as history items)
+  const handleViewResult = (item: GenerationItem) => {
+    if (!item.result) return;
+
+    console.log('Queue result clicked:', item);
+    
+    if (item.serviceType === 'comparison') {
+      // Navigate to home with comparison tab and data
+      const encodedData = encodeURIComponent(JSON.stringify(item.result));
+      const url = "/?tab=comparison&data=" + encodedData;
+      console.log('Navigating to comparison:', url);
+      
+      setLocation(url);
+      setTimeout(() => {
+        window.history.pushState({}, '', url);
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      }, 100);
+    } else if (item.serviceType === 'video') {
+      // Navigate to home with video tab and data
+      const encodedData = encodeURIComponent(JSON.stringify(item.result));
+      const url = "/?tab=video&data=" + encodedData;
+      console.log('Navigating to video analysis:', url);
+      
+      setLocation(url);
+      setTimeout(() => {
+        window.history.pushState({}, '', url);
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      }, 100);
+    } else {
+      // Show analysis popup for other types
+      setSelectedResult(item);
+      setShowAnalysisPopup(true);
+    }
   };
 
   // Get status color
@@ -90,7 +154,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
     }
   }, [queue.length]);
 
-  // Expose queue management functions globally
+  // Expose queue management functions globally and setup toast integration
   useEffect(() => {
     (window as any).generationQueue = {
       add: addToQueue,
@@ -98,8 +162,18 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
       remove: removeGeneration
     };
 
+    // Expose toast function for notifications
+    (window as any).showToast = ({ title, description }: { title: string; description: string }) => {
+      // This will be handled by the toast system in the main app
+      const event = new CustomEvent('queue-notification', { 
+        detail: { title, description } 
+      });
+      window.dispatchEvent(event);
+    };
+
     return () => {
       delete (window as any).generationQueue;
+      delete (window as any).showToast;
     };
   }, []);
 
@@ -184,7 +258,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => onSelectGeneration(item.result)}
+                        onClick={() => handleViewResult(item)}
                         className="h-6 w-6 p-0 text-blue-400 hover:text-blue-300"
                         title="View result"
                       >
@@ -211,6 +285,24 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
           <CardContent className="p-4 text-center text-gray-400 text-sm">
             No generations in queue
           </CardContent>
+        )}
+
+        {/* Analysis Popup */}
+        {showAnalysisPopup && selectedResult && (
+          <AnalysisPopup
+            open={showAnalysisPopup}
+            onOpenChange={(open) => {
+              setShowAnalysisPopup(open);
+              if (!open) {
+                setSelectedResult(null);
+              }
+            }}
+            type={selectedResult.serviceType}
+            data={selectedResult.result}
+            athleteName={selectedResult.athleteName}
+            athleteId=""
+            createdAt={selectedResult.createdAt?.toISOString()}
+          />
         )}
       </Card>
     </div>

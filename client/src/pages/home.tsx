@@ -32,6 +32,22 @@ export default function Home() {
   const [videoAnalysisData, setVideoAnalysisData] = useState<any>(null);
   const [location] = useLocation();
 
+  // Listen for queue notifications
+  useEffect(() => {
+    const handleQueueNotification = (event: CustomEvent) => {
+      const { title, description } = event.detail;
+      toast({
+        title,
+        description,
+      });
+    };
+
+    window.addEventListener('queue-notification', handleQueueNotification as EventListener);
+    return () => {
+      window.removeEventListener('queue-notification', handleQueueNotification as EventListener);
+    };
+  }, [toast]);
+
   // Check for payment success notification
   useEffect(() => {
     const paymentSuccess = sessionStorage.getItem('paymentSuccess');
