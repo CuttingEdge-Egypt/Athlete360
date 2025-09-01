@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,8 +44,31 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
   const [analysisData, setAnalysisData] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [currentQueueId, setCurrentQueueId] = useState<string | null>(null);
   
   const IconComponent = iconMap[service.icon as keyof typeof iconMap] || User;
+
+  // Listen for cancellation events from the queue
+  useEffect(() => {
+    const handleCancellation = (event: CustomEvent) => {
+      const { athleteName, serviceType } = event.detail;
+      if (athleteName === athlete.name && serviceType === service.id && isProcessing) {
+        // Stop the current processing
+        setIsProcessing(false);
+        setCurrentQueueId(null);
+        toast({
+          title: "Generation Cancelled",
+          description: `${service.title} analysis was cancelled`,
+          variant: "destructive",
+        });
+      }
+    };
+
+    window.addEventListener('cancel-generation', handleCancellation as EventListener);
+    return () => {
+      window.removeEventListener('cancel-generation', handleCancellation as EventListener);
+    };
+  }, [athlete.name, service.id, service.title, isProcessing, toast]);
 
   const analysisMutation = useMutation({
     mutationFn: async (forceUpdate?: boolean) => {
@@ -56,6 +79,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       
       // Add to generation queue with auto-trigger
       const queueId = (window as any).generationQueue?.add?.(athlete.name, service.id, true);
+      setCurrentQueueId(queueId);
       
       try {
         // For bio service refresh, use the specific bio refresh endpoint
@@ -93,6 +117,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       setAnalysisData(data);
       setShowAnalysisPopup(true);
       setIsProcessing(false);
+      setCurrentQueueId(null);
       
       toast({
         title: "Analysis Complete",
@@ -118,6 +143,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
     },
     onError: (error) => {
       setIsProcessing(false);
+      setCurrentQueueId(null);
       
       if (isUnauthorizedError(error)) {
         toast({

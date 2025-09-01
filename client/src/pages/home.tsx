@@ -406,8 +406,17 @@ export default function Home() {
     }
   ];
 
-  // Expose trigger analysis function for queue retries
+  // Expose trigger analysis function for queue retries and cancellation function
   useEffect(() => {
+    // Function to handle cancellation from queue
+    (window as any).cancelGeneration = (athleteName: string, serviceType: string) => {
+      // Trigger a custom event that service cards can listen to
+      const event = new CustomEvent('cancel-generation', {
+        detail: { athleteName, serviceType }
+      });
+      window.dispatchEvent(event);
+    };
+
     (window as any).triggerAnalysis = async (athleteName: string, serviceType: string) => {
       // Find the athlete in current context
       if (selectedAthlete?.name === athleteName) {
@@ -450,6 +459,7 @@ export default function Home() {
 
     return () => {
       delete (window as any).triggerAnalysis;
+      delete (window as any).cancelGeneration;
     };
   }, [selectedAthlete, services]);
 

@@ -97,6 +97,12 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
   // Handle cancel confirmation
   const handleCancelConfirm = () => {
     if (itemToCancel) {
+      // Notify service cards about cancellation
+      const canceledItem = queue.find(item => item.id === itemToCancel);
+      if (canceledItem && (window as any).cancelGeneration) {
+        (window as any).cancelGeneration(canceledItem.athleteName, canceledItem.serviceType);
+      }
+      
       setQueue(prev => prev.filter(item => item.id !== itemToCancel));
       setItemToCancel(null);
     }
