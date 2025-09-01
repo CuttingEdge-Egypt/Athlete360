@@ -82,7 +82,8 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         if (queueId) {
           (window as any).generationQueue?.update?.(queueId, { 
             status: 'error', 
-            error: error instanceof Error ? error.message : 'Unknown error'
+            error: error instanceof Error ? error.message : 'Unknown error',
+            canRetry: true
           });
         }
         throw error;
@@ -215,37 +216,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
             🔄 Refresh with AI
           </Button>
           
-          <Button 
-            data-testid={`button-${service.id}-queue`}
-            variant="outline"
-            size="sm"
-            className="w-full text-xs border-yellow-500 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-colors mt-1"
-            disabled={analysisMutation.isPending || isProcessing}
-            onClick={(e) => {
-              e.stopPropagation();
-              
-              // Check if user has enough tokens first
-              if (!user || (user.tokens || 0) < service.cost) {
-                onInsufficientTokens();
-                return;
-              }
-              
-              // Add to queue and auto-trigger generation
-              const queueId = (window as any).generationQueue?.add?.(athlete.name, service.id, true);
-              
-              // Start the analysis immediately
-              if (queueId) {
-                handleServiceClick(false);
-              }
-              
-              toast({
-                title: "Added to Queue",
-                description: `${service.title} analysis started and added to queue`,
-              });
-            }}
-          >
-            📋 Add to Queue
-          </Button>
+
         </div>
       </CardContent>
       </Card>

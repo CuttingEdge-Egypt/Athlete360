@@ -105,6 +105,15 @@ Preferred communication style: Simple, everyday language.
 - **History Integration**: "View Result" button behaves exactly like clicking history items, opening AnalysisPopup or navigating to comparison/video tabs
 - **Status**: ✅ Complete queue system with auto-triggering, proper notifications, and seamless history integration
 
+### Queue System Enhancements (September 1, 2025)
+- **Removed "Add to Queue" Button**: Since generation buttons automatically add to queue, removed redundant queue button
+- **Immediate Token Deduction**: Tokens are deducted as soon as generation completes successfully
+- **Cancel Generation**: Remove button becomes "Cancel generation" with confirmation for running items
+- **Retry Failed Generations**: Failed queue items show retry button to regenerate analysis
+- **Clean Error Messages**: Removed technical JSON error details from user-facing error messages
+- **Status Consistency**: Fixed queue status synchronization to prevent duplicate running/failed items
+- **Status**: ✅ Enhanced queue system with better UX, proper error handling, and retry functionality
+
 ### Paymob Integration Fully Working (Updated August 26, 2025)
 - **Integration ID**: 4233746 confirmed working for online card payments
 - **Payment Flow**: Successfully tested end-to-end payment processing

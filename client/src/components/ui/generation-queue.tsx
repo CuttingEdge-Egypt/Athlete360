@@ -14,6 +14,7 @@ interface GenerationItem {
   result?: any;
   error?: string;
   createdAt: Date;
+  canRetry?: boolean;
 }
 
 interface GenerationQueueProps {
@@ -80,9 +81,25 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
     });
   };
 
-  // Remove generation from queue
-  const removeGeneration = (id: string) => {
+  // Remove generation from queue or cancel if running
+  const removeGeneration = (id: string, showConfirm: boolean = false) => {
+    if (showConfirm) {
+      const confirmed = window.confirm("Are you sure you want to cancel this generation?");
+      if (!confirmed) return;
+    }
     setQueue(prev => prev.filter(item => item.id !== id));
+  };
+
+  // Retry failed generation
+  const retryGeneration = (item: GenerationItem) => {
+    // Remove the failed item and create a new one
+    removeGeneration(item.id);
+    const newId = addToQueue(item.athleteName, item.serviceType, true);
+    // Trigger the actual analysis here by calling the service
+    // This should be handled by the parent component or service integration
+    if ((window as any).triggerAnalysis) {
+      (window as any).triggerAnalysis(item.athleteName, item.serviceType);
+    }
   };
 
   // Clear completed generations
@@ -159,7 +176,8 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
     (window as any).generationQueue = {
       add: addToQueue,
       update: updateGeneration,
-      remove: removeGeneration
+      remove: removeGeneration,
+      retry: retryGeneration
     };
 
     // Expose toast function for notifications
@@ -175,7 +193,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
       delete (window as any).generationQueue;
       delete (window as any).showToast;
     };
-  }, []);
+  }, [addToQueue, updateGeneration, removeGeneration, retryGeneration]);
 
   if (!isVisible) return null;
 
@@ -265,12 +283,23 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
                         <Eye className="w-3 h-3" />
                       </Button>
                     )}
+                    {item.status === 'error' && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => retryGeneration(item)}
+                        className="h-6 w-6 p-0 text-green-400 hover:text-green-300"
+                        title="Retry generation"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => removeGeneration(item.id)}
+                      onClick={() => removeGeneration(item.id, item.status === 'running')}
                       className="h-6 w-6 p-0 text-gray-400 hover:text-red-400"
-                      title="Remove"
+                      title={item.status === 'running' ? "Cancel generation" : "Remove"}
                     >
                       <X className="w-3 h-3" />
                     </Button>

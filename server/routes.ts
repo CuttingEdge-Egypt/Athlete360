@@ -1777,8 +1777,7 @@ Return only valid JSON with the missing fields.`;
         console.log(`❌ Beat strategies analysis failed for ${athlete.name}, refunding tokens`);
         await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "beat", "Beat Strategies");
         return res.status(500).json({
-          message: "Unable to generate authentic strategic analysis at this time. Please try again later. Your tokens have been refunded.",
-          error: "AI analysis failed"
+          message: "Unable to generate authentic strategic analysis at this time. Please try again later. Your tokens have been refunded."
         });
       }
       
@@ -1787,8 +1786,7 @@ Return only valid JSON with the missing fields.`;
         console.log(`❌ Beat strategies analysis failed for ${athlete.name}, refunding tokens`);
         await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "beat", "Beat Strategies");
         return res.status(500).json({
-          message: "Unable to generate authentic strategic analysis at this time. Please try again later. Your tokens have been refunded.",
-          error: "AI analysis failed"
+          message: "Unable to generate authentic strategic analysis at this time. Please try again later. Your tokens have been refunded."
         });
       }
 
@@ -1820,8 +1818,7 @@ Return only valid JSON with the missing fields.`;
       // Refund tokens for unexpected errors
       await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "beat", "Beat Strategies");
       res.status(500).json({ 
-        message: "Unable to generate authentic beat strategies at this time. Please try again later. Your tokens have been refunded.",
-        error: error instanceof Error ? error.message : String(error)
+        message: "Unable to generate authentic beat strategies at this time. Please try again later. Your tokens have been refunded."
       });
     }
   });

@@ -48,6 +48,8 @@ export default function Home() {
     };
   }, [toast]);
 
+
+
   // Check for payment success notification
   useEffect(() => {
     const paymentSuccess = sessionStorage.getItem('paymentSuccess');
@@ -403,6 +405,53 @@ export default function Home() {
       color: "text-red-400"
     }
   ];
+
+  // Expose trigger analysis function for queue retries
+  useEffect(() => {
+    (window as any).triggerAnalysis = async (athleteName: string, serviceType: string) => {
+      // Find the athlete in current context
+      if (selectedAthlete?.name === athleteName) {
+        // Find the service and trigger it
+        const service = services.find(s => s.id === serviceType);
+        if (service) {
+          try {
+            const response = await fetch(`/api/analysis/${selectedAthlete.id}/${serviceType}`, {
+              method: 'POST',
+              credentials: 'include',
+            });
+            
+            if (response.ok) {
+              const result = await response.json();
+              // Update queue with success
+              (window as any).generationQueue?.update?.(
+                `gen_${Date.now()}_retry`,
+                { 
+                  status: 'completed', 
+                  result: { ...result, serviceType, athleteName }
+                }
+              );
+            } else {
+              const error = await response.json();
+              // Update queue with error
+              (window as any).generationQueue?.update?.(
+                `gen_${Date.now()}_retry`,
+                { 
+                  status: 'error', 
+                  error: error.message || 'Failed to regenerate analysis'
+                }
+              );
+            }
+          } catch (error) {
+            console.error('Retry analysis failed:', error);
+          }
+        }
+      }
+    };
+
+    return () => {
+      delete (window as any).triggerAnalysis;
+    };
+  }, [selectedAthlete, services]);
 
   return (
     <div className="container mx-auto px-4 pt-20">
