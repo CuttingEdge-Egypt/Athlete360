@@ -964,7 +964,6 @@ CRITICAL ERROR HANDLING:
           content: prompt
         }
       ],
-      temperature: 0.1,
       max_completion_tokens: 3000
     });
 
@@ -1048,7 +1047,6 @@ async function searchAthleteImageWithAI(athleteName: string, sport?: string, nat
           content: `Find an official profile image URL for athlete "${athleteName}" who competes in ${sport || 'sports'} from ${nationality || 'unknown country'}.`
         }
       ],
-      temperature: 0.1,
       max_completion_tokens: 200
     });
 
@@ -1286,7 +1284,6 @@ If no ranking data found, use "Not Found" for missing fields but maintain the JS
           content: prompt
         }
       ],
-      temperature: 0.1,
       max_completion_tokens: 4000
     });
 
@@ -1378,7 +1375,6 @@ Provide a comprehensive comparison in this JSON format:
           content: prompt
         }
       ],
-      temperature: 0.1,
       max_completion_tokens: 3000
     });
 
