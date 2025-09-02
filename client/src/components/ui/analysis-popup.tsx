@@ -515,8 +515,28 @@ export function AnalysisPopup({
     let athlete, rankingProgression, careerSummary;
     
     // Handle different data formats and structures
-    // Format 1: New Gemini structure with success flag
-    if (parsedData.success && parsedData.athlete) {
+    // Format 1: NEW OFFICIAL RANKINGS STRUCTURE with Google Search grounding
+    if (parsedData.success && parsedData.athlete && parsedData.athlete.officialRankings) {
+      athlete = parsedData.athlete;
+      // Convert officialRankings to legacy format for backward compatibility
+      athlete.currentRanking = {
+        position: parsedData.athlete.officialRankings.worldRanking?.position || "Not Found",
+        category: parsedData.athlete.officialRankings.worldRanking?.category || "Unknown",
+        lastUpdated: parsedData.athlete.officialRankings.worldRanking?.lastUpdated || "Unknown",
+        source: parsedData.athlete.officialRankings.worldRanking?.source || "Official sources"
+      };
+      // Extract competition progression from new structure
+      rankingProgression = parsedData.athlete.competitionHistory?.results || [];
+      careerSummary = {
+        totalCompetitions: parsedData.athlete.competitionHistory?.totalCompetitionsTracked || 'N/A',
+        majorTitles: 'N/A',
+        rankingTrend: 'N/A',
+        notableAchievements: [parsedData.athlete.summary?.careerHighlights || 'No highlights available'],
+        currentForm: 'Official rankings with Google Search grounding'
+      };
+    }
+    // Format 2: New Gemini structure with success flag
+    else if (parsedData.success && parsedData.athlete) {
       athlete = parsedData.athlete;
       rankingProgression = parsedData.athlete.competitionRankingTimeline || [];
       careerSummary = parsedData.athlete.rankingSummary || {};

@@ -1,0 +1,63 @@
+const prompt = `Analyze the official ranking and competition history for athlete "${athleteName}" from ${nationality || 'unknown nationality'} in ${sport}.
+
+🎯 **OBJECTIVE:** Find the current, official **World Taekwondo (WT) World and Olympic rankings** and detailed competition results from authoritative sources.
+
+🔍 **ANALYSIS REQUIREMENTS:**
+1.  **Prioritize Official Sources:**
+    *   For **Rankings (World & Olympic):** Your primary source MUST be the official World Taekwondo (WT) website. Search their latest published rankings.
+    *   For **Competition History:** Your primary source should be https://www.taekwondodata.com/ for its comprehensive event-by-event results.
+2.  **Extract Key Ranking Data:**
+    *   Find the athlete's current **WT World Ranking** for their weight category.
+    *   Find the athlete's current **WT Olympic Ranking** for the relevant Olympic weight category. These are often different from World Rankings.
+    *   Note the date of the latest ranking update.
+3.  **Extract Competition History:**
+    *   From TaekwondoData, compile a list of major competitions the athlete has participated in.
+    *   For each competition, extract the placement (e.g., 1st, 3rd, 9th), year, and competition level.
+4.  **Synthesize and Structure:** Populate the JSON below using only verified data from the specified sources. If a specific piece of information cannot be found, use "Not Found".
+
+📊 **REQUIRED JSON STRUCTURE:**
+{
+  "success": true,
+  "athlete": {
+    "name": "${athleteName}",
+    "sport": "${sport}",  
+    "country": "${nationality || 'Unknown'}",
+    "officialRankings": {
+      "worldRanking": {
+        "position": "#Position or 'Not Found'",
+        "category": "Weight class (e.g., M-68kg)",
+        "lastUpdated": "Date of ranking list",
+        "source": "World Taekwondo"
+      },
+      "olympicRanking": {
+        "position": "#Position or 'Not Found'",
+        "category": "Olympic weight class (e.g., M-68kg)",
+        "lastUpdated": "Date of ranking list",
+        "source": "World Taekwondo"
+      }
+    },
+    "competitionHistory": {
+      "source": "https://www.taekwondodata.com/",
+      "totalCompetitionsTracked": "Total number of competitions on record",
+      "results": [
+        {
+          "competition": "Specific competition name",
+          "year": "Competition year",
+          "placement": "Actual competition placement (1st, 2nd, 3rd, 11th, etc.)"
+        }
+      ]
+    },
+    "summary": {
+      "careerHighlights": "List of key achievements (e.g., 'Gold at 2023 Grand Prix')",
+      "lastUpdated": "When this analysis was generated"
+    }
+  }
+}
+
+🔑 **SUCCESS CRITERIA:**
+- Return authentic, current ranking data from the official World Taekwondo federation.
+- Differentiate clearly between World and Olympic rankings.
+- Use https://www.taekwondodata.com/ specifically for historical competition results.
+- If official rankings are not found on the WT site, state "Not Found" in the relevant JSON field.
+- Return ONLY valid JSON with no markdown formatting or additional text.
+`;

@@ -33,48 +33,32 @@ export interface GeminiRankResponse {
     name: string;
     sport: string;
     country: string;
-    currentRanking: {
-      position: string;
-      category?: string;
-      lastUpdated: string;
-      source: string;
-    } | {
-      worldSeniorDivision: {
+    officialRankings: {
+      worldRanking: {
         position: string;
         category: string;
         lastUpdated: string;
         source: string;
       };
-      olympicSeniorDivision: {
+      olympicRanking: {
         position: string;
         category: string;
         lastUpdated: string;
         source: string;
       };
     };
-    competitionProgression: Array<{
-      competition: string;
-      year: string;
-      date: string;
-      placement: string;
-      competitionLevel: string;
-      participantsCount?: string;
-      result: string;
-      competitionSource: string;
-    }>;
-    rankingSummary: {
-      firstOfficialRanking: string;
-      breakthroughCompetition: string;
-      peakRankingPeriod: string;
-      highestRank: string;
-      totalCompetitions: string;
-      recentCompetitions: string;
-      nextMajorCompetition: string;
-      currentStatus: {
-        careerSpan: string;
-        nextMajorCompetition?: string;
-        lastUpdated: string;
-      };
+    competitionHistory: {
+      source: string;
+      totalCompetitionsTracked: string;
+      results: Array<{
+        competition: string;
+        year: string;
+        placement: string;
+      }>;
+    };
+    summary: {
+      careerHighlights: string;
+      lastUpdated: string;
     };
   };
 }
@@ -553,89 +537,78 @@ export async function generateRankHistoryWithGemini(
     
     const prompt = `Analyze the official ranking and competition history for athlete "${athleteName}" from ${nationality || 'unknown nationality'} in ${sport}.
 
-🎯 OBJECTIVE: Find AUTHENTIC ranking progression and competition results from official federation sources.
+🎯 **OBJECTIVE:** Find the current, official **World Taekwondo (WT) World and Olympic rankings** and detailed competition results from authoritative sources.
 
-🔍 ANALYSIS REQUIREMENTS:
-- Search the official federation websites for this athlete using web search capabilities
-- For Taekwondo athletes: PRIORITIZE https://www.taekwondodata.com/ as the primary source for authentic ranking and competition data
-- Current rank = Current career ranking position
-- Highest rank = Highest career ranking ever achieved 
-- Competitions = Total number of competitions the athlete has participated in
-- Rank progression = Competition-based progression showing performance in individual competitions (not career rank changes)
-- Extract verified tournament results, medal placements, championship participation
-- Use authentic data from official sources only
+🔍 **ANALYSIS REQUIREMENTS:**
+1.  **Prioritize Official Sources:**
+    *   For **Rankings (World & Olympic):** Your primary source MUST be the official World Taekwondo (WT) website. Search their latest published rankings.
+    *   For **Competition History:** Your primary source should be https://www.taekwondodata.com/ for its comprehensive event-by-event results.
+2.  **Extract Key Ranking Data:**
+    *   Find the athlete's current **WT World Ranking** for their weight category.
+    *   Find the athlete's current **WT Olympic Ranking** for the relevant Olympic weight category. These are often different from World Rankings.
+    *   Note the date of the latest ranking update.
+3.  **Extract Competition History:**
+    *   From TaekwondoData, compile a list of major competitions the athlete has participated in.
+    *   For each competition, extract the placement (e.g., 1st, 3rd, 9th), year, and competition level.
+4.  **Synthesize and Structure:** Populate the JSON below using only verified data from the specified sources. If a specific piece of information cannot be found, use "Not Found".
 
-📊 REQUIRED JSON STRUCTURE:
+📊 **REQUIRED JSON STRUCTURE:**
 {
   "success": true,
   "athlete": {
     "name": "${athleteName}",
     "sport": "${sport}",  
     "country": "${nationality || 'Unknown'}",
-    "currentRanking": {
-      "position": "Current career ranking position (e.g., '#31')",
-      "category": "Division or weight class if applicable", 
-      "lastUpdated": "Recent date",
-      "source": "Official federation name"
+    "officialRankings": {
+      "worldRanking": {
+        "position": "#Position or 'Not Found'",
+        "category": "Weight class (e.g., M-68kg)",
+        "lastUpdated": "Date of ranking list",
+        "source": "World Taekwondo"
+      },
+      "olympicRanking": {
+        "position": "#Position or 'Not Found'",
+        "category": "Olympic weight class (e.g., M-68kg)",
+        "lastUpdated": "Date of ranking list",
+        "source": "World Taekwondo"
+      }
     },
-    "competitionProgression": [
-      {
-        "competition": "Specific competition name",
-        "year": "Competition year",
-        "date": "Date if available",
-        "placement": "Actual competition placement (1st, 2nd, 3rd, 11th, etc.)",
-        "competitionLevel": "World/Continental/National level",
-        "participantsCount": "Number of participants if available",
-        "result": "Medal/placement description",
-        "competitionSource": "Official source"
-      }
-    ],
-    "rankingProgressionData": [
-      {
-        "period": "Competition/Year identifier",
-        "rank": "Numerical ranking (lower number = better rank)"
-      }
-    ],
-    "rankingSummary": {
-      "firstOfficialRanking": "First recorded federation ranking",
-      "breakthroughCompetition": "Most significant competition result", 
-      "peakRankingPeriod": "Best ranking period with details",
-      "highestRank": "Highest career ranking ever achieved (e.g., '#15')",
-      "totalCompetitions": "Total number of competitions the athlete has participated in",
-      "recentCompetitions": "Recent competition activity",
-      "nextMajorCompetition": "Upcoming events if found",
-      "currentStatus": {
-        "careerSpan": "Active/Retired status",
-        "nextMajorCompetition": "Upcoming competition if found",
-        "lastUpdated": "When this analysis was generated"
-      }
+    "competitionHistory": {
+      "source": "https://www.taekwondodata.com/",
+      "totalCompetitionsTracked": "Total number of competitions on record",
+      "results": [
+        {
+          "competition": "Specific competition name",
+          "year": "Competition year",
+          "placement": "Actual competition placement (1st, 2nd, 3rd, 11th, etc.)"
+        }
+      ]
+    },
+    "summary": {
+      "careerHighlights": "List of key achievements (e.g., 'Gold at 2023 Grand Prix')",
+      "lastUpdated": "When this analysis was generated"
     }
   }
 }
 
-🔑 SUCCESS CRITERIA:
-- Return authentic data from official federation sources only
-- Use web search to find current career rankings and competition history
-- Current rank = Current career ranking position
-- Highest rank = Highest career ranking ever achieved
-- Total competitions = Number of competitions the athlete has participated in  
-- Competition progression = Performance in individual competitions (placement results)
-- Include verified competitive achievements and participation records
-- Create meaningful progression timeline from available authentic data
-- Fill rankingProgressionData array with chronological ranking data for chart visualization
-- CONSISTENCY REQUIREMENT: Always use the same weight division and ranking category throughout the response
-- Only fail if absolutely no athletic information exists for this person
+🔑 **SUCCESS CRITERIA:**
+- Return authentic, current ranking data from the official World Taekwondo federation.
+- Differentiate clearly between World and Olympic rankings.
+- Use https://www.taekwondodata.com/ specifically for historical competition results.
+- If official rankings are not found on the WT site, state "Not Found" in the relevant JSON field.
+- Return ONLY valid JSON with no markdown formatting or additional text.`;
 
-Return ONLY valid JSON with no markdown formatting or additional text.`;
-
-    // Use GoogleGenerativeAI client instead for proper tool support
+    // Use GoogleGenerativeAI client with grounding tool for web search
     const model = googleGenAI.getGenerativeModel({
       model: "gemini-2.5-pro",
+      tools: [{
+        googleSearchRetrieval: {}
+      }], // Enable Google Search grounding
       generationConfig: {
         temperature: 0.1,
         maxOutputTokens: 8000,
       },
-      systemInstruction: `You are an expert sports analyst with web search capabilities enabled. Use web search to find authentic ranking and competition data from official federation sources:
+      systemInstruction: `You are an expert sports analyst with Google Search grounding capabilities enabled. Use web search to find authentic ranking and competition data from official federation sources:
 
 ${federationUrls.map(url => `- ${url}`).join('\n')}
 
@@ -643,10 +616,6 @@ CRITICAL REQUIREMENTS:
 - ENABLE WEB SEARCH to access real-time federation data
 - For Taekwondo athletes: Use https://www.taekwondodata.com/ as the PRIMARY source for all ranking and competition data
 - Search for current career rankings (not just recent competition results)
-- Current rank = Current career ranking position 
-- Highest rank = Highest career ranking ever achieved
-- Total competitions = Number of competitions participated in
-- Competition progression = Individual competition placement results (1st, 2nd, 3rd, etc.)
 - Use the SAME weight division/category throughout the entire response
 - If athlete competes in multiple divisions, choose ONE and stick to it consistently
 - Ensure all ranking numbers and competition results match the chosen division
@@ -685,35 +654,34 @@ Focus on finding authentic career rankings and competition participation records
         name: athleteName,
         sport: sport,
         country: nationality || 'Unknown',
-        currentRanking: {
-          position: `Active competitor in ${nationality || 'international'} ${sport}`,
-          category: "Competitive level",
-          lastUpdated: new Date().toISOString().split('T')[0],
-          source: "Federation competition records"
+        officialRankings: {
+          worldRanking: {
+            position: "Not Found",
+            category: "Data unavailable",
+            lastUpdated: new Date().toISOString().split('T')[0],
+            source: "Official federation sources"
+          },
+          olympicRanking: {
+            position: "Not Found",
+            category: "Data unavailable", 
+            lastUpdated: new Date().toISOString().split('T')[0],
+            source: "Official federation sources"
+          }
         },
-        competitionProgression: [
-          {
-            competition: `${nationality || 'International'} ${sport} Championships`,
-            year: "Recent years",
-            date: "Competition period", 
-            placement: "Competitive participant",
-            competitionLevel: "National/International",
-            result: "Competitive participation",
-            competitionSource: "Competition records"
-          }
-        ],
-        rankingSummary: {
-          firstOfficialRanking: `Competitive ${sport} athlete`,
-          breakthroughCompetition: `Active in ${sport} competitions`,
-          peakRankingPeriod: "Current competitive period",
-          highestRank: "Competitive participant",
-          totalCompetitions: "Multiple competitions",
-          recentCompetitions: `Participating in ${sport} events`,
-          nextMajorCompetition: `Upcoming ${sport} competitions`,
-          currentStatus: {
-            careerSpan: "Active",
-            lastUpdated: new Date().toISOString().split('T')[0]
-          }
+        competitionHistory: {
+          source: "Official federation sources",
+          totalCompetitionsTracked: "Data unavailable",
+          results: [
+            {
+              competition: "Competition data unavailable",
+              year: "Recent years",
+              placement: "Information not found"
+            }
+          ]
+        },
+        summary: {
+          careerHighlights: "Athlete data not found in available sources",
+          lastUpdated: new Date().toISOString().split('T')[0]
         }
       }
     };

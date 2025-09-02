@@ -310,13 +310,33 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     // Adaptive data extraction for multiple JSON formats
     let athlete, rankingProgression, careerSummary;
     
-    // Format 1: New enhanced structure (athlete, rankingProgression, careerSummary)
-    if (parsedData.athlete && parsedData.rankingProgression !== undefined && parsedData.careerSummary) {
+    // Format 1: NEW OFFICIAL RANKINGS STRUCTURE with Google Search grounding
+    if (parsedData.athlete && parsedData.athlete.officialRankings) {
+      athlete = parsedData.athlete;
+      // Convert officialRankings to legacy format for backward compatibility
+      athlete.currentRanking = {
+        position: parsedData.athlete.officialRankings.worldRanking?.position || "Not Found",
+        category: parsedData.athlete.officialRankings.worldRanking?.category || "Unknown",
+        lastUpdated: parsedData.athlete.officialRankings.worldRanking?.lastUpdated || "Unknown",
+        source: parsedData.athlete.officialRankings.worldRanking?.source || "Official sources"
+      };
+      // Extract competition progression from new structure
+      rankingProgression = parsedData.athlete.competitionHistory?.results || [];
+      careerSummary = {
+        totalCompetitions: parsedData.athlete.competitionHistory?.totalCompetitionsTracked || 'N/A',
+        majorTitles: 'N/A',
+        rankingTrend: 'N/A',
+        notableAchievements: [parsedData.athlete.summary?.careerHighlights || 'No highlights available'],
+        currentForm: 'Official rankings with Google Search grounding'
+      };
+    }
+    // Format 2: Enhanced structure (athlete, rankingProgression, careerSummary)
+    else if (parsedData.athlete && parsedData.rankingProgression !== undefined && parsedData.careerSummary) {
       athlete = parsedData.athlete;
       rankingProgression = parsedData.rankingProgression;
       careerSummary = parsedData.careerSummary;
     }
-    // Format 1b: New Taekwondo dual ranking structure
+    // Format 3: Taekwondo dual ranking structure
     else if (parsedData.athlete && (parsedData.athlete.worldRankProgression || parsedData.athlete.competitionPlacementProgression)) {
       athlete = parsedData.athlete;
       // Extract ranking progression from the athlete object for backward compatibility
