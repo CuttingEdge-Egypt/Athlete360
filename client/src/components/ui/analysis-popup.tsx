@@ -592,9 +592,9 @@ export function AnalysisPopup({
               <div className="text-right">
                 <div className="text-sm text-gray-400">Career Span</div>
                 <div className="text-xl font-bold text-white">
-                  {activePeriod.start_year} - {activePeriod.end_year === "current" ? "Present" : activePeriod.end_year}
+                  {activePeriod.start_year} - {activePeriod.end_year === "current" || activePeriod.end_year?.toString().includes("2025") ? "Present" : activePeriod.end_year}
                 </div>
-                {activePeriod.end_year === "current" && (
+                {(activePeriod.end_year === "current" || activePeriod.end_year?.toString().includes("2025")) && (
                   <Badge className="bg-green-600 text-white mt-2">Active</Badge>
                 )}
               </div>

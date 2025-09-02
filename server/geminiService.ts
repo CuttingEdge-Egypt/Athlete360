@@ -456,7 +456,15 @@ export async function generateRankHistoryWithGemini(
     // Get sport-specific federation URLs for context
     const federationUrls = getSportFederationUrls(sport);
     
+    // Get current date for more accurate analysis
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.toLocaleString('en-US', { month: 'long' });
+    const formattedCurrentDate = `${currentMonth} ${currentYear}`;
+    
     const prompt = `As an expert sports analyst, your task is to generate a comprehensive rank history analysis for athlete "${athleteName}" from ${nationality || 'unknown nationality'} in ${sport}.
+
+**CURRENT DATE CONTEXT**: Today is ${formattedCurrentDate}. Use this as your reference point for determining what is "current" and "recent" in your analysis.
 
 **Instructions:**
 
@@ -473,8 +481,8 @@ export async function generateRankHistoryWithGemini(
   "sport": "${sport}",
   "nationality": "${nationality || 'Unknown'}",
   "active_period": {
-    "start_year": 2017,
-    "end_year": "current"
+    "start_year": Start year of player,
+    "end_year": "${formattedCurrentDate}"
   },
   "ranking_system_overview": "Detailed explanation of how the ranking system works in ${sport}, including point systems, event tiers, and what achievements lead to ranking improvements",
   "career_phases": [
@@ -485,7 +493,7 @@ export async function generateRankHistoryWithGemini(
         {
           "year": 2018,
           "event_name": "Specific tournament name",
-          "event_tier": "G1/G2/G4/G6/G12 classification or equivalent",
+          "event_tier": "competition tier",
           "result": "Medal/placement result",
           "notes": "Explanation of significance and ranking impact"
         }
@@ -506,14 +514,14 @@ export async function generateRankHistoryWithGemini(
     },
     {
       "phase_name": "Elite Status and Recent Achievements",
-      "period": "2023-current",
+      "period": "2023-${formattedCurrentDate}",
       "key_achievements": [
         {
           "year": 2023,
           "event_name": "Recent major competition",
           "event_tier": "Event classification",
           "result": "Achievement",
-          "notes": "Current status and ranking implications"
+          "notes": "Current status and ranking implications as of ${formattedCurrentDate}"
         }
       ]
     }
