@@ -112,30 +112,27 @@ export function AnalysisPopup({
     
     const sections: any = {};
     
-    // Look for introduction (current status)
-    const introMatch = bioText.match(/^(.*?)\n\n/);
+    // Look for "Introduction and current status:" pattern
+    const introMatch = bioText.match(/Introduction and current status:\s*(.*?)(?=Overall story:|$)/);
     if (introMatch) {
       sections.introduction = introMatch[1].trim();
     }
     
-    // Look for overall story section
-    const storyMatch = bioText.match(/Players' overall story and what they're known for[\s\S]*?\n\n([\s\S]*?)(?:\n\n|$)/);
+    // Look for "Overall story:" pattern  
+    const storyMatch = bioText.match(/Overall story:\s*(.*?)(?=Recent Competitions:|Career Record|Notable Achievements:|$)/);
     if (storyMatch) {
       sections.overallStory = storyMatch[1].trim();
-    } else {
-      // Fallback - use the middle portion of bio
-      const parts = bioText.split('\n\n');
-      if (parts.length > 1) {
-        sections.overallStory = parts.slice(1, -1).join('\n\n');
-      }
     }
     
     // Look for career record section
-    const careerMatch = bioText.match(/career record|rankings|record/i);
+    const careerMatch = bioText.match(/Career Record and Rankings:\s*(.*?)(?=Notable Achievements:|Recent Competitions:|$)/);
     if (careerMatch) {
-      const careerText = bioText.substring(careerMatch.index || 0);
-      const endMatch = careerText.match(/\n\n/);
-      sections.careerRecord = endMatch ? careerText.substring(0, endMatch.index) : careerText;
+      sections.careerRecord = careerMatch[1].trim();
+    }
+    
+    // If no sections found, display entire bio as introduction
+    if (Object.keys(sections).length === 0 && bioText.length > 0) {
+      sections.introduction = bioText;
     }
     
     return sections;
@@ -751,11 +748,14 @@ export function AnalysisPopup({
   };
 
   const renderBioAnalysis = (data: any) => {
+    console.log('Frontend Bio Data RECEIVED:', JSON.stringify(data, null, 2));
+    
     // Use refreshed data if available, otherwise use original data
     const dataToRender = refreshedBioData || data;
     
     // Parse the data first using the utility function
     const parsedData = parseAnalysisData(dataToRender);
+    console.log('Parsed Bio Data:', JSON.stringify(parsedData, null, 2));
     
     // Ensure we have a proper object to work with
     let bioData = parsedData;
@@ -788,13 +788,106 @@ export function AnalysisPopup({
       };
     }
     
-    // Extract data with safe fallbacks
-    const name = bioData.name || "Athlete Profile";
-    const bio = bioData.bio || "";
-    const rank = bioData.rank || "N/A";
-    const achievements = Array.isArray(bioData.achievements) ? bioData.achievements : [];
-    const recentNews = bioData.personalInfo?.recentNews || bioData.recentNews || [];
-    const profileImageUrl = bioData.profileImageUrl;
+    // Extract data with safe fallbacks - handle nested data structure
+    const actualData = bioData.data || bioData; // Handle case where data is nested under 'data' key
+    const name = actualData.name || bioData.name || "Athlete Profile";
+    const bio = actualData.bio || bioData.bio || "";
+    const rank = actualData.rank || bioData.rank || "N/A";
+    const achievements = Array.isArray(actualData.achievements) ? actualData.achievements : 
+                        Array.isArray(bioData.achievements) ? bioData.achievements : [];
+    const recentNews = actualData.personalInfo?.recentNews || actualData.recentNews || 
+                      bioData.personalInfo?.recentNews || bioData.recentNews || [];
+    const profileImageUrl = actualData.profileImageUrl || bioData.profileImageUrl;
+    
+    console.log('Bio content to parse:', bio);
+    
+    // If bio content is empty or just basic text, display it directly
+    if (!bio || bio.length < 50) {
+      return (
+        <div className="space-y-8 max-w-none">
+          {/* Bio Analysis Header with Refresh Button */}
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center space-x-3">
+              <User className="text-athlete-accent" size={32} />
+              <h2 className="text-2xl font-bold text-athlete-accent">Biography Analysis</h2>
+            </div>
+            <Button
+              onClick={() => refreshBioMutation.mutate()}
+              disabled={refreshBioMutation.isPending}
+              variant="outline"
+              size="sm"
+              className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-black"
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${refreshBioMutation.isPending ? 'animate-spin' : ''}`} />
+              {refreshBioMutation.isPending ? 'Refreshing...' : 'Refresh Bio'}
+            </Button>
+          </div>
+
+          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-accent border-gray-600 shadow-xl">
+            <CardContent className="p-8">
+              <h3 className="text-3xl font-bold text-emerald-400 mb-6 flex items-center">
+                <User className="mr-4 text-emerald-400" size={32} />
+                Biography
+              </h3>
+              <div className="prose prose-invert max-w-none">
+                <p className="text-gray-200 leading-relaxed text-lg">
+                  {bio || "No biography data available. Click 'Refresh Bio' to generate fresh content."}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Achievements Section */}
+          {achievements.length > 0 && (
+            <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-warning border-gray-600 shadow-xl">
+              <CardContent className="p-8">
+                <h3 className="text-3xl font-bold text-athlete-warning mb-6 flex items-center">
+                  <Award className="mr-4 text-athlete-warning" size={32} />
+                  Notable Achievements
+                </h3>
+                <div className="grid gap-4">
+                  {achievements.map((achievement: string, index: number) => (
+                    <div 
+                      key={index}
+                      className="flex items-start space-x-4 p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20"
+                    >
+                      <div className="w-3 h-3 bg-athlete-warning rounded-full mt-2 flex-shrink-0"></div>
+                      <p className="text-gray-200 leading-relaxed text-lg font-medium">
+                        {typeof achievement === 'string' ? achievement : JSON.stringify(achievement, null, 2)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Recent News Section */}
+          {recentNews.length > 0 && (
+            <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-purple-400 border-gray-600 shadow-xl">
+              <CardContent className="p-8">
+                <h3 className="text-3xl font-bold text-purple-400 mb-6 flex items-center">
+                  <Calendar className="mr-4 text-purple-400" size={32} />
+                  Recent News
+                </h3>
+                <div className="space-y-4">
+                  {recentNews.map((news: string, index: number) => (
+                    <div 
+                      key={index}
+                      className="p-6 bg-athlete-gray-600 rounded-xl border-l-4 border-purple-400 shadow-lg"
+                    >
+                      <p className="text-gray-200 leading-relaxed text-lg font-medium">
+                        {typeof news === 'string' ? news : JSON.stringify(news, null, 2)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      );
+    }
     
     // Parse bio content to extract different sections
     const bioSections = parseBioSections(bio);
