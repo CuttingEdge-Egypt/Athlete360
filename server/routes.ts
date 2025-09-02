@@ -815,12 +815,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           // Update athlete bio in database with GPT-5 AI content
+          const rankValue = gptBioAnalysis.currentRank || gptBioAnalysis.rank;
           await storage.updateAthlete(athleteId, { 
             bio: gptBioAnalysis.bio,
             playersStory: gptBioAnalysis.playersStory || "",
-            rank: typeof gptBioAnalysis.rank === 'number' ? gptBioAnalysis.rank : 
-                  (typeof gptBioAnalysis.rank === 'string' && !isNaN(Number(gptBioAnalysis.rank)) && gptBioAnalysis.rank !== 'N/A') ? 
-                  Number(gptBioAnalysis.rank) : undefined,
+            rank: typeof rankValue === 'number' ? rankValue : 
+                  (typeof rankValue === 'string' && !isNaN(Number(rankValue)) && rankValue !== 'N/A') ? 
+                  Number(rankValue) : undefined,
             achievements: gptBioAnalysis.achievements || []
           });
           
@@ -828,7 +829,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             name: gptBioAnalysis.name,
             bio: gptBioAnalysis.bio,
             playersStory: gptBioAnalysis.playersStory || "",
-            rank: gptBioAnalysis.rank,
+            rank: gptBioAnalysis.currentRank || gptBioAnalysis.rank,
             profileImageUrl: athlete.profileImageUrl,
             achievements: gptBioAnalysis.achievements && Array.isArray(gptBioAnalysis.achievements) && gptBioAnalysis.achievements.length > 0 ? gptBioAnalysis.achievements.slice(0, 4) : [
               "Career achievements from GPT-5 analysis with web search",
