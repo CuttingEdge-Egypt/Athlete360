@@ -903,7 +903,7 @@ export function AnalysisPopup({
                   >
                     <div className="w-3 h-3 bg-athlete-warning rounded-full mt-2 flex-shrink-0"></div>
                     <p className="text-gray-200 leading-relaxed text-lg font-medium">
-                      {achievement}
+                      {typeof achievement === 'string' ? achievement : JSON.stringify(achievement, null, 2)}
                     </p>
                   </div>
                 ))}
@@ -927,7 +927,7 @@ export function AnalysisPopup({
                     className="p-6 bg-athlete-gray-600 rounded-xl border-l-4 border-purple-400 shadow-lg"
                   >
                     <p className="text-gray-200 leading-relaxed text-lg font-medium">
-                      {news}
+                      {typeof news === 'string' ? news : JSON.stringify(news, null, 2)}
                     </p>
                   </div>
                 ))}
