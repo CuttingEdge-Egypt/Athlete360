@@ -557,6 +557,7 @@ export async function generateRankHistoryWithGemini(
 
 🔍 ANALYSIS REQUIREMENTS:
 - Search the official federation websites for this athlete using web search capabilities
+- For Taekwondo athletes: PRIORITIZE https://www.taekwondodata.com/ as the primary source for authentic ranking and competition data
 - Current rank = Current career ranking position
 - Highest rank = Highest career ranking ever achieved 
 - Competitions = Total number of competitions the athlete has participated in
@@ -640,6 +641,7 @@ ${federationUrls.map(url => `- ${url}`).join('\n')}
 
 CRITICAL REQUIREMENTS:
 - ENABLE WEB SEARCH to access real-time federation data
+- For Taekwondo athletes: Use https://www.taekwondodata.com/ as the PRIMARY source for all ranking and competition data
 - Search for current career rankings (not just recent competition results)
 - Current rank = Current career ranking position 
 - Highest rank = Highest career ranking ever achieved
@@ -723,9 +725,10 @@ function getSportFederationUrls(sport: string): string[] {
   
   if (sportLower.includes('taekwondo')) {
     return [
+      'https://www.taekwondodata.com/',
+      'https://www.taekwondodata.com/ranking_search.html', 
       'https://www.worldtaekwondo.org/ranking/rk_index.html',
       'https://www.worldtaekwondo.org/ranking/ranking.html',
-      'https://www.taekwondodata.com/ranking_search.html',
       'https://www.worldtaekwondo.org/competition/list.html'
     ];
   } else if (sportLower.includes('fencing')) {
