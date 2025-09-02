@@ -316,6 +316,19 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
       rankingProgression = parsedData.rankingProgression;
       careerSummary = parsedData.careerSummary;
     }
+    // Format 1b: New Taekwondo dual ranking structure
+    else if (parsedData.athlete && (parsedData.athlete.worldRankProgression || parsedData.athlete.competitionPlacementProgression)) {
+      athlete = parsedData.athlete;
+      // Extract ranking progression from the athlete object for backward compatibility
+      rankingProgression = parsedData.athlete.worldRankProgression || parsedData.athlete.competitionRankingTimeline || [];
+      careerSummary = parsedData.athlete.rankingSummary || {
+        totalCompetitions: 'N/A',
+        majorTitles: 'N/A',
+        rankingTrend: 'N/A',
+        notableAchievements: [],
+        currentForm: 'Taekwondo dual ranking format'
+      };
+    }
     // Format 2: Old synthetic structure (currentRank, peakRank, history, recommendations)
     else if (parsedData.currentRank || parsedData.peakRank || parsedData.history) {
       athlete = {
@@ -373,11 +386,19 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
             
             <div className="grid md:grid-cols-4 gap-4">
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-blue-500/20">
-                <div className="text-2xl font-bold text-white">{athlete.currentRanking || 'N/A'}</div>
+                <div className="text-2xl font-bold text-white">
+                  {athlete.currentRanking?.worldSeniorDivision?.position || 
+                   athlete.currentRanking?.position || 
+                   athlete.currentRanking || 'N/A'}
+                </div>
                 <div className="text-sm text-blue-300">Current Rank</div>
               </div>
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-green-500/20">
-                <div className="text-2xl font-bold text-green-400">{athlete.peakRanking || 'N/A'}</div>
+                <div className="text-2xl font-bold text-green-400">
+                  {athlete.peakRanking || 
+                   athlete.rankingSummary?.highestRank || 
+                   'N/A'}
+                </div>
                 <div className="text-sm text-green-300">Peak Rank</div>
               </div>
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-yellow-500/20">
