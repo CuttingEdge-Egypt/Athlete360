@@ -1042,8 +1042,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Use Gemini 2.5 Pro with URL context for enhanced ranking analysis
           rankData = await generateRankHistoryWithGemini(athlete.name, sportName, athlete.country || undefined);
           
-          // Ensure we have valid data structure
-          if (!rankData || !rankData.athlete) {
+          // Ensure we have valid data structure (updated for new career phases format)
+          if (!rankData || !rankData.athlete_name) {
             throw new Error("Failed to generate valid rank history data");
           }
         } catch (rankError) {
