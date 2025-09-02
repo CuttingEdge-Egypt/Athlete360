@@ -169,7 +169,26 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     const bio = bioData.bio || "";
     const playersStory = bioData.playersStory || "";
     const rank = bioData.currentRank || bioData.rank || "N/A";
-    const achievements = Array.isArray(bioData.achievements) ? bioData.achievements : [];
+    
+    // Debug achievements parsing
+    console.log('Raw achievements data:', bioData.achievements);
+    console.log('Achievements type:', typeof bioData.achievements);
+    console.log('Is array?', Array.isArray(bioData.achievements));
+    
+    let achievements = [];
+    if (Array.isArray(bioData.achievements)) {
+      achievements = bioData.achievements;
+    } else if (typeof bioData.achievements === 'string') {
+      try {
+        achievements = JSON.parse(bioData.achievements);
+      } catch (e) {
+        console.log('Failed to parse achievements string:', e);
+        achievements = [];
+      }
+    }
+    
+    console.log('Final parsed achievements:', achievements);
+    
     const recentNews = bioData.personalInfo?.recentNews || bioData.recentNews || [];
     const profileImageUrl = bioData.profileImageUrl;
     
