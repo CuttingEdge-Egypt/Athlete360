@@ -144,8 +144,11 @@ export function AnalysisPopup({
   const renderStrengthsAnalysis = (data: any) => {
     console.log('Frontend Strengths Data RECEIVED:', JSON.stringify(data, null, 2));
     
+    // Use refreshed data if available, otherwise use original data
+    const dataToUse = refreshedStrengthsData || data;
+    
     // Parse the data first using the utility function
-    const parsedData = parseAnalysisData(data);
+    const parsedData = parseAnalysisData(dataToUse);
     
     // Check for error state first
     if (parsedData.error || parsedData.message?.includes('Unable to generate')) {
@@ -173,6 +176,21 @@ export function AnalysisPopup({
 
     return (
       <div className="space-y-6">
+        {/* Refresh Button */}
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold text-white">Athlete Strengths</h3>
+          <Button
+            onClick={() => refreshStrengthsMutation.mutate()}
+            disabled={refreshStrengthsMutation.isPending}
+            variant="outline"
+            size="sm"
+            className="border-athlete-success text-athlete-success hover:bg-athlete-success hover:text-black"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${refreshStrengthsMutation.isPending ? 'animate-spin' : ''}`} />
+            {refreshStrengthsMutation.isPending ? 'Refreshing...' : 'Refresh Analysis'}
+          </Button>
+        </div>
+        
         {strengths.length > 0 ? strengths.map((strength: any, index: number) => {
           // Only render if we have authentic strength data
           if (!strength.title && !strength.description) {
@@ -258,7 +276,10 @@ export function AnalysisPopup({
   };
 
   const renderWeaknessesAnalysis = (data: any) => {
-    const parsedData = parseAnalysisData(data);
+    // Use refreshed data if available, otherwise use original data
+    const dataToUse = refreshedWeaknessesData || data;
+    
+    const parsedData = parseAnalysisData(dataToUse);
     
     if (parsedData.error || parsedData.message?.includes('Unable to generate')) {
       return (
@@ -283,20 +304,37 @@ export function AnalysisPopup({
     }
 
     return (
-      <div className="space-y-4">
-        {weaknesses.length > 0 ? weaknesses.map((weakness: any, index: number) => (
-          <Card key={index} className="bg-athlete-gray-700 border-gray-600">
-            <CardContent className="p-4">
-              <h5 className="font-semibold text-athlete-danger mb-2">{weakness.title}</h5>
-              <p className="text-sm text-gray-300">{weakness.description}</p>
-            </CardContent>
-          </Card>
-        )) : (
-          <div className="text-gray-400 text-center py-8">
-            <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-gray-500" />
-            <p>No weaknesses analysis data available</p>
-          </div>
-        )}
+      <div className="space-y-6">
+        {/* Refresh Button */}
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold text-white">Areas for Improvement</h3>
+          <Button
+            onClick={() => refreshWeaknessesMutation.mutate()}
+            disabled={refreshWeaknessesMutation.isPending}
+            variant="outline"
+            size="sm"
+            className="border-athlete-danger text-athlete-danger hover:bg-athlete-danger hover:text-black"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${refreshWeaknessesMutation.isPending ? 'animate-spin' : ''}`} />
+            {refreshWeaknessesMutation.isPending ? 'Refreshing...' : 'Refresh Analysis'}
+          </Button>
+        </div>
+        
+        <div className="space-y-4">
+          {weaknesses.length > 0 ? weaknesses.map((weakness: any, index: number) => (
+            <Card key={index} className="bg-athlete-gray-700 border-gray-600">
+              <CardContent className="p-4">
+                <h5 className="font-semibold text-athlete-danger mb-2">{weakness.title}</h5>
+                <p className="text-sm text-gray-300">{weakness.description}</p>
+              </CardContent>
+            </Card>
+          )) : (
+            <div className="text-gray-400 text-center py-8">
+              <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-gray-500" />
+              <p>No weaknesses analysis data available</p>
+            </div>
+          )}
+        </div>
       </div>
     );
   };
@@ -495,6 +533,10 @@ export function AnalysisPopup({
     
     // Parse data with comprehensive fallback strategies for adaptive UI
     const parsedData = parseAnalysisData(data);
+    
+    // Initialize variables to avoid undefined errors
+    let rankingProgression: any[] = [];
+    let careerSummary: any = {};
     
     // Handle different data formats and error states
     if (parsedData.error || parsedData.message?.includes('Unable to generate')) {
@@ -902,13 +944,15 @@ export function AnalysisPopup({
   const [showInputForm, setShowInputForm] = useState(false);
   const [showCustomizePlanModal, setShowCustomizePlanModal] = useState(false);
   const [refreshedBioData, setRefreshedBioData] = useState<any>(null);
+  const [refreshedStrengthsData, setRefreshedStrengthsData] = useState<any>(null);
+  const [refreshedWeaknessesData, setRefreshedWeaknessesData] = useState<any>(null);
   const queryClient = useQueryClient();
 
   // Refresh bio analysis mutation
   const refreshBioMutation = useMutation({
     mutationFn: async () => {
       if (!athleteId) throw new Error('No athlete ID available');
-      const response = await fetch(`/api/analysis/${athleteId}/bio`, {
+      const response = await fetch(`/api/analysis/${athleteId}/bio?forceUpdate=true`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -931,6 +975,70 @@ export function AnalysisPopup({
     onError: (error: any) => {
       toast({
         title: "Failed to refresh analysis",
+        description: error.message || "Please try again later.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Refresh strengths analysis mutation
+  const refreshStrengthsMutation = useMutation({
+    mutationFn: async () => {
+      if (!athleteId) throw new Error('No athlete ID available');
+      const response = await fetch(`/api/analysis/${athleteId}/strengths?forceUpdate=true`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to refresh strengths analysis');
+      }
+      return await response.json();
+    },
+    onSuccess: (result) => {
+      setRefreshedStrengthsData(result);
+      toast({
+        title: "Strengths analysis refreshed!",
+        description: "Generated fresh analysis with latest data.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/user-history'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to refresh strengths",
+        description: error.message || "Please try again later.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Refresh weaknesses analysis mutation
+  const refreshWeaknessesMutation = useMutation({
+    mutationFn: async () => {
+      if (!athleteId) throw new Error('No athlete ID available');
+      const response = await fetch(`/api/analysis/${athleteId}/weaknesses?forceUpdate=true`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to refresh weaknesses analysis');
+      }
+      return await response.json();
+    },
+    onSuccess: (result) => {
+      setRefreshedWeaknessesData(result);
+      toast({
+        title: "Weaknesses analysis refreshed!",
+        description: "Generated fresh analysis with latest data.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/user-history'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to refresh weaknesses",
         description: error.message || "Please try again later.",
         variant: "destructive",
       });
