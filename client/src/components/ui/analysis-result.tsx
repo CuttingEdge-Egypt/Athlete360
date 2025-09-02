@@ -154,7 +154,8 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     // Extract data with safe fallbacks
     const name = bioData.name || "Athlete Profile";
     const bio = bioData.bio || "";
-    const rank = bioData.rank || "N/A";
+    const playersStory = bioData.playersStory || "";
+    const rank = bioData.currentRank || bioData.rank || "N/A";
     const achievements = Array.isArray(bioData.achievements) ? bioData.achievements : [];
     const recentNews = bioData.personalInfo?.recentNews || bioData.recentNews || [];
     const profileImageUrl = bioData.profileImageUrl;
@@ -204,15 +205,15 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
         )}
 
         {/* Players' Overall Story Section */}
-        {bioSections.overallStory && (
+        {(playersStory || bioSections.overallStory) && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-cyan-400 border-gray-600 shadow-xl">
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-cyan-400 mb-6 flex items-center">
                 <Star className="mr-4 text-cyan-400" size={32} />
-                Players' Overall Story
+                Player's Story
               </h3>
               <div className="prose prose-invert max-w-none">
-                <p className="text-gray-200 leading-relaxed text-lg">{bioSections.overallStory}</p>
+                <p className="text-gray-200 leading-relaxed text-lg">{playersStory || bioSections.overallStory}</p>
               </div>
             </CardContent>
           </Card>

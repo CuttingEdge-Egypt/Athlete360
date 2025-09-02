@@ -54,7 +54,9 @@ export interface GeminiRankResponse {
 export interface AthleteData {
   name: string;
   bio: string;
-  rank: number | string;
+  playersStory?: string;
+  currentRank: number | string;
+  rank?: number | string; // Keep for backward compatibility
   achievements?: string[];
   recentNews?: string[];
   profileImageUrl?: string | null;
@@ -614,7 +616,8 @@ export async function generateAthleteBiography(name: string, sport: string, nati
     Provide the response as a JSON object with these fields:
     - name: athlete's full name
     - bio: the detailed biography without any links or citations
-    - rank: current world ranking if available (as number or "N/A")
+    - playersStory: a compelling narrative about the athlete's journey and what makes them unique
+    - currentRank: current world ranking if available (as number or "N/A")
     - achievements: array of key achievements
     - recentNews: array of recent news or competition results
     
@@ -627,7 +630,8 @@ export async function generateAthleteBiography(name: string, sport: string, nati
     {
       "name": "athlete's full name",
       "bio": "detailed biography without any links or citations",
-      "rank": "current world ranking or N/A",
+      "playersStory": "compelling narrative about the athlete's journey and unique qualities",
+      "currentRank": "current world ranking or N/A",
       "achievements": ["array of key achievements"],
       "recentNews": ["array of recent news or competition results"]
     }`;
@@ -683,9 +687,18 @@ export async function generateAthleteBiography(name: string, sport: string, nati
       athleteData.achievements = athleteData.achievements || [];
       athleteData.recentNews = athleteData.recentNews || [];
       
-      // Handle rank conversion
-      if (typeof athleteData.rank === 'string' && !isNaN(Number(athleteData.rank)) && athleteData.rank !== 'N/A') {
+      // Handle rank conversion for both rank and currentRank fields
+      if (athleteData.currentRank && typeof athleteData.currentRank === 'string' && !isNaN(Number(athleteData.currentRank)) && athleteData.currentRank !== 'N/A') {
+        athleteData.currentRank = Number(athleteData.currentRank);
+      }
+      // Also handle legacy rank field for backward compatibility - map currentRank to rank for frontend
+      if (athleteData.rank && typeof athleteData.rank === 'string' && !isNaN(Number(athleteData.rank)) && athleteData.rank !== 'N/A') {
         athleteData.rank = Number(athleteData.rank);
+      }
+      
+      // Map currentRank to rank for frontend compatibility
+      if (athleteData.currentRank !== undefined) {
+        athleteData.rank = athleteData.currentRank;
       }
       
       console.log(`✅ Gemini successfully generated bio data for ${name}`);
@@ -785,7 +798,8 @@ Return as valid JSON:
 {
   "name": "full name",
   "bio": "biography text with sections above",
-  "rank": "current ranking or N/A",
+  "playersStory": "compelling narrative about the athlete's journey",
+  "currentRank": "current ranking or N/A",
   "achievements": ["key achievements"],
   "recentNews": ["recent results"]
 }`;
