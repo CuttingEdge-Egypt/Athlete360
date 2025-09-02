@@ -2527,6 +2527,43 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
+  // ==== TOKEN REFUND ROUTE FOR CANCELLED ANALYSIS ====
+  app.post('/api/refund-cancelled-analysis', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { athleteId, serviceType, reason } = req.body;
+      
+      // Get service cost mapping
+      const serviceCosts: { [key: string]: number } = {
+        'bio': 20,
+        'rank': 70,
+        'strengths': 50,
+        'weaknesses': 50,
+        'development-plan': 80,
+        'nutrition-plan': 75,
+        'beat-strategies': 100,
+        'video': 200
+      };
+      
+      const tokenCost = serviceCosts[serviceType] || 50;
+      
+      // Refund the tokens using existing helper function
+      await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, serviceType, `${serviceType} Analysis - CANCELLED`);
+      
+      console.log(`💫 CANCELLED ANALYSIS REFUND: ${tokenCost} tokens refunded to user ${userId} for cancelled ${serviceType} analysis`);
+      
+      res.json({ 
+        success: true, 
+        message: "Tokens refunded for cancelled analysis",
+        tokensRefunded: tokenCost 
+      });
+      
+    } catch (error) {
+      console.error('Error refunding tokens for cancelled analysis:', error);
+      res.status(500).json({ message: "Failed to refund tokens" });
+    }
+  });
+
   // ==== PAYMENT AND REFERRAL SYSTEM ROUTES ====
 
   // Complete user signup with mandatory payment card

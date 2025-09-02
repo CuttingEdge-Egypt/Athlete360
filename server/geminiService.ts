@@ -475,7 +475,8 @@ export async function generateRankHistoryWithGemini(
 - Find specific competitions where ranking changed with before/after positions
 - Extract verified tournament results, medal placements, championship participation
 - Use competition-based timeline format showing actual ranking movements
-
+-For the competition ranking timeline, include rank of the player in the competition not in the world ranking.
+-Make sure to include all current competitions up to current date.
 📊 REQUIRED JSON STRUCTURE:
 {
   "success": true,
@@ -484,7 +485,7 @@ export async function generateRankHistoryWithGemini(
     "sport": "${sport}",  
     "country": "${nationality || 'Unknown'}",
     "currentRanking": {
-      "position": "Current world rank or competitive status",
+      "position": "Current Career rank",
       "category": "Weight class/division if applicable", 
       "lastUpdated": "Recent date",
       "source": "Official federation source"
@@ -547,9 +548,14 @@ Return ONLY valid JSON with no markdown formatting or additional text.`;
     const model = googleGenAI.getGenerativeModel({
       model: "gemini-2.5-pro",
       generationConfig: {
-        temperature: 0.1,
+        temperature: 1,
         maxOutputTokens: 8000,
       },
+      tools: [
+        {
+          googleSearchRetrieval: {} 
+        }
+      ],
       systemInstruction: `You are an expert sports analyst with access to official federation websites. Use web search capabilities to find authentic ranking and competition data from these federation sources:
 
 ${federationUrls.map(url => `- ${url}`).join('\n')}
