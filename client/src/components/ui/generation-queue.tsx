@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AnalysisPopup } from '@/components/ui/analysis-popup';
 import { CancelConfirmationDialog } from '@/components/ui/cancel-confirmation-dialog';
-import { X, Play, Pause, RotateCcw, Check, Loader2, Eye } from 'lucide-react';
+import { X, Play, Pause, RotateCcw, Check, Loader2, Eye, Trash2 } from 'lucide-react';
 import { useLocation } from 'wouter';
 
 interface GenerationItem {
@@ -143,6 +143,9 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
 
   // Clear completed generations
   const clearCompleted = () => {
+    const completedCount = queue.filter(item => item.status === 'completed' || item.status === 'error').length;
+    if (completedCount === 0) return; // No completed items to clear
+    
     setQueue(prev => prev.filter(item => item.status !== 'completed' && item.status !== 'error'));
   };
 
@@ -254,7 +257,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
               className="h-6 w-6 p-0 text-gray-400 hover:text-gray-200"
               title="Clear completed"
             >
-              <RotateCcw className="w-3 h-3" />
+              <Trash2 className="w-3 h-3" />
             </Button>
             <Button
               variant="ghost"
