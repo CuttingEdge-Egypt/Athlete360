@@ -133,8 +133,8 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     // Parse the data first using the utility function
     const parsedData = parseAnalysisData(data);
     
-    // Ensure we have a proper object to work with
-    let bioData = parsedData;
+    // Access the nested data object where the actual bio information is
+    let bioData = parsedData.data;
     
     // If it's still a string, try to extract structured information
     if (typeof bioData === 'string') {
