@@ -650,7 +650,7 @@ export async function generateAthleteBiography(name: string, sport: string, nati
       contents: prompt,
       config: {
         temperature: 1,
-        maxOutputTokens: 4000,
+        maxOutputTokens: 8000,
         tools: [{ googleSearch: {} }]
       }
     });
@@ -792,26 +792,45 @@ export async function refreshAthleteBiographyWithSearch(name: string, sport: str
   const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const nationalityContext = nationality ? ` from ${nationality}` : '';
   
-  const prompt = `Search for current information about athlete "${name}"${nationalityContext} in ${sport}.
+  const prompt = `Today's date is ${currentDate}.
+    
+    Using Google search, find factual, up-to-date information about the athlete "${name}"${nationalityContext}, who competes in ${sport}.
+    
+    Create a detailed biography structured with the following headings:
+    - An introductory paragraph
+    - Players' overall story and what they're known for in ${sport}
+    - A heading "Recent Competitions:"
+    - A heading "Career Record and Rankings:"
+    - A heading "Notable Achievements:"
 
-Create a biography with these sections:
-1. Introduction paragraph
-2. Players' overall story and what they're known for in ${sport}
-3. Recent Competitions (2024-2025)  
-4. Career Record and Rankings
-5. Notable Achievements
+    Only mention information that is 100% accurate and verifiable.
 
-IMPORTANT: Do not include any links, URLs, citations, or references. Provide clean text only.
+    IMPORTANT: Do not include any links, URLs, citations, or references in your response. Provide clean text without any reference links or citations.
 
-Return as valid JSON:
-{
-  "name": "full name",
-  "bio": "biography text with sections above",
-  "playersStory": "compelling narrative about the athlete's journey",
-  "currentRank": "current ranking or N/A",
-  "achievements": ["key achievements"],
-  "recentNews": ["recent results"]
-}`;
+    For achievements, include the medal type (Gold Medal, Silver Medal, Bronze Medal) when applicable.
+
+    Provide the response as a JSON object with these fields:
+    - name: athlete's full name
+    - bio: the detailed biography without any links or citations
+    - playersStory: a compelling narrative about the athlete's journey and what makes them unique
+    - currentRank: current world ranking if available (as number or "N/A")
+    - achievements: array of key achievements with medal types when applicable
+    - recentNews: array of recent news or competition results
+    
+    CRITICAL ERROR HANDLING:
+    - If you cannot find any reliable data through Google search, respond with exactly: {"error": "no_data_found", "success": false}
+    - If search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
+    - If the athlete/information does not exist, respond with exactly: {"error": "not_found", "success": false}
+
+    Please respond in valid JSON format with these exact fields:
+    {
+      "name": "athlete's full name",
+      "bio": "detailed biography without any links or citations",
+      "playersStory": "compelling narrative about the athlete's journey and unique qualities",
+      "currentRank": "current world ranking or N/A",
+      "achievements": ["array of key achievements with medal types"],
+      "recentNews": ["array of recent news or competition results"]
+    }`;
 
   try {
     const result = await genAI.models.generateContent({
@@ -831,16 +850,24 @@ Return as valid JSON:
       throw new Error("Empty response from Gemini model");
     }
     
-    // Clean up response
+    // Clean up response - remove markdown formatting
     cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
     cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
     
-    // Extract JSON
+    // Remove any markdown headers or text before JSON
+    cleanedText = cleanedText.replace(/^#+.*$/gm, '').trim();
+    cleanedText = cleanedText.replace(/^[^{]*/, '').trim();
+    
+    // Extract JSON more robustly
     const jsonStart = cleanedText.indexOf('{');
     const jsonEnd = cleanedText.lastIndexOf('}');
-    if (jsonStart !== -1 && jsonEnd !== -1) {
-      cleanedText = cleanedText.substring(jsonStart, jsonEnd + 1);
+    
+    if (jsonStart === -1 || jsonEnd === -1 || jsonStart >= jsonEnd) {
+      console.error('No valid JSON structure found in refresh bio response:', cleanedText.substring(0, 200));
+      throw new Error('Invalid JSON structure in Gemini refresh bio response');
     }
+    
+    cleanedText = cleanedText.substring(jsonStart, jsonEnd + 1);
     
     // Parse and validate
     const athleteData = JSON.parse(cleanedText);
@@ -863,12 +890,22 @@ Return as valid JSON:
     athleteData.achievements = athleteData.achievements || [];
     athleteData.recentNews = athleteData.recentNews || [];
     
-    // Handle rank conversion
-    if (typeof athleteData.rank === 'string' && !isNaN(Number(athleteData.rank)) && athleteData.rank !== 'N/A') {
+    // Handle rank conversion for both rank and currentRank fields
+    if (athleteData.currentRank && typeof athleteData.currentRank === 'string' && !isNaN(Number(athleteData.currentRank)) && athleteData.currentRank !== 'N/A') {
+      athleteData.currentRank = Number(athleteData.currentRank);
+    }
+    // Also handle legacy rank field for backward compatibility - map currentRank to rank for frontend
+    if (athleteData.rank && typeof athleteData.rank === 'string' && !isNaN(Number(athleteData.rank)) && athleteData.rank !== 'N/A') {
       athleteData.rank = Number(athleteData.rank);
     }
     
+    // Map currentRank to rank for frontend compatibility
+    if (athleteData.currentRank !== undefined) {
+      athleteData.rank = athleteData.currentRank;
+    }
+    
     console.log(`✅ Gemini successfully refreshed bio data for ${name}`);
+    console.log('Final refresh athleteData structure:', JSON.stringify(athleteData, null, 2));
     return athleteData;
     
   } catch (error) {
