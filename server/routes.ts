@@ -1074,7 +1074,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               description: strength.description,
               rating: strength.rating || Math.max(85, 97 - index * 3), // Add ratings from AI or generate reasonable ones
               category: strength.category || "Technical",
-              evidence: strength.evidence || "Based on AI performance analysis"
+              evidence: strength.evidence ? strength.evidence.replace(/\([^)]*\)/g, '').replace(/\[[^\]]*\]/g, '').trim() : "Based on AI performance analysis"
             }))
           : [
               {
