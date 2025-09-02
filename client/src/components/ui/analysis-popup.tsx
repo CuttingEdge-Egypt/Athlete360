@@ -599,11 +599,17 @@ export function AnalysisPopup({
             <div className="grid md:grid-cols-4 gap-4">
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-blue-500/20">
                 <div className="text-2xl font-bold text-white">
-                  {athlete.currentRanking?.position || athlete.currentWorldRank || athlete.currentRanking || 'Unranked'}
+                  {athlete.currentRanking?.worldSeniorDivision?.position || 
+                   athlete.currentRanking?.position || 
+                   athlete.currentWorldRank || 
+                   (typeof athlete.currentRanking === 'string' ? athlete.currentRanking : '') || 
+                   'Unranked'}
                 </div>
                 <div className="text-sm text-blue-300">Current Rank</div>
-                {athlete.currentRanking?.category && (
-                  <div className="text-xs text-blue-400 mt-1">{athlete.currentRanking.category}</div>
+                {(athlete.currentRanking?.worldSeniorDivision?.category || athlete.currentRanking?.category) && (
+                  <div className="text-xs text-blue-400 mt-1">
+                    {athlete.currentRanking?.worldSeniorDivision?.category || athlete.currentRanking?.category}
+                  </div>
                 )}
               </div>
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-green-500/20">
