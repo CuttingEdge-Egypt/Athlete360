@@ -277,23 +277,9 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
               </h3>
               <div className="grid gap-4">
                 {achievements.map((achievementObj: any, index: number) => {
-                  // Direct property access for clean display
-                  const text = achievementObj.achievement;
-                  const medal = achievementObj.medal;
-                  
-                  // Render medal icon based on type
-                  const renderMedalIcon = () => {
-                    switch (medal) {
-                      case 'Gold':
-                        return <Medal className="w-6 h-6 text-yellow-500" />;
-                      case 'Silver':
-                        return <Medal className="w-6 h-6 text-gray-300" />;
-                      case 'Bronze':
-                        return <Medal className="w-6 h-6 text-amber-600" />;
-                      default:
-                        return <CheckCircle className="w-6 h-6 text-green-500" />;
-                    }
-                  };
+                  // Extract text and medal directly from object
+                  const text = achievementObj?.achievement || '';
+                  const medal = achievementObj?.medal || 'Participation';
                   
                   return (
                     <div 
@@ -302,7 +288,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
                       data-testid={`achievement-item-${index}`}
                     >
                       <div className="mt-1 flex-shrink-0">
-                        {renderMedalIcon()}
+                        {getMedalIcon(medal)}
                       </div>
                       <p className="text-gray-200 leading-relaxed text-lg font-medium">
                         {text}
