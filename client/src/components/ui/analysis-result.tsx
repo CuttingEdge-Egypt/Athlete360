@@ -219,7 +219,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
         )}
 
         {/* Players' Overall Story Section */}
-        {(playersStory || bioSections.overallStory) && (
+        {(playersStory && playersStory.trim()) && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-cyan-400 border-gray-600 shadow-xl">
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-cyan-400 mb-6 flex items-center">
@@ -227,7 +227,22 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
                 Player's Story
               </h3>
               <div className="prose prose-invert max-w-none">
-                <p className="text-gray-200 leading-relaxed text-lg">{playersStory || bioSections.overallStory}</p>
+                <p className="text-gray-200 leading-relaxed text-lg">{playersStory}</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        {/* Fallback: Show bioSections.overallStory if playersStory is not available */}
+        {(!playersStory || !playersStory.trim()) && bioSections.overallStory && (
+          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-cyan-400 border-gray-600 shadow-xl">
+            <CardContent className="p-8">
+              <h3 className="text-3xl font-bold text-cyan-400 mb-6 flex items-center">
+                <Star className="mr-4 text-cyan-400" size={32} />
+                Player's Story
+              </h3>
+              <div className="prose prose-invert max-w-none">
+                <p className="text-gray-200 leading-relaxed text-lg">{bioSections.overallStory}</p>
               </div>
             </CardContent>
           </Card>
@@ -260,8 +275,27 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
               <div className="grid gap-4">
                 {achievements.map((achievement: any, index: number) => {
                   // Handle both old string format and new object format
-                  const achievementText = typeof achievement === 'string' ? achievement : achievement.achievement;
-                  const medalType = typeof achievement === 'object' && achievement.medal ? achievement.medal : 'Participation';
+                  let achievementText: string;
+                  let medalType: string;
+                  
+                  if (typeof achievement === 'string') {
+                    // Old string format - try to parse if it's JSON
+                    try {
+                      const parsed = JSON.parse(achievement);
+                      achievementText = parsed.achievement || achievement;
+                      medalType = parsed.medal || 'Participation';
+                    } catch {
+                      achievementText = achievement;
+                      medalType = 'Participation';
+                    }
+                  } else if (typeof achievement === 'object' && achievement !== null) {
+                    // New object format
+                    achievementText = achievement.achievement || JSON.stringify(achievement);
+                    medalType = achievement.medal || 'Participation';
+                  } else {
+                    achievementText = String(achievement);
+                    medalType = 'Participation';
+                  }
                   
                   return (
                     <div 
