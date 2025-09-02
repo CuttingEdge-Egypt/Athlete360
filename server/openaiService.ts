@@ -957,14 +957,15 @@ CRITICAL ERROR HANDLING:
       messages: [
         {
           role: "system",
-          content: `You are an expert ${sport} analyst. Return only valid JSON. No markdown or extra text.`
+          content: `You are an expert ${sport} analyst with web search capabilities. Return only valid JSON. No markdown or extra text.`
         },
         {
           role: "user", 
           content: prompt
         }
       ],
-      max_completion_tokens: 3000
+      tools: [{ type: "web_search_preview" }],
+      max_output_tokens: 8000
     });
 
     const response = completion.choices[0].message.content;
@@ -1284,7 +1285,8 @@ If no ranking data found, use "Not Found" for missing fields but maintain the JS
           content: prompt
         }
       ],
-      max_completion_tokens: 4000
+      tools: [{ type: "web_search_preview" }],
+      max_output_tokens: 8000
     });
 
     const response = completion.choices[0].message.content;
@@ -1368,14 +1370,15 @@ Provide a comprehensive comparison in this JSON format:
       messages: [
         {
           role: "system",
-          content: `You are an expert ${sport} analyst. Compare athletes objectively based on available data. Return only valid JSON.`
+          content: `You are an expert ${sport} analyst with web search capabilities. Compare athletes objectively based on available data. Return only valid JSON.`
         },
         {
           role: "user",
           content: prompt
         }
       ],
-      max_completion_tokens: 3000
+      tools: [{ type: "web_search_preview" }],
+      max_output_tokens: 8000
     });
 
     const response = completion.choices[0].message.content;
