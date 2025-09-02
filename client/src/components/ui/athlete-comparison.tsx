@@ -309,6 +309,9 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
     if ((window as any).generationQueue) {
       const queueId = (window as any).generationQueue.add(comparisonName, 'comparison', false);
       
+      // Immediately update status to running when we start the mutation
+      (window as any).generationQueue.update(queueId, 'running', null, null, 'Analyzing athletes...');
+      
       // Update queue status when mutation completes
       comparisonMutation.mutate(undefined, {
         onSuccess: (data) => {
@@ -322,11 +325,6 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
           }
         }
       });
-      
-      // Update queue status to running
-      if ((window as any).generationQueue) {
-        (window as any).generationQueue.update(queueId, 'running');
-      }
     } else {
       comparisonMutation.mutate();
     }
