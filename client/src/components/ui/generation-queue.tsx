@@ -16,6 +16,7 @@ interface GenerationItem {
   error?: string;
   createdAt: Date;
   canRetry?: boolean;
+  progressMessage?: string;
 }
 
 interface GenerationQueueProps {
@@ -45,11 +46,24 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
       athleteName,
       serviceType,
       status: autoTrigger ? 'running' : 'pending',
-      createdAt: new Date()
+      createdAt: new Date(),
+      progressMessage: autoTrigger ? 'Request sent, our AI is processing...' : 'waiting'
     };
     
     setQueue(prev => [...prev, newItem]);
     setIsVisible(true);
+    
+    // Update progress messages over time for running items
+    if (autoTrigger) {
+      setTimeout(() => {
+        updateGeneration(newItem.id, { progressMessage: 'This might take 2-3 minutes...' });
+      }, 3000);
+      
+      setTimeout(() => {
+        updateGeneration(newItem.id, { progressMessage: 'Almost there, finalizing analysis...' });
+      }, 90000); // After 1.5 minutes
+    }
+    
     return newItem.id;
   };
 
@@ -289,7 +303,9 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
                     <div className="flex items-center gap-2 text-xs text-gray-400">
                       {getStatusIcon(item.status)}
                       <span>
-                        {item.status === 'error' ? item.error : item.status}
+                        {item.status === 'error' ? item.error : 
+                         item.status === 'running' ? (item.progressMessage || 'running') :
+                         item.status}
                       </span>
                       <span>•</span>
                       <span>{item.createdAt.toLocaleTimeString()}</span>

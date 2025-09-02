@@ -1513,6 +1513,8 @@ CRITICAL ERROR HANDLING:
       ]
     }
 
+IMPORTANT: Do not include any links, URLs, citations, or references in your response. Provide clean text without any reference links or citations.
+
 CRITICAL ERROR HANDLING:
 - If you cannot find any reliable data through web search, respond with exactly: {"error": "no_data_found", "success": false}
 - If web search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
