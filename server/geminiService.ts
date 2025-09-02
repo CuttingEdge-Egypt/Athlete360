@@ -569,16 +569,24 @@ Return ONLY valid JSON with no markdown formatting or additional text.`;
       throw new Error("Empty response from Gemini model");
     }
     
-    // Clean up response
+    // Clean up response - remove markdown formatting
     cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
     cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
     
-    // Extract JSON
+    // Remove any markdown headers or text before JSON
+    cleanedText = cleanedText.replace(/^#+.*$/gm, '').trim();
+    cleanedText = cleanedText.replace(/^[^{]*/, '').trim();
+    
+    // Extract JSON more robustly
     const jsonStart = cleanedText.indexOf('{');
     const jsonEnd = cleanedText.lastIndexOf('}');
-    if (jsonStart !== -1 && jsonEnd !== -1) {
-      cleanedText = cleanedText.substring(jsonStart, jsonEnd + 1);
+    
+    if (jsonStart === -1 || jsonEnd === -1 || jsonStart >= jsonEnd) {
+      console.error('No valid JSON structure found in rank response:', cleanedText.substring(0, 200));
+      throw new Error('Invalid JSON structure in Gemini rank response');
     }
+    
+    cleanedText = cleanedText.substring(jsonStart, jsonEnd + 1);
     
     const rankData = JSON.parse(cleanedText);
     console.log(`✅ Gemini successfully generated rank data for ${athleteName}`);
@@ -702,6 +710,7 @@ export async function generateAthleteBiography(name: string, sport: string, nati
       }
       
       console.log(`✅ Gemini successfully generated bio data for ${name}`);
+      console.log('Final athleteData structure:', JSON.stringify(athleteData, null, 2));
       return athleteData;
       
     } catch (parseError) {

@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RankChart } from "./rank-chart";
-import { Download, Share2, User, Trophy, Star, AlertTriangle, Calendar, Swords, Video, Award, TrendingUp, Clock, Target, PlayCircle, Zap, Shield, CheckCircle, BarChart } from "lucide-react";
+import { Download, Share2, User, Trophy, Star, AlertTriangle, Calendar, Swords, Video, Award, TrendingUp, Clock, Target, PlayCircle, Zap, Shield, CheckCircle, BarChart, Medal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface AnalysisResultProps {
@@ -116,6 +116,20 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     return sections;
   };
 
+  // Helper function to get medal icon based on achievement text
+  const getMedalIcon = (achievement: string) => {
+    const lower = achievement.toLowerCase();
+    if (lower.includes('gold')) {
+      return <Medal className="w-5 h-5 text-yellow-500" />;
+    } else if (lower.includes('silver')) {
+      return <Medal className="w-5 h-5 text-gray-300" />;
+    } else if (lower.includes('bronze')) {
+      return <Medal className="w-5 h-5 text-amber-600" />;
+    } else {
+      return <CheckCircle className="w-5 h-5 text-green-500" />;
+    }
+  };
+
   const renderBioAnalysis = (data: any) => {
     // Parse the data first using the utility function
     const parsedData = parseAnalysisData(data);
@@ -159,6 +173,10 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     const achievements = Array.isArray(bioData.achievements) ? bioData.achievements : [];
     const recentNews = bioData.personalInfo?.recentNews || bioData.recentNews || [];
     const profileImageUrl = bioData.profileImageUrl;
+    
+    // Debug logging for player's story
+    console.log('Bio data received:', bioData);
+    console.log('Players story extracted:', playersStory);
     
     // Parse bio content to extract different sections
     const bioSections = parseBioSections(bio);
@@ -248,7 +266,9 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
                     key={index}
                     className="flex items-start space-x-4 p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20"
                   >
-                    <div className="w-3 h-3 bg-athlete-warning rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="mt-1 flex-shrink-0">
+                      {getMedalIcon(achievement)}
+                    </div>
                     <p className="text-gray-200 leading-relaxed text-lg font-medium">
                       {achievement}
                     </p>
