@@ -633,8 +633,8 @@ export async function generateAthleteBiography(name: string, sport: string, nati
     }`;
 
   try {
-    const model = await genAI.models.get({ model: "gemini-2.5-pro" });
-    const result = await model.generateContent({
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
       contents: prompt,
       config: {
         temperature: 1,
@@ -791,8 +791,8 @@ Return as valid JSON:
 }`;
 
   try {
-    const model = await genAI.models.get({ model: "gemini-2.5-pro" });
-    const result = await model.generateContent({
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
       contents: prompt,
       config: {
         temperature: 1,
