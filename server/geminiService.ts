@@ -562,7 +562,7 @@ Focus on creating realistic competition records, rankings, and athletic achievem
     const result = await model.generateContent(prompt);
     const response = await result.response;
     let cleanedText = response.text().trim();
-    console.log(`Gemini rank response for ${athleteName}:`, cleanedText.substring(0, 500) + '...');
+    console.log(`Gemini rank response for ${athleteName}:`, cleanedText);
     
     // Clean up response
     cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
