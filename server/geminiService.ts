@@ -544,12 +544,7 @@ Return ONLY valid JSON with no markdown formatting or additional text.`;
       generationConfig: {
         temperature: 1,
         maxOutputTokens: 8000,
-      },
-    tools: [
-      {
-        googleSearchRetrieval: {}
       }
-    ]
     });
     
     const result = await model.generateContent(prompt);
