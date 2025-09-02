@@ -34,6 +34,11 @@ export interface GeminiRankResponse {
     sport: string;
     country: string;
     currentRanking: {
+      position: string;
+      category?: string;
+      lastUpdated: string;
+      source: string;
+    } | {
       worldSeniorDivision: {
         position: string;
         category: string;
@@ -47,33 +52,29 @@ export interface GeminiRankResponse {
         source: string;
       };
     };
-    worldRankProgression: Array<{
-      competition: string;
-      year: string;
-      date: string;
-      worldRankBefore: string;
-      worldRankAfter: string;
-      rankingChange: string;
-      competitionLevel: string;
-      result: string;
-      rankingSource: string;
-    }>;
-    competitionPlacementProgression: Array<{
+    competitionProgression: Array<{
       competition: string;
       year: string;
       date: string;
       placement: string;
       competitionLevel: string;
-      participantsCount: string;
+      participantsCount?: string;
       result: string;
-      rankingSource: string;
+      competitionSource: string;
     }>;
     rankingSummary: {
       firstOfficialRanking: string;
       breakthroughCompetition: string;
       peakRankingPeriod: string;
+      highestRank: string;
+      totalCompetitions: string;
       recentCompetitions: string;
       nextMajorCompetition: string;
+      currentStatus: {
+        careerSpan: string;
+        nextMajorCompetition?: string;
+        lastUpdated: string;
+      };
     };
   };
 }
@@ -554,23 +555,14 @@ export async function generateRankHistoryWithGemini(
 
 🎯 OBJECTIVE: Find AUTHENTIC ranking progression and competition results from official federation sources.
 
-${sport.toLowerCase() === 'taekwondo' ? 
-`
-🥋 TAEKWONDO-SPECIFIC REQUIREMENTS:
-1. DIFFERENTIATE between World Senior Division Ranking and Olympic Senior Division Ranking
-2. World Senior Division = General WT world rankings for all competitions  
-3. Olympic Senior Division = Specific Olympic qualification rankings
-4. Each competition has TWO progressions:
-   - World rank progression AFTER each competition (how world rank changed)
-   - Competition placement progression (actual placement in each competition)
-
 🔍 ANALYSIS REQUIREMENTS:
-- Search the official federation websites provided in URL context for this athlete
-- Look for BOTH World Senior Division and Olympic Senior Division rankings
-- Find specific competitions where world ranking changed with before/after positions
-- Track competition placements separately (1st, 2nd, 3rd, 11th, etc.)  
+- Search the official federation websites for this athlete using web search capabilities
+- Current rank = Current career ranking position
+- Highest rank = Highest career ranking ever achieved 
+- Competitions = Total number of competitions the athlete has participated in
+- Rank progression = Competition-based progression showing performance in individual competitions (not career rank changes)
 - Extract verified tournament results, medal placements, championship participation
-- Use dual progression format: world rank changes + competition placements
+- Use authentic data from official sources only
 
 📊 REQUIRED JSON STRUCTURE:
 {
@@ -580,56 +572,12 @@ ${sport.toLowerCase() === 'taekwondo' ?
     "sport": "${sport}",  
     "country": "${nationality || 'Unknown'}",
     "currentRanking": {
-      "worldSeniorDivision": {
-        "position": "Current World Senior Division rank",
-        "category": "Weight class (e.g., M-63kg)", 
-        "lastUpdated": "Recent date",
-        "source": "World Taekwondo Federation"
-      },
-      "olympicSeniorDivision": {
-        "position": "Current Olympic Senior Division rank",
-        "category": "Weight class (e.g., M-63kg)", 
-        "lastUpdated": "Recent date",
-        "source": "World Taekwondo Federation"
-      }
-    },` 
-: 
-`
-🔍 ANALYSIS REQUIREMENTS:
-- Search the official federation websites provided in URL context for this athlete
-- Look for current world rankings, historical positions, and competition results  
-- Find specific competitions where ranking changed with before/after positions
-- Extract verified tournament results, medal placements, championship participation
-- Use competition-based timeline format showing actual ranking movements
-
-📊 REQUIRED JSON STRUCTURE:
-{
-  "success": true,
-  "athlete": {
-    "name": "${athleteName}",
-    "sport": "${sport}",  
-    "country": "${nationality || 'Unknown'}",
-    "currentRanking": {
-      "position": "Current world rank or competitive status",
-      "category": "Weight class/division if applicable", 
+      "position": "Current career ranking position (e.g., '#31')",
+      "category": "Division or weight class if applicable", 
       "lastUpdated": "Recent date",
-      "source": "Official federation source"
-    },`}
-${sport.toLowerCase() === 'taekwondo' ? 
-`    "worldRankProgression": [
-      {
-        "competition": "Specific competition name",
-        "year": "Competition year",
-        "date": "Date if available", 
-        "worldRankBefore": "World Senior rank before competition",
-        "worldRankAfter": "World Senior rank after competition",
-        "rankingChange": "Change description (e.g., '#25 → #18 (+7)')",
-        "competitionLevel": "World/Continental/National level",
-        "result": "Medal/placement/result",
-        "rankingSource": "World Taekwondo Federation"
-      }
-    ],
-    "competitionPlacementProgression": [
+      "source": "Official federation name"
+    },
+    "competitionProgression": [
       {
         "competition": "Specific competition name",
         "year": "Competition year",
@@ -638,25 +586,9 @@ ${sport.toLowerCase() === 'taekwondo' ?
         "competitionLevel": "World/Continental/National level",
         "participantsCount": "Number of participants if available",
         "result": "Medal/placement description",
-        "rankingSource": "Competition source"
+        "competitionSource": "Official source"
       }
-    ],`
-:
-`    "competitionRankingTimeline": [
-      {
-        "competition": "Specific competition name",
-        "rank": "Final ranking after this competition (e.g., '#18')",
-        "year": "Competition year",
-        "date": "Date if available", 
-        "rankingBefore": "Rank before competition",
-        "rankingAfter": "Rank after competition",
-        "rankingChange": "Change description (e.g., '#25 → #18 (+7)')",
-        "rankBoostReason": "Explanation of why this ranking was achieved (e.g., 'Strong performance reaching Round of 16 against higher-ranked opponents')",
-        "competitionLevel": "World/Continental/National level",
-        "result": "Medal/placement/result",
-        "rankingSource": "Federation source"
-      }
-    ],`}
+    ],
     "rankingProgressionData": [
       {
         "period": "Competition/Year identifier",
@@ -667,8 +599,8 @@ ${sport.toLowerCase() === 'taekwondo' ?
       "firstOfficialRanking": "First recorded federation ranking",
       "breakthroughCompetition": "Most significant competition result", 
       "peakRankingPeriod": "Best ranking period with details",
-      "highestRank": "Highest/best ranking achieved (e.g., '#15')",
-      "stayedAtRankLongest": "Ranking position athlete maintained for the longest period (format: '#25 (June 2021 to November 2023)' or just '#25' if no time period available)",
+      "highestRank": "Highest career ranking ever achieved (e.g., '#15')",
+      "totalCompetitions": "Total number of competitions the athlete has participated in",
       "recentCompetitions": "Recent competition activity",
       "nextMajorCompetition": "Upcoming events if found",
       "currentStatus": {
@@ -682,15 +614,14 @@ ${sport.toLowerCase() === 'taekwondo' ?
 
 🔑 SUCCESS CRITERIA:
 - Return authentic data from official federation sources only
-- If no world rankings found, use national/regional competition results
-- Include any verified competitive achievements or participation records
+- Use web search to find current career rankings and competition history
+- Current rank = Current career ranking position
+- Highest rank = Highest career ranking ever achieved
+- Total competitions = Number of competitions the athlete has participated in  
+- Competition progression = Performance in individual competitions (placement results)
+- Include verified competitive achievements and participation records
 - Create meaningful progression timeline from available authentic data
-- Fill in highestRank field with best ranking achieved (e.g., "#15")
-- Fill in stayedAtRankLongest with consistent format: "#[NUMBER] ([TIME PERIOD])" e.g., "#25 (June 2021 to November 2023)"
-- Include currentStatus with careerSpan (Active/Retired), nextMajorCompetition, and lastUpdated fields
 - Fill rankingProgressionData array with chronological ranking data for chart visualization
-- Add "rank" field to each competitionRankingTimeline entry with final ranking after competition
-- Add "rankBoostReason" field explaining why each ranking improvement was achieved
 - CONSISTENCY REQUIREMENT: Always use the same weight division and ranking category throughout the response
 - Only fail if absolutely no athletic information exists for this person
 
@@ -703,18 +634,22 @@ Return ONLY valid JSON with no markdown formatting or additional text.`;
         temperature: 0.1,
         maxOutputTokens: 8000,
       },
-      systemInstruction: `You are an expert sports analyst with access to official federation websites. Use web search capabilities to find authentic ranking and competition data from these federation sources:
+      systemInstruction: `You are an expert sports analyst with web search capabilities enabled. Use web search to find authentic ranking and competition data from official federation sources:
 
 ${federationUrls.map(url => `- ${url}`).join('\n')}
 
-CRITICAL CONSISTENCY REQUIREMENTS:
+CRITICAL REQUIREMENTS:
+- ENABLE WEB SEARCH to access real-time federation data
+- Search for current career rankings (not just recent competition results)
+- Current rank = Current career ranking position 
+- Highest rank = Highest career ranking ever achieved
+- Total competitions = Number of competitions participated in
+- Competition progression = Individual competition placement results (1st, 2nd, 3rd, etc.)
 - Use the SAME weight division/category throughout the entire response
-- If you find the athlete competes in multiple divisions, choose ONE and stick to it
-- Ensure all ranking numbers, competition results, and timeline entries are consistent with the chosen division
-- Double-check that currentRanking.position matches the athlete's final ranking in competitionRankingTimeline
-- Format stayedAtRankLongest as "#[NUMBER] ([TIME PERIOD])" consistently
+- If athlete competes in multiple divisions, choose ONE and stick to it consistently
+- Ensure all ranking numbers and competition results match the chosen division
 
-Focus on finding any authentic competition records, rankings, or athletic achievements from these official sources.`
+Focus on finding authentic career rankings and competition participation records from official sources.`
     });
     
     const result = await model.generateContent(prompt);
@@ -754,25 +689,29 @@ Focus on finding any authentic competition records, rankings, or athletic achiev
           lastUpdated: new Date().toISOString().split('T')[0],
           source: "Federation competition records"
         },
-        competitionRankingTimeline: [
+        competitionProgression: [
           {
             competition: `${nationality || 'International'} ${sport} Championships`,
             year: "Recent years",
-            date: "Competition period",
-            rankingBefore: "Competitive participant",
-            rankingAfter: "Active status",
-            rankingChange: "Maintaining competitive activity",
+            date: "Competition period", 
+            placement: "Competitive participant",
             competitionLevel: "National/International",
             result: "Competitive participation",
-            rankingSource: "Competition records"
+            competitionSource: "Competition records"
           }
         ],
         rankingSummary: {
           firstOfficialRanking: `Competitive ${sport} athlete`,
           breakthroughCompetition: `Active in ${sport} competitions`,
           peakRankingPeriod: "Current competitive period",
+          highestRank: "Competitive participant",
+          totalCompetitions: "Multiple competitions",
           recentCompetitions: `Participating in ${sport} events`,
-          nextMajorCompetition: `Upcoming ${sport} competitions`
+          nextMajorCompetition: `Upcoming ${sport} competitions`,
+          currentStatus: {
+            careerSpan: "Active",
+            lastUpdated: new Date().toISOString().split('T')[0]
+          }
         }
       }
     };
