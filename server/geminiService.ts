@@ -621,12 +621,14 @@ export async function generateAthleteBiography(name: string, sport: string, nati
 
     IMPORTANT: Do not include any links, URLs, citations, or references in your response. Provide clean text without any reference links or citations.
 
+    For achievements, determine the medal type for each achievement.
+
     Provide the response as a JSON object with these fields:
     - name: athlete's full name
     - bio: the detailed biography without any links or citations
     - playersStory: a compelling narrative about the athlete's journey and what makes them unique
     - currentRank: current world ranking if available (as number or "N/A")
-    - achievements: array of key achievements
+    - achievements: array of achievement objects with achievement description and medal type
     - recentNews: array of recent news or competition results
     
     CRITICAL ERROR HANDLING:
@@ -640,7 +642,12 @@ export async function generateAthleteBiography(name: string, sport: string, nati
       "bio": "detailed biography without any links or citations",
       "playersStory": "compelling narrative about the athlete's journey and unique qualities",
       "currentRank": "current world ranking or N/A",
-      "achievements": ["array of key achievements"],
+      "achievements": [
+        {
+          "achievement": "achievement description",
+          "medal": "Gold" | "Silver" | "Bronze" | "Participation"
+        }
+      ],
       "recentNews": ["array of recent news or competition results"]
     }`;
 
@@ -807,14 +814,14 @@ export async function refreshAthleteBiographyWithSearch(name: string, sport: str
 
     IMPORTANT: Do not include any links, URLs, citations, or references in your response. Provide clean text without any reference links or citations.
 
-    For achievements, include the medal type (Gold Medal, Silver Medal, Bronze Medal) when applicable.
+    For achievements, determine the medal type for each achievement.
 
     Provide the response as a JSON object with these fields:
     - name: athlete's full name
     - bio: the detailed biography without any links or citations
     - playersStory: a compelling narrative about the athlete's journey and what makes them unique
     - currentRank: current world ranking if available (as number or "N/A")
-    - achievements: array of key achievements with medal types when applicable
+    - achievements: array of achievement objects with achievement description and medal type
     - recentNews: array of recent news or competition results
     
     CRITICAL ERROR HANDLING:
@@ -828,7 +835,12 @@ export async function refreshAthleteBiographyWithSearch(name: string, sport: str
       "bio": "detailed biography without any links or citations",
       "playersStory": "compelling narrative about the athlete's journey and unique qualities",
       "currentRank": "current world ranking or N/A",
-      "achievements": ["array of key achievements with medal types"],
+      "achievements": [
+        {
+          "achievement": "achievement description",
+          "medal": "Gold" | "Silver" | "Bronze" | "Participation"
+        }
+      ],
       "recentNews": ["array of recent news or competition results"]
     }`;
 

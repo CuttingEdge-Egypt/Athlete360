@@ -116,14 +116,13 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     return sections;
   };
 
-  // Helper function to get medal icon based on achievement text
-  const getMedalIcon = (achievement: string) => {
-    const lower = achievement.toLowerCase();
-    if (lower.includes('gold')) {
+  // Helper function to get medal icon based on medal type
+  const getMedalIcon = (medal: string) => {
+    if (medal === 'Gold') {
       return <Medal className="w-5 h-5 text-yellow-500" />;
-    } else if (lower.includes('silver')) {
+    } else if (medal === 'Silver') {
       return <Medal className="w-5 h-5 text-gray-300" />;
-    } else if (lower.includes('bronze')) {
+    } else if (medal === 'Bronze') {
       return <Medal className="w-5 h-5 text-amber-600" />;
     } else {
       return <CheckCircle className="w-5 h-5 text-green-500" />;
@@ -236,6 +235,14 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
             </CardContent>
           </Card>
         )}
+        
+        {/* Debug Info - Remove after testing */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="p-4 bg-red-900 text-white text-xs">
+            <p>Debug: playersStory = "{playersStory}"</p>
+            <p>Debug: bioSections.overallStory = "{bioSections.overallStory}"</p>
+          </div>
+        )}
 
         {/* Career Record and Rankings */}
         {bioSections.careerRecord && (
@@ -261,19 +268,26 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
                 Notable Achievements
               </h3>
               <div className="grid gap-4">
-                {achievements.map((achievement: string, index: number) => (
-                  <div 
-                    key={index}
-                    className="flex items-start space-x-4 p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20"
-                  >
-                    <div className="mt-1 flex-shrink-0">
-                      {getMedalIcon(achievement)}
+                {achievements.map((achievement: any, index: number) => {
+                  // Handle both old string format and new object format
+                  const achievementText = typeof achievement === 'string' ? achievement : achievement.achievement;
+                  const medalType = typeof achievement === 'object' && achievement.medal ? achievement.medal : 'Participation';
+                  
+                  return (
+                    <div 
+                      key={index}
+                      className="flex items-start space-x-4 p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20"
+                      data-testid={`achievement-item-${index}`}
+                    >
+                      <div className="mt-1 flex-shrink-0">
+                        {getMedalIcon(medalType)}
+                      </div>
+                      <p className="text-gray-200 leading-relaxed text-lg font-medium">
+                        {achievementText}
+                      </p>
                     </div>
-                    <p className="text-gray-200 leading-relaxed text-lg font-medium">
-                      {achievement}
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
