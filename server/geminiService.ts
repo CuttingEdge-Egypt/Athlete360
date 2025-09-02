@@ -545,18 +545,11 @@ Return ONLY valid JSON with no markdown formatting or additional text.`;
         temperature: 1,
         maxOutputTokens: 8000,
       },
-      systemInstruction: `You are an expert sports analyst. Create authentic ranking and competition data based on real federation knowledge from these sources:
-
-${federationUrls.map(url => `- ${url}`).join('\n')}
-
-CRITICAL CONSISTENCY REQUIREMENTS:
-- Use the SAME weight division/category throughout the entire response
-- If you find the athlete competes in multiple divisions, choose ONE and stick to it
-- Ensure all ranking numbers, competition results, and timeline entries are consistent with the chosen division
-- Double-check that currentRanking.position matches the athlete's final ranking in competitionRankingTimeline
-- Format stayedAtRankLongest as "#[NUMBER] ([TIME PERIOD])" consistently
-
-Focus on creating realistic competition records, rankings, and athletic achievements based on federation standards.`
+    tools: [
+      {
+        googleSearchRetrieval: {}
+      }
+    ]
     });
     
     const result = await model.generateContent(prompt);
@@ -593,10 +586,7 @@ function getSportFederationUrls(sport: string): string[] {
   
   if (sportLower.includes('taekwondo')) {
     return [
-      'https://www.worldtaekwondo.org/ranking/rk_index.html',
-      'https://www.worldtaekwondo.org/ranking/ranking.html',
-      'https://www.taekwondodata.com/ranking_search.html',
-      'https://www.worldtaekwondo.org/competition/list.html'
+'https://www.taekwondodata.com/ranking_search.html',
     ];
   } else if (sportLower.includes('fencing')) {
     return [
