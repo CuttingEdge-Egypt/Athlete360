@@ -293,12 +293,18 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
               </h3>
               <div className="grid gap-4">
                 {achievements.map((achievement: any, index: number) => {
-                  // Handle both old string format and new object format
-                  let achievementText: string;
-                  let medalType: string;
+                  console.log(`Achievement ${index}:`, achievement);
+                  console.log(`Achievement type:`, typeof achievement);
                   
-                  if (typeof achievement === 'string') {
-                    // Old string format - try to parse if it's JSON
+                  let achievementText: string = '';
+                  let medalType: string = 'Participation';
+                  
+                  if (typeof achievement === 'object' && achievement !== null && achievement.achievement) {
+                    // New object format - extract the text directly
+                    achievementText = achievement.achievement;
+                    medalType = achievement.medal || 'Participation';
+                  } else if (typeof achievement === 'string') {
+                    // Old string format or JSON string
                     try {
                       const parsed = JSON.parse(achievement);
                       achievementText = parsed.achievement || achievement;
@@ -307,14 +313,14 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
                       achievementText = achievement;
                       medalType = 'Participation';
                     }
-                  } else if (typeof achievement === 'object' && achievement !== null) {
-                    // New object format
-                    achievementText = achievement.achievement || JSON.stringify(achievement);
-                    medalType = achievement.medal || 'Participation';
                   } else {
-                    achievementText = String(achievement);
+                    // Fallback
+                    achievementText = 'Achievement data could not be parsed';
                     medalType = 'Participation';
                   }
+                  
+                  console.log(`Final achievementText:`, achievementText);
+                  console.log(`Final medalType:`, medalType);
                   
                   return (
                     <div 
