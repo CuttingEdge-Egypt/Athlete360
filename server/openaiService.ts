@@ -644,7 +644,8 @@ Please respond in valid JSON format with these exact fields:
       tools: [
         { type: "web_search_preview" }
       ],
-      max_output_tokens: 8000
+      max_output_tokens: 4000,
+      temperature: 1.0
     });
 
     console.log("Full OpenAI Refresh Response:", JSON.stringify(response, null, 2));

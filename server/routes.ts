@@ -903,9 +903,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} GPT-5 bio analysis for ${athlete.name}`);
         
         try {
-          const gptBioAnalysis = forceUpdate 
-            ? await refreshAthleteBiographyWithSearch(athlete.name, sportName)
-            : await generateAthleteBiography(athlete.name, sportName);
+          let gptBioAnalysis;
+          if (forceUpdate) {
+            try {
+              gptBioAnalysis = await refreshAthleteBiographyWithSearch(athlete.name, sportName);
+            } catch (refreshError) {
+              console.log(`Refresh failed for ${athlete.name}, falling back to regular bio generation:`, refreshError);
+              gptBioAnalysis = await generateAthleteBiography(athlete.name, sportName);
+            }
+          } else {
+            gptBioAnalysis = await generateAthleteBiography(athlete.name, sportName);
+          }
           
           // Update athlete bio in database with GPT-5 AI content
           await storage.updateAthlete(athleteId, { 
