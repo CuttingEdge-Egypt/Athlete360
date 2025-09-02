@@ -27,7 +27,7 @@ export function RankChart({ data }: RankChartProps) {
       data: {
         labels: data.map(d => d.month),
         datasets: [{
-          label: 'World Ranking',
+          label: 'Career Ranking',
           data: data.map(d => d.rank),
           borderColor: 'hsl(207, 90%, 54%)',
           backgroundColor: 'rgba(14, 165, 233, 0.1)',
@@ -98,7 +98,7 @@ export function RankChart({ data }: RankChartProps) {
               },
               callback: function(value) {
                 // Show actual rank numbers (inverted scale)
-                const actualRank = 100 - value;
+                const actualRank = 100 - Number(value);
                 return actualRank > 0 ? '#' + actualRank : '';
               },
               stepSize: 1

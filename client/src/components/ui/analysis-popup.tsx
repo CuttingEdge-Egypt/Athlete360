@@ -930,7 +930,7 @@ export function AnalysisPopup({
           <h2 className="text-4xl font-bold text-athlete-accent mb-3">{name}</h2>
           {rank !== "N/A" && (
             <div className="inline-block px-6 py-2 bg-athlete-warning text-black font-bold text-lg rounded-full">
-              World Rank #{rank}
+              Career Rank #{rank}
             </div>
           )}
         </div>

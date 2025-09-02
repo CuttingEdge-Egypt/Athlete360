@@ -516,23 +516,23 @@ export async function refreshAthleteBiographyWithSearch(name: string, sport: str
     - Current world ranking status
     - 2024-2025 season performance
     
-    CRITICAL WORLD RANKING REQUIREMENT:
-    You MUST search for and include the athlete's current world ranking position in their sport:
+    CRITICAL CAREER RANKING REQUIREMENT:
+    You MUST search for and include the athlete's current career ranking position in their sport:
     - For Taekwondo: Search "World Taekwondo ranking" or "WT ranking" for their weight category
     - For Boxing: Search "world boxing rankings" for their weight division  
     - For Judo: Search "IJF world ranking" for their weight category
     - For Wrestling: Search "United World Wrestling ranking" for their category
     - For other sports: Search "[sport name] world ranking" or official federation rankings
     
-    Include the specific ranking number (e.g., "#5 in world", "Ranked 12th globally") or state "Unranked at world level" if no official ranking exists.
+    Include the specific ranking number (e.g., "#5 in career", "Ranked 12th globally") or state "Unranked at world level" if no official ranking exists.
 
 Don't include the references in the biography. 
     
     Create an updated biography with fresh information, structured as:
-    - Introduction with current status and world ranking position
+    - Introduction with current status and career ranking position
     - Players' overall story and what they're known for in their sport
     - "Recent Competitions:" (2024-2025 results)
-    - "Career Record and Rankings:" (current world ranking position and competitive record)
+    - "Career Record and Rankings:" (current career ranking position and competitive record)
     - "Notable Achievements:" (career highlights)
 
     Only mention information that is 100% accurate and verifiable.
