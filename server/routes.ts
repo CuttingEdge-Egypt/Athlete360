@@ -8,7 +8,7 @@ import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
 import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, compareAthletes, generateRankHistory } from "./openaiService";
-import { generateNutritionPlan, generateRankHistoryWithGemini, generateAthleteBiography, refreshAthleteBiographyWithSearch } from "./geminiService";
+import { generateNutritionPlan, generateRankHistoryWithGemini, generateAthleteBiography } from "./geminiService";
 import { analyzeVideoFile } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
 
@@ -529,7 +529,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Updating athlete data for ${athlete.name} using Gemini 2.5 Pro...`);
       
       // Fetch fresh, authentic athlete data from Gemini 2.5 Pro
-      const aiAthleteData = await refreshAthleteBiographyWithSearch(athlete.name, sportName);
+      const aiAthleteData = await generateAthleteBiography(athlete.name, sportName);
       
       // Handle rank - convert to number if possible, otherwise store as undefined
       let rankValue = undefined;
@@ -737,108 +737,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Refresh bio endpoint with 20 token cost
-  app.post('/api/athletes/:athleteId/refresh-bio', isAuthenticated, async (req: any, res) => {
-    const tokenCost = 20;
-    try {
-      const userId = req.user.claims.sub;
-      const athleteId = req.params.athleteId;
-
-      // Check if user has enough tokens
-      const user = await storage.getUser(userId);
-      if (!user || (user.tokens || 0) < tokenCost) {
-        return res.status(402).json({ message: "Insufficient tokens" });
-      }
-
-      const userTokens = user.tokens || 0;
-      // Deduct tokens
-      console.log(`DEDUCTING ${tokenCost} tokens from user ${userId}: ${userTokens} → ${userTokens - tokenCost}`);
-      console.log(`UPDATING user ${userId} tokens to ${userTokens - tokenCost}`);
-      await storage.deductTokens(userId, tokenCost);
-      console.log(`UPDATE COMPLETE: User tokens are now ${userTokens - tokenCost}`);
-      console.log(`DEDUCTION RESULT: User now has ${userTokens - tokenCost} tokens`);
-
-      // Create transaction
-      await storage.createTransaction({
-        userId,
-        action: "Refresh Biography",
-        tokensDeducted: tokenCost,
-        athleteId,
-        serviceType: "refresh-bio"
-      });
-
-      // Get athlete data
-      const athlete = await storage.getAthleteById(athleteId);
-      if (!athlete) {
-        return res.status(404).json({ message: "Athlete not found" });
-      }
-
-      // Get sport info for context
-      const sport = await storage.getSportById(athlete.sportId);
-      const sportName = sport?.name || "Unknown Sport";
-      
-      // Force refresh bio using Gemini 2.5 Pro with web search capabilities
-      console.log(`Refreshing bio for ${athlete.name} using Gemini 2.5 Pro`);
-      
-      try {
-        const refreshedBioData = await refreshAthleteBiographyWithSearch(athlete.name, sportName, athlete.country || "Unknown");
-        
-        // Handle rank - convert to number if possible, otherwise keep existing
-        let rankValue = athlete.rank;
-        if (typeof refreshedBioData.rank === 'number') {
-          rankValue = refreshedBioData.rank;
-        } else if (typeof refreshedBioData.rank === 'string' && !isNaN(Number(refreshedBioData.rank)) && refreshedBioData.rank !== 'N/A') {
-          rankValue = Number(refreshedBioData.rank);
-        }
-        
-        // Update athlete bio in database with fresh AI content
-        await storage.updateAthlete(athleteId, { 
-          bio: refreshedBioData.bio,
-          rank: rankValue,
-          updatedAt: new Date()
-        });
-        
-        const refreshedAnalysis = {
-          name: refreshedBioData.name,
-          bio: refreshedBioData.bio,
-          rank: refreshedBioData.rank,
-          worldRank: refreshedBioData.worldRank,
-          currentRecord: refreshedBioData.currentRecord,
-          profileImageUrl: athlete.profileImageUrl,
-          achievements: refreshedBioData.achievements || [],
-          personalInfo: {
-            sport: sportName,
-            status: "Active Professional", 
-            analysisDate: new Date().toLocaleDateString(),
-            lastUpdated: "Refreshed with OpenAI GPT-5 web search analysis",
-            recentNews: refreshedBioData.recentNews
-          },
-          referenceLinks: []
-        };
-
-        await storage.createAnalysisLog({
-          userId,
-          athleteId,
-          serviceType: "refresh-bio",
-          resultData: refreshedAnalysis
-        });
-
-        res.json({
-          success: true,
-          message: "Biography refreshed successfully",
-          data: refreshedAnalysis
-        });
-        
-      } catch (aiError) {
-        console.error(`Error refreshing bio for ${athlete.name}:`, aiError);
-        res.status(500).json({ message: "Failed to refresh biography using AI" });
-      }
-      
-    } catch (error) {
-      console.error("Error refreshing athlete bio:", error);
-      res.status(500).json({ message: "Failed to refresh athlete biography" });
-    }
-  });
 
   // Analysis service routes
   app.post('/api/analysis/:athleteId/bio', isAuthenticated, async (req: any, res) => {
@@ -906,7 +804,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           let gptBioAnalysis;
           if (forceUpdate) {
             try {
-              gptBioAnalysis = await refreshAthleteBiographyWithSearch(athlete.name, sportName);
+              gptBioAnalysis = await generateAthleteBiography(athlete.name, sportName);
             } catch (refreshError) {
               console.log(`Refresh failed for ${athlete.name}, falling back to regular bio generation:`, refreshError);
               gptBioAnalysis = await generateAthleteBiography(athlete.name, sportName);

@@ -99,10 +99,8 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       setCurrentQueueId(queueId);
       
       try {
-        // For bio service refresh, use the specific bio refresh endpoint
-        const url = service.id === "bio" && forceUpdate 
-          ? `/api/athletes/${athlete.id}/refresh-bio`
-          : forceUpdate 
+        // Use standard analysis endpoints for all services
+        const url = forceUpdate 
           ? `/api/analysis/${athlete.id}/${service.id}?forceUpdate=true`
           : `/api/analysis/${athlete.id}/${service.id}`;
         

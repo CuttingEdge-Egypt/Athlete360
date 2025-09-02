@@ -35,7 +35,6 @@ import {
   Brain,
   Flame,
   ChevronRight,
-  RefreshCw,
   PlayCircle,
   CheckCircle,
   BarChart,
@@ -141,8 +140,8 @@ export function AnalysisPopup({
   const renderStrengthsAnalysis = (data: any) => {
     console.log('Frontend Strengths Data RECEIVED:', JSON.stringify(data, null, 2));
     
-    // Use refreshed data if available, otherwise use original data
-    const dataToUse = refreshedStrengthsData || data;
+    // Use the original data
+    const dataToUse = data;
     
     // Parse the data first using the utility function
     const parsedData = parseAnalysisData(dataToUse);
@@ -173,20 +172,7 @@ export function AnalysisPopup({
 
     return (
       <div className="space-y-6">
-        {/* Refresh Button */}
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-white">Athlete Strengths</h3>
-          <Button
-            onClick={() => refreshStrengthsMutation.mutate()}
-            disabled={refreshStrengthsMutation.isPending}
-            variant="outline"
-            size="sm"
-            className="border-athlete-success text-athlete-success hover:bg-athlete-success hover:text-black"
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${refreshStrengthsMutation.isPending ? 'animate-spin' : ''}`} />
-            {refreshStrengthsMutation.isPending ? 'Refreshing...' : 'Refresh Analysis'}
-          </Button>
-        </div>
+        <h3 className="text-lg font-semibold text-white">Athlete Strengths</h3>
         
         {strengths.length > 0 ? strengths.map((strength: any, index: number) => {
           // Only render if we have authentic strength data
@@ -273,8 +259,8 @@ export function AnalysisPopup({
   };
 
   const renderWeaknessesAnalysis = (data: any) => {
-    // Use refreshed data if available, otherwise use original data
-    const dataToUse = refreshedWeaknessesData || data;
+    // Use the original data
+    const dataToUse = data;
     
     const parsedData = parseAnalysisData(dataToUse);
     
@@ -302,20 +288,7 @@ export function AnalysisPopup({
 
     return (
       <div className="space-y-6">
-        {/* Refresh Button */}
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-white">Areas for Improvement</h3>
-          <Button
-            onClick={() => refreshWeaknessesMutation.mutate()}
-            disabled={refreshWeaknessesMutation.isPending}
-            variant="outline"
-            size="sm"
-            className="border-athlete-danger text-athlete-danger hover:bg-athlete-danger hover:text-black"
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${refreshWeaknessesMutation.isPending ? 'animate-spin' : ''}`} />
-            {refreshWeaknessesMutation.isPending ? 'Refreshing...' : 'Refresh Analysis'}
-          </Button>
-        </div>
+        <h3 className="text-lg font-semibold text-white">Areas for Improvement</h3>
         
         <div className="space-y-4">
           {weaknesses.length > 0 ? weaknesses.map((weakness: any, index: number) => (
@@ -750,8 +723,8 @@ export function AnalysisPopup({
   const renderBioAnalysis = (data: any) => {
     console.log('Frontend Bio Data RECEIVED:', JSON.stringify(data, null, 2));
     
-    // Use refreshed data if available, otherwise use original data
-    const dataToRender = refreshedBioData || data;
+    // Use the original data
+    const dataToRender = data;
     
     // Parse the data first using the utility function
     const parsedData = parseAnalysisData(dataToRender);
@@ -805,22 +778,10 @@ export function AnalysisPopup({
     if (!bio || bio.length < 50) {
       return (
         <div className="space-y-8 max-w-none">
-          {/* Bio Analysis Header with Refresh Button */}
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center space-x-3">
-              <User className="text-athlete-accent" size={32} />
-              <h2 className="text-2xl font-bold text-athlete-accent">Biography Analysis</h2>
-            </div>
-            <Button
-              onClick={() => refreshBioMutation.mutate()}
-              disabled={refreshBioMutation.isPending}
-              variant="outline"
-              size="sm"
-              className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-black"
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 ${refreshBioMutation.isPending ? 'animate-spin' : ''}`} />
-              {refreshBioMutation.isPending ? 'Refreshing...' : 'Refresh Bio'}
-            </Button>
+          {/* Bio Analysis Header */}
+          <div className="flex items-center space-x-3 mb-6">
+            <User className="text-athlete-accent" size={32} />
+            <h2 className="text-2xl font-bold text-athlete-accent">Biography Analysis</h2>
           </div>
 
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-accent border-gray-600 shadow-xl">
@@ -831,7 +792,7 @@ export function AnalysisPopup({
               </h3>
               <div className="prose prose-invert max-w-none">
                 <p className="text-gray-200 leading-relaxed text-lg">
-                  {bio || "No biography data available. Click 'Refresh Bio' to generate fresh content."}
+                  {bio || "No biography data available."}
                 </p>
               </div>
             </CardContent>
@@ -895,21 +856,9 @@ export function AnalysisPopup({
     return (
       <div className="space-y-8 max-w-none">
         {/* Bio Analysis Header with Refresh Button */}
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center space-x-3">
-            <User className="text-athlete-accent" size={32} />
-            <h2 className="text-2xl font-bold text-athlete-accent">Biography Analysis</h2>
-          </div>
-          <Button
-            onClick={() => refreshBioMutation.mutate()}
-            disabled={refreshBioMutation.isPending}
-            variant="outline"
-            size="sm"
-            className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-black"
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${refreshBioMutation.isPending ? 'animate-spin' : ''}`} />
-            {refreshBioMutation.isPending ? 'Refreshing...' : 'Refresh Bio'}
-          </Button>
+        <div className="flex items-center space-x-3 mb-6">
+          <User className="text-athlete-accent" size={32} />
+          <h2 className="text-2xl font-bold text-athlete-accent">Biography Analysis</h2>
         </div>
 
         {/* Athlete Profile Header */}
@@ -1036,107 +985,10 @@ export function AnalysisPopup({
   const [isExporting, setIsExporting] = useState(false);
   const [showInputForm, setShowInputForm] = useState(false);
   const [showCustomizePlanModal, setShowCustomizePlanModal] = useState(false);
-  const [refreshedBioData, setRefreshedBioData] = useState<any>(null);
-  const [refreshedStrengthsData, setRefreshedStrengthsData] = useState<any>(null);
-  const [refreshedWeaknessesData, setRefreshedWeaknessesData] = useState<any>(null);
   const queryClient = useQueryClient();
 
-  // Refresh bio analysis mutation
-  const refreshBioMutation = useMutation({
-    mutationFn: async () => {
-      if (!athleteId) throw new Error('No athlete ID available');
-      const response = await fetch(`/api/analysis/${athleteId}/bio?forceUpdate=true`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to refresh bio analysis');
-      }
-      return await response.json();
-    },
-    onSuccess: (result) => {
-      setRefreshedBioData(result.newAnalysis || result);
-      toast({
-        title: "Bio analysis refreshed!",
-        description: "Updated analysis with latest information.",
-      });
-      // Invalidate relevant queries
-      queryClient.invalidateQueries({ queryKey: ['/api/user-history'] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Failed to refresh analysis",
-        description: error.message || "Please try again later.",
-        variant: "destructive",
-      });
-    },
-  });
 
-  // Refresh strengths analysis mutation
-  const refreshStrengthsMutation = useMutation({
-    mutationFn: async () => {
-      if (!athleteId) throw new Error('No athlete ID available');
-      const response = await fetch(`/api/analysis/${athleteId}/strengths?forceUpdate=true`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to refresh strengths analysis');
-      }
-      return await response.json();
-    },
-    onSuccess: (result) => {
-      setRefreshedStrengthsData(result);
-      toast({
-        title: "Strengths analysis refreshed!",
-        description: "Generated fresh analysis with latest data.",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/user-history'] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Failed to refresh strengths",
-        description: error.message || "Please try again later.",
-        variant: "destructive",
-      });
-    },
-  });
 
-  // Refresh weaknesses analysis mutation
-  const refreshWeaknessesMutation = useMutation({
-    mutationFn: async () => {
-      if (!athleteId) throw new Error('No athlete ID available');
-      const response = await fetch(`/api/analysis/${athleteId}/weaknesses?forceUpdate=true`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to refresh weaknesses analysis');
-      }
-      return await response.json();
-    },
-    onSuccess: (result) => {
-      setRefreshedWeaknessesData(result);
-      toast({
-        title: "Weaknesses analysis refreshed!",
-        description: "Generated fresh analysis with latest data.",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/user-history'] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Failed to refresh weaknesses",
-        description: error.message || "Please try again later.",
-        variant: "destructive",
-      });
-    },
-  });
 
   // User input states for enhanced analysis
   const [developmentDuration, setDevelopmentDuration] = useState("4 weeks");
