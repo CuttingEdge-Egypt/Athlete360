@@ -781,6 +781,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bioAnalysis = {
           name: athlete.name,
           bio: athlete.bio,
+          playersStory: athlete.playersStory || "",
           rank: athlete.rank || Math.floor(Math.random() * 10) + 1,
           profileImageUrl: athlete.profileImageUrl,
           achievements: athlete.achievements && Array.isArray(athlete.achievements) && athlete.achievements.length > 0 ? athlete.achievements.slice(0, 4) : [
@@ -816,6 +817,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Update athlete bio in database with GPT-5 AI content
           await storage.updateAthlete(athleteId, { 
             bio: gptBioAnalysis.bio,
+            playersStory: gptBioAnalysis.playersStory || "",
             rank: typeof gptBioAnalysis.rank === 'number' ? gptBioAnalysis.rank : 
                   (typeof gptBioAnalysis.rank === 'string' && !isNaN(Number(gptBioAnalysis.rank)) && gptBioAnalysis.rank !== 'N/A') ? 
                   Number(gptBioAnalysis.rank) : undefined,
@@ -825,6 +827,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           bioAnalysis = {
             name: gptBioAnalysis.name,
             bio: gptBioAnalysis.bio,
+            playersStory: gptBioAnalysis.playersStory || "",
             rank: gptBioAnalysis.rank,
             profileImageUrl: athlete.profileImageUrl,
             achievements: gptBioAnalysis.achievements && Array.isArray(gptBioAnalysis.achievements) && gptBioAnalysis.achievements.length > 0 ? gptBioAnalysis.achievements.slice(0, 4) : [

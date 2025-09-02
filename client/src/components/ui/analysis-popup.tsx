@@ -735,14 +735,11 @@ export function AnalysisPopup({
   };
 
   const renderBioAnalysis = (data: any) => {
-    console.log('Frontend Bio Data RECEIVED:', JSON.stringify(data, null, 2));
-    
     // Use the original data
     const dataToRender = data;
     
     // Parse the data first using the utility function
     const parsedData = parseAnalysisData(dataToRender);
-    console.log('Parsed Bio Data:', JSON.stringify(parsedData, null, 2));
     
     // Ensure we have a proper object to work with
     let bioData = parsedData;
@@ -777,17 +774,16 @@ export function AnalysisPopup({
     
     // Extract data with safe fallbacks - handle nested data structure
     const actualData = bioData.data || bioData; // Handle case where data is nested under 'data' key
+    
     const name = actualData.name || bioData.name || "Athlete Profile";
     const bio = actualData.bio || bioData.bio || "";
-    const playersStory = actualData.playersStory || bioData.playersStory || "";
+    const playersStory = actualData.playersStory || bioData.playersStory || actualData.playerStory || bioData.playerStory || "";
     const rank = actualData.currentRank || actualData.rank || bioData.currentRank || bioData.rank || "N/A";
     const achievements = Array.isArray(actualData.achievements) ? actualData.achievements : 
                         Array.isArray(bioData.achievements) ? bioData.achievements : [];
     const recentNews = actualData.personalInfo?.recentNews || actualData.recentNews || 
                       bioData.personalInfo?.recentNews || bioData.recentNews || [];
     const profileImageUrl = actualData.profileImageUrl || bioData.profileImageUrl;
-    
-    console.log('Bio content to parse:', bio);
     
     // If bio content is empty or just basic text, display it directly
     if (!bio || bio.length < 50) {
@@ -812,6 +808,21 @@ export function AnalysisPopup({
               </div>
             </CardContent>
           </Card>
+
+          {/* Player's Story Section */}
+          {playersStory && (
+            <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-cyan-400 border-gray-600 shadow-xl">
+              <CardContent className="p-8">
+                <h3 className="text-3xl font-bold text-cyan-400 mb-6 flex items-center">
+                  <Star className="mr-4 text-cyan-400" size={32} />
+                  Player's Story
+                </h3>
+                <div className="prose prose-invert max-w-none">
+                  <p className="text-gray-200 leading-relaxed text-lg">{playersStory}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Achievements Section */}
           {achievements.length > 0 && (
