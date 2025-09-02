@@ -170,24 +170,8 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     const playersStory = bioData.playersStory || "";
     const rank = bioData.currentRank || bioData.rank || "N/A";
     
-    // Debug achievements parsing
-    console.log('Raw achievements data:', bioData.achievements);
-    console.log('Achievements type:', typeof bioData.achievements);
-    console.log('Is array?', Array.isArray(bioData.achievements));
-    
-    let achievements = [];
-    if (Array.isArray(bioData.achievements)) {
-      achievements = bioData.achievements;
-    } else if (typeof bioData.achievements === 'string') {
-      try {
-        achievements = JSON.parse(bioData.achievements);
-      } catch (e) {
-        console.log('Failed to parse achievements string:', e);
-        achievements = [];
-      }
-    }
-    
-    console.log('Final parsed achievements:', achievements);
+    // Parse achievements properly
+    const achievements = Array.isArray(bioData.achievements) ? bioData.achievements : [];
     
     const recentNews = bioData.personalInfo?.recentNews || bioData.recentNews || [];
     const profileImageUrl = bioData.profileImageUrl;
@@ -293,34 +277,9 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
               </h3>
               <div className="grid gap-4">
                 {achievements.map((achievement: any, index: number) => {
-                  console.log(`Achievement ${index}:`, achievement);
-                  console.log(`Achievement type:`, typeof achievement);
-                  
-                  let achievementText: string = '';
-                  let medalType: string = 'Participation';
-                  
-                  if (typeof achievement === 'object' && achievement !== null && achievement.achievement) {
-                    // New object format - extract the text directly
-                    achievementText = achievement.achievement;
-                    medalType = achievement.medal || 'Participation';
-                  } else if (typeof achievement === 'string') {
-                    // Old string format or JSON string
-                    try {
-                      const parsed = JSON.parse(achievement);
-                      achievementText = parsed.achievement || achievement;
-                      medalType = parsed.medal || 'Participation';
-                    } catch {
-                      achievementText = achievement;
-                      medalType = 'Participation';
-                    }
-                  } else {
-                    // Fallback
-                    achievementText = 'Achievement data could not be parsed';
-                    medalType = 'Participation';
-                  }
-                  
-                  console.log(`Final achievementText:`, achievementText);
-                  console.log(`Final medalType:`, medalType);
+                  // Simple object property access - no debugging
+                  const achievementText = achievement?.achievement || achievement;
+                  const medalType = achievement?.medal || 'Participation';
                   
                   return (
                     <div 
