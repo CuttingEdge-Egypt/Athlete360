@@ -29,35 +29,26 @@ export interface StructuredNutritionPlan {
 
 export interface GeminiRankResponse {
   success: boolean;
-  athlete: {
-    name: string;
-    sport: string;
-    country: string;
-    currentRanking: {
-      position: string;
-      category: string;
-      lastUpdated: string;
-      source: string;
-    };
-    competitionRankingTimeline: Array<{
-      competition: string;
-      year: string;
-      date: string;
-      rankingBefore: string;
-      rankingAfter: string;
-      rankingChange: string;
-      competitionLevel: string;
-      result: string;
-      rankingSource: string;
-    }>;
-    rankingSummary: {
-      firstOfficialRanking: string;
-      breakthroughCompetition: string;
-      peakRankingPeriod: string;
-      recentCompetitions: string;
-      nextMajorCompetition: string;
-    };
+  athlete_name: string;
+  sport: string;
+  nationality: string;
+  active_period: {
+    start_year: number;
+    end_year: string | number;
   };
+  ranking_system_overview: string;
+  career_phases: Array<{
+    phase_name: string;
+    period: string;
+    key_achievements: Array<{
+      year: number;
+      event_name: string;
+      event_tier: string;
+      result: string;
+      notes: string;
+    }>;
+  }>;
+  analysis_narrative: string;
 }
 
 export async function generateNutritionPlan(
@@ -465,82 +456,77 @@ export async function generateRankHistoryWithGemini(
     // Get sport-specific federation URLs for context
     const federationUrls = getSportFederationUrls(sport);
     
-    const prompt = `Analyze the official ranking and competition history for athlete "${athleteName}" from ${nationality || 'unknown nationality'} in ${sport}.
+    const prompt = `As an expert sports analyst, your task is to generate a comprehensive rank history analysis for athlete "${athleteName}" from ${nationality || 'unknown nationality'} in ${sport}.
 
-🎯 OBJECTIVE: Find AUTHENTIC ranking progression and competition results from official federation sources.
+**Instructions:**
 
-🔍 ANALYSIS REQUIREMENTS:
-- Search the official federation websites provided in URL context for this athlete
-- Look for current world rankings, historical positions, and competition results  
-- Find specific competitions where ranking changed with before/after positions
-- Extract verified tournament results, medal placements, championship participation
-- Use competition-based timeline format showing actual ranking movements
--For the competition ranking timeline, include rank of the player in the competition not in the world ranking.
--Make sure to include all current competitions up to current date.
-📊 REQUIRED JSON STRUCTURE:
+1. **Analyze, Don't Just List:** Do not simply list the athlete's achievements. Your primary goal is to create a narrative that explains the **impact** of these achievements on the athlete's ranking and standing within their sport.
+2. **Explain the "Why":** Use the ranking_system_overview to explain *why* certain results led to significant changes in rank. Explain how winning major events provides substantial point boosts compared to lower-tier events.
+3. **Infer the Trajectory:** Based on the results, infer the athlete's likely ranking trajectory. Use phrases like "this likely propelled them into the top 50," "this would have solidified their position among the elite," or "this performance established their initial senior ranking."
+4. **Follow the Chronology:** Structure your analysis chronologically using career phases. Dedicate a section to each phase, explaining the progression during that period.
+5. **Maintain a Professional Tone:** Write the analysis in a clear, professional, and insightful manner, as would be expected from a sports journalist or analyst.
+
+**REQUIRED JSON STRUCTURE:**
 {
   "success": true,
-  "athlete": {
-    "name": "${athleteName}",
-    "sport": "${sport}",  
-    "country": "${nationality || 'Unknown'}",
-    "currentRanking": {
-      "position": "Current Career rank",
-      "category": "Weight class/division if applicable", 
-      "lastUpdated": "Recent date",
-      "source": "Official federation source"
+  "athlete_name": "${athleteName}",
+  "sport": "${sport}",
+  "nationality": "${nationality || 'Unknown'}",
+  "active_period": {
+    "start_year": 2017,
+    "end_year": "current"
+  },
+  "ranking_system_overview": "Detailed explanation of how the ranking system works in ${sport}, including point systems, event tiers, and what achievements lead to ranking improvements",
+  "career_phases": [
+    {
+      "phase_name": "Early Career and Senior Transition",
+      "period": "2017-2019",
+      "key_achievements": [
+        {
+          "year": 2018,
+          "event_name": "Specific tournament name",
+          "event_tier": "G1/G2/G4/G6/G12 classification or equivalent",
+          "result": "Medal/placement result",
+          "notes": "Explanation of significance and ranking impact"
+        }
+      ]
     },
-    "competitionRankingTimeline": [
-      {
-        "competition": "Specific competition name",
-        "rank": "Final ranking after this competition (e.g., '#18')",
-        "year": "Competition year",
-        "date": "Date if available", 
-        "rankingBefore": "Rank before competition",
-        "rankingAfter": "Rank after competition",
-        "rankingChange": "Change description (e.g., '#25 → #18 (+7)')",
-        "rankBoostReason": "Explanation of why this ranking was achieved (e.g., 'Strong performance reaching Round of 16 against higher-ranked opponents')",
-        "competitionLevel": "World/Continental/National level",
-        "result": "Medal/placement/result",
-        "rankingSource": "Federation source"
-      }
-    ],
-    "rankingProgressionData": [
-      {
-        "period": "Competition/Year identifier",
-        "rank": "Numerical ranking (lower number = better rank)"
-      }
-    ],
-    "rankingSummary": {
-      "firstOfficialRanking": "First recorded federation ranking",
-      "breakthroughCompetition": "Most significant competition result", 
-      "peakRankingPeriod": "Best ranking period with details",
-      "highestRank": "Highest/best ranking achieved (e.g., '#15')",
-      "stayedAtRankLongest": "Ranking position athlete maintained for the longest period (format: '#25 (June 2021 to November 2023)' or just '#25' if no time period available)",
-      "recentCompetitions": "Recent competition activity",
-      "nextMajorCompetition": "Upcoming events if found",
-      "currentStatus": {
-        "careerSpan": "Active/Retired status",
-        "nextMajorCompetition": "Upcoming competition if found",
-        "lastUpdated": "When this analysis was generated"
-      }
+    {
+      "phase_name": "Continental Breakthrough and Ranking Ascent",
+      "period": "2020-2022",
+      "key_achievements": [
+        {
+          "year": 2021,
+          "event_name": "Major championship name",
+          "event_tier": "Continental Championship or equivalent tier",
+          "result": "Medal result",
+          "notes": "Impact on world ranking and career trajectory"
+        }
+      ]
+    },
+    {
+      "phase_name": "Elite Status and Recent Achievements",
+      "period": "2023-current",
+      "key_achievements": [
+        {
+          "year": 2023,
+          "event_name": "Recent major competition",
+          "event_tier": "Event classification",
+          "result": "Achievement",
+          "notes": "Current status and ranking implications"
+        }
+      ]
     }
-  }
+  ],
+  "analysis_narrative": "A comprehensive 3-4 paragraph narrative analyzing the athlete's ranking journey, explaining how each achievement contributed to their career progression, discussing their current standing in the sport, and providing insights into their competitive trajectory based on the career phases above."
 }
 
-🔑 SUCCESS CRITERIA:
-- Return authentic data from official federation sources only
-- If no world rankings found, use national/regional competition results
-- Include any verified competitive achievements or participation records
-- Create meaningful progression timeline from available authentic data
-- Fill in highestRank field with best ranking achieved (e.g., "#15")
-- Fill in stayedAtRankLongest with consistent format: "#[NUMBER] ([TIME PERIOD])" e.g., "#25 (June 2021 to November 2023)"
-- Include currentStatus with careerSpan (Active/Retired), nextMajorCompetition, and lastUpdated fields
-- Fill rankingProgressionData array with chronological ranking data for chart visualization
-- Add "rank" field to each competitionRankingTimeline entry with final ranking after competition
-- Add "rankBoostReason" field explaining why each ranking improvement was achieved
-- CONSISTENCY REQUIREMENT: Always use the same weight division and ranking category throughout the response
-- Only fail if absolutely no athletic information exists for this person
+**CRITICAL REQUIREMENTS:**
+- Base analysis on authentic competitive achievements and realistic ranking progressions
+- Include proper event tier classifications (G-ratings for combat sports, ATP levels for tennis, etc.)
+- Create logical career phases that reflect natural progression in the sport
+- Provide detailed analysis narrative that connects achievements to ranking impact
+- Only use realistic and sport-appropriate event names and results
 
 Return ONLY valid JSON with no markdown formatting or additional text.`;
 
