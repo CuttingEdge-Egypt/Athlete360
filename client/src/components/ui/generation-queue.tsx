@@ -253,15 +253,6 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              onClick={clearCompleted}
-              className="h-6 w-6 p-0 text-gray-400 hover:text-gray-200"
-              title="Clear completed"
-            >
-              <Trash2 className="w-3 h-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
               onClick={() => setIsMinimized(!isMinimized)}
               className="h-6 w-6 p-0 text-gray-400 hover:text-gray-200"
             >

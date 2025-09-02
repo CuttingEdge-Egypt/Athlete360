@@ -300,7 +300,36 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       return;
     }
 
-    comparisonMutation.mutate();
+    // Get athlete names for queue display
+    const athlete1 = athletes1.find(a => a.id === selectedAthlete1);
+    const athlete2 = athletes2.find(a => a.id === selectedAthlete2);
+    const comparisonName = `${athlete1?.name || 'Athlete 1'} vs ${athlete2?.name || 'Athlete 2'}`;
+    
+    // Add to generation queue if available
+    if ((window as any).generationQueue) {
+      const queueId = (window as any).generationQueue.add(comparisonName, 'comparison', false);
+      
+      // Update queue status when mutation completes
+      comparisonMutation.mutate(undefined, {
+        onSuccess: (data) => {
+          if ((window as any).generationQueue) {
+            (window as any).generationQueue.update(queueId, 'completed', data);
+          }
+        },
+        onError: (error) => {
+          if ((window as any).generationQueue) {
+            (window as any).generationQueue.update(queueId, 'error', null, error.message || 'Comparison failed');
+          }
+        }
+      });
+      
+      // Update queue status to running
+      if ((window as any).generationQueue) {
+        (window as any).generationQueue.update(queueId, 'running');
+      }
+    } else {
+      comparisonMutation.mutate();
+    }
   };
 
   // Use comparisonData state that is initialized with preloaded data
@@ -382,13 +411,13 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
               <SelectContent>
                 {availableAthletes1.map((athlete: Athlete) => (
                   <SelectItem key={athlete.id} value={athlete.id}>
-                    <div className="flex items-center gap-2">
-                      <span>{athlete.name}</span>
+                    <div className="flex items-center gap-2 truncate max-w-full">
+                      <span className="truncate">{athlete.name}</span>
                       {athlete.country && (
-                        <span className="text-xs text-gray-400">({athlete.country})</span>
+                        <span className="text-xs text-gray-400 flex-shrink-0">({athlete.country})</span>
                       )}
                       {athlete.rank && (
-                        <span className="text-xs text-gray-400">#{athlete.rank}</span>
+                        <span className="text-xs text-gray-400 flex-shrink-0">#{athlete.rank}</span>
                       )}
                     </div>
                   </SelectItem>
@@ -435,13 +464,13 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
               <SelectContent>
                 {availableAthletes2.map((athlete: Athlete) => (
                   <SelectItem key={athlete.id} value={athlete.id}>
-                    <div className="flex items-center gap-2">
-                      <span>{athlete.name}</span>
+                    <div className="flex items-center gap-2 truncate max-w-full">
+                      <span className="truncate">{athlete.name}</span>
                       {athlete.country && (
-                        <span className="text-xs text-gray-400">({athlete.country})</span>
+                        <span className="text-xs text-gray-400 flex-shrink-0">({athlete.country})</span>
                       )}
                       {athlete.rank && (
-                        <span className="text-xs text-gray-400">#{athlete.rank}</span>
+                        <span className="text-xs text-gray-400 flex-shrink-0">#{athlete.rank}</span>
                       )}
                     </div>
                   </SelectItem>
@@ -460,7 +489,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
           {comparisonMutation.isPending ? (
             <>
               <Activity className="mr-2 h-4 w-4 animate-spin" />
-              Analyzing...
+              {["Analyzing athletes...", "Gathering performance data...", "This may take a moment..."][Math.floor(Date.now() / 3000) % 3]}
             </>
           ) : (
             <>
@@ -489,7 +518,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                     <User className="w-10 h-10 text-gray-400" />
                   </div>
                 )}
-                <h3 className="text-xl font-bold text-white break-words leading-tight">{comparisonData.athlete1.name}</h3>
+                <h3 className="text-xl font-bold text-white break-words leading-tight px-2">{comparisonData.athlete1.name}</h3>
                 <Badge variant="outline" className="mt-2">
                   Rank #{comparisonData.athlete1.rank || "TBD"}
                 </Badge>
@@ -507,7 +536,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                     <User className="w-10 h-10 text-gray-400" />
                   </div>
                 )}
-                <h3 className="text-xl font-bold text-white break-words leading-tight">{comparisonData.athlete2.name}</h3>
+                <h3 className="text-xl font-bold text-white break-words leading-tight px-2">{comparisonData.athlete2.name}</h3>
                 <Badge variant="outline" className="mt-2">
                   Rank #{comparisonData.athlete2.rank || "TBD"}
                 </Badge>

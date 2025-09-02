@@ -2310,16 +2310,19 @@ Return only valid JSON with the missing fields.`;
       console.log(`Generating GPT-5 powered comparison between ${athlete1.name} and ${athlete2.name}...`);
 
       // Create minimal athlete data for GPT-5 web search (name, country, sport only)
+      // Also include the stored rank if available
       const athlete1ForComparison = {
         name: athlete1.name,
         country: athlete1.country || "Unknown",
-        profileImageUrl: athlete1.profileImageUrl || ""
+        profileImageUrl: athlete1.profileImageUrl || "",
+        rank: athlete1.rank || null
       };
       
       const athlete2ForComparison = {
         name: athlete2.name, 
         country: athlete2.country || "Unknown",
-        profileImageUrl: athlete2.profileImageUrl || ""
+        profileImageUrl: athlete2.profileImageUrl || "",
+        rank: athlete2.rank || null
       };
       
       // Try GPT-5 comparison first, fall back to Gemini if it fails
@@ -2428,13 +2431,7 @@ Return only valid JSON with the missing fields.`;
         ...basicComparisonResult,
         overallAnalysis: finalOverallAnalysis,
         detailedAnalysis: detailedAnalysisResult.detailedAnalysis,
-        headToHead: detailedAnalysisResult.headToHead,
-        aiModels: {
-          basicComparison: "GPT-5",
-          detailedAnalysis: "Gemini-2.5-pro",
-          headToHead: "Gemini-2.5-pro",
-          overallAnalysis: overallAnalysisModel
-        }
+        headToHead: detailedAnalysisResult.headToHead
       };
 
       // Log the comparison

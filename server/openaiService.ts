@@ -583,7 +583,9 @@ Return this exact JSON structure:
   ]
 }
 
-Create a plan for the full duration specified. Use authentic data and personalize based on the athlete's profile and specified goal.`;
+Create a plan for the full duration specified. Use authentic data and personalize based on the athlete's profile and specified goal.
+
+IMPORTANT: Do not include any links, URLs, citations, or reference sources in your response. Provide clean text without any reference links, citations, or bracketed/parenthetical references to websites.`;
 
   try {
     const response = await openai.responses.create({
@@ -1271,6 +1273,8 @@ Return this exact JSON structure:
 
 Use authentic data only - base analysis on real competition results and verified performance data.
 
+IMPORTANT: Do not include any links, URLs, citations, or reference sources in your response. Provide clean text without any reference links, citations, or bracketed/parenthetical references to websites.
+
 CRITICAL ERROR HANDLING:
 - If you cannot find any reliable data through web search, respond with exactly: {"error": "no_data_found", "success": false}
 - If web search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
@@ -1815,13 +1819,13 @@ Return this exact JSON structure:
   "athlete1": {
     "name": "${athlete1.name}",
     "country": "${athlete1.country || 'Unknown'}",
-    "rank": "${athlete1.rank || 'N/A'}",
+    "rank": "${athlete1.rank || 'Search for current world ranking'}",
     "profileImageUrl": "${athlete1.profileImageUrl || ''}"
   },
   "athlete2": {
     "name": "${athlete2.name}",
     "country": "${athlete2.country || 'Unknown'}",
-    "rank": "${athlete2.rank || 'N/A'}",
+    "rank": "${athlete2.rank || 'Search for current world ranking'}",
     "profileImageUrl": "${athlete2.profileImageUrl || ''}"
   },
   "strengths": {

@@ -78,11 +78,23 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
 
     setIsAnalyzing(true);
     
+    // Add to generation queue if available
+    let queueId: string | null = null;
+    if ((window as any).generationQueue) {
+      queueId = (window as any).generationQueue.add(`Video: ${uploadedFile.name}`, 'video', false);
+      (window as any).generationQueue.update(queueId, 'running', null, null, 'Uploading video...');
+    }
+    
     const formData = new FormData();
     formData.append('video', uploadedFile);
     formData.append('roundToAnalyze', roundToAnalyze.toString());
 
     try {
+      // Update queue status
+      if (queueId && (window as any).generationQueue) {
+        (window as any).generationQueue.update(queueId, 'running', null, null, 'Processing video...');
+      }
+      
       const response = await fetch('/api/analysis/video', {
         method: 'POST',
         body: formData,
@@ -98,6 +110,10 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
             description: "You need more tokens to perform video analysis. Please purchase tokens to continue.",
             variant: "destructive",
           });
+          // Update queue status on error
+          if (queueId && (window as any).generationQueue) {
+            (window as any).generationQueue.update(queueId, 'error', null, 'Insufficient tokens');
+          }
           return;
         }
         throw new Error(result.message || 'Analysis failed');
@@ -108,6 +124,11 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
         title: "Analysis Complete",
         description: "Video analysis completed successfully!",
       });
+      
+      // Update queue status on success
+      if (queueId && (window as any).generationQueue) {
+        (window as any).generationQueue.update(queueId, 'completed', result.data);
+      }
 
     } catch (error) {
       console.error('Video analysis error:', error);
@@ -116,6 +137,11 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
         description: error instanceof Error ? error.message : 'Unknown error occurred',
         variant: "destructive",
       });
+      
+      // Update queue status on error
+      if (queueId && (window as any).generationQueue) {
+        (window as any).generationQueue.update(queueId, 'error', null, error instanceof Error ? error.message : 'Unknown error');
+      }
     } finally {
       setIsAnalyzing(false);
     }
