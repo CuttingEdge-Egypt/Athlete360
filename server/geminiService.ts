@@ -34,19 +34,37 @@ export interface GeminiRankResponse {
     sport: string;
     country: string;
     currentRanking: {
-      position: string;
-      category: string;
-      lastUpdated: string;
-      source: string;
+      worldSeniorDivision: {
+        position: string;
+        category: string;
+        lastUpdated: string;
+        source: string;
+      };
+      olympicSeniorDivision: {
+        position: string;
+        category: string;
+        lastUpdated: string;
+        source: string;
+      };
     };
-    competitionRankingTimeline: Array<{
+    worldRankProgression: Array<{
       competition: string;
       year: string;
       date: string;
-      rankingBefore: string;
-      rankingAfter: string;
+      worldRankBefore: string;
+      worldRankAfter: string;
       rankingChange: string;
       competitionLevel: string;
+      result: string;
+      rankingSource: string;
+    }>;
+    competitionPlacementProgression: Array<{
+      competition: string;
+      year: string;
+      date: string;
+      placement: string;
+      competitionLevel: string;
+      participantsCount: string;
       result: string;
       rankingSource: string;
     }>;
@@ -75,21 +93,30 @@ Search these SPECIFIC official sources for ${athleteName}${countryContext}:
 1. https://www.taekwondodata.com/ - Complete taekwondo database with fighter profiles
 2. https://www.worldtaekwondo.org/ranking/ranking.html - Official World Taekwondo rankings
 
-Find the ACTUAL current world ranking for ${athleteName}. Look for:
-- Current Olympic ranking position
-- Latest World Taekwondo Federation ranking
-- Weight category and division
-- Last ranking update date
+CRITICAL DISTINCTIONS FOR TAEKWONDO:
+1. DIFFERENTIATE between World Senior Division Ranking and Olympic Senior Division Ranking
+2. World Senior Division = General WT world rankings for all competitions
+3. Olympic Senior Division = Specific Olympic qualification rankings
+
+Find the ACTUAL current rankings for ${athleteName} in BOTH divisions:
 
 Return ONLY this exact JSON format with authentic data:
 {
-  "worldRank": "#XX" (actual ranking number or "N/A" if unranked),
-  "source": "World Taekwondo Federation" or "TaekwondoData" or "Unranked",
-  "category": "M-XXkg" or "F-XXkg" (weight division),
-  "lastUpdated": "Month YYYY"
+  "worldSeniorDivision": {
+    "worldRank": "#XX" (actual World Senior ranking or "N/A"),
+    "source": "World Taekwondo Federation" or "TaekwondoData" or "Unranked",
+    "category": "M-XXkg" or "F-XXkg" (weight division),
+    "lastUpdated": "Month YYYY"
+  },
+  "olympicSeniorDivision": {
+    "worldRank": "#XX" (actual Olympic Senior ranking or "N/A"),
+    "source": "World Taekwondo Federation" or "TaekwondoData" or "Unranked", 
+    "category": "M-XXkg" or "F-XXkg" (weight division),
+    "lastUpdated": "Month YYYY"
+  }
 }
 
-CRITICAL: Only return real, verifiable ranking data. If the athlete is not found in official rankings, return worldRank as "N/A".`;
+CRITICAL: Only return real, verifiable ranking data from official sources. If not found in either division, return "N/A".`;
 
     const model = googleGenAI.getGenerativeModel({ model: "gemini-2.5-pro" });
     const result = await model.generateContent(prompt);
@@ -105,8 +132,8 @@ CRITICAL: Only return real, verifiable ranking data. If the athlete is not found
     const rankData = JSON.parse(cleanedResponse);
     
     return {
-      worldRank: rankData.worldRank || "N/A",
-      source: rankData.source || "Official Sources"
+      worldRank: rankData.worldSeniorDivision?.worldRank || rankData.worldRank || "N/A",
+      source: rankData.worldSeniorDivision?.source || rankData.source || "Official Sources"
     };
     
   } catch (error) {
@@ -527,6 +554,47 @@ export async function generateRankHistoryWithGemini(
 
 🎯 OBJECTIVE: Find AUTHENTIC ranking progression and competition results from official federation sources.
 
+${sport.toLowerCase() === 'taekwondo' ? 
+`
+🥋 TAEKWONDO-SPECIFIC REQUIREMENTS:
+1. DIFFERENTIATE between World Senior Division Ranking and Olympic Senior Division Ranking
+2. World Senior Division = General WT world rankings for all competitions  
+3. Olympic Senior Division = Specific Olympic qualification rankings
+4. Each competition has TWO progressions:
+   - World rank progression AFTER each competition (how world rank changed)
+   - Competition placement progression (actual placement in each competition)
+
+🔍 ANALYSIS REQUIREMENTS:
+- Search the official federation websites provided in URL context for this athlete
+- Look for BOTH World Senior Division and Olympic Senior Division rankings
+- Find specific competitions where world ranking changed with before/after positions
+- Track competition placements separately (1st, 2nd, 3rd, 11th, etc.)  
+- Extract verified tournament results, medal placements, championship participation
+- Use dual progression format: world rank changes + competition placements
+
+📊 REQUIRED JSON STRUCTURE:
+{
+  "success": true,
+  "athlete": {
+    "name": "${athleteName}",
+    "sport": "${sport}",  
+    "country": "${nationality || 'Unknown'}",
+    "currentRanking": {
+      "worldSeniorDivision": {
+        "position": "Current World Senior Division rank",
+        "category": "Weight class (e.g., M-63kg)", 
+        "lastUpdated": "Recent date",
+        "source": "World Taekwondo Federation"
+      },
+      "olympicSeniorDivision": {
+        "position": "Current Olympic Senior Division rank",
+        "category": "Weight class (e.g., M-63kg)", 
+        "lastUpdated": "Recent date",
+        "source": "World Taekwondo Federation"
+      }
+    },` 
+: 
+`
 🔍 ANALYSIS REQUIREMENTS:
 - Search the official federation websites provided in URL context for this athlete
 - Look for current world rankings, historical positions, and competition results  
@@ -546,8 +614,35 @@ export async function generateRankHistoryWithGemini(
       "category": "Weight class/division if applicable", 
       "lastUpdated": "Recent date",
       "source": "Official federation source"
-    },
-    "competitionRankingTimeline": [
+    },`}
+${sport.toLowerCase() === 'taekwondo' ? 
+`    "worldRankProgression": [
+      {
+        "competition": "Specific competition name",
+        "year": "Competition year",
+        "date": "Date if available", 
+        "worldRankBefore": "World Senior rank before competition",
+        "worldRankAfter": "World Senior rank after competition",
+        "rankingChange": "Change description (e.g., '#25 → #18 (+7)')",
+        "competitionLevel": "World/Continental/National level",
+        "result": "Medal/placement/result",
+        "rankingSource": "World Taekwondo Federation"
+      }
+    ],
+    "competitionPlacementProgression": [
+      {
+        "competition": "Specific competition name",
+        "year": "Competition year",
+        "date": "Date if available",
+        "placement": "Actual competition placement (1st, 2nd, 3rd, 11th, etc.)",
+        "competitionLevel": "World/Continental/National level",
+        "participantsCount": "Number of participants if available",
+        "result": "Medal/placement description",
+        "rankingSource": "Competition source"
+      }
+    ],`
+:
+`    "competitionRankingTimeline": [
       {
         "competition": "Specific competition name",
         "rank": "Final ranking after this competition (e.g., '#18')",
@@ -561,7 +656,7 @@ export async function generateRankHistoryWithGemini(
         "result": "Medal/placement/result",
         "rankingSource": "Federation source"
       }
-    ],
+    ],`}
     "rankingProgressionData": [
       {
         "period": "Competition/Year identifier",

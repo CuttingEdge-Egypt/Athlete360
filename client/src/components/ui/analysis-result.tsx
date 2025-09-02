@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RankChart } from "./rank-chart";
 import { Download, Share2, User, Trophy, Star, AlertTriangle, Calendar, Swords, Video, Award, TrendingUp, Clock, Target, PlayCircle, Zap, Shield, CheckCircle, BarChart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -392,7 +393,109 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
         </Card>
 
         {/* Ranking Progression Timeline */}
-        {rankingProgression && rankingProgression.length > 0 && (
+{/* Taekwondo Dual Ranking System */}
+        {data.athlete?.sport === 'Taekwondo' && (data.athlete.worldRankProgression || data.athlete.competitionPlacementProgression) && (
+          <Card className="bg-athlete-gray-800 border-gray-600">
+            <CardHeader>
+              <CardTitle className="text-2xl text-gray-100 flex items-center">
+                <TrendingUp className="mr-3 text-blue-400" size={24} />
+                🥋 Taekwondo Ranking Analysis
+              </CardTitle>
+              <p className="text-sm text-gray-400 mt-2">
+                World Senior Division ranking progression and competition placement history
+              </p>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="worldRank" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 bg-athlete-gray-700">
+                  <TabsTrigger 
+                    value="worldRank" 
+                    className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                  >
+                    World Rank Progression
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="competition" 
+                    className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+                  >
+                    Competition Placements
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="worldRank" className="mt-4">
+                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                    {data.athlete.worldRankProgression?.map((entry: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-gray-500 transition-colors">
+                        <div className="flex-1">
+                          <div className="font-semibold text-gray-100">
+                            {entry.competition || `Event ${index + 1}`}
+                          </div>
+                          <div className="text-sm text-gray-400">
+                            {entry.date || 'Date unknown'} • {entry.result || 'Result unknown'}
+                          </div>
+                          <div className="text-xs text-blue-400 mt-1">
+                            World Senior Division • {entry.competitionLevel || 'Competition level unknown'}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xl font-bold text-white">
+                            {entry.worldRankAfter || entry.worldRankBefore || 'N/A'}
+                          </div>
+                          {entry.rankingChange && (
+                            <div className="text-sm font-medium text-blue-400">
+                              {entry.rankingChange}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )) || (
+                      <div className="text-gray-400 text-center py-4">
+                        No world ranking progression data available
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="competition" className="mt-4">
+                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                    {data.athlete.competitionPlacementProgression?.map((entry: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-gray-500 transition-colors">
+                        <div className="flex-1">
+                          <div className="font-semibold text-gray-100">
+                            {entry.competition || `Event ${index + 1}`}
+                          </div>
+                          <div className="text-sm text-gray-400">
+                            {entry.date || 'Date unknown'} • {entry.competitionLevel || 'Competition level unknown'}
+                          </div>
+                          {entry.participantsCount && (
+                            <div className="text-xs text-purple-400 mt-1">
+                              {entry.participantsCount} participants
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xl font-bold text-white">
+                            {entry.placement || 'N/A'}
+                          </div>
+                          <div className="text-sm text-purple-400">
+                            {entry.result || 'Placement'}
+                          </div>
+                        </div>
+                      </div>
+                    )) || (
+                      <div className="text-gray-400 text-center py-4">
+                        No competition placement data available
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Standard Ranking Progression (Non-Taekwondo) */}
+        {data.athlete?.sport !== 'Taekwondo' && rankingProgression && rankingProgression.length > 0 && (
           <Card className="bg-athlete-gray-800 border-gray-600">
             <CardHeader>
               <CardTitle className="text-2xl text-gray-100 flex items-center">
