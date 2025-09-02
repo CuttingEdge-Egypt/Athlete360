@@ -267,8 +267,8 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
           </Card>
         )}
 
-        {/* Notable Achievements Section */}
-        {achievements.length > 0 && (
+        {/* Notable Achievements Section - Completely Rewritten */}
+        {achievements && achievements.length > 0 && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-warning border-gray-600 shadow-xl">
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-athlete-warning mb-6 flex items-center">
@@ -276,10 +276,24 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
                 Notable Achievements
               </h3>
               <div className="grid gap-4">
-                {achievements.map((achievement: any, index: number) => {
-                  // Simple object property access - no debugging
-                  const achievementText = achievement?.achievement || achievement;
-                  const medalType = achievement?.medal || 'Participation';
+                {achievements.map((achievementObj: any, index: number) => {
+                  // Direct property access for clean display
+                  const text = achievementObj.achievement;
+                  const medal = achievementObj.medal;
+                  
+                  // Render medal icon based on type
+                  const renderMedalIcon = () => {
+                    switch (medal) {
+                      case 'Gold':
+                        return <Medal className="w-6 h-6 text-yellow-500" />;
+                      case 'Silver':
+                        return <Medal className="w-6 h-6 text-gray-300" />;
+                      case 'Bronze':
+                        return <Medal className="w-6 h-6 text-amber-600" />;
+                      default:
+                        return <CheckCircle className="w-6 h-6 text-green-500" />;
+                    }
+                  };
                   
                   return (
                     <div 
@@ -288,10 +302,10 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
                       data-testid={`achievement-item-${index}`}
                     >
                       <div className="mt-1 flex-shrink-0">
-                        {getMedalIcon(medalType)}
+                        {renderMedalIcon()}
                       </div>
                       <p className="text-gray-200 leading-relaxed text-lg font-medium">
-                        {achievementText}
+                        {text}
                       </p>
                     </div>
                   );
