@@ -248,7 +248,11 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         className={`service-card bg-gradient-to-br from-athlete-gray-800 to-athlete-gray-700 border-gray-700 hover:border-athlete-accent cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-athlete-accent/20 ${
           (analysisMutation.isPending || isProcessing) ? 'opacity-75 pointer-events-none' : ''
         }`}
-        onClick={() => handleServiceClick(false)}
+        onClick={() => {
+          // Force fresh AI analysis for bio, strengths, and weaknesses
+          const shouldForceUpdate = ['bio', 'strengths', 'weaknesses'].includes(service.id);
+          handleServiceClick(shouldForceUpdate);
+        }}
       >
       <CardContent className="p-6">
         <div className="flex justify-between items-start mb-4">
@@ -268,7 +272,9 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
             disabled={analysisMutation.isPending || isProcessing}
             onClick={(e) => {
               e.stopPropagation();
-              handleServiceClick(false);
+              // Force fresh AI analysis for bio, strengths, and weaknesses
+              const shouldForceUpdate = ['bio', 'strengths', 'weaknesses'].includes(service.id);
+              handleServiceClick(shouldForceUpdate);
             }}
           >
             {(analysisMutation.isPending || isProcessing) ? (
