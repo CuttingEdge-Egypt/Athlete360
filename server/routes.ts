@@ -1890,7 +1890,56 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
-  // Token purchase endpoint (for testing)
+  // Token purchase endpoint - simplified endpoint for modal compatibility
+  app.post('/api/purchase-tokens', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { amount } = req.body;
+
+      if (!amount) {
+        return res.status(400).json({ message: "Amount is required" });
+      }
+
+      // Calculate tokens based on amount
+      const tokensAmount = amount === 15 ? 500 : amount === 25 ? 1000 : amount === 50 ? 2500 : 0;
+      if (tokensAmount === 0) {
+        return res.status(400).json({ message: "Invalid purchase amount" });
+      }
+
+      const transactionId = `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Add tokens to user
+      await storage.addTokensPurchase(userId, tokensAmount);
+
+      // Create transaction record
+      await storage.createTransaction({
+        userId,
+        action: "Token Purchase",
+        tokensDeducted: -tokensAmount,
+        serviceType: "purchase"
+      });
+
+      const updatedUser = await storage.getUser(userId);
+      res.json({ 
+        success: true,
+        message: "Tokens purchased successfully", 
+        tokens: updatedUser?.tokens || 0,
+        totalPurchased: updatedUser?.totalTokensPurchased || 0,
+        purchased: tokensAmount,
+        transactionId
+      });
+    } catch (error) {
+      console.error("Error purchasing tokens:", error);
+      res.status(500).json({ message: "Failed to purchase tokens" });
+    }
+  });
+
+  // Token purchase endpoint (for testing) - detailed endpoint
   app.post('/api/user/purchase-tokens', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
