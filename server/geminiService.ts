@@ -538,19 +538,23 @@ export async function generateRankHistoryWithGemini(
 
 Return ONLY valid JSON with no markdown formatting or additional text.`;
 
-    // Use GoogleGenerativeAI client without search grounding (not supported in current configuration)
-    const model = googleGenAI.getGenerativeModel({
+    // Use new GoogleGenAI client with proper search grounding
+    const result = await genAI.models.generateContent({
       model: "gemini-2.5-pro",
-      generationConfig: {
+      contents: prompt,
+      config: {
         temperature: 1,
         maxOutputTokens: 8000,
+        tools: [{ googleSearch: {} }]
       }
     });
     
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    let cleanedText = response.text().trim();
+    let cleanedText = (result.text || "").trim();
     console.log(`Gemini rank response for ${athleteName}:`, cleanedText);
+    
+    if (!cleanedText) {
+      throw new Error("Empty response from Gemini model");
+    }
     
     // Clean up response
     cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
