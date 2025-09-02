@@ -965,7 +965,7 @@ CRITICAL ERROR HANDLING:
         }
       ],
       temperature: 0.1,
-      max_tokens: 3000
+      max_completion_tokens: 3000
     });
 
     const response = completion.choices[0].message.content;
@@ -1049,7 +1049,7 @@ async function searchAthleteImageWithAI(athleteName: string, sport?: string, nat
         }
       ],
       temperature: 0.1,
-      max_tokens: 200
+      max_completion_tokens: 200
     });
 
     const response = completion.choices[0].message.content?.trim();
@@ -1287,7 +1287,7 @@ If no ranking data found, use "Not Found" for missing fields but maintain the JS
         }
       ],
       temperature: 0.1,
-      max_tokens: 4000
+      max_completion_tokens: 4000
     });
 
     const response = completion.choices[0].message.content;
@@ -1379,7 +1379,7 @@ Provide a comprehensive comparison in this JSON format:
         }
       ],
       temperature: 0.1,
-      max_tokens: 3000
+      max_completion_tokens: 3000
     });
 
     const response = completion.choices[0].message.content;
