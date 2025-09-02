@@ -60,6 +60,64 @@ export interface GeminiRankResponse {
   };
 }
 
+// Generate authentic current world rank for taekwondo athletes using official sources
+export async function generateAuthenticTaekwondoRank(
+  athleteName: string,
+  country?: string
+): Promise<{ worldRank: string; source: string }> {
+  try {
+    console.log(`🥋 Fetching authentic rank for ${athleteName} from official taekwondo sources...`);
+    
+    const countryContext = country ? ` from ${country}` : '';
+    const prompt = `You are an expert taekwondo analyst with access to official ranking data. 
+
+Search these SPECIFIC official sources for ${athleteName}${countryContext}:
+1. https://www.taekwondodata.com/ - Complete taekwondo database with fighter profiles
+2. https://www.worldtaekwondo.org/ranking/ranking.html - Official World Taekwondo rankings
+
+Find the ACTUAL current world ranking for ${athleteName}. Look for:
+- Current Olympic ranking position
+- Latest World Taekwondo Federation ranking
+- Weight category and division
+- Last ranking update date
+
+Return ONLY this exact JSON format with authentic data:
+{
+  "worldRank": "#XX" (actual ranking number or "N/A" if unranked),
+  "source": "World Taekwondo Federation" or "TaekwondoData" or "Unranked",
+  "category": "M-XXkg" or "F-XXkg" (weight division),
+  "lastUpdated": "Month YYYY"
+}
+
+CRITICAL: Only return real, verifiable ranking data. If the athlete is not found in official rankings, return worldRank as "N/A".`;
+
+    const model = googleGenAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
+    
+    console.log(`Raw Gemini rank response: ${responseText}`);
+    
+    // Clean and parse JSON response
+    let cleanedResponse = responseText.trim();
+    cleanedResponse = cleanedResponse.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    cleanedResponse = cleanedResponse.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    
+    const rankData = JSON.parse(cleanedResponse);
+    
+    return {
+      worldRank: rankData.worldRank || "N/A",
+      source: rankData.source || "Official Sources"
+    };
+    
+  } catch (error) {
+    console.error(`Error fetching authentic rank for ${athleteName}:`, error);
+    return {
+      worldRank: "N/A",
+      source: "Data Unavailable"
+    };
+  }
+}
+
 export async function generateNutritionPlan(
   name: string,
   age: number,
