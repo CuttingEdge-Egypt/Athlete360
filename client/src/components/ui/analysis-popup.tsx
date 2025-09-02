@@ -38,6 +38,7 @@ import {
   PlayCircle,
   CheckCircle,
   BarChart,
+  Medal,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -720,6 +721,19 @@ export function AnalysisPopup({
     );
   };
 
+  // Helper function to get medal icon based on medal type
+  const getMedalIcon = (medal: string) => {
+    if (medal === 'Gold') {
+      return <Medal className="w-5 h-5 text-yellow-500" />;
+    } else if (medal === 'Silver') {
+      return <Medal className="w-5 h-5 text-gray-300" />;
+    } else if (medal === 'Bronze') {
+      return <Medal className="w-5 h-5 text-amber-600" />;
+    } else {
+      return <CheckCircle className="w-5 h-5 text-green-500" />;
+    }
+  };
+
   const renderBioAnalysis = (data: any) => {
     console.log('Frontend Bio Data RECEIVED:', JSON.stringify(data, null, 2));
     
@@ -765,7 +779,8 @@ export function AnalysisPopup({
     const actualData = bioData.data || bioData; // Handle case where data is nested under 'data' key
     const name = actualData.name || bioData.name || "Athlete Profile";
     const bio = actualData.bio || bioData.bio || "";
-    const rank = actualData.rank || bioData.rank || "N/A";
+    const playersStory = actualData.playersStory || bioData.playersStory || "";
+    const rank = actualData.currentRank || actualData.rank || bioData.currentRank || bioData.rank || "N/A";
     const achievements = Array.isArray(actualData.achievements) ? actualData.achievements : 
                         Array.isArray(bioData.achievements) ? bioData.achievements : [];
     const recentNews = actualData.personalInfo?.recentNews || actualData.recentNews || 
@@ -807,17 +822,25 @@ export function AnalysisPopup({
                   Notable Achievements
                 </h3>
                 <div className="grid gap-4">
-                  {achievements.map((achievement: string, index: number) => (
-                    <div 
-                      key={index}
-                      className="flex items-start space-x-4 p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20"
-                    >
-                      <div className="w-3 h-3 bg-athlete-warning rounded-full mt-2 flex-shrink-0"></div>
-                      <p className="text-gray-200 leading-relaxed text-lg font-medium">
-                        {typeof achievement === 'string' ? achievement : JSON.stringify(achievement, null, 2)}
-                      </p>
-                    </div>
-                  ))}
+                  {achievements.map((achievementObj: any, index: number) => {
+                    // Handle both string and object achievements
+                    const text = typeof achievementObj === 'string' ? achievementObj : achievementObj?.achievement || '';
+                    const medal = typeof achievementObj === 'object' ? achievementObj?.medal : null;
+                    
+                    return (
+                      <div 
+                        key={index}
+                        className="flex items-start space-x-4 p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20"
+                      >
+                        <div className="mt-1 flex-shrink-0">
+                          {medal ? getMedalIcon(medal) : <div className="w-3 h-3 bg-athlete-warning rounded-full mt-1"></div>}
+                        </div>
+                        <p className="text-gray-200 leading-relaxed text-lg font-medium">
+                          {text}
+                        </p>
+                      </div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -899,16 +922,16 @@ export function AnalysisPopup({
           </Card>
         )}
 
-        {/* Players' Overall Story Section */}
-        {bioSections.overallStory && (
+        {/* Player's Story Section */}
+        {(playersStory || bioSections.overallStory) && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-cyan-400 border-gray-600 shadow-xl">
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-cyan-400 mb-6 flex items-center">
                 <Star className="mr-4 text-cyan-400" size={32} />
-                Players' Overall Story
+                Player's Story
               </h3>
               <div className="prose prose-invert max-w-none">
-                <p className="text-gray-200 leading-relaxed text-lg">{bioSections.overallStory}</p>
+                <p className="text-gray-200 leading-relaxed text-lg">{playersStory || bioSections.overallStory}</p>
               </div>
             </CardContent>
           </Card>
@@ -938,17 +961,25 @@ export function AnalysisPopup({
                 Notable Achievements
               </h3>
               <div className="grid gap-4">
-                {achievements.map((achievement: string, index: number) => (
-                  <div 
-                    key={index}
-                    className="flex items-start space-x-4 p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20"
-                  >
-                    <div className="w-3 h-3 bg-athlete-warning rounded-full mt-2 flex-shrink-0"></div>
-                    <p className="text-gray-200 leading-relaxed text-lg font-medium">
-                      {typeof achievement === 'string' ? achievement : JSON.stringify(achievement, null, 2)}
-                    </p>
-                  </div>
-                ))}
+                {achievements.map((achievementObj: any, index: number) => {
+                  // Handle both string and object achievements
+                  const text = typeof achievementObj === 'string' ? achievementObj : achievementObj?.achievement || '';
+                  const medal = typeof achievementObj === 'object' ? achievementObj?.medal : null;
+                  
+                  return (
+                    <div 
+                      key={index}
+                      className="flex items-start space-x-4 p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20"
+                    >
+                      <div className="mt-1 flex-shrink-0">
+                        {medal ? getMedalIcon(medal) : <div className="w-3 h-3 bg-athlete-warning rounded-full mt-1"></div>}
+                      </div>
+                      <p className="text-gray-200 leading-relaxed text-lg font-medium">
+                        {text}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
