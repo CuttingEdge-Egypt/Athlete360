@@ -100,10 +100,17 @@ export async function getEnhancedTaekwondoData(athleteName: string, nationality?
     
     const nationalityContext = nationality ? ` from ${nationality}` : '';
     
-    // Use GPT-5 with web search to get specific ranking and record data (no timeout)
-    const response = await openai.responses.create({
+    // Use GPT-5 chat completions for ranking search
+    const response = await openai.chat.completions.create({
       model: "gpt-5",
-      input: `Search the web for current World Taekwondo (WT) ranking and competition record information for the athlete "${athleteName}"${nationalityContext}.
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert sports analyst. Search for authentic athlete ranking data and return only valid JSON."
+        },
+        {
+          role: "user",
+          content: `Search for current World Taekwondo (WT) ranking and competition record information for the athlete "${athleteName}"${nationalityContext}.
 
 Focus specifically on finding:
 1. Current World Taekwondo (WT) world ranking position
@@ -125,15 +132,17 @@ Response format:
 {
   "worldRank": "#X" (where X is the ranking number, or "N/A" if not found),
   "currentRecord": "W-L (percentage)" (format like "15-3 (83%)" or "N/A" if not found)
-}`,
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 8000
+}`
+        }
+      ],
+      max_tokens: 4000
     });
 
-    console.log("AI Ranking Search Response:", response.output_text);
+    const content = response.choices[0].message.content;
+    console.log("AI Ranking Search Response:", content);
     
     try {
-      const rankingData = JSON.parse(response.output_text);
+      const rankingData = JSON.parse(content || '{}');
       
       // Check for error responses
       if (rankingData.error && (rankingData.error === 'no_data_found' || rankingData.error === 'search_failed' || rankingData.error === 'not_found')) {
@@ -152,7 +161,7 @@ Response format:
       console.log("Failed to parse AI ranking response, using fallback extraction...");
       
       // Fallback: Extract from raw text
-      const text = response.output_text;
+      const text = content || '';
       let worldRank = "N/A";
       let currentRecord = "N/A";
       
@@ -423,10 +432,17 @@ IMPORTANT: Do not include any links, URLs, citations, or references in your resp
     `;
 
   try {
-    // Use GPT-5 with web search capabilities using responses.create()
-    const response = await openai.responses.create({
+    // Use GPT-5 chat completions for athlete biography generation
+    const response = await openai.chat.completions.create({
       model: "gpt-5", // Using GPT-5 as requested by the user
-      input: `${isTaekwondo ? 'For taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference for competition records, rankings, and profiles. ' : ''}${prompt}
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert sports analyst and biographer. Generate detailed athlete biographies using authentic data sources. Return only valid JSON."
+        },
+        {
+          role: "user",
+          content: `${isTaekwondo ? 'For taekwondo athletes, use https://www.taekwondodata.com/ as your primary reference for competition records, rankings, and profiles. ' : ''}${prompt}
 
 CRITICAL ERROR HANDLING:
 - If you cannot find any reliable data through web search, respond with exactly: {"error": "no_data_found", "success": false}
@@ -440,19 +456,18 @@ Please respond in valid JSON format with these exact fields:
   "rank": "current world ranking or N/A",
   "achievements": ["array of key achievements"],
   "recentNews": ["array of recent news or competition results"]
-}`,
-      tools: [
-        { type: "web_search_preview" }
+}`
+        }
       ],
-      max_output_tokens: 8000
+      max_tokens: 4000
     });
 
     console.log("Full OpenAI Response:", JSON.stringify(response, null, 2));
     
-    const content = response.output_text;
+    const content = response.choices[0].message.content;
     if (!content) {
       console.log("OpenAI Response Details:", {
-        output_text: response.output_text,
+        content: content,
         usage: response.usage
       });
       throw new Error("No content received from OpenAI");
@@ -541,9 +556,16 @@ Don't include the references in the biography.
     Return as JSON with name, bio, rank, achievements, and recentNews fields.`;
 
   try {
-    const response = await openai.responses.create({
+    const response = await openai.chat.completions.create({
       model: "gpt-5", // Using GPT-5 as requested by the user
-      input: `${prompt}
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert sports analyst. Return valid JSON."
+        },
+        {
+          role: "user",
+          content: `${prompt}
 
 Please respond in valid JSON format with these exact fields:
 {
@@ -552,19 +574,18 @@ Please respond in valid JSON format with these exact fields:
   "rank": "current world ranking or N/A", 
   "achievements": ["array of key achievements"],
   "recentNews": ["array of recent news or competition results"]
-}`,
-      tools: [
-        { type: "web_search_preview" }
+}`
+        }
       ],
-      max_output_tokens: 8000
+      max_tokens: 4000
     });
 
     console.log("Full OpenAI Refresh Response:", JSON.stringify(response, null, 2));
     
-    const content = response.output_text;
+    const content = response.choices[0].message.content;
     if (!content) {
       console.log("OpenAI Refresh Response Details:", {
-        output_text: response.output_text,
+        output_text: response.choices[0].message.content,
         usage: response.usage
       });
       throw new Error("No content received from OpenAI refresh");
@@ -644,15 +665,14 @@ export async function getAthleteProfile(name: string, sport: string, nationality
     - profileImageDescription: string (description for finding profile images)`;
 
   try {
-    const response = await openai.responses.create({
+    const response = await openai.chat.completions.create({
       model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after gpt-4o. do not change this unless explicitly requested by the user
       input: prompt,
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 8000,
+      max_tokens: 4000,
       // temperature: 1.0 is default and minimum for GPT-5
     });
 
-    const result = JSON.parse(response.output_text);
+    const result = JSON.parse(response.choices[0].message.content);
     
     // Check for error responses indicating no data found
     if (result.error && (result.error === 'no_data_found' || result.error === 'search_failed' || result.error === 'not_found')) {
@@ -712,15 +732,14 @@ export async function getDetailedAnalysis(athleteName: string, sport: string): P
   - rankHistory: array of {rank, date, tournament}`;
 
   try {
-    const response = await openai.responses.create({
+    const response = await openai.chat.completions.create({
       model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after gpt-4o. do not change this unless explicitly requested by the user
       input: prompt,
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 8000,
+      max_tokens: 4000,
       // temperature: 1.0 is default and minimum for GPT-5
     });
 
-    return JSON.parse(response.output_text);
+    return JSON.parse(response.choices[0].message.content);
   } catch (error) {
     console.error(`Error getting detailed analysis for ${athleteName}:`, error);
     // Fallback with structured data
@@ -792,15 +811,14 @@ Return this exact JSON structure:
 Create a plan for the full duration specified. Use authentic data and personalize based on the athlete's profile and specified goal.`;
 
   try {
-    const response = await openai.responses.create({
+    const response = await openai.chat.completions.create({
       model: "gpt-5",
       input: prompt,
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 8000,
+      max_tokens: 4000,
     });
 
     // Apply the same robust JSON cleanup used in generateSpecificAnalysis
-    let cleanedText = response.output_text.trim();
+    let cleanedText = response.choices[0].message.content.trim();
     
     // Remove markdown formatting
     cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
@@ -964,8 +982,7 @@ CRITICAL ERROR HANDLING:
           content: prompt
         }
       ],
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 8000
+      max_tokens: 4000
     });
 
     const response = completion.choices[0].message.content;
@@ -1285,8 +1302,7 @@ If no ranking data found, use "Not Found" for missing fields but maintain the JS
           content: prompt
         }
       ],
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 8000
+      max_tokens: 4000
     });
 
     const response = completion.choices[0].message.content;
@@ -1377,8 +1393,7 @@ Provide a comprehensive comparison in this JSON format:
           content: prompt
         }
       ],
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 8000
+      max_tokens: 4000
     });
 
     const response = completion.choices[0].message.content;
