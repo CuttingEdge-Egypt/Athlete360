@@ -458,8 +458,27 @@ Please respond in valid JSON format with these exact fields:
       throw new Error("No content received from OpenAI");
     }
 
+    // Clean and validate the JSON response
+    let cleanedText = content.trim();
+    
+    // Remove any markdown formatting that might wrap the JSON
+    cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    
+    // Try to find the JSON object within the response
+    let jsonMatch = cleanedText.match(/\{[\s\S]*\}(?=\s*$)/);
+    if (!jsonMatch) {
+      // Try to find any JSON object in the response
+      jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        cleanedText = jsonMatch[0];
+      }
+    } else {
+      cleanedText = jsonMatch[0];
+    }
+
     try {
-      const athleteData = JSON.parse(content) as AthleteData;
+      const athleteData = JSON.parse(cleanedText) as AthleteData;
       
       // Check for error responses in the content
       if (content.includes('"error": "no_data_found"') || 
@@ -493,9 +512,78 @@ Please respond in valid JSON format with these exact fields:
 
       return athleteData;
     } catch (parseError) {
-      console.error(`❌ Error parsing OpenAI JSON response for ${name}:`, parseError);
-      console.error(`❌ Raw response content:`, content);
-      throw new Error(`Failed to parse OpenAI response for ${name}: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+      console.log("Initial JSON parse failed, attempting to fix malformed JSON...");
+      
+      // Try to fix common JSON issues
+      let fixedText = cleanedText;
+      
+      // Fix unescaped newlines in strings
+      fixedText = fixedText.replace(/"([^"]*?)\\n\\n([^"]*?)"/g, '"$1 $2"');
+      fixedText = fixedText.replace(/"([^"]*?)\\n([^"]*?)"/g, '"$1 $2"');
+      
+      // Fix truncated strings by completing them
+      if (fixedText.endsWith('"') === false && fixedText.includes('"bio":')) {
+        // Find the bio field and close it properly
+        const bioMatch = fixedText.match(/"bio":\s*"([^"]*?)$/);
+        if (bioMatch) {
+          fixedText = fixedText + '"';
+        }
+      }
+      
+      // Ensure the JSON object is properly closed
+      let braceCount = (fixedText.match(/\{/g) || []).length - (fixedText.match(/\}/g) || []).length;
+      let bracketCount = (fixedText.match(/\[/g) || []).length - (fixedText.match(/\]/g) || []).length;
+      
+      // Add missing closing braces/brackets
+      while (braceCount > 0) {
+        fixedText += '}';
+        braceCount--;
+      }
+      while (bracketCount > 0) {
+        fixedText += ']';
+        bracketCount--;
+      }
+      
+      try {
+        const athleteData = JSON.parse(fixedText) as AthleteData;
+        
+        // Check for error responses in the content
+        if (content.includes('"error": "no_data_found"') || 
+            content.includes('"error": "search_failed"') || 
+            content.includes('"error": "not_found"') ||
+            content.includes('"success": false')) {
+          throw new Error('AI_WEB_SEARCH_FAILED: No authentic athlete data found through web search');
+        }
+        
+        // Validate required fields
+        if (!athleteData.name || !athleteData.bio) {
+          throw new Error("Missing required fields in fixed OpenAI response");
+        }
+
+        // Ensure arrays are properly formatted
+        athleteData.achievements = athleteData.achievements || [];
+        athleteData.recentNews = athleteData.recentNews || [];
+
+        // Handle rank conversion
+        if (typeof athleteData.rank === 'string' && !isNaN(Number(athleteData.rank)) && athleteData.rank !== 'N/A') {
+          athleteData.rank = Number(athleteData.rank);
+        }
+
+        // For taekwondo athletes, enhance with specific ranking and record data
+        if (isTaekwondo) {
+          console.log(`Enhancing taekwondo data for ${name}...`);
+          const enhancedData = await getEnhancedTaekwondoData(name, nationality);
+          athleteData.worldRank = enhancedData.worldRank;
+          athleteData.currentRecord = enhancedData.currentRecord;
+        }
+
+        return athleteData;
+      } catch (finalError) {
+        console.error(`❌ Failed to parse even after fixing JSON for ${name}:`, finalError);
+        console.error(`❌ Original content:`, content);
+        console.error(`❌ Fixed content:`, fixedText);
+        throw parseError; // Throw the original parse error
+      }
     }
   } catch (error) {
     console.error(`❌ Error generating OpenAI profile for ${name}:`, error);
@@ -570,21 +658,99 @@ Please respond in valid JSON format with these exact fields:
       throw new Error("No content received from OpenAI refresh");
     }
 
-    const athleteData = JSON.parse(content) as AthleteData;
+    // Clean and validate the JSON response
+    let cleanedText = content.trim();
     
-    // Validate and format response
-    if (!athleteData.name || !athleteData.bio) {
-      throw new Error("Missing required fields in OpenAI refresh response");
+    // Remove any markdown formatting that might wrap the JSON
+    cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    
+    // Try to find the JSON object within the response
+    let jsonMatch = cleanedText.match(/\{[\s\S]*\}(?=\s*$)/);
+    if (!jsonMatch) {
+      // Try to find any JSON object in the response
+      jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        cleanedText = jsonMatch[0];
+      }
+    } else {
+      cleanedText = jsonMatch[0];
     }
+    
+    // Fix common JSON issues
+    try {
+      // First, try parsing as-is
+      const athleteData = JSON.parse(cleanedText) as AthleteData;
+      
+      // Validate and format response
+      if (!athleteData.name || !athleteData.bio) {
+        throw new Error("Missing required fields in OpenAI refresh response");
+      }
 
-    athleteData.achievements = athleteData.achievements || [];
-    athleteData.recentNews = athleteData.recentNews || [];
+      athleteData.achievements = athleteData.achievements || [];
+      athleteData.recentNews = athleteData.recentNews || [];
 
-    if (typeof athleteData.rank === 'string' && !isNaN(Number(athleteData.rank)) && athleteData.rank !== 'N/A') {
-      athleteData.rank = Number(athleteData.rank);
+      if (typeof athleteData.rank === 'string' && !isNaN(Number(athleteData.rank)) && athleteData.rank !== 'N/A') {
+        athleteData.rank = Number(athleteData.rank);
+      }
+
+      return athleteData;
+    } catch (parseError) {
+      console.log("Initial JSON parse failed, attempting to fix malformed JSON...");
+      
+      // Try to fix common JSON issues
+      let fixedText = cleanedText;
+      
+      // Fix unescaped newlines in strings
+      fixedText = fixedText.replace(/"([^"]*?)\\n\\n([^"]*?)"/g, '"$1 $2"');
+      fixedText = fixedText.replace(/"([^"]*?)\\n([^"]*?)"/g, '"$1 $2"');
+      
+      // Fix truncated strings by completing them
+      if (fixedText.endsWith('"') === false && fixedText.includes('"bio":')) {
+        // Find the bio field and close it properly
+        const bioMatch = fixedText.match(/"bio":\s*"([^"]*?)$/);
+        if (bioMatch) {
+          fixedText = fixedText + '"';
+        }
+      }
+      
+      // Ensure the JSON object is properly closed
+      let braceCount = (fixedText.match(/\{/g) || []).length - (fixedText.match(/\}/g) || []).length;
+      let bracketCount = (fixedText.match(/\[/g) || []).length - (fixedText.match(/\]/g) || []).length;
+      
+      // Add missing closing braces/brackets
+      while (braceCount > 0) {
+        fixedText += '}';
+        braceCount--;
+      }
+      while (bracketCount > 0) {
+        fixedText += ']';
+        bracketCount--;
+      }
+      
+      try {
+        const athleteData = JSON.parse(fixedText) as AthleteData;
+        
+        // Validate and format response
+        if (!athleteData.name || !athleteData.bio) {
+          throw new Error("Missing required fields in fixed OpenAI refresh response");
+        }
+
+        athleteData.achievements = athleteData.achievements || [];
+        athleteData.recentNews = athleteData.recentNews || [];
+
+        if (typeof athleteData.rank === 'string' && !isNaN(Number(athleteData.rank)) && athleteData.rank !== 'N/A') {
+          athleteData.rank = Number(athleteData.rank);
+        }
+
+        return athleteData;
+      } catch (finalError) {
+        console.error("❌ Failed to parse even after fixing JSON:", finalError);
+        console.error("❌ Original content:", content);
+        console.error("❌ Fixed content:", fixedText);
+        throw parseError; // Throw the original parse error
+      }
     }
-
-    return athleteData;
   } catch (error) {
     console.error(`❌ Error refreshing OpenAI profile for ${name}:`, error);
     throw new Error(`Failed to refresh OpenAI profile for ${name}: ${error instanceof Error ? error.message : String(error)}`);
