@@ -537,20 +537,22 @@ export async function generateRankHistoryWithGemini(
     
     const prompt = `Analyze the official ranking and competition history for athlete "${athleteName}" from ${nationality || 'unknown nationality'} in ${sport}.
 
-🎯 **OBJECTIVE:** Find the current, official **World Taekwondo (WT) World and Olympic rankings** and detailed competition results from authoritative sources.
+🎯 **OBJECTIVE:** Find the current, official **World Taekwondo (WT) ranking** and detailed competition rank progression from authoritative sources.
 
 🔍 **ANALYSIS REQUIREMENTS:**
 1.  **Use Your Sports Knowledge Base:**
     *   Access your comprehensive knowledge of **World Taekwondo (WT) rankings** and athlete databases
-    *   For **Rankings (World & Olympic):** Retrieve the athlete's current WT World and Olympic rankings from your knowledge base
+    *   For **Current Ranking:** Retrieve the athlete's most recent official WT ranking (World or Olympic)
     *   For **Competition History:** Access competition records from major taekwondo databases like TaekwondoData
 2.  **Extract Key Ranking Data:**
-    *   Find the athlete's current **WT World Ranking** for their weight category from your knowledge
-    *   Find the athlete's current **WT Olympic Ranking** for the relevant Olympic weight category
+    *   Find the athlete's current **WT Ranking** for their primary weight category from your knowledge
     *   Include the most recent ranking update information available
-3.  **Extract Competition History:**
+    *   Specify whether it's World Ranking or Olympic Ranking
+3.  **Extract Competition Rank Progression:**
     *   From your sports database knowledge, compile major competitions the athlete has participated in
-    *   For each competition, extract the placement (e.g., 1st, 3rd, 9th), year, and competition level
+    *   For each competition, extract: placement, year, ranking before competition, ranking after competition
+    *   Calculate rank changes (+5, -3, No Change) to show progression through career
+    *   Focus on competitions that affected their official ranking
 4.  **Synthesize and Structure:** Populate the JSON below using verified data from your knowledge base. If specific information is not available, use "Not Found".
 
 📊 **REQUIRED JSON STRUCTURE:**
@@ -561,27 +563,25 @@ export async function generateRankHistoryWithGemini(
     "sport": "${sport}",  
     "country": "${nationality || 'Unknown'}",
     "officialRankings": {
-      "worldRanking": {
+      "currentRanking": {
         "position": "#Position or 'Not Found'",
         "category": "Weight class (e.g., M-68kg)",
         "lastUpdated": "Date of ranking list",
-        "source": "World Taekwondo"
-      },
-      "olympicRanking": {
-        "position": "#Position or 'Not Found'",
-        "category": "Olympic weight class (e.g., M-68kg)",
-        "lastUpdated": "Date of ranking list",
-        "source": "World Taekwondo"
+        "source": "World Taekwondo",
+        "rankingType": "World Ranking or Olympic Ranking"
       }
     },
     "competitionHistory": {
       "source": "https://www.taekwondodata.com/",
       "totalCompetitionsTracked": "Total number of competitions on record",
-      "results": [
+      "rankProgression": [
         {
           "competition": "Specific competition name",
           "year": "Competition year",
-          "placement": "Actual competition placement (1st, 2nd, 3rd, 11th, etc.)"
+          "placement": "Actual competition placement (1st, 2nd, 3rd, 11th, etc.)",
+          "rankBefore": "#Position before this competition",
+          "rankAfter": "#Position after this competition",
+          "rankChange": "+5 or -3 or No Change"
         }
       ]
     },
@@ -594,9 +594,10 @@ export async function generateRankHistoryWithGemini(
 
 🔑 **SUCCESS CRITERIA:**
 - Return authentic, current ranking data from the official World Taekwondo federation.
-- Differentiate clearly between World and Olympic rankings.
-- Use https://www.taekwondodata.com/ specifically for historical competition results.
-- If official rankings are not found on the WT site, state "Not Found" in the relevant JSON field.
+- Show rank progression through major competitions with before/after rankings.
+- Use https://www.taekwondodata.com/ specifically for historical competition results and rank changes.
+- Calculate meaningful rank changes that show career progression.
+- If official rankings are not found, state "Not Found" in the relevant JSON field.
 - Return ONLY valid JSON with no markdown formatting or additional text.`;
 
     // Use GoogleGenerativeAI client for rank analysis
