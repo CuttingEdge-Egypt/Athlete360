@@ -173,9 +173,6 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     const recentNews = bioData.personalInfo?.recentNews || bioData.recentNews || [];
     const profileImageUrl = bioData.profileImageUrl;
     
-    // Debug logging for player's story
-    console.log('Bio data received:', bioData);
-    console.log('Players story extracted:', playersStory);
     
     // Parse bio content to extract different sections
     const bioSections = parseBioSections(bio);
@@ -236,13 +233,6 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
           </Card>
         )}
         
-        {/* Debug Info - Remove after testing */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="p-4 bg-red-900 text-white text-xs">
-            <p>Debug: playersStory = "{playersStory}"</p>
-            <p>Debug: bioSections.overallStory = "{bioSections.overallStory}"</p>
-          </div>
-        )}
 
         {/* Career Record and Rankings */}
         {bioSections.careerRecord && (
