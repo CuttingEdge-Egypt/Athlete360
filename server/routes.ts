@@ -7,8 +7,8 @@ import { setupLocalAuth, isAuthenticatedUniversal } from "./localAuth";
 import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, compareAthletes, generateRankHistory } from "./openaiService";
-import { generateNutritionPlan, generateRankHistoryWithGemini } from "./geminiService";
+import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, compareAthletes, generateRankHistory } from "./openaiService";
+import { generateNutritionPlan, generateRankHistoryWithGemini, generateAthleteBiography, refreshAthleteBiographyWithSearch } from "./geminiService";
 import { analyzeVideoFile } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
 
@@ -413,8 +413,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Sport not found" });
       }
 
-      // Use OpenAI GPT-5 to get athlete profile
-      console.log(`Creating athlete ${name} for sport ${sport.name} using OpenAI GPT-5...`);
+      // Use Gemini 2.5 Pro to get athlete profile
+      console.log(`Creating athlete ${name} for sport ${sport.name} using Gemini 2.5 Pro...`);
       const aiProfile = await generateAthleteBiography(name, sport.name, req.body.nationality);
 
       // Extract nationality from bio data first
@@ -526,9 +526,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sport = await storage.getSportById(athlete.sportId);
       const sportName = sport?.name || "Unknown Sport";
       
-      console.log(`Updating athlete data for ${athlete.name} using OpenAI GPT-5...`);
+      console.log(`Updating athlete data for ${athlete.name} using Gemini 2.5 Pro...`);
       
-      // Fetch fresh, authentic athlete data from OpenAI GPT-5
+      // Fetch fresh, authentic athlete data from Gemini 2.5 Pro
       const aiAthleteData = await refreshAthleteBiographyWithSearch(athlete.name, sportName);
       
       // Handle rank - convert to number if possible, otherwise store as undefined
@@ -777,8 +777,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sport = await storage.getSportById(athlete.sportId);
       const sportName = sport?.name || "Unknown Sport";
       
-      // Force refresh bio using OpenAI GPT-5 with web search capabilities
-      console.log(`Refreshing bio for ${athlete.name} using OpenAI GPT-5`);
+      // Force refresh bio using Gemini 2.5 Pro with web search capabilities
+      console.log(`Refreshing bio for ${athlete.name} using Gemini 2.5 Pro`);
       
       try {
         const refreshedBioData = await refreshAthleteBiographyWithSearch(athlete.name, sportName, athlete.country || "Unknown");

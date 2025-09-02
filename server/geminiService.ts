@@ -51,6 +51,17 @@ export interface GeminiRankResponse {
   analysis_narrative: string;
 }
 
+export interface AthleteData {
+  name: string;
+  bio: string;
+  rank: number | string;
+  achievements?: string[];
+  recentNews?: string[];
+  profileImageUrl?: string | null;
+  worldRank?: string;
+  currentRecord?: string;
+}
+
 export async function generateNutritionPlan(
   name: string,
   age: number,
@@ -576,6 +587,269 @@ Return ONLY valid JSON with no markdown formatting or additional text.`;
     console.error(`Error generating Gemini rank history for ${athleteName}:`, error);
     
     // Throw error to trigger proper error handling in routes.ts
+    throw new Error(`AI_WEB_SEARCH_FAILED: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+// Bio generation functions using Gemini 2.5 Pro
+export async function generateAthleteBiography(name: string, sport: string, nationality?: string): Promise<AthleteData> {
+  const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const nationalityContext = nationality ? ` from ${nationality}` : '';
+  
+  const prompt = `Today's date is ${currentDate}.
+    
+    Using Google search, find factual, up-to-date information about the athlete "${name}"${nationalityContext}, who competes in ${sport}.
+    
+    Create a detailed biography structured with the following headings:
+    - An introductory paragraph
+    - Players' overall story and what they're known for in ${sport}
+    - A heading "Recent Competitions:"
+    - A heading "Career Record and Rankings:"
+    - A heading "Notable Achievements:"
+
+    Only mention information that is 100% accurate and verifiable.
+
+    IMPORTANT: Do not include any links, URLs, citations, or references in your response. Provide clean text without any reference links or citations.
+
+    Provide the response as a JSON object with these fields:
+    - name: athlete's full name
+    - bio: the detailed biography without any links or citations
+    - rank: current world ranking if available (as number or "N/A")
+    - achievements: array of key achievements
+    - recentNews: array of recent news or competition results
+    
+    CRITICAL ERROR HANDLING:
+    - If you cannot find any reliable data through Google search, respond with exactly: {"error": "no_data_found", "success": false}
+    - If search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
+    - If the athlete/information does not exist, respond with exactly: {"error": "not_found", "success": false}
+
+    Please respond in valid JSON format with these exact fields:
+    {
+      "name": "athlete's full name",
+      "bio": "detailed biography without any links or citations",
+      "rank": "current world ranking or N/A",
+      "achievements": ["array of key achievements"],
+      "recentNews": ["array of recent news or competition results"]
+    }`;
+
+  try {
+    const model = await genAI.models.get({ model: "gemini-2.5-pro" });
+    const result = await model.generateContent({
+      contents: prompt,
+      config: {
+        temperature: 1,
+        maxOutputTokens: 4000,
+        tools: [{ googleSearch: {} }]
+      }
+    });
+    
+    let cleanedText = (result.text || "").trim();
+    console.log(`Gemini bio response for ${name}:`, cleanedText);
+    
+    if (!cleanedText) {
+      throw new Error("Empty response from Gemini model");
+    }
+    
+    // Clean up response
+    cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    
+    // Extract JSON
+    const jsonStart = cleanedText.indexOf('{');
+    const jsonEnd = cleanedText.lastIndexOf('}');
+    if (jsonStart !== -1 && jsonEnd !== -1) {
+      cleanedText = cleanedText.substring(jsonStart, jsonEnd + 1);
+    }
+    
+    // Try to parse and handle malformed JSON
+    try {
+      const athleteData = JSON.parse(cleanedText);
+      
+      // Check for error responses
+      if (athleteData.error && (athleteData.error === 'no_data_found' || athleteData.error === 'search_failed' || athleteData.error === 'not_found')) {
+        throw new Error(`AI_WEB_SEARCH_FAILED: ${athleteData.error}`);
+      }
+      
+      if (athleteData.success === false) {
+        throw new Error('AI_WEB_SEARCH_FAILED: No authentic athlete data found through Google search');
+      }
+      
+      // Validate required fields
+      if (!athleteData.name || !athleteData.bio) {
+        throw new Error("Missing required fields in Gemini bio response");
+      }
+      
+      // Ensure arrays are properly formatted
+      athleteData.achievements = athleteData.achievements || [];
+      athleteData.recentNews = athleteData.recentNews || [];
+      
+      // Handle rank conversion
+      if (typeof athleteData.rank === 'string' && !isNaN(Number(athleteData.rank)) && athleteData.rank !== 'N/A') {
+        athleteData.rank = Number(athleteData.rank);
+      }
+      
+      console.log(`✅ Gemini successfully generated bio data for ${name}`);
+      return athleteData;
+      
+    } catch (parseError) {
+      console.log("Initial JSON parse failed, attempting to fix malformed JSON...");
+      
+      // Try to fix common JSON issues
+      let fixedText = cleanedText;
+      
+      // Fix unescaped newlines in strings
+      fixedText = fixedText.replace(/"([^"]*?)\\n\\n([^"]*?)"/g, '"$1 $2"');
+      fixedText = fixedText.replace(/"([^"]*?)\\n([^"]*?)"/g, '"$1 $2"');
+      
+      // Fix truncated strings by completing them
+      if (fixedText.endsWith('"') === false && fixedText.includes('"bio":')) {
+        const bioMatch = fixedText.match(/"bio":\s*"([^"]*?)$/);
+        if (bioMatch) {
+          fixedText = fixedText + '"';
+        }
+      }
+      
+      // Ensure the JSON object is properly closed
+      let braceCount = (fixedText.match(/\{/g) || []).length - (fixedText.match(/\}/g) || []).length;
+      let bracketCount = (fixedText.match(/\[/g) || []).length - (fixedText.match(/\]/g) || []).length;
+      
+      // Add missing closing braces/brackets
+      while (braceCount > 0) {
+        fixedText += '}';
+        braceCount--;
+      }
+      while (bracketCount > 0) {
+        fixedText += ']';
+        bracketCount--;
+      }
+      
+      try {
+        const athleteData = JSON.parse(fixedText);
+        
+        // Check for error responses
+        if (athleteData.error && (athleteData.error === 'no_data_found' || athleteData.error === 'search_failed' || athleteData.error === 'not_found')) {
+          throw new Error(`AI_WEB_SEARCH_FAILED: ${athleteData.error}`);
+        }
+        
+        if (athleteData.success === false) {
+          throw new Error('AI_WEB_SEARCH_FAILED: No authentic athlete data found through Google search');
+        }
+        
+        // Validate required fields
+        if (!athleteData.name || !athleteData.bio) {
+          throw new Error("Missing required fields in fixed Gemini bio response");
+        }
+        
+        // Ensure arrays are properly formatted
+        athleteData.achievements = athleteData.achievements || [];
+        athleteData.recentNews = athleteData.recentNews || [];
+        
+        // Handle rank conversion
+        if (typeof athleteData.rank === 'string' && !isNaN(Number(athleteData.rank)) && athleteData.rank !== 'N/A') {
+          athleteData.rank = Number(athleteData.rank);
+        }
+        
+        console.log(`✅ Gemini successfully generated bio data for ${name} after JSON fix`);
+        return athleteData;
+        
+      } catch (finalError) {
+        console.error(`❌ Failed to parse even after fixing JSON for ${name}:`, finalError);
+        console.error(`❌ Original content:`, cleanedText);
+        console.error(`❌ Fixed content:`, fixedText);
+        throw parseError;
+      }
+    }
+    
+  } catch (error) {
+    console.error(`❌ Error generating Gemini bio for ${name}:`, error);
+    throw new Error(`AI_WEB_SEARCH_FAILED: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+export async function refreshAthleteBiographyWithSearch(name: string, sport: string, nationality?: string): Promise<AthleteData> {
+  const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const nationalityContext = nationality ? ` from ${nationality}` : '';
+  
+  const prompt = `Search for current information about athlete "${name}"${nationalityContext} in ${sport}.
+
+Create a biography with these sections:
+1. Introduction paragraph
+2. Players' overall story and what they're known for in ${sport}
+3. Recent Competitions (2024-2025)  
+4. Career Record and Rankings
+5. Notable Achievements
+
+IMPORTANT: Do not include any links, URLs, citations, or references. Provide clean text only.
+
+Return as valid JSON:
+{
+  "name": "full name",
+  "bio": "biography text with sections above",
+  "rank": "current ranking or N/A",
+  "achievements": ["key achievements"],
+  "recentNews": ["recent results"]
+}`;
+
+  try {
+    const model = await genAI.models.get({ model: "gemini-2.5-pro" });
+    const result = await model.generateContent({
+      contents: prompt,
+      config: {
+        temperature: 1,
+        maxOutputTokens: 4000,
+        tools: [{ googleSearch: {} }]
+      }
+    });
+    
+    let cleanedText = (result.text || "").trim();
+    console.log(`Gemini refresh bio response for ${name}:`, cleanedText);
+    
+    if (!cleanedText) {
+      throw new Error("Empty response from Gemini model");
+    }
+    
+    // Clean up response
+    cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    
+    // Extract JSON
+    const jsonStart = cleanedText.indexOf('{');
+    const jsonEnd = cleanedText.lastIndexOf('}');
+    if (jsonStart !== -1 && jsonEnd !== -1) {
+      cleanedText = cleanedText.substring(jsonStart, jsonEnd + 1);
+    }
+    
+    // Parse and validate
+    const athleteData = JSON.parse(cleanedText);
+    
+    // Check for error responses
+    if (athleteData.error && (athleteData.error === 'no_data_found' || athleteData.error === 'search_failed' || athleteData.error === 'not_found')) {
+      throw new Error(`AI_WEB_SEARCH_FAILED: ${athleteData.error}`);
+    }
+    
+    if (athleteData.success === false) {
+      throw new Error('AI_WEB_SEARCH_FAILED: No authentic athlete data found through Google search');
+    }
+    
+    // Validate required fields
+    if (!athleteData.name || !athleteData.bio) {
+      throw new Error("Missing required fields in Gemini refresh response");
+    }
+    
+    // Ensure arrays are properly formatted
+    athleteData.achievements = athleteData.achievements || [];
+    athleteData.recentNews = athleteData.recentNews || [];
+    
+    // Handle rank conversion
+    if (typeof athleteData.rank === 'string' && !isNaN(Number(athleteData.rank)) && athleteData.rank !== 'N/A') {
+      athleteData.rank = Number(athleteData.rank);
+    }
+    
+    console.log(`✅ Gemini successfully refreshed bio data for ${name}`);
+    return athleteData;
+    
+  } catch (error) {
+    console.error(`❌ Error refreshing Gemini bio for ${name}:`, error);
     throw new Error(`AI_WEB_SEARCH_FAILED: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
