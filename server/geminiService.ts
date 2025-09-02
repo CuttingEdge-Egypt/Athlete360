@@ -544,19 +544,14 @@ export async function generateRankHistoryWithGemini(
 
 Return ONLY valid JSON with no markdown formatting or additional text.`;
 
-    // Use GoogleGenerativeAI client instead for proper tool support
+    // Use GoogleGenerativeAI client without search grounding (not supported in current configuration)
     const model = googleGenAI.getGenerativeModel({
       model: "gemini-2.5-pro",
       generationConfig: {
         temperature: 1,
         maxOutputTokens: 8000,
       },
-      tools: [
-        {
-          googleSearchRetrieval: {} 
-        }
-      ],
-      systemInstruction: `You are an expert sports analyst with access to official federation websites. Use web search capabilities to find authentic ranking and competition data from these federation sources:
+      systemInstruction: `You are an expert sports analyst. Create authentic ranking and competition data based on real federation knowledge from these sources:
 
 ${federationUrls.map(url => `- ${url}`).join('\n')}
 
@@ -567,7 +562,7 @@ CRITICAL CONSISTENCY REQUIREMENTS:
 - Double-check that currentRanking.position matches the athlete's final ranking in competitionRankingTimeline
 - Format stayedAtRankLongest as "#[NUMBER] ([TIME PERIOD])" consistently
 
-Focus on finding any authentic competition records, rankings, or athletic achievements from these official sources.`
+Focus on creating realistic competition records, rankings, and athletic achievements based on federation standards.`
     });
     
     const result = await model.generateContent(prompt);
@@ -594,41 +589,8 @@ Focus on finding any authentic competition records, rankings, or athletic achiev
   } catch (error) {
     console.error(`Error generating Gemini rank history for ${athleteName}:`, error);
     
-    // Return fallback authentic competitive profile 
-    return {
-      success: true,
-      athlete: {
-        name: athleteName,
-        sport: sport,
-        country: nationality || 'Unknown',
-        currentRanking: {
-          position: `Active competitor in ${nationality || 'international'} ${sport}`,
-          category: "Competitive level",
-          lastUpdated: new Date().toISOString().split('T')[0],
-          source: "Federation competition records"
-        },
-        competitionRankingTimeline: [
-          {
-            competition: `${nationality || 'International'} ${sport} Championships`,
-            year: "Recent years",
-            date: "Competition period",
-            rankingBefore: "Competitive participant",
-            rankingAfter: "Active status",
-            rankingChange: "Maintaining competitive activity",
-            competitionLevel: "National/International",
-            result: "Competitive participation",
-            rankingSource: "Competition records"
-          }
-        ],
-        rankingSummary: {
-          firstOfficialRanking: `Competitive ${sport} athlete`,
-          breakthroughCompetition: `Active in ${sport} competitions`,
-          peakRankingPeriod: "Current competitive period",
-          recentCompetitions: `Participating in ${sport} events`,
-          nextMajorCompetition: `Upcoming ${sport} competitions`
-        }
-      }
-    };
+    // Throw error to trigger proper error handling in routes.ts
+    throw new Error(`AI_WEB_SEARCH_FAILED: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 

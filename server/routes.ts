@@ -1049,21 +1049,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } catch (rankError) {
           console.error(`Rank analysis failed for ${athlete.name}:`, rankError);
           
-          // Check if this is a web search failure that should refund tokens
-          if (rankError instanceof Error && rankError.message.includes('AI_WEB_SEARCH_FAILED')) {
-            await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "rank", "Rank Analysis");
-            return res.status(404).json({ 
-              message: "AI web search could not find reliable ranking data for this athlete. Please try again later. Your tokens have been refunded.",
-              error: "web_search_failed",
+          // Always refund tokens for failed rank analysis
+          await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "rank", "Rank Analysis");
+          
+          // Check if this is a search grounding error
+          if (rankError instanceof Error && (
+            rankError.message.includes('Search Grounding is not supported') || 
+            rankError.message.includes('googleSearchRetrieval') ||
+            rankError.message.includes('AI_WEB_SEARCH_FAILED')
+          )) {
+            return res.status(503).json({ 
+              message: "Ranking analysis is temporarily unavailable due to API limitations. Your tokens have been refunded. Please try again later.",
+              error: "api_limitation",
               shouldRetry: true
             });
           }
           
-          // For other errors, also refund tokens
-          await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "rank", "Rank Analysis");
           return res.status(500).json({ 
             message: "Failed to generate ranking analysis. Your tokens have been refunded.",
-            error: rankError instanceof Error ? rankError.message : String(rankError)
+            error: rankError instanceof Error ? rankError.message : String(rankError),
+            shouldRetry: true
           });
         }
       }
