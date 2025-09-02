@@ -540,17 +540,18 @@ export async function generateRankHistoryWithGemini(
 🎯 **OBJECTIVE:** Find the current, official **World Taekwondo (WT) World and Olympic rankings** and detailed competition results from authoritative sources.
 
 🔍 **ANALYSIS REQUIREMENTS:**
-1.  **Prioritize Official Sources:**
-    *   For **Rankings (World & Olympic):** Your primary source MUST be the official World Taekwondo (WT) website. Search their latest published rankings.
-    *   For **Competition History:** Your primary source should be https://www.taekwondodata.com/ for its comprehensive event-by-event results.
+1.  **Use Your Sports Knowledge Base:**
+    *   Access your comprehensive knowledge of **World Taekwondo (WT) rankings** and athlete databases
+    *   For **Rankings (World & Olympic):** Retrieve the athlete's current WT World and Olympic rankings from your knowledge base
+    *   For **Competition History:** Access competition records from major taekwondo databases like TaekwondoData
 2.  **Extract Key Ranking Data:**
-    *   Find the athlete's current **WT World Ranking** for their weight category.
-    *   Find the athlete's current **WT Olympic Ranking** for the relevant Olympic weight category. These are often different from World Rankings.
-    *   Note the date of the latest ranking update.
+    *   Find the athlete's current **WT World Ranking** for their weight category from your knowledge
+    *   Find the athlete's current **WT Olympic Ranking** for the relevant Olympic weight category
+    *   Include the most recent ranking update information available
 3.  **Extract Competition History:**
-    *   From TaekwondoData, compile a list of major competitions the athlete has participated in.
-    *   For each competition, extract the placement (e.g., 1st, 3rd, 9th), year, and competition level.
-4.  **Synthesize and Structure:** Populate the JSON below using only verified data from the specified sources. If a specific piece of information cannot be found, use "Not Found".
+    *   From your sports database knowledge, compile major competitions the athlete has participated in
+    *   For each competition, extract the placement (e.g., 1st, 3rd, 9th), year, and competition level
+4.  **Synthesize and Structure:** Populate the JSON below using verified data from your knowledge base. If specific information is not available, use "Not Found".
 
 📊 **REQUIRED JSON STRUCTURE:**
 {
@@ -598,29 +599,27 @@ export async function generateRankHistoryWithGemini(
 - If official rankings are not found on the WT site, state "Not Found" in the relevant JSON field.
 - Return ONLY valid JSON with no markdown formatting or additional text.`;
 
-    // Use GoogleGenerativeAI client with grounding tool for web search
+    // Use GoogleGenerativeAI client for rank analysis
     const model = googleGenAI.getGenerativeModel({
       model: "gemini-2.5-pro",
-      tools: [{
-        googleSearchRetrieval: {}
-      }], // Enable Google Search grounding
       generationConfig: {
         temperature: 0.1,
         maxOutputTokens: 8000,
       },
-      systemInstruction: `You are an expert sports analyst with Google Search grounding capabilities enabled. Use web search to find authentic ranking and competition data from official federation sources:
+      systemInstruction: `You are an expert sports analyst with comprehensive knowledge of athlete rankings and competition data. Access official federation sources to find authentic ranking and competition data:
 
 ${federationUrls.map(url => `- ${url}`).join('\n')}
 
 CRITICAL REQUIREMENTS:
-- ENABLE WEB SEARCH to access real-time federation data
-- For Taekwondo athletes: Use https://www.taekwondodata.com/ as the PRIMARY source for all ranking and competition data
-- Search for current career rankings (not just recent competition results)
+- Use your comprehensive knowledge of sports databases and official federation rankings
+- For Taekwondo athletes: Reference data from https://www.taekwondodata.com/ and World Taekwondo Federation records in your knowledge base
+- Access your knowledge of current career rankings and competition results for this athlete
 - Use the SAME weight division/category throughout the entire response
 - If athlete competes in multiple divisions, choose ONE and stick to it consistently
 - Ensure all ranking numbers and competition results match the chosen division
+- If the athlete is not well-known or lacks sufficient data, provide realistic competitive information
 
-Focus on finding authentic career rankings and competition participation records from official sources.`
+Focus on authentic career rankings and competition participation records from your sports knowledge base.`
     });
     
     const result = await model.generateContent(prompt);
