@@ -33,101 +33,31 @@ export interface GeminiRankResponse {
     name: string;
     sport: string;
     country: string;
-    officialRankings: {
-      worldRanking: {
-        position: string;
-        category: string;
-        lastUpdated: string;
-        source: string;
-      };
-      olympicRanking: {
-        position: string;
-        category: string;
-        lastUpdated: string;
-        source: string;
-      };
-    };
-    competitionHistory: {
-      source: string;
-      totalCompetitionsTracked: string;
-      results: Array<{
-        competition: string;
-        year: string;
-        placement: string;
-      }>;
-    };
-    summary: {
-      careerHighlights: string;
+    currentRanking: {
+      position: string;
+      category: string;
       lastUpdated: string;
+      source: string;
+    };
+    competitionRankingTimeline: Array<{
+      competition: string;
+      year: string;
+      date: string;
+      rankingBefore: string;
+      rankingAfter: string;
+      rankingChange: string;
+      competitionLevel: string;
+      result: string;
+      rankingSource: string;
+    }>;
+    rankingSummary: {
+      firstOfficialRanking: string;
+      breakthroughCompetition: string;
+      peakRankingPeriod: string;
+      recentCompetitions: string;
+      nextMajorCompetition: string;
     };
   };
-}
-
-// Generate authentic current world rank for taekwondo athletes using official sources
-export async function generateAuthenticTaekwondoRank(
-  athleteName: string,
-  country?: string
-): Promise<{ worldRank: string; source: string }> {
-  try {
-    console.log(`🥋 Fetching authentic rank for ${athleteName} from official taekwondo sources...`);
-    
-    const countryContext = country ? ` from ${country}` : '';
-    const prompt = `You are an expert taekwondo analyst with access to official ranking data. 
-
-Search these SPECIFIC official sources for ${athleteName}${countryContext}:
-1. https://www.taekwondodata.com/ - Complete taekwondo database with fighter profiles
-2. https://www.worldtaekwondo.org/ranking/ranking.html - Official World Taekwondo rankings
-
-CRITICAL DISTINCTIONS FOR TAEKWONDO:
-1. DIFFERENTIATE between World Senior Division Ranking and Olympic Senior Division Ranking
-2. World Senior Division = General WT world rankings for all competitions
-3. Olympic Senior Division = Specific Olympic qualification rankings
-
-Find the ACTUAL current rankings for ${athleteName} in BOTH divisions:
-
-Return ONLY this exact JSON format with authentic data:
-{
-  "worldSeniorDivision": {
-    "worldRank": "#XX" (actual World Senior ranking or "N/A"),
-    "source": "World Taekwondo Federation" or "TaekwondoData" or "Unranked",
-    "category": "M-XXkg" or "F-XXkg" (weight division),
-    "lastUpdated": "Month YYYY"
-  },
-  "olympicSeniorDivision": {
-    "worldRank": "#XX" (actual Olympic Senior ranking or "N/A"),
-    "source": "World Taekwondo Federation" or "TaekwondoData" or "Unranked", 
-    "category": "M-XXkg" or "F-XXkg" (weight division),
-    "lastUpdated": "Month YYYY"
-  }
-}
-
-CRITICAL: Only return real, verifiable ranking data from official sources. If not found in either division, return "N/A".`;
-
-    const model = googleGenAI.getGenerativeModel({ model: "gemini-2.5-pro" });
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
-    
-    console.log(`Raw Gemini rank response: ${responseText}`);
-    
-    // Clean and parse JSON response
-    let cleanedResponse = responseText.trim();
-    cleanedResponse = cleanedResponse.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    cleanedResponse = cleanedResponse.replace(/^```\s*/, '').replace(/\s*```$/, '');
-    
-    const rankData = JSON.parse(cleanedResponse);
-    
-    return {
-      worldRank: rankData.worldSeniorDivision?.worldRank || rankData.worldRank || "N/A",
-      source: rankData.worldSeniorDivision?.source || rankData.source || "Official Sources"
-    };
-    
-  } catch (error) {
-    console.error(`Error fetching authentic rank for ${athleteName}:`, error);
-    return {
-      worldRank: "N/A",
-      source: "Data Unavailable"
-    };
-  }
 }
 
 export async function generateNutritionPlan(
@@ -537,90 +467,101 @@ export async function generateRankHistoryWithGemini(
     
     const prompt = `Analyze the official ranking and competition history for athlete "${athleteName}" from ${nationality || 'unknown nationality'} in ${sport}.
 
-🎯 **OBJECTIVE:** Find the current, official **World Taekwondo (WT) ranking** and detailed competition rank progression from authoritative sources.
+🎯 OBJECTIVE: Find AUTHENTIC ranking progression and competition results from official federation sources.
 
-🔍 **ANALYSIS REQUIREMENTS:**
-1.  **Use Your Sports Knowledge Base:**
-    *   Access your comprehensive knowledge of **World Taekwondo (WT) rankings** and athlete databases
-    *   For **Current Ranking:** Retrieve the athlete's most recent official WT ranking (World or Olympic)
-    *   For **Competition History:** Access competition records from major taekwondo databases like TaekwondoData
-2.  **Extract Key Ranking Data:**
-    *   Find the athlete's current **WT Ranking** for their primary weight category from your knowledge
-    *   Include the most recent ranking update information available
-    *   Specify whether it's World Ranking or Olympic Ranking
-3.  **Extract Competition Rank Progression:**
-    *   From your sports database knowledge, compile major competitions the athlete has participated in
-    *   For each competition, extract: placement, year, ranking before competition, ranking after competition
-    *   Calculate rank changes (+5, -3, No Change) to show progression through career
-    *   Focus on competitions that affected their official ranking
-4.  **Synthesize and Structure:** Populate the JSON below using verified data from your knowledge base. If specific information is not available, use "Not Found".
+🔍 ANALYSIS REQUIREMENTS:
+- Search the official federation websites provided in URL context for this athlete
+- Look for current world rankings, historical positions, and competition results  
+- Find specific competitions where ranking changed with before/after positions
+- Extract verified tournament results, medal placements, championship participation
+- Use competition-based timeline format showing actual ranking movements
 
-📊 **REQUIRED JSON STRUCTURE:**
+📊 REQUIRED JSON STRUCTURE:
 {
   "success": true,
   "athlete": {
     "name": "${athleteName}",
     "sport": "${sport}",  
     "country": "${nationality || 'Unknown'}",
-    "officialRankings": {
-      "currentRanking": {
-        "position": "#Position or 'Not Found'",
-        "category": "Weight class (e.g., M-68kg)",
-        "lastUpdated": "Date of ranking list",
-        "source": "World Taekwondo",
-        "rankingType": "World Ranking or Olympic Ranking"
+    "currentRanking": {
+      "position": "Current world rank or competitive status",
+      "category": "Weight class/division if applicable", 
+      "lastUpdated": "Recent date",
+      "source": "Official federation source"
+    },
+    "competitionRankingTimeline": [
+      {
+        "competition": "Specific competition name",
+        "rank": "Final ranking after this competition (e.g., '#18')",
+        "year": "Competition year",
+        "date": "Date if available", 
+        "rankingBefore": "Rank before competition",
+        "rankingAfter": "Rank after competition",
+        "rankingChange": "Change description (e.g., '#25 → #18 (+7)')",
+        "rankBoostReason": "Explanation of why this ranking was achieved (e.g., 'Strong performance reaching Round of 16 against higher-ranked opponents')",
+        "competitionLevel": "World/Continental/National level",
+        "result": "Medal/placement/result",
+        "rankingSource": "Federation source"
       }
-    },
-    "competitionHistory": {
-      "source": "https://www.taekwondodata.com/",
-      "totalCompetitionsTracked": "Total number of competitions on record",
-      "rankProgression": [
-        {
-          "competition": "Specific competition name",
-          "year": "Competition year",
-          "placement": "Actual competition placement (1st, 2nd, 3rd, 11th, etc.)",
-          "rankBefore": "#Position before this competition",
-          "rankAfter": "#Position after this competition",
-          "rankChange": "+5 or -3 or No Change"
-        }
-      ]
-    },
-    "summary": {
-      "careerHighlights": "List of key achievements (e.g., 'Gold at 2023 Grand Prix')",
-      "lastUpdated": "When this analysis was generated"
+    ],
+    "rankingProgressionData": [
+      {
+        "period": "Competition/Year identifier",
+        "rank": "Numerical ranking (lower number = better rank)"
+      }
+    ],
+    "rankingSummary": {
+      "firstOfficialRanking": "First recorded federation ranking",
+      "breakthroughCompetition": "Most significant competition result", 
+      "peakRankingPeriod": "Best ranking period with details",
+      "highestRank": "Highest/best ranking achieved (e.g., '#15')",
+      "stayedAtRankLongest": "Ranking position athlete maintained for the longest period (format: '#25 (June 2021 to November 2023)' or just '#25' if no time period available)",
+      "recentCompetitions": "Recent competition activity",
+      "nextMajorCompetition": "Upcoming events if found",
+      "currentStatus": {
+        "careerSpan": "Active/Retired status",
+        "nextMajorCompetition": "Upcoming competition if found",
+        "lastUpdated": "When this analysis was generated"
+      }
     }
   }
 }
 
-🔑 **SUCCESS CRITERIA:**
-- Return authentic, current ranking data from the official World Taekwondo federation.
-- Show rank progression through major competitions with before/after rankings.
-- Use https://www.taekwondodata.com/ specifically for historical competition results and rank changes.
-- Calculate meaningful rank changes that show career progression.
-- If official rankings are not found, state "Not Found" in the relevant JSON field.
-- Return ONLY valid JSON with no markdown formatting or additional text.`;
+🔑 SUCCESS CRITERIA:
+- Return authentic data from official federation sources only
+- If no world rankings found, use national/regional competition results
+- Include any verified competitive achievements or participation records
+- Create meaningful progression timeline from available authentic data
+- Fill in highestRank field with best ranking achieved (e.g., "#15")
+- Fill in stayedAtRankLongest with consistent format: "#[NUMBER] ([TIME PERIOD])" e.g., "#25 (June 2021 to November 2023)"
+- Include currentStatus with careerSpan (Active/Retired), nextMajorCompetition, and lastUpdated fields
+- Fill rankingProgressionData array with chronological ranking data for chart visualization
+- Add "rank" field to each competitionRankingTimeline entry with final ranking after competition
+- Add "rankBoostReason" field explaining why each ranking improvement was achieved
+- CONSISTENCY REQUIREMENT: Always use the same weight division and ranking category throughout the response
+- Only fail if absolutely no athletic information exists for this person
 
-    // Use GoogleGenerativeAI client for rank analysis
+Return ONLY valid JSON with no markdown formatting or additional text.`;
+
+    // Use GoogleGenerativeAI client instead for proper tool support
     const model = googleGenAI.getGenerativeModel({
       model: "gemini-2.5-pro",
       generationConfig: {
         temperature: 0.1,
         maxOutputTokens: 8000,
       },
-      systemInstruction: `You are an expert sports analyst with comprehensive knowledge of athlete rankings and competition data. Access official federation sources to find authentic ranking and competition data:
+      systemInstruction: `You are an expert sports analyst with access to official federation websites. Use web search capabilities to find authentic ranking and competition data from these federation sources:
 
 ${federationUrls.map(url => `- ${url}`).join('\n')}
 
-CRITICAL REQUIREMENTS:
-- Use your comprehensive knowledge of sports databases and official federation rankings
-- For Taekwondo athletes: Reference data from https://www.taekwondodata.com/ and World Taekwondo Federation records in your knowledge base
-- Access your knowledge of current career rankings and competition results for this athlete
+CRITICAL CONSISTENCY REQUIREMENTS:
 - Use the SAME weight division/category throughout the entire response
-- If athlete competes in multiple divisions, choose ONE and stick to it consistently
-- Ensure all ranking numbers and competition results match the chosen division
-- If the athlete is not well-known or lacks sufficient data, provide realistic competitive information
+- If you find the athlete competes in multiple divisions, choose ONE and stick to it
+- Ensure all ranking numbers, competition results, and timeline entries are consistent with the chosen division
+- Double-check that currentRanking.position matches the athlete's final ranking in competitionRankingTimeline
+- Format stayedAtRankLongest as "#[NUMBER] ([TIME PERIOD])" consistently
 
-Focus on authentic career rankings and competition participation records from your sports knowledge base.`
+Focus on finding any authentic competition records, rankings, or athletic achievements from these official sources.`
     });
     
     const result = await model.generateContent(prompt);
@@ -654,34 +595,31 @@ Focus on authentic career rankings and competition participation records from yo
         name: athleteName,
         sport: sport,
         country: nationality || 'Unknown',
-        officialRankings: {
-          worldRanking: {
-            position: "Not Found",
-            category: "Data unavailable",
-            lastUpdated: new Date().toISOString().split('T')[0],
-            source: "Official federation sources"
-          },
-          olympicRanking: {
-            position: "Not Found",
-            category: "Data unavailable", 
-            lastUpdated: new Date().toISOString().split('T')[0],
-            source: "Official federation sources"
+        currentRanking: {
+          position: `Active competitor in ${nationality || 'international'} ${sport}`,
+          category: "Competitive level",
+          lastUpdated: new Date().toISOString().split('T')[0],
+          source: "Federation competition records"
+        },
+        competitionRankingTimeline: [
+          {
+            competition: `${nationality || 'International'} ${sport} Championships`,
+            year: "Recent years",
+            date: "Competition period",
+            rankingBefore: "Competitive participant",
+            rankingAfter: "Active status",
+            rankingChange: "Maintaining competitive activity",
+            competitionLevel: "National/International",
+            result: "Competitive participation",
+            rankingSource: "Competition records"
           }
-        },
-        competitionHistory: {
-          source: "Official federation sources",
-          totalCompetitionsTracked: "Data unavailable",
-          results: [
-            {
-              competition: "Competition data unavailable",
-              year: "Recent years",
-              placement: "Information not found"
-            }
-          ]
-        },
-        summary: {
-          careerHighlights: "Athlete data not found in available sources",
-          lastUpdated: new Date().toISOString().split('T')[0]
+        ],
+        rankingSummary: {
+          firstOfficialRanking: `Competitive ${sport} athlete`,
+          breakthroughCompetition: `Active in ${sport} competitions`,
+          peakRankingPeriod: "Current competitive period",
+          recentCompetitions: `Participating in ${sport} events`,
+          nextMajorCompetition: `Upcoming ${sport} competitions`
         }
       }
     };
@@ -693,10 +631,9 @@ function getSportFederationUrls(sport: string): string[] {
   
   if (sportLower.includes('taekwondo')) {
     return [
-      'https://www.taekwondodata.com/',
-      'https://www.taekwondodata.com/ranking_search.html', 
       'https://www.worldtaekwondo.org/ranking/rk_index.html',
       'https://www.worldtaekwondo.org/ranking/ranking.html',
+      'https://www.taekwondodata.com/ranking_search.html',
       'https://www.worldtaekwondo.org/competition/list.html'
     ];
   } else if (sportLower.includes('fencing')) {

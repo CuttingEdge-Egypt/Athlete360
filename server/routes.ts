@@ -8,7 +8,7 @@ import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
 import { seedDatabase } from "./seedData";
 import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, generateAthleteBiography, refreshAthleteBiographyWithSearch, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, compareAthletes, generateRankHistory } from "./openaiService";
-import { generateNutritionPlan, generateAuthenticTaekwondoRank } from "./geminiService";
+import { generateNutritionPlan, generateRankHistoryWithGemini } from "./geminiService";
 import { analyzeVideoFile } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
 
@@ -907,38 +907,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ? await refreshAthleteBiographyWithSearch(athlete.name, sportName)
             : await generateAthleteBiography(athlete.name, sportName);
           
-          // Update athlete bio in database with GPT-5 AI content and authentic rank
+          // Update athlete bio in database with GPT-5 AI content
           await storage.updateAthlete(athleteId, { 
             bio: gptBioAnalysis.bio,
-            rank: typeof authenticRank === 'number' ? authenticRank : 
-                  (typeof authenticRank === 'string' && !isNaN(Number(authenticRank)) && authenticRank !== 'N/A') ? 
-                  Number(authenticRank) : undefined,
+            rank: typeof gptBioAnalysis.rank === 'number' ? gptBioAnalysis.rank : 
+                  (typeof gptBioAnalysis.rank === 'string' && !isNaN(Number(gptBioAnalysis.rank)) && gptBioAnalysis.rank !== 'N/A') ? 
+                  Number(gptBioAnalysis.rank) : undefined,
             achievements: gptBioAnalysis.achievements || []
           });
           
-          // For taekwondo athletes, get authentic rank using Gemini
-          let authenticRank = gptBioAnalysis.rank;
-          if (sportName.toLowerCase() === 'taekwondo') {
-            try {
-              console.log(`🥋 Getting authentic taekwondo rank for ${athlete.name} using Gemini`);
-              const geminiRank = await generateAuthenticTaekwondoRank(athlete.name, athlete.country);
-              if (geminiRank.worldRank && geminiRank.worldRank !== 'N/A') {
-                // Extract numeric rank from format like "#7" 
-                const numericRank = geminiRank.worldRank.replace('#', '');
-                if (!isNaN(Number(numericRank))) {
-                  authenticRank = Number(numericRank);
-                  console.log(`✅ Updated to authentic rank: ${authenticRank} (from ${geminiRank.source})`);
-                }
-              }
-            } catch (rankError) {
-              console.error('Failed to get authentic taekwondo rank:', rankError);
-            }
-          }
-
           bioAnalysis = {
             name: gptBioAnalysis.name,
             bio: gptBioAnalysis.bio,
-            rank: authenticRank,
+            rank: gptBioAnalysis.rank,
             profileImageUrl: athlete.profileImageUrl,
             achievements: gptBioAnalysis.achievements && Array.isArray(gptBioAnalysis.achievements) && gptBioAnalysis.achievements.length > 0 ? gptBioAnalysis.achievements.slice(0, 4) : [
               "Career achievements from GPT-5 analysis with web search",
@@ -1058,8 +1039,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} rank analysis for ${athlete.name}`);
         
         try {
-          // Use GPT-5 with web search for enhanced ranking analysis
-          rankData = await generateRankHistory(athlete.name, sportName, athlete.country || undefined);
+          // Use Gemini 2.5 Pro with URL context for enhanced ranking analysis
+          rankData = await generateRankHistoryWithGemini(athlete.name, sportName, athlete.country || undefined);
           
           // Ensure we have valid data structure
           if (!rankData || !rankData.athlete) {

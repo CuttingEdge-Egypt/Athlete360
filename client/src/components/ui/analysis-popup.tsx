@@ -515,29 +515,8 @@ export function AnalysisPopup({
     let athlete, rankingProgression, careerSummary;
     
     // Handle different data formats and structures
-    // Format 1: NEW OFFICIAL RANKINGS STRUCTURE with Google Search grounding
-    if (parsedData.success && parsedData.athlete && parsedData.athlete.officialRankings) {
-      athlete = parsedData.athlete;
-      // Convert officialRankings to legacy format for backward compatibility
-      athlete.currentRanking = {
-        position: parsedData.athlete.officialRankings.currentRanking?.position || "Not Found",
-        category: parsedData.athlete.officialRankings.currentRanking?.category || "Unknown",
-        lastUpdated: parsedData.athlete.officialRankings.currentRanking?.lastUpdated || "Unknown",
-        source: parsedData.athlete.officialRankings.currentRanking?.source || "Official sources",
-        rankingType: parsedData.athlete.officialRankings.currentRanking?.rankingType || "Official Ranking"
-      };
-      // Extract competition progression from new structure
-      rankingProgression = parsedData.athlete.competitionHistory?.rankProgression || [];
-      careerSummary = {
-        totalCompetitions: parsedData.athlete.competitionHistory?.totalCompetitionsTracked || 'N/A',
-        majorTitles: 'N/A',
-        rankingTrend: 'N/A',
-        notableAchievements: [parsedData.athlete.summary?.careerHighlights || 'No highlights available'],
-        currentForm: 'Official rankings with Google Search grounding'
-      };
-    }
-    // Format 2: New Gemini structure with success flag
-    else if (parsedData.success && parsedData.athlete) {
+    // Format 1: New Gemini structure with success flag
+    if (parsedData.success && parsedData.athlete) {
       athlete = parsedData.athlete;
       rankingProgression = parsedData.athlete.competitionRankingTimeline || [];
       careerSummary = parsedData.athlete.rankingSummary || {};
@@ -620,17 +599,11 @@ export function AnalysisPopup({
             <div className="grid md:grid-cols-4 gap-4">
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-blue-500/20">
                 <div className="text-2xl font-bold text-white">
-                  {athlete.currentRanking?.worldSeniorDivision?.position || 
-                   athlete.currentRanking?.position || 
-                   athlete.currentWorldRank || 
-                   (typeof athlete.currentRanking === 'string' ? athlete.currentRanking : '') || 
-                   'Unranked'}
+                  {athlete.currentRanking?.position || athlete.currentWorldRank || athlete.currentRanking || 'Unranked'}
                 </div>
                 <div className="text-sm text-blue-300">Current Rank</div>
-                {(athlete.currentRanking?.worldSeniorDivision?.category || athlete.currentRanking?.category) && (
-                  <div className="text-xs text-blue-400 mt-1">
-                    {athlete.currentRanking?.worldSeniorDivision?.category || athlete.currentRanking?.category}
-                  </div>
+                {athlete.currentRanking?.category && (
+                  <div className="text-xs text-blue-400 mt-1">{athlete.currentRanking.category}</div>
                 )}
               </div>
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-green-500/20">
@@ -707,7 +680,7 @@ export function AnalysisPopup({
                           rank: entry.rank ? (100 - parseInt(entry.rank.toString().replace(/[^\d]/g, ''))) : 0 // Invert for bottom-up display
                         }))
                       : rankingProgression.map((entry: any, index: number) => {
-                          const rankNum = parseInt(entry.rankAfter?.replace(/[^\d]/g, '') || entry.rankingAfter?.replace(/[^\d]/g, '') || entry.rank?.replace(/[^\d]/g, '') || entry.newRank?.replace(/[^\d]/g, '') || '0') || 0;
+                          const rankNum = parseInt(entry.rankingAfter?.replace(/[^\d]/g, '') || entry.rank?.replace(/[^\d]/g, '') || entry.newRank?.replace(/[^\d]/g, '') || '0') || 0;
                           return {
                             month: entry.year || entry.date || `Event ${index + 1}`,
                             rank: rankNum ? (100 - rankNum) : 0 // Invert ranking for bottom-up chart (better rank = higher on chart)
@@ -742,8 +715,10 @@ export function AnalysisPopup({
                         <div className="text-sm text-gray-400">
                           {entry.year || entry.date || 'Competition year'} • {entry.competitionLevel || entry.level || 'International'}
                         </div>
-                        {entry.placement && (
-                          <div className="text-yellow-400 text-sm">Placement: {entry.placement}</div>
+                        {entry.rank && (
+                          <div className="text-sm text-blue-300 mt-1">
+                            Final Rank: {entry.rank}
+                          </div>
                         )}
                       </div>
                       <div className="text-right">
@@ -758,27 +733,18 @@ export function AnalysisPopup({
                       <div className="text-center flex-1">
                         <div className="text-xs text-gray-400 uppercase tracking-wide">Before</div>
                         <div className="text-lg font-bold text-red-300">
-                          {entry.rankBefore || entry.rankingBefore || entry.previousRank || 'Unranked'}
+                          {entry.rankingBefore || entry.previousRank || 'Unranked'}
                         </div>
                       </div>
                       
-                      <div className="px-4 flex flex-col items-center">
+                      <div className="px-4">
                         <div className="text-2xl text-blue-400">→</div>
-                        {entry.rankChange && (
-                          <div className={`text-xs px-2 py-1 rounded mt-1 ${
-                            entry.rankChange.startsWith('+') ? 'bg-green-500/20 text-green-400' :
-                            entry.rankChange.startsWith('-') ? 'bg-red-500/20 text-red-400' :
-                            'bg-gray-500/20 text-gray-400'
-                          }`}>
-                            {entry.rankChange}
-                          </div>
-                        )}
                       </div>
                       
                       <div className="text-center flex-1">
                         <div className="text-xs text-gray-400 uppercase tracking-wide">After</div>
                         <div className="text-lg font-bold text-green-400">
-                          {entry.rankAfter || entry.rankingAfter || entry.newRank || entry.worldRank || entry.rank || 'Developing'}
+                          {entry.rankingAfter || entry.newRank || entry.worldRank || entry.rank || 'Developing'}
                         </div>
                       </div>
                     </div>

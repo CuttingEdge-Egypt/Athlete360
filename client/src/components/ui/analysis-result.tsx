@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RankChart } from "./rank-chart";
 import { Download, Share2, User, Trophy, Star, AlertTriangle, Calendar, Swords, Video, Award, TrendingUp, Clock, Target, PlayCircle, Zap, Shield, CheckCircle, BarChart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -310,44 +309,11 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     // Adaptive data extraction for multiple JSON formats
     let athlete, rankingProgression, careerSummary;
     
-    // Format 1: NEW OFFICIAL RANKINGS STRUCTURE with Google Search grounding
-    if (parsedData.athlete && parsedData.athlete.officialRankings) {
-      athlete = parsedData.athlete;
-      // Convert officialRankings to legacy format for backward compatibility
-      athlete.currentRanking = {
-        position: parsedData.athlete.officialRankings.worldRanking?.position || "Not Found",
-        category: parsedData.athlete.officialRankings.worldRanking?.category || "Unknown",
-        lastUpdated: parsedData.athlete.officialRankings.worldRanking?.lastUpdated || "Unknown",
-        source: parsedData.athlete.officialRankings.worldRanking?.source || "Official sources"
-      };
-      // Extract competition progression from new structure
-      rankingProgression = parsedData.athlete.competitionHistory?.results || [];
-      careerSummary = {
-        totalCompetitions: parsedData.athlete.competitionHistory?.totalCompetitionsTracked || 'N/A',
-        majorTitles: 'N/A',
-        rankingTrend: 'N/A',
-        notableAchievements: [parsedData.athlete.summary?.careerHighlights || 'No highlights available'],
-        currentForm: 'Official rankings with Google Search grounding'
-      };
-    }
-    // Format 2: Enhanced structure (athlete, rankingProgression, careerSummary)
-    else if (parsedData.athlete && parsedData.rankingProgression !== undefined && parsedData.careerSummary) {
+    // Format 1: New enhanced structure (athlete, rankingProgression, careerSummary)
+    if (parsedData.athlete && parsedData.rankingProgression !== undefined && parsedData.careerSummary) {
       athlete = parsedData.athlete;
       rankingProgression = parsedData.rankingProgression;
       careerSummary = parsedData.careerSummary;
-    }
-    // Format 3: Taekwondo dual ranking structure
-    else if (parsedData.athlete && (parsedData.athlete.worldRankProgression || parsedData.athlete.competitionPlacementProgression)) {
-      athlete = parsedData.athlete;
-      // Extract ranking progression from the athlete object for backward compatibility
-      rankingProgression = parsedData.athlete.worldRankProgression || parsedData.athlete.competitionRankingTimeline || [];
-      careerSummary = parsedData.athlete.rankingSummary || {
-        totalCompetitions: 'N/A',
-        majorTitles: 'N/A',
-        rankingTrend: 'N/A',
-        notableAchievements: [],
-        currentForm: 'Taekwondo dual ranking format'
-      };
     }
     // Format 2: Old synthetic structure (currentRank, peakRank, history, recommendations)
     else if (parsedData.currentRank || parsedData.peakRank || parsedData.history) {
@@ -406,19 +372,11 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
             
             <div className="grid md:grid-cols-4 gap-4">
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-blue-500/20">
-                <div className="text-2xl font-bold text-white">
-                  {athlete.currentRanking?.worldSeniorDivision?.position || 
-                   athlete.currentRanking?.position || 
-                   athlete.currentRanking || 'N/A'}
-                </div>
+                <div className="text-2xl font-bold text-white">{athlete.currentRanking || 'N/A'}</div>
                 <div className="text-sm text-blue-300">Current Rank</div>
               </div>
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-green-500/20">
-                <div className="text-2xl font-bold text-green-400">
-                  {athlete.peakRanking || 
-                   athlete.rankingSummary?.highestRank || 
-                   'N/A'}
-                </div>
+                <div className="text-2xl font-bold text-green-400">{athlete.peakRanking || 'N/A'}</div>
                 <div className="text-sm text-green-300">Peak Rank</div>
               </div>
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-yellow-500/20">
@@ -434,109 +392,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
         </Card>
 
         {/* Ranking Progression Timeline */}
-{/* Taekwondo Dual Ranking System */}
-        {data.athlete?.sport === 'Taekwondo' && (data.athlete.worldRankProgression || data.athlete.competitionPlacementProgression) && (
-          <Card className="bg-athlete-gray-800 border-gray-600">
-            <CardHeader>
-              <CardTitle className="text-2xl text-gray-100 flex items-center">
-                <TrendingUp className="mr-3 text-blue-400" size={24} />
-                🥋 Taekwondo Ranking Analysis
-              </CardTitle>
-              <p className="text-sm text-gray-400 mt-2">
-                World Senior Division ranking progression and competition placement history
-              </p>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="worldRank" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-athlete-gray-700">
-                  <TabsTrigger 
-                    value="worldRank" 
-                    className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-                  >
-                    World Rank Progression
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="competition" 
-                    className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-                  >
-                    Competition Placements
-                  </TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="worldRank" className="mt-4">
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {data.athlete.worldRankProgression?.map((entry: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-gray-500 transition-colors">
-                        <div className="flex-1">
-                          <div className="font-semibold text-gray-100">
-                            {entry.competition || `Event ${index + 1}`}
-                          </div>
-                          <div className="text-sm text-gray-400">
-                            {entry.date || 'Date unknown'} • {entry.result || 'Result unknown'}
-                          </div>
-                          <div className="text-xs text-blue-400 mt-1">
-                            World Senior Division • {entry.competitionLevel || 'Competition level unknown'}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-xl font-bold text-white">
-                            {entry.worldRankAfter || entry.worldRankBefore || 'N/A'}
-                          </div>
-                          {entry.rankingChange && (
-                            <div className="text-sm font-medium text-blue-400">
-                              {entry.rankingChange}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )) || (
-                      <div className="text-gray-400 text-center py-4">
-                        No world ranking progression data available
-                      </div>
-                    )}
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="competition" className="mt-4">
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {data.athlete.competitionPlacementProgression?.map((entry: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-gray-500 transition-colors">
-                        <div className="flex-1">
-                          <div className="font-semibold text-gray-100">
-                            {entry.competition || `Event ${index + 1}`}
-                          </div>
-                          <div className="text-sm text-gray-400">
-                            {entry.date || 'Date unknown'} • {entry.competitionLevel || 'Competition level unknown'}
-                          </div>
-                          {entry.participantsCount && (
-                            <div className="text-xs text-purple-400 mt-1">
-                              {entry.participantsCount} participants
-                            </div>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <div className="text-xl font-bold text-white">
-                            {entry.placement || 'N/A'}
-                          </div>
-                          <div className="text-sm text-purple-400">
-                            {entry.result || 'Placement'}
-                          </div>
-                        </div>
-                      </div>
-                    )) || (
-                      <div className="text-gray-400 text-center py-4">
-                        No competition placement data available
-                      </div>
-                    )}
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Standard Ranking Progression (Non-Taekwondo) */}
-        {data.athlete?.sport !== 'Taekwondo' && rankingProgression && rankingProgression.length > 0 && (
+        {rankingProgression && rankingProgression.length > 0 && (
           <Card className="bg-athlete-gray-800 border-gray-600">
             <CardHeader>
               <CardTitle className="text-2xl text-gray-100 flex items-center">

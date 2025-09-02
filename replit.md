@@ -34,7 +34,6 @@ Preferred communication style: Simple, everyday language.
 - **Payment System**: Integrated with Paymob for token purchases, featuring a dual callback system (webhook and redirect) and automatic token crediting.
 - **Generation Queue System**: Manages multiple AI generations simultaneously with real-time status updates, cancellation, and retry functionality.
 - **Error Handling**: Comprehensive system for AI web search failures, preventing token deduction and providing user-friendly messages.
-- **GPT-5 Rank Analysis**: Enhanced rank history analysis using GPT-5 with web search capabilities, featuring competition-by-competition rank progression tracking.
 
 ### Data Storage
 - **Primary Database**: PostgreSQL via Neon serverless.
@@ -50,7 +49,7 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### AI and Language Models
-- **OpenAI GPT-5**: Primary LLM for athlete analysis, biography generation, comparison, rank history analysis, and sports insights with web search capabilities.
+- **OpenAI GPT-5**: Primary LLM for athlete analysis, biography generation, comparison, and sports insights.
 - **Google Gemini 2.5 Pro**: Specialized for nutrition plan generation, video analysis, and enhanced athlete comparison.
 - **OpenAI SDK**: For GPT-5 integration.
 - **Google Generative AI SDK**: For Gemini integration.

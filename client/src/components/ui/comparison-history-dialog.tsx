@@ -64,10 +64,7 @@ export function ComparisonHistoryDialog({
               )}
               <h3 className="text-xl font-bold text-white">{comparisonData.athlete1?.name}</h3>
               <Badge variant="outline" className="mt-2">
-                Rank #{typeof comparisonData.athlete1?.rank === 'object' ? 
-                  comparisonData.athlete1?.rank?.worldSeniorDivision?.position || 
-                  comparisonData.athlete1?.rank?.position || 'TBD' : 
-                  comparisonData.athlete1?.rank || "TBD"}
+                Rank #{comparisonData.athlete1?.rank || "TBD"}
               </Badge>
             </div>
             
@@ -85,10 +82,7 @@ export function ComparisonHistoryDialog({
               )}
               <h3 className="text-xl font-bold text-white">{comparisonData.athlete2?.name}</h3>
               <Badge variant="outline" className="mt-2">
-                Rank #{typeof comparisonData.athlete2?.rank === 'object' ? 
-                  comparisonData.athlete2?.rank?.worldSeniorDivision?.position || 
-                  comparisonData.athlete2?.rank?.position || 'TBD' : 
-                  comparisonData.athlete2?.rank || "TBD"}
+                Rank #{comparisonData.athlete2?.rank || "TBD"}
               </Badge>
             </div>
           </div>
