@@ -53,18 +53,18 @@ export function TokenModal({ open, onOpenChange }: TokenModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-athlete-gray-800 border-gray-700 text-white max-w-md">
+      <DialogContent className="bg-athlete-gray-800 border-gray-700 text-white w-[95vw] max-w-md sm:max-w-lg max-h-[95vh] overflow-y-auto">
         <DialogHeader className="text-center">
-          <div className="text-6xl mb-4">🪙</div>
-          <DialogTitle className="text-2xl font-bold text-athlete-warning">
+          <div className="text-5xl mb-3">🪙</div>
+          <DialogTitle className="text-xl font-bold text-athlete-warning mb-2">
             Running Low on Tokens!
           </DialogTitle>
-          <DialogDescription className="text-gray-300">
+          <DialogDescription className="text-gray-300 text-sm">
             You need more tokens to access this premium feature. Recharge now to continue your athlete analysis journey.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3 mt-6">
+        <div className="space-y-3 mt-4">
           {/* Professional Pack - Most Popular */}
           <Card className="bg-athlete-gray-700 border-athlete-accent border-2 relative">
             <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
