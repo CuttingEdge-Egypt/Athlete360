@@ -137,6 +137,17 @@ Requirements:
 - Generate 7 complete days
 - Each meal should have 2-4 food items with quantities
 
+FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insufficient data, web search failures, or any other issues, return this exact JSON structure:
+{
+  "error": true,
+  "errorType": "insufficient_data|web_search_failed|parsing_error|other",
+  "errorMessage": "Specific reason why nutrition plan failed",
+  "retryable": true,
+  "suggestion": "What the user should try instead"
+}
+
+Otherwise, return the full nutrition plan structure.
+
 CRITICAL ERROR HANDLING:
 - If you cannot find any reliable nutrition data through web search, respond with exactly: {"error": "no_data_found", "success": false}
 - If web search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
@@ -256,13 +267,15 @@ CRITICAL ERROR HANDLING:
   } catch (error) {
     console.error("Error generating nutrition plan:", error);
     
-    // Check if this is a web search failure that should prevent token deduction
-    if (error instanceof Error && error.message.includes('AI_WEB_SEARCH_FAILED')) {
-      throw error; // Re-throw to prevent token deduction
-    }
-    
-    // For other errors, also prevent token deduction by throwing
-    throw new Error(`Failed to generate authentic nutrition plan: ${error instanceof Error ? error.message : String(error)}`);
+    // Return structured error response instead of throwing
+    return {
+      error: true,
+      errorType: error instanceof Error && error.message.includes('AI_WEB_SEARCH_FAILED') ? "web_search_failed" : "parsing_error",
+      errorMessage: `Unable to generate nutrition plan: ${error instanceof Error ? error.message : String(error)}`,
+      retryable: true,
+      suggestion: "Please try again or check if the athlete information is correct",
+      days: []
+    };
   }
 }
 

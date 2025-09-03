@@ -566,6 +566,17 @@ Use the following athlete information for personalized planning:
 - Competition Record: ${athleteData?.competitionRecord || 'N/A'}
 - Achievements: ${athleteData?.achievements?.join(', ') || 'N/A'}
 
+FAILURE HANDLING: If you cannot generate authentic development plan due to insufficient data, web search failures, or any other issues, return this exact JSON structure:
+{
+  "error": true,
+  "errorType": "insufficient_data|web_search_failed|parsing_error|other",
+  "errorMessage": "Specific reason why development plan failed",
+  "retryable": true,
+  "suggestion": "What the user should try instead"
+}
+
+Otherwise, return the full development plan structure.
+
 Search the web for latest training methodologies specific to ${sport} and ${goal}. Create a personalized weekly plan that addresses this athlete's specific needs and goals.
 
 Return this exact JSON structure:
@@ -645,6 +656,12 @@ IMPORTANT: Do not include any links, URLs, citations, or reference sources in yo
     
     const parsedData = JSON.parse(cleanedText);
     
+    // Check if AI returned an error response
+    if (parsedData.error) {
+      console.log(`GPT-5 returned error for development plan ${athleteName}:`, parsedData.errorMessage);
+      return parsedData; // Return the error response directly
+    }
+    
     // Ensure we have the expected structure
     return {
       duration: parsedData.duration || duration,
@@ -654,12 +671,16 @@ IMPORTANT: Do not include any links, URLs, citations, or reference sources in yo
     
   } catch (error: any) {
     console.error(`Error generating development plan for ${athleteName}:`, error);
-    // Return error instead of generic fallback data
+    
+    // Return structured error response
     return {
+      error: true,
+      errorType: error.message?.includes('AI_WEB_SEARCH_FAILED') ? "web_search_failed" : "parsing_error",
+      errorMessage: `Unable to generate development plan: ${error.message || 'Unknown error'}`,
+      retryable: true,
+      suggestion: "Please try again or check if the athlete name is correct",
       duration,
       goal,
-      error: true,
-      message: `Unable to generate authentic development plan for ${athleteName} at this time. Please try again later or contact support if the issue persists.`,
       plan: []
     };
   }
@@ -1809,6 +1830,17 @@ Include specific ranking numbers (e.g., "#3 vs #7", "Ranked 5th vs 12th globally
 
 CRITICAL JSON REQUIREMENT: Do NOT include any URLs, links, citations, or parenthetical references in your response. All text must be clean without any bracketed links or references.
 
+FAILURE HANDLING: If you cannot generate authentic analysis due to insufficient data, web search failures, or any other issues, return this exact JSON structure:
+{
+  "error": true,
+  "errorType": "insufficient_data|web_search_failed|parsing_error|other",
+  "errorMessage": "Specific reason why generation failed",
+  "retryable": true,
+  "suggestion": "What the user should try instead"
+}
+
+Only return error JSON if generation truly fails - otherwise provide the full analysis structure.
+
 ANALYSIS REQUIREMENTS (use web search for ALL sections):
 1. Strengths Analysis - Find specific technical and tactical strengths from recent competitions
 2. Weaknesses Analysis - Identify areas for improvement based on competition footage and expert analysis
@@ -1816,7 +1848,16 @@ ANALYSIS REQUIREMENTS (use web search for ALL sections):
 4. Head-to-Head Prediction - Predict matchup outcome based on fighting styles and recent form
 5. Overall Analysis - Comprehensive comparison summary based on web research
 
-Return this exact JSON structure:
+FAILURE HANDLING: If you cannot generate authentic comparison due to insufficient data, web search failures, or any other issues, return this exact JSON structure:
+{
+  "error": true,
+  "errorType": "insufficient_data|web_search_failed|parsing_error|other",
+  "errorMessage": "Specific reason why comparison failed",
+  "retryable": true,
+  "suggestion": "What the user should try instead"
+}
+
+Otherwise, return this exact JSON structure:
 {
   "athlete1": {
     "name": "${athlete1.name}",
@@ -1963,11 +2004,26 @@ MANDATORY: Use ONLY current web search results. Do not use generic descriptions 
     let parsedData;
     try {
       parsedData = JSON.parse(cleanedText);
+      
+      // Check if AI returned an error response
+      if (parsedData.error) {
+        console.log(`GPT-5 returned error for ${athlete1.name} vs ${athlete2.name}:`, parsedData.errorMessage);
+        return parsedData; // Return the error response directly
+      }
+      
       console.log(`GPT-5 Comparison Response for ${athlete1.name} vs ${athlete2.name}:`, JSON.stringify(parsedData, null, 2));
     } catch (parseError: any) {
       console.error(`JSON parsing failed for GPT-5 response: ${parseError.message}`);
       console.log(`Raw response (first 500 chars): ${cleanedText.substring(0, 500)}`);
-      throw parseError;
+      
+      // Return structured error instead of throwing
+      return {
+        error: true,
+        errorType: "parsing_error",
+        errorMessage: `JSON parsing failed: ${parseError.message}`,
+        retryable: true,
+        suggestion: "Please try again - the AI response was malformed"
+      };
     }
     
     // Validate that we received authentic GPT-5 data
@@ -2033,7 +2089,14 @@ MANDATORY: Use ONLY current web search results. Do not use generic descriptions 
     
   } catch (error: any) {
     console.error(`Error generating athlete comparison for ${athlete1.name} vs ${athlete2.name}:`, error);
-    // Throw error instead of returning fallback data
-    throw new Error(`Athlete comparison failed for ${athlete1.name} vs ${athlete2.name}: ${error.message}`);
+    
+    // Return structured error response instead of throwing
+    return {
+      error: true,
+      errorType: "parsing_error",
+      errorMessage: `Failed to generate comparison: ${error.message}`,
+      retryable: true,
+      suggestion: "Please try again or select different athletes"
+    };
   }
 }

@@ -1397,8 +1397,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log(`🚫 FAILED: Development plan generation failed for ${athlete.name}, refunded ${tokenCost} tokens`);
         return res.status(500).json({
-          message: developmentPlan.message || "Unable to generate authentic development plan at this time. Please try again later.",
-          error: true
+          message: developmentPlan.errorMessage || developmentPlan.message || "Unable to generate authentic development plan at this time. Please try again later.",
+          error: true,
+          errorType: developmentPlan.errorType || "unknown",
+          retryable: developmentPlan.retryable || true,
+          suggestion: developmentPlan.suggestion || "Please try again later"
         });
       }
       
@@ -1509,6 +1512,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let athleteAge = athlete.age;
       let athleteGender = athlete.gender;
       let athleteCountry = athlete.country;
+      
+      // Generate nutrition plan
+      const nutritionPlan = await generateNutritionPlan(athlete.name, sportName, athleteAge, athleteGender, athleteCountry);
+      
+      // Check if the nutrition plan generation failed
+      if (nutritionPlan.error) {
+        // Refund tokens for failed analysis
+        await refundTokensForFailedAnalysis(
+          userId,
+          athleteId,
+          tokenCost,
+          'nutrition-plan',
+          'Nutrition Plan'
+        );
+        
+        console.log(`🚫 FAILED: Nutrition plan generation failed for ${athlete.name}, refunded ${tokenCost} tokens`);
+        return res.status(500).json({
+          message: nutritionPlan.errorMessage || "Unable to generate authentic nutrition plan at this time. Please try again later.",
+          error: true,
+          errorType: nutritionPlan.errorType || "unknown",
+          retryable: nutritionPlan.retryable || true,
+          suggestion: nutritionPlan.suggestion || "Please try again later"
+        });
+      }
 
       // Smart fallback: extract missing info from bio or use AI
       if (!athleteAge || !athleteGender || !athleteCountry) {
@@ -2481,6 +2508,27 @@ Return only valid JSON with the missing fields.`;
             overallAnalysisModel = "Gemini-2.5-pro (fallback)";
           }
         }
+      }
+      
+      // Check if basic comparison failed
+      if (basicComparisonResult.error) {
+        // Refund tokens for failed analysis
+        await refundTokensForFailedAnalysis(
+          userId,
+          athlete1Id,
+          100, // comparison token cost
+          'comparison',
+          'Athlete Comparison'
+        );
+        
+        console.log(`🚫 FAILED: Comparison generation failed, refunded 100 tokens`);
+        return res.status(500).json({
+          message: basicComparisonResult.errorMessage || "Unable to generate authentic comparison at this time. Please try again later.",
+          error: true,
+          errorType: basicComparisonResult.errorType || "unknown",
+          retryable: basicComparisonResult.retryable || true,
+          suggestion: basicComparisonResult.suggestion || "Please try again with different athletes"
+        });
       }
       
       // Merge the results from both AI models
