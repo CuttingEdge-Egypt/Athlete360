@@ -1384,6 +1384,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate personalized development plan
       const developmentPlan = await generateDevelopmentPlan(athlete.name, sportName, duration, goal, athleteDataForAnalysis);
       
+      // Check if the development plan generation failed
+      if (developmentPlan.error) {
+        // Refund tokens for failed analysis
+        await refundTokensForFailedAnalysis(
+          userId,
+          athleteId,
+          tokenCost,
+          'development',
+          'Development Plan'
+        );
+        
+        console.log(`🚫 FAILED: Development plan generation failed for ${athlete.name}, refunded ${tokenCost} tokens`);
+        return res.status(500).json({
+          message: developmentPlan.message || "Unable to generate authentic development plan at this time. Please try again later.",
+          error: true
+        });
+      }
+      
       // Store development plans in database for future use
       if (developmentPlan.plan && developmentPlan.plan.length > 0) {
         for (const weekPlan of developmentPlan.plan) {
@@ -1414,7 +1432,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(developmentPlan);
     } catch (error) {
       console.error("Error generating development plan:", error);
-      res.status(500).json({ message: "Failed to generate development plan" });
+      
+      // Check if this is a web search failure that should get token refund
+      if (error instanceof Error && error.message.includes('AI_WEB_SEARCH_FAILED')) {
+        try {
+          await refundTokensForFailedAnalysis(
+            userId,
+            athleteId,
+            tokenCost,
+            'development',
+            'Development Plan'
+          );
+          console.log(`🚫 WEB SEARCH FAILED: Refunded ${tokenCost} tokens for failed development plan web search`);
+        } catch (refundError) {
+          console.error('Failed to refund tokens:', refundError);
+        }
+        
+        return res.status(500).json({ 
+          message: "Unable to generate authentic development plan at this time. Please try again later.",
+          error: true
+        });
+      }
+      
+      // For other errors, try to refund tokens as well
+      try {
+        await refundTokensForFailedAnalysis(
+          userId,
+          athleteId,
+          tokenCost,
+          'development',
+          'Development Plan'
+        );
+        console.log(`🚫 ERROR: Refunded ${tokenCost} tokens for failed development plan generation`);
+      } catch (refundError) {
+        console.error('Failed to refund tokens:', refundError);
+      }
+      
+      res.status(500).json({ 
+        message: "Unable to generate development plan at this time. Please try again later.",
+        error: true 
+      });
     }
   });
 
