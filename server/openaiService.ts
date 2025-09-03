@@ -1807,6 +1807,8 @@ You MUST search for and include both athletes' current world ranking positions:
 
 Include specific ranking numbers (e.g., "#3 vs #7", "Ranked 5th vs 12th globally") or state "Unranked" if no official ranking exists.
 
+CRITICAL JSON REQUIREMENT: Do NOT include any URLs, links, citations, or parenthetical references in your response. All text must be clean without any bracketed links or references.
+
 ANALYSIS REQUIREMENTS (use web search for ALL sections):
 1. Strengths Analysis - Find specific technical and tactical strengths from recent competitions
 2. Weaknesses Analysis - Identify areas for improvement based on competition footage and expert analysis
@@ -1925,6 +1927,12 @@ MANDATORY: Use ONLY current web search results. Do not use generic descriptions 
       // Clean up common JSON issues
       cleanedText = cleanedText.replace(/,\s*}/g, '}');
       cleanedText = cleanedText.replace(/,\s*]/g, ']');
+      
+      // Remove URLs and links that break JSON
+      cleanedText = cleanedText.replace(/\(\[([^\]]+)\]\([^\)]+\)\)/g, '');
+      cleanedText = cleanedText.replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1');
+      cleanedText = cleanedText.replace(/https?:\/\/[^\s\"\)]+/g, '');
+      cleanedText = cleanedText.replace(/\(\s*\)/g, '');
       
       // Fix truncated JSON by balancing braces/brackets
       let braceCount = 0;
