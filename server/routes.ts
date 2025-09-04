@@ -781,7 +781,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bioAnalysis = {
           name: athlete.name,
           bio: athlete.bio,
-          playersStory: athlete.playersStory || "",
+          playersStory: "", // No playersStory field in database schema
           rank: athlete.rank || Math.floor(Math.random() * 10) + 1,
           profileImageUrl: athlete.profileImageUrl,
           achievements: athlete.achievements && Array.isArray(athlete.achievements) && athlete.achievements.length > 0 ? athlete.achievements.slice(0, 4) : [
@@ -818,7 +818,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const rankValue = gptBioAnalysis.currentRank || gptBioAnalysis.rank;
           await storage.updateAthlete(athleteId, { 
             bio: gptBioAnalysis.bio,
-            playersStory: gptBioAnalysis.playersStory || "",
             rank: typeof rankValue === 'number' ? rankValue : 
                   (typeof rankValue === 'string' && !isNaN(Number(rankValue)) && rankValue !== 'N/A') ? 
                   Number(rankValue) : undefined,
@@ -1513,11 +1512,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let athleteGender = athlete.gender;
       let athleteCountry = athlete.country;
       
-      // Generate nutrition plan
-      const nutritionPlan = await generateNutritionPlan(athlete.name, sportName, athleteAge, athleteGender, athleteCountry);
+      // Generate nutrition plan with safe defaults for missing data
+      const nutritionPlan = await generateNutritionPlan(
+        athlete.name, 
+        sportName, 
+        athleteAge || 25, // Default age if not provided
+        athleteGender || 'Unknown', 
+        athleteCountry || 'International'
+      );
       
       // Check if the nutrition plan generation failed
-      if (nutritionPlan.error) {
+      if ((nutritionPlan as any).error) {
         // Refund tokens for failed analysis
         await refundTokensForFailedAnalysis(
           userId,
@@ -1529,11 +1534,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log(`🚫 FAILED: Nutrition plan generation failed for ${athlete.name}, refunded ${tokenCost} tokens`);
         return res.status(500).json({
-          message: nutritionPlan.errorMessage || "Unable to generate authentic nutrition plan at this time. Please try again later.",
+          message: (nutritionPlan as any).errorMessage || "Unable to generate authentic nutrition plan at this time. Please try again later.",
           error: true,
-          errorType: nutritionPlan.errorType || "unknown",
-          retryable: nutritionPlan.retryable || true,
-          suggestion: nutritionPlan.suggestion || "Please try again later"
+          errorType: (nutritionPlan as any).errorType || "unknown",
+          retryable: (nutritionPlan as any).retryable || true,
+          suggestion: (nutritionPlan as any).suggestion || "Please try again later"
         });
       }
 
@@ -2348,9 +2353,13 @@ Return only valid JSON with the missing fields.`;
   // Compare two athletes using OpenAI
   app.post('/api/athletes/compare', isAuthenticated, async (req, res) => {
     const tokenCost = 100; // Higher cost for comparison analysis
+    let queueId: string | undefined; // Define queueId for queue management
     try {
       const userId = (req.user as any)?.claims?.sub;
       const { athlete1Id, athlete2Id } = req.body;
+      
+      // Generate queue ID for tracking
+      queueId = `comp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
       if (!athlete1Id || !athlete2Id) {
         return res.status(400).json({ message: "Both athlete IDs are required" });
@@ -2640,42 +2649,6 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
-  // ==== TOKEN REFUND ROUTE FOR CANCELLED ANALYSIS ====
-  app.post('/api/refund-cancelled-analysis', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { athleteId, serviceType, reason } = req.body;
-      
-      // Get service cost mapping
-      const serviceCosts: { [key: string]: number } = {
-        'bio': 20,
-        'rank': 70,
-        'strengths': 50,
-        'weaknesses': 50,
-        'development-plan': 80,
-        'nutrition-plan': 75,
-        'beat-strategies': 100,
-        'video': 200
-      };
-      
-      const tokenCost = serviceCosts[serviceType] || 50;
-      
-      // Refund the tokens using existing helper function
-      await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, serviceType, `${serviceType} Analysis - CANCELLED`);
-      
-      console.log(`💫 CANCELLED ANALYSIS REFUND: ${tokenCost} tokens refunded to user ${userId} for cancelled ${serviceType} analysis`);
-      
-      res.json({ 
-        success: true, 
-        message: "Tokens refunded for cancelled analysis",
-        tokensRefunded: tokenCost 
-      });
-      
-    } catch (error) {
-      console.error('Error refunding tokens for cancelled analysis:', error);
-      res.status(500).json({ message: "Failed to refund tokens" });
-    }
-  });
 
   // ==== PAYMENT AND REFERRAL SYSTEM ROUTES ====
 
