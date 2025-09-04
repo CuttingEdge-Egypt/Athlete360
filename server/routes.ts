@@ -2436,7 +2436,23 @@ Return only valid JSON with the missing fields.`;
         
         // Handle GPT-5 result
         if (gptResult.status === 'fulfilled') {
-          basicComparisonResult = gptResult.value;
+          const gptResponse = gptResult.value;
+          
+          // Check if we got a raw response structure
+          if (gptResponse.rawResponse) {
+            console.log('Got raw GPT-5 response, returning it directly to frontend');
+            
+            // Return the raw response immediately for debugging
+            return res.json({
+              rawResponse: gptResponse.rawResponse,
+              source: gptResponse.source,
+              athletes: gptResponse.athletes,
+              timestamp: gptResponse.timestamp,
+              isRawResponse: true
+            });
+          }
+          
+          basicComparisonResult = gptResponse;
         } else {
           console.error(`GPT-5 comparison failed: ${gptResult.reason?.message || gptResult.reason}`);
           gptFailed = true;
