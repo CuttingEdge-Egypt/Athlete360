@@ -914,7 +914,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                   <Card className="bg-yellow-900/30 border-yellow-600/50">
                     <CardContent className="p-4">
                       <p className="text-yellow-300">
-                        Detailed analysis powered by Gemini-2.5-pro is not available for this comparison.
+                        Detailed analysis is not available for this comparison.
                       </p>
                     </CardContent>
                   </Card>

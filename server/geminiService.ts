@@ -426,6 +426,46 @@ CRITICAL ERROR HANDLING:
     
     try {
       const parsedData = JSON.parse(cleanedResponse);
+      
+      // Check if Gemini returned an error response
+      if (parsedData.error) {
+        console.log(`[GEMINI] Returned error response:`, parsedData.error);
+        console.log(`[GEMINI] Using fallback structure due to:`, parsedData.error);
+        
+        // Return structured fallback instead of the error
+        return {
+          detailedAnalysis: {
+            athlete1: {
+              name: athlete1.name,
+              country: athlete1.country,
+              currentForm: "Analysis not available - insufficient data found",
+              technicalSkills: [],
+              physicalAttributes: {},
+              recentPerformance: {}
+            },
+            athlete2: {
+              name: athlete2.name,
+              country: athlete2.country,
+              currentForm: "Analysis not available - insufficient data found", 
+              technicalSkills: [],
+              physicalAttributes: {},
+              recentPerformance: {}
+            },
+            comparison: {}
+          },
+          headToHead: {
+            prediction: "athlete1",
+            confidence: 50,
+            reasoning: "Detailed analysis unavailable - using basic comparison data",
+            keyFactors: ["Analysis unavailable"],
+            scenario: "Unable to provide detailed scenario",
+            tacticalAdvice: {},
+            historicalContext: "Information not found",
+            expertPredictions: "No expert predictions available"
+          }
+        };
+      }
+      
       console.log(`[GEMINI] Successfully parsed detailed comparison data`);
       return parsedData;
     } catch (parseError) {
