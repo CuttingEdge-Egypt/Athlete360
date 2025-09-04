@@ -704,8 +704,8 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       <Trophy className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
                       <div className="text-sm text-gray-400">Ranking Advantage</div>
                       <div className="text-lg font-bold text-white">
-                        {comparisonData.ranking?.competitiveEdge === 'athlete1' ? comparisonData.athlete1.name :
-                         comparisonData.ranking?.competitiveEdge === 'athlete2' ? comparisonData.athlete2.name : 'Even'}
+                        {comparisonData.ranking?.competitiveEdge === 'athlete1' ? comparisonData.athlete1?.name :
+                         comparisonData.ranking?.competitiveEdge === 'athlete2' ? comparisonData.athlete2?.name : 'Even'}
                       </div>
                     </CardContent>
                   </Card>
@@ -715,8 +715,8 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       <TrendingUp className="h-8 w-8 text-green-500 mx-auto mb-2" />
                       <div className="text-sm text-gray-400">Strength Advantage</div>
                       <div className="text-lg font-bold text-white">
-                        {comparisonData.strengths?.advantage === 'athlete1' ? comparisonData.athlete1.name :
-                         comparisonData.strengths?.advantage === 'athlete2' ? comparisonData.athlete2.name : 'Even'}
+                        {comparisonData.strengths?.advantage === 'athlete1' ? comparisonData.athlete1?.name :
+                         comparisonData.strengths?.advantage === 'athlete2' ? comparisonData.athlete2?.name : 'Even'}
                       </div>
                     </CardContent>
                   </Card>
@@ -726,8 +726,8 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       <Target className="h-8 w-8 text-purple-500 mx-auto mb-2" />
                       <div className="text-sm text-gray-400">Predicted Winner</div>
                       <div className="text-lg font-bold text-white">
-                        {comparisonData.headToHead?.prediction === 'athlete1' ? comparisonData.athlete1.name :
-                         comparisonData.headToHead?.prediction === 'athlete2' ? comparisonData.athlete2.name : 'Even Match'}
+                        {comparisonData.headToHead?.prediction === 'athlete1' ? comparisonData.athlete1?.name :
+                         comparisonData.headToHead?.prediction === 'athlete2' ? comparisonData.athlete2?.name : 'Even Match'}
                       </div>
                     </CardContent>
                   </Card>
@@ -1010,7 +1010,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Card className="bg-athlete-gray-900 border-gray-600">
                     <CardHeader>
-                      <CardTitle className="text-lg text-white">{comparisonData.athlete1.name} Strengths</CardTitle>
+                      <CardTitle className="text-lg text-white">{comparisonData.athlete1?.name || "Athlete 1"} Strengths</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
                       {(comparisonData.strengths?.athlete1 || []).map((strength: any, index: number) => (
@@ -1041,7 +1041,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
                   <Card className="bg-athlete-gray-900 border-gray-600">
                     <CardHeader>
-                      <CardTitle className="text-lg text-white">{comparisonData.athlete2.name} Strengths</CardTitle>
+                      <CardTitle className="text-lg text-white">{comparisonData.athlete2?.name || "Athlete 2"} Strengths</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
                       {(comparisonData.strengths?.athlete2 || []).map((strength: any, index: number) => (
@@ -1076,7 +1076,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Card className="bg-athlete-gray-900 border-gray-600">
                     <CardHeader>
-                      <CardTitle className="text-lg text-white">{comparisonData.athlete1.name} Areas to Improve</CardTitle>
+                      <CardTitle className="text-lg text-white">{comparisonData.athlete1?.name || "Athlete 1"} Areas to Improve</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
                       {(comparisonData.weaknesses?.athlete1 || []).map((weakness: any, index: number) => (
@@ -1107,7 +1107,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
                   <Card className="bg-athlete-gray-900 border-gray-600">
                     <CardHeader>
-                      <CardTitle className="text-lg text-white">{comparisonData.athlete2.name} Areas to Improve</CardTitle>
+                      <CardTitle className="text-lg text-white">{comparisonData.athlete2?.name} Areas to Improve</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
                       {(comparisonData.weaknesses?.athlete2 || []).map((weakness: any, index: number) => (
@@ -1149,8 +1149,8 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                   <CardContent className="space-y-4">
                     <div className="text-center">
                       <div className="text-3xl font-bold text-white mb-2">
-                        {comparisonData.headToHead?.prediction === 'athlete1' ? comparisonData.athlete1.name :
-                         comparisonData.headToHead?.prediction === 'athlete2' ? comparisonData.athlete2.name : 'Even Match'}
+                        {comparisonData.headToHead?.prediction === 'athlete1' ? comparisonData.athlete1?.name :
+                         comparisonData.headToHead?.prediction === 'athlete2' ? comparisonData.athlete2?.name : 'Even Match'}
                       </div>
                       <Badge variant="outline" className="text-lg px-4 py-1">
                         {comparisonData.headToHead?.confidence || 50}% Confidence
@@ -1211,7 +1211,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                             {comparisonData.headToHead.tacticalAdvice.forAthlete1 && (
                               <Card className="bg-athlete-gray-800 border-gray-600">
                                 <CardHeader className="pb-2">
-                                  <CardTitle className="text-sm text-blue-400">For {comparisonData.athlete1.name}</CardTitle>
+                                  <CardTitle className="text-sm text-blue-400">For {comparisonData.athlete1?.name}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                   <p className="text-xs text-gray-300">{comparisonData.headToHead.tacticalAdvice.forAthlete1}</p>
@@ -1221,7 +1221,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                             {comparisonData.headToHead.tacticalAdvice.forAthlete2 && (
                               <Card className="bg-athlete-gray-800 border-gray-600">
                                 <CardHeader className="pb-2">
-                                  <CardTitle className="text-sm text-red-400">For {comparisonData.athlete2.name}</CardTitle>
+                                  <CardTitle className="text-sm text-red-400">For {comparisonData.athlete2?.name}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                   <p className="text-xs text-gray-300">{comparisonData.headToHead.tacticalAdvice.forAthlete2}</p>
