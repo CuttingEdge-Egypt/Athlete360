@@ -411,7 +411,10 @@ CRITICAL ERROR HANDLING:
 - If either athlete's information does not exist, respond with exactly: {"error": "not_found", "success": false}
 - Only provide comparison data if you can find authentic, verifiable information about both athletes through web search`;
 
-    const response = await model.generateContent(prompt);
+    const response = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      tools: [{ googleSearch: {} }]
+    });
     const responseText = response.response.text();
     
     console.log(`[GEMINI] Detailed comparison generated for ${athlete1.name} vs ${athlete2.name}`);

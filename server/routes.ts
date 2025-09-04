@@ -2537,12 +2537,37 @@ Return only valid JSON with the missing fields.`;
         });
       }
       
+      // Check if detailed analysis failed and refund 20 tokens as partial compensation
+      let partialRefund = false;
+      if (detailedAnalysisResult.error || 
+          !detailedAnalysisResult.detailedAnalysis || 
+          !detailedAnalysisResult.detailedAnalysis.athlete1 ||
+          !detailedAnalysisResult.detailedAnalysis.athlete2) {
+        
+        console.log(`⚠️  Detailed analysis failed, providing 20 token refund for incomplete comparison`);
+        
+        // Refund 20 tokens for failed detailed analysis
+        await refundTokensForFailedAnalysis(
+          userId,
+          athlete1Id,
+          20, // Partial refund for failed detailed tabs
+          'comparison-partial',
+          'Partial Athlete Comparison Refund'
+        );
+        
+        partialRefund = true;
+      }
+
       // Merge the results from both AI models
       const comparisonResult = {
         ...basicComparisonResult,
         overallAnalysis: finalOverallAnalysis,
         detailedAnalysis: detailedAnalysisResult.detailedAnalysis,
-        headToHead: detailedAnalysisResult.headToHead
+        headToHead: detailedAnalysisResult.headToHead,
+        partialRefund: partialRefund ? {
+          amount: 20,
+          reason: "Some comparison tabs could not be generated"
+        } : undefined
       };
 
       // Log the comparison

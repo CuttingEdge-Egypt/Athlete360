@@ -271,10 +271,20 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
     },
     onSuccess: (data) => {
       setComparisonData(data);
-      toast({
-        title: "Comparison Complete",
-        description: "AI-powered athlete comparison generated successfully!",
-      });
+      
+      // Check for partial refund notification
+      if (data.partialRefund) {
+        toast({
+          title: "Comparison Partially Complete",
+          description: `Basic comparison generated successfully! Some detailed tabs couldn't be generated, so we've refunded ${data.partialRefund.amount} tokens.`,
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Comparison Complete",
+          description: "AI-powered athlete comparison generated successfully!",
+        });
+      }
     },
     onError: (error: any) => {
       toast({
