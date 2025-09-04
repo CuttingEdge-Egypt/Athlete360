@@ -576,18 +576,37 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
               
               try {
                 if (comparisonData.gptResponse?.rawResponse) {
-                  gptData = JSON.parse(comparisonData.gptResponse.rawResponse);
+                  // Clean GPT response 
+                  let cleanedGpt = comparisonData.gptResponse.rawResponse.trim();
+                  // Handle cases where response may be incomplete due to streaming/truncation
+                  if (!cleanedGpt.endsWith('}')) {
+                    const lastBrace = cleanedGpt.lastIndexOf('}');
+                    if (lastBrace > 0) {
+                      cleanedGpt = cleanedGpt.substring(0, lastBrace + 1);
+                    }
+                  }
+                  gptData = JSON.parse(cleanedGpt);
                 }
               } catch (error) {
-                console.error('Error parsing GPT response:', error);
+                console.warn('Could not parse GPT response:', error.message);
               }
               
               try {
                 if (comparisonData.geminiResponse?.rawResponse) {
-                  geminiData = JSON.parse(comparisonData.geminiResponse.rawResponse);
+                  // Clean Gemini response - remove markdown wrapper
+                  let cleanedGemini = comparisonData.geminiResponse.rawResponse.trim();
+                  cleanedGemini = cleanedGemini.replace(/^```json\s*/, '').replace(/```\s*$/, '').trim();
+                  // Handle cases where response may be incomplete
+                  if (!cleanedGemini.endsWith('}')) {
+                    const lastBrace = cleanedGemini.lastIndexOf('}');
+                    if (lastBrace > 0) {
+                      cleanedGemini = cleanedGemini.substring(0, lastBrace + 1);
+                    }
+                  }
+                  geminiData = JSON.parse(cleanedGemini);
                 }
               } catch (error) {
-                console.error('Error parsing Gemini response:', error);
+                console.warn('Could not parse Gemini response:', error.message);
               }
               
               // Use GPT data as primary source, Gemini for detailed analysis
@@ -1010,10 +1029,10 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                       <div>
                                         <div className="text-sm font-medium text-gray-300 mb-2">Technical Skills:</div>
                                         <ul className="space-y-1">
-                                          {parsedData.detailedAnalysis.athlete1.technicalSkills.map((skill: string, index: number) => (
+                                          {parsedData.detailedAnalysis.athlete1.technicalSkills.map((skill: any, index: number) => (
                                             <li key={index} className="text-xs text-gray-400 flex items-start gap-1">
                                               <span className="text-blue-400">•</span>
-                                              {skill}
+                                              {typeof skill === 'string' ? skill : skill.skill || skill.description || 'Technical skill'}
                                             </li>
                                           ))}
                                         </ul>
@@ -1033,10 +1052,10 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                       <div>
                                         <div className="text-sm font-medium text-gray-300 mb-2">Technical Skills:</div>
                                         <ul className="space-y-1">
-                                          {parsedData.detailedAnalysis.athlete2.technicalSkills.map((skill: string, index: number) => (
+                                          {parsedData.detailedAnalysis.athlete2.technicalSkills.map((skill: any, index: number) => (
                                             <li key={index} className="text-xs text-gray-400 flex items-start gap-1">
                                               <span className="text-purple-400">•</span>
-                                              {skill}
+                                              {typeof skill === 'string' ? skill : skill.skill || skill.description || 'Technical skill'}
                                             </li>
                                           ))}
                                         </ul>
