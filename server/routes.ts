@@ -2525,7 +2525,7 @@ Return only valid JSON with the missing fields.`;
       }
       
       // Check if basic comparison failed
-      if (basicComparisonResult.error) {
+      if (basicComparisonResult.error && (basicComparisonResult.error === "Couldn't Generate" || basicComparisonResult.error === "Error" || basicComparisonResult.error === true)) {
         // Refund tokens for failed analysis
         await refundTokensForFailedAnalysis(
           userId,
@@ -2553,7 +2553,7 @@ Return only valid JSON with the missing fields.`;
       
       // Check if detailed analysis failed and refund 20 tokens as partial compensation
       let partialRefund = false;
-      if (detailedAnalysisResult.error || 
+      if ((detailedAnalysisResult.error && (detailedAnalysisResult.error === "Couldn't Generate" || detailedAnalysisResult.error === "Error")) || 
           !detailedAnalysisResult.detailedAnalysis || 
           !detailedAnalysisResult.detailedAnalysis.athlete1 ||
           !detailedAnalysisResult.detailedAnalysis.athlete2) {

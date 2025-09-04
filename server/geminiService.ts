@@ -406,15 +406,22 @@ Return this EXACT JSON structure:
 MANDATORY: Use ONLY current web search results from 2024-2025. If specific information cannot be found through web search, clearly state "Information not found through web search" rather than using generic descriptions.
 
 CRITICAL ERROR HANDLING:
-- If you cannot find any reliable comparison data through web search, respond with exactly: {"error": "no_data_found", "success": false}
-- If web search fails or returns no results, respond with exactly: {"error": "search_failed", "success": false}
-- If either athlete's information does not exist, respond with exactly: {"error": "not_found", "success": false}
+- If you cannot find any reliable comparison data through web search, respond with exactly: {"error": "Couldn't Generate", "errorType": "no_data_found", "errorMessage": "Insufficient authentic data found for both athletes"}
+- If web search fails or returns no results, respond with exactly: {"error": "Error", "errorType": "search_failed", "errorMessage": "Web search capabilities returned no results"}
+- If either athlete's information does not exist, respond with exactly: {"error": "Couldn't Generate", "errorType": "not_found", "errorMessage": "One or both athletes not found in current databases"}
 - Only provide comparison data if you can find authentic, verifiable information about both athletes through web search`;
 
-    const response = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      tools: [{ googleSearch: {} }]
-    });
+    // Add timeout wrapper to prevent long delays
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Gemini analysis timed out after 90 seconds')), 90000)
+    );
+    
+    const response = await Promise.race([
+      model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }]
+      }),
+      timeoutPromise
+    ]) as any;
     const responseText = response.response.text();
     
     console.log(`[GEMINI] Detailed comparison generated for ${athlete1.name} vs ${athlete2.name}`);
@@ -431,7 +438,7 @@ CRITICAL ERROR HANDLING:
       const parsedData = JSON.parse(cleanedResponse);
       
       // Check if Gemini returned an error response
-      if (parsedData.error) {
+      if (parsedData.error && (parsedData.error === "Couldn't Generate" || parsedData.error === "Error" || parsedData.error === "no_data_found" || parsedData.error === "search_failed" || parsedData.error === "not_found")) {
         console.log(`[GEMINI] Returned error response:`, parsedData.error);
         console.log(`[GEMINI] Using fallback structure due to:`, parsedData.error);
         

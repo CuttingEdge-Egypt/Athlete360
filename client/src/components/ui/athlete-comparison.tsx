@@ -17,7 +17,8 @@ import {
   Activity,
   Brain,
   Heart,
-  User
+  User,
+  AlertCircle
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -676,7 +677,10 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
               </TabsContent>
 
               <TabsContent value="detailed" className="space-y-4">
-                {comparisonData.detailedAnalysis ? (
+                {comparisonData.detailedAnalysis && 
+                 !comparisonData.detailedAnalysis.error && 
+                 comparisonData.detailedAnalysis.athlete1 && 
+                 comparisonData.detailedAnalysis.athlete2 ? (
                   <div className="space-y-6">
                     {/* AI Models Info */}
                     {comparisonData.aiModels && (
@@ -921,11 +925,24 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                     )}
                   </div>
                 ) : (
-                  <Card className="bg-yellow-900/30 border-yellow-600/50">
+                  <Card className="bg-red-900/30 border-red-600/50">
                     <CardContent className="p-4">
-                      <p className="text-yellow-300">
-                        Detailed analysis is not available for this comparison.
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertCircle className="h-4 w-4 text-red-400" />
+                        <span className="font-medium text-red-300">Analysis Error</span>
+                      </div>
+                      <p className="text-red-200">
+                        {comparisonData.detailedAnalysis?.error === "Couldn't Generate" ? 
+                          "Couldn't generate detailed analysis - insufficient authentic data found." :
+                         comparisonData.detailedAnalysis?.error === "Error" ? 
+                          "Error occurred during detailed analysis generation." :
+                          "Detailed analysis is not available for this comparison."}
                       </p>
+                      {comparisonData.detailedAnalysis?.errorMessage && (
+                        <p className="text-red-300 text-sm mt-2">
+                          {comparisonData.detailedAnalysis.errorMessage}
+                        </p>
+                      )}
                     </CardContent>
                   </Card>
                 )}

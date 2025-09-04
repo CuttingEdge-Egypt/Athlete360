@@ -1832,7 +1832,7 @@ CRITICAL JSON REQUIREMENT: Do NOT include any URLs, links, citations, or parenth
 
 FAILURE HANDLING: If you cannot generate authentic analysis due to insufficient data, web search failures, or any other issues, return this exact JSON structure:
 {
-  "error": true,
+  "error": "Couldn't Generate",
   "errorType": "insufficient_data|web_search_failed|parsing_error|other",
   "errorMessage": "Specific reason why generation failed",
   "retryable": true,
@@ -1850,7 +1850,7 @@ ANALYSIS REQUIREMENTS (use web search for ALL sections):
 
 FAILURE HANDLING: If you cannot generate authentic comparison due to insufficient data, web search failures, or any other issues, return this exact JSON structure:
 {
-  "error": true,
+  "error": "Couldn't Generate",
   "errorType": "insufficient_data|web_search_failed|parsing_error|other",
   "errorMessage": "Specific reason why comparison failed",
   "retryable": true,
