@@ -2464,6 +2464,11 @@ Return only valid JSON with the missing fields.`;
       const { generateDetailedComparison } = await import('./geminiService.js');
       const detailedAnalysisResult = await generateDetailedComparison(athlete1ForComparison, athlete2ForComparison, sportName);
       
+      // Update queue status to completing after detailed analysis
+      if (queueId && (global as any).generationQueue) {
+        (global as any).generationQueue.updateStatus(queueId, 'completing');
+      }
+      
       // Check if GPT-5 overall analysis failed and use Gemini as fallback
       let finalOverallAnalysis = basicComparisonResult.overallAnalysis;
       let overallAnalysisModel = gptFailed ? "Gemini-2.5-pro (fallback)" : "GPT-5";
@@ -2578,9 +2583,20 @@ Return only valid JSON with the missing fields.`;
         resultData: comparisonResult
       });
 
+      // Update queue status to completed
+      if (queueId && (global as any).generationQueue) {
+        (global as any).generationQueue.updateStatus(queueId, 'completed');
+      }
+
       res.json(comparisonResult);
     } catch (error) {
       console.error("Error generating athlete comparison:", error);
+      
+      // Update queue status to error if it failed
+      if (queueId && (global as any).generationQueue) {
+        (global as any).generationQueue.updateStatus(queueId, 'error');
+      }
+      
       res.status(500).json({ 
         message: "Unable to generate authentic athlete comparison at this time. Please try again later.",
         error: error instanceof Error ? error.message : String(error)
