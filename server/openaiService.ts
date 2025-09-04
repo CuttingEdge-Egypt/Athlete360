@@ -1969,12 +1969,11 @@ MANDATORY: Use ONLY current web search results. Do not use generic descriptions 
       cleanedText = cleanedText.replace(/,\s*}/g, '}');
       cleanedText = cleanedText.replace(/,\s*]/g, ']');
       
-      // Remove URLs and links that break JSON
+      // Remove URLs and links that break JSON - enhanced cleaning
       cleanedText = cleanedText.replace(/\(\[([^\]]+)\]\([^\)]+\)\)/g, '');
       cleanedText = cleanedText.replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1');
-      cleanedText = cleanedText.replace(/https?:\/\/[^\s\"\)]+/g, '');
-      cleanedText = cleanedText.replace(/\(\s*\)/g, '');
-      
+      cleanedText = cleanedText.replace(/https?:\/\/[^\s\)\],}"]*/g, '');
+      cleanedText = cleanedText.replace(/www\.[^\s\)\],}"]*/g, '');
       // Fix truncated JSON by balancing braces/brackets
       let braceCount = 0;
       let bracketCount = 0;

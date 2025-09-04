@@ -314,18 +314,32 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       const queueId = (window as any).generationQueue.add(comparisonName, 'comparison', false);
       
       // Immediately update status to running when we start the mutation
-      (window as any).generationQueue.update(queueId, 'running', null, null, 'Analyzing athletes...');
+      (window as any).generationQueue.update(queueId, { 
+        status: 'running', 
+        progressMessage: 'Analyzing athletes...' 
+      });
       
       // Update queue status when mutation completes
       comparisonMutation.mutate(undefined, {
         onSuccess: (data) => {
           if ((window as any).generationQueue) {
-            (window as any).generationQueue.update(queueId, 'completed', data);
+            (window as any).generationQueue.update(queueId, { status: 'completed' });
           }
         },
         onError: (error) => {
           if ((window as any).generationQueue) {
-            (window as any).generationQueue.update(queueId, 'error', null, error.message || 'Comparison failed');
+            (window as any).generationQueue.update(queueId, { 
+              status: 'error',
+              errorMessage: error.message || 'Comparison failed - tokens refunded'
+            });
+          }
+          
+          // Show error toast
+          if ((window as any).showToast) {
+            (window as any).showToast({
+              title: "Comparison Failed",
+              description: "Unable to generate comparison. Tokens have been refunded."
+            });
           }
         }
       });

@@ -2522,12 +2522,18 @@ Return only valid JSON with the missing fields.`;
         );
         
         console.log(`🚫 FAILED: Comparison generation failed, refunded 100 tokens`);
+        
+        // Return error response for queue handling
         return res.status(500).json({
           message: basicComparisonResult.errorMessage || "Unable to generate authentic comparison at this time. Please try again later.",
           error: true,
           errorType: basicComparisonResult.errorType || "unknown",
           retryable: basicComparisonResult.retryable || true,
-          suggestion: basicComparisonResult.suggestion || "Please try again with different athletes"
+          suggestion: basicComparisonResult.suggestion || "Please try again with different athletes",
+          queueUpdate: {
+            status: 'error',
+            errorMessage: basicComparisonResult.errorMessage || "Generation failed"
+          }
         });
       }
       
