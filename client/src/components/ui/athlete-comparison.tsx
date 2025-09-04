@@ -565,66 +565,503 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
           )}
         </Button>
 
-        {/* Raw Response Display */}
+        {/* Parsed Comparison Results */}
         {comparisonData?.isRawResponse && (
           <div className="space-y-6 mt-8">
             <Separator className="bg-gray-600" />
-            
-            {/* GPT-5 Response */}
-            {comparisonData.gptResponse && (
-              <Card className="bg-gray-900 border-gray-600">
-                <CardHeader>
-                  <CardTitle className="text-lg text-white flex items-center gap-2">
-                    <Brain className="h-5 w-5" />
-                    Raw GPT-5 Response
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="text-sm text-gray-400">
-                      <span className="font-medium">Athletes:</span> {comparisonData.gptResponse.athletes}
+            {(() => {
+              // Parse both JSON responses
+              let gptData = null;
+              let geminiData = null;
+              
+              try {
+                if (comparisonData.gptResponse?.rawResponse) {
+                  gptData = JSON.parse(comparisonData.gptResponse.rawResponse);
+                }
+              } catch (error) {
+                console.error('Error parsing GPT response:', error);
+              }
+              
+              try {
+                if (comparisonData.geminiResponse?.rawResponse) {
+                  geminiData = JSON.parse(comparisonData.geminiResponse.rawResponse);
+                }
+              } catch (error) {
+                console.error('Error parsing Gemini response:', error);
+              }
+              
+              // Use GPT data as primary source, Gemini for detailed analysis
+              const parsedData = {
+                athlete1: gptData?.athlete1 || { name: "Athlete 1", country: "Unknown", rank: "N/A" },
+                athlete2: gptData?.athlete2 || { name: "Athlete 2", country: "Unknown", rank: "N/A" },
+                strengths: gptData?.strengths,
+                weaknesses: gptData?.weaknesses,
+                ranking: gptData?.ranking,
+                headToHead: gptData?.headToHead || geminiData?.headToHead,
+                overallAnalysis: gptData?.overallAnalysis,
+                detailedAnalysis: geminiData?.detailedAnalysis
+              };
+
+              return (
+                <>
+                  {/* Athlete Headers */}
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="text-center">
+                      <div className="w-20 h-20 rounded-full bg-athlete-gray-600 flex items-center justify-center mx-auto mb-3">
+                        <User className="w-10 h-10 text-gray-400" />
+                      </div>
+                      <h3 className="text-xl font-bold text-white break-words leading-tight px-2">{parsedData.athlete1?.name || "Athlete 1"}</h3>
+                      <Badge variant="outline" className="mt-2">
+                        {parsedData.athlete1?.country || "Unknown"}
+                      </Badge>
+                      <Badge variant="outline" className="mt-1 block">
+                        Rank #{parsedData.athlete1?.rank || "N/A"}
+                      </Badge>
                     </div>
-                    <div className="text-sm text-gray-400">
-                      <span className="font-medium">Generated:</span> {new Date(comparisonData.gptResponse.timestamp).toLocaleString()}
-                    </div>
-                    <div className="bg-gray-800 p-4 rounded-lg">
-                      <h4 className="text-white font-medium mb-2">Raw JSON Response:</h4>
-                      <pre className="text-xs text-green-400 whitespace-pre-wrap overflow-auto max-h-96 font-mono">
-                        {comparisonData.gptResponse.rawResponse}
-                      </pre>
+                    
+                    <div className="text-center">
+                      <div className="w-20 h-20 rounded-full bg-athlete-gray-600 flex items-center justify-center mx-auto mb-3">
+                        <User className="w-10 h-10 text-gray-400" />
+                      </div>
+                      <h3 className="text-xl font-bold text-white break-words leading-tight px-2">{parsedData.athlete2?.name || "Athlete 2"}</h3>
+                      <Badge variant="outline" className="mt-2">
+                        {parsedData.athlete2?.country || "Unknown"}
+                      </Badge>
+                      <Badge variant="outline" className="mt-1 block">
+                        Rank #{parsedData.athlete2?.rank || "N/A"}
+                      </Badge>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            )}
-            
-            {/* Gemini Response */}
-            {comparisonData.geminiResponse && (
-              <Card className="bg-gray-900 border-gray-600">
-                <CardHeader>
-                  <CardTitle className="text-lg text-white flex items-center gap-2">
-                    <Brain className="h-5 w-5" />
-                    Raw Gemini 2.5 Pro Response
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="text-sm text-gray-400">
-                      <span className="font-medium">Athletes:</span> {comparisonData.geminiResponse.athletes}
-                    </div>
-                    <div className="text-sm text-gray-400">
-                      <span className="font-medium">Generated:</span> {new Date(comparisonData.geminiResponse.timestamp).toLocaleString()}
-                    </div>
-                    <div className="bg-gray-800 p-4 rounded-lg">
-                      <h4 className="text-white font-medium mb-2">Raw JSON Response:</h4>
-                      <pre className="text-xs text-blue-400 whitespace-pre-wrap overflow-auto max-h-96 font-mono">
-                        {comparisonData.geminiResponse.rawResponse}
-                      </pre>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+
+                  {/* Tabbed Analysis */}
+                  <Tabs defaultValue="overview" className="w-full">
+                    <TabsList className="grid w-full grid-cols-6 bg-athlete-gray-700">
+                      <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
+                      <TabsTrigger value="strengths" data-testid="tab-strengths">Strengths</TabsTrigger>
+                      <TabsTrigger value="weaknesses" data-testid="tab-weaknesses">Weaknesses</TabsTrigger>
+                      <TabsTrigger value="ranking" data-testid="tab-ranking">Ranking</TabsTrigger>
+                      <TabsTrigger value="head-to-head" data-testid="tab-head-to-head">Head-to-Head</TabsTrigger>
+                      <TabsTrigger value="detailed" data-testid="tab-detailed">Details</TabsTrigger>
+                    </TabsList>
+
+                    {/* Overview Tab */}
+                    <TabsContent value="overview" className="space-y-4">
+                      <Card className="bg-athlete-gray-900 border-gray-600">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Brain className="h-5 w-5 text-blue-400" />
+                            <h4 className="font-semibold text-white">Overall Analysis</h4>
+                            <span className="text-xs bg-blue-600/20 text-blue-300 px-2 py-1 rounded">
+                              GPT-5 Powered
+                            </span>
+                          </div>
+                          {parsedData.overallAnalysis?.summary ? (
+                            <p className="text-gray-300 leading-relaxed">
+                              {parsedData.overallAnalysis.summary}
+                            </p>
+                          ) : (
+                            <div className="p-3 bg-yellow-900/30 border border-yellow-600/50 rounded-lg">
+                              <p className="text-yellow-300">Overall analysis not available</p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <Card className="bg-athlete-gray-900 border-gray-600">
+                          <CardContent className="p-4 text-center">
+                            <Trophy className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
+                            <div className="text-sm text-gray-400">Ranking Advantage</div>
+                            <div className="text-lg font-bold text-white">
+                              {parsedData.ranking?.competitiveEdge === 'athlete1' ? parsedData.athlete1?.name :
+                               parsedData.ranking?.competitiveEdge === 'athlete2' ? parsedData.athlete2?.name : 'Even'}
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="bg-athlete-gray-900 border-gray-600">
+                          <CardContent className="p-4 text-center">
+                            <TrendingUp className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                            <div className="text-sm text-gray-400">Strength Advantage</div>
+                            <div className="text-lg font-bold text-white">
+                              {parsedData.strengths?.advantage === 'athlete1' ? parsedData.athlete1?.name :
+                               parsedData.strengths?.advantage === 'athlete2' ? parsedData.athlete2?.name : 'Even'}
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="bg-athlete-gray-900 border-gray-600">
+                          <CardContent className="p-4 text-center">
+                            <Target className="h-8 w-8 text-purple-500 mx-auto mb-2" />
+                            <div className="text-sm text-gray-400">Predicted Winner</div>
+                            <div className="text-lg font-bold text-white">
+                              {parsedData.headToHead?.prediction === 'athlete1' ? parsedData.athlete1?.name :
+                               parsedData.headToHead?.prediction === 'athlete2' ? parsedData.athlete2?.name : 'Even Match'}
+                            </div>
+                            {parsedData.headToHead?.confidence && (
+                              <div className="text-xs text-purple-300 mt-1">
+                                {parsedData.headToHead.confidence}% confidence
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </TabsContent>
+
+                    {/* Strengths Tab */}
+                    <TabsContent value="strengths" className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Card className="bg-athlete-gray-900 border-gray-600">
+                          <CardHeader>
+                            <CardTitle className="text-lg text-white">{parsedData.athlete1?.name || "Athlete 1"} Strengths</CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            {(parsedData.strengths?.athlete1 || []).map((strength: any, index: number) => (
+                              <div key={index} className="border-l-4 border-green-500 pl-4 py-2 bg-gray-800/50">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="font-medium text-white">
+                                      {typeof strength === 'string' ? strength : strength.title}
+                                    </div>
+                                    {typeof strength === 'object' && strength.description && (
+                                      <div className="text-sm text-gray-400 mt-1">
+                                        {strength.description}
+                                      </div>
+                                    )}
+                                    {typeof strength === 'object' && strength.evidence && (
+                                      <div className="text-xs text-green-300 mt-2 italic">
+                                        Evidence: {strength.evidence}
+                                      </div>
+                                    )}
+                                  </div>
+                                  {typeof strength === 'object' && strength.rating && (
+                                    <div className="text-sm font-bold text-green-400 ml-2">
+                                      {strength.rating}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                            {(!parsedData.strengths?.athlete1 || parsedData.strengths.athlete1.length === 0) && (
+                              <div className="text-gray-400 text-center py-4">No strengths data available</div>
+                            )}
+                          </CardContent>
+                        </Card>
+
+                        <Card className="bg-athlete-gray-900 border-gray-600">
+                          <CardHeader>
+                            <CardTitle className="text-lg text-white">{parsedData.athlete2?.name || "Athlete 2"} Strengths</CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            {(parsedData.strengths?.athlete2 || []).map((strength: any, index: number) => (
+                              <div key={index} className="border-l-4 border-green-500 pl-4 py-2 bg-gray-800/50">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="font-medium text-white">
+                                      {typeof strength === 'string' ? strength : strength.title}
+                                    </div>
+                                    {typeof strength === 'object' && strength.description && (
+                                      <div className="text-sm text-gray-400 mt-1">
+                                        {strength.description}
+                                      </div>
+                                    )}
+                                    {typeof strength === 'object' && strength.evidence && (
+                                      <div className="text-xs text-green-300 mt-2 italic">
+                                        Evidence: {strength.evidence}
+                                      </div>
+                                    )}
+                                  </div>
+                                  {typeof strength === 'object' && strength.rating && (
+                                    <div className="text-sm font-bold text-green-400 ml-2">
+                                      {strength.rating}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                            {(!parsedData.strengths?.athlete2 || parsedData.strengths.athlete2.length === 0) && (
+                              <div className="text-gray-400 text-center py-4">No strengths data available</div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </TabsContent>
+
+                    {/* Weaknesses Tab */}
+                    <TabsContent value="weaknesses" className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Card className="bg-athlete-gray-900 border-gray-600">
+                          <CardHeader>
+                            <CardTitle className="text-lg text-white">{parsedData.athlete1?.name || "Athlete 1"} Areas to Improve</CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            {(parsedData.weaknesses?.athlete1 || []).map((weakness: any, index: number) => (
+                              <div key={index} className="border-l-4 border-red-500 pl-4 py-2 bg-gray-800/50">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="font-medium text-white">
+                                      {typeof weakness === 'string' ? weakness : weakness.title}
+                                    </div>
+                                    {typeof weakness === 'object' && weakness.description && (
+                                      <div className="text-sm text-gray-400 mt-1">
+                                        {weakness.description}
+                                      </div>
+                                    )}
+                                    {typeof weakness === 'object' && weakness.exploitation && (
+                                      <div className="text-xs text-red-300 mt-2 italic">
+                                        Tactical note: {weakness.exploitation}
+                                      </div>
+                                    )}
+                                  </div>
+                                  {typeof weakness === 'object' && weakness.impact && (
+                                    <div className={`text-sm font-bold ml-2 ${
+                                      weakness.impact === 'high' ? 'text-red-400' :
+                                      weakness.impact === 'medium' ? 'text-orange-400' : 'text-yellow-400'
+                                    }`}>
+                                      {weakness.impact}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                            {(!parsedData.weaknesses?.athlete1 || parsedData.weaknesses.athlete1.length === 0) && (
+                              <div className="text-gray-400 text-center py-4">No weaknesses data available</div>
+                            )}
+                          </CardContent>
+                        </Card>
+
+                        <Card className="bg-athlete-gray-900 border-gray-600">
+                          <CardHeader>
+                            <CardTitle className="text-lg text-white">{parsedData.athlete2?.name || "Athlete 2"} Areas to Improve</CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            {(parsedData.weaknesses?.athlete2 || []).map((weakness: any, index: number) => (
+                              <div key={index} className="border-l-4 border-red-500 pl-4 py-2 bg-gray-800/50">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="font-medium text-white">
+                                      {typeof weakness === 'string' ? weakness : weakness.title}
+                                    </div>
+                                    {typeof weakness === 'object' && weakness.description && (
+                                      <div className="text-sm text-gray-400 mt-1">
+                                        {weakness.description}
+                                      </div>
+                                    )}
+                                    {typeof weakness === 'object' && weakness.exploitation && (
+                                      <div className="text-xs text-red-300 mt-2 italic">
+                                        Tactical note: {weakness.exploitation}
+                                      </div>
+                                    )}
+                                  </div>
+                                  {typeof weakness === 'object' && weakness.impact && (
+                                    <div className={`text-sm font-bold ml-2 ${
+                                      weakness.impact === 'high' ? 'text-red-400' :
+                                      weakness.impact === 'medium' ? 'text-orange-400' : 'text-yellow-400'
+                                    }`}>
+                                      {weakness.impact}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                            {(!parsedData.weaknesses?.athlete2 || parsedData.weaknesses.athlete2.length === 0) && (
+                              <div className="text-gray-400 text-center py-4">No weaknesses data available</div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </TabsContent>
+
+                    {/* Ranking Tab */}
+                    <TabsContent value="ranking" className="space-y-4">
+                      <Card className="bg-athlete-gray-900 border-gray-600">
+                        <CardHeader>
+                          <CardTitle className="text-lg text-white flex items-center gap-2">
+                            <Trophy className="h-5 w-5" />
+                            Ranking Analysis
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          {parsedData.ranking?.comparison && (
+                            <div>
+                              <h4 className="font-semibold text-white mb-2">Current Status</h4>
+                              <p className="text-gray-300 text-sm">
+                                {parsedData.ranking.comparison}
+                              </p>
+                            </div>
+                          )}
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="p-3 bg-gray-800/50 rounded-lg">
+                              <h4 className="font-semibold text-blue-400 mb-2">{parsedData.athlete1?.name || "Athlete 1"} Trajectory</h4>
+                              <p className="text-gray-300 text-sm">
+                                {parsedData.ranking?.athlete1Trajectory || "No trajectory data available"}
+                              </p>
+                            </div>
+                            
+                            <div className="p-3 bg-gray-800/50 rounded-lg">
+                              <h4 className="font-semibold text-purple-400 mb-2">{parsedData.athlete2?.name || "Athlete 2"} Trajectory</h4>
+                              <p className="text-gray-300 text-sm">
+                                {parsedData.ranking?.athlete2Trajectory || "No trajectory data available"}
+                              </p>
+                            </div>
+                          </div>
+
+                          {parsedData.ranking?.competitiveEdge && (
+                            <div className="text-center p-3 bg-gradient-to-r from-yellow-900/30 to-orange-900/30 border border-yellow-600/50 rounded-lg">
+                              <div className="text-sm text-yellow-300">Competitive Edge</div>
+                              <div className="text-lg font-bold text-white">
+                                {parsedData.ranking.competitiveEdge === 'athlete1' ? parsedData.athlete1?.name :
+                                 parsedData.ranking.competitiveEdge === 'athlete2' ? parsedData.athlete2?.name : 'Even'}
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+
+                    {/* Head-to-Head Tab */}
+                    <TabsContent value="head-to-head" className="space-y-4">
+                      <Card className="bg-athlete-gray-900 border-gray-600">
+                        <CardHeader>
+                          <CardTitle className="text-lg text-white flex items-center gap-2">
+                            <Target className="h-5 w-5" />
+                            Head-to-Head Prediction
+                            <span className="text-xs bg-purple-600/20 text-purple-300 px-2 py-1 rounded">
+                              AI Analysis
+                            </span>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="text-center p-4 bg-gradient-to-r from-purple-900/30 to-blue-900/30 border border-purple-600/50 rounded-lg">
+                            <div className="text-sm text-purple-300 mb-1">Predicted Winner</div>
+                            <div className="text-2xl font-bold text-white mb-2">
+                              {parsedData.headToHead?.prediction === 'athlete1' ? parsedData.athlete1?.name :
+                               parsedData.headToHead?.prediction === 'athlete2' ? parsedData.athlete2?.name : 'Even Match'}
+                            </div>
+                            {parsedData.headToHead?.confidence && (
+                              <div className="text-purple-300">
+                                Confidence: {parsedData.headToHead.confidence}%
+                              </div>
+                            )}
+                          </div>
+
+                          {parsedData.headToHead?.reasoning && (
+                            <div>
+                              <h4 className="font-semibold text-white mb-2">Analysis Reasoning</h4>
+                              <p className="text-gray-300 text-sm leading-relaxed">
+                                {parsedData.headToHead.reasoning}
+                              </p>
+                            </div>
+                          )}
+
+                          {parsedData.headToHead?.keyFactors && parsedData.headToHead.keyFactors.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold text-white mb-2">Key Factors</h4>
+                              <ul className="space-y-2">
+                                {parsedData.headToHead.keyFactors.map((factor: string, index: number) => (
+                                  <li key={index} className="flex items-start gap-2">
+                                    <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
+                                    <span className="text-gray-300 text-sm">{factor}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {parsedData.headToHead?.scenario && (
+                            <div>
+                              <h4 className="font-semibold text-white mb-2">Match Scenario</h4>
+                              <p className="text-gray-300 text-sm leading-relaxed">
+                                {parsedData.headToHead.scenario}
+                              </p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+
+                    {/* Detailed Tab */}
+                    <TabsContent value="detailed" className="space-y-4">
+                      <Card className="bg-athlete-gray-900 border-gray-600">
+                        <CardHeader>
+                          <CardTitle className="text-lg text-white flex items-center gap-2">
+                            <Brain className="h-5 w-5" />
+                            Detailed Analysis
+                            <span className="text-xs bg-blue-600/20 text-blue-300 px-2 py-1 rounded">
+                              Gemini-2.5-pro
+                            </span>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          {parsedData.detailedAnalysis ? (
+                            <div className="space-y-4">
+                              {parsedData.detailedAnalysis.athlete1 && parsedData.detailedAnalysis.athlete2 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                  <div className="p-4 bg-gray-800/50 rounded-lg">
+                                    <h4 className="font-semibold text-blue-400 mb-3">{parsedData.detailedAnalysis.athlete1.name}</h4>
+                                    {parsedData.detailedAnalysis.athlete1.currentForm && (
+                                      <div className="mb-3">
+                                        <div className="text-sm font-medium text-gray-300">Current Form:</div>
+                                        <div className="text-sm text-gray-400">{parsedData.detailedAnalysis.athlete1.currentForm}</div>
+                                      </div>
+                                    )}
+                                    {parsedData.detailedAnalysis.athlete1.technicalSkills && parsedData.detailedAnalysis.athlete1.technicalSkills.length > 0 && (
+                                      <div>
+                                        <div className="text-sm font-medium text-gray-300 mb-2">Technical Skills:</div>
+                                        <ul className="space-y-1">
+                                          {parsedData.detailedAnalysis.athlete1.technicalSkills.map((skill: string, index: number) => (
+                                            <li key={index} className="text-xs text-gray-400 flex items-start gap-1">
+                                              <span className="text-blue-400">•</span>
+                                              {skill}
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                  </div>
+                                  
+                                  <div className="p-4 bg-gray-800/50 rounded-lg">
+                                    <h4 className="font-semibold text-purple-400 mb-3">{parsedData.detailedAnalysis.athlete2.name}</h4>
+                                    {parsedData.detailedAnalysis.athlete2.currentForm && (
+                                      <div className="mb-3">
+                                        <div className="text-sm font-medium text-gray-300">Current Form:</div>
+                                        <div className="text-sm text-gray-400">{parsedData.detailedAnalysis.athlete2.currentForm}</div>
+                                      </div>
+                                    )}
+                                    {parsedData.detailedAnalysis.athlete2.technicalSkills && parsedData.detailedAnalysis.athlete2.technicalSkills.length > 0 && (
+                                      <div>
+                                        <div className="text-sm font-medium text-gray-300 mb-2">Technical Skills:</div>
+                                        <ul className="space-y-1">
+                                          {parsedData.detailedAnalysis.athlete2.technicalSkills.map((skill: string, index: number) => (
+                                            <li key={index} className="text-xs text-gray-400 flex items-start gap-1">
+                                              <span className="text-purple-400">•</span>
+                                              {skill}
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="p-3 bg-yellow-900/30 border border-yellow-600/50 rounded-lg">
+                                  <p className="text-yellow-300">Detailed analysis not available</p>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="p-3 bg-yellow-900/30 border border-yellow-600/50 rounded-lg">
+                              <p className="text-yellow-300">Detailed analysis not available</p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                  </Tabs>
+                </>
+              );
+            })()}
           </div>
         )}
 
