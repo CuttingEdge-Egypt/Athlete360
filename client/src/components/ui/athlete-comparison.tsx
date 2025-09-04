@@ -305,8 +305,8 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
     }
 
     // Get athlete names for queue display
-    const athlete1 = athletes1.find(a => a.id === selectedAthlete1);
-    const athlete2 = athletes2.find(a => a.id === selectedAthlete2);
+    const athlete1 = athletes1.find(a => a && a.id === selectedAthlete1);
+    const athlete2 = athletes2.find(a => a && a.id === selectedAthlete2);
     const comparisonName = `${athlete1?.name || 'Athlete 1'} vs ${athlete2?.name || 'Athlete 2'}`;
     
     // Add to generation queue if available
@@ -335,8 +335,8 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
   };
 
   // Use comparisonData state that is initialized with preloaded data
-  const availableAthletes1 = athletes1.filter((a: Athlete) => a.id !== selectedAthlete2);
-  const availableAthletes2 = athletes2.filter((a: Athlete) => a.id !== selectedAthlete1);
+  const availableAthletes1 = athletes1.filter((a: Athlete) => a && a.id && a.id !== selectedAthlete2);
+  const availableAthletes2 = athletes2.filter((a: Athlete) => a && a.id && a.id !== selectedAthlete1);
 
   return (
     <Card className="bg-athlete-gray-800 border-gray-700">
@@ -366,7 +366,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                 <SelectValue placeholder="Select sport..." />
               </SelectTrigger>
               <SelectContent>
-                {sports.map((sport) => (
+                {Array.isArray(sports) && sports.map((sport) => (
                   <SelectItem key={sport.id} value={sport.id}>
                     {sport.name}
                   </SelectItem>
@@ -390,7 +390,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All countries</SelectItem>
-                {countries.map((country) => (
+                {Array.isArray(countries) && countries.map((country) => (
                   <SelectItem key={country} value={country}>
                     {country}
                   </SelectItem>
@@ -417,18 +417,20 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                   </div>
                 ) : (
                   availableAthletes1.map((athlete: Athlete) => (
-                    <SelectItem key={athlete.id} value={athlete.id}>
-                      <div className="flex items-center gap-2 truncate max-w-full">
-                        <span className="truncate">{athlete.name || 'Unknown Athlete'}</span>
-                        {athlete.country && (
-                          <span className="text-xs text-gray-400 flex-shrink-0">({athlete.country})</span>
-                        )}
-                        {athlete.rank && (
-                          <span className="text-xs text-gray-400 flex-shrink-0">#{athlete.rank}</span>
-                        )}
-                      </div>
-                    </SelectItem>
-                  ))
+                    athlete && athlete.id ? (
+                      <SelectItem key={athlete.id} value={athlete.id}>
+                        <div className="flex items-center gap-2 truncate max-w-full">
+                          <span className="truncate">{athlete.name || 'Unknown Athlete'}</span>
+                          {athlete.country && (
+                            <span className="text-xs text-gray-400 flex-shrink-0">({athlete.country})</span>
+                          )}
+                          {athlete.rank && (
+                            <span className="text-xs text-gray-400 flex-shrink-0">#{athlete.rank}</span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ) : null
+                  )).filter(Boolean)
                 )}
               </SelectContent>
             </Select>
@@ -449,7 +451,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All countries</SelectItem>
-                {countries.map((country) => (
+                {Array.isArray(countries) && countries.map((country) => (
                   <SelectItem key={country} value={country}>
                     {country}
                   </SelectItem>
@@ -476,18 +478,20 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                   </div>
                 ) : (
                   availableAthletes2.map((athlete: Athlete) => (
-                    <SelectItem key={athlete.id} value={athlete.id}>
-                      <div className="flex items-center gap-2 truncate max-w-full">
-                        <span className="truncate">{athlete.name || 'Unknown Athlete'}</span>
-                        {athlete.country && (
-                          <span className="text-xs text-gray-400 flex-shrink-0">({athlete.country})</span>
-                        )}
-                        {athlete.rank && (
-                          <span className="text-xs text-gray-400 flex-shrink-0">#{athlete.rank}</span>
-                        )}
-                      </div>
-                    </SelectItem>
-                  ))
+                    athlete && athlete.id ? (
+                      <SelectItem key={athlete.id} value={athlete.id}>
+                        <div className="flex items-center gap-2 truncate max-w-full">
+                          <span className="truncate">{athlete.name || 'Unknown Athlete'}</span>
+                          {athlete.country && (
+                            <span className="text-xs text-gray-400 flex-shrink-0">({athlete.country})</span>
+                          )}
+                          {athlete.rank && (
+                            <span className="text-xs text-gray-400 flex-shrink-0">#{athlete.rank}</span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ) : null
+                  )).filter(Boolean)
                 )}
               </SelectContent>
             </Select>
