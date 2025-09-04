@@ -1990,18 +1990,27 @@ Include specific ranking numbers (e.g., "#3 vs #7", "Ranked 5th vs 12th globally
 
 CRITICAL JSON REQUIREMENT: Do NOT include any URLs, links, citations, or parenthetical references in your response. All text must be clean without any bracketed links or references.
 
-MANDATORY JSON RESPONSE: You MUST always return a valid JSON response. Even if you cannot find complete data through web search, you MUST return the full athlete comparison structure with available data and clearly marked unavailable sections.
+MANDATORY JSON RESPONSE: You MUST return ONLY valid JSON with no additional text, explanations, markdown formatting, or content outside the JSON structure. Your entire response must be pure JSON that can be parsed directly.
 
-Only return this error JSON structure if web search completely fails or you cannot access any information about either athlete:
+CRITICAL JSON FORMATTING REQUIREMENTS:
+1. NO markdown code blocks (backticks with json or just backticks)
+2. NO explanatory text before or after the JSON
+3. NO escape sequences that break JSON parsing
+4. NO unescaped quotes in string values - use proper escaping
+5. NO trailing commas in objects or arrays
+6. ALL string values must be properly quoted and escaped
+7. ALL numbers must be valid JSON numbers (no quotes around numeric values)
+
+If web search completely fails or you cannot access any information about either athlete, return this EXACT error structure:
 {
   "error": "Couldn't Generate",
-  "errorType": "web_search_failed|athletes_not_found|complete_data_unavailable",
-  "errorMessage": "Specific reason why generation failed",
+  "errorType": "web_search_failed",
+  "errorMessage": "Unable to find authentic athlete data through web search",
   "retryable": true,
-  "suggestion": "What the user should try instead"
+  "suggestion": "Please verify athlete names and try again"
 }
 
-Otherwise, ALWAYS return the full analysis structure even with partial data.
+Otherwise, ALWAYS return the complete analysis structure even with partial data.
 
 ANALYSIS REQUIREMENTS (use web search for ALL sections):
 1. Strengths Analysis - Find specific technical and tactical strengths from recent competitions
@@ -2019,7 +2028,7 @@ FAILURE HANDLING: If you cannot generate authentic comparison due to insufficien
   "suggestion": "What the user should try instead"
 }
 
-Otherwise, return this exact JSON structure:
+REQUIRED JSON STRUCTURE (return this exact format with proper escaping):
 {
   "athlete1": {
     "name": "${athlete1.name}",

@@ -308,8 +308,17 @@ Athlete 2: ${athlete2.name} from ${athlete2.country} (${sport})
 CRITICAL INSTRUCTIONS:
 1. MANDATORY: Use web search to find current competition data, rankings, recent results, and performance metrics from official federation websites and sports databases
 2. MANDATORY: Search for technical analysis, fighting styles, recent match footage, and expert commentary from credible sports news sources
-3. MANDATORY: Return ONLY valid JSON with no additional text or explanations - you MUST always return JSON even if data is limited
+3. MANDATORY: Return ONLY pure JSON with absolutely no additional text, explanations, markdown formatting, or content outside the JSON structure
 4. MANDATORY: Base ALL analysis on current web search findings from 2024-2025 - no generic content or training data
+
+CRITICAL JSON FORMATTING REQUIREMENTS:
+- NO markdown code blocks (backticks with json or just backticks)
+- NO explanatory text before or after the JSON
+- NO unescaped quotes in string values
+- NO trailing commas in objects or arrays
+- ALL string values must be properly quoted and escaped
+- ALL numbers must be valid JSON numbers (no quotes around numeric values)
+- Your entire response must be parseable JSON that fits the frontend structure exactly
 
 WEB SEARCH FOCUS AREAS:
 - Recent competition results and performance trends (2024-2025)
@@ -320,7 +329,16 @@ WEB SEARCH FOCUS AREAS:
 - Expert analysis and predictions from sports analysts
 - Injury history and current form assessment
 
-Return this EXACT JSON structure:
+FAILURE HANDLING: If web search fails completely or no data is found, return this exact error JSON:
+{
+  "error": "Couldn't Generate",
+  "errorType": "web_search_failed",
+  "errorMessage": "Unable to find authentic athlete data through web search",
+  "retryable": true,
+  "suggestion": "Please verify athlete names and try again"
+}
+
+REQUIRED JSON STRUCTURE (return this exact format as pure JSON with no additional content):
 {
   "detailedAnalysis": {
     "athlete1": {
