@@ -190,6 +190,8 @@ Response format:
 // Emergency rescue parsing for malformed JSON responses
 function attemptRescueJsonParsing(text: string, athlete1: any, athlete2: any): any | null {
   try {
+    console.log('🚑 Attempting emergency rescue parsing...');
+    
     // Try to extract basic structure from the malformed JSON
     const rescueData = {
       athlete1: {
@@ -204,8 +206,8 @@ function attemptRescueJsonParsing(text: string, athlete1: any, athlete2: any): a
         rank: 'N/A',
         profileImageUrl: athlete2.profileImageUrl || ''
       },
-      strengths: { athlete1: [], athlete2: [], advantage: "even" },
-      weaknesses: { athlete1: [], athlete2: [], advantage: "even" },
+      strengths: { athlete1: [] as any[], athlete2: [] as any[], advantage: "even" },
+      weaknesses: { athlete1: [] as any[], athlete2: [] as any[], advantage: "even" },
       ranking: {
         comparison: "Analysis partially available - rescued from malformed response",
         athlete1Trajectory: "Analysis rescued",
@@ -228,7 +230,49 @@ function attemptRescueJsonParsing(text: string, athlete1: any, athlete2: any): a
       }
     };
     
-    // Try to extract any readable content from the malformed JSON
+    // Try to extract strengths data
+    const strengthsMatch = text.match(/"strengths":\s*\{[\s\S]*?"athlete1":\s*\[([\s\S]*?)\][\s\S]*?"athlete2":\s*\[([\s\S]*?)\]/i);
+    if (strengthsMatch) {
+      console.log('🚑 Found strengths data, attempting to extract...');
+      try {
+        // Extract individual strength items for athlete1
+        const athlete1StrengthsText = strengthsMatch[1];
+        const athlete1Strengths = extractStrengthsWeaknesses(athlete1StrengthsText, 'strength');
+        if (athlete1Strengths.length > 0) rescueData.strengths.athlete1 = athlete1Strengths;
+        
+        // Extract individual strength items for athlete2
+        const athlete2StrengthsText = strengthsMatch[2];
+        const athlete2Strengths = extractStrengthsWeaknesses(athlete2StrengthsText, 'strength');
+        if (athlete2Strengths.length > 0) rescueData.strengths.athlete2 = athlete2Strengths;
+        
+        console.log(`🚑 Rescued ${athlete1Strengths.length} strengths for athlete1, ${athlete2Strengths.length} for athlete2`);
+      } catch (strengthError) {
+        console.error('Failed to parse rescued strengths:', strengthError);
+      }
+    }
+    
+    // Try to extract weaknesses data
+    const weaknessesMatch = text.match(/"weaknesses":\s*\{[\s\S]*?"athlete1":\s*\[([\s\S]*?)\][\s\S]*?"athlete2":\s*\[([\s\S]*?)\]/i);
+    if (weaknessesMatch) {
+      console.log('🚑 Found weaknesses data, attempting to extract...');
+      try {
+        // Extract individual weakness items for athlete1
+        const athlete1WeaknessesText = weaknessesMatch[1];
+        const athlete1Weaknesses = extractStrengthsWeaknesses(athlete1WeaknessesText, 'weakness');
+        if (athlete1Weaknesses.length > 0) rescueData.weaknesses.athlete1 = athlete1Weaknesses;
+        
+        // Extract individual weakness items for athlete2
+        const athlete2WeaknessesText = weaknessesMatch[2];
+        const athlete2Weaknesses = extractStrengthsWeaknesses(athlete2WeaknessesText, 'weakness');
+        if (athlete2Weaknesses.length > 0) rescueData.weaknesses.athlete2 = athlete2Weaknesses;
+        
+        console.log(`🚑 Rescued ${athlete1Weaknesses.length} weaknesses for athlete1, ${athlete2Weaknesses.length} for athlete2`);
+      } catch (weaknessError) {
+        console.error('Failed to parse rescued weaknesses:', weaknessError);
+      }
+    }
+    
+    // Try to extract other readable content
     const summaryMatch = text.match(/"summary":\s*"([^"]*)/i);
     if (summaryMatch && summaryMatch[1]) {
       rescueData.overallAnalysis.summary = summaryMatch[1] + " (rescued data)";
@@ -244,6 +288,63 @@ function attemptRescueJsonParsing(text: string, athlete1: any, athlete2: any): a
     console.error('Rescue parsing failed:', error);
     return null;
   }
+}
+
+// Helper function to extract strengths/weaknesses from partial JSON text
+function extractStrengthsWeaknesses(text: string, type: 'strength' | 'weakness'): any[] {
+  const items: any[] = [];
+  
+  try {
+    // Look for individual item objects in the text
+    const itemMatches = text.match(/\{[^}]*\}/g);
+    if (itemMatches) {
+      for (const itemText of itemMatches) {
+        try {
+          // Try to clean and parse individual items
+          let cleanItem = itemText.replace(/"\s*"/g, '"').replace(/,\s*}/g, '}');
+          const item = JSON.parse(cleanItem);
+          
+          // Ensure the item has the required structure
+          const processedItem = {
+            title: item.title || 'Rescued analysis item',
+            description: item.description || 'Data recovered from parsing error',
+            rating: type === 'strength' ? (item.rating || 75) : undefined,
+            evidence: item.evidence || 'Evidence recovered from AI response',
+            impact: type === 'weakness' ? (item.impact || 'medium') : undefined,
+            exploitation: type === 'weakness' ? (item.exploitation || 'Analysis recovered') : undefined
+          };
+          
+          // Remove undefined fields
+          Object.keys(processedItem).forEach(key => {
+            if ((processedItem as any)[key] === undefined) {
+              delete (processedItem as any)[key];
+            }
+          });
+          
+          items.push(processedItem);
+        } catch (itemError) {
+          // If individual item parsing fails, try to extract just the description
+          const titleMatch = itemText.match(/"title":\s*"([^"]*)/);
+          const descMatch = itemText.match(/"description":\s*"([^"]*)/);
+          
+          if (titleMatch || descMatch) {
+            items.push({
+              title: titleMatch?.[1] || 'Rescued item',
+              description: descMatch?.[1] || 'Analysis recovered from malformed response',
+              rating: type === 'strength' ? 75 : undefined,
+              evidence: 'Data rescued from parsing error',
+              impact: type === 'weakness' ? 'medium' : undefined,
+              exploitation: type === 'weakness' ? 'Potential exploitation recovered' : undefined
+            });
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error(`Failed to extract ${type}s:`, error);
+  }
+  
+  return items;
 }
 
 // Fallback function to get taekwondo-specific data from TaekwondoData.com (faster, no AI)
@@ -2026,23 +2127,19 @@ MANDATORY: Use ONLY current web search results. Do not use generic descriptions 
     if (jsonMatch) {
       cleanedText = jsonMatch[0];
       
-      // Enhanced cleaning for complex rank descriptions and athlete names with special characters
-      // Fix unescaped quotes in string values - especially important for rank descriptions
-      cleanedText = cleanedText.replace(/"([^"]*)"([^":,\}\]]*)"([^"]*)":/g, '"$1\\"$2\\"$3":');
-      cleanedText = cleanedText.replace(/:\s*"([^"]*)"([^"]*)"([^"]*)"(?=[,\}\]])/g, ': "$1\\"$2\\"$3"');
+      // Fix the specific double quote issue seen in the logs
+      // Pattern like "name": "Seif Eissa"", should become "name": "Seif Eissa"
+      cleanedText = cleanedText.replace(/"\s*"\s*,/g, '",');
+      cleanedText = cleanedText.replace(/"\s*"\s*}/g, '"}');
+      cleanedText = cleanedText.replace(/"\s*"\s*]/g, '"]');
       
-      // Fix common JSON syntax issues
+      // Fix common JSON syntax issues  
       cleanedText = cleanedText.replace(/,\s*}/g, '}');
       cleanedText = cleanedText.replace(/,\s*]/g, ']');
       
-      // Clean problematic characters from string values
-      cleanedText = cleanedText.replace(/:\s*"([^"]*)"([^":,\}\]]*)"/g, (match, p1, p2) => {
-        // If there's text after the quote that shouldn't be there, clean it
-        if (p2.trim() && !p2.match(/^[\s,\}\]]/)) {
-          return `: "${p1.replace(/"/g, '\\"')} ${p2.replace(/"/g, '\\"')}"`;
-        }
-        return match;
-      });
+      // Fix broken object structures like {"<newline> should be {
+      cleanedText = cleanedText.replace(/\{\s*"/g, '{"');
+      cleanedText = cleanedText.replace(/"\s*:/g, '":');
       
       // Remove URLs and links that break JSON - enhanced cleaning
       cleanedText = cleanedText.replace(/\(\[([^\]]+)\]\([^\)]+\)\)/g, '');
