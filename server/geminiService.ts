@@ -443,97 +443,16 @@ Otherwise, ALWAYS return the full detailedAnalysis and headToHead structure even
     ]) as any;
     const responseText = response.response.text();
     
-    console.log(`[GEMINI] Detailed comparison generated for ${athlete1.name} vs ${athlete2.name}`);
+    console.log(`[GEMINI] Raw response for ${athlete1.name} vs ${athlete2.name}:`, responseText);
     console.log(`[GEMINI] Response length: ${responseText.length} characters`);
 
-    // Clean and parse JSON response
-    let cleanedResponse = responseText.trim();
-    
-    // Remove code block markers if present
-    cleanedResponse = cleanedResponse.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    cleanedResponse = cleanedResponse.replace(/^```\s*/, '').replace(/\s*```$/, '');
-    
-    try {
-      const parsedData = JSON.parse(cleanedResponse);
-      
-      // Check if Gemini returned an error response
-      if (parsedData.error && (parsedData.error === "Couldn't Generate" || parsedData.error === "Error" || parsedData.error === "no_data_found" || parsedData.error === "search_failed" || parsedData.error === "not_found")) {
-        console.log(`[GEMINI] Returned error response:`, parsedData.error);
-        console.log(`[GEMINI] Using fallback structure due to:`, parsedData.error);
-        
-        // Return structured fallback instead of the error
-        return {
-          detailedAnalysis: {
-            athlete1: {
-              name: athlete1.name,
-              country: athlete1.country,
-              currentForm: "Analysis not available - insufficient data found",
-              technicalSkills: [],
-              physicalAttributes: {},
-              recentPerformance: {}
-            },
-            athlete2: {
-              name: athlete2.name,
-              country: athlete2.country,
-              currentForm: "Analysis not available - insufficient data found", 
-              technicalSkills: [],
-              physicalAttributes: {},
-              recentPerformance: {}
-            },
-            comparison: {}
-          },
-          headToHead: {
-            prediction: "athlete1",
-            confidence: 50,
-            reasoning: "Detailed analysis unavailable - using basic comparison data",
-            keyFactors: ["Analysis unavailable"],
-            scenario: "Unable to provide detailed scenario",
-            tacticalAdvice: {},
-            historicalContext: "Information not found",
-            expertPredictions: "No expert predictions available"
-          }
-        };
-      }
-      
-      console.log(`[GEMINI] Successfully parsed detailed comparison data`);
-      return parsedData;
-    } catch (parseError) {
-      console.error(`[GEMINI] JSON parsing failed for detailed comparison:`, parseError);
-      console.log(`[GEMINI] Raw response:`, responseText.substring(0, 500));
-      
-      // Return structured fallback data
-      return {
-        detailedAnalysis: {
-          athlete1: {
-            name: athlete1.name,
-            country: athlete1.country,
-            currentForm: "Information not found through web search",
-            technicalSkills: [],
-            physicalAttributes: {},
-            recentPerformance: {}
-          },
-          athlete2: {
-            name: athlete2.name,
-            country: athlete2.country,
-            currentForm: "Information not found through web search", 
-            technicalSkills: [],
-            physicalAttributes: {},
-            recentPerformance: {}
-          },
-          comparison: {}
-        },
-        headToHead: {
-          prediction: "athlete1",
-          confidence: 50,
-          reasoning: "Unable to generate detailed analysis due to web search limitations",
-          keyFactors: ["Analysis unavailable"],
-          scenario: "Unable to provide detailed scenario",
-          tacticalAdvice: {},
-          historicalContext: "Information not found through web search",
-          expertPredictions: "No expert predictions found"
-        }
-      };
-    }
+    // Return raw response without any parsing
+    return {
+      rawResponse: responseText,
+      source: "Gemini-2.5-pro",
+      athletes: `${athlete1.name} vs ${athlete2.name}`,
+      timestamp: new Date().toISOString()
+    };
   } catch (error) {
     console.error("Error generating detailed comparison with Gemini:", error);
     throw new Error(`Failed to generate detailed comparison: ${error instanceof Error ? error.message : String(error)}`);

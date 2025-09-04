@@ -2120,130 +2120,17 @@ MANDATORY: Use ONLY current web search results. Do not use generic descriptions 
       // temperature: 1.0 is default and minimum for GPT-5
     });
 
-    // Enhanced JSON cleanup for complex athlete comparison responses
-    let cleanedText = response.output_text.trim();
+    // Return raw response without any JSON parsing or cleaning
+    const rawResponse = response.output_text.trim();
+    console.log(`Raw GPT-5 Response for ${athlete1.name} vs ${athlete2.name}:`, rawResponse);
     
-    // Remove markdown formatting
-    cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
-    
-    // Try to find complete JSON first, then any JSON
-    let jsonMatch = cleanedText.match(/\{[\s\S]*\}(?=\s*$)/);
-    if (!jsonMatch) {
-      jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
-    }
-    
-    if (jsonMatch) {
-      cleanedText = jsonMatch[0];
-      
-      // Fix the specific double quote issue seen in the logs
-      // Pattern like "name": "Seif Eissa"", should become "name": "Seif Eissa"
-      cleanedText = cleanedText.replace(/"\s*"\s*,/g, '",');
-      cleanedText = cleanedText.replace(/"\s*"\s*}/g, '"}');
-      cleanedText = cleanedText.replace(/"\s*"\s*]/g, '"]');
-      
-      // Fix common JSON syntax issues  
-      cleanedText = cleanedText.replace(/,\s*}/g, '}');
-      cleanedText = cleanedText.replace(/,\s*]/g, ']');
-      
-      // Fix broken object structures like {"<newline> should be {
-      cleanedText = cleanedText.replace(/\{\s*"/g, '{"');
-      cleanedText = cleanedText.replace(/"\s*:/g, '":');
-      
-      // Remove URLs and links that break JSON - enhanced cleaning
-      cleanedText = cleanedText.replace(/\(\[([^\]]+)\]\([^\)]+\)\)/g, '');
-      cleanedText = cleanedText.replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1');
-      cleanedText = cleanedText.replace(/https?:\/\/[^\s\)\],}"]*/g, '');
-      cleanedText = cleanedText.replace(/www\.[^\s\)\],}"]*/g, '');
-      
-      // Fix unclosed quotes in string values
-      cleanedText = cleanedText.replace(/"([^"]*$)/gm, (match, p1) => {
-        if (p1.includes(',') || p1.includes('}') || p1.includes(']')) {
-          const parts = p1.split(/([,\}\]])/);
-          return '"' + parts[0] + '"' + parts.slice(1).join('');
-        }
-        return '"' + p1 + '"';
-      });
-      
-      // Fix truncated JSON by balancing braces/brackets
-      let braceCount = 0;
-      let bracketCount = 0;
-      let quoteCount = 0;
-      let result = '';
-      let inString = false;
-      
-      for (let i = 0; i < cleanedText.length; i++) {
-        const char = cleanedText[i];
-        const prevChar = i > 0 ? cleanedText[i - 1] : '';
-        
-        result += char;
-        
-        if (char === '"' && prevChar !== '\\') {
-          inString = !inString;
-          quoteCount++;
-        } else if (!inString) {
-          if (char === '{') braceCount++;
-          else if (char === '}') braceCount--;
-          else if (char === '[') bracketCount++;
-          else if (char === ']') bracketCount--;
-        }
-      }
-      
-      // If we're inside a string, close it
-      if (inString) {
-        result += '"';
-      }
-      
-      // Add missing closing characters
-      while (braceCount > 0) {
-        result += '}';
-        braceCount--;
-      }
-      while (bracketCount > 0) {
-        result += ']';
-        bracketCount--;
-      }
-      
-      cleanedText = result;
-    }
-    
-    let parsedData;
-    try {
-      parsedData = JSON.parse(cleanedText);
-      
-      // Check if AI returned an error response
-      if (parsedData.error) {
-        console.log(`GPT-5 returned error for ${athlete1.name} vs ${athlete2.name}:`, parsedData.errorMessage);
-        return parsedData; // Return the error response directly
-      }
-      
-      console.log(`GPT-5 Comparison Response for ${athlete1.name} vs ${athlete2.name}:`, JSON.stringify(parsedData, null, 2));
-    } catch (parseError: any) {
-      console.error(`JSON parsing failed for GPT-5 response: ${parseError.message}`);
-      console.log(`Raw response (first 500 chars): ${cleanedText.substring(0, 500)}`);
-      
-      // Attempt final rescue parsing by extracting key components manually
-      try {
-        const rescueData = attemptRescueJsonParsing(cleanedText, athlete1, athlete2);
-        if (rescueData) {
-          console.log(`🚑 Rescue parsing succeeded for ${athlete1.name} vs ${athlete2.name}`);
-          parsedData = rescueData;
-        } else {
-          throw new Error("Rescue parsing also failed");
-        }
-      } catch (rescueError) {
-        console.error(`All parsing attempts failed: ${rescueError}`);
-        
-        // Return structured error instead of throwing
-        return {
-          error: "Error",
-          errorType: "parsing_error",
-          errorMessage: `JSON parsing failed: ${parseError.message}`,
-          retryable: true,
-          suggestion: "Please try again - the AI response was malformed"
-        };
-      }
-    }
+    // Return the raw response directly
+    return {
+      rawResponse: rawResponse,
+      source: "GPT-5",
+      athletes: `${athlete1.name} vs ${athlete2.name}`,
+      timestamp: new Date().toISOString()
+    };
     
     // Validate that we received authentic GPT-5 data
     const hasAuthenticOverallAnalysis = parsedData.overallAnalysis?.summary && 
