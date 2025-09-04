@@ -658,7 +658,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
                       <TabsTrigger value="strengths" data-testid="tab-strengths">Strengths</TabsTrigger>
                       <TabsTrigger value="weaknesses" data-testid="tab-weaknesses">Weaknesses</TabsTrigger>
-                      <TabsTrigger value="ranking" data-testid="tab-ranking">Ranking</TabsTrigger>
+                      <TabsTrigger value="ranking" data-testid="tab-ranking">Competition History</TabsTrigger>
                       <TabsTrigger value="head-to-head" data-testid="tab-head-to-head">Head-to-Head</TabsTrigger>
                       <TabsTrigger value="detailed" data-testid="tab-detailed">Details</TabsTrigger>
                     </TabsList>
@@ -891,19 +891,19 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       </div>
                     </TabsContent>
 
-                    {/* Ranking Tab */}
+                    {/* Competition History Tab */}
                     <TabsContent value="ranking" className="space-y-4">
                       <Card className="bg-athlete-gray-900 border-gray-600">
                         <CardHeader>
                           <CardTitle className="text-lg text-white flex items-center gap-2">
                             <Trophy className="h-5 w-5" />
-                            Ranking Analysis
+                            Competition History
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                           {parsedData.ranking?.comparison && (
                             <div>
-                              <h4 className="font-semibold text-white mb-2">Current Status</h4>
+                              <h4 className="font-semibold text-white mb-2">Competition Level Analysis</h4>
                               <p className="text-gray-300 text-sm">
                                 {parsedData.ranking.comparison}
                               </p>
@@ -912,23 +912,23 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="p-3 bg-gray-800/50 rounded-lg">
-                              <h4 className="font-semibold text-blue-400 mb-2">{parsedData.athlete1?.name || "Athlete 1"} Trajectory</h4>
+                              <h4 className="font-semibold text-blue-400 mb-2">{parsedData.athlete1?.name || "Athlete 1"} Competition Experience</h4>
                               <p className="text-gray-300 text-sm">
-                                {parsedData.ranking?.athlete1Trajectory || "No trajectory data available"}
+                                {parsedData.ranking?.athlete1Trajectory || "No competition history available"}
                               </p>
                             </div>
                             
                             <div className="p-3 bg-gray-800/50 rounded-lg">
-                              <h4 className="font-semibold text-purple-400 mb-2">{parsedData.athlete2?.name || "Athlete 2"} Trajectory</h4>
+                              <h4 className="font-semibold text-purple-400 mb-2">{parsedData.athlete2?.name || "Athlete 2"} Competition Experience</h4>
                               <p className="text-gray-300 text-sm">
-                                {parsedData.ranking?.athlete2Trajectory || "No trajectory data available"}
+                                {parsedData.ranking?.athlete2Trajectory || "No competition history available"}
                               </p>
                             </div>
                           </div>
 
                           {parsedData.ranking?.competitiveEdge && (
                             <div className="text-center p-3 bg-gradient-to-r from-yellow-900/30 to-orange-900/30 border border-yellow-600/50 rounded-lg">
-                              <div className="text-sm text-yellow-300">Competitive Edge</div>
+                              <div className="text-sm text-yellow-300">Higher Level Experience</div>
                               <div className="text-lg font-bold text-white">
                                 {parsedData.ranking.competitiveEdge === 'athlete1' ? parsedData.athlete1?.name :
                                  parsedData.ranking.competitiveEdge === 'athlete2' ? parsedData.athlete2?.name : 'Even'}
@@ -969,7 +969,9 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                             <div>
                               <h4 className="font-semibold text-white mb-2">Analysis Reasoning</h4>
                               <p className="text-gray-300 text-sm leading-relaxed">
-                                {parsedData.headToHead.reasoning}
+                                {parsedData.headToHead.reasoning
+                                  .replace(/Athlete 1/g, parsedData.athlete1?.name || "Athlete 1")
+                                  .replace(/Athlete 2/g, parsedData.athlete2?.name || "Athlete 2")}
                               </p>
                             </div>
                           )}
@@ -992,7 +994,9 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                             <div>
                               <h4 className="font-semibold text-white mb-2">Match Scenario</h4>
                               <p className="text-gray-300 text-sm leading-relaxed">
-                                {parsedData.headToHead.scenario}
+                                {parsedData.headToHead.scenario
+                                  .replace(/Athlete 1/g, parsedData.athlete1?.name || "Athlete 1")
+                                  .replace(/Athlete 2/g, parsedData.athlete2?.name || "Athlete 2")}
                               </p>
                             </div>
                           )}
