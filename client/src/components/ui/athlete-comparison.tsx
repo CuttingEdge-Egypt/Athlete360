@@ -349,27 +349,6 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       <CardContent className="space-y-6">
         {/* Selection Controls */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-          {/* Show message if no athletes available for selected country */}
-          {selectedSport && selectedCountry1 && athletes1.length === 0 && (
-            <div className="md:col-span-6 mb-4">
-              <div className="bg-yellow-900/20 border border-yellow-600/50 rounded-lg p-4">
-                <p className="text-yellow-400 text-sm">
-                  No athletes found for the selected country in {sports.find(s => s.id === selectedSport)?.name}. 
-                  Try selecting "All countries" or choose a different country.
-                </p>
-              </div>
-            </div>
-          )}
-          {selectedSport && selectedCountry2 && athletes2.length === 0 && (
-            <div className="md:col-span-6 mb-4">
-              <div className="bg-yellow-900/20 border border-yellow-600/50 rounded-lg p-4">
-                <p className="text-yellow-400 text-sm">
-                  No athletes found for the selected country in {sports.find(s => s.id === selectedSport)?.name}. 
-                  Try selecting "All countries" or choose a different country.
-                </p>
-              </div>
-            </div>
-          )}
           <div className="space-y-2 md:col-span-2">
             <label className="text-sm font-medium text-gray-300">Sport</label>
             <Select
