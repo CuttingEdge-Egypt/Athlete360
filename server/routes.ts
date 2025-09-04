@@ -2438,16 +2438,31 @@ Return only valid JSON with the missing fields.`;
         if (gptResult.status === 'fulfilled') {
           const gptResponse = gptResult.value;
           
-          // Check if we got a raw response structure
+          // Check if we got a raw response structure from GPT-5
           if (gptResponse.rawResponse) {
-            console.log('Got raw GPT-5 response, returning it directly to frontend');
+            console.log('Got raw GPT-5 response');
             
-            // Return the raw response immediately for debugging
+            // Also check if Gemini returned raw response
+            let geminiRawResponse = null;
+            if (geminiResult.status === 'fulfilled' && geminiResult.value?.rawResponse) {
+              geminiRawResponse = geminiResult.value;
+              console.log('Got raw Gemini response too');
+            }
+            
+            // Return both raw responses for debugging
             return res.json({
-              rawResponse: gptResponse.rawResponse,
-              source: gptResponse.source,
-              athletes: gptResponse.athletes,
-              timestamp: gptResponse.timestamp,
+              gptResponse: {
+                rawResponse: gptResponse.rawResponse,
+                source: gptResponse.source,
+                athletes: gptResponse.athletes,
+                timestamp: gptResponse.timestamp
+              },
+              geminiResponse: geminiRawResponse ? {
+                rawResponse: geminiRawResponse.rawResponse,
+                source: geminiRawResponse.source,
+                athletes: geminiRawResponse.athletes,
+                timestamp: geminiRawResponse.timestamp
+              } : null,
               isRawResponse: true
             });
           }

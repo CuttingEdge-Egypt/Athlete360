@@ -167,12 +167,10 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
   const [selectedAthlete2, setSelectedAthlete2] = useState<string>("");
   const [comparisonData, setComparisonData] = useState<any>(() => {
     // Handle raw response structure
-    if (preloadedComparisonData?.rawResponse) {
+    if (preloadedComparisonData?.isRawResponse) {
       return {
-        rawResponse: preloadedComparisonData.rawResponse,
-        source: preloadedComparisonData.source,
-        athletes: preloadedComparisonData.athletes,
-        timestamp: preloadedComparisonData.timestamp,
+        gptResponse: preloadedComparisonData.gptResponse,
+        geminiResponse: preloadedComparisonData.geminiResponse,
         isRawResponse: true,
         // Default structure to prevent errors
         athlete1: { name: "Athlete 1", country: "Unknown", rank: "N/A" },
@@ -186,12 +184,10 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
   // Update comparison data when preloaded data changes
   useEffect(() => {
     if (preloadedComparisonData) {
-      if (preloadedComparisonData?.rawResponse) {
+      if (preloadedComparisonData?.isRawResponse) {
         setComparisonData({
-          rawResponse: preloadedComparisonData.rawResponse,
-          source: preloadedComparisonData.source,
-          athletes: preloadedComparisonData.athletes,
-          timestamp: preloadedComparisonData.timestamp,
+          gptResponse: preloadedComparisonData.gptResponse,
+          geminiResponse: preloadedComparisonData.geminiResponse,
           isRawResponse: true,
           athlete1: { name: "Athlete 1", country: "Unknown", rank: "N/A" },
           athlete2: { name: "Athlete 2", country: "Unknown", rank: "N/A" }
@@ -573,30 +569,62 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
         {comparisonData?.isRawResponse && (
           <div className="space-y-6 mt-8">
             <Separator className="bg-gray-600" />
-            <Card className="bg-gray-900 border-gray-600">
-              <CardHeader>
-                <CardTitle className="text-lg text-white flex items-center gap-2">
-                  <Brain className="h-5 w-5" />
-                  Raw AI Response - {comparisonData.source}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="text-sm text-gray-400">
-                    <span className="font-medium">Athletes:</span> {comparisonData.athletes}
+            
+            {/* GPT-5 Response */}
+            {comparisonData.gptResponse && (
+              <Card className="bg-gray-900 border-gray-600">
+                <CardHeader>
+                  <CardTitle className="text-lg text-white flex items-center gap-2">
+                    <Brain className="h-5 w-5" />
+                    Raw GPT-5 Response
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="text-sm text-gray-400">
+                      <span className="font-medium">Athletes:</span> {comparisonData.gptResponse.athletes}
+                    </div>
+                    <div className="text-sm text-gray-400">
+                      <span className="font-medium">Generated:</span> {new Date(comparisonData.gptResponse.timestamp).toLocaleString()}
+                    </div>
+                    <div className="bg-gray-800 p-4 rounded-lg">
+                      <h4 className="text-white font-medium mb-2">Raw JSON Response:</h4>
+                      <pre className="text-xs text-green-400 whitespace-pre-wrap overflow-auto max-h-96 font-mono">
+                        {comparisonData.gptResponse.rawResponse}
+                      </pre>
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-400">
-                    <span className="font-medium">Generated:</span> {new Date(comparisonData.timestamp).toLocaleString()}
+                </CardContent>
+              </Card>
+            )}
+            
+            {/* Gemini Response */}
+            {comparisonData.geminiResponse && (
+              <Card className="bg-gray-900 border-gray-600">
+                <CardHeader>
+                  <CardTitle className="text-lg text-white flex items-center gap-2">
+                    <Brain className="h-5 w-5" />
+                    Raw Gemini 2.5 Pro Response
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="text-sm text-gray-400">
+                      <span className="font-medium">Athletes:</span> {comparisonData.geminiResponse.athletes}
+                    </div>
+                    <div className="text-sm text-gray-400">
+                      <span className="font-medium">Generated:</span> {new Date(comparisonData.geminiResponse.timestamp).toLocaleString()}
+                    </div>
+                    <div className="bg-gray-800 p-4 rounded-lg">
+                      <h4 className="text-white font-medium mb-2">Raw JSON Response:</h4>
+                      <pre className="text-xs text-blue-400 whitespace-pre-wrap overflow-auto max-h-96 font-mono">
+                        {comparisonData.geminiResponse.rawResponse}
+                      </pre>
+                    </div>
                   </div>
-                  <div className="bg-gray-800 p-4 rounded-lg">
-                    <h4 className="text-white font-medium mb-2">Raw JSON Response:</h4>
-                    <pre className="text-xs text-green-400 whitespace-pre-wrap overflow-auto max-h-96 font-mono">
-                      {comparisonData.rawResponse}
-                    </pre>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
 
