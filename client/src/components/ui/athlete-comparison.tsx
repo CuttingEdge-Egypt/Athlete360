@@ -18,7 +18,8 @@ import {
   Brain,
   Heart,
   User,
-  AlertCircle
+  AlertCircle,
+  Medal
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -588,7 +589,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                   gptData = JSON.parse(cleanedGpt);
                 }
               } catch (error) {
-                console.warn('Could not parse GPT response:', error.message);
+                console.warn('Could not parse GPT response:', error instanceof Error ? error.message : 'Unknown error');
               }
               
               try {
@@ -606,7 +607,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                   geminiData = JSON.parse(cleanedGemini);
                 }
               } catch (error) {
-                console.warn('Could not parse Gemini response:', error.message);
+                console.warn('Could not parse Gemini response:', error instanceof Error ? error.message : 'Unknown error');
               }
               
               // Use GPT data as primary source, Gemini for detailed analysis
@@ -900,38 +901,137 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                             Competition History
                           </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-6">
+                          {/* Competition Overview */}
                           {parsedData.ranking?.comparison && (
-                            <div>
-                              <h4 className="font-semibold text-white mb-2">Competition Level Analysis</h4>
-                              <p className="text-gray-300 text-sm">
+                            <div className="p-4 bg-gradient-to-r from-amber-900/30 to-yellow-900/30 border border-amber-600/50 rounded-lg">
+                              <h4 className="font-semibold text-amber-200 mb-3 flex items-center gap-2">
+                                <Trophy className="h-4 w-4" />
+                                Tournament Experience Overview
+                              </h4>
+                              <p className="text-gray-300 text-sm leading-relaxed">
                                 {parsedData.ranking.comparison}
                               </p>
                             </div>
                           )}
                           
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="p-3 bg-gray-800/50 rounded-lg">
-                              <h4 className="font-semibold text-blue-400 mb-2">{parsedData.athlete1?.name || "Athlete 1"} Competition Experience</h4>
-                              <p className="text-gray-300 text-sm">
-                                {parsedData.ranking?.athlete1Trajectory || "No competition history available"}
-                              </p>
+                          {/* Achievement Showcase */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="p-4 bg-gray-800/50 rounded-lg border border-blue-500/30">
+                              <h4 className="font-semibold text-blue-400 mb-4 flex items-center gap-2">
+                                <Medal className="h-4 w-4" />
+                                {parsedData.athlete1?.name || "Athlete 1"} Key Achievements
+                              </h4>
+                              
+                              {/* Competition History & Impact */}
+                              <div className="space-y-3">
+                                <div className="text-sm text-gray-300">
+                                  <span className="font-medium text-blue-300">Competition History:</span>
+                                  <div className="mt-1 text-gray-400 text-sm leading-relaxed">
+                                    {parsedData.ranking?.athlete1Trajectory || "No detailed competition history available"}
+                                  </div>
+                                </div>
+                                
+                                {/* Impact Analysis */}
+                                <div className="p-3 bg-blue-900/20 border border-blue-600/30 rounded-lg">
+                                  <div className="text-xs font-medium text-blue-300 mb-1">Match Impact Factor:</div>
+                                  <div className="text-xs text-gray-400">
+                                    {parsedData.ranking?.athlete1Trajectory?.includes('title') || parsedData.ranking?.athlete1Trajectory?.includes('gold') || parsedData.ranking?.athlete1Trajectory?.includes('champion') 
+                                      ? "High-pressure tournament experience provides significant mental advantage in crucial moments"
+                                      : parsedData.ranking?.athlete1Trajectory?.includes('silver') || parsedData.ranking?.athlete1Trajectory?.includes('final') 
+                                      ? "Finals experience offers valuable insights into peak performance scenarios"
+                                      : parsedData.ranking?.athlete1Trajectory?.includes('medal') || parsedData.ranking?.athlete1Trajectory?.includes('podium')
+                                      ? "Podium finishes demonstrate ability to perform when stakes are highest"
+                                      : "Building competitive experience through consistent tournament participation"}
+                                  </div>
+                                </div>
+                                
+                                {/* Competitive Edge Indicators */}
+                                <div className="flex flex-wrap gap-2">
+                                  {parsedData.ranking?.athlete1Trajectory?.toLowerCase().includes('world') && (
+                                    <span className="text-xs bg-yellow-600/20 text-yellow-300 px-2 py-1 rounded">World Level</span>
+                                  )}
+                                  {(parsedData.ranking?.athlete1Trajectory?.toLowerCase().includes('olympic') || parsedData.ranking?.athlete1Trajectory?.toLowerCase().includes('olympics')) && (
+                                    <span className="text-xs bg-purple-600/20 text-purple-300 px-2 py-1 rounded">Olympic Experience</span>
+                                  )}
+                                  {parsedData.ranking?.athlete1Trajectory?.toLowerCase().includes('champion') && (
+                                    <span className="text-xs bg-green-600/20 text-green-300 px-2 py-1 rounded">Champion</span>
+                                  )}
+                                  {(parsedData.ranking?.athlete1Trajectory?.toLowerCase().includes('#1') || parsedData.ranking?.athlete1Trajectory?.toLowerCase().includes('ranked')) && (
+                                    <span className="text-xs bg-blue-600/20 text-blue-300 px-2 py-1 rounded">Top Ranked</span>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                             
-                            <div className="p-3 bg-gray-800/50 rounded-lg">
-                              <h4 className="font-semibold text-purple-400 mb-2">{parsedData.athlete2?.name || "Athlete 2"} Competition Experience</h4>
-                              <p className="text-gray-300 text-sm">
-                                {parsedData.ranking?.athlete2Trajectory || "No competition history available"}
-                              </p>
+                            <div className="p-4 bg-gray-800/50 rounded-lg border border-purple-500/30">
+                              <h4 className="font-semibold text-purple-400 mb-4 flex items-center gap-2">
+                                <Medal className="h-4 w-4" />
+                                {parsedData.athlete2?.name || "Athlete 2"} Key Achievements
+                              </h4>
+                              
+                              {/* Competition History & Impact */}
+                              <div className="space-y-3">
+                                <div className="text-sm text-gray-300">
+                                  <span className="font-medium text-purple-300">Competition History:</span>
+                                  <div className="mt-1 text-gray-400 text-sm leading-relaxed">
+                                    {parsedData.ranking?.athlete2Trajectory || "No detailed competition history available"}
+                                  </div>
+                                </div>
+                                
+                                {/* Impact Analysis */}
+                                <div className="p-3 bg-purple-900/20 border border-purple-600/30 rounded-lg">
+                                  <div className="text-xs font-medium text-purple-300 mb-1">Match Impact Factor:</div>
+                                  <div className="text-xs text-gray-400">
+                                    {parsedData.ranking?.athlete2Trajectory?.includes('title') || parsedData.ranking?.athlete2Trajectory?.includes('gold') || parsedData.ranking?.athlete2Trajectory?.includes('champion') 
+                                      ? "High-pressure tournament experience provides significant mental advantage in crucial moments"
+                                      : parsedData.ranking?.athlete2Trajectory?.includes('silver') || parsedData.ranking?.athlete2Trajectory?.includes('final') 
+                                      ? "Finals experience offers valuable insights into peak performance scenarios"
+                                      : parsedData.ranking?.athlete2Trajectory?.includes('medal') || parsedData.ranking?.athlete2Trajectory?.includes('podium')
+                                      ? "Podium finishes demonstrate ability to perform when stakes are highest"
+                                      : "Building competitive experience through consistent tournament participation"}
+                                  </div>
+                                </div>
+                                
+                                {/* Competitive Edge Indicators */}
+                                <div className="flex flex-wrap gap-2">
+                                  {parsedData.ranking?.athlete2Trajectory?.toLowerCase().includes('world') && (
+                                    <span className="text-xs bg-yellow-600/20 text-yellow-300 px-2 py-1 rounded">World Level</span>
+                                  )}
+                                  {(parsedData.ranking?.athlete2Trajectory?.toLowerCase().includes('olympic') || parsedData.ranking?.athlete2Trajectory?.toLowerCase().includes('olympics')) && (
+                                    <span className="text-xs bg-purple-600/20 text-purple-300 px-2 py-1 rounded">Olympic Experience</span>
+                                  )}
+                                  {parsedData.ranking?.athlete2Trajectory?.toLowerCase().includes('champion') && (
+                                    <span className="text-xs bg-green-600/20 text-green-300 px-2 py-1 rounded">Champion</span>
+                                  )}
+                                  {(parsedData.ranking?.athlete2Trajectory?.toLowerCase().includes('#1') || parsedData.ranking?.athlete2Trajectory?.toLowerCase().includes('ranked')) && (
+                                    <span className="text-xs bg-blue-600/20 text-blue-300 px-2 py-1 rounded">Top Ranked</span>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           </div>
 
+                          {/* Competitive Advantage Analysis */}
                           {parsedData.ranking?.competitiveEdge && (
-                            <div className="text-center p-3 bg-gradient-to-r from-yellow-900/30 to-orange-900/30 border border-yellow-600/50 rounded-lg">
-                              <div className="text-sm text-yellow-300">Higher Level Experience</div>
-                              <div className="text-lg font-bold text-white">
-                                {parsedData.ranking.competitiveEdge === 'athlete1' ? parsedData.athlete1?.name :
-                                 parsedData.ranking.competitiveEdge === 'athlete2' ? parsedData.athlete2?.name : 'Even'}
+                            <div className="p-4 bg-gradient-to-r from-emerald-900/30 to-teal-900/30 border border-emerald-600/50 rounded-lg">
+                              <div className="text-center mb-3">
+                                <div className="text-sm text-emerald-300 mb-1">Experience Advantage</div>
+                                <div className="text-xl font-bold text-white mb-2">
+                                  {parsedData.ranking.competitiveEdge === 'athlete1' ? parsedData.athlete1?.name :
+                                   parsedData.ranking.competitiveEdge === 'athlete2' ? parsedData.athlete2?.name : 'Even Match'}
+                                </div>
+                              </div>
+                              
+                              <div className="text-sm text-gray-300 text-center">
+                                <span className="font-medium text-emerald-200">How This Affects The Match:</span>
+                                <div className="mt-2 text-gray-400">
+                                  {parsedData.ranking.competitiveEdge === 'athlete1' 
+                                    ? `${parsedData.athlete1?.name || 'Athlete 1'}'s superior tournament experience and proven ability at high-level competitions gives them the mental edge in pressure situations, crucial late-round decision making, and tactical adjustments.`
+                                    : parsedData.ranking.competitiveEdge === 'athlete2'
+                                    ? `${parsedData.athlete2?.name || 'Athlete 2'}'s superior tournament experience and proven ability at high-level competitions gives them the mental edge in pressure situations, crucial late-round decision making, and tactical adjustments.`
+                                    : "Both athletes bring comparable high-level experience, making this a true test of current form and tactical execution rather than experience gaps."}
+                                </div>
                               </div>
                             </div>
                           )}
@@ -946,9 +1046,6 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           <CardTitle className="text-lg text-white flex items-center gap-2">
                             <Target className="h-5 w-5" />
                             Head-to-Head Prediction
-                            <span className="text-xs bg-purple-600/20 text-purple-300 px-2 py-1 rounded">
-                              AI Analysis
-                            </span>
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -1011,65 +1108,79 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           <CardTitle className="text-lg text-white flex items-center gap-2">
                             <Brain className="h-5 w-5" />
                             Detailed Analysis
-                            <span className="text-xs bg-blue-600/20 text-blue-300 px-2 py-1 rounded">
-                              Gemini-2.5-pro
-                            </span>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
                           {parsedData.detailedAnalysis ? (
-                            <div className="space-y-4">
-                              {parsedData.detailedAnalysis.athlete1 && parsedData.detailedAnalysis.athlete2 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                  <div className="p-4 bg-gray-800/50 rounded-lg">
-                                    <h4 className="font-semibold text-blue-400 mb-3">{parsedData.detailedAnalysis.athlete1.name}</h4>
-                                    {parsedData.detailedAnalysis.athlete1.currentForm && (
-                                      <div className="mb-3">
-                                        <div className="text-sm font-medium text-gray-300">Current Form:</div>
-                                        <div className="text-sm text-gray-400">{parsedData.detailedAnalysis.athlete1.currentForm}</div>
-                                      </div>
-                                    )}
-                                    {parsedData.detailedAnalysis.athlete1.technicalSkills && parsedData.detailedAnalysis.athlete1.technicalSkills.length > 0 && (
-                                      <div>
-                                        <div className="text-sm font-medium text-gray-300 mb-2">Technical Skills:</div>
-                                        <ul className="space-y-1">
-                                          {parsedData.detailedAnalysis.athlete1.technicalSkills.map((skill: any, index: number) => (
-                                            <li key={index} className="text-xs text-gray-400 flex items-start gap-1">
-                                              <span className="text-blue-400">•</span>
-                                              {typeof skill === 'string' ? skill : skill.skill || skill.description || 'Technical skill'}
-                                            </li>
-                                          ))}
-                                        </ul>
-                                      </div>
-                                    )}
-                                  </div>
+                            <div className="space-y-6">
+                              {/* Victory Analysis */}
+                              <div className="p-4 bg-gradient-to-r from-green-900/30 to-emerald-900/30 border border-green-600/50 rounded-lg">
+                                <h4 className="font-medium text-green-400 mb-3">Why {parsedData.headToHead?.prediction === 'athlete1' ? parsedData.athlete1?.name : parsedData.athlete2?.name || 'The Predicted Winner'} Will Win</h4>
+                                <p className="text-gray-300 text-sm leading-relaxed">
+                                  {parsedData.overallAnalysis?.summary || parsedData.headToHead?.reasoning || "Based on comprehensive analysis of both athletes' recent performances, technical capabilities, and competitive experience, the prediction favors the athlete with superior current form and tactical advantages."}
+                                </p>
+                              </div>
+
+                              {/* Player Profiles */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="p-4 bg-gray-800/50 rounded-lg border border-blue-500/30">
+                                  <h4 className="font-semibold text-blue-400 mb-3">{parsedData.detailedAnalysis?.athlete1?.name || parsedData.athlete1?.name || "Athlete 1"} Profile</h4>
                                   
-                                  <div className="p-4 bg-gray-800/50 rounded-lg">
-                                    <h4 className="font-semibold text-purple-400 mb-3">{parsedData.detailedAnalysis.athlete2.name}</h4>
-                                    {parsedData.detailedAnalysis.athlete2.currentForm && (
-                                      <div className="mb-3">
-                                        <div className="text-sm font-medium text-gray-300">Current Form:</div>
-                                        <div className="text-sm text-gray-400">{parsedData.detailedAnalysis.athlete2.currentForm}</div>
-                                      </div>
-                                    )}
-                                    {parsedData.detailedAnalysis.athlete2.technicalSkills && parsedData.detailedAnalysis.athlete2.technicalSkills.length > 0 && (
-                                      <div>
-                                        <div className="text-sm font-medium text-gray-300 mb-2">Technical Skills:</div>
-                                        <ul className="space-y-1">
-                                          {parsedData.detailedAnalysis.athlete2.technicalSkills.map((skill: any, index: number) => (
-                                            <li key={index} className="text-xs text-gray-400 flex items-start gap-1">
-                                              <span className="text-purple-400">•</span>
-                                              {typeof skill === 'string' ? skill : skill.skill || skill.description || 'Technical skill'}
-                                            </li>
-                                          ))}
-                                        </ul>
-                                      </div>
-                                    )}
-                                  </div>
+                                  {parsedData.detailedAnalysis?.athlete1?.currentForm && (
+                                    <div className="mb-3">
+                                      <div className="text-sm font-medium text-gray-300 mb-1">Current Form:</div>
+                                      <div className="text-sm text-gray-400">{parsedData.detailedAnalysis.athlete1.currentForm}</div>
+                                    </div>
+                                  )}
+                                  
+                                  {parsedData.detailedAnalysis?.athlete1?.technicalSkills && parsedData.detailedAnalysis.athlete1.technicalSkills.length > 0 && (
+                                    <div>
+                                      <div className="text-sm font-medium text-gray-300 mb-2">Technical Skills:</div>
+                                      <ul className="space-y-1">
+                                        {parsedData.detailedAnalysis.athlete1.technicalSkills.slice(0, 3).map((skill: any, index: number) => (
+                                          <li key={index} className="text-xs text-gray-400 flex items-start gap-1">
+                                            <span className="text-blue-400">•</span>
+                                            <span>{typeof skill === 'string' ? skill : skill.skill || skill.description || 'Technical skill'}</span>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
                                 </div>
-                              ) : (
-                                <div className="p-3 bg-yellow-900/30 border border-yellow-600/50 rounded-lg">
-                                  <p className="text-yellow-300">Detailed analysis not available</p>
+                                
+                                <div className="p-4 bg-gray-800/50 rounded-lg border border-purple-500/30">
+                                  <h4 className="font-semibold text-purple-400 mb-3">{parsedData.detailedAnalysis?.athlete2?.name || parsedData.athlete2?.name || "Athlete 2"} Profile</h4>
+                                  
+                                  {parsedData.detailedAnalysis?.athlete2?.currentForm && (
+                                    <div className="mb-3">
+                                      <div className="text-sm font-medium text-gray-300 mb-1">Current Form:</div>
+                                      <div className="text-sm text-gray-400">{parsedData.detailedAnalysis.athlete2.currentForm}</div>
+                                    </div>
+                                  )}
+                                  
+                                  {parsedData.detailedAnalysis?.athlete2?.technicalSkills && parsedData.detailedAnalysis.athlete2.technicalSkills.length > 0 && (
+                                    <div>
+                                      <div className="text-sm font-medium text-gray-300 mb-2">Technical Skills:</div>
+                                      <ul className="space-y-1">
+                                        {parsedData.detailedAnalysis.athlete2.technicalSkills.slice(0, 3).map((skill: any, index: number) => (
+                                          <li key={index} className="text-xs text-gray-400 flex items-start gap-1">
+                                            <span className="text-purple-400">•</span>
+                                            <span>{typeof skill === 'string' ? skill : skill.skill || skill.description || 'Technical skill'}</span>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Strategic Analysis */}
+                              {(parsedData.headToHead?.reasoning || parsedData.overallAnalysis?.recommendation) && (
+                                <div className="p-4 bg-gradient-to-r from-indigo-900/30 to-purple-900/30 border border-indigo-600/50 rounded-lg">
+                                  <h4 className="font-medium text-indigo-300 mb-3">Strategic Matchup Analysis</h4>
+                                  <p className="text-gray-300 text-sm leading-relaxed">
+                                    {parsedData.overallAnalysis?.recommendation || parsedData.headToHead?.reasoning || "Strategic analysis considers technical skill matchups, recent form, and competitive experience to determine the most likely outcome."}
+                                  </p>
                                 </div>
                               )}
                             </div>
@@ -1161,11 +1272,6 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                     <div className="flex items-center gap-2 mb-3">
                       <Brain className="h-5 w-5 text-blue-400" />
                       <h4 className="font-semibold text-white">Overall Analysis</h4>
-                      {comparisonData.aiModels?.overallAnalysis && (
-                        <span className="text-xs bg-blue-600/20 text-blue-300 px-2 py-1 rounded">
-                          {comparisonData.aiModels.overallAnalysis}
-                        </span>
-                      )}
                     </div>
                     {comparisonData.error ? (
                       <div className="p-3 bg-red-900/30 border border-red-600/50 rounded-lg">
