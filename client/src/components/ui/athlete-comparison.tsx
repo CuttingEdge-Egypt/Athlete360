@@ -211,10 +211,12 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
     }
   });
 
-  // Deduplicate athletes for athlete 1
-  const athletes1 = allAthletes1.reduce((acc: Athlete[], current) => {
+  // Deduplicate athletes for athlete 1 with safety checks
+  const athletes1 = Array.isArray(allAthletes1) ? allAthletes1.reduce((acc: Athlete[], current) => {
+    if (!current || !current.name) return acc; // Skip invalid athletes
+    
     const existingIndex = acc.findIndex(athlete => 
-      athlete.name.toLowerCase().trim() === current.name.toLowerCase().trim()
+      athlete.name && athlete.name.toLowerCase().trim() === current.name.toLowerCase().trim()
     );
     
     if (existingIndex === -1) {
@@ -232,12 +234,14 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
     }
     
     return acc;
-  }, []);
+  }, []) : [];
 
-  // Deduplicate athletes for athlete 2
-  const athletes2 = allAthletes2.reduce((acc: Athlete[], current) => {
+  // Deduplicate athletes for athlete 2 with safety checks
+  const athletes2 = Array.isArray(allAthletes2) ? allAthletes2.reduce((acc: Athlete[], current) => {
+    if (!current || !current.name) return acc; // Skip invalid athletes
+    
     const existingIndex = acc.findIndex(athlete => 
-      athlete.name.toLowerCase().trim() === current.name.toLowerCase().trim()
+      athlete.name && athlete.name.toLowerCase().trim() === current.name.toLowerCase().trim()
     );
     
     if (existingIndex === -1) {
@@ -255,7 +259,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
     }
     
     return acc;
-  }, []);
+  }, []) : [];
 
   const comparisonMutation = useMutation({
     mutationFn: async () => {
@@ -345,6 +349,27 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       <CardContent className="space-y-6">
         {/* Selection Controls */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+          {/* Show message if no athletes available for selected country */}
+          {selectedSport && selectedCountry1 && athletes1.length === 0 && (
+            <div className="md:col-span-6 mb-4">
+              <div className="bg-yellow-900/20 border border-yellow-600/50 rounded-lg p-4">
+                <p className="text-yellow-400 text-sm">
+                  No athletes found for the selected country in {sports.find(s => s.id === selectedSport)?.name}. 
+                  Try selecting "All countries" or choose a different country.
+                </p>
+              </div>
+            </div>
+          )}
+          {selectedSport && selectedCountry2 && athletes2.length === 0 && (
+            <div className="md:col-span-6 mb-4">
+              <div className="bg-yellow-900/20 border border-yellow-600/50 rounded-lg p-4">
+                <p className="text-yellow-400 text-sm">
+                  No athletes found for the selected country in {sports.find(s => s.id === selectedSport)?.name}. 
+                  Try selecting "All countries" or choose a different country.
+                </p>
+              </div>
+            </div>
+          )}
           <div className="space-y-2 md:col-span-2">
             <label className="text-sm font-medium text-gray-300">Sport</label>
             <Select
@@ -407,19 +432,25 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                 <SelectValue placeholder="Select first athlete..." />
               </SelectTrigger>
               <SelectContent>
-                {availableAthletes1.map((athlete: Athlete) => (
-                  <SelectItem key={athlete.id} value={athlete.id}>
-                    <div className="flex items-center gap-2 truncate max-w-full">
-                      <span className="truncate">{athlete.name}</span>
-                      {athlete.country && (
-                        <span className="text-xs text-gray-400 flex-shrink-0">({athlete.country})</span>
-                      )}
-                      {athlete.rank && (
-                        <span className="text-xs text-gray-400 flex-shrink-0">#{athlete.rank}</span>
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
+                {availableAthletes1.length === 0 ? (
+                  <div className="p-2 text-sm text-gray-400">
+                    {selectedSport ? 'No athletes available for selected filters' : 'Select a sport first'}
+                  </div>
+                ) : (
+                  availableAthletes1.map((athlete: Athlete) => (
+                    <SelectItem key={athlete.id} value={athlete.id}>
+                      <div className="flex items-center gap-2 truncate max-w-full">
+                        <span className="truncate">{athlete.name || 'Unknown Athlete'}</span>
+                        {athlete.country && (
+                          <span className="text-xs text-gray-400 flex-shrink-0">({athlete.country})</span>
+                        )}
+                        {athlete.rank && (
+                          <span className="text-xs text-gray-400 flex-shrink-0">#{athlete.rank}</span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -460,19 +491,25 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                 <SelectValue placeholder="Select second athlete..." />
               </SelectTrigger>
               <SelectContent>
-                {availableAthletes2.map((athlete: Athlete) => (
-                  <SelectItem key={athlete.id} value={athlete.id}>
-                    <div className="flex items-center gap-2 truncate max-w-full">
-                      <span className="truncate">{athlete.name}</span>
-                      {athlete.country && (
-                        <span className="text-xs text-gray-400 flex-shrink-0">({athlete.country})</span>
-                      )}
-                      {athlete.rank && (
-                        <span className="text-xs text-gray-400 flex-shrink-0">#{athlete.rank}</span>
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
+                {availableAthletes2.length === 0 ? (
+                  <div className="p-2 text-sm text-gray-400">
+                    {selectedSport ? 'No athletes available for selected filters' : 'Select a sport first'}
+                  </div>
+                ) : (
+                  availableAthletes2.map((athlete: Athlete) => (
+                    <SelectItem key={athlete.id} value={athlete.id}>
+                      <div className="flex items-center gap-2 truncate max-w-full">
+                        <span className="truncate">{athlete.name || 'Unknown Athlete'}</span>
+                        {athlete.country && (
+                          <span className="text-xs text-gray-400 flex-shrink-0">({athlete.country})</span>
+                        )}
+                        {athlete.rank && (
+                          <span className="text-xs text-gray-400 flex-shrink-0">#{athlete.rank}</span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -502,51 +539,64 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
           <div className="space-y-6 mt-8">
             <Separator className="bg-gray-600" />
             
-            {/* Athlete Headers */}
-            <div className="grid grid-cols-2 gap-6">
-              <div className="text-center">
-                {comparisonData.athlete1.profileImageUrl ? (
-                  <img
-                    src={comparisonData.athlete1.profileImageUrl}
-                    alt={comparisonData.athlete1.name}
-                    className="w-20 h-20 rounded-full object-cover mx-auto mb-3"
-                  />
-                ) : (
-                  <div className="w-20 h-20 rounded-full bg-athlete-gray-600 flex items-center justify-center mx-auto mb-3">
-                    <User className="w-10 h-10 text-gray-400" />
-                  </div>
+            {comparisonData.error ? (
+              <div className="bg-red-900/20 border border-red-600/50 rounded-lg p-4">
+                <h3 className="text-red-400 font-semibold mb-2">Comparison Failed</h3>
+                <p className="text-red-300 text-sm mb-3">{comparisonData.message || comparisonData.errorMessage || "Unable to generate comparison"}</p>
+                {comparisonData.suggestion && (
+                  <p className="text-red-200 text-xs">{comparisonData.suggestion}</p>
                 )}
-                <h3 className="text-xl font-bold text-white break-words leading-tight px-2">{comparisonData.athlete1.name}</h3>
-                <Badge variant="outline" className="mt-2">
-                  Rank #{comparisonData.athlete1.rank || "TBD"}
-                </Badge>
               </div>
-              
-              <div className="text-center">
-                {comparisonData.athlete2.profileImageUrl ? (
-                  <img
-                    src={comparisonData.athlete2.profileImageUrl}
-                    alt={comparisonData.athlete2.name}
-                    className="w-20 h-20 rounded-full object-cover mx-auto mb-3"
-                  />
-                ) : (
-                  <div className="w-20 h-20 rounded-full bg-athlete-gray-600 flex items-center justify-center mx-auto mb-3">
-                    <User className="w-10 h-10 text-gray-400" />
+            ) : (
+              <>
+                {/* Athlete Headers */}
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="text-center">
+                    {comparisonData.athlete1?.profileImageUrl ? (
+                      <img
+                        src={comparisonData.athlete1.profileImageUrl}
+                        alt={comparisonData.athlete1?.name || "Athlete 1"}
+                        className="w-20 h-20 rounded-full object-cover mx-auto mb-3"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-full bg-athlete-gray-600 flex items-center justify-center mx-auto mb-3">
+                        <User className="w-10 h-10 text-gray-400" />
+                      </div>
+                    )}
+                    <h3 className="text-xl font-bold text-white break-words leading-tight px-2">{comparisonData.athlete1?.name || "Athlete 1"}</h3>
+                    <Badge variant="outline" className="mt-2">
+                      Rank #{comparisonData.athlete1?.rank || "TBD"}
+                    </Badge>
                   </div>
-                )}
-                <h3 className="text-xl font-bold text-white break-words leading-tight px-2">{comparisonData.athlete2.name}</h3>
-                <Badge variant="outline" className="mt-2">
-                  Rank #{comparisonData.athlete2.rank || "TBD"}
-                </Badge>
-              </div>
-            </div>
+                  
+                  <div className="text-center">
+                    {comparisonData.athlete2?.profileImageUrl ? (
+                      <img
+                        src={comparisonData.athlete2.profileImageUrl}
+                        alt={comparisonData.athlete2?.name || "Athlete 2"}
+                        className="w-20 h-20 rounded-full object-cover mx-auto mb-3"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-full bg-athlete-gray-600 flex items-center justify-center mx-auto mb-3">
+                        <User className="w-10 h-10 text-gray-400" />
+                      </div>
+                    )}
+                    <h3 className="text-xl font-bold text-white break-words leading-tight px-2">{comparisonData.athlete2?.name || "Athlete 2"}</h3>
+                    <Badge variant="outline" className="mt-2">
+                      Rank #{comparisonData.athlete2?.rank || "TBD"}
+                    </Badge>
+                  </div>
+                </div>
+              </>
+            )}
 
-            {/* Detailed Comparison */}
-            <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-5 bg-athlete-gray-700">
-                <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
-                <TabsTrigger value="detailed" data-testid="tab-detailed">Detailed</TabsTrigger>
-                <TabsTrigger value="strengths" data-testid="tab-strengths">Strengths</TabsTrigger>
+            {/* Detailed Comparison - Only show if no error */}
+            {!comparisonData.error && (
+              <Tabs defaultValue="overview" className="w-full">
+                <TabsList className="grid w-full grid-cols-5 bg-athlete-gray-700">
+                  <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
+                  <TabsTrigger value="detailed" data-testid="tab-detailed">Detailed</TabsTrigger>
+                  <TabsTrigger value="strengths" data-testid="tab-strengths">Strengths</TabsTrigger>
                 <TabsTrigger value="weaknesses" data-testid="tab-weaknesses">Weaknesses</TabsTrigger>
                 <TabsTrigger value="prediction" data-testid="tab-prediction">Head-to-Head</TabsTrigger>
               </TabsList>
@@ -1136,6 +1186,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                 </Card>
               </TabsContent>
             </Tabs>
+            )}
           </div>
         )}
       </CardContent>
