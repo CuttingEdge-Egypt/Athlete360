@@ -2418,18 +2418,30 @@ Return only valid JSON with the missing fields.`;
         rank: athlete2.rank || null
       };
       
-      // Try GPT-5 comparison first, fall back to Gemini if it fails
-      console.log(`Generating GPT-5 basic comparison...`);
+      // Run both AI models in parallel for better performance
+      console.log(`Generating GPT-5 basic comparison and Gemini-2.5-pro detailed analysis in parallel...`);
       let basicComparisonResult;
+      let detailedAnalysisResult;
       let gptFailed = false;
       
       try {
-        basicComparisonResult = await compareAthletes(athlete1ForComparison, athlete2ForComparison, sportName);
-      } catch (gptError: any) {
-        console.error(`GPT-5 comparison failed: ${gptError.message}`);
-        gptFailed = true;
+        // Run both AI models simultaneously
+        const [gptResult, geminiResult] = await Promise.allSettled([
+          compareAthletes(athlete1ForComparison, athlete2ForComparison, sportName),
+          (async () => {
+            const { generateDetailedComparison } = await import('./geminiService.js');
+            return generateDetailedComparison(athlete1ForComparison, athlete2ForComparison, sportName);
+          })()
+        ]);
         
-        // Create fallback structure when GPT-5 completely fails
+        // Handle GPT-5 result
+        if (gptResult.status === 'fulfilled') {
+          basicComparisonResult = gptResult.value;
+        } else {
+          console.error(`GPT-5 comparison failed: ${gptResult.reason?.message || gptResult.reason}`);
+          gptFailed = true;
+          
+          // Create fallback structure when GPT-5 completely fails
         basicComparisonResult = {
           athlete1: {
             name: athlete1.name,
@@ -2466,12 +2478,71 @@ Return only valid JSON with the missing fields.`;
             recommendation: "Analysis could not be generated"
           }
         };
+        }
+        
+        // Handle Gemini result
+        if (geminiResult.status === 'fulfilled') {
+          detailedAnalysisResult = geminiResult.value;
+          console.log(`[GEMINI] Parallel generation completed successfully`);
+        } else {
+          console.error(`Gemini detailed analysis failed: ${geminiResult.reason?.message || geminiResult.reason}`);
+          // Create fallback structure for failed Gemini analysis
+          detailedAnalysisResult = {
+            detailedAnalysis: {
+              athlete1: {
+                name: athlete1.name,
+                country: athlete1.country,
+                currentForm: "Analysis not available - Gemini generation failed",
+                technicalSkills: [],
+                physicalAttributes: {},
+                recentPerformance: {}
+              },
+              athlete2: {
+                name: athlete2.name,
+                country: athlete2.country,
+                currentForm: "Analysis not available - Gemini generation failed",
+                technicalSkills: [],
+                physicalAttributes: {},
+                recentPerformance: {}
+              },
+              comparison: {}
+            },
+            headToHead: {
+              prediction: "athlete1",
+              confidence: 50,
+              reasoning: "Detailed analysis unavailable - Gemini generation failed",
+              keyFactors: ["Analysis unavailable"],
+              scenario: "Unable to provide detailed scenario",
+              tacticalAdvice: {},
+              historicalContext: "Information not found",
+              expertPredictions: "No expert predictions available"
+            }
+          };
+        }
+      } catch (parallelError: any) {
+        console.error(`Parallel generation failed: ${parallelError.message}`);
+        gptFailed = true;
+        
+        // Create minimal fallback data for both services
+        basicComparisonResult = {
+          athlete1: { name: athlete1.name, country: athlete1.country || 'Unknown', rank: 'N/A', profileImageUrl: athlete1.profileImageUrl || '' },
+          athlete2: { name: athlete2.name, country: athlete2.country || 'Unknown', rank: 'N/A', profileImageUrl: athlete2.profileImageUrl || '' },
+          strengths: { athlete1: [], athlete2: [], advantage: "even" },
+          weaknesses: { athlete1: [], athlete2: [], advantage: "even" },
+          ranking: { comparison: "Analysis temporarily unavailable", athlete1Trajectory: "Analysis unavailable", athlete2Trajectory: "Analysis unavailable", competitiveEdge: "even" },
+          headToHead: { prediction: "even", confidence: 50, reasoning: "Analysis temporarily unavailable", keyFactors: ["Analysis unavailable"], scenario: "Analysis temporarily unavailable" },
+          overallAnalysis: { summary: "Analysis temporarily unavailable", betterAthlete: "even", reasonsWhy: ["Analysis unavailable"], closeness: "even", recommendation: "Analysis could not be generated" }
+        };
+        
+        detailedAnalysisResult = {
+          detailedAnalysis: {
+            athlete1: { name: athlete1.name, country: athlete1.country, currentForm: "Analysis not available", technicalSkills: [], physicalAttributes: {}, recentPerformance: {} },
+            athlete2: { name: athlete2.name, country: athlete2.country, currentForm: "Analysis not available", technicalSkills: [], physicalAttributes: {}, recentPerformance: {} },
+            comparison: {}
+          },
+          headToHead: { prediction: "athlete1", confidence: 50, reasoning: "Analysis unavailable", keyFactors: ["Analysis unavailable"], scenario: "Unable to provide detailed scenario", tacticalAdvice: {}, historicalContext: "Information not found", expertPredictions: "No expert predictions available" }
+        };
       }
-      
-      // Generate detailed analysis and head-to-head using Gemini-2.5-pro
-      console.log(`Generating Gemini-2.5-pro detailed analysis and head-to-head...`);
-      const { generateDetailedComparison } = await import('./geminiService.js');
-      const detailedAnalysisResult = await generateDetailedComparison(athlete1ForComparison, athlete2ForComparison, sportName);
       
       // Update queue status to completing after detailed analysis
       if (queueId && (global as any).generationQueue) {
@@ -2598,6 +2669,7 @@ Return only valid JSON with the missing fields.`;
       }
 
       res.json(comparisonResult);
+      
     } catch (error) {
       console.error("Error generating athlete comparison:", error);
       

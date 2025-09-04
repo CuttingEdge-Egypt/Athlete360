@@ -1795,15 +1795,15 @@ export async function compareAthletes(athlete1: any, athlete2: any, sport: strin
   const timestamp = new Date().toISOString();
   const sessionId = Math.random().toString(36).substring(7);
 
-  const prompt = `You are an expert ${sport} analyst and coach. Use your web search capabilities to find current, authentic information about these two athletes and create a comprehensive comparison.
+  const prompt = `You are an expert ${sport} analyst and coach with advanced web search capabilities. You MUST search the internet extensively to find current, authentic information about these two athletes and create a comprehensive comparison.
 
 Session ID: ${sessionId} - Generation Time: ${timestamp}
 
 CRITICAL INSTRUCTIONS:
-1. Use web search to find current competition records, rankings, recent matches, and performance data
-2. Find authentic biographical information, achievements, and career statistics  
-3. Return only valid JSON with no extra text or explanations
-4. Base ALL analysis on current web search results, not pre-existing data
+1. MANDATORY: Use your web search tool to find current competition records, rankings, recent matches, and performance data for both athletes
+2. MANDATORY: Search for authentic biographical information, achievements, and career statistics from official sports federation websites, news sources, and competition databases
+3. MANDATORY: Return only valid JSON with no extra text or explanations - even if you cannot find data, you MUST return the JSON structure
+4. MANDATORY: Base ALL analysis on current web search results from 2024-2025, not pre-existing training data
 
 ATHLETES TO RESEARCH:
 Athlete 1: ${athlete1.name} from ${athlete1.country || 'Unknown country'} (${sport})
@@ -1830,16 +1830,18 @@ Include specific ranking numbers (e.g., "#3 vs #7", "Ranked 5th vs 12th globally
 
 CRITICAL JSON REQUIREMENT: Do NOT include any URLs, links, citations, or parenthetical references in your response. All text must be clean without any bracketed links or references.
 
-FAILURE HANDLING: If you cannot generate authentic analysis due to insufficient data, web search failures, or any other issues, return this exact JSON structure:
+MANDATORY JSON RESPONSE: You MUST always return a valid JSON response. Even if you cannot find complete data through web search, you MUST return the full athlete comparison structure with available data and clearly marked unavailable sections.
+
+Only return this error JSON structure if web search completely fails or you cannot access any information about either athlete:
 {
   "error": "Couldn't Generate",
-  "errorType": "insufficient_data|web_search_failed|parsing_error|other",
+  "errorType": "web_search_failed|athletes_not_found|complete_data_unavailable",
   "errorMessage": "Specific reason why generation failed",
   "retryable": true,
   "suggestion": "What the user should try instead"
 }
 
-Only return error JSON if generation truly fails - otherwise provide the full analysis structure.
+Otherwise, ALWAYS return the full analysis structure even with partial data.
 
 ANALYSIS REQUIREMENTS (use web search for ALL sections):
 1. Strengths Analysis - Find specific technical and tactical strengths from recent competitions
@@ -2017,7 +2019,7 @@ MANDATORY: Use ONLY current web search results. Do not use generic descriptions 
       
       // Return structured error instead of throwing
       return {
-        error: true,
+        error: "Error",
         errorType: "parsing_error",
         errorMessage: `JSON parsing failed: ${parseError.message}`,
         retryable: true,

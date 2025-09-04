@@ -297,7 +297,7 @@ export async function generateDetailedComparison(
       },
     });
 
-    const prompt = `You are an expert ${sport} analyst specializing in detailed athlete comparisons and head-to-head predictions. Use your web search capabilities to find the most current and comprehensive information about these two athletes.
+    const prompt = `You are an expert ${sport} analyst with advanced web search capabilities specializing in detailed athlete comparisons and head-to-head predictions. You MUST search the internet extensively to find the most current and comprehensive information about these two athletes.
 
 Session ID: ${sessionId} - Generation Time: ${timestamp}
 
@@ -306,10 +306,10 @@ Athlete 1: ${athlete1.name} from ${athlete1.country} (${sport})
 Athlete 2: ${athlete2.name} from ${athlete2.country} (${sport})
 
 CRITICAL INSTRUCTIONS:
-1. Search the web extensively for current competition data, rankings, recent results, and performance metrics
-2. Find technical analysis, fighting styles, recent match footage, and expert commentary
-3. Return ONLY valid JSON with no additional text or explanations
-4. Base ALL analysis on current web search findings - no generic content
+1. MANDATORY: Use web search to find current competition data, rankings, recent results, and performance metrics from official federation websites and sports databases
+2. MANDATORY: Search for technical analysis, fighting styles, recent match footage, and expert commentary from credible sports news sources
+3. MANDATORY: Return ONLY valid JSON with no additional text or explanations - you MUST always return JSON even if data is limited
+4. MANDATORY: Base ALL analysis on current web search findings from 2024-2025 - no generic content or training data
 
 WEB SEARCH FOCUS AREAS:
 - Recent competition results and performance trends (2024-2025)
@@ -405,11 +405,12 @@ Return this EXACT JSON structure:
 
 MANDATORY: Use ONLY current web search results from 2024-2025. If specific information cannot be found through web search, clearly state "Information not found through web search" rather than using generic descriptions.
 
-CRITICAL ERROR HANDLING:
-- If you cannot find any reliable comparison data through web search, respond with exactly: {"error": "Couldn't Generate", "errorType": "no_data_found", "errorMessage": "Insufficient authentic data found for both athletes"}
-- If web search fails or returns no results, respond with exactly: {"error": "Error", "errorType": "search_failed", "errorMessage": "Web search capabilities returned no results"}
-- If either athlete's information does not exist, respond with exactly: {"error": "Couldn't Generate", "errorType": "not_found", "errorMessage": "One or both athletes not found in current databases"}
-- Only provide comparison data if you can find authentic, verifiable information about both athletes through web search`;
+MANDATORY JSON RESPONSE: You MUST always return a valid JSON response. Even if you cannot find complete data through web search, you MUST return the full detailed analysis structure with available data and clearly marked unavailable sections.
+
+Only return this error JSON structure if web search completely fails or you cannot access any information about either athlete:
+{"error": "Couldn't Generate", "errorType": "web_search_failed|athletes_not_found|complete_data_unavailable", "errorMessage": "Specific reason why generation failed"}
+
+Otherwise, ALWAYS return the full detailedAnalysis and headToHead structure even with partial data. Mark missing information as "Information not found through web search" rather than returning an error.`;
 
     // Add timeout wrapper to prevent long delays
     const timeoutPromise = new Promise((_, reject) => 
@@ -614,18 +615,20 @@ export async function generateRankHistoryWithGemini(
 
 Return ONLY valid JSON with no markdown formatting or additional text.`;
 
-    // Use new GoogleGenAI client with proper search grounding
-    const result = await genAI.models.generateContent({
+    // Use GoogleGenAI client with proper search grounding
+    const model = googleGenAI.getGenerativeModel({
       model: "gemini-2.5-pro",
-      contents: prompt,
-      config: {
+      generationConfig: {
         temperature: 1,
         maxOutputTokens: 8000,
-        tools: [{ googleSearch: {} }]
-      }
+      },
     });
     
-    let cleanedText = (result.text || "").trim();
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }]
+    });
+    
+    let cleanedText = result.response.text().trim();
     console.log(`Gemini rank response for ${athleteName}:`, cleanedText);
     
     if (!cleanedText) {
