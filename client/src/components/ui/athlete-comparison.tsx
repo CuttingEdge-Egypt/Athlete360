@@ -1293,14 +1293,10 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       <div className="p-3 bg-red-900/30 border border-red-600/50 rounded-lg">
                         <p className="text-red-300">{comparisonData.message}</p>
                       </div>
-                    ) : (parsedData.overallAnalysis?.summary && 
-                         !parsedData.overallAnalysis.summary.includes('temporarily unavailable')) ? (
+                    ) : comparisonData.overallAnalysis?.summary && 
+                         !comparisonData.overallAnalysis.summary.includes('temporarily unavailable') ? (
                       <p className="text-gray-300 leading-relaxed">
-                        {parsedData.overallAnalysis.summary}
-                      </p>
-                    ) : (parsedData.headToHead?.reasoning) ? (
-                      <p className="text-gray-300 leading-relaxed">
-                        {parsedData.headToHead.reasoning}
+                        {comparisonData.overallAnalysis.summary}
                       </p>
                     ) : (
                       <div className="p-3 bg-yellow-900/30 border border-yellow-600/50 rounded-lg">
