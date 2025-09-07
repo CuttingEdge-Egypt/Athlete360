@@ -2350,7 +2350,7 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
-  // Compare two athletes using OpenAI
+  // Compare two athletes using modular Gemini-2.5-pro approach
   app.post('/api/athletes/compare', isAuthenticated, async (req, res) => {
     const tokenCost = 100; // Higher cost for comparison analysis
     let queueId: string | undefined; // Define queueId for queue management
@@ -2400,168 +2400,119 @@ Return only valid JSON with the missing fields.`;
       const sport = await storage.getSportById(athlete1.sportId);
       const sportName = sport?.name || "Unknown Sport";
 
-      console.log(`Generating Gemini-2.5-pro powered comparison between ${athlete1.name} and ${athlete2.name}...`);
+      console.log(`Generating modular Gemini-2.5-pro comparison between ${athlete1.name} and ${athlete2.name}...`);
 
-      // Create minimal athlete data for GPT-5 web search (name, country, sport only)
-      // Also include the stored rank if available
+      // Create athlete data for comparison
       const athlete1ForComparison = {
         name: athlete1.name,
         country: athlete1.country || "Unknown",
-        profileImageUrl: athlete1.profileImageUrl || "",
-        rank: athlete1.rank || null
+        profileImageUrl: athlete1.profileImageUrl || ""
       };
       
       const athlete2ForComparison = {
         name: athlete2.name, 
         country: athlete2.country || "Unknown",
-        profileImageUrl: athlete2.profileImageUrl || "",
-        rank: athlete2.rank || null
+        profileImageUrl: athlete2.profileImageUrl || ""
       };
       
-      // Start asynchronous Gemini-2.5-pro comprehensive comparison with Google search
-      console.log(`Starting threaded Gemini-2.5-pro comprehensive comparison for ${athlete1.name} vs ${athlete2.name}...`);
+      // Import all modular comparison functions
+      const {
+        generateOverviewComparison,
+        generateStrengthsComparison,
+        generateWeaknessesComparison,
+        generateCompetitionHistoryComparison,
+        generateHeadToHeadComparison,
+        generateDetailsComparison
+      } = await import('./geminiService.js');
+
+      // Execute all tab analyses in parallel for maximum efficiency
+      console.log(`🚀 Starting all 6 tab analyses in parallel...`);
       
-      // Return immediate response to prevent user waiting
+      const [
+        overviewResult,
+        strengthsResult,
+        weaknessesResult,
+        competitionHistoryResult,
+        headToHeadResult,
+        detailsResult
+      ] = await Promise.all([
+        generateOverviewComparison(athlete1ForComparison, athlete2ForComparison, sportName),
+        generateStrengthsComparison(athlete1ForComparison, athlete2ForComparison, sportName),
+        generateWeaknessesComparison(athlete1ForComparison, athlete2ForComparison, sportName),
+        generateCompetitionHistoryComparison(athlete1ForComparison, athlete2ForComparison, sportName),
+        generateHeadToHeadComparison(athlete1ForComparison, athlete2ForComparison, sportName),
+        generateDetailsComparison(athlete1ForComparison, athlete2ForComparison, sportName)
+      ]);
+
+      console.log('✅ All 6 tab analyses completed successfully');
+
+      // Structure the response with all tab data
       const comparisonId = Math.random().toString(36).substring(7);
       
-      // Start comparison in background thread
-      (async () => {
-        try {
-          const { generateComprehensiveAthleteComparison } = await import('./geminiService.js');
-          const comparisonResult = await generateComprehensiveAthleteComparison(
-            athlete1ForComparison, 
-            athlete2ForComparison, 
-            sportName
-          );
-          
-          console.log(`✅ Threaded comparison completed for ${athlete1.name} vs ${athlete2.name}`);
-          console.log(`[GEMINI] Comprehensive comparison response length: ${comparisonResult.rawResponse?.length || 0} characters`);
-          
-          // Store result for potential retrieval (optional - could be enhanced with database storage)
-          
-        } catch (error) {
-          console.error(`❌ Threaded comparison failed for ${athlete1.name} vs ${athlete2.name}:`, error);
-        }
-      })();
-      
-      // Return immediate response with threaded processing
-      try {
-        const { generateComprehensiveAthleteComparison } = await import('./geminiService.js');
-        const comparisonResult = await generateComprehensiveAthleteComparison(
-          athlete1ForComparison, 
-          athlete2ForComparison, 
-          sportName
-        );
-        
-        console.log('✅ Gemini comprehensive comparison completed');
-        
-        // Check if we got a raw response structure
-        if (comparisonResult.rawResponse) {
-          return res.json({
-            gptResponse: {
-              rawResponse: comparisonResult.rawResponse,
-              source: comparisonResult.source,
-              athletes: comparisonResult.athletes,
-              timestamp: comparisonResult.timestamp
-            },
-            geminiResponse: {
-              rawResponse: comparisonResult.rawResponse,
-              source: comparisonResult.source,
-              athletes: comparisonResult.athletes,
-              timestamp: comparisonResult.timestamp
-            },
-            isRawResponse: true,
-            comparisonId: comparisonId,
-            note: "Powered by Gemini-2.5-pro with Google Search"
-          });
-        }
-        
-        // Legacy fallback structure
-        const basicComparisonResult = {
-          athlete1: {
-            name: athlete1.name,
-            country: athlete1.country || 'Unknown',
-            rank: 'N/A',
-            profileImageUrl: athlete1.profileImageUrl || ''
+      return res.json({
+        tabs: {
+          overview: {
+            rawResponse: overviewResult.rawResponse,
+            source: overviewResult.source,
+            tabType: overviewResult.tabType
           },
-          athlete2: {
-            name: athlete2.name,
-            country: athlete2.country || 'Unknown',
-            rank: 'N/A',
-            profileImageUrl: athlete2.profileImageUrl || ''
+          strengths: {
+            rawResponse: strengthsResult.rawResponse,
+            source: strengthsResult.source,
+            tabType: strengthsResult.tabType
           },
-          strengths: { athlete1: [], athlete2: [], advantage: "even" },
-          weaknesses: { athlete1: [], athlete2: [], advantage: "even" },
-          ranking: {
-            comparison: "GPT-5 analysis temporarily unavailable",
-            athlete1Trajectory: "Analysis unavailable", 
-            athlete2Trajectory: "Analysis unavailable",
-            competitiveEdge: "even"
+          weaknesses: {
+            rawResponse: weaknessesResult.rawResponse,
+            source: weaknessesResult.source,
+            tabType: weaknessesResult.tabType
+          },
+          competitionHistory: {
+            rawResponse: competitionHistoryResult.rawResponse,
+            source: competitionHistoryResult.source,
+            tabType: competitionHistoryResult.tabType
           },
           headToHead: {
-            prediction: "even",
-            confidence: 50,
-            reasoning: "Analysis temporarily unavailable",
-            keyFactors: ["Analysis unavailable"],
-            scenario: "GPT-5 analysis temporarily unavailable"
+            rawResponse: headToHeadResult.rawResponse,
+            source: headToHeadResult.source,
+            tabType: headToHeadResult.tabType
           },
-          overallAnalysis: {
-            summary: "Analysis temporarily unavailable",
-            betterAthlete: "even",
-            reasonsWhy: ["Analysis unavailable"],
-            closeness: "even", 
-            recommendation: "Analysis could not be generated"
+          details: {
+            rawResponse: detailsResult.rawResponse,
+            source: detailsResult.source,
+            tabType: detailsResult.tabType
           }
-        };
+        },
+        // Legacy compatibility - use overview data for main response
+        gptResponse: {
+          rawResponse: overviewResult.rawResponse,
+          source: "Gemini-2.5-pro",
+          athletes: `${athlete1.name} vs ${athlete2.name}`,
+          timestamp: new Date().toISOString()
+        },
+        comparisonId: comparisonId,
+        note: "Powered by modular Gemini-2.5-pro with Google Search"
+      });
         
-        return res.json({
-          ...basicComparisonResult,
-          aiModels: {
-            basicComparison: "Gemini-2.5-pro",
-            detailedAnalysis: "Gemini-2.5-pro",
-            headToHead: "Gemini-2.5-pro"
-          },
-          comparisonId: comparisonId,
-          note: "Powered by Gemini-2.5-pro with Google Search"
-        });
-        
-      } catch (geminiError) {
-        console.error(`❌ Gemini comprehensive comparison failed:`, geminiError);
-        
-        // Provide token refund for failed comparison
-        if (user && tokenCost > 0 && user.tokens !== null) {
-          const refundAmount = Math.floor(tokenCost * 0.8);
-          console.log(`REFUNDING ${refundAmount} tokens to user ${user.id}: ${user.tokens} → ${user.tokens + refundAmount}`);
-          
-          await storage.updateUserTokens(user.id, user.tokens + refundAmount);
-          
-          await storage.createTransaction({
-            userId: user.id,
-            action: `Refund for failed athlete comparison: ${athlete1.name} vs ${athlete2.name}`,
-            tokensDeducted: -refundAmount, // negative for refund
-            serviceType: 'comparison'
-          });
-          
-          console.log(`🔄 REFUNDED ${refundAmount} tokens to user ${user.id} for failed comparison`);
-        }
-        
-        return res.status(500).json({
-          error: "Comparison failed",
-          message: "Unable to generate athlete comparison",
-          refunded: true
-        });
-      }
-      
-      // Update queue status to completing after detailed analysis
-      if (queueId && (global as any).generationQueue) {
-        (global as any).generationQueue.updateStatus(queueId, 'completing');
-      }
-      
-      // Log the comparison analysis (already handled in Gemini response section above)
-      console.log('✅ Gemini-only athlete comparison completed successfully');
-      
     } catch (error) {
-      console.error("Error generating athlete comparison:", error);
+      console.error(`❌ Modular comparison failed:`, error);
+      
+      // Provide token refund for failed comparison
+      const user = await storage.getUser((req.user as any)?.claims?.sub);
+      if (user && tokenCost > 0 && user.tokens !== null) {
+        const refundAmount = Math.floor(tokenCost * 0.8);
+        console.log(`REFUNDING ${refundAmount} tokens to user ${user.id}: ${user.tokens} → ${user.tokens + refundAmount}`);
+        
+        await storage.updateUserTokens(user.id, user.tokens + refundAmount);
+        
+        await storage.createTransaction({
+          userId: user.id,
+          action: `Refund for failed athlete comparison`,
+          tokensDeducted: -refundAmount, // negative for refund
+          serviceType: 'comparison'
+        });
+        
+        console.log(`🔄 REFUNDED ${refundAmount} tokens to user ${user.id} for failed comparison`);
+      }
       
       // Update queue status to error if it failed
       if (queueId && (global as any).generationQueue) {
@@ -2569,8 +2520,9 @@ Return only valid JSON with the missing fields.`;
       }
       
       res.status(500).json({ 
-        message: "Unable to generate authentic athlete comparison at this time. Please try again later.",
-        error: error instanceof Error ? error.message : String(error)
+        message: "Unable to generate athlete comparison at this time. Please try again later.",
+        error: error instanceof Error ? error.message : String(error),
+        refunded: true
       });
     }
   });
