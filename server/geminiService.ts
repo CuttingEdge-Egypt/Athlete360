@@ -279,7 +279,440 @@ CRITICAL ERROR HANDLING:
   }
 }
 
-// Comprehensive Gemini-2.5-pro athlete comparison with Google search and threading support
+// Modular Gemini-2.5-pro comparison functions for each tab
+
+// 1. Overview Tab - Basic athlete information and rankings
+export async function generateOverviewComparison(
+  athlete1: { name: string; country: string; profileImageUrl?: string },
+  athlete2: { name: string; country: string; profileImageUrl?: string },
+  sport: string
+): Promise<any> {
+  try {
+    const prompt = `You are an expert ${sport} analyst with Google search capabilities. Find current ranking and basic information for these two athletes.
+
+ATHLETES TO ANALYZE:
+Athlete 1: ${athlete1.name} from ${athlete1.country} (${sport})
+Athlete 2: ${athlete2.name} from ${athlete2.country} (${sport})
+
+MANDATORY: Use Google search to find current World ${sport} rankings 2024-2025.
+
+Return ONLY pure JSON (no markdown blocks):
+{
+  "athlete1": {
+    "name": "${athlete1.name}",
+    "country": "${athlete1.country}", 
+    "rank": "Current world ranking from search or 'Unranked'",
+    "profileImageUrl": "${athlete1.profileImageUrl || ''}"
+  },
+  "athlete2": {
+    "name": "${athlete2.name}",
+    "country": "${athlete2.country}",
+    "rank": "Current world ranking from search or 'Unranked'", 
+    "profileImageUrl": "${athlete2.profileImageUrl || ''}"
+  },
+  "overallAnalysis": {
+    "summary": "Brief comparison summary based on rankings and recent form",
+    "betterAthlete": "athlete1, athlete2, or even",
+    "reasonsWhy": ["Primary reasons based on current standings"],
+    "closeness": "clear-difference, somewhat-close, or very-close"
+  }
+}`;
+
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      contents: prompt,
+      config: {
+        temperature: 0.1,
+        maxOutputTokens: 2048,
+        tools: [{ googleSearch: {} }]
+      }
+    });
+
+    let responseText = result.text || "";
+    responseText = responseText.trim()
+      .replace(/^```json\s*/, '').replace(/\s*```$/, '')
+      .replace(/^```\s*/, '').replace(/\s*```$/, '');
+    
+    const jsonStart = responseText.indexOf('{');
+    const jsonEnd = responseText.lastIndexOf('}');
+    if (jsonStart !== -1 && jsonEnd !== -1 && jsonStart < jsonEnd) {
+      responseText = responseText.substring(jsonStart, jsonEnd + 1);
+    }
+
+    return {
+      rawResponse: responseText,
+      source: "Gemini-2.5-pro",
+      tabType: "overview"
+    };
+  } catch (error) {
+    console.error("Error generating overview comparison:", error);
+    throw new Error(`Failed to generate overview: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+// 2. Strengths Tab - Detailed strength analysis
+export async function generateStrengthsComparison(
+  athlete1: { name: string; country: string; profileImageUrl?: string },
+  athlete2: { name: string; country: string; profileImageUrl?: string },
+  sport: string
+): Promise<any> {
+  try {
+    const prompt = `You are an expert ${sport} analyst. Analyze the specific strengths of these two athletes using Google search.
+
+ATHLETES: ${athlete1.name} (${athlete1.country}) vs ${athlete2.name} (${athlete2.country}) in ${sport}
+
+MANDATORY: Search for technical skills, recent performances, signature techniques, and competitive advantages.
+
+Return ONLY pure JSON:
+{
+  "strengths": {
+    "athlete1": [
+      {
+        "title": "Specific strength name",
+        "description": "Detailed explanation with evidence",
+        "rating": 90,
+        "evidence": "Recent examples from competitions"
+      }
+    ],
+    "athlete2": [
+      {
+        "title": "Specific strength name", 
+        "description": "Detailed explanation with evidence",
+        "rating": 88,
+        "evidence": "Recent examples from competitions"
+      }
+    ],
+    "advantage": "athlete1, athlete2, or even"
+  }
+}`;
+
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      contents: prompt,
+      config: {
+        temperature: 0.1,
+        maxOutputTokens: 3072,
+        tools: [{ googleSearch: {} }]
+      }
+    });
+
+    let responseText = result.text || "";
+    responseText = responseText.trim()
+      .replace(/^```json\s*/, '').replace(/\s*```$/, '')
+      .replace(/^```\s*/, '').replace(/\s*```$/, '');
+    
+    const jsonStart = responseText.indexOf('{');
+    const jsonEnd = responseText.lastIndexOf('}');
+    if (jsonStart !== -1 && jsonEnd !== -1 && jsonStart < jsonEnd) {
+      responseText = responseText.substring(jsonStart, jsonEnd + 1);
+    }
+
+    return {
+      rawResponse: responseText,
+      source: "Gemini-2.5-pro",
+      tabType: "strengths"
+    };
+  } catch (error) {
+    console.error("Error generating strengths comparison:", error);
+    throw new Error(`Failed to generate strengths: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+// 3. Weaknesses Tab - Detailed weakness analysis
+export async function generateWeaknessesComparison(
+  athlete1: { name: string; country: string; profileImageUrl?: string },
+  athlete2: { name: string; country: string; profileImageUrl?: string },
+  sport: string
+): Promise<any> {
+  try {
+    const prompt = `You are an expert ${sport} analyst. Analyze areas for improvement and weaknesses for these athletes using Google search.
+
+ATHLETES: ${athlete1.name} (${athlete1.country}) vs ${athlete2.name} (${athlete2.country}) in ${sport}
+
+MANDATORY: Search for technical weaknesses, past struggles, and areas opponents have exploited.
+
+Return ONLY pure JSON:
+{
+  "weaknesses": {
+    "athlete1": [
+      {
+        "title": "Area for improvement",
+        "description": "Detailed explanation",
+        "impact": "high, medium, or low",
+        "exploitation": "How opponents can exploit this"
+      }
+    ],
+    "athlete2": [
+      {
+        "title": "Area for improvement",
+        "description": "Detailed explanation", 
+        "impact": "high, medium, or low",
+        "exploitation": "How opponents can exploit this"
+      }
+    ],
+    "advantage": "athlete1, athlete2, or even"
+  }
+}`;
+
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      contents: prompt,
+      config: {
+        temperature: 0.1,
+        maxOutputTokens: 3072,
+        tools: [{ googleSearch: {} }]
+      }
+    });
+
+    let responseText = result.text || "";
+    responseText = responseText.trim()
+      .replace(/^```json\s*/, '').replace(/\s*```$/, '')
+      .replace(/^```\s*/, '').replace(/\s*```$/, '');
+    
+    const jsonStart = responseText.indexOf('{');
+    const jsonEnd = responseText.lastIndexOf('}');
+    if (jsonStart !== -1 && jsonEnd !== -1 && jsonStart < jsonEnd) {
+      responseText = responseText.substring(jsonStart, jsonEnd + 1);
+    }
+
+    return {
+      rawResponse: responseText,
+      source: "Gemini-2.5-pro",
+      tabType: "weaknesses"
+    };
+  } catch (error) {
+    console.error("Error generating weaknesses comparison:", error);
+    throw new Error(`Failed to generate weaknesses: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+// 4. Competition History Tab - Career achievements and trajectory
+export async function generateCompetitionHistoryComparison(
+  athlete1: { name: string; country: string; profileImageUrl?: string },
+  athlete2: { name: string; country: string; profileImageUrl?: string },
+  sport: string
+): Promise<any> {
+  try {
+    const prompt = `You are an expert ${sport} analyst. Research the competition history and achievements of these athletes using Google search.
+
+ATHLETES: ${athlete1.name} (${athlete1.country}) vs ${athlete2.name} (${athlete2.country}) in ${sport}
+
+MANDATORY: Search for major tournament wins, career milestones, ranking progression, and recent competition results.
+
+Return ONLY pure JSON:
+{
+  "ranking": {
+    "comparison": "Current ranking analysis from search",
+    "athlete1Trajectory": "Recent ranking progression and trajectory",
+    "athlete2Trajectory": "Recent ranking progression and trajectory", 
+    "competitiveEdge": "athlete1, athlete2, or even"
+  }
+}`;
+
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      contents: prompt,
+      config: {
+        temperature: 0.1,
+        maxOutputTokens: 3072,
+        tools: [{ googleSearch: {} }]
+      }
+    });
+
+    let responseText = result.text || "";
+    responseText = responseText.trim()
+      .replace(/^```json\s*/, '').replace(/\s*```$/, '')
+      .replace(/^```\s*/, '').replace(/\s*```$/, '');
+    
+    const jsonStart = responseText.indexOf('{');
+    const jsonEnd = responseText.lastIndexOf('}');
+    if (jsonStart !== -1 && jsonEnd !== -1 && jsonStart < jsonEnd) {
+      responseText = responseText.substring(jsonStart, jsonEnd + 1);
+    }
+
+    return {
+      rawResponse: responseText,
+      source: "Gemini-2.5-pro",
+      tabType: "competition-history"
+    };
+  } catch (error) {
+    console.error("Error generating competition history:", error);
+    throw new Error(`Failed to generate competition history: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+// 5. Head-to-Head Tab - Direct prediction and match analysis
+export async function generateHeadToHeadComparison(
+  athlete1: { name: string; country: string; profileImageUrl?: string },
+  athlete2: { name: string; country: string; profileImageUrl?: string },
+  sport: string
+): Promise<any> {
+  try {
+    const prompt = `You are an expert ${sport} analyst. Provide head-to-head prediction analysis for these athletes using Google search.
+
+ATHLETES: ${athlete1.name} (${athlete1.country}) vs ${athlete2.name} (${athlete2.country}) in ${sport}
+
+MANDATORY: Search for previous meetings, fighting styles, recent form, and expert predictions.
+
+Return ONLY pure JSON:
+{
+  "headToHead": {
+    "prediction": "athlete1 or athlete2",
+    "confidence": 75,
+    "reasoning": "Comprehensive prediction based on analysis",
+    "keyFactors": [
+      "Most important factor",
+      "Second factor",
+      "Third factor"
+    ],
+    "scenario": "Detailed match scenario prediction",
+    "tacticalAdvice": {
+      "forAthlete1": "Strategic advice based on opponent analysis",
+      "forAthlete2": "Strategic advice based on opponent analysis"
+    },
+    "historicalContext": "Previous meetings or similar matchups",
+    "expertPredictions": "Expert opinions from search or 'No predictions found'"
+  }
+}`;
+
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      contents: prompt,
+      config: {
+        temperature: 0.1,
+        maxOutputTokens: 4096,
+        tools: [{ googleSearch: {} }]
+      }
+    });
+
+    let responseText = result.text || "";
+    responseText = responseText.trim()
+      .replace(/^```json\s*/, '').replace(/\s*```$/, '')
+      .replace(/^```\s*/, '').replace(/\s*```$/, '');
+    
+    const jsonStart = responseText.indexOf('{');
+    const jsonEnd = responseText.lastIndexOf('}');
+    if (jsonStart !== -1 && jsonEnd !== -1 && jsonStart < jsonEnd) {
+      responseText = responseText.substring(jsonStart, jsonEnd + 1);
+    }
+
+    return {
+      rawResponse: responseText,
+      source: "Gemini-2.5-pro",
+      tabType: "head-to-head"
+    };
+  } catch (error) {
+    console.error("Error generating head-to-head comparison:", error);
+    throw new Error(`Failed to generate head-to-head: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+// 6. Details Tab - Comprehensive technical analysis
+export async function generateDetailsComparison(
+  athlete1: { name: string; country: string; profileImageUrl?: string },
+  athlete2: { name: string; country: string; profileImageUrl?: string },
+  sport: string
+): Promise<any> {
+  try {
+    const prompt = `You are an expert ${sport} analyst. Provide detailed technical analysis of these athletes using Google search.
+
+ATHLETES: ${athlete1.name} (${athlete1.country}) vs ${athlete2.name} (${athlete2.country}) in ${sport}
+
+MANDATORY: Search for physical attributes, technical skills, training methods, and performance metrics.
+
+Return ONLY pure JSON:
+{
+  "detailedAnalysis": {
+    "athlete1": {
+      "name": "${athlete1.name}",
+      "country": "${athlete1.country}",
+      "currentForm": "Recent performance analysis",
+      "technicalSkills": [
+        {
+          "skill": "Specific technique name",
+          "proficiency": 95,
+          "description": "Analysis with evidence",
+          "evidence": "Examples from recent competitions"
+        }
+      ],
+      "physicalAttributes": {
+        "height": "From search or 'Not found'",
+        "weight": "Competition weight class",
+        "reach": "From search or 'Not found'", 
+        "stance": "Fighting stance",
+        "strengths": ["Physical advantages"]
+      },
+      "recentPerformance": {
+        "wins": "Recent win count",
+        "losses": "Recent loss count",
+        "lastCompetition": "Most recent competition", 
+        "rankingChange": "Recent ranking progression",
+        "form": "Current form assessment"
+      }
+    },
+    "athlete2": {
+      "name": "${athlete2.name}",
+      "country": "${athlete2.country}",
+      "currentForm": "Recent performance analysis",
+      "technicalSkills": [
+        {
+          "skill": "Specific technique name", 
+          "proficiency": 92,
+          "description": "Analysis with evidence",
+          "evidence": "Examples from recent competitions"
+        }
+      ],
+      "physicalAttributes": {
+        "height": "From search or 'Not found'",
+        "weight": "Competition weight class",
+        "reach": "From search or 'Not found'",
+        "stance": "Fighting stance", 
+        "strengths": ["Physical advantages"]
+      },
+      "recentPerformance": {
+        "wins": "Recent win count",
+        "losses": "Recent loss count",
+        "lastCompetition": "Most recent competition",
+        "rankingChange": "Recent ranking progression", 
+        "form": "Current form assessment"
+      }
+    }
+  }
+}`;
+
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      contents: prompt,
+      config: {
+        temperature: 0.1,
+        maxOutputTokens: 6144,
+        tools: [{ googleSearch: {} }]
+      }
+    });
+
+    let responseText = result.text || "";
+    responseText = responseText.trim()
+      .replace(/^```json\s*/, '').replace(/\s*```$/, '')
+      .replace(/^```\s*/, '').replace(/\s*```$/, '');
+    
+    const jsonStart = responseText.indexOf('{');
+    const jsonEnd = responseText.lastIndexOf('}');
+    if (jsonStart !== -1 && jsonEnd !== -1 && jsonStart < jsonEnd) {
+      responseText = responseText.substring(jsonStart, jsonEnd + 1);
+    }
+
+    return {
+      rawResponse: responseText,
+      source: "Gemini-2.5-pro",
+      tabType: "details"
+    };
+  } catch (error) {
+    console.error("Error generating details comparison:", error);
+    throw new Error(`Failed to generate details: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+// Legacy comprehensive comparison function (kept for backward compatibility)
 export async function generateComprehensiveAthleteComparison(
   athlete1: { name: string; country: string; profileImageUrl?: string },
   athlete2: { name: string; country: string; profileImageUrl?: string },
