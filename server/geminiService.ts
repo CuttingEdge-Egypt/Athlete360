@@ -275,7 +275,7 @@ CRITICAL ERROR HANDLING:
       retryable: true,
       suggestion: "Please try again or check if the athlete information is correct",
       days: []
-    };
+    } as any;
   }
 }
 
@@ -471,7 +471,7 @@ Otherwise, ALWAYS return the complete structure with available data.`;
       }
     });
 
-    const responseText = await result.text();
+    const responseText = result.text || "";
     
     console.log(`[GEMINI] Comprehensive comparison response for ${athlete1.name} vs ${athlete2.name}`);
     console.log(`[GEMINI] Response length: ${responseText.length} characters`);

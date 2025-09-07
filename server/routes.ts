@@ -1516,7 +1516,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const nutritionPlan = await generateNutritionPlan(
         athlete.name, 
         sportName, 
-        athleteAge || 25, // Default age if not provided
+        Number(athleteAge) || 25, // Default age if not provided
         athleteGender || 'Unknown', 
         athleteCountry || 'International'
       );
@@ -2529,27 +2529,20 @@ Return only valid JSON with the missing fields.`;
         console.error(`❌ Gemini comprehensive comparison failed:`, geminiError);
         
         // Provide token refund for failed comparison
-        if (currentUser && tokenCost > 0) {
+        if (user && tokenCost > 0 && user.tokens !== null) {
           const refundAmount = Math.floor(tokenCost * 0.8);
-          console.log(`REFUNDING ${refundAmount} tokens to user ${currentUser.id}: ${currentUser.tokens} → ${currentUser.tokens + refundAmount}`);
+          console.log(`REFUNDING ${refundAmount} tokens to user ${user.id}: ${user.tokens} → ${user.tokens + refundAmount}`);
           
-          await storage.updateUserTokens(currentUser.id, currentUser.tokens + refundAmount);
+          await storage.updateUserTokens(user.id, user.tokens + refundAmount);
           
-          await storage.createTokenTransaction({
-            userId: currentUser.id,
-            amount: refundAmount,
-            type: 'refund',
-            description: `Refund for failed athlete comparison: ${athlete1.name} vs ${athlete2.name}`,
-            serviceType: 'comparison',
-            metadata: {
-              originalCost: tokenCost,
-              refundReason: 'comparison_failed',
-              athletes: `${athlete1.name} vs ${athlete2.name}`,
-              sport: sportName
-            }
+          await storage.createTransaction({
+            userId: user.id,
+            action: `Refund for failed athlete comparison: ${athlete1.name} vs ${athlete2.name}`,
+            tokensDeducted: -refundAmount, // negative for refund
+            serviceType: 'comparison'
           });
           
-          console.log(`🔄 REFUNDED ${refundAmount} tokens to user ${currentUser.id} for failed comparison`);
+          console.log(`🔄 REFUNDED ${refundAmount} tokens to user ${user.id} for failed comparison`);
         }
         
         return res.status(500).json({
