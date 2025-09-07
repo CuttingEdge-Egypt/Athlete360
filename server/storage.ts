@@ -717,12 +717,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async clearUserHistory(userId: string): Promise<void> {
-    await db.transaction(async (tx) => {
-      // Clear transactions
-      await tx.delete(transactions).where(eq(transactions.userId, userId));
-      // Clear analysis logs
-      await tx.delete(analysisLogs).where(eq(analysisLogs.userId, userId));
-    });
+    // Clear transactions and analysis logs (no transaction support in neon-http driver)
+    await db.delete(transactions).where(eq(transactions.userId, userId));
+    await db.delete(analysisLogs).where(eq(analysisLogs.userId, userId));
   }
 
   // Payment card operations
