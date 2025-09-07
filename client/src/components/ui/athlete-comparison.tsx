@@ -566,60 +566,112 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
           )}
         </Button>
 
-        {/* Parsed Comparison Results */}
-        {comparisonData?.isRawResponse && (
+        {/* Parsed Comparison Results - New Modular Tab Structure */}
+        {(comparisonData?.tabs || comparisonData?.isRawResponse) && (
           <div className="space-y-6 mt-8">
             <Separator className="bg-gray-600" />
             {(() => {
-              // Parse both JSON responses
-              let gptData = null;
-              let geminiData = null;
+              // Parse modular tab responses
+              let overviewData = null;
+              let strengthsData = null;
+              let weaknessesData = null;
+              let competitionHistoryData = null;
+              let headToHeadData = null;
+              let detailsData = null;
               
-              try {
-                if (comparisonData.gptResponse?.rawResponse) {
-                  // Clean GPT response 
-                  let cleanedGpt = comparisonData.gptResponse.rawResponse.trim();
-                  // Handle cases where response may be incomplete due to streaming/truncation
-                  if (!cleanedGpt.endsWith('}')) {
-                    const lastBrace = cleanedGpt.lastIndexOf('}');
-                    if (lastBrace > 0) {
-                      cleanedGpt = cleanedGpt.substring(0, lastBrace + 1);
-                    }
+              // New modular approach - parse each tab separately
+              if (comparisonData.tabs) {
+                // Parse Overview tab
+                try {
+                  if (comparisonData.tabs.overview?.rawResponse) {
+                    overviewData = JSON.parse(comparisonData.tabs.overview.rawResponse);
                   }
-                  gptData = JSON.parse(cleanedGpt);
+                } catch (error) {
+                  console.warn('Could not parse Overview tab:', error instanceof Error ? error.message : 'Unknown error');
                 }
-              } catch (error) {
-                console.warn('Could not parse GPT response:', error instanceof Error ? error.message : 'Unknown error');
+
+                // Parse Strengths tab
+                try {
+                  if (comparisonData.tabs.strengths?.rawResponse) {
+                    strengthsData = JSON.parse(comparisonData.tabs.strengths.rawResponse);
+                  }
+                } catch (error) {
+                  console.warn('Could not parse Strengths tab:', error instanceof Error ? error.message : 'Unknown error');
+                }
+
+                // Parse Weaknesses tab
+                try {
+                  if (comparisonData.tabs.weaknesses?.rawResponse) {
+                    weaknessesData = JSON.parse(comparisonData.tabs.weaknesses.rawResponse);
+                  }
+                } catch (error) {
+                  console.warn('Could not parse Weaknesses tab:', error instanceof Error ? error.message : 'Unknown error');
+                }
+
+                // Parse Competition History tab
+                try {
+                  if (comparisonData.tabs.competitionHistory?.rawResponse) {
+                    competitionHistoryData = JSON.parse(comparisonData.tabs.competitionHistory.rawResponse);
+                  }
+                } catch (error) {
+                  console.warn('Could not parse Competition History tab:', error instanceof Error ? error.message : 'Unknown error');
+                }
+
+                // Parse Head-to-Head tab
+                try {
+                  if (comparisonData.tabs.headToHead?.rawResponse) {
+                    headToHeadData = JSON.parse(comparisonData.tabs.headToHead.rawResponse);
+                  }
+                } catch (error) {
+                  console.warn('Could not parse Head-to-Head tab:', error instanceof Error ? error.message : 'Unknown error');
+                }
+
+                // Parse Details tab
+                try {
+                  if (comparisonData.tabs.details?.rawResponse) {
+                    detailsData = JSON.parse(comparisonData.tabs.details.rawResponse);
+                  }
+                } catch (error) {
+                  console.warn('Could not parse Details tab:', error instanceof Error ? error.message : 'Unknown error');
+                }
+              } else {
+                // Legacy fallback for old response format
+                try {
+                  if (comparisonData.gptResponse?.rawResponse) {
+                    let cleanedGpt = comparisonData.gptResponse.rawResponse.trim();
+                    if (!cleanedGpt.endsWith('}')) {
+                      const lastBrace = cleanedGpt.lastIndexOf('}');
+                      if (lastBrace > 0) {
+                        cleanedGpt = cleanedGpt.substring(0, lastBrace + 1);
+                      }
+                    }
+                    const legacyData = JSON.parse(cleanedGpt);
+                    overviewData = {
+                      athlete1: legacyData.athlete1,
+                      athlete2: legacyData.athlete2,
+                      overallAnalysis: legacyData.overallAnalysis
+                    };
+                    strengthsData = { strengths: legacyData.strengths };
+                    weaknessesData = { weaknesses: legacyData.weaknesses };
+                    competitionHistoryData = { ranking: legacyData.ranking };
+                    headToHeadData = { headToHead: legacyData.headToHead };
+                    detailsData = { detailedAnalysis: legacyData.detailedAnalysis };
+                  }
+                } catch (error) {
+                  console.warn('Could not parse legacy response:', error instanceof Error ? error.message : 'Unknown error');
+                }
               }
               
-              try {
-                if (comparisonData.geminiResponse?.rawResponse) {
-                  // Clean Gemini response - remove markdown wrapper
-                  let cleanedGemini = comparisonData.geminiResponse.rawResponse.trim();
-                  cleanedGemini = cleanedGemini.replace(/^```json\s*/, '').replace(/```\s*$/, '').trim();
-                  // Handle cases where response may be incomplete
-                  if (!cleanedGemini.endsWith('}')) {
-                    const lastBrace = cleanedGemini.lastIndexOf('}');
-                    if (lastBrace > 0) {
-                      cleanedGemini = cleanedGemini.substring(0, lastBrace + 1);
-                    }
-                  }
-                  geminiData = JSON.parse(cleanedGemini);
-                }
-              } catch (error) {
-                console.warn('Could not parse Gemini response:', error instanceof Error ? error.message : 'Unknown error');
-              }
-              
-              // Use GPT data as primary source, Gemini for detailed analysis
+              // Create unified data structure for rendering
               const parsedData = {
-                athlete1: gptData?.athlete1 || { name: "Athlete 1", country: "Unknown", rank: "N/A" },
-                athlete2: gptData?.athlete2 || { name: "Athlete 2", country: "Unknown", rank: "N/A" },
-                strengths: gptData?.strengths,
-                weaknesses: gptData?.weaknesses,
-                ranking: gptData?.ranking,
-                headToHead: gptData?.headToHead || geminiData?.headToHead,
-                overallAnalysis: gptData?.overallAnalysis,
-                detailedAnalysis: geminiData?.detailedAnalysis
+                athlete1: overviewData?.athlete1 || { name: "Athlete 1", country: "Unknown", rank: "N/A" },
+                athlete2: overviewData?.athlete2 || { name: "Athlete 2", country: "Unknown", rank: "N/A" },
+                strengths: strengthsData?.strengths,
+                weaknesses: weaknessesData?.weaknesses,
+                ranking: competitionHistoryData?.ranking,
+                headToHead: headToHeadData?.headToHead,
+                overallAnalysis: overviewData?.overallAnalysis,
+                detailedAnalysis: detailsData?.detailedAnalysis
               };
 
               return (
