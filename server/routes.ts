@@ -2449,7 +2449,7 @@ Return only valid JSON with the missing fields.`;
       // Structure the response with all tab data
       const comparisonId = Math.random().toString(36).substring(7);
       
-      return res.json({
+      const responseData = {
         tabs: {
           overview: {
             rawResponse: overviewResult.rawResponse,
@@ -2491,7 +2491,17 @@ Return only valid JSON with the missing fields.`;
         },
         comparisonId: comparisonId,
         note: "Powered by modular Gemini-2.5-pro with Google Search"
+      };
+
+      // Save comparison results to database for history
+      await storage.createAnalysisLog({
+        userId,
+        athleteId: athlete1Id, // Use first athlete as primary reference
+        serviceType: "comparison",
+        resultData: responseData
       });
+
+      return res.json(responseData);
         
     } catch (error) {
       console.error(`❌ Modular comparison failed:`, error);
