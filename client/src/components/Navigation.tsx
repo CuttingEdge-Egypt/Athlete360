@@ -63,16 +63,19 @@ export function Navigation() {
             </div>
           </div>
           
-          <Link href="/video-analysis">
-            <Button 
-              data-testid="button-video-analysis"
-              variant="ghost"
-              className="text-gray-300 hover:text-white"
-            >
-              <Video className="mr-2" size={16} />
-              Video Analysis
-            </Button>
-          </Link>
+          <Button 
+            data-testid="button-video-analysis"
+            variant="ghost"
+            className="text-gray-300 hover:text-white"
+            onClick={() => {
+              // Clear any URL parameters and sessionStorage to ensure fresh start
+              sessionStorage.removeItem('videoAnalysisData');
+              setLocation('/video-analysis');
+            }}
+          >
+            <Video className="mr-2" size={16} />
+            Video Analysis
+          </Button>
           
           <Link href="/payment-center">
             <Button 
