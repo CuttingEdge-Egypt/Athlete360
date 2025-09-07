@@ -602,7 +602,7 @@ export async function getAthleteProfile(name: string, sport: string, nationality
       model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after gpt-4o. do not change this unless explicitly requested by the user
       input: prompt,
       tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 6000,
+      max_output_tokens: 8000,
       // temperature: 1.0 is default and minimum for GPT-5
     });
 
@@ -670,7 +670,7 @@ export async function getDetailedAnalysis(athleteName: string, sport: string): P
       model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after gpt-4o. do not change this unless explicitly requested by the user
       input: prompt,
       tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 6000,
+      max_output_tokens: 8000,
       // temperature: 1.0 is default and minimum for GPT-5
     });
 
@@ -763,7 +763,7 @@ IMPORTANT: Do not include any links, URLs, citations, or reference sources in yo
       model: "gpt-5",
       input: prompt,
       tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 6000,
+      max_output_tokens: 8000,
     });
 
     // Apply the same robust JSON cleanup used in generateSpecificAnalysis
@@ -1054,7 +1054,7 @@ RESPONSE FORMAT REQUIREMENTS:
       model: "gpt-5",
       input: prompt,
       tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 6000,
+      max_output_tokens: 8000,
     });
 
     let cleanedText = response.output_text.trim();
@@ -1522,7 +1522,7 @@ CRITICAL ERROR HANDLING:
       model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after gpt-4o. do not change this unless explicitly requested by the user
       input: prompt,
       tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 6000,
+      max_output_tokens: 8000,
       // temperature: 1.0 is default and minimum for GPT-5
     });
 
@@ -2116,7 +2116,7 @@ MANDATORY: Use ONLY current web search results. Do not use generic descriptions 
       model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released after gpt-4o. do not change this unless explicitly requested by the user
       input: prompt,
       tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 6000,
+      max_output_tokens: 8000,
       // temperature: 1.0 is default and minimum for GPT-5
     });
 

@@ -610,10 +610,6 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                 console.warn('Could not parse Gemini response:', error instanceof Error ? error.message : 'Unknown error');
               }
               
-              // Debug: Log parsed data structures
-              console.log('Parsed GPT data structure:', gptData);
-              console.log('Parsed Gemini data structure:', geminiData);
-              
               // Use GPT data as primary source, Gemini for detailed analysis
               const parsedData = {
                 athlete1: gptData?.athlete1 || { name: "Athlete 1", country: "Unknown", rank: "N/A" },
@@ -623,19 +619,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                 ranking: gptData?.ranking,
                 headToHead: gptData?.headToHead || geminiData?.headToHead,
                 overallAnalysis: gptData?.overallAnalysis,
-                // Map Gemini detailed analysis structure correctly - fix the root structure
-                detailedAnalysis: geminiData?.detailedAnalysis || (geminiData ? {
-                  athlete1: {
-                    name: gptData?.athlete1?.name || "Athlete 1",
-                    currentForm: geminiData.athlete1?.currentForm || geminiData.athlete1?.recentPerformance?.form || "No current form data available",
-                    technicalSkills: geminiData.athlete1?.technicalSkills || []
-                  },
-                  athlete2: {
-                    name: gptData?.athlete2?.name || "Athlete 2", 
-                    currentForm: geminiData.athlete2?.currentForm || geminiData.athlete2?.recentPerformance?.form || "No current form data available",
-                    technicalSkills: geminiData.athlete2?.technicalSkills || []
-                  }
-                } : null)
+                detailedAnalysis: geminiData?.detailedAnalysis
               };
 
               return (
