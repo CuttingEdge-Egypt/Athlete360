@@ -38,7 +38,7 @@ import {
   type InsertSavedCard,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, asc, sql, ilike } from "drizzle-orm";
+import { eq, desc, and, asc, sql, ilike, ne } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -682,7 +682,12 @@ export class DatabaseStorage implements IStorage {
         .from(transactions)
         .leftJoin(athletes, eq(transactions.athleteId, athletes.id))
         .leftJoin(sports, eq(athletes.sportId, sports.id))
-        .where(eq(transactions.userId, userId))
+        .where(
+          and(
+            eq(transactions.userId, userId),
+            ne(transactions.serviceType, 'comparison') // Exclude comparison transactions since analysis logs have the data
+          )
+        )
         .orderBy(desc(transactions.createdAt))
         .limit(50),
         
