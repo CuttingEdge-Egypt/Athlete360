@@ -697,7 +697,16 @@ export class DatabaseStorage implements IStorage {
           id: analysisLogs.id,
           action: sql`'analysis'`.as("action"),
           serviceType: analysisLogs.serviceType,
-          tokensDeducted: sql`50`.as("tokensDeducted"), // Default token cost
+          tokensDeducted: sql`
+            CASE 
+              WHEN ${analysisLogs.serviceType} = 'video' THEN 200
+              WHEN ${analysisLogs.serviceType} = 'comparison' THEN 100
+              WHEN ${analysisLogs.serviceType} = 'development' THEN 80
+              WHEN ${analysisLogs.serviceType} = 'nutrition-plan' THEN 75
+              WHEN ${analysisLogs.serviceType} = 'rank' THEN 70
+              ELSE 50
+            END
+          `.as("tokensDeducted"),
           athleteId: analysisLogs.athleteId,
           athleteName: athletes.name,
           athleteSport: sports.name,
