@@ -85,9 +85,9 @@ export function HistoryDropdown() {
     console.log('HistoryDropdown clicked item:', item);
     
     if (item.serviceType === 'comparison') {
-      // Navigate to home with comparison tab and data
-      const encodedData = encodeURIComponent(JSON.stringify(item.resultData));
-      const url = "/?tab=comparison&data=" + encodedData;
+      // Store comparison data in sessionStorage to avoid URL length limits
+      sessionStorage.setItem('comparisonData', JSON.stringify(item.resultData));
+      const url = "/?tab=comparison&data=fromStorage";
       console.log('Navigating to:', url);
       
       // Use both wouter navigation and manual URL update

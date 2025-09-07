@@ -78,7 +78,22 @@ export default function Home() {
       
       if (tab === 'comparison' && data) {
         try {
-          const parsedData = JSON.parse(decodeURIComponent(data));
+          let parsedData;
+          if (data === 'fromStorage') {
+            // Get data from sessionStorage
+            const storedData = sessionStorage.getItem('comparisonData');
+            if (storedData) {
+              parsedData = JSON.parse(storedData);
+              // Clean up sessionStorage after use
+              sessionStorage.removeItem('comparisonData');
+            } else {
+              throw new Error('No comparison data found in sessionStorage');
+            }
+          } else {
+            // Legacy URL-based approach
+            parsedData = JSON.parse(decodeURIComponent(data));
+          }
+          
           console.log('Parsed comparison data:', parsedData);
           setComparisonData(parsedData);
           setActiveTab("comparison");
@@ -123,7 +138,22 @@ export default function Home() {
     
     if (tab === 'comparison' && data) {
       try {
-        const parsedData = JSON.parse(decodeURIComponent(data));
+        let parsedData;
+        if (data === 'fromStorage') {
+          // Get data from sessionStorage
+          const storedData = sessionStorage.getItem('comparisonData');
+          if (storedData) {
+            parsedData = JSON.parse(storedData);
+            // Clean up sessionStorage after use
+            sessionStorage.removeItem('comparisonData');
+          } else {
+            throw new Error('No comparison data found in sessionStorage');
+          }
+        } else {
+          // Legacy URL-based approach
+          parsedData = JSON.parse(decodeURIComponent(data));
+        }
+        
         console.log('Location change - Parsed comparison data:', parsedData);
         setComparisonData(parsedData);
         setActiveTab("comparison");
