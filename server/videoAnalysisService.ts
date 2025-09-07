@@ -124,6 +124,8 @@ export async function processVideoGemini(videoFilePath: string, roundToAnalyze: 
     // Define prompts for each analysis type
     const promptMatch = `Write me a match Analysis of what happened in round ${roundToAnalyze} in technical terms. Include the story of the round.
 
+IMPORTANT: Start directly with "**Match Analysis: Round ${roundToAnalyze}**" - DO NOT include any prefacing phrases like "Of course", "Here is", "Sure", or similar AI response patterns.
+
 Listen to any insights the commentator might have. Here is a template:
 
 Match Score:
