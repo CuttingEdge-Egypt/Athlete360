@@ -1515,9 +1515,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate nutrition plan with safe defaults for missing data
       const nutritionPlan = await generateNutritionPlan(
         athlete.name, 
-        sportName, 
         Number(athleteAge) || 25, // Default age if not provided
         athleteGender || 'Unknown', 
+        sportName,
         athleteCountry || 'International'
       );
       
