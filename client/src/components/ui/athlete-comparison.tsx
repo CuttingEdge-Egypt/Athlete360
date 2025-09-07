@@ -671,9 +671,6 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           <div className="flex items-center gap-2 mb-3">
                             <Brain className="h-5 w-5 text-blue-400" />
                             <h4 className="font-semibold text-white">Overall Analysis</h4>
-                            <span className="text-xs bg-blue-600/20 text-blue-300 px-2 py-1 rounded">
-                              GPT-5 Powered
-                            </span>
                           </div>
                           {parsedData.overallAnalysis?.summary ? (
                             <p className="text-gray-300 leading-relaxed">
