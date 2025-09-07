@@ -579,17 +579,57 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                 if (comparisonData.gptResponse?.rawResponse) {
                   // Clean GPT response 
                   let cleanedGpt = comparisonData.gptResponse.rawResponse.trim();
-                  // Handle cases where response may be incomplete due to streaming/truncation
+                  
+                  // Handle incomplete JSON responses more robustly
                   if (!cleanedGpt.endsWith('}')) {
-                    const lastBrace = cleanedGpt.lastIndexOf('}');
-                    if (lastBrace > 0) {
-                      cleanedGpt = cleanedGpt.substring(0, lastBrace + 1);
+                    // Find the last complete object or array
+                    let bracesToClose = 0;
+                    let lastValidPos = cleanedGpt.length - 1;
+                    
+                    // Work backwards to find where JSON structure breaks
+                    for (let i = cleanedGpt.length - 1; i >= 0; i--) {
+                      const char = cleanedGpt[i];
+                      if (char === '}') bracesToClose++;
+                      else if (char === '{') bracesToClose--;
+                      else if (char === ']') bracesToClose++;
+                      else if (char === '[') bracesToClose--;
+                      
+                      // If we're back to balanced brackets, this is a safe cut point
+                      if (bracesToClose === 0 && (char === '}' || char === ']')) {
+                        lastValidPos = i;
+                        break;
+                      }
                     }
+                    
+                    cleanedGpt = cleanedGpt.substring(0, lastValidPos + 1);
                   }
+                  
+                  // Additional cleanup for common JSON issues
+                  cleanedGpt = cleanedGpt.replace(/,(\s*[}\]])/g, '$1'); // Remove trailing commas
+                  cleanedGpt = cleanedGpt.replace(/"\s*:\s*"/g, '": "'); // Fix spacing in key-value pairs
+                  
                   gptData = JSON.parse(cleanedGpt);
                 }
               } catch (error) {
                 console.warn('Could not parse GPT response:', error instanceof Error ? error.message : 'Unknown error');
+                
+                // Fallback: try to extract at least athlete names if main parsing fails
+                try {
+                  const rawText = comparisonData.gptResponse?.rawResponse || '';
+                  const athlete1Match = rawText.match(/"athlete1":\s*{\s*"name":\s*"([^"]+)"/);
+                  const athlete2Match = rawText.match(/"athlete2":\s*{\s*"name":\s*"([^"]+)"/);
+                  
+                  if (athlete1Match || athlete2Match) {
+                    gptData = {
+                      athlete1: { name: athlete1Match?.[1] || "Athlete 1" },
+                      athlete2: { name: athlete2Match?.[1] || "Athlete 2" },
+                      error: true,
+                      message: "Partial data recovered from incomplete response"
+                    };
+                  }
+                } catch (fallbackError) {
+                  console.warn('Fallback parsing also failed');
+                }
               }
               
               try {
@@ -597,13 +637,32 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                   // Clean Gemini response - remove markdown wrapper
                   let cleanedGemini = comparisonData.geminiResponse.rawResponse.trim();
                   cleanedGemini = cleanedGemini.replace(/^```json\s*/, '').replace(/```\s*$/, '').trim();
-                  // Handle cases where response may be incomplete
+                  
+                  // Apply same robust cleaning as GPT response
                   if (!cleanedGemini.endsWith('}')) {
-                    const lastBrace = cleanedGemini.lastIndexOf('}');
-                    if (lastBrace > 0) {
-                      cleanedGemini = cleanedGemini.substring(0, lastBrace + 1);
+                    let bracesToClose = 0;
+                    let lastValidPos = cleanedGemini.length - 1;
+                    
+                    for (let i = cleanedGemini.length - 1; i >= 0; i--) {
+                      const char = cleanedGemini[i];
+                      if (char === '}') bracesToClose++;
+                      else if (char === '{') bracesToClose--;
+                      else if (char === ']') bracesToClose++;
+                      else if (char === '[') bracesToClose--;
+                      
+                      if (bracesToClose === 0 && (char === '}' || char === ']')) {
+                        lastValidPos = i;
+                        break;
+                      }
                     }
+                    
+                    cleanedGemini = cleanedGemini.substring(0, lastValidPos + 1);
                   }
+                  
+                  // Additional cleanup
+                  cleanedGemini = cleanedGemini.replace(/,(\s*[}\]])/g, '$1');
+                  cleanedGemini = cleanedGemini.replace(/"\s*:\s*"/g, '": "');
+                  
                   geminiData = JSON.parse(cleanedGemini);
                 }
               } catch (error) {
