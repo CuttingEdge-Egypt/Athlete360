@@ -471,12 +471,29 @@ Otherwise, ALWAYS return the complete structure with available data.`;
       }
     });
 
-    const responseText = result.text || "";
+    let responseText = result.text || "";
     
     console.log(`[GEMINI] Comprehensive comparison response for ${athlete1.name} vs ${athlete2.name}`);
     console.log(`[GEMINI] Response length: ${responseText.length} characters`);
 
-    // Return raw response for frontend parsing
+    // Clean the response to remove markdown blocks
+    responseText = responseText.trim();
+    
+    // Remove markdown code blocks
+    responseText = responseText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    responseText = responseText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    
+    // Extract JSON if wrapped in other text
+    const jsonStart = responseText.indexOf('{');
+    const jsonEnd = responseText.lastIndexOf('}');
+    if (jsonStart !== -1 && jsonEnd !== -1 && jsonStart < jsonEnd) {
+      responseText = responseText.substring(jsonStart, jsonEnd + 1);
+    }
+
+    console.log(`[GEMINI] Cleaned response length: ${responseText.length} characters`);
+    console.log(`[GEMINI] Cleaned response preview:`, responseText.substring(0, 200) + '...');
+
+    // Return cleaned response for frontend parsing
     return {
       rawResponse: responseText,
       source: "Gemini-2.5-pro",
