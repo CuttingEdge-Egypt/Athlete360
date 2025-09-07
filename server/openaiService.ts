@@ -2000,6 +2000,11 @@ CRITICAL JSON FORMATTING REQUIREMENTS:
 5. NO trailing commas in objects or arrays
 6. ALL string values must be properly quoted and escaped
 7. ALL numbers must be valid JSON numbers (no quotes around numeric values)
+8. ENSURE COMPLETE JSON: Your response must be a complete, well-formed JSON object with all opening and closing braces properly matched
+9. NO TRUNCATION: If the response is getting too long, prioritize completing the JSON structure over including all details
+10. VALIDATE JSON: Before sending, mentally verify your JSON would pass JSON.parse() without errors
+11. CLOSE ALL BRACKETS: Every opening brace { must have a corresponding closing brace }
+12. COMPLETE ALL ARRAYS: Every opening bracket [ must have a corresponding closing bracket ]
 
 If web search completely fails or you cannot access any information about either athlete, return this EXACT error structure:
 {

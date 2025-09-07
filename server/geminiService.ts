@@ -319,6 +319,12 @@ CRITICAL JSON FORMATTING REQUIREMENTS:
 - ALL string values must be properly quoted and escaped
 - ALL numbers must be valid JSON numbers (no quotes around numeric values)
 - Your entire response must be parseable JSON that fits the frontend structure exactly
+- ENSURE COMPLETE JSON: Your response must be a complete, well-formed JSON object with all opening and closing braces properly matched
+- NO TRUNCATION: If the response is getting too long, prioritize completing the JSON structure over including all details
+- VALIDATE JSON SYNTAX: Before sending, mentally verify your JSON would pass JSON.parse() without errors
+- CLOSE ALL BRACKETS: Every opening brace { must have a corresponding closing brace }
+- COMPLETE ALL ARRAYS: Every opening bracket [ must have a corresponding closing bracket ]
+- JSON COMPLETENESS: If you reach token limits, ensure you close all open JSON structures properly
 
 WEB SEARCH FOCUS AREAS:
 - Recent competition results and performance trends (2024-2025)
