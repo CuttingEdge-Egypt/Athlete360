@@ -577,130 +577,19 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
               
               try {
                 if (comparisonData.gptResponse?.rawResponse) {
-                  let rawGpt = comparisonData.gptResponse.rawResponse.trim();
-                  console.log('Raw GPT response length:', rawGpt.length);
-                  console.log('Raw GPT preview:', rawGpt.substring(0, 500));
-                  console.log('Raw GPT ending:', rawGpt.substring(Math.max(0, rawGpt.length - 200)));
-                  
-                  // Advanced JSON cleaning and repair
-                  let cleanedGpt = rawGpt;
-                  
-                  // Step 1: Fix common escape issues and malformed strings
-                  cleanedGpt = cleanedGpt.replace(/\\n/g, ' '); // Replace literal \n with space
-                  cleanedGpt = cleanedGpt.replace(/\n/g, ' '); // Replace actual newlines with space
-                  cleanedGpt = cleanedGpt.replace(/\r/g, ' '); // Replace carriage returns
-                  cleanedGpt = cleanedGpt.replace(/\t/g, ' '); // Replace tabs
-                  cleanedGpt = cleanedGpt.replace(/\s+/g, ' '); // Collapse multiple spaces
-                  
-                  // Step 2: Fix unescaped quotes in string values
-                  cleanedGpt = cleanedGpt.replace(/"([^"]*)"([^"]*)"([^"]*)":/g, '"$1\\"$2\\"$3":'); // Fix quotes in keys
-                  cleanedGpt = cleanedGpt.replace(/:\s*"([^"]*)"([^"]*)"([^"]*)",/g, ': "$1\\"$2\\"$3",'); // Fix quotes in values
-                  
-                  // Step 3: Handle truncated responses
+                  // Clean GPT response 
+                  let cleanedGpt = comparisonData.gptResponse.rawResponse.trim();
+                  // Handle cases where response may be incomplete due to streaming/truncation
                   if (!cleanedGpt.endsWith('}')) {
-                    console.log('Response appears truncated, attempting repair...');
-                    
-                    // Find the last complete, valid JSON structure
-                    let validJsonEnd = -1;
-                    let braceCount = 0;
-                    let bracketCount = 0;
-                    let inString = false;
-                    let escapeNext = false;
-                    
-                    for (let i = 0; i < cleanedGpt.length; i++) {
-                      const char = cleanedGpt[i];
-                      
-                      if (escapeNext) {
-                        escapeNext = false;
-                        continue;
-                      }
-                      
-                      if (char === '\\') {
-                        escapeNext = true;
-                        continue;
-                      }
-                      
-                      if (char === '"') {
-                        inString = !inString;
-                        continue;
-                      }
-                      
-                      if (!inString) {
-                        if (char === '{') braceCount++;
-                        else if (char === '}') {
-                          braceCount--;
-                          if (braceCount === 0 && bracketCount === 0) {
-                            validJsonEnd = i;
-                          }
-                        }
-                        else if (char === '[') bracketCount++;
-                        else if (char === ']') {
-                          bracketCount--;
-                          if (braceCount === 0 && bracketCount === 0) {
-                            validJsonEnd = i;
-                          }
-                        }
-                      }
-                    }
-                    
-                    if (validJsonEnd > 0) {
-                      cleanedGpt = cleanedGpt.substring(0, validJsonEnd + 1);
-                      console.log('Truncated to valid JSON end at position:', validJsonEnd);
+                    const lastBrace = cleanedGpt.lastIndexOf('}');
+                    if (lastBrace > 0) {
+                      cleanedGpt = cleanedGpt.substring(0, lastBrace + 1);
                     }
                   }
-                  
-                  // Step 4: Final cleanup
-                  cleanedGpt = cleanedGpt.replace(/,(\s*[}\]])/g, '$1'); // Remove trailing commas
-                  cleanedGpt = cleanedGpt.replace(/,(\s*,)/g, ','); // Remove duplicate commas
-                  
-                  console.log('Cleaned GPT response length:', cleanedGpt.length);
-                  console.log('Attempting to parse cleaned JSON...');
-                  
                   gptData = JSON.parse(cleanedGpt);
-                  console.log('GPT JSON parsed successfully');
                 }
               } catch (error) {
-                console.error('GPT JSON parsing failed:', error instanceof Error ? error.message : 'Unknown error');
-                console.log('Attempting fallback extraction...');
-                
-                // Enhanced fallback with more comprehensive extraction
-                try {
-                  const rawText = comparisonData.gptResponse?.rawResponse || '';
-                  
-                  // Extract athlete information
-                  const athlete1Match = rawText.match(/"athlete1":\s*{\s*"name":\s*"([^"]+)"/);
-                  const athlete2Match = rawText.match(/"athlete2":\s*{\s*"name":\s*"([^"]+)"/);
-                  const predictionMatch = rawText.match(/"prediction":\s*"([^"]+)"/);
-                  const confidenceMatch = rawText.match(/"confidence":\s*(\d+)/);
-                  
-                  if (athlete1Match || athlete2Match) {
-                    gptData = {
-                      athlete1: { 
-                        name: athlete1Match?.[1] || "Athlete 1",
-                        country: "Unknown",
-                        rank: "N/A"
-                      },
-                      athlete2: { 
-                        name: athlete2Match?.[1] || "Athlete 2",
-                        country: "Unknown", 
-                        rank: "N/A"
-                      },
-                      headToHead: {
-                        prediction: predictionMatch?.[1] || "even",
-                        confidence: confidenceMatch ? parseInt(confidenceMatch[1]) : 50,
-                        reasoning: "Analysis incomplete due to data parsing issues"
-                      },
-                      overallAnalysis: {
-                        summary: "Data extraction incomplete - partial analysis only"
-                      },
-                      error: true,
-                      message: "Partial data recovered from malformed response"
-                    };
-                    console.log('Fallback extraction successful');
-                  }
-                } catch (fallbackError) {
-                  console.error('Fallback parsing also failed:', fallbackError);
-                }
+                console.warn('Could not parse GPT response:', error instanceof Error ? error.message : 'Unknown error');
               }
               
               try {
@@ -708,32 +597,13 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                   // Clean Gemini response - remove markdown wrapper
                   let cleanedGemini = comparisonData.geminiResponse.rawResponse.trim();
                   cleanedGemini = cleanedGemini.replace(/^```json\s*/, '').replace(/```\s*$/, '').trim();
-                  
-                  // Apply same robust cleaning as GPT response
+                  // Handle cases where response may be incomplete
                   if (!cleanedGemini.endsWith('}')) {
-                    let bracesToClose = 0;
-                    let lastValidPos = cleanedGemini.length - 1;
-                    
-                    for (let i = cleanedGemini.length - 1; i >= 0; i--) {
-                      const char = cleanedGemini[i];
-                      if (char === '}') bracesToClose++;
-                      else if (char === '{') bracesToClose--;
-                      else if (char === ']') bracesToClose++;
-                      else if (char === '[') bracesToClose--;
-                      
-                      if (bracesToClose === 0 && (char === '}' || char === ']')) {
-                        lastValidPos = i;
-                        break;
-                      }
+                    const lastBrace = cleanedGemini.lastIndexOf('}');
+                    if (lastBrace > 0) {
+                      cleanedGemini = cleanedGemini.substring(0, lastBrace + 1);
                     }
-                    
-                    cleanedGemini = cleanedGemini.substring(0, lastValidPos + 1);
                   }
-                  
-                  // Additional cleanup
-                  cleanedGemini = cleanedGemini.replace(/,(\s*[}\]])/g, '$1');
-                  cleanedGemini = cleanedGemini.replace(/"\s*:\s*"/g, '": "');
-                  
                   geminiData = JSON.parse(cleanedGemini);
                 }
               } catch (error) {
