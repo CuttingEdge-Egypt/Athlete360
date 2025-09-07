@@ -279,7 +279,217 @@ CRITICAL ERROR HANDLING:
   }
 }
 
-// Gemini-2.5-pro powered detailed comparison data and head-to-head analysis
+// Comprehensive Gemini-2.5-pro athlete comparison with Google search and threading support
+export async function generateComprehensiveAthleteComparison(
+  athlete1: { name: string; country: string; profileImageUrl?: string },
+  athlete2: { name: string; country: string; profileImageUrl?: string },
+  sport: string
+): Promise<any> {
+  try {
+    const timestamp = new Date().toISOString();
+    const sessionId = Math.random().toString(36).substring(7);
+
+    console.log(`[GEMINI] Starting comprehensive comparison: ${athlete1.name} vs ${athlete2.name}`);
+
+    const prompt = `You are an expert ${sport} analyst with advanced Google search capabilities. You MUST use the Google search tool extensively to find the most current and comprehensive information about these two athletes for a complete comparison.
+
+Session ID: ${sessionId} - Generation Time: ${timestamp}
+
+ATHLETES TO ANALYZE:
+Athlete 1: ${athlete1.name} from ${athlete1.country} (${sport})
+Athlete 2: ${athlete2.name} from ${athlete2.country} (${sport})
+
+MANDATORY GOOGLE SEARCH REQUIREMENTS:
+1. SEARCH for current World ${sport} rankings 2024-2025 for both athletes
+2. SEARCH for recent competition results and tournament performances 2024-2025
+3. SEARCH for technical analysis, fighting styles, and signature techniques
+4. SEARCH for head-to-head records if they've competed against each other
+5. SEARCH for expert analysis and predictions from sports analysts
+6. SEARCH for physical attributes, training methods, and performance metrics
+7. SEARCH for career achievements, major titles, and competition history
+
+CRITICAL JSON FORMATTING REQUIREMENTS:
+- Return ONLY pure JSON with no markdown blocks, explanations, or additional text
+- Ensure complete JSON structure with all opening and closing braces matched
+- Prioritize completing JSON structure over including all details if response gets long
+- All string values must be properly quoted and escaped
+- No trailing commas in objects or arrays
+
+COMPREHENSIVE COMPARISON STRUCTURE (return as pure JSON):
+{
+  "athlete1": {
+    "name": "${athlete1.name}",
+    "country": "${athlete1.country}",
+    "rank": "Current world ranking from Google search",
+    "profileImageUrl": "${athlete1.profileImageUrl || ''}"
+  },
+  "athlete2": {
+    "name": "${athlete2.name}",
+    "country": "${athlete2.country}",
+    "rank": "Current world ranking from Google search",
+    "profileImageUrl": "${athlete2.profileImageUrl || ''}"
+  },
+  "strengths": {
+    "athlete1": [
+      {
+        "title": "Specific strength from search analysis",
+        "description": "Detailed explanation with evidence",
+        "rating": 90,
+        "evidence": "Specific examples from recent competitions found via search"
+      }
+    ],
+    "athlete2": [
+      {
+        "title": "Specific strength from search analysis", 
+        "description": "Detailed explanation with evidence",
+        "rating": 88,
+        "evidence": "Specific examples from recent competitions found via search"
+      }
+    ],
+    "advantage": "athlete1 or athlete2 based on analysis"
+  },
+  "weaknesses": {
+    "athlete1": [
+      {
+        "title": "Area for improvement from analysis",
+        "description": "Detailed explanation",
+        "impact": "high, medium, or low",
+        "exploitation": "How opponents can exploit this"
+      }
+    ],
+    "athlete2": [
+      {
+        "title": "Area for improvement from analysis",
+        "description": "Detailed explanation", 
+        "impact": "high, medium, or low",
+        "exploitation": "How opponents can exploit this"
+      }
+    ],
+    "advantage": "athlete1 or athlete2 based on analysis"
+  },
+  "ranking": {
+    "comparison": "Current ranking analysis from Google search",
+    "athlete1Trajectory": "Recent ranking progression and trajectory",
+    "athlete2Trajectory": "Recent ranking progression and trajectory", 
+    "competitiveEdge": "athlete1, athlete2, or even"
+  },
+  "headToHead": {
+    "prediction": "athlete1 or athlete2",
+    "confidence": 75,
+    "reasoning": "Comprehensive prediction based on Google search analysis",
+    "keyFactors": [
+      "Most important factor from analysis",
+      "Second most important factor",
+      "Third deciding factor"
+    ],
+    "scenario": "Detailed match scenario prediction"
+  },
+  "overallAnalysis": {
+    "summary": "Comprehensive summary based on all Google search findings",
+    "betterAthlete": "athlete1, athlete2, or even",
+    "reasonsWhy": [
+      "Primary reason with evidence",
+      "Secondary reason with evidence",
+      "Supporting factor"
+    ],
+    "closeness": "clear-difference, somewhat-close, or very-close",
+    "recommendation": "Training and tactical recommendations for both athletes"
+  },
+  "detailedAnalysis": {
+    "athlete1": {
+      "name": "${athlete1.name}",
+      "country": "${athlete1.country}",
+      "currentForm": "Recent performance analysis from search",
+      "technicalSkills": [
+        {
+          "skill": "Specific technique name",
+          "proficiency": 95,
+          "description": "Analysis with evidence",
+          "evidence": "Examples from 2024-2025 competitions"
+        }
+      ],
+      "physicalAttributes": {
+        "height": "From search or 'Not found'",
+        "weight": "Competition weight class",
+        "reach": "From search or 'Not found'", 
+        "stance": "Fighting stance",
+        "strengths": ["Physical advantages"]
+      },
+      "recentPerformance": {
+        "wins": "Recent win count",
+        "losses": "Recent loss count",
+        "lastCompetition": "Most recent competition", 
+        "rankingChange": "Recent ranking progression",
+        "form": "Current form assessment"
+      }
+    },
+    "athlete2": {
+      "name": "${athlete2.name}",
+      "country": "${athlete2.country}",
+      "currentForm": "Recent performance analysis from search",
+      "technicalSkills": [
+        {
+          "skill": "Specific technique name", 
+          "proficiency": 92,
+          "description": "Analysis with evidence",
+          "evidence": "Examples from 2024-2025 competitions"
+        }
+      ],
+      "physicalAttributes": {
+        "height": "From search or 'Not found'",
+        "weight": "Competition weight class",
+        "reach": "From search or 'Not found'",
+        "stance": "Fighting stance", 
+        "strengths": ["Physical advantages"]
+      },
+      "recentPerformance": {
+        "wins": "Recent win count",
+        "losses": "Recent loss count",
+        "lastCompetition": "Most recent competition",
+        "rankingChange": "Recent ranking progression", 
+        "form": "Current form assessment"
+      }
+    }
+  }
+}
+
+MANDATORY: Base ALL analysis on current Google search results from 2024-2025. If information cannot be found, state "Information not found through search" rather than using generic content.
+
+FAILURE HANDLING: Only return error JSON if Google search completely fails:
+{"error": "Couldn't Generate", "errorType": "search_failed", "errorMessage": "Google search unavailable", "retryable": true}
+
+Otherwise, ALWAYS return the complete structure with available data.`;
+
+    // Use GoogleGenAI with search tools enabled
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      contents: prompt,
+      config: {
+        temperature: 0.1,
+        maxOutputTokens: 8192,
+        tools: [{ googleSearch: {} }]
+      }
+    });
+
+    const responseText = await result.text();
+    
+    console.log(`[GEMINI] Comprehensive comparison response for ${athlete1.name} vs ${athlete2.name}`);
+    console.log(`[GEMINI] Response length: ${responseText.length} characters`);
+
+    // Return raw response for frontend parsing
+    return {
+      rawResponse: responseText,
+      source: "Gemini-2.5-pro",
+      athletes: `${athlete1.name} vs ${athlete2.name}`,
+      timestamp: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error("Error generating comprehensive comparison with Gemini:", error);
+    throw new Error(`Failed to generate comprehensive comparison: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+// Legacy detailed comparison function (kept for backward compatibility)
 export async function generateDetailedComparison(
   athlete1: { name: string; country: string; profileImageUrl?: string },
   athlete2: { name: string; country: string; profileImageUrl?: string },
