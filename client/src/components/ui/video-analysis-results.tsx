@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,12 @@ interface YellowCardEvent {
 
 export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps) {
   const [selectedTimestamp, setSelectedTimestamp] = useState<number | null>(null);
+  const [hasError, setHasError] = useState(false);
+
+  // Error boundary-like behavior for parsing errors
+  useEffect(() => {
+    setHasError(false);
+  }, [analysisData]);
 
   // Parse analysis data and extract scoring/card events with cumulative tracking
   const parseAnalysisEvents = () => {
@@ -32,9 +38,16 @@ export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps
       try {
         return typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
       } catch (error) {
+        console.warn('Failed to parse analysis data:', error);
         return { content: jsonString };
       }
     };
+
+    // Early return with empty data if analysisData is missing
+    if (!analysisData) {
+      console.warn('Analysis data is missing');
+      return { scoreEvents: [], yellowCardEvents: [] };
+    }
 
     const scoreAnalysis = analysisData.score_analysis ? parseAnalysisData(analysisData.score_analysis) : null;
     const yellowCardAnalysis = analysisData.yellow_card_analysis ? parseAnalysisData(analysisData.yellow_card_analysis) : null;
@@ -185,12 +198,44 @@ export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps
     };
   };
 
-  const events = parseAnalysisEvents();
+  // Safely parse events with error handling
+  let events;
+  try {
+    events = parseAnalysisEvents();
+  } catch (error) {
+    console.error('Error parsing analysis events:', error);
+    setHasError(true);
+    events = { 
+      scoreEvents: [], 
+      yellowCardEvents: [], 
+      finalScores: { blue: 0, red: 0 },
+      finalCards: { blue: 0, red: 0 },
+      kickCounts: { blue: 0, red: 0 }
+    };
+  }
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
+  // Show error state if parsing failed
+  if (hasError) {
+    return (
+      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <div className="flex items-center space-x-2">
+          <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+          <h3 className="text-red-800 dark:text-red-200 font-medium">
+            Error Loading Video Analysis
+          </h3>
+        </div>
+        <p className="text-red-700 dark:text-red-300 mt-2">
+          There was an issue parsing the video analysis data. Please try refreshing or contact support.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -237,13 +282,13 @@ export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps
               <div className="flex justify-between items-center p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
                 <span className="text-blue-400 font-semibold">Blue Player</span>
                 <Badge variant="secondary" className="bg-blue-500 text-white">
-                  {events.finalScores.blue} points
+                  {events?.finalScores?.blue || 0} points
                 </Badge>
               </div>
               <div className="flex justify-between items-center p-3 bg-red-500/10 rounded-lg border border-red-500/20">
                 <span className="text-red-400 font-semibold">Red Player</span>
                 <Badge variant="secondary" className="bg-red-500 text-white">
-                  {events.finalScores.red} points
+                  {events?.finalScores?.red || 0} points
                 </Badge>
               </div>
             </div>
@@ -262,13 +307,13 @@ export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps
               <div className="flex justify-between items-center p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
                 <span className="text-blue-400 font-semibold">Blue Player</span>
                 <Badge variant="secondary" className="bg-yellow-500 text-black">
-                  {events.finalCards.blue} cards
+                  {events?.finalCards?.blue || 0} cards
                 </Badge>
               </div>
               <div className="flex justify-between items-center p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
                 <span className="text-red-400 font-semibold">Red Player</span>
                 <Badge variant="secondary" className="bg-yellow-500 text-black">
-                  {events.finalCards.red} cards
+                  {events?.finalCards?.red || 0} cards
                 </Badge>
               </div>
             </div>
@@ -289,13 +334,13 @@ export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps
             <div className="flex justify-between items-center p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
               <span className="text-blue-400 font-semibold">Blue Player Kicks</span>
               <Badge variant="secondary" className="bg-blue-500 text-white">
-                {events.kickCounts.blue}
+                {events?.kickCounts?.blue || 0}
               </Badge>
             </div>
             <div className="flex justify-between items-center p-3 bg-red-500/10 rounded-lg border border-red-500/20">
               <span className="text-red-400 font-semibold">Red Player Kicks</span>
               <Badge variant="secondary" className="bg-red-500 text-white">
-                {events.kickCounts.red}
+                {events?.kickCounts?.red || 0}
               </Badge>
             </div>
           </div>
