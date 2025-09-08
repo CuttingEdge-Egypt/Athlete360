@@ -755,15 +755,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Deduct tokens
       await storage.deductTokens(userId, tokenCost);
 
-      // Create transaction
-      await storage.createTransaction({
-        userId,
-        action: "Bio Analysis",
-        tokensDeducted: tokenCost,
-        athleteId,
-        serviceType: "bio"
-      });
-
       // Get athlete data
       const athlete = await storage.getAthleteById(athleteId);
       if (!athlete) {

@@ -38,7 +38,7 @@ import {
   type InsertSavedCard,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, asc, sql, ilike, ne } from "drizzle-orm";
+import { eq, desc, and, asc, sql, ilike, ne, notInArray } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -685,7 +685,8 @@ export class DatabaseStorage implements IStorage {
         .where(
           and(
             eq(transactions.userId, userId),
-            ne(transactions.serviceType, 'comparison') // Exclude comparison transactions since analysis logs have the data
+            // Exclude transactions that have analysis logs with result data
+            notInArray(transactions.serviceType, ['comparison', 'bio', 'rank', 'strengths', 'weaknesses', 'development', 'nutrition-plan', 'beat-strategies', 'video'])
           )
         )
         .orderBy(desc(transactions.createdAt))
