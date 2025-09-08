@@ -382,15 +382,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Search athletes by name with AI fallback
   app.get('/api/athletes/search-by-name', async (req, res) => {
     try {
-      const { name, sportId } = req.query;
+      const { name, sportId, country } = req.query;
       if (!name) {
         return res.status(400).json({ message: "Athlete name is required" });
       }
       
-      console.log(`Searching for athletes with name: "${name}" and sportId: "${sportId}"`);
+      console.log(`Searching for athletes with name: "${name}", sportId: "${sportId}", country: "${country}"`);
       
-      // Search for existing athletes in database by name
-      const athletes = await storage.searchAthletesByName(name as string, sportId as string);
+      // Search for existing athletes in database by name, sport, and country
+      const athletes = await storage.searchAthletesByName(name as string, sportId as string, country as string);
       console.log(`Found ${athletes.length} athletes matching search criteria`);
       res.json(athletes);
     } catch (error) {

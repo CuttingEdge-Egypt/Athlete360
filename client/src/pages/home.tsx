@@ -218,11 +218,11 @@ export default function Home() {
 
   // Search athletes by name with AI fallback
   const { data: searchResults = [], isLoading: isSearchLoading } = useQuery<Athlete[]>({
-    queryKey: ["/api/athletes/search-by-name", searchName.trim(), selectedSport],
+    queryKey: ["/api/athletes/search-by-name", searchName.trim(), selectedSport, selectedCountry],
     enabled: !!searchName.trim() && searchName.trim().length >= 2,
     queryFn: async () => {
       try {
-        const response = await fetch(`/api/athletes/search-by-name?name=${encodeURIComponent(searchName.trim())}&sportId=${encodeURIComponent(selectedSport)}`);
+        const response = await fetch(`/api/athletes/search-by-name?name=${encodeURIComponent(searchName.trim())}&sportId=${encodeURIComponent(selectedSport)}&country=${encodeURIComponent(selectedCountry)}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

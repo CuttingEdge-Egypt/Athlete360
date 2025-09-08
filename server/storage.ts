@@ -98,7 +98,7 @@ export interface IStorage {
 
   // Athletes operations
   getAthletesBySearch(name: string, sportId?: string): Promise<Athlete[]>;
-  searchAthletesByName(name: string, sportId?: string): Promise<Athlete[]>;
+  searchAthletesByName(name: string, sportId?: string, country?: string): Promise<Athlete[]>;
   getAthleteById(id: string): Promise<Athlete | undefined>;
   getAthletesBySport(sportId: string, country?: string): Promise<Athlete[]>;
   getAllCountries(): Promise<string[]>;
@@ -509,10 +509,13 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async searchAthletesByName(name: string, sportId?: string): Promise<Athlete[]> {
+  async searchAthletesByName(name: string, sportId?: string, country?: string): Promise<Athlete[]> {
     const conditions = [ilike(athletes.name, `%${name}%`)];
     if (sportId) {
       conditions.push(eq(athletes.sportId, sportId));
+    }
+    if (country) {
+      conditions.push(eq(athletes.country, country));
     }
     
     return await db.select().from(athletes)
