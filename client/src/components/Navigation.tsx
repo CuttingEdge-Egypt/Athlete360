@@ -70,7 +70,12 @@ export function Navigation() {
             onClick={() => {
               // Clear any URL parameters and sessionStorage to ensure fresh start
               sessionStorage.removeItem('videoAnalysisData');
+              console.log('Header Video Analysis button clicked - clearing data and navigating');
+              // Clear URL params by navigating to clean path
+              window.history.replaceState({}, '', '/video-analysis');
               setLocation('/video-analysis');
+              // Force reload to ensure clean state
+              setTimeout(() => window.location.reload(), 50);
             }}
           >
             <Video className="mr-2" size={16} />
