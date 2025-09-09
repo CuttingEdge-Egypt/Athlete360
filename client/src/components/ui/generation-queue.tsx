@@ -39,35 +39,80 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [itemToCancel, setItemToCancel] = useState<string | null>(null);
 
-  // Add new generation to queue and auto-trigger
+  // Add new generation to queue and auto-trigger (max 4 concurrent)
   const addToQueue = (athleteName: string, serviceType: string, autoTrigger: boolean = true) => {
-    const newItem: GenerationItem = {
-      id: `gen_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      athleteName,
-      serviceType,
-      status: autoTrigger ? 'running' : 'pending',
-      createdAt: new Date(),
-      progressMessage: autoTrigger ? 'Request sent, our AI is processing...' : 'waiting'
-    };
+    const itemId = `gen_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
-    setQueue(prev => [...prev, newItem]);
-    setIsVisible(true);
-    
-    // Update progress messages over time for running items
-    if (autoTrigger) {
-      setTimeout(() => {
-        updateGeneration(newItem.id, { progressMessage: 'This might take 2-3 minutes...' });
-      }, 3000);
+    setQueue(prev => {
+      const runningCount = prev.filter(item => item.status === 'running').length;
+      const shouldStart = autoTrigger && runningCount < 4;
       
-      setTimeout(() => {
-        updateGeneration(newItem.id, { progressMessage: 'Almost there, finalizing analysis...' });
-      }, 90000); // After 1.5 minutes
-    }
+      const newItem: GenerationItem = {
+        id: itemId,
+        athleteName,
+        serviceType,
+        status: shouldStart ? 'running' : 'pending',
+        createdAt: new Date(),
+        progressMessage: shouldStart ? 'Request sent, our AI is processing...' : 'Waiting for available slot...'
+      };
+      
+      // Update progress messages over time for running items
+      if (shouldStart) {
+        setTimeout(() => {
+          updateGeneration(itemId, { progressMessage: 'This might take 2-3 minutes...' });
+        }, 3000);
+        
+        setTimeout(() => {
+          updateGeneration(itemId, { progressMessage: 'Almost there, finalizing analysis...' });
+        }, 90000); // After 1.5 minutes
+      }
+      
+      setIsVisible(true);
+      return [...prev, newItem];
+    });
     
-    return newItem.id;
+    return itemId;
   };
 
-  // Update generation status with notification
+  // Process queue - start pending items if slots are available
+  const processQueue = () => {
+    setQueue(prev => {
+      const runningCount = prev.filter(item => item.status === 'running').length;
+      const availableSlots = Math.max(0, 4 - runningCount);
+      
+      if (availableSlots === 0) return prev;
+      
+      let slotsUsed = 0;
+      const updated = prev.map(item => {
+        if (item.status === 'pending' && slotsUsed < availableSlots) {
+          slotsUsed++;
+          
+          // Start the pending item
+          const runningItem = { 
+            ...item, 
+            status: 'running' as const,
+            progressMessage: 'Request sent, our AI is processing...'
+          };
+          
+          // Update progress messages over time for newly started items
+          setTimeout(() => {
+            updateGeneration(item.id, { progressMessage: 'This might take 2-3 minutes...' });
+          }, 3000);
+          
+          setTimeout(() => {
+            updateGeneration(item.id, { progressMessage: 'Almost there, finalizing analysis...' });
+          }, 90000);
+          
+          return runningItem;
+        }
+        return item;
+      });
+      
+      return updated;
+    });
+  };
+
+  // Update generation status with notification and queue processing
   const updateGeneration = (id: string, updates: Partial<GenerationItem>) => {
     setQueue(prev => {
       const updated = prev.map(item => {
@@ -94,6 +139,10 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
         }
         return item;
       });
+      
+      // Process queue after update to start pending items
+      setTimeout(() => processQueue(), 100);
+      
       return updated;
     });
   };
@@ -106,6 +155,8 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
       return;
     }
     setQueue(prev => prev.filter(item => item.id !== id));
+    // Process queue after removal to start pending items
+    setTimeout(() => processQueue(), 100);
   };
 
   // Handle cancel confirmation
@@ -119,6 +170,9 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
       
       setQueue(prev => prev.filter(item => item.id !== itemToCancel));
       setItemToCancel(null);
+      
+      // Process queue after cancellation to start pending items
+      setTimeout(() => processQueue(), 100);
     }
     setShowCancelDialog(false);
   };
@@ -147,6 +201,8 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
     if (completedCount === 0) return; // No completed items to clear
     
     setQueue(prev => prev.filter(item => item.status !== 'completed' && item.status !== 'error'));
+    // Process queue after clearing completed items
+    setTimeout(() => processQueue(), 100);
   };
 
   // Handle viewing a generation result (same as history items)
@@ -167,16 +223,9 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
         window.dispatchEvent(new PopStateEvent('popstate'));
       }, 100);
     } else if (item.serviceType === 'video') {
-      // Navigate to home with video tab and data
-      const encodedData = encodeURIComponent(JSON.stringify(item.result));
-      const url = "/?tab=video&data=" + encodedData;
-      console.log('Navigating to video analysis:', url);
-      
-      setLocation(url);
-      setTimeout(() => {
-        window.history.pushState({}, '', url);
-        window.dispatchEvent(new PopStateEvent('popstate'));
-      }, 100);
+      // Navigate to video analysis page with data in sessionStorage
+      sessionStorage.setItem('videoAnalysisData', JSON.stringify(item.result));
+      setLocation('/video-analysis');
     } else {
       // Show analysis popup for other types
       setSelectedResult(item);
