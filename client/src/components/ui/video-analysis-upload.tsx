@@ -17,6 +17,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [roundToAnalyze, setRoundToAnalyze] = useState(1);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('Analyzing Video...');
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [dragOver, setDragOver] = useState(false);
   const { toast } = useToast();
@@ -77,6 +78,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
     }
 
     setIsAnalyzing(true);
+    setLoadingMessage('Uploading video...');
     
     // Add to generation queue if available
     let queueId: string | null = null;
@@ -84,6 +86,25 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
       queueId = (window as any).generationQueue.add(`Video: ${uploadedFile.name}`, 'video', false);
       (window as any).generationQueue.update(queueId, 'running', null, null, 'Uploading video...');
     }
+    
+    // Start cycling through loading messages
+    const messages = [
+      'Uploading video to server...',
+      'Processing video frames...',
+      'Analyzing athlete movements...',
+      'Detecting scoring events...',
+      'Identifying kicks and strikes...',
+      'Analyzing penalties and violations...',
+      'Generating comprehensive analysis...',
+      'Finalizing results...'
+    ];
+    let messageIndex = 0;
+    const messageInterval = setInterval(() => {
+      if (messageIndex < messages.length - 1) {
+        messageIndex++;
+        setLoadingMessage(messages[messageIndex]);
+      }
+    }, 5000); // Change message every 5 seconds
     
     const formData = new FormData();
     formData.append('video', uploadedFile);
@@ -94,6 +115,9 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
       if (queueId && (window as any).generationQueue) {
         (window as any).generationQueue.update(queueId, 'running', null, null, 'Processing video...');
       }
+      
+      // Update loading message for processing phase
+      setLoadingMessage('Processing video with Gemini AI...')
       
       const response = await fetch('/api/analysis/video', {
         method: 'POST',
@@ -114,6 +138,8 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
           if (queueId && (window as any).generationQueue) {
             (window as any).generationQueue.update(queueId, 'error', null, 'Insufficient tokens');
           }
+          clearInterval(messageInterval);
+          setIsAnalyzing(false);
           return;
         }
         throw new Error(result.message || 'Analysis failed');
@@ -143,7 +169,9 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
         (window as any).generationQueue.update(queueId, 'error', null, error instanceof Error ? error.message : 'Unknown error');
       }
     } finally {
+      clearInterval(messageInterval);
       setIsAnalyzing(false);
+      setLoadingMessage('Analyzing Video...');
     }
   };
 
@@ -283,7 +311,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
               {isAnalyzing ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Analyzing Video...
+                  {loadingMessage}
                 </>
               ) : (
                 <>

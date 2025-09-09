@@ -6,9 +6,10 @@ import { useLocation } from "wouter";
 
 export default function VideoAnalysis() {
   const [historyAnalysisData, setHistoryAnalysisData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [location] = useLocation();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Reset to upload state when user clicks header button
   const resetToUploadState = () => {
@@ -24,6 +25,10 @@ export default function VideoAnalysis() {
     
     const loadData = async () => {
       try {
+        // Only show loading if not already initialized
+        if (!isInitialized) {
+          setIsLoading(true);
+        }
         setHasError(false);
         
         // Check URL parameters for history data first
@@ -38,6 +43,7 @@ export default function VideoAnalysis() {
             if (isMounted) {
               setHistoryAnalysisData(parsedData);
               setIsLoading(false);
+              setIsInitialized(true);
             }
             return;
           } catch (error) {
@@ -48,6 +54,7 @@ export default function VideoAnalysis() {
             if (isMounted) {
               setHasError(true);
               setIsLoading(false);
+              setIsInitialized(true);
             }
             return;
           }
@@ -80,10 +87,10 @@ export default function VideoAnalysis() {
           }
         }
 
-        // Add small delay to prevent white screen flash, but ensure component is still mounted
-        await new Promise(resolve => setTimeout(resolve, 200));
+        // Mark as initialized and stop loading immediately
         if (isMounted) {
           setIsLoading(false);
+          setIsInitialized(true);
         }
       } catch (error) {
         // Log quietly in development only
@@ -133,10 +140,8 @@ export default function VideoAnalysis() {
                 onClick={() => {
                   setHasError(false);
                   setHistoryAnalysisData(null);
-                  setIsLoading(true);
-                  // Clear any stored data and retry
+                  // Clear any stored data
                   sessionStorage.removeItem('videoAnalysisData');
-                  setTimeout(() => setIsLoading(false), 300);
                 }}
                 variant="outline"
                 className="border-red-400 text-red-600 hover:bg-red-50"
