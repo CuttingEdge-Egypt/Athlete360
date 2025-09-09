@@ -227,7 +227,7 @@ export function HistoryDropdown() {
                       </div>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Coins className="h-3 w-3" />
-                        {item.tokensDeducted}
+                        {item.tokensDeducted < 0 ? `+${Math.abs(item.tokensDeducted)}` : item.tokensDeducted}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground w-full">
