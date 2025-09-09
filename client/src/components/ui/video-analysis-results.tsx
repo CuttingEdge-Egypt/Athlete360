@@ -25,6 +25,27 @@ interface YellowCardEvent {
 
 export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps) {
   const [selectedTimestamp, setSelectedTimestamp] = useState<number | null>(null);
+
+  // Function to render markdown-style formatted text
+  const renderFormattedText = (text: string) => {
+    if (!text) return null;
+
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    return (
+      <>
+        {parts.map((part, index) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            return (
+              <strong key={index} className="text-white font-semibold">
+                {part.slice(2, -2)}
+              </strong>
+            );
+          }
+          return part;
+        })}
+      </>
+    );
+  };
   const [hasError, setHasError] = useState(false);
 
   // Error boundary-like behavior for parsing errors
@@ -266,7 +287,7 @@ export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps
         </CardHeader>
         <CardContent>
           <div className="text-gray-300 whitespace-pre-wrap leading-relaxed">
-            {analysisData.match_analysis || 'No match analysis available'}
+            {renderFormattedText(analysisData.match_analysis) || 'No match analysis available'}
           </div>
         </CardContent>
       </Card>
