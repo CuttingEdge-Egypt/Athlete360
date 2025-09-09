@@ -199,7 +199,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
           <div className="space-y-4">
             <Label className="text-white font-medium">Upload Video File</Label>
             <div
-              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+              className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                 dragOver 
                   ? 'border-indigo-400 bg-indigo-400/10' 
                   : 'border-gray-600 hover:border-gray-500'
@@ -212,7 +212,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
               onDragLeave={() => setDragOver(false)}
             >
               {uploadedFile ? (
-                <div className="space-y-3">
+                <div className="space-y-3 pointer-events-none">
                   <FileVideo className="mx-auto text-indigo-400" size={48} />
                   <div>
                     <p className="text-white font-medium">{uploadedFile.name}</p>
@@ -225,7 +225,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
                   </Badge>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-3 pointer-events-none">
                   <Upload className="mx-auto text-gray-400" size={48} />
                   <div>
                     <p className="text-white">Drop your video file here</p>
@@ -240,7 +240,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
                 type="file"
                 accept="video/*"
                 onChange={handleFileInput}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                className="absolute inset-0 opacity-0 cursor-pointer z-10"
                 data-testid="input-video-file"
               />
             </div>

@@ -45,12 +45,14 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
     const yellowCardAnalysis = analysisData.yellow_card_analysis ? parseAnalysisData(analysisData.yellow_card_analysis) : null;
     const kickAnalysis = analysisData.kick_count_analysis ? parseAnalysisData(analysisData.kick_count_analysis) : null;
 
-    // Debug logging to check data structure
-    console.log("=== VIDEO ANALYSIS DEBUG ===");
-    console.log("Score Analysis:", scoreAnalysis);
-    console.log("Yellow Card Analysis:", yellowCardAnalysis);
-    console.log("Kick Analysis:", kickAnalysis);
-    console.log("Raw analysisData:", analysisData);
+    // Debug logging only in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log("=== VIDEO ANALYSIS DEBUG ===");
+      console.log("Score Analysis:", scoreAnalysis);
+      console.log("Yellow Card Analysis:", yellowCardAnalysis);
+      console.log("Kick Analysis:", kickAnalysis);
+      console.log("Raw analysisData:", analysisData);
+    }
 
     const timestampRegex = /(\d{1,2}:\d{2}|\d{1,3}s|\d+\s*seconds?|\d+\s*min)/gi;
     
@@ -298,11 +300,13 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
       }
     }
 
-    // Additional debug logging for parsed events
-    console.log("=== PARSED EVENTS ===");
-    console.log("Score Events:", scoreEvents);
-    console.log("Yellow Card Events:", yellowCardEvents);
-    console.log("Blue Kicks:", blueKicks, "Red Kicks:", redKicks);
+    // Additional debug logging only in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log("=== PARSED EVENTS ===");
+      console.log("Score Events:", scoreEvents);
+      console.log("Yellow Card Events:", yellowCardEvents);
+      console.log("Blue Kicks:", blueKicks, "Red Kicks:", redKicks);
+    }
 
     return { scoreEvents, yellowCardEvents, blueKicks, redKicks };
   };

@@ -15,7 +15,7 @@ export default function VideoAnalysis() {
     setHistoryAnalysisData(null);
     setHasError(false);
     sessionStorage.removeItem('videoAnalysisData');
-    console.log('Reset video analysis to upload state');
+    // Reset state silently
   };
 
   // Check for video analysis data from history navigation
@@ -34,14 +34,17 @@ export default function VideoAnalysis() {
         if (tabParam === 'video' && dataParam && dataParam !== 'null') {
           try {
             const parsedData = JSON.parse(decodeURIComponent(dataParam));
-            console.log('Loaded video analysis data from URL params:', parsedData);
+            // Loaded video analysis data from URL params
             if (isMounted) {
               setHistoryAnalysisData(parsedData);
               setIsLoading(false);
             }
             return;
           } catch (error) {
-            console.error('Error parsing URL data:', error);
+            // Log quietly in development only
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Error parsing URL data:', error);
+            }
             if (isMounted) {
               setHasError(true);
               setIsLoading(false);
@@ -55,14 +58,17 @@ export default function VideoAnalysis() {
         if (storedData) {
           try {
             const parsedData = JSON.parse(storedData);
-            console.log('Loaded video analysis data from sessionStorage:', parsedData);
+            // Loaded video analysis data from sessionStorage
             if (isMounted) {
               setHistoryAnalysisData(parsedData);
               // Clean up after loading
               sessionStorage.removeItem('videoAnalysisData');
             }
           } catch (error) {
-            console.error('Error parsing stored video analysis data:', error);
+            // Log quietly in development only
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Error parsing stored video analysis data:', error);
+            }
             if (isMounted) {
               setHasError(true);
             }
@@ -80,7 +86,10 @@ export default function VideoAnalysis() {
           setIsLoading(false);
         }
       } catch (error) {
-        console.error('Unexpected error in video analysis loading:', error);
+        // Log quietly in development only
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Unexpected error in video analysis loading:', error);
+        }
         if (isMounted) {
           setHasError(true);
           setIsLoading(false);

@@ -38,14 +38,14 @@ export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps
       try {
         return typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
       } catch (error) {
-        console.warn('Failed to parse analysis data:', error);
+        // Silently handle parse errors - data will be treated as plain text
         return { content: jsonString };
       }
     };
 
     // Early return with empty data if analysisData is missing
     if (!analysisData) {
-      console.warn('Analysis data is missing');
+      // Analysis data is missing - return empty data structure
       return { scoreEvents: [], yellowCardEvents: [] };
     }
 
@@ -203,7 +203,10 @@ export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps
   try {
     events = parseAnalysisEvents();
   } catch (error) {
-    console.error('Error parsing analysis events:', error);
+    // Error parsing analysis - use default empty data
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error parsing analysis events:', error);
+    }
     setHasError(true);
     events = { 
       scoreEvents: [], 
