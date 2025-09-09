@@ -211,7 +211,7 @@ export default function Landing() {
             </Card>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Second Row - Advanced Features */}
             <Card className="bg-athlete-gray-700 border-gray-600">
               <CardContent className="p-6">
@@ -245,31 +245,34 @@ export default function Landing() {
                 <p className="text-gray-400 text-sm">Comprehensive meal planning based on body composition and goals</p>
               </CardContent>
             </Card>
-
-            <Card className="bg-athlete-gray-700 border-gray-600">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <Video className="text-2xl text-orange-400" size={32} />
-                  <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">120 tokens</span>
-                </div>
-                <h3 className="text-lg font-semibold mb-2 text-white">Video Analysis</h3>
-                <p className="text-gray-400 text-sm">Frame-by-frame performance breakdown with AI-powered insights</p>
-              </CardContent>
-            </Card>
           </div>
 
-          {/* Comparison Feature Highlight */}
-          <div className="mt-12 max-w-2xl mx-auto">
-            <Card className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 border-purple-400/30">
-              <CardContent className="p-8 text-center">
-                <div className="flex justify-center mb-4">
-                  <Users className="text-4xl text-purple-400" size={48} />
-                </div>
-                <h3 className="text-2xl font-semibold mb-3 text-white">Compare Athletes</h3>
-                <p className="text-gray-300 mb-4">Head-to-head analysis comparing any two athletes across all performance metrics</p>
-                <span className="bg-purple-500 text-white text-sm px-4 py-2 rounded-full font-semibold">150 tokens</span>
-              </CardContent>
-            </Card>
+          {/* Premium Features - Video Analysis and Compare Athletes */}
+          <div className="mt-12">
+            <h3 className="text-2xl font-bold text-center mb-8 text-white">Premium Analysis Features</h3>
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              <Card className="bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-400/30">
+                <CardContent className="p-8 text-center">
+                  <div className="flex justify-center mb-4">
+                    <Video className="text-4xl text-orange-400" size={48} />
+                  </div>
+                  <h3 className="text-2xl font-semibold mb-3 text-white">Video Analysis</h3>
+                  <p className="text-gray-300 mb-4">Frame-by-frame performance breakdown with AI-powered insights</p>
+                  <span className="bg-orange-500 text-white text-sm px-4 py-2 rounded-full font-semibold">120 tokens</span>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 border-purple-400/30">
+                <CardContent className="p-8 text-center">
+                  <div className="flex justify-center mb-4">
+                    <Users className="text-4xl text-purple-400" size={48} />
+                  </div>
+                  <h3 className="text-2xl font-semibold mb-3 text-white">Compare Athletes</h3>
+                  <p className="text-gray-300 mb-4">Head-to-head analysis comparing any two athletes across all performance metrics</p>
+                  <span className="bg-purple-500 text-white text-sm px-4 py-2 rounded-full font-semibold">150 tokens</span>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </section>
