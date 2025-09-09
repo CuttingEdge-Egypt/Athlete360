@@ -490,9 +490,14 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
                       {scoreEvents.map((event, index) => (
                         <div
                           key={`score-${index}`}
-                          className="absolute top-0 w-0.5 h-3 -mt-1 cursor-pointer bg-yellow-400"
+                          className="absolute top-0 w-0.5 h-3 -mt-1 cursor-pointer bg-yellow-400 hover:bg-yellow-300 z-10"
                           style={{ left: `${(event.timestamp / duration) * 100}%` }}
-                          title={`${event.player.toUpperCase()} scores ${event.increment} points`}
+                          title={`${event.player.toUpperCase()} scores ${event.increment} points - Click to jump`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSeek(event.timestamp);
+                          }}
+                          data-testid={`score-marker-${index}`}
                         />
                       ))}
                       
@@ -500,9 +505,14 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
                       {yellowCardEvents.map((event, index) => (
                         <div
                           key={`card-${index}`}
-                          className="absolute top-0 w-0.5 h-3 -mt-1 cursor-pointer bg-yellow-600"
+                          className="absolute top-0 w-0.5 h-3 -mt-1 cursor-pointer bg-yellow-600 hover:bg-yellow-500 z-10"
                           style={{ left: `${(event.timestamp / duration) * 100}%` }}
-                          title={`${event.player.toUpperCase()} receives yellow card`}
+                          title={`${event.player.toUpperCase()} receives yellow card - Click to jump`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSeek(event.timestamp);
+                          }}
+                          data-testid={`card-marker-${index}`}
                         />
                       ))}
                     </div>
