@@ -16,7 +16,7 @@ import { AthleteComparison } from "@/components/ui/athlete-comparison";
 import { VideoAnalysisResults } from "@/components/ui/video-analysis-results";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Star, User, Loader2 } from "lucide-react";
+import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3 } from "lucide-react";
 import type { Sport, Athlete } from "@shared/schema";
 import GenerationQueue from "@/components/ui/generation-queue";
 import { CountrySelect } from "@/components/ui/country-select";
@@ -414,22 +414,6 @@ export default function Home() {
       color: "text-athlete-danger"
     },
     {
-      id: "development-plan",
-      title: "Development Plan",
-      description: "4-week personalized training plan to address weaknesses",
-      cost: 80,
-      icon: "calendar-alt",
-      color: "text-purple-400"
-    },
-    {
-      id: "nutrition-plan",
-      title: "Nutrition Plan",
-      description: "AI-powered personalized nutrition plan based on sport, age, gender, and nationality",
-      cost: 75,
-      icon: "apple-alt",
-      color: "text-green-500"
-    },
-    {
       id: "beat-strategies",
       title: "How to Beat",
       description: "Tactical strategies and techniques to gain competitive advantage",
@@ -510,20 +494,38 @@ export default function Home() {
 
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-6xl mx-auto">
-            <TabsList className="grid w-full grid-cols-2 bg-athlete-gray-800 mb-8">
+            <TabsList className="grid w-full grid-cols-4 bg-athlete-gray-800 mb-8">
               <TabsTrigger 
                 value="analysis" 
                 data-testid="tab-analysis"
-                className="data-[state=active]:bg-athlete-accent"
+                className="data-[state=active]:bg-athlete-accent flex items-center gap-2"
               >
-{t('interface.athleteAnalysis')}
+                <BarChart3 size={16} />
+                {t('interface.athleteAnalysis')}
               </TabsTrigger>
               <TabsTrigger 
                 value="comparison" 
                 data-testid="tab-comparison"
-                className="data-[state=active]:bg-athlete-accent"
+                className="data-[state=active]:bg-athlete-accent flex items-center gap-2"
               >
-{t('interface.compareAthletes')}
+                <Users size={16} />
+                {t('interface.compareAthletes')}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="nutrition" 
+                data-testid="tab-nutrition"
+                className="data-[state=active]:bg-athlete-accent flex items-center gap-2"
+              >
+                <Apple size={16} />
+                {t('interface.nutritionPlan')}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="development" 
+                data-testid="tab-development"
+                className="data-[state=active]:bg-athlete-accent flex items-center gap-2"
+              >
+                <CalendarDays size={16} />
+                {t('interface.developmentPlan')}
               </TabsTrigger>
             </TabsList>
 
@@ -723,6 +725,146 @@ export default function Home() {
               <AthleteComparison preloadedComparisonData={comparisonData} />
             </TabsContent>
 
+            <TabsContent value="nutrition" className="space-y-8">
+              {/* Nutrition Plan Form */}
+              <Card className="bg-athlete-gray-800 border-gray-700">
+                <CardContent className="p-8">
+                  <h2 className="text-2xl font-bold mb-6 text-center text-white">{t('nutritionPlan.title')}</h2>
+                  
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Sport Selection (Optional) */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-gray-300">{t('nutritionPlan.sport')}</label>
+                      <Select value={selectedSport} onValueChange={setSelectedSport}>
+                        <SelectTrigger 
+                          data-testid="select-nutrition-sport"
+                          className="bg-athlete-gray-700 border-gray-600 text-white"
+                        >
+                          <SelectValue placeholder={t('interface.chooseASport')} />
+                        </SelectTrigger>
+                        <SelectContent className="bg-athlete-gray-700 border-gray-600">
+                          {sports.map((sport) => (
+                            <SelectItem key={sport.id} value={sport.id}>
+                              {sport.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Goal Input (Required) */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-gray-300">{t('nutritionPlan.goal')} *</label>
+                      <Input
+                        data-testid="input-nutrition-goal"
+                        placeholder={t('nutritionPlan.goalPlaceholder')}
+                        className="bg-athlete-gray-700 border-gray-600 text-white"
+                        required
+                      />
+                    </div>
+
+                    {/* Current Weight (Required) */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-gray-300">{t('nutritionPlan.currentWeight')} *</label>
+                      <Input
+                        data-testid="input-current-weight"
+                        type="number"
+                        placeholder="70"
+                        className="bg-athlete-gray-700 border-gray-600 text-white"
+                        required
+                      />
+                    </div>
+
+                    {/* Target Weight (Required) */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-gray-300">{t('nutritionPlan.targetWeight')} *</label>
+                      <Input
+                        data-testid="input-target-weight"
+                        type="number"
+                        placeholder="75"
+                        className="bg-athlete-gray-700 border-gray-600 text-white"
+                        required
+                      />
+                    </div>
+
+                    {/* Country Selection (Required) */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-gray-300">{t('nutritionPlan.country')} *</label>
+                      <CountrySelect
+                        value={selectedCountry || ""}
+                        onValueChange={(country) => setSelectedCountry(country)}
+                        placeholder={t('nutritionPlan.countryHint')}
+                        countries={countries}
+                        testId="select-nutrition-country"
+                      />
+                    </div>
+
+                    {/* Period in Weeks (Optional) */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-gray-300">{t('nutritionPlan.period')}</label>
+                      <Input
+                        data-testid="input-nutrition-period"
+                        type="number"
+                        placeholder="4"
+                        className="bg-athlete-gray-700 border-gray-600 text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-6 grid md:grid-cols-2 gap-6">
+                    {/* InBody Report Upload (Optional) */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-gray-300">{t('nutritionPlan.inbodyReport')}</label>
+                      <Input
+                        data-testid="input-inbody-report"
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        className="bg-athlete-gray-700 border-gray-600 text-white"
+                      />
+                    </div>
+
+                    {/* Language Selection */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-gray-300">{t('nutritionPlan.language')}</label>
+                      <Select defaultValue="en">
+                        <SelectTrigger 
+                          data-testid="select-nutrition-language"
+                          className="bg-athlete-gray-700 border-gray-600 text-white"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-athlete-gray-700 border-gray-600">
+                          <SelectItem value="en">English</SelectItem>
+                          <SelectItem value="ar">العربية</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-center mt-8">
+                    <Button 
+                      data-testid="button-generate-nutrition-plan"
+                      className="bg-athlete-accent hover:bg-blue-600 text-white px-8 py-3 text-lg"
+                    >
+                      <Apple className="mr-2" size={20} />
+                      {t('nutritionPlan.generate')}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="development" className="space-y-8">
+              {/* Development Plan Placeholder */}
+              <Card className="bg-athlete-gray-800 border-gray-700">
+                <CardContent className="p-8 text-center">
+                  <CalendarDays className="mx-auto mb-4 text-athlete-accent" size={64} />
+                  <h2 className="text-2xl font-bold mb-4 text-white">{t('developmentPlan.title')}</h2>
+                  <p className="text-gray-400 text-lg mb-4">{t('developmentPlan.comingSoon')}</p>
+                  <p className="text-gray-500">{t('developmentPlan.description')}</p>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
           </Tabs>
 

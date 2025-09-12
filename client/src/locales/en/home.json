@@ -69,6 +69,8 @@
     "tagline": "Analyze any athlete's performance with AI-powered insights",
     "athleteAnalysis": "Athlete Analysis",
     "compareAthletes": "Compare Athletes",
+    "nutritionPlan": "Nutrition Plan",
+    "developmentPlan": "Development Plan",
     "selectSportAthlete": "Select Sport & Athlete",
     "sport": "Sport",
     "country": "Country",
@@ -83,6 +85,30 @@
     "analysisServices": "Analysis Services",
     "clickForBiography": "Click for Biography →",
     "rank": "Rank"
+  },
+  "nutritionPlan": {
+    "title": "Create Your Nutrition Plan",
+    "sport": "Sport (Optional)",
+    "goal": "Goal",
+    "currentWeight": "Current Weight (kg)",
+    "targetWeight": "Target Weight (kg)",
+    "country": "Country (For meal preferences)",
+    "period": "Period (Weeks)",
+    "inbodyReport": "InBody Report (Optional)",
+    "language": "Plan Language",
+    "generate": "Generate Nutrition Plan",
+    "goalPlaceholder": "e.g., Build muscle, lose weight, improve endurance...",
+    "countryHint": "This affects meal types and local food preferences",
+    "weekNavigation": {
+      "week": "Week",
+      "previous": "Previous Week",
+      "next": "Next Week"
+    }
+  },
+  "developmentPlan": {
+    "title": "Development Plan",
+    "comingSoon": "Coming Soon",
+    "description": "Personalized development plans will be available soon."
   },
   "referral": {
     "title": "You're using a referral link!",

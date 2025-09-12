@@ -69,6 +69,8 @@
     "tagline": "حلل أداء أي رياضي بواسطة الذكاء الاصطناعي",
     "athleteAnalysis": "تحليل الرياضي",
     "compareAthletes": "مقارنة الرياضيين",
+    "nutritionPlan": "خطة التغذية",
+    "developmentPlan": "خطة التطوير",
     "selectSportAthlete": "اختر الرياضة والرياضي",
     "sport": "الرياضة",
     "country": "البلد",
@@ -83,6 +85,30 @@
     "analysisServices": "خدمات التحليل",
     "clickForBiography": "انقر للسيرة الذاتية ←",
     "rank": "التصنيف"
+  },
+  "nutritionPlan": {
+    "title": "أنشئ خطة التغذية الخاصة بك",
+    "sport": "الرياضة (اختياري)",
+    "goal": "الهدف",
+    "currentWeight": "الوزن الحالي (كيلو)",
+    "targetWeight": "الوزن المستهدف (كيلو)",
+    "country": "البلد (لتفضيلات الوجبات)",
+    "period": "المدة (بالأسابيع)",
+    "inbodyReport": "تقرير إن بودي (اختياري)",
+    "language": "لغة الخطة",
+    "generate": "إنشاء خطة التغذية",
+    "goalPlaceholder": "مثال: بناء العضلات، إنقاص الوزن، تحسين التحمل...",
+    "countryHint": "هذا يؤثر على أنواع الوجبات وتفضيلات الطعام المحلي",
+    "weekNavigation": {
+      "week": "الأسبوع",
+      "previous": "الأسبوع السابق",
+      "next": "الأسبوع التالي"
+    }
+  },
+  "developmentPlan": {
+    "title": "خطة التطوير",
+    "comingSoon": "قريباً",
+    "description": "ستتوفر خطط التطوير الشخصية قريباً."
   },
   "referral": {
     "title": "أنت تستخدم رابط إحالة!",
