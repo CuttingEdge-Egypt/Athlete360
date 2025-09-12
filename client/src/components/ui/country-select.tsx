@@ -1,0 +1,109 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface CountrySelectProps {
+  value?: string;
+  onValueChange: (value: string) => void;
+  placeholder?: string;
+  countries: string[];
+  className?: string;
+  testId?: string;
+}
+
+export function CountrySelect({
+  value,
+  onValueChange,
+  placeholder = "Select country...",
+  countries,
+  className,
+  testId,
+}: CountrySelectProps) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className={cn(
+            "w-full justify-between bg-athlete-gray-700 border-gray-600 text-white hover:bg-athlete-gray-600",
+            className
+          )}
+          data-testid={testId}
+        >
+          {value && value !== "all"
+            ? countries.find((country) => country === value) || value
+            : placeholder}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-full p-0 bg-athlete-gray-700 border-gray-600">
+        <Command className="bg-athlete-gray-700">
+          <CommandInput
+            placeholder="Search countries..."
+            className="h-9 text-white placeholder:text-gray-400"
+          />
+          <CommandList>
+            <CommandEmpty className="text-gray-300 py-2 text-center text-sm">
+              No country found.
+            </CommandEmpty>
+            <CommandGroup>
+              <CommandItem
+                value="all"
+                onSelect={() => {
+                  onValueChange("all");
+                  setOpen(false);
+                }}
+                className="text-white hover:bg-athlete-gray-600"
+              >
+                <Check
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    value === "all" ? "opacity-100" : "opacity-0"
+                  )}
+                />
+                All countries
+              </CommandItem>
+              {countries.map((country) => (
+                <CommandItem
+                  key={country}
+                  value={country}
+                  onSelect={(currentValue) => {
+                    onValueChange(currentValue === value ? "" : currentValue);
+                    setOpen(false);
+                  }}
+                  className="text-white hover:bg-athlete-gray-600"
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === country ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {country}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}

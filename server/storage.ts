@@ -590,7 +590,8 @@ export class DatabaseStorage implements IStorage {
     const existingCountries = athleteCountries.map((row) => row.country!).filter(Boolean);
     
     // Combine all countries with existing athlete countries, remove duplicates, and sort
-    const combinedCountries = [...new Set([...allCountries, ...existingCountries])];
+    const combinedSet = new Set([...allCountries, ...existingCountries]);
+    const combinedCountries = Array.from(combinedSet);
     return combinedCountries.sort();
   }
 

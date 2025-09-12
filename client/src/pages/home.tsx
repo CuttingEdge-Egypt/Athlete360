@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Search, Star, User, Loader2 } from "lucide-react";
 import type { Sport, Athlete } from "@shared/schema";
 import GenerationQueue from "@/components/ui/generation-queue";
+import { CountrySelect } from "@/components/ui/country-select";
 
 export default function Home() {
   const { user } = useAuth();
@@ -554,22 +555,13 @@ export default function Home() {
 
                 <div>
                   <label className="block text-sm font-medium mb-2 text-gray-300">{t('interface.country')}</label>
-                  <Select value={selectedCountry || "all"} onValueChange={handleCountryChange}>
-                    <SelectTrigger 
-                      data-testid="select-country"
-                      className="bg-athlete-gray-700 border-gray-600 text-white"
-                    >
-                      <SelectValue placeholder={t('interface.allCountries')} />
-                    </SelectTrigger>
-                    <SelectContent className="bg-athlete-gray-700 border-gray-600">
-                      <SelectItem value="all">{t('interface.allCountries')}</SelectItem>
-                      {countries.map((country) => (
-                        <SelectItem key={country} value={country}>
-                          {country}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <CountrySelect
+                    value={selectedCountry || "all"}
+                    onValueChange={handleCountryChange}
+                    placeholder={t('interface.allCountries')}
+                    countries={countries}
+                    testId="select-country"
+                  />
                 </div>
                 
                 <div>

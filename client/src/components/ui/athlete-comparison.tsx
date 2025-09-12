@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CountrySelect } from "@/components/ui/country-select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -310,26 +311,16 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300">Country (Athlete 1)</label>
-            <Select
+            <CountrySelect
               value={selectedCountry1 || "all"}
               onValueChange={(value) => {
                 setSelectedCountry1(value === "all" ? "" : value);
                 setSelectedAthlete1("");
               }}
-              data-testid="select-country1"
-            >
-              <SelectTrigger className="bg-athlete-gray-700 border-gray-600">
-                <SelectValue placeholder="All countries" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All countries</SelectItem>
-                {Array.isArray(countries) && countries.map((country) => (
-                  <SelectItem key={country} value={country}>
-                    {country}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              placeholder="All countries"
+              countries={Array.isArray(countries) ? countries : []}
+              testId="select-country1"
+            />
           </div>
 
           <div className="space-y-2">
@@ -376,26 +367,16 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300">Country (Athlete 2)</label>
-            <Select
+            <CountrySelect
               value={selectedCountry2 || "all"}
               onValueChange={(value) => {
                 setSelectedCountry2(value === "all" ? "" : value);
                 setSelectedAthlete2("");
               }}
-              data-testid="select-country2"
-            >
-              <SelectTrigger className="bg-athlete-gray-700 border-gray-600">
-                <SelectValue placeholder="All countries" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All countries</SelectItem>
-                {Array.isArray(countries) && countries.map((country) => (
-                  <SelectItem key={country} value={country}>
-                    {country}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              placeholder="All countries"
+              countries={Array.isArray(countries) ? countries : []}
+              testId="select-country2"
+            />
           </div>
 
           <div className="space-y-2">
