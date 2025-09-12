@@ -120,7 +120,7 @@ export function Navigation() {
           </div>
 
           {/* History, Profile Menu, Logout, and Language Switcher */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-4">
             <HistoryDropdown />
             <ProfileDropdown />
             
