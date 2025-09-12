@@ -597,7 +597,7 @@ export default function Home() {
                           data-testid={`athlete-option-${athlete.id}`}
                           onClick={() => {
                             setSelectedAthlete(athlete);
-                            setSearchName(athlete.name);
+                            setSearchName("");
                           }}
                           className="w-full text-left px-4 py-2 hover:bg-athlete-gray-600 text-white border-b border-gray-600 last:border-b-0"
                         >
