@@ -39,17 +39,7 @@ const serviceIcons = {
   comparison: GitCompare,
 };
 
-const serviceLabels = {
-  bio: "Biography",
-  rank: "Ranking Analysis",
-  strengths: "Strengths Analysis", 
-  weaknesses: "Weaknesses Analysis",
-  development: "Development Plan",
-
-  beat: "Beat Strategies",
-  video: "Video Analysis",
-  comparison: "Athlete Comparison",
-};
+// Moved to component to access t function
 
 export function HistoryDropdown() {
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<HistoryItem | null>(null);
@@ -57,9 +47,24 @@ export function HistoryDropdown() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  const { t } = useTranslation('nav');
+  const { t } = useTranslation(['nav', 'home']);
   const { language } = useLanguage();
   const isArabic = language === 'ar';
+
+  // Create service labels with translations
+  const getServiceLabel = (serviceType: string) => {
+    const serviceLabels: { [key: string]: string } = {
+      bio: t('services.bioAnalysis.title', { ns: 'home' }),
+      rank: t('services.rankHistory.title', { ns: 'home' }),
+      strengths: t('services.strengths.title', { ns: 'home' }),
+      weaknesses: t('services.weaknesses.title', { ns: 'home' }),
+      development: t('services.trainingPlans.title', { ns: 'home' }),
+      beat: t('services.tacticRecommendations.title', { ns: 'home' }),
+      video: t('services.videoAnalysis.title', { ns: 'home' }),
+      comparison: t('services.athleteComparison.title', { ns: 'home' }),
+    };
+    return serviceLabels[serviceType] || serviceType;
+  };
 
   const { data: historyItems = [], isLoading } = useQuery<HistoryItem[]>({
     queryKey: ["/api/user-history"],
@@ -72,14 +77,14 @@ export function HistoryDropdown() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user-history"] });
       toast({
-        title: "History Cleared",
-        description: "All your analysis history has been permanently deleted",
+        title: t('toasts.historyCleared.title', { ns: 'home' }),
+        description: t('toasts.historyCleared.description', { ns: 'home' }),
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to clear history. Please try again.",
+        title: t('toasts.error.title', { ns: 'home' }),
+        description: t('toasts.clearHistoryError.description', { ns: 'home' }),
         variant: "destructive",
       });
     },
@@ -142,7 +147,7 @@ export function HistoryDropdown() {
           <div className="flex items-center justify-between px-3 py-2 border-b">
             <div className="flex items-center gap-2 font-semibold text-sm">
               <History className="h-4 w-4" />
-              Analysis History
+              {t('menu.history')}
             </div>
             {historyItems.length > 0 && (
               <AlertDialog>
@@ -154,33 +159,33 @@ export function HistoryDropdown() {
                     data-testid="button-clear-history"
                   >
                     <Trash2 className="h-3 w-3 mr-1" />
-                    Clear
+                    {t('actions.clear', { ns: 'home' })}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Clear All History?</AlertDialogTitle>
+                    <AlertDialogTitle>{t('dialogs.clearHistory.title', { ns: 'home' })}</AlertDialogTitle>
                     <AlertDialogDescription className="space-y-2">
-                      <p>This will permanently delete all your analysis history, including:</p>
+                      <p>{t('dialogs.clearHistory.description', { ns: 'home' })}</p>
                       <ul className="list-disc list-inside space-y-1 text-sm">
-                        <li>All athlete analysis records</li>
-                        <li>Token transaction history</li>
-                        <li>Service usage logs</li>
+                        <li>{t('dialogs.clearHistory.items.analyses', { ns: 'home' })}</li>
+                        <li>{t('dialogs.clearHistory.items.transactions', { ns: 'home' })}</li>
+                        <li>{t('dialogs.clearHistory.items.usage', { ns: 'home' })}</li>
                       </ul>
                       <p className="font-medium text-destructive">
-                        This action cannot be undone.
+                        {t('dialogs.clearHistory.warning', { ns: 'home' })}
                       </p>
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>{t('actions.cancel', { ns: 'home' })}</AlertDialogCancel>
                     <AlertDialogAction 
                       onClick={() => clearHistoryMutation.mutate()}
                       disabled={clearHistoryMutation.isPending}
                       className="bg-destructive hover:bg-destructive/90"
                       data-testid="button-confirm-clear-history"
                     >
-                      {clearHistoryMutation.isPending ? "Clearing..." : "Clear History"}
+                      {clearHistoryMutation.isPending ? t('actions.clearing', { ns: 'home' }) : t('actions.clearHistory', { ns: 'home' })}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -190,17 +195,17 @@ export function HistoryDropdown() {
           
           {isLoading ? (
             <div className="p-4 text-center text-muted-foreground">
-              Loading history...
+              {t('states.loading', { ns: 'home' })}
             </div>
           ) : historyItems.length === 0 ? (
             <div className="p-4 text-center text-muted-foreground">
-              No analysis history yet
+              {t('states.emptyHistory', { ns: 'home' })}
             </div>
           ) : (
             <ScrollArea className="h-80">
               {historyItems.map((item) => {
                 const ServiceIcon = serviceIcons[item.serviceType as keyof typeof serviceIcons] || User;
-                const serviceLabel = serviceLabels[item.serviceType as keyof typeof serviceLabels] || item.serviceType;
+                const serviceLabel = getServiceLabel(item.serviceType);
                 
                 return (
                   <DropdownMenuItem
@@ -250,7 +255,7 @@ export function HistoryDropdown() {
           }}
           type={selectedHistoryItem.serviceType}
           data={selectedHistoryItem.resultData}
-          athleteName={selectedHistoryItem.athleteName || "Unknown Athlete"}
+          athleteName={selectedHistoryItem.athleteName || t('states.unknownAthlete', { ns: 'home' })}
           athleteId={selectedHistoryItem.athleteId}
           createdAt={selectedHistoryItem.createdAt}
         />

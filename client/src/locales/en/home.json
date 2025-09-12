@@ -113,5 +113,40 @@
   "referral": {
     "title": "You're using a referral link!",
     "description": "Your friend will get 100 bonus tokens when you sign up!\nYou'll start with 1000 free tokens."
+  },
+  "actions": {
+    "clear": "Clear",
+    "cancel": "Cancel", 
+    "clearHistory": "Clear History",
+    "clearing": "Clearing..."
+  },
+  "dialogs": {
+    "clearHistory": {
+      "title": "Clear All History?",
+      "description": "This will permanently delete all your analysis history, including:",
+      "items": {
+        "analyses": "All athlete analysis records",
+        "transactions": "Token transaction history",
+        "usage": "Service usage logs"
+      },
+      "warning": "This action cannot be undone."
+    }
+  },
+  "toasts": {
+    "historyCleared": {
+      "title": "History Cleared",
+      "description": "All your analysis history has been permanently deleted"
+    },
+    "error": {
+      "title": "Error"
+    },
+    "clearHistoryError": {
+      "description": "Failed to clear history. Please try again."
+    }
+  },
+  "states": {
+    "loading": "Loading history...",
+    "emptyHistory": "No analysis history yet",
+    "unknownAthlete": "Unknown Athlete"
   }
 }

@@ -383,40 +383,40 @@ export default function Home() {
   const services = [
     {
       id: "bio",
-      title: "Bio Analysis",
-      description: "Complete athlete biography with career highlights and achievements",
+      title: t('services.bioAnalysis.title'),
+      description: t('services.bioAnalysis.description'),
       cost: 50,
       icon: "user-alt",
       color: "text-athlete-accent"
     },
     {
       id: "rank",
-      title: "Rank History",
-      description: "Interactive charts showing ranking progression and improvement recommendations",
+      title: t('services.rankHistory.title'),
+      description: t('services.rankHistory.description'),
       cost: 70,
       icon: "trophy",
       color: "text-athlete-warning"
     },
     {
       id: "strengths",
-      title: "Strengths",
-      description: "Detailed analysis of key strengths and competitive advantages",
+      title: t('services.strengths.title'),
+      description: t('services.strengths.description'),
       cost: 50,
       icon: "muscle",
       color: "text-athlete-success"
     },
     {
       id: "weaknesses",
-      title: "Weaknesses",
-      description: "Identify areas for improvement and development opportunities",
+      title: t('services.weaknesses.title'),
+      description: t('services.weaknesses.description'),
       cost: 50,
       icon: "exclamation-triangle",
       color: "text-athlete-danger"
     },
     {
       id: "beat-strategies",
-      title: "How to Beat",
-      description: "Tactical strategies and techniques to gain competitive advantage",
+      title: t('services.tacticRecommendations.title'),
+      description: t('services.tacticRecommendations.description'),
       cost: 100,
       icon: "chess",
       color: "text-red-400"
