@@ -62,6 +62,7 @@ export const athletes = pgTable("athletes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   sportId: varchar("sport_id").notNull().references(() => sports.id),
   name: varchar("name").notNull(),
+  nameArabic: varchar("name_arabic"), // Arabic name for bilingual support
   age: integer("age"),
   gender: varchar("gender"), // Male, Female, Other
   country: varchar("country"), // This is nationality 
@@ -246,6 +247,7 @@ export const insertSportSchema = createInsertSchema(sports).pick({
 export const insertAthleteSchema = createInsertSchema(athletes).pick({
   sportId: true,
   name: true,
+  nameArabic: true,
   age: true,
   gender: true,
   country: true,
