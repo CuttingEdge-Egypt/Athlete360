@@ -11,6 +11,9 @@ import { History, Clock, User, TrendingUp, Target, Utensils, Zap, Video, GitComp
 import { formatDistanceToNow } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/lib/LanguageProvider";
+import { formatNumber } from "@/lib/arabicNumbers";
 
 interface HistoryItem {
   id: string;
@@ -54,6 +57,9 @@ export function HistoryDropdown() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { t } = useTranslation('nav');
+  const { language } = useLanguage();
+  const isArabic = language === 'ar';
 
   const { data: historyItems = [], isLoading } = useQuery<HistoryItem[]>({
     queryKey: ["/api/user-history"],
@@ -117,13 +123,13 @@ export function HistoryDropdown() {
             className="relative flex items-center gap-2 px-3"
           >
             <History className="h-4 w-4" />
-            <span className="text-sm">History</span>
+            <span className="text-sm">{t('menu.history')}</span>
             {historyItems.length > 0 && (
               <Badge 
                 variant="secondary" 
                 className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
               >
-                {historyItems.length > 99 ? '99+' : historyItems.length}
+                {historyItems.length > 99 ? formatNumber('99+', isArabic) : formatNumber(historyItems.length, isArabic)}
               </Badge>
             )}
           </Button>
@@ -217,7 +223,7 @@ export function HistoryDropdown() {
                       </div>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Coins className="h-3 w-3" />
-                        {item.tokensDeducted < 0 ? `+${Math.abs(item.tokensDeducted)}` : item.tokensDeducted}
+                        {item.tokensDeducted < 0 ? `+${formatNumber(Math.abs(item.tokensDeducted), isArabic)}` : formatNumber(item.tokensDeducted, isArabic)}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground w-full">

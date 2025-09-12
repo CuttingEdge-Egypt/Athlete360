@@ -12,11 +12,15 @@ import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
 import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/lib/LanguageProvider";
+import { formatNumber } from "@/lib/arabicNumbers";
 
 export function Navigation() {
   const { user: authUser } = useAuth();
   const [, setLocation] = useLocation();
-  const { t } = useTranslation('nav');
+  const { t } = useTranslation(['nav', 'common']);
+  const { language } = useLanguage();
+  const isArabic = language === 'ar';
   
   const { data: user } = useQuery<User>({
     queryKey: ["/api/auth/user"],
@@ -57,10 +61,10 @@ export function Navigation() {
           >
             <Coins className="text-athlete-warning" size={20} />
             <div className="flex flex-col items-center">
-              <span className="font-semibold text-white">{user?.tokens || 0}</span>
+              <span className="font-semibold text-white">{formatNumber(user?.tokens || 0, isArabic)}</span>
               {user?.totalTokensPurchased && (
                 <span className="text-xs text-gray-400">
-                  /{user.totalTokensPurchased} tokens
+                  /{formatNumber(user.totalTokensPurchased, isArabic)} {t('units.tokens', { ns: 'common' })}
                 </span>
               )}
             </div>
@@ -105,11 +109,11 @@ export function Navigation() {
             >
               <div className="flex items-center">
                 <Coins className="mr-1" size={14} />
-                {user?.tokens || 0}
+                {formatNumber(user?.tokens || 0, isArabic)}
               </div>
               {user?.totalTokensPurchased && (
                 <span className="text-xs text-gray-400">
-                  /{user.totalTokensPurchased}
+                  /{formatNumber(user.totalTokensPurchased, isArabic)}
                 </span>
               )}
             </Badge>
