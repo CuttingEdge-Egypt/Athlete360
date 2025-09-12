@@ -695,7 +695,7 @@ export default function Home() {
               {/* Service Boxes Grid */}
               {selectedAthlete && (
                 <div>
-                  <h2 className="text-3xl font-bold text-center mb-8 text-white">Analysis Services</h2>
+                  <h2 className="text-3xl font-bold text-center mb-8 text-white">{t('interface.analysisServices')}</h2>
                   <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {services.map((service) => (
                       <ServiceCard
@@ -713,9 +713,9 @@ export default function Home() {
               {!selectedAthlete && (
                 <div className="text-center py-20">
                   <div className="text-6xl mb-4">🏆</div>
-                  <h3 className="text-2xl font-bold mb-4 text-white">Ready to Analyze?</h3>
+                  <h3 className="text-2xl font-bold mb-4 text-white">{t('interface.readyToAnalyze.title')}</h3>
                   <p className="text-gray-400 max-w-md mx-auto">
-                    Select a sport and enter an athlete's name to begin your comprehensive analysis journey.
+                    {t('interface.readyToAnalyze.description')}
                   </p>
                 </div>
               )}
