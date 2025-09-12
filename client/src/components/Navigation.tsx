@@ -115,10 +115,9 @@ export function Navigation() {
             </Badge>
           </div>
 
-          {/* History, Language Switcher, and Profile Menu */}
+          {/* History, Profile Menu, Logout, and Language Switcher */}
           <div className="flex items-center space-x-2">
             <HistoryDropdown />
-            <LanguageSwitcher />
             <ProfileDropdown />
             
             <Button 
@@ -131,6 +130,9 @@ export function Navigation() {
               <LogOut size={16} />
               <span className="hidden sm:inline ml-2">{t('menu.logout')}</span>
             </Button>
+            
+            {/* Language switcher as last element - rightmost in LTR, leftmost in RTL due to flex inversion */}
+            <LanguageSwitcher />
           </div>
         </div>
       </div>
