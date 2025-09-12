@@ -669,7 +669,7 @@ export default function Home() {
                         </div>
                         <div>
                           <h3 className="text-xl font-bold text-white">{selectedAthlete.name}</h3>
-                          <p className="text-gray-400 capitalize">{selectedSport || "Multi-Sport"}</p>
+                          <p className="text-gray-400 capitalize">{selectedAthlete.country || "Unknown Country"}</p>
                           <div className="flex items-center space-x-2 mt-1">
                             <Star className="text-athlete-warning" size={16} />
                             <span className="text-sm text-gray-300">Rank #{selectedAthlete.rank || "TBD"}</span>
