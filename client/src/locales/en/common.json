@@ -1,0 +1,85 @@
+{
+  "buttons": {
+    "signUp": "Sign Up",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "clear": "Clear",
+    "retry": "Retry",
+    "close": "Close",
+    "next": "Next",
+    "back": "Back",
+    "view": "View",
+    "upload": "Upload",
+    "analyze": "Analyze",
+    "compare": "Compare",
+    "buyTokens": "Buy Tokens",
+    "startFreeTrial": "Start Free Trial",
+    "startFreeTrialTokens": "Start Free Trial - 1000 Tokens",
+    "signInToContinue": "Sign In to Continue"
+  },
+  "labels": {
+    "athleteName": "Athlete Name",
+    "sport": "Sport",
+    "country": "Country",
+    "email": "Email Address",
+    "password": "Password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "cardNumber": "Card Number",
+    "expiryDate": "Expiry Date",
+    "cvv": "CVV",
+    "cardholderName": "Cardholder Name"
+  },
+  "placeholders": {
+    "searchAthlete": "Search athlete by name...",
+    "enterEmail": "Enter your email",
+    "enterPassword": "Enter your password",
+    "selectSport": "Select a sport",
+    "selectCountry": "Select a country"
+  },
+  "messages": {
+    "welcome": "Welcome back!",
+    "loginFailed": "Login failed",
+    "signupSuccessful": "Signup successful",
+    "profileUpdated": "Profile updated",
+    "paymentSuccessful": "Payment successful!",
+    "paymentFailed": "Payment failed",
+    "analysisComplete": "Analysis complete",
+    "generationCancelled": "Generation cancelled",
+    "referralLinkCopied": "Referral link copied!",
+    "athleteNotFound": "Athlete not found",
+    "searchWithAI": "Search with AI",
+    "searchingWithAI": "Searching with AI...",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "unknownCountry": "Unknown Country"
+  },
+  "tabs": {
+    "overview": "Overview",
+    "detailed": "Detailed",
+    "strengths": "Strengths",
+    "weaknesses": "Weaknesses",
+    "competitionHistory": "Competition History",
+    "headToHead": "Head-to-Head",
+    "details": "Details",
+    "analysisResults": "Analysis Results",
+    "history": "History",
+    "comparison": "Comparison"
+  },
+  "units": {
+    "tokens": "tokens",
+    "month": "month",
+    "egp": "EGP"
+  },
+  "languages": {
+    "english": "English",
+    "arabic": "العربية"
+  }
+}

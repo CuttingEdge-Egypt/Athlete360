@@ -1,0 +1,80 @@
+{
+  "hero": {
+    "title": "Athlete360",
+    "subtitle": "AI-Powered Athlete Analytics & Performance Optimization Platform",
+    "description": "Analyze any athlete's performance, get tactical insights, create development plans, and unlock the secrets to athletic excellence with our revolutionary AI system."
+  },
+  "features": {
+    "athleteProfiles": {
+      "title": "Athlete Profiles",
+      "description": "Comprehensive bios with latest stats"
+    },
+    "performanceAnalytics": {
+      "title": "Performance Analytics", 
+      "description": "Dynamic analysis and rankings"
+    },
+    "trainingPlans": {
+      "title": "Training Plans",
+      "description": "Personalized development strategies"
+    }
+  },
+  "pricing": {
+    "title": "Start Your Journey",
+    "price": "$25",
+    "period": "/month",
+    "description": "Get 1,000 tokens to analyze any athlete"
+  },
+  "about": {
+    "title": "About Athlete360 AI",
+    "description": "Revolutionary sports analytics platform that combines artificial intelligence with deep athletic insights to provide unprecedented analysis of any athlete's performance, strengths, and development opportunities."
+  },
+  "services": {
+    "bioAnalysis": {
+      "title": "Bio Analysis",
+      "description": "Complete athlete biography with career highlights and achievements"
+    },
+    "rankHistory": {
+      "title": "Rank History", 
+      "description": "Interactive charts showing ranking progression and improvement recommendations"
+    },
+    "strengths": {
+      "title": "Strengths",
+      "description": "Detailed analysis of key strengths and competitive advantages"
+    },
+    "weaknesses": {
+      "title": "Weaknesses",
+      "description": "In-depth analysis of areas needing improvement and targeted solutions"
+    },
+    "tacticRecommendations": {
+      "title": "Tactic Recommendations",
+      "description": "AI-powered strategic insights and competition preparation plans"
+    },
+    "trainingPlans": {
+      "title": "Training Plans",
+      "description": "Customized workout regimens and development programs"
+    },
+    "videoAnalysis": {
+      "title": "Video Analysis",
+      "description": "Advanced performance analysis from competition footage"
+    },
+    "athleteComparison": {
+      "title": "Athlete Comparison",
+      "description": "Head-to-head analysis and competitive insights"
+    }
+  },
+  "interface": {
+    "selectSport": "Select Sport",
+    "selectCountry": "Select Country",
+    "readyToAnalyze": {
+      "title": "Ready to Analyze?",
+      "description": "Select a sport and enter an athlete's name to begin your comprehensive analysis journey."
+    },
+    "analysisServices": "Analysis Services",
+    "clickForBiography": "Click for Biography →",
+    "rank": "Rank"
+  },
+  "referral": {
+    "title": "You're using a referral link!",
+    "description": "Your friend will get 100 bonus tokens when you sign up!\nYou'll start with 1000 free tokens."
+  }
+}

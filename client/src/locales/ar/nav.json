@@ -1,0 +1,36 @@
+{
+  "brand": "أثليت360",
+  "menu": {
+    "home": "الرئيسية",
+    "dashboard": "لوحة التحكم",
+    "analysis": "التحليل",
+    "comparison": "المقارنة",
+    "profile": "الملف الشخصي",
+    "settings": "الإعدادات",
+    "help": "المساعدة",
+    "logout": "تسجيل الخروج"
+  },
+  "footer": {
+    "tagline": "تحليلات رياضية مدعومة بالذكاء الاصطناعي للجيل القادم من التحليل الرياضي.",
+    "features": "الميزات",
+    "featuresList": {
+      "athleteProfiles": "ملفات اللاعبين",
+      "performanceAnalytics": "تحليل الأداء",
+      "trainingPlans": "خطط التدريب",
+      "videoAnalysis": "تحليل الفيديو"
+    },
+    "support": "الدعم",
+    "supportList": {
+      "helpCenter": "مركز المساعدة",
+      "apiDocumentation": "وثائق API",
+      "contactUs": "اتصل بنا",
+      "community": "المجتمع"
+    },
+    "connect": "تواصل",
+    "contact": {
+      "email": "support@athlete360.ai",
+      "liveChat": "دعم الدردشة المباشرة"
+    },
+    "copyright": "© 2024 أثليت360. جميع الحقوق محفوظة."
+  }
+}
