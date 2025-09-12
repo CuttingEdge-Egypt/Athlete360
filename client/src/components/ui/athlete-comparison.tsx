@@ -31,6 +31,7 @@ type Sport = {
 type Athlete = {
   id: string;
   name: string;
+  nameArabic: string | null;
   country: string | null;
   rank: number | null;
   profileImageUrl: string | null;
@@ -352,7 +353,12 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                     athlete && athlete.id ? (
                       <SelectItem key={athlete.id} value={athlete.id}>
                         <div className="flex items-center gap-2 truncate max-w-full">
-                          <span className="truncate">{athlete.name || 'Unknown Athlete'}</span>
+                          <span className="truncate">
+                            {athlete.name || 'Unknown Athlete'}
+                            {athlete.nameArabic && (
+                              <span className="text-gray-400 text-sm"> / {athlete.nameArabic}</span>
+                            )}
+                          </span>
                           {athlete.country && (
                             <span className="text-xs text-gray-400 flex-shrink-0">({athlete.country})</span>
                           )}
@@ -413,7 +419,12 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                     athlete && athlete.id ? (
                       <SelectItem key={athlete.id} value={athlete.id}>
                         <div className="flex items-center gap-2 truncate max-w-full">
-                          <span className="truncate">{athlete.name || 'Unknown Athlete'}</span>
+                          <span className="truncate">
+                            {athlete.name || 'Unknown Athlete'}
+                            {athlete.nameArabic && (
+                              <span className="text-gray-400 text-sm"> / {athlete.nameArabic}</span>
+                            )}
+                          </span>
                           {athlete.country && (
                             <span className="text-xs text-gray-400 flex-shrink-0">({athlete.country})</span>
                           )}

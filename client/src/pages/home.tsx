@@ -603,7 +603,12 @@ export default function Home() {
                           }}
                           className="w-full text-left px-4 py-2 hover:bg-athlete-gray-600 text-white border-b border-gray-600 last:border-b-0"
                         >
-                          <div className="font-medium">{athlete.name}</div>
+                          <div className="font-medium">
+                            {athlete.name}
+                            {athlete.nameArabic && (
+                              <span className="text-gray-300 mr-2"> / {athlete.nameArabic}</span>
+                            )}
+                          </div>
                           {athlete.country && (
                             <div className="text-sm text-gray-400">{athlete.country}</div>
                           )}
@@ -670,7 +675,12 @@ export default function Home() {
                           </div>
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold text-white">{selectedAthlete.name}</h3>
+                          <h3 className="text-xl font-bold text-white">
+                            {selectedAthlete.name}
+                            {selectedAthlete.nameArabic && (
+                              <span className="text-gray-300 font-normal text-lg block">{selectedAthlete.nameArabic}</span>
+                            )}
+                          </h3>
                           <p className="text-gray-400 capitalize">{selectedAthlete.country || "Unknown Country"}</p>
                           <div className="flex items-center space-x-2 mt-1">
                             <Star className="text-athlete-warning" size={16} />
