@@ -122,7 +122,7 @@ export function Navigation() {
           {/* History, Profile Menu, Logout, and Language Switcher */}
           <div className="flex items-center space-x-4">
             <HistoryDropdown />
-            <div className="ml-6">
+            <div className={isArabic ? "mr-6" : "ml-6"}>
               <ProfileDropdown />
             </div>
             
