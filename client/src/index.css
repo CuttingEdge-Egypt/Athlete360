@@ -2,6 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+/* RTL Support for Arabic Language - Essential Rules Only */
+
+/* Icon rotation for arrows and chevrons */
+[dir="rtl"] .rtl-flip {
+  transform: scaleX(-1);
+}
+
+/* Float adjustments (minimal impact) */
+[dir="rtl"] .float-left { float: right; }
+[dir="rtl"] .float-right { float: left; }
+
+/* Arabic font optimization */
+[lang="ar"] {
+  font-family: 'Segoe UI', 'Tahoma', 'Arial', 'Helvetica Neue', sans-serif;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+}
+
+/* Ensure proper text direction inheritance */
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  direction: rtl;
+  text-align: right;
+}
+
+[dir="ltr"] input,
+[dir="ltr"] textarea,
+[dir="ltr"] select {
+  direction: ltr;
+  text-align: left;
+}
+
 :root {
   --background: hsl(222, 47%, 11%);
   --foreground: hsl(213, 31%, 91%);

@@ -28,13 +28,12 @@ const resources = {
 
 // Configure i18next
 i18n
-  .use(ICU) // For complex pluralization (important for Arabic)
+  .use(ICU) // For complex pluralization (supports Arabic)
   .use(LanguageDetector) // Automatic language detection
   .use(initReactI18next) // React integration
   .init({
     resources,
     fallbackLng: 'en',
-    lng: 'en', // Default language
     
     // Namespace configuration
     ns: ['common', 'nav', 'home'],
@@ -49,7 +48,7 @@ i18n
     
     // Interpolation configuration
     interpolation: {
-      escapeValue: true, // XSS protection
+      escapeValue: false, // React already does XSS protection, true causes double-escaping
     },
     
     // Arabic pluralization support

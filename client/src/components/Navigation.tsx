@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { HistoryDropdown } from "@/components/ui/history-dropdown";
 import { ProfileDropdown } from "@/components/ui/profile-dropdown";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { Trophy, Coins, Plus, LogOut, User as UserIcon, Video } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -112,9 +113,10 @@ export function Navigation() {
             </Badge>
           </div>
 
-          {/* History and Profile Menu */}
+          {/* History, Language Switcher, and Profile Menu */}
           <div className="flex items-center space-x-2">
             <HistoryDropdown />
+            <LanguageSwitcher />
             <ProfileDropdown />
             
             <Button 
