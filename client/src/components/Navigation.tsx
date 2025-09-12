@@ -122,7 +122,9 @@ export function Navigation() {
           {/* History, Profile Menu, Logout, and Language Switcher */}
           <div className="flex items-center space-x-4">
             <HistoryDropdown />
-            <ProfileDropdown />
+            <div className="ml-6">
+              <ProfileDropdown />
+            </div>
             
             <Button 
               onClick={handleLogout}
