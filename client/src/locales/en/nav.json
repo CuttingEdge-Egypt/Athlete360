@@ -8,7 +8,10 @@
     "profile": "Profile",
     "settings": "Settings",
     "help": "Help",
-    "logout": "Logout"
+    "logout": "Logout",
+    "buyTokens": "Buy Tokens",
+    "videoAnalysis": "Video Analysis",
+    "history": "History"
   },
   "footer": {
     "tagline": "AI-powered athlete analytics for the next generation of sports analysis.",

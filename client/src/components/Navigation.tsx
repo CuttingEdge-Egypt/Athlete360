@@ -11,10 +11,12 @@ import { queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
+import { useTranslation } from "react-i18next";
 
 export function Navigation() {
   const { user: authUser } = useAuth();
   const [, setLocation] = useLocation();
+  const { t } = useTranslation('nav');
   
   const { data: user } = useQuery<User>({
     queryKey: ["/api/auth/user"],
@@ -44,7 +46,7 @@ export function Navigation() {
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Link href="/" className="flex items-center space-x-2 cursor-pointer">
           <Trophy className="text-athlete-accent text-2xl" />
-          <span className="text-xl font-bold text-white">Athlete360</span>
+          <span className="text-xl font-bold text-white">{t('brand')}</span>
         </Link>
         
         <div className="hidden md:flex items-center space-x-6">
@@ -80,7 +82,7 @@ export function Navigation() {
             }}
           >
             <Video className="mr-2" size={16} />
-            Video Analysis
+            {t('menu.videoAnalysis')}
           </Button>
           
           <Link href="/payment-center">
@@ -89,7 +91,7 @@ export function Navigation() {
               className="bg-athlete-accent hover:bg-blue-600 text-white"
             >
               <Plus className="mr-2" size={16} />
-              Buy Tokens
+              {t('menu.buyTokens')}
             </Button>
           </Link>
         </div>
@@ -127,7 +129,7 @@ export function Navigation() {
               className="text-gray-300 hover:text-white"
             >
               <LogOut size={16} />
-              <span className="hidden sm:inline ml-2">Logout</span>
+              <span className="hidden sm:inline ml-2">{t('menu.logout')}</span>
             </Button>
           </div>
         </div>

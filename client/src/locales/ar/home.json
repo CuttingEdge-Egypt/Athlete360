@@ -65,6 +65,17 @@
   "interface": {
     "selectSport": "اختر الرياضة",
     "selectCountry": "اختر البلد",
+    "welcome": "أهلاً بك في أثليت360",
+    "tagline": "حلل أداء أي رياضي بواسطة الذكاء الاصطناعي",
+    "athleteAnalysis": "تحليل الرياضي",
+    "compareAthletes": "مقارنة الرياضيين",
+    "selectSportAthlete": "اختر الرياضة والرياضي",
+    "sport": "الرياضة",
+    "country": "البلد",
+    "athleteName": "اسم الرياضي",
+    "chooseASport": "اختر رياضة...",
+    "allCountries": "جميع البلدان",
+    "searchAthlete": "ابحث عن رياضي بالاسم...",
     "readyToAnalyze": {
       "title": "مستعد للتحليل؟",
       "description": "اختر رياضة وأدخل اسم رياضي لبدء رحلة التحليل الشاملة."

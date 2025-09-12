@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 import { ServiceCard } from "@/components/ui/service-card";
 import { TokenModal } from "@/components/ui/token-modal";
@@ -23,6 +24,7 @@ export default function Home() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation('home');
   const [selectedSport, setSelectedSport] = useState<string>("");
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [searchName, setSearchName] = useState<string>("");
@@ -498,10 +500,10 @@ export default function Home() {
           {/* Welcome Section */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-4 text-white">
-              Welcome to Athlete360
+{t('interface.welcome')}
             </h1>
             <p className="text-xl text-gray-300 mb-8">
-              Analyze any athlete's performance with AI-powered insights
+{t('interface.tagline')}
             </p>
           </div>
 
@@ -513,14 +515,14 @@ export default function Home() {
                 data-testid="tab-analysis"
                 className="data-[state=active]:bg-athlete-accent"
               >
-                Athlete Analysis
+{t('interface.athleteAnalysis')}
               </TabsTrigger>
               <TabsTrigger 
                 value="comparison" 
                 data-testid="tab-comparison"
                 className="data-[state=active]:bg-athlete-accent"
               >
-                Compare Athletes
+{t('interface.compareAthletes')}
               </TabsTrigger>
             </TabsList>
 
@@ -528,17 +530,17 @@ export default function Home() {
               {/* Sport & Athlete Selection */}
               <Card className="bg-athlete-gray-800 border-gray-700">
                 <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold mb-6 text-center text-white">Select Sport & Athlete</h2>
+                  <h2 className="text-2xl font-bold mb-6 text-center text-white">{t('interface.selectSportAthlete')}</h2>
               
               <div className="grid md:grid-cols-3 gap-6 mb-6">
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-300">Sport</label>
+                  <label className="block text-sm font-medium mb-2 text-gray-300">{t('interface.sport')}</label>
                   <Select value={selectedSport} onValueChange={handleSportChange}>
                     <SelectTrigger 
                       data-testid="select-sport"
                       className="bg-athlete-gray-700 border-gray-600 text-white"
                     >
-                      <SelectValue placeholder="Choose a sport..." />
+                      <SelectValue placeholder={t('interface.chooseASport')} />
                     </SelectTrigger>
                     <SelectContent className="bg-athlete-gray-700 border-gray-600">
                       {sports.map((sport) => (
@@ -551,16 +553,16 @@ export default function Home() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-300">Country</label>
+                  <label className="block text-sm font-medium mb-2 text-gray-300">{t('interface.country')}</label>
                   <Select value={selectedCountry || "all"} onValueChange={handleCountryChange}>
                     <SelectTrigger 
                       data-testid="select-country"
                       className="bg-athlete-gray-700 border-gray-600 text-white"
                     >
-                      <SelectValue placeholder="All countries" />
+                      <SelectValue placeholder={t('interface.allCountries')} />
                     </SelectTrigger>
                     <SelectContent className="bg-athlete-gray-700 border-gray-600">
-                      <SelectItem value="all">All countries</SelectItem>
+                      <SelectItem value="all">{t('interface.allCountries')}</SelectItem>
                       {countries.map((country) => (
                         <SelectItem key={country} value={country}>
                           {country}
@@ -571,11 +573,11 @@ export default function Home() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-300">Athlete Name</label>
+                  <label className="block text-sm font-medium mb-2 text-gray-300">{t('interface.athleteName')}</label>
                   <div className="relative">
                     <Input
                       data-testid="search-athlete-name"
-                      placeholder="Search athlete by name..."
+                      placeholder={t('interface.searchAthlete')}
                       value={searchName}
                       onChange={(e) => setSearchName(e.target.value)}
                       className="bg-athlete-gray-700 border-gray-600 text-white pl-10"

@@ -65,6 +65,17 @@
   "interface": {
     "selectSport": "Select Sport",
     "selectCountry": "Select Country",
+    "welcome": "Welcome to Athlete360",
+    "tagline": "Analyze any athlete's performance with AI-powered insights",
+    "athleteAnalysis": "Athlete Analysis",
+    "compareAthletes": "Compare Athletes",
+    "selectSportAthlete": "Select Sport & Athlete",
+    "sport": "Sport",
+    "country": "Country",
+    "athleteName": "Athlete Name",
+    "chooseASport": "Choose a sport...",
+    "allCountries": "All countries",
+    "searchAthlete": "Search athlete by name...",
     "readyToAnalyze": {
       "title": "Ready to Analyze?",
       "description": "Select a sport and enter an athlete's name to begin your comprehensive analysis journey."
