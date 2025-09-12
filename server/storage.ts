@@ -499,18 +499,27 @@ export class DatabaseStorage implements IStorage {
 
   // Athletes operations
   async getAthletesBySearch(name: string, sportId?: string): Promise<Athlete[]> {
+    const nameConditions = [
+      eq(athletes.name, name),
+      eq(athletes.nameArabic, name)
+    ];
+    
     if (sportId) {
       return await db.select().from(athletes).where(and(
-        eq(athletes.name, name),
+        sql`(${athletes.name} = ${name} OR ${athletes.nameArabic} = ${name})`,
         eq(athletes.sportId, sportId)
       ));
     } else {
-      return await db.select().from(athletes).where(eq(athletes.name, name));
+      return await db.select().from(athletes).where(
+        sql`(${athletes.name} = ${name} OR ${athletes.nameArabic} = ${name})`
+      );
     }
   }
 
   async searchAthletesByName(name: string, sportId?: string, country?: string): Promise<Athlete[]> {
-    const conditions = [ilike(athletes.name, `%${name}%`)];
+    const nameCondition = sql`(${athletes.name} ILIKE ${`%${name}%`} OR ${athletes.nameArabic} ILIKE ${`%${name}%`})`;
+    const conditions = [nameCondition];
+    
     if (sportId) {
       conditions.push(eq(athletes.sportId, sportId));
     }
