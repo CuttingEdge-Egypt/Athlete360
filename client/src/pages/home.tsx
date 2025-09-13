@@ -60,7 +60,7 @@ export default function Home() {
   // Nutrition Plan form validation schema with translations
   const nutritionPlanSchema = useMemo(() => z.object({
     goal: z.string().min(10, t('validation.goalRequired')).max(1000, t('validation.goalTooLong')),
-    sport: z.string().min(1, t('validation.sportRequired')),
+    sport: z.string().optional(),
     age: requiredNumber(t('validation.ageRequired'), t('validation.ageInvalid'), 13, 99),
     currentWeight: requiredNumber(t('validation.currentWeightRequired'), t('validation.currentWeightInvalid'), 30, 300),
     targetWeight: requiredNumber(t('validation.targetWeightRequired'), t('validation.targetWeightInvalid'), 30, 300),
@@ -391,6 +391,17 @@ export default function Home() {
     setSelectedSport(sportId);
     setSelectedAthlete(null);
     setSearchName("");
+    // Sync with nutrition form to ensure bidirectional state consistency
+    nutritionForm.setValue('sport', sportId, { shouldDirty: true, shouldValidate: true });
+  };
+
+  // Clear selected sport
+  const handleClearSport = () => {
+    setSelectedSport("");
+    setSelectedAthlete(null);
+    setSearchName("");
+    // Also clear the nutrition form's sport field to keep form state in sync
+    nutritionForm.setValue('sport', '');
   };
 
   // Reset selected athlete when country changes
@@ -602,21 +613,35 @@ export default function Home() {
               <div className="grid md:grid-cols-3 gap-6 mb-6">
                 <div>
                   <label className="block text-sm font-medium mb-2 text-gray-300">{t('interface.sport')}</label>
-                  <Select value={selectedSport} onValueChange={handleSportChange}>
-                    <SelectTrigger 
-                      data-testid="select-sport"
-                      className="bg-athlete-gray-700 border-gray-600 text-white"
-                    >
-                      <SelectValue placeholder={t('interface.chooseASport')} />
-                    </SelectTrigger>
-                    <SelectContent className="bg-athlete-gray-700 border-gray-600">
-                      {sports.map((sport) => (
-                        <SelectItem key={sport.id} value={sport.id}>
-                          {sport.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="flex gap-2">
+                    <Select value={selectedSport} onValueChange={handleSportChange}>
+                      <SelectTrigger 
+                        data-testid="select-sport"
+                        className="bg-athlete-gray-700 border-gray-600 text-white flex-1"
+                      >
+                        <SelectValue placeholder={t('interface.chooseASport')} />
+                      </SelectTrigger>
+                      <SelectContent className="bg-athlete-gray-700 border-gray-600">
+                        {sports.map((sport) => (
+                          <SelectItem key={sport.id} value={sport.id}>
+                            {sport.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {selectedSport && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleClearSport}
+                        className="bg-athlete-gray-700 border-gray-600 text-gray-400 hover:text-white hover:bg-athlete-gray-600"
+                        data-testid="clear-sport-button"
+                      >
+                        {t('interface.clearSport')}
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 <div>
@@ -825,26 +850,50 @@ export default function Home() {
                           name="sport"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-gray-300">{t('nutritionPlan.sport')} *</FormLabel>
+                              <FormLabel className="text-gray-300">{t('nutritionPlan.sport')}</FormLabel>
                               <FormControl>
-                                <Select value={field.value || ""} onValueChange={(value) => { 
-                                  field.onChange(value);
-                                  setSelectedSport(value);
-                                }}>
-                                  <SelectTrigger 
-                                    data-testid="select-nutrition-sport"
-                                    className="bg-athlete-gray-700 border-gray-600 text-white"
-                                  >
-                                    <SelectValue placeholder={t('interface.chooseASport')} />
-                                  </SelectTrigger>
-                                  <SelectContent className="bg-athlete-gray-700 border-gray-600">
-                                    {sports.map((sport) => (
-                                      <SelectItem key={sport.id} value={sport.id}>
-                                        {sport.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                <div className="flex gap-2">
+                                  <Select value={selectedSport || field.value || ""} onValueChange={(value) => { 
+                                    field.onChange(value);
+                                    setSelectedSport(value);
+                                    // Clear athlete selection when sport changes in form
+                                    if (value !== selectedSport) {
+                                      setSelectedAthlete(null);
+                                      setSearchName("");
+                                    }
+                                  }}>
+                                    <SelectTrigger 
+                                      data-testid="select-nutrition-sport"
+                                      className="bg-athlete-gray-700 border-gray-600 text-white flex-1"
+                                    >
+                                      <SelectValue placeholder={t('interface.chooseASport')} />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-athlete-gray-700 border-gray-600">
+                                      {sports.map((sport) => (
+                                        <SelectItem key={sport.id} value={sport.id}>
+                                          {sport.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  {field.value && (
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        field.onChange('');
+                                        setSelectedSport('');
+                                        setSelectedAthlete(null);
+                                        setSearchName('');
+                                      }}
+                                      className="bg-athlete-gray-700 border-gray-600 text-gray-400 hover:text-white hover:bg-athlete-gray-600"
+                                      data-testid="clear-nutrition-sport-button"
+                                    >
+                                      {t('interface.clearSport')}
+                                    </Button>
+                                  )}
+                                </div>
                               </FormControl>
                               <FormMessage className="text-red-400" />
                             </FormItem>

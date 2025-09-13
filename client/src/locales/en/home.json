@@ -76,6 +76,7 @@
     "country": "Country",
     "athleteName": "Athlete Name",
     "chooseASport": "Choose a sport...",
+    "clearSport": "Clear sport selection",
     "allCountries": "All countries",
     "searchAthlete": "Search athlete by name...",
     "readyToAnalyze": {
