@@ -21,7 +21,7 @@ import { AthleteComparison } from "@/components/ui/athlete-comparison";
 import { VideoAnalysisResults } from "@/components/ui/video-analysis-results";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3 } from "lucide-react";
+import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X } from "lucide-react";
 import type { Sport, Athlete } from "@shared/schema";
 import GenerationQueue from "@/components/ui/generation-queue";
 import { CountrySelect } from "@/components/ui/country-select";
@@ -635,10 +635,10 @@ export default function Home() {
                         variant="outline"
                         size="sm"
                         onClick={handleClearSport}
-                        className="bg-athlete-gray-700 border-gray-600 text-gray-400 hover:text-white hover:bg-athlete-gray-600"
+                        className="bg-athlete-gray-700 border-gray-600 text-red-400 hover:text-red-300 hover:bg-red-900/20 p-2"
                         data-testid="clear-sport-button"
                       >
-                        {t('interface.clearSport')}
+                        <X size={16} />
                       </Button>
                     )}
                   </div>
@@ -887,10 +887,10 @@ export default function Home() {
                                         setSelectedAthlete(null);
                                         setSearchName('');
                                       }}
-                                      className="bg-athlete-gray-700 border-gray-600 text-gray-400 hover:text-white hover:bg-athlete-gray-600"
+                                      className="bg-athlete-gray-700 border-gray-600 text-red-400 hover:text-red-300 hover:bg-red-900/20 p-2"
                                       data-testid="clear-nutrition-sport-button"
                                     >
-                                      {t('interface.clearSport')}
+                                      <X size={16} />
                                     </Button>
                                   )}
                                 </div>
