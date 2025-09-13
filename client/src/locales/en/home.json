@@ -90,6 +90,7 @@
     "title": "Create Your Nutrition Plan",
     "sport": "Sport (Optional)",
     "goal": "Goal",
+    "age": "Age",
     "currentWeight": "Current Weight (kg)",
     "targetWeight": "Target Weight (kg)",
     "country": "Country (For meal preferences)",

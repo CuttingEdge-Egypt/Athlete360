@@ -731,6 +731,17 @@ export default function Home() {
                 <CardContent className="p-8">
                   <h2 className="text-2xl font-bold mb-6 text-center text-white">{t('nutritionPlan.title')}</h2>
                   
+                  {/* Goal Input (Required) - Full Width Row */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium mb-2 text-gray-300">{t('nutritionPlan.goal')} *</label>
+                    <Input
+                      data-testid="input-nutrition-goal"
+                      placeholder={t('nutritionPlan.goalPlaceholder')}
+                      className="bg-athlete-gray-700 border-gray-600 text-white"
+                      required
+                    />
+                  </div>
+
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {/* Sport Selection (Optional) */}
                     <div>
@@ -752,12 +763,13 @@ export default function Home() {
                       </Select>
                     </div>
 
-                    {/* Goal Input (Required) */}
+                    {/* Age (Required) */}
                     <div>
-                      <label className="block text-sm font-medium mb-2 text-gray-300">{t('nutritionPlan.goal')} *</label>
+                      <label className="block text-sm font-medium mb-2 text-gray-300">{t('nutritionPlan.age')} *</label>
                       <Input
-                        data-testid="input-nutrition-goal"
-                        placeholder={t('nutritionPlan.goalPlaceholder')}
+                        data-testid="input-nutrition-age"
+                        type="number"
+                        placeholder="25"
                         className="bg-athlete-gray-700 border-gray-600 text-white"
                         required
                       />
