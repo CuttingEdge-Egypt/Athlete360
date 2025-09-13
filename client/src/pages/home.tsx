@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 import { ServiceCard } from "@/components/ui/service-card";
 import { TokenModal } from "@/components/ui/token-modal";
@@ -25,7 +29,7 @@ export default function Home() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { t } = useTranslation('home');
+  const { t, i18n } = useTranslation('home');
   const [selectedSport, setSelectedSport] = useState<string>("");
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [searchName, setSearchName] = useState<string>("");
@@ -34,6 +38,65 @@ export default function Home() {
   const [comparisonData, setComparisonData] = useState<any>(null);
   const [videoAnalysisData, setVideoAnalysisData] = useState<any>(null);
   const [location] = useLocation();
+
+  // Helper for required number validation that shows proper required messages
+  const requiredNumber = (requiredMsg: string, invalidMsg: string, min: number, max: number) => 
+    z.preprocess(
+      (v) => {
+        if (v === '' || v == null) return undefined;
+        if (typeof v === 'string') {
+          const num = Number(v);
+          return isNaN(num) ? v : num; // Return original if not a valid number, let z.number handle the error
+        }
+        return v;
+      },
+      z.number({ 
+        required_error: requiredMsg, 
+        invalid_type_error: invalidMsg 
+      }).min(min, invalidMsg).max(max, invalidMsg)
+    );
+
+  // Nutrition Plan form validation schema with translations
+  const nutritionPlanSchema = useMemo(() => z.object({
+    goal: z.string().min(10, t('validation.goalRequired')),
+    sport: z.string().min(1, t('validation.sportRequired')),
+    age: requiredNumber(t('validation.ageRequired'), t('validation.ageInvalid'), 13, 99),
+    currentWeight: requiredNumber(t('validation.currentWeightRequired'), t('validation.currentWeightInvalid'), 30, 300),
+    targetWeight: requiredNumber(t('validation.targetWeightRequired'), t('validation.targetWeightInvalid'), 30, 300),
+    country: z.string().min(1, t('validation.countryRequired')),
+    period: z.preprocess(
+      (v) => v === '' || v == null ? undefined : Number(v),
+      z.number().int().min(1).max(52)
+    ).optional(),
+    inbodyReport: z.any().optional(),
+    language: z.string().default("en")
+  }), [t, i18n.language]);
+
+  type NutritionPlanFormData = z.infer<typeof nutritionPlanSchema>;
+
+  // Initialize form with validation
+  const nutritionForm = useForm<NutritionPlanFormData>({
+    resolver: zodResolver(nutritionPlanSchema),
+    defaultValues: {
+      goal: "",
+      sport: selectedSport,
+      age: undefined,
+      currentWeight: undefined,
+      targetWeight: undefined,
+      country: selectedCountry || "",
+      period: undefined,
+      language: "en"
+    }
+  });
+
+  // Form submission handler
+  const onSubmitNutritionPlan = (data: NutritionPlanFormData) => {
+    console.log('Nutrition plan form submitted:', data);
+    toast({
+      title: "Nutrition Plan Generated!",
+      description: "Your personalized nutrition plan is ready.",
+    });
+  };
 
   // Listen for queue notifications
   useEffect(() => {
@@ -731,137 +794,228 @@ export default function Home() {
                 <CardContent className="p-8">
                   <h2 className="text-2xl font-bold mb-6 text-center text-white">{t('nutritionPlan.title')}</h2>
                   
-                  {/* Goal Input (Required) - Full Width Row */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium mb-2 text-gray-300">{t('nutritionPlan.goal')} *</label>
-                    <Input
-                      data-testid="input-nutrition-goal"
-                      placeholder={t('nutritionPlan.goalPlaceholder')}
-                      className="bg-athlete-gray-700 border-gray-600 text-white"
-                      required
-                    />
-                  </div>
+                  <Form {...nutritionForm}>
+                    <form onSubmit={nutritionForm.handleSubmit(onSubmitNutritionPlan)} className="space-y-6">
+                      {/* Goal Input (Required) - Full Width Row */}
+                      <FormField
+                        control={nutritionForm.control}
+                        name="goal"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-300">{t('nutritionPlan.goal')} *</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                data-testid="input-nutrition-goal"
+                                placeholder={t('nutritionPlan.goalPlaceholder')}
+                                className="bg-athlete-gray-700 border-gray-600 text-white"
+                              />
+                            </FormControl>
+                            <FormMessage className="text-red-400" />
+                          </FormItem>
+                        )}
+                      />
 
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Sport Selection (Optional) */}
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-gray-300">{t('nutritionPlan.sport')}</label>
-                      <Select value={selectedSport} onValueChange={setSelectedSport}>
-                        <SelectTrigger 
-                          data-testid="select-nutrition-sport"
-                          className="bg-athlete-gray-700 border-gray-600 text-white"
+                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {/* Sport Selection (Optional) */}
+                        <FormField
+                          control={nutritionForm.control}
+                          name="sport"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-300">{t('nutritionPlan.sport')} *</FormLabel>
+                              <FormControl>
+                                <Select value={field.value || ""} onValueChange={(value) => { 
+                                  field.onChange(value);
+                                  setSelectedSport(value);
+                                }}>
+                                  <SelectTrigger 
+                                    data-testid="select-nutrition-sport"
+                                    className="bg-athlete-gray-700 border-gray-600 text-white"
+                                  >
+                                    <SelectValue placeholder={t('interface.chooseASport')} />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-athlete-gray-700 border-gray-600">
+                                    {sports.map((sport) => (
+                                      <SelectItem key={sport.id} value={sport.id}>
+                                        {sport.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </FormControl>
+                              <FormMessage className="text-red-400" />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Age (Required) */}
+                        <FormField
+                          control={nutritionForm.control}
+                          name="age"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-300">{t('nutritionPlan.age')} *</FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  data-testid="input-nutrition-age"
+                                  type="number"
+                                  className="bg-athlete-gray-700 border-gray-600 text-white"
+                                />
+                              </FormControl>
+                              <FormMessage className="text-red-400" />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Current Weight (Required) */}
+                        <FormField
+                          control={nutritionForm.control}
+                          name="currentWeight"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-300">{t('nutritionPlan.currentWeight')} *</FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  data-testid="input-current-weight"
+                                  type="number"
+                                  className="bg-athlete-gray-700 border-gray-600 text-white"
+                                />
+                              </FormControl>
+                              <FormMessage className="text-red-400" />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Target Weight (Required) */}
+                        <FormField
+                          control={nutritionForm.control}
+                          name="targetWeight"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-300">{t('nutritionPlan.targetWeight')} *</FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  data-testid="input-target-weight"
+                                  type="number"
+                                  className="bg-athlete-gray-700 border-gray-600 text-white"
+                                />
+                              </FormControl>
+                              <FormMessage className="text-red-400" />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Country Selection (Required) */}
+                        <FormField
+                          control={nutritionForm.control}
+                          name="country"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-300">{t('nutritionPlan.country')} *</FormLabel>
+                              <FormControl>
+                                <CountrySelect
+                                  value={field.value || ""}
+                                  onValueChange={(value) => {
+                                    field.onChange(value);
+                                    setSelectedCountry(value);
+                                  }}
+                                  placeholder={t('interface.selectCountry')}
+                                  countries={countries}
+                                  testId="select-nutrition-country"
+                                />
+                              </FormControl>
+                              <FormMessage className="text-red-400" />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Period in Weeks (Optional) */}
+                        <FormField
+                          control={nutritionForm.control}
+                          name="period"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-300">{t('nutritionPlan.period')}</FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  data-testid="input-nutrition-period"
+                                  type="number"
+                                  placeholder="4"
+                                  className="bg-athlete-gray-700 border-gray-600 text-white"
+                                />
+                              </FormControl>
+                              <FormMessage className="text-red-400" />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="mt-6 grid md:grid-cols-2 gap-6">
+                        {/* InBody Report Upload (Optional) */}
+                        <FormField
+                          control={nutritionForm.control}
+                          name="inbodyReport"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-300">{t('nutritionPlan.inbodyReport')}</FormLabel>
+                              <FormControl>
+                                <Input
+                                  data-testid="input-inbody-report"
+                                  type="file"
+                                  accept=".pdf,.jpg,.jpeg,.png"
+                                  className="bg-athlete-gray-700 border-gray-600 text-white"
+                                  onChange={(e) => field.onChange(e.target.files?.[0])}
+                                />
+                              </FormControl>
+                              <FormMessage className="text-red-400" />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Language Selection */}
+                        <FormField
+                          control={nutritionForm.control}
+                          name="language"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-300">{t('nutritionPlan.language')}</FormLabel>
+                              <FormControl>
+                                <Select value={field.value} onValueChange={field.onChange}>
+                                  <SelectTrigger 
+                                    data-testid="select-nutrition-language"
+                                    className="bg-athlete-gray-700 border-gray-600 text-white"
+                                  >
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-athlete-gray-700 border-gray-600">
+                                    <SelectItem value="en">English</SelectItem>
+                                    <SelectItem value="ar">العربية</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </FormControl>
+                              <FormMessage className="text-red-400" />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="flex justify-center mt-8">
+                        <Button 
+                          type="submit"
+                          data-testid="button-generate-nutrition-plan"
+                          className="bg-athlete-accent hover:bg-blue-600 text-white px-8 py-3 text-lg"
                         >
-                          <SelectValue placeholder={t('interface.chooseASport')} />
-                        </SelectTrigger>
-                        <SelectContent className="bg-athlete-gray-700 border-gray-600">
-                          {sports.map((sport) => (
-                            <SelectItem key={sport.id} value={sport.id}>
-                              {sport.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Age (Required) */}
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-gray-300">{t('nutritionPlan.age')} *</label>
-                      <Input
-                        data-testid="input-nutrition-age"
-                        type="number"
-                        placeholder="25"
-                        className="bg-athlete-gray-700 border-gray-600 text-white"
-                        required
-                      />
-                    </div>
-
-                    {/* Current Weight (Required) */}
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-gray-300">{t('nutritionPlan.currentWeight')} *</label>
-                      <Input
-                        data-testid="input-current-weight"
-                        type="number"
-                        placeholder="70"
-                        className="bg-athlete-gray-700 border-gray-600 text-white"
-                        required
-                      />
-                    </div>
-
-                    {/* Target Weight (Required) */}
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-gray-300">{t('nutritionPlan.targetWeight')} *</label>
-                      <Input
-                        data-testid="input-target-weight"
-                        type="number"
-                        placeholder="75"
-                        className="bg-athlete-gray-700 border-gray-600 text-white"
-                        required
-                      />
-                    </div>
-
-                    {/* Country Selection (Required) */}
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-gray-300">{t('nutritionPlan.country')} *</label>
-                      <CountrySelect
-                        value={selectedCountry || ""}
-                        onValueChange={(country) => setSelectedCountry(country)}
-                        placeholder={t('interface.selectCountry')}
-                        countries={countries}
-                        testId="select-nutrition-country"
-                      />
-                    </div>
-
-                    {/* Period in Weeks (Optional) */}
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-gray-300">{t('nutritionPlan.period')}</label>
-                      <Input
-                        data-testid="input-nutrition-period"
-                        type="number"
-                        placeholder="4"
-                        className="bg-athlete-gray-700 border-gray-600 text-white"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-6 grid md:grid-cols-2 gap-6">
-                    {/* InBody Report Upload (Optional) */}
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-gray-300">{t('nutritionPlan.inbodyReport')}</label>
-                      <Input
-                        data-testid="input-inbody-report"
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        className="bg-athlete-gray-700 border-gray-600 text-white"
-                      />
-                    </div>
-
-                    {/* Language Selection */}
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-gray-300">{t('nutritionPlan.language')}</label>
-                      <Select defaultValue="en">
-                        <SelectTrigger 
-                          data-testid="select-nutrition-language"
-                          className="bg-athlete-gray-700 border-gray-600 text-white"
-                        >
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-athlete-gray-700 border-gray-600">
-                          <SelectItem value="en">English</SelectItem>
-                          <SelectItem value="ar">العربية</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-center mt-8">
-                    <Button 
-                      data-testid="button-generate-nutrition-plan"
-                      className="bg-athlete-accent hover:bg-blue-600 text-white px-8 py-3 text-lg"
-                    >
-                      <Apple className="mr-2" size={20} />
-                      {t('nutritionPlan.generate')}
-                    </Button>
-                  </div>
+                          <Apple className="mr-2" size={20} />
+                          {t('nutritionPlan.generate')}
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
                 </CardContent>
               </Card>
             </TabsContent>

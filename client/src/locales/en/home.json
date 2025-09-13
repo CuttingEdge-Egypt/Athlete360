@@ -88,7 +88,7 @@
   },
   "nutritionPlan": {
     "title": "Create Your Nutrition Plan",
-    "sport": "Sport (Optional)",
+    "sport": "Sport",
     "goal": "Goal",
     "age": "Age",
     "currentWeight": "Current Weight (kg)",
@@ -98,7 +98,7 @@
     "inbodyReport": "InBody Report (Optional)",
     "language": "Plan Language",
     "generate": "Generate Nutrition Plan",
-    "goalPlaceholder": "e.g., Build muscle, lose weight, improve endurance...",
+    "goalPlaceholder": "Be specific! Describe your fitness goals in detail - what do you want to achieve, by when, and why? The more details you provide, the better your personalized nutrition plan will be.",
     "countryHint": "This affects meal types and local food preferences",
     "weekNavigation": {
       "week": "Week",
@@ -149,5 +149,16 @@
     "loading": "Loading history...",
     "emptyHistory": "No analysis history yet",
     "unknownAthlete": "Unknown Athlete"
+  },
+  "validation": {
+    "goalRequired": "Please describe your fitness goals in detail",
+    "sportRequired": "Please select a sport",
+    "ageRequired": "Age is required",
+    "ageInvalid": "Please enter a valid age between 13 and 99",
+    "currentWeightRequired": "Current weight is required",
+    "currentWeightInvalid": "Please enter a valid weight between 30 and 300 kg",
+    "targetWeightRequired": "Target weight is required",
+    "targetWeightInvalid": "Please enter a valid target weight between 30 and 300 kg",
+    "countryRequired": "Please select a country for meal preferences"
   }
 }
