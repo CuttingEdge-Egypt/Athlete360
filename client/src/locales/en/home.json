@@ -152,6 +152,7 @@
   },
   "validation": {
     "goalRequired": "Please describe your fitness goals in detail",
+    "goalTooLong": "Goal description is too long. Please keep it under 1000 characters",
     "sportRequired": "Please select a sport",
     "ageRequired": "Age is required",
     "ageInvalid": "Please enter a valid age between 13 and 99",

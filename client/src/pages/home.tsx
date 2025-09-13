@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
@@ -58,7 +59,7 @@ export default function Home() {
 
   // Nutrition Plan form validation schema with translations
   const nutritionPlanSchema = useMemo(() => z.object({
-    goal: z.string().min(10, t('validation.goalRequired')),
+    goal: z.string().min(10, t('validation.goalRequired')).max(1000, t('validation.goalTooLong')),
     sport: z.string().min(1, t('validation.sportRequired')),
     age: requiredNumber(t('validation.ageRequired'), t('validation.ageInvalid'), 13, 99),
     currentWeight: requiredNumber(t('validation.currentWeightRequired'), t('validation.currentWeightInvalid'), 30, 300),
@@ -804,11 +805,12 @@ export default function Home() {
                           <FormItem>
                             <FormLabel className="text-gray-300">{t('nutritionPlan.goal')} *</FormLabel>
                             <FormControl>
-                              <Input
+                              <Textarea
                                 {...field}
                                 data-testid="input-nutrition-goal"
                                 placeholder={t('nutritionPlan.goalPlaceholder')}
-                                className="bg-athlete-gray-700 border-gray-600 text-white"
+                                className="bg-athlete-gray-700 border-gray-600 text-white min-h-[120px] resize-y overflow-y-auto"
+                                maxLength={1000}
                               />
                             </FormControl>
                             <FormMessage className="text-red-400" />
