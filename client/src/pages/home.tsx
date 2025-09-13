@@ -793,7 +793,7 @@ export default function Home() {
                       <CountrySelect
                         value={selectedCountry || ""}
                         onValueChange={(country) => setSelectedCountry(country)}
-                        placeholder={t('nutritionPlan.countryHint')}
+                        placeholder={t('interface.selectCountry')}
                         countries={countries}
                         testId="select-nutrition-country"
                       />
