@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -62,6 +62,7 @@ export default function Home() {
     goal: z.string().min(10, t('validation.goalRequired')).max(1000, t('validation.goalTooLong')),
     sport: z.string().optional(),
     age: requiredNumber(t('validation.ageRequired'), t('validation.ageInvalid'), 13, 99),
+    height: requiredNumber(t('validation.heightRequired'), t('validation.heightInvalid'), 120, 250),
     currentWeight: requiredNumber(t('validation.currentWeightRequired'), t('validation.currentWeightInvalid'), 30, 300),
     targetWeight: requiredNumber(t('validation.targetWeightRequired'), t('validation.targetWeightInvalid'), 30, 300),
     country: z.string().min(1, t('validation.countryRequired')),
@@ -82,21 +83,52 @@ export default function Home() {
       goal: "",
       sport: selectedSport,
       age: undefined,
+      height: undefined,
       currentWeight: undefined,
       targetWeight: undefined,
       country: selectedCountry || "",
       period: undefined,
-      language: "en"
+      language: i18n.language
     }
+  });
+
+  // Nutrition plan generation mutation
+  const generateNutritionPlanMutation = useMutation({
+    mutationFn: async (data: NutritionPlanFormData) => {
+      const response = await fetch('/api/analysis/nutrition-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to generate nutrition plan');
+      }
+      return response.json();
+    },
+    onSuccess: (result) => {
+      toast({
+        title: "Nutrition Plan Generated!",
+        description: "Your personalized nutrition plan is ready.",
+      });
+      // Invalidate relevant queries to refresh user data
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user-history'] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Generation Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   // Form submission handler
   const onSubmitNutritionPlan = (data: NutritionPlanFormData) => {
     console.log('Nutrition plan form submitted:', data);
-    toast({
-      title: "Nutrition Plan Generated!",
-      description: "Your personalized nutrition plan is ready.",
-    });
+    generateNutritionPlanMutation.mutate(data);
   };
 
   // Listen for queue notifications
@@ -920,6 +952,26 @@ export default function Home() {
                           )}
                         />
 
+                        {/* Height (Required) */}
+                        <FormField
+                          control={nutritionForm.control}
+                          name="height"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-300">{t('nutritionPlan.height')} *</FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  data-testid="input-nutrition-height"
+                                  type="number"
+                                  className="bg-athlete-gray-700 border-gray-600 text-white"
+                                />
+                              </FormControl>
+                              <FormMessage className="text-red-400" />
+                            </FormItem>
+                          )}
+                        />
+
                         {/* Current Weight (Required) */}
                         <FormField
                           control={nutritionForm.control}
@@ -1059,10 +1111,15 @@ export default function Home() {
                         <Button 
                           type="submit"
                           data-testid="button-generate-nutrition-plan"
+                          disabled={generateNutritionPlanMutation.isPending}
                           className="bg-athlete-accent hover:bg-blue-600 text-white px-8 py-3 text-lg"
                         >
-                          <Apple className="mr-2" size={20} />
-                          {t('nutritionPlan.generate')}
+                          {generateNutritionPlanMutation.isPending ? (
+                            <Loader2 className="mr-2 animate-spin" size={20} />
+                          ) : (
+                            <Apple className="mr-2" size={20} />
+                          )}
+                          {generateNutritionPlanMutation.isPending ? 'Generating...' : t('nutritionPlan.generate')}
                         </Button>
                       </div>
                     </form>
