@@ -40,6 +40,7 @@ export default function Home() {
   const [comparisonData, setComparisonData] = useState<any>(null);
   const [videoAnalysisData, setVideoAnalysisData] = useState<any>(null);
   const [nutritionPlanData, setNutritionPlanData] = useState<any>(null);
+  const [showNutritionForm, setShowNutritionForm] = useState<boolean>(true);
   const [location] = useLocation();
 
   // Helper for required number validation that shows proper required messages
@@ -112,6 +113,7 @@ export default function Home() {
     onSuccess: (result) => {
       console.log('Nutrition plan result:', result);
       setNutritionPlanData(result);
+      setShowNutritionForm(false); // Hide form and show results
       setActiveTab('nutrition'); // Auto-switch to nutrition tab to show results
       toast({
         title: "Nutrition Plan Generated!",
@@ -852,10 +854,11 @@ export default function Home() {
             </TabsContent>
 
             <TabsContent value="nutrition" className="space-y-8">
-              {/* Nutrition Plan Form */}
-              <Card className="bg-athlete-gray-800 border-gray-700">
-                <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold mb-6 text-center text-white">{t('nutritionPlan.title')}</h2>
+              {showNutritionForm ? (
+                /* Nutrition Plan Form */
+                <Card className="bg-athlete-gray-800 border-gray-700">
+                  <CardContent className="p-8">
+                    <h2 className="text-2xl font-bold mb-6 text-center text-white">{t('nutritionPlan.title')}</h2>
                   
                   <Form {...nutritionForm}>
                     <form onSubmit={nutritionForm.handleSubmit(onSubmitNutritionPlan)} className="space-y-6">
@@ -1128,13 +1131,26 @@ export default function Home() {
                         </Button>
                       </div>
                     </form>
-                  </Form>
-                </CardContent>
-              </Card>
-              
-              {/* Display nutrition plan results */}
-              {nutritionPlanData && (
-                <div className="mt-8">
+                    </Form>
+                  </CardContent>
+                </Card>
+              ) : nutritionPlanData && (
+                /* Nutrition Plan Results with New Plan Button */
+                <div className="space-y-6">
+                  <div className="flex justify-center">
+                    <Button 
+                      onClick={() => {
+                        setShowNutritionForm(true);
+                        setNutritionPlanData(null);
+                        nutritionForm.reset();
+                      }}
+                      data-testid="button-new-nutrition-plan"
+                      className="bg-athlete-accent hover:bg-blue-600 text-white px-6 py-2"
+                    >
+                      <Apple className="mr-2" size={20} />
+                      New Nutrition Plan
+                    </Button>
+                  </div>
                   <NutritionPlanDisplay plan={nutritionPlanData.plan || nutritionPlanData} />
                 </div>
               )}
@@ -1183,6 +1199,7 @@ export default function Home() {
                 setActiveTab('video');
               } else if (result.serviceType === 'nutrition-plan') {
                 setNutritionPlanData(result);
+                setShowNutritionForm(false); // Hide form and show results
                 setActiveTab('nutrition');
               } else {
                 // Handle other analysis types - they're handled by the AnalysisPopup component
