@@ -33,7 +33,8 @@ const serviceIcons = {
   strengths: Target,
   weaknesses: Target,
   development: Zap,
-
+  'nutrition-plan': Utensils,
+  nutrition: Utensils,
   beat: Zap,
   video: Video,
   comparison: GitCompare,
@@ -59,6 +60,8 @@ export function HistoryDropdown() {
       strengths: t('services.strengths.title', { ns: 'home' }),
       weaknesses: t('services.weaknesses.title', { ns: 'home' }),
       development: t('services.trainingPlans.title', { ns: 'home' }),
+      'nutrition-plan': t('services.nutritionPlan.title', { ns: 'home' }),
+      nutrition: t('services.nutritionPlan.title', { ns: 'home' }),
       beat: t('services.tacticRecommendations.title', { ns: 'home' }),
       video: t('services.videoAnalysis.title', { ns: 'home' }),
       comparison: t('services.athleteComparison.title', { ns: 'home' }),
@@ -244,7 +247,7 @@ export function HistoryDropdown() {
       </DropdownMenu>
 
       {/* Analysis Popup for revisiting individual analyses */}
-      {selectedHistoryItem && selectedHistoryItem.athleteId && showAnalysisPopup && (
+      {selectedHistoryItem && showAnalysisPopup && (
         <AnalysisPopup
           open={showAnalysisPopup}
           onOpenChange={(open) => {

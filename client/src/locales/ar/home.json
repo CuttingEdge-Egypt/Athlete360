@@ -60,6 +60,10 @@
     "athleteComparison": {
       "title": "مقارنة الرياضيين",
       "description": "تحليل المواجهة المباشرة والرؤى التنافسية"
+    },
+    "nutritionPlan": {
+      "title": "خطة التغذية",
+      "description": "تخطيط التغذية الشخصية وإرشاد الوجبات"
     }
   },
   "interface": {

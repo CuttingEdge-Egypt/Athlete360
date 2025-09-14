@@ -60,6 +60,10 @@
     "athleteComparison": {
       "title": "Athlete Comparison",
       "description": "Head-to-head analysis and competitive insights"
+    },
+    "nutritionPlan": {
+      "title": "Nutrition Plan",
+      "description": "Personalized nutrition planning and meal guidance"
     }
   },
   "interface": {
