@@ -218,6 +218,9 @@ const SERVICE_TOKEN_COSTS: { [key: string]: number } = {
   'comparison': 120
 };
 
+// Async error handler utility
+const asyncHandler = (fn: any) => (req: any, res: any, next: any) => Promise.resolve(fn(req, res, next)).catch(next);
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware - setup both Replit OIDC and local auth
   await setupAuth(app);
@@ -1734,7 +1737,7 @@ Return only valid JSON with the missing fields.`;
   });
 
   // Enhanced Nutrition Plan endpoint for form-based generation
-  app.post('/api/analysis/nutrition-plan', isAuthenticated, async (req: any, res) => {
+  app.post('/api/analysis/nutrition-plan', isAuthenticatedUniversal, asyncHandler(async (req: any, res) => {
     const tokenCost = 75;
     const userId = req.user.claims.sub;
     
@@ -1871,7 +1874,7 @@ Return only valid JSON with the missing fields.`;
         retryable: true
       });
     }
-  });
+  }));
 
   app.post('/api/analysis/:athleteId/beat-strategies', isAuthenticated, async (req: any, res) => {
     const tokenCost = 100;
