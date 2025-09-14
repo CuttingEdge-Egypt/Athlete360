@@ -103,15 +103,18 @@ export async function generateEnhancedNutritionPlan(
       `${currentWeight > targetWeight ? 'lose' : 'gain'} ${Math.abs(currentWeight - targetWeight)}kg` : 
       'maintain current weight';
     
+    // Calculate total days based on period
+    const totalDays = period * 7;
+    
     // Language-specific system prompt
     const isArabic = language === 'ar';
     const systemPrompt = isArabic ? 
-      `أنت أخصائي تغذية رياضية محترف متخصص في المأكولات ${nationalityText === 'international' ? 'العالمية' : nationalityText}. قم بإنشاء خطة تغذية لمدة 7 أيام بصيغة JSON فقط. لا تشمل أي نص قبل أو بعد JSON. يجب أن تكون الاستجابة JSON صالحة بدون أي تنسيق markdown.` :
-      `You are a professional sports nutritionist specializing in ${nationalityText} cuisine. Create a 7-day nutrition plan in JSON format only. Do not include any text before or after the JSON. The response must be valid JSON without any markdown formatting.`;
+      `أنت أخصائي تغذية رياضية محترف متخصص في المأكولات ${nationalityText === 'international' ? 'العالمية' : nationalityText}. قم بإنشاء خطة تغذية لمدة ${period} أسابيع (${totalDays} أيام) بصيغة JSON فقط. لا تشمل أي نص قبل أو بعد JSON. يجب أن تكون الاستجابة JSON صالحة بدون أي تنسيق markdown.` :
+      `You are a professional sports nutritionist specializing in ${nationalityText} cuisine. Create a ${period}-week nutrition plan (${totalDays} days) in JSON format only. Do not include any text before or after the JSON. The response must be valid JSON without any markdown formatting.`;
     
     // Enhanced prompt with all form data
     const prompt = isArabic ? 
-      `قم بإنشاء خطة تغذية شخصية لمدة 7 أيام لهذا الرياضي:
+      `قم بإنشاء خطة تغذية شخصية لمدة ${period} أسابيع (${totalDays} أيام) لهذا الرياضي:
 
 الرياضي: ${name} (${genderText} من ${nationalityText})
 الرياضة: ${sportName}
@@ -176,7 +179,7 @@ export async function generateEnhancedNutritionPlan(
 - ضع في الاعتبار احتياجات تدريب ${sportName} (القوة الانفجارية، الرشاقة، الاستشفاء)
 - احسب السعرات الحرارية بناءً على هدف ${weightGoal} خلال ${period} أسبوع
 - قدم أحجام واقعية للحصص
-- أنشئ 7 أيام كاملة
+- أنشئ ${totalDays} أيام كاملة (${period} أسابيع)
 - كل وجبة يجب أن تحتوي على 2-4 عناصر غذائية مع الكميات
 
 معالجة الأخطاء: إذا لم تستطع إنشاء خطة تغذية حقيقية بسبب عدم كفاية البيانات، فشل البحث على الويب، أو أي مشاكل أخرى، أرجع هذا التركيب JSON بالضبط:
@@ -187,7 +190,7 @@ export async function generateEnhancedNutritionPlan(
   "retryable": true,
   "suggestion": "ما يجب على المستخدم المحاولة بدلاً من ذلك"
 }` :
-      `Create a personalized 7-day nutrition plan for this athlete:
+      `Create a personalized ${period}-week nutrition plan (${totalDays} days) for this athlete:
 
 Athlete: ${name} (${genderText} from ${nationalityText})
 Sport: ${sportName}
@@ -252,7 +255,7 @@ Requirements:
 - Consider ${sportName} training needs (explosive power, agility, recovery)
 - Calculate calories based on ${weightGoal} goal over ${period} weeks
 - Provide realistic portion sizes
-- Generate 7 complete days
+- Generate ${totalDays} complete days (${period} weeks)
 - Each meal should have 2-4 food items with quantities
 
 FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insufficient data, web search failures, or any other issues, return this exact JSON structure:
@@ -339,8 +342,15 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
         ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"] :
         ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
       
+      // Generate array for the specified number of days
+      const planDays = [];
+      for (let i = 0; i < totalDays; i++) {
+        const dayIndex = i % 7;
+        planDays.push(dayNames[dayIndex]);
+      }
+      
       parsedPlan = {
-        days: dayNames.map((dayName, index) => ({
+        days: planDays.map((dayName, index) => ({
           day: {
             date: new Date(Date.now() + index * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
             name: dayName
@@ -405,14 +415,19 @@ export async function generateNutritionPlan(
   age: number,
   gender: string,
   sport: string,
-  nationality: string
+  nationality: string,
+  period: number = 1
 ): Promise<NutritionPlanData> {
   try {
     const nationalityText = nationality === 'International' ? 'international' : nationality;
     const genderText = gender === 'Unknown' ? 'athlete' : `${age} years old ${gender}`;
-    const systemPrompt = `You are a professional sports nutritionist specializing in ${nationalityText} cuisine. Create a 7-day nutrition plan in JSON format only. Do not include any text before or after the JSON. The response must be valid JSON without any markdown formatting.`;
     
-    const prompt = `Create a personalized 7-day nutrition plan for this athlete:
+    // Calculate total days based on period (default 1 week for backward compatibility)
+    const totalDays = period * 7;
+    
+    const systemPrompt = `You are a professional sports nutritionist specializing in ${nationalityText} cuisine. Create a ${period}-week nutrition plan (${totalDays} days) in JSON format only. Do not include any text before or after the JSON. The response must be valid JSON without any markdown formatting.`;
+    
+    const prompt = `Create a personalized ${period}-week nutrition plan (${totalDays} days) for this athlete:
 
 Athlete: ${name} (${genderText} from ${nationalityText})
 Sport: ${sport}
@@ -470,7 +485,7 @@ Requirements:
 - Include 5 meals per day (breakfast, snack, lunch, snack, dinner)
 - Consider ${sport} training needs (explosive power, agility, recovery)
 - Provide realistic portion sizes
-- Generate 7 complete days
+- Generate ${totalDays} complete days (${period} weeks)
 - Each meal should have 2-4 food items with quantities
 
 FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insufficient data, web search failures, or any other issues, return this exact JSON structure:
