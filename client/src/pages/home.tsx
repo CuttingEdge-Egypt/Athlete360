@@ -19,6 +19,7 @@ import { TokenModal } from "@/components/ui/token-modal";
 import { AnalysisPopup } from "@/components/ui/analysis-popup";
 import { AthleteComparison } from "@/components/ui/athlete-comparison";
 import { VideoAnalysisResults } from "@/components/ui/video-analysis-results";
+import { NutritionPlanDisplay } from "@/components/ui/nutrition-plan-display";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X } from "lucide-react";
@@ -38,6 +39,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<string>("analysis");
   const [comparisonData, setComparisonData] = useState<any>(null);
   const [videoAnalysisData, setVideoAnalysisData] = useState<any>(null);
+  const [nutritionPlanData, setNutritionPlanData] = useState<any>(null);
   const [location] = useLocation();
 
   // Helper for required number validation that shows proper required messages
@@ -108,6 +110,9 @@ export default function Home() {
       return response.json();
     },
     onSuccess: (result) => {
+      console.log('Nutrition plan result:', result);
+      setNutritionPlanData(result);
+      setActiveTab('nutrition'); // Auto-switch to nutrition tab to show results
       toast({
         title: "Nutrition Plan Generated!",
         description: "Your personalized nutrition plan is ready.",
@@ -1126,6 +1131,13 @@ export default function Home() {
                   </Form>
                 </CardContent>
               </Card>
+              
+              {/* Display nutrition plan results */}
+              {nutritionPlanData && (
+                <div className="mt-8">
+                  <NutritionPlanDisplay plan={nutritionPlanData.plan || nutritionPlanData} />
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="development" className="space-y-8">
@@ -1169,6 +1181,9 @@ export default function Home() {
               } else if (result.serviceType === 'video') {
                 setVideoAnalysisData(result);
                 setActiveTab('video');
+              } else if (result.serviceType === 'nutrition-plan') {
+                setNutritionPlanData(result);
+                setActiveTab('nutrition');
               } else {
                 // Handle other analysis types - they're handled by the AnalysisPopup component
                 console.log('Selected generation result:', result);
