@@ -6,9 +6,30 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { setupLocalAuth, isAuthenticatedUniversal } from "./localAuth";
 import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
 import { z } from "zod";
+
+// Nutrition Plan Form Validation Schema
+const nutritionPlanSchema = z.object({
+  goal: z.string().min(3, "Goal must be at least 3 characters").max(100, "Goal too long"),
+  age: z.coerce.number().int().min(12, "Age must be at least 12").max(80, "Age must be 80 or younger"),
+  height: z.coerce.number().min(120, "Height must be at least 120cm").max(250, "Height must be 250cm or less"),
+  currentWeight: z.coerce.number().min(30, "Current weight must be at least 30kg").max(200, "Current weight must be 200kg or less"),
+  targetWeight: z.coerce.number().min(30, "Target weight must be at least 30kg").max(200, "Target weight must be 200kg or less"),
+  period: z.coerce.number().int().min(1, "Period must be at least 1 week").max(52, "Period must be 52 weeks or less"),
+  country: z.string().min(2, "Country must be specified").max(50, "Country name too long"),
+  language: z.enum(["en", "ar"], { errorMap: () => ({ message: "Language must be 'en' or 'ar'" }) }),
+  sport: z.string().optional() // Can be sport ID or sport name
+}).refine(
+  (data) => Math.abs(data.currentWeight - data.targetWeight) <= 50,
+  {
+    message: "Weight difference cannot exceed 50kg",
+    path: ["targetWeight"]
+  }
+);
+
+type NutritionPlanRequest = z.infer<typeof nutritionPlanSchema>;
 import { seedDatabase } from "./seedData";
 import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, compareAthletes, generateRankHistory } from "./openaiService";
-import { generateNutritionPlan, generateRankHistoryWithGemini, generateAthleteBiography } from "./geminiService";
+import { generateNutritionPlan, generateEnhancedNutritionPlan, generateRankHistoryWithGemini, generateAthleteBiography, type NutritionPlanFormData } from "./geminiService";
 import { analyzeVideoFile } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
 
@@ -1707,7 +1728,148 @@ Return only valid JSON with the missing fields.`;
       res.json(nutritionPlanData);
     } catch (error) {
       console.error("Error generating nutrition plan:", error);
-      res.status(500).json({ message: "Failed to generate nutrition plan" });
+      // This catch block should now be unreachable due to comprehensive error handling above
+      res.status(500).json({ message: "Unexpected system error occurred" });
+    }
+  });
+
+  // Enhanced Nutrition Plan endpoint for form-based generation
+  app.post('/api/analysis/nutrition-plan', isAuthenticated, async (req: any, res) => {
+    const tokenCost = 75;
+    const userId = req.user.claims.sub;
+    
+    try {
+      // Validate request body with Zod schema
+      const validationResult = nutritionPlanSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = validationResult.error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
+        return res.status(400).json({ 
+          message: "Validation failed", 
+          errors: errors,
+          details: validationResult.error.errors
+        });
+      }
+
+      const formData = validationResult.data;
+      const { goal, sport, age, height, currentWeight, targetWeight, country, period, language } = formData;
+
+      // Check user tokens
+      const user = await storage.getUser(userId);
+      if (!user || (user.tokens || 0) < tokenCost) {
+        return res.status(402).json({ message: "Insufficient tokens" });
+      }
+
+      // Deduct tokens before processing
+      await storage.deductTokens(userId, tokenCost);
+      await storage.createTransaction({
+        userId,
+        action: "Personal Nutrition Plan Generation",
+        tokensDeducted: tokenCost,
+        serviceType: "nutrition-plan"
+      });
+
+      console.log(`🍽️ Generating nutrition plan for user ${userId} with enhanced data: goal=${goal}, weight=${currentWeight}→${targetWeight}kg, period=${period}w, language=${language}`);
+
+      // Get sport name - handle both sport ID and sport name
+      let sportName = "General Fitness";
+      if (sport) {
+        try {
+          // First try to get by ID (if it's a UUID format)
+          if (sport.includes('-') && sport.length > 20) {
+            const sportData = await storage.getSportById(sport);
+            sportName = sportData?.name || sport;
+          } else {
+            // If not ID format, use as sport name directly
+            sportName = sport;
+          }
+        } catch (error) {
+          console.log(`Sport '${sport}' not found by ID, using as name directly`);
+          sportName = sport;
+        }
+      }
+
+      // Prepare enhanced form data for AI generation
+      const enhancedFormData: NutritionPlanFormData = {
+        goal,
+        age,
+        height,
+        currentWeight,
+        targetWeight,
+        period,
+        sportName,
+        country,
+        language,
+        gender: 'Unknown', // Not collected in form
+        name: 'User' // Using generic name for privacy
+      };
+
+      // Generate personalized nutrition plan with enhanced function
+      const nutritionPlan = await generateEnhancedNutritionPlan(enhancedFormData);
+      
+      // Check if the nutrition plan generation failed
+      if ((nutritionPlan as any).error) {
+        // Refund tokens for failed analysis
+        await refundTokensForFailedAnalysis(
+          userId,
+          null, // No athleteId for form-based nutrition plans
+          tokenCost,
+          'nutrition-plan',
+          'Personal Nutrition Plan'
+        );
+        
+        console.log(`🚫 FAILED: Enhanced nutrition plan generation failed, refunded ${tokenCost} tokens`);
+        return res.status(500).json({
+          message: (nutritionPlan as any).errorMessage || "Unable to generate nutrition plan at this time. Please try again later.",
+          error: true,
+          errorType: (nutritionPlan as any).errorType || "unknown",
+          retryable: (nutritionPlan as any).retryable || true,
+          suggestion: (nutritionPlan as any).suggestion || "Please try again later"
+        });
+      }
+
+      console.log(`✅ SUCCESS: Enhanced nutrition plan generated for user ${userId}`);
+
+      // Create analysis log with enhanced data
+      await storage.createAnalysisLog({
+        userId,
+        serviceType: "nutrition-plan",
+        resultData: {
+          ...nutritionPlan,
+          userInputs: { goal, sport: sportName, age, height, currentWeight, targetWeight, country, period, language },
+          enhancedGeneration: true
+        }
+      });
+
+      res.json({
+        ...nutritionPlan,
+        userGoal: goal,
+        period: period,
+        language: language,
+        sportName: sportName,
+        enhancedGeneration: true
+      });
+    } catch (error) {
+      console.error("Error generating enhanced nutrition plan:", error);
+      
+      // Ensure tokens are refunded on any uncaught errors
+      try {
+        await refundTokensForFailedAnalysis(
+          userId,
+          null,
+          tokenCost,
+          'nutrition-plan',
+          'Personal Nutrition Plan - System Error'
+        );
+        console.log(`🔄 EMERGENCY REFUND: ${tokenCost} tokens refunded due to system error`);
+      } catch (refundError) {
+        console.error("Failed to refund tokens after system error:", refundError);
+      }
+      
+      res.status(500).json({ 
+        message: "Failed to generate nutrition plan. Your tokens have been refunded.",
+        error: true,
+        retryable: true
+      });
     }
   });
 

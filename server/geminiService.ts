@@ -9,6 +9,20 @@ export interface NutritionPlanData {
   plan: string;
 }
 
+export interface NutritionPlanFormData {
+  goal: string;
+  age: number;
+  height: number; // in cm
+  currentWeight: number; // in kg
+  targetWeight: number; // in kg  
+  period: number; // in weeks
+  sportName: string;
+  country: string;
+  language: string;
+  gender?: string; // optional, defaults to 'Unknown'
+  name?: string; // optional, defaults to 'User'
+}
+
 export interface NutritionPlanDay {
   day: {
     date: string;
@@ -64,6 +78,328 @@ export interface AthleteData {
   currentRecord?: string;
 }
 
+// Enhanced nutrition plan function that accepts comprehensive form data
+export async function generateEnhancedNutritionPlan(
+  formData: NutritionPlanFormData
+): Promise<NutritionPlanData> {
+  try {
+    const {
+      goal,
+      age,
+      height,
+      currentWeight,
+      targetWeight,
+      period,
+      sportName,
+      country,
+      language,
+      gender = 'Unknown',
+      name = 'User'
+    } = formData;
+
+    const nationalityText = country === 'International' ? 'international' : country;
+    const genderText = gender === 'Unknown' ? 'athlete' : `${age} years old ${gender}`;
+    const weightGoal = currentWeight !== targetWeight ? 
+      `${currentWeight > targetWeight ? 'lose' : 'gain'} ${Math.abs(currentWeight - targetWeight)}kg` : 
+      'maintain current weight';
+    
+    // Language-specific system prompt
+    const isArabic = language === 'ar';
+    const systemPrompt = isArabic ? 
+      `أنت أخصائي تغذية رياضية محترف متخصص في المأكولات ${nationalityText === 'international' ? 'العالمية' : nationalityText}. قم بإنشاء خطة تغذية لمدة 7 أيام بصيغة JSON فقط. لا تشمل أي نص قبل أو بعد JSON. يجب أن تكون الاستجابة JSON صالحة بدون أي تنسيق markdown.` :
+      `You are a professional sports nutritionist specializing in ${nationalityText} cuisine. Create a 7-day nutrition plan in JSON format only. Do not include any text before or after the JSON. The response must be valid JSON without any markdown formatting.`;
+    
+    // Enhanced prompt with all form data
+    const prompt = isArabic ? 
+      `قم بإنشاء خطة تغذية شخصية لمدة 7 أيام لهذا الرياضي:
+
+الرياضي: ${name} (${genderText} من ${nationalityText})
+الرياضة: ${sportName}
+الهدف: ${goal}
+الطول: ${height} سم
+الوزن الحالي: ${currentWeight} كغ
+الوزن المستهدف: ${targetWeight} كغ
+الفترة الزمنية: ${period} أسبوع
+هدف الوزن: ${weightGoal}
+
+مهم جداً: أرجع JSON صالح فقط بهذا التركيب الدقيق بدون أي نص إضافي، بدون markdown، بدون شروحات:
+
+{
+  "days": [
+    {
+      "day": {
+        "date": "2024-08-14",
+        "name": "الاثنين"
+      },
+      "meals": [
+        {
+          "calories_intake": "500 سعرة حرارية",
+          "meal_description": [
+            "طبق إفطار تقليدي ${nationalityText} 100غ",
+            "عنصر آخر مع الكمية"
+          ]
+        },
+        {
+          "calories_intake": "300 سعرة حرارية",
+          "meal_description": [
+            "وجبة خفيفة في منتصف الصباح"
+          ]
+        },
+        {
+          "calories_intake": "700 سعرة حرارية",
+          "meal_description": [
+            "غداء تقليدي ${nationalityText}"
+          ]
+        },
+        {
+          "calories_intake": "200 سعرة حرارية",
+          "meal_description": [
+            "وجبة خفيفة بعد الظهر"
+          ]
+        },
+        {
+          "calories_intake": "600 سعرة حرارية",
+          "meal_description": [
+            "عشاء تقليدي ${nationalityText}"
+          ]
+        }
+      ],
+      "explanation": "شرح موجز لماذا تدعم هذه الخطة اليومية أداء ${sportName} مع الأطعمة ${nationalityText}",
+      "total_calories_intake": "2300 سعرة حرارية"
+    }
+  ]
+}
+
+المتطلبات:
+- استخدم الأطعمة التقليدية ${nationalityText} المناسبة لرياضيي ${sportName}
+- اشمل 5 وجبات يومياً (إفطار، وجبة خفيفة، غداء، وجبة خفيفة، عشاء)
+- ضع في الاعتبار احتياجات تدريب ${sportName} (القوة الانفجارية، الرشاقة، الاستشفاء)
+- احسب السعرات الحرارية بناءً على هدف ${weightGoal} خلال ${period} أسبوع
+- قدم أحجام واقعية للحصص
+- أنشئ 7 أيام كاملة
+- كل وجبة يجب أن تحتوي على 2-4 عناصر غذائية مع الكميات
+
+معالجة الأخطاء: إذا لم تستطع إنشاء خطة تغذية حقيقية بسبب عدم كفاية البيانات، فشل البحث على الويب، أو أي مشاكل أخرى، أرجع هذا التركيب JSON بالضبط:
+{
+  "error": true,
+  "errorType": "insufficient_data|web_search_failed|parsing_error|other",
+  "errorMessage": "السبب المحدد لفشل خطة التغذية",
+  "retryable": true,
+  "suggestion": "ما يجب على المستخدم المحاولة بدلاً من ذلك"
+}` :
+      `Create a personalized 7-day nutrition plan for this athlete:
+
+Athlete: ${name} (${genderText} from ${nationalityText})
+Sport: ${sportName}
+Goal: ${goal}
+Height: ${height}cm
+Current Weight: ${currentWeight}kg
+Target Weight: ${targetWeight}kg
+Timeframe: ${period} weeks
+Weight Goal: ${weightGoal}
+
+CRITICAL: Return ONLY valid JSON in this EXACT structure with no additional text, no markdown, no explanations:
+
+{
+  "days": [
+    {
+      "day": {
+        "date": "2024-08-14",
+        "name": "Monday"
+      },
+      "meals": [
+        {
+          "calories_intake": "500 kcal",
+          "meal_description": [
+            "Traditional ${nationalityText} breakfast item 100g",
+            "Another item with quantity"
+          ]
+        },
+        {
+          "calories_intake": "300 kcal",
+          "meal_description": [
+            "Mid-morning snack items"
+          ]
+        },
+        {
+          "calories_intake": "700 kcal",
+          "meal_description": [
+            "Traditional ${nationalityText} lunch items"
+          ]
+        },
+        {
+          "calories_intake": "200 kcal",
+          "meal_description": [
+            "Afternoon snack"
+          ]
+        },
+        {
+          "calories_intake": "600 kcal",
+          "meal_description": [
+            "Traditional ${nationalityText} dinner items"
+          ]
+        }
+      ],
+      "explanation": "Brief explanation of why this daily plan supports ${sportName} performance with ${nationalityText} foods",
+      "total_calories_intake": "2300 kcal"
+    }
+  ]
+}
+
+Requirements:
+- Use traditional ${nationalityText} foods appropriate for ${sportName} athletes
+- Include 5 meals per day (breakfast, snack, lunch, snack, dinner)
+- Consider ${sportName} training needs (explosive power, agility, recovery)
+- Calculate calories based on ${weightGoal} goal over ${period} weeks
+- Provide realistic portion sizes
+- Generate 7 complete days
+- Each meal should have 2-4 food items with quantities
+
+FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insufficient data, web search failures, or any other issues, return this exact JSON structure:
+{
+  "error": true,
+  "errorType": "insufficient_data|web_search_failed|parsing_error|other",
+  "errorMessage": "Specific reason why nutrition plan failed",
+  "retryable": true,
+  "suggestion": "What the user should try instead"
+}`;
+
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "object",
+          properties: {
+            days: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  day: {
+                    type: "object",
+                    properties: {
+                      date: { type: "string" },
+                      name: { type: "string" }
+                    },
+                    required: ["date", "name"]
+                  },
+                  meals: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        calories_intake: { type: "string" },
+                        meal_description: {
+                          type: "array",
+                          items: { type: "string" }
+                        }
+                      },
+                      required: ["calories_intake", "meal_description"]
+                    }
+                  },
+                  explanation: { type: "string" },
+                  total_calories_intake: { type: "string" }
+                },
+                required: ["day", "meals", "explanation", "total_calories_intake"]
+              }
+            }
+          },
+          required: ["days"]
+        }
+      },
+      contents: prompt,
+    });
+
+    const responseText = result.text || "{}";
+    
+    // Check for error responses indicating no data found
+    if (responseText.includes('"error": "no_data_found"') || 
+        responseText.includes('"error": "search_failed"') || 
+        responseText.includes('"error": "not_found"') ||
+        responseText.includes('"success": false')) {
+      throw new Error('AI_WEB_SEARCH_FAILED: No authentic nutrition data found through web search');
+    }
+    
+    // Clean and parse the JSON response
+    let cleanedResponse = responseText.trim();
+    
+    // Remove any markdown code blocks
+    cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
+    
+    // Try to parse the JSON
+    let parsedPlan: StructuredNutritionPlan;
+    try {
+      parsedPlan = JSON.parse(cleanedResponse);
+    } catch (parseError) {
+      console.error("JSON parsing failed, using fallback structure:", parseError);
+      // Enhanced fallback structure with form data
+      const dayNames = isArabic ? 
+        ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"] :
+        ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+      
+      parsedPlan = {
+        days: dayNames.map((dayName, index) => ({
+          day: {
+            date: new Date(Date.now() + index * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            name: dayName
+          },
+          meals: [
+            {
+              calories_intake: isArabic ? "500 سعرة حرارية" : "500 kcal",
+              meal_description: isArabic ? 
+                [`أطعمة إفطار تقليدية ${nationalityText}`, "مكونات مختلطة محلية"] :
+                [`Traditional ${country} breakfast items`, "Mixed with local ingredients"]
+            },
+            {
+              calories_intake: isArabic ? "300 سعرة حرارية" : "300 kcal", 
+              meal_description: [isArabic ? "خيارات وجبات خفيفة صحية" : "Healthy snack options"]
+            },
+            {
+              calories_intake: isArabic ? "700 سعرة حرارية" : "700 kcal",
+              meal_description: isArabic ? 
+                [`غداء تقليدي ${nationalityText}`, `متوازن لتدريب ${sportName}`] :
+                [`Traditional ${country} lunch`, `Balanced for ${sportName} training`]
+            },
+            {
+              calories_intake: isArabic ? "200 سعرة حرارية" : "200 kcal",
+              meal_description: [isArabic ? "دفعة طاقة بعد الظهر" : "Afternoon energy boost"]
+            },
+            {
+              calories_intake: isArabic ? "600 سعرة حرارية" : "600 kcal",
+              meal_description: isArabic ? 
+                [`عشاء تقليدي ${nationalityText}`, "محسن للاستشفاء"] :
+                [`Traditional ${country} dinner`, "Optimized for recovery"]
+            }
+          ],
+          explanation: isArabic ? 
+            `خطة تغذية عينة للرياضي ${sportName} تتضمن مأكولات ${nationalityText} لهدف ${goal}` :
+            `Sample nutrition plan for ${sportName} athlete incorporating ${country} cuisine for ${goal}`,
+          total_calories_intake: isArabic ? "2300 سعرة حرارية" : "2300 kcal"
+        }))
+      };
+    }
+
+    return {
+      plan: JSON.stringify(parsedPlan)
+    };
+  } catch (error) {
+    console.error("Error generating enhanced nutrition plan:", error);
+    
+    // Return structured error response instead of throwing
+    return {
+      error: true,
+      errorType: error instanceof Error && error.message.includes('AI_WEB_SEARCH_FAILED') ? "web_search_failed" : "parsing_error",
+      errorMessage: `Unable to generate nutrition plan: ${error instanceof Error ? error.message : String(error)}`,
+      retryable: true,
+      suggestion: "Please try again or check if the athlete information is correct",
+      days: []
+    } as any;
+  }
+}
+
+// Keep the original function for backward compatibility
 export async function generateNutritionPlan(
   name: string,
   age: number,
