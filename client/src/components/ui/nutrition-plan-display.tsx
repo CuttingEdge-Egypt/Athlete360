@@ -208,75 +208,52 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Unified Navigation Controls */}
-          <div className="flex items-center justify-between">
-            <Button 
-              variant="outline" 
-              size="lg"
-              onClick={handlePrevious}
-              disabled={!canGoPrevious}
-              className="flex items-center gap-2 bg-slate-700 border-border text-white hover:bg-slate-600 disabled:opacity-50"
-              data-testid="button-previous"
-            >
-              <ChevronLeft className="h-5 w-5" />
-              Previous
-            </Button>
-            
-            {/* Progress Bar with Week/Day Indicators */}
-            <div className="flex-1 mx-8">
-              <div className="flex items-center justify-center gap-1">
-                {weeks.map((week, weekIndex) => (
-                  <div key={weekIndex} className="flex items-center">
-                    <div className="flex gap-1">
-                      {week.days.map((_, dayIndex) => {
-                        const globalDayIndex = weekIndex * 7 + dayIndex;
-                        const isCurrentDay = weekIndex === currentWeek && dayIndex === safCurrentDay;
-                        const isCurrentWeek = weekIndex === currentWeek;
-                        
-                        return (
-                          <button
-                            key={dayIndex}
-                            onClick={() => {
-                              setCurrentWeek(weekIndex);
-                              setCurrentDay(dayIndex);
-                            }}
-                            className={`w-6 h-6 rounded-lg transition-all duration-200 flex items-center justify-center text-xs font-bold border-2 ${
-                              isCurrentDay 
-                                ? 'bg-green-500 text-white border-green-400 scale-110 shadow-lg' 
-                                : isCurrentWeek
-                                  ? 'bg-slate-600 text-slate-200 border-gray-500 hover:bg-slate-500'
-                                  : 'bg-slate-700 text-muted-foreground border-border hover:bg-slate-600'
-                            }`}
-                            title={`Week ${weekIndex + 1}, Day ${dayIndex + 1}`}
-                            data-testid={`day-${weekIndex}-${dayIndex}`}
-                          >
-                            {dayIndex + 1}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {weekIndex < totalWeeks - 1 && (
-                      <div className="w-2 h-0.5 bg-slate-600 mx-1"></div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <div className="text-center mt-2 text-xs text-muted-foreground">
-                Tap any day or use arrows to navigate
+          {/* Week Slider */}
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="text-sm text-muted-foreground mb-3">Select Week</div>
+              <div className="flex items-center justify-center gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleWeekChange(currentWeek - 1)}
+                  disabled={currentWeek === 0}
+                  className="bg-slate-700 border-border text-white hover:bg-slate-600"
+                  data-testid="button-week-previous"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                
+                <div className="flex gap-2">
+                  {weeks.map((week, weekIndex) => (
+                    <button
+                      key={weekIndex}
+                      onClick={() => handleWeekChange(weekIndex)}
+                      className={`w-10 h-10 rounded-lg transition-all duration-200 flex items-center justify-center font-bold border-2 ${
+                        weekIndex === currentWeek
+                          ? 'bg-green-500 text-white border-green-400 scale-110 shadow-lg'
+                          : 'bg-slate-700 text-slate-200 border-slate-600 hover:bg-slate-600'
+                      }`}
+                      title={`Week ${weekIndex + 1}`}
+                      data-testid={`week-${weekIndex}`}
+                    >
+                      {weekIndex + 1}
+                    </button>
+                  ))}
+                </div>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleWeekChange(currentWeek + 1)}
+                  disabled={currentWeek === totalWeeks - 1}
+                  className="bg-slate-700 border-border text-white hover:bg-slate-600"
+                  data-testid="button-week-next"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
             </div>
-
-            <Button 
-              variant="outline" 
-              size="lg"
-              onClick={handleNext}
-              disabled={!canGoNext}
-              className="flex items-center gap-2 bg-slate-700 border-border text-white hover:bg-slate-600 disabled:opacity-50"
-              data-testid="button-next"
-            >
-              Next
-              <ChevronRight className="h-5 w-5" />
-            </Button>
           </div>
         </CardContent>
       </Card>
@@ -299,6 +276,54 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
                 {currentDayData.total_calories_intake}
               </Badge>
             </CardTitle>
+            
+            {/* Day Slider */}
+            <div className="mt-4 pt-4 border-t border-border">
+              <div className="text-center">
+                <div className="text-sm text-muted-foreground mb-3">Select Day in Week {currentWeek + 1}</div>
+                <div className="flex items-center justify-center gap-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDayChange(safCurrentDay - 1)}
+                    disabled={safCurrentDay === 0}
+                    className="bg-slate-700 border-border text-white hover:bg-slate-600"
+                    data-testid="button-day-previous"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  
+                  <div className="flex gap-2">
+                    {currentWeekData.days.map((day, dayIndex) => (
+                      <button
+                        key={dayIndex}
+                        onClick={() => handleDayChange(dayIndex)}
+                        className={`w-10 h-10 rounded-lg transition-all duration-200 flex items-center justify-center font-bold border-2 ${
+                          dayIndex === safCurrentDay
+                            ? 'bg-green-500 text-white border-green-400 scale-110 shadow-lg'
+                            : 'bg-slate-700 text-slate-200 border-slate-600 hover:bg-slate-600'
+                        }`}
+                        title={`${day.day.name}`}
+                        data-testid={`day-${dayIndex}`}
+                      >
+                        {dayIndex + 1}
+                      </button>
+                    ))}
+                  </div>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDayChange(safCurrentDay + 1)}
+                    disabled={safCurrentDay === maxDayInWeek}
+                    className="bg-slate-700 border-border text-white hover:bg-slate-600"
+                    data-testid="button-day-next"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             {/* Enhanced Meals Grid */}
