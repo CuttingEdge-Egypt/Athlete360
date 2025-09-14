@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Clock, Utensils, Droplets, Zap, Target, Apple, Pill, NotebookPen, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, Utensils, Target, Apple } from "lucide-react";
 
 interface NutritionPlanProps {
   plan: string | any;
@@ -77,15 +77,15 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
   // If parsing failed, show raw text
   if (!nutritionData) {
     return (
-      <Card className="w-full max-w-4xl mx-auto">
+      <Card className="w-full max-w-4xl mx-auto bg-card border-border">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-foreground">
             <Utensils className="h-5 w-5" />
             Nutrition Plan
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="whitespace-pre-wrap text-sm">
+          <div className="whitespace-pre-wrap text-sm text-muted-foreground">
             {typeof plan === 'string' ? plan : JSON.stringify(plan, null, 2)}
           </div>
         </CardContent>
@@ -93,8 +93,9 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
     );
   }
 
-  // Group days into weeks (7 days each)
+  // Group days into weeks (7 days each)  
   const groupIntoWeeks = (days: NutritionPlanDay[]): WeekData[] => {
+    if (!days || days.length === 0) return [];
     const weeks: WeekData[] = [];
     for (let i = 0; i < days.length; i += 7) {
       const weekDays = days.slice(i, i + 7);
@@ -109,7 +110,7 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
   };
 
   const weeks = groupIntoWeeks(nutritionData.days);
-  const currentWeekData = weeks[currentWeek];
+  const currentWeekData = weeks[currentWeek] || { days: [], weekNumber: 1, startDate: "", endDate: "" };
   const totalWeeks = weeks.length;
 
   // Calculate total stats
@@ -117,269 +118,274 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
   const totalMeals = nutritionData.days.reduce((total, day) => total + day.meals.length, 0);
   const avgCaloriesPerDay = totalDays > 0 ? Math.round(
     nutritionData.days.reduce((total, day) => {
-      const dayCalories = parseInt(day.total_calories_intake.replace(/[^\d]/g, '')) || 0;
+      const dayCalories = parseInt(day.total_calories_intake?.replace(/[^\d]/g, '') || '0') || 0;
       return total + dayCalories;
     }, 0) / totalDays
   ) : 0;
 
-  // Reset currentDay when week changes and ensure it's within bounds
-  const maxDayInWeek = (currentWeekData?.days.length || 1) - 1;
-  const safCurrentDay = Math.min(currentDay, maxDayInWeek);
-  
-  // Week change handler that resets day to 0
+  // Empty state guard
+  if (totalWeeks === 0 || totalDays === 0) {
+    return (
+      <Card className="w-full max-w-4xl mx-auto bg-card border-border">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-foreground">
+            <Apple className="h-5 w-5 text-green-400" />
+            Nutrition Plan
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-center py-12">
+          <div className="text-muted-foreground">
+            No nutrition plan data available.
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Safe bounds checking
+  const maxDayInWeek = Math.max(0, (currentWeekData?.days.length || 1) - 1);
+  const safCurrentDay = Math.min(Math.max(0, currentDay), maxDayInWeek);
+  const currentDayData = currentWeekData?.days[safCurrentDay];
+
+  // Navigation handlers
   const handleWeekChange = (newWeek: number) => {
-    setCurrentWeek(newWeek);
+    const clampedWeek = Math.min(Math.max(0, newWeek), totalWeeks - 1);
+    setCurrentWeek(clampedWeek);
     setCurrentDay(0);
   };
 
-  // Day navigation handlers
-  const handlePreviousDay = () => {
-    setCurrentDay(Math.max(0, currentDay - 1));
+  const handleDayChange = (newDay: number) => {
+    const clampedDay = Math.min(Math.max(0, newDay), maxDayInWeek);
+    setCurrentDay(clampedDay);
   };
 
-  const handleNextDay = () => {
-    setCurrentDay(Math.min(maxDayInWeek, currentDay + 1));
+  const handlePrevious = () => {
+    if (currentDay > 0) {
+      setCurrentDay(currentDay - 1);
+    } else if (currentWeek > 0) {
+      const prevWeek = currentWeek - 1;
+      const prevWeekData = weeks[prevWeek];
+      setCurrentWeek(prevWeek);
+      setCurrentDay((prevWeekData?.days.length || 1) - 1);
+    }
   };
+
+  const handleNext = () => {
+    if (currentDay < maxDayInWeek) {
+      setCurrentDay(currentDay + 1);
+    } else if (currentWeek < totalWeeks - 1) {
+      setCurrentWeek(currentWeek + 1);
+      setCurrentDay(0);
+    }
+  };
+
+  const canGoPrevious = currentWeek > 0 || currentDay > 0;
+  const canGoNext = currentWeek < totalWeeks - 1 || currentDay < maxDayInWeek;
 
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
-      {/* Header Overview with Week Navigation */}
-      <Card>
+      {/* Consolidated Navigation Header */}
+      <Card className="bg-gradient-to-r from-card to-slate-700 border-border">
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Apple className="h-5 w-5 text-green-500" />
-              Nutrition Plan - {totalDays} Days ({totalWeeks} Week{totalWeeks > 1 ? 's' : ''})
+          <CardTitle className="flex items-center justify-between text-foreground">
+            <div className="flex items-center gap-3">
+              <Apple className="h-6 w-6 text-green-400" />
+              <div>
+                <div className="text-xl font-bold">Nutrition Plan</div>
+                <div className="text-sm text-muted-foreground font-normal">
+                  {totalDays} Days • {totalWeeks} Week{totalWeeks > 1 ? 's' : ''} • {totalMeals} Meals
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
-                Week {currentWeek + 1} of {totalWeeks}
+            <div className="text-right">
+              <Badge variant="secondary" className="bg-green-600 text-white mb-1">
+                Week {currentWeek + 1} • Day {safCurrentDay + 1}
               </Badge>
+              <div className="text-sm text-muted-foreground">
+                {currentDayData?.day.name} - {currentDayData?.day.date}
+              </div>
             </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {/* Unified Navigation Controls */}
           <div className="flex items-center justify-between">
-            {/* Week Navigation Controls */}
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => handleWeekChange(Math.max(0, currentWeek - 1))}
-                disabled={currentWeek === 0}
-                className="flex items-center gap-2"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Previous Week
-              </Button>
-              
-              <div className="text-center">
-                <div className="text-lg font-semibold text-green-600 dark:text-green-400">
-                  Week {currentWeek + 1}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {currentWeekData?.startDate} - {currentWeekData?.endDate}
-                </div>
+            <Button 
+              variant="outline" 
+              size="lg"
+              onClick={handlePrevious}
+              disabled={!canGoPrevious}
+              className="flex items-center gap-2 bg-slate-700 border-border text-white hover:bg-slate-600 disabled:opacity-50"
+              data-testid="button-previous"
+            >
+              <ChevronLeft className="h-5 w-5" />
+              Previous
+            </Button>
+            
+            {/* Progress Bar with Week/Day Indicators */}
+            <div className="flex-1 mx-8">
+              <div className="flex items-center justify-center gap-1">
+                {weeks.map((week, weekIndex) => (
+                  <div key={weekIndex} className="flex items-center">
+                    <div className="flex gap-1">
+                      {week.days.map((_, dayIndex) => {
+                        const globalDayIndex = weekIndex * 7 + dayIndex;
+                        const isCurrentDay = weekIndex === currentWeek && dayIndex === safCurrentDay;
+                        const isCurrentWeek = weekIndex === currentWeek;
+                        
+                        return (
+                          <button
+                            key={dayIndex}
+                            onClick={() => {
+                              setCurrentWeek(weekIndex);
+                              setCurrentDay(dayIndex);
+                            }}
+                            className={`w-6 h-6 rounded-lg transition-all duration-200 flex items-center justify-center text-xs font-bold border-2 ${
+                              isCurrentDay 
+                                ? 'bg-green-500 text-white border-green-400 scale-110 shadow-lg' 
+                                : isCurrentWeek
+                                  ? 'bg-slate-600 text-slate-200 border-gray-500 hover:bg-slate-500'
+                                  : 'bg-slate-700 text-muted-foreground border-border hover:bg-slate-600'
+                            }`}
+                            title={`Week ${weekIndex + 1}, Day ${dayIndex + 1}`}
+                            data-testid={`day-${weekIndex}-${dayIndex}`}
+                          >
+                            {dayIndex + 1}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {weekIndex < totalWeeks - 1 && (
+                      <div className="w-2 h-0.5 bg-slate-600 mx-1"></div>
+                    )}
+                  </div>
+                ))}
               </div>
-
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => handleWeekChange(Math.min(totalWeeks - 1, currentWeek + 1))}
-                disabled={currentWeek === totalWeeks - 1}
-                className="flex items-center gap-2"
-              >
-                Next Week
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+              <div className="text-center mt-2 text-xs text-muted-foreground">
+                Tap any day or use arrows to navigate
+              </div>
             </div>
 
-            {/* Week Progress Indicators */}
-            <div className="flex items-center gap-2">
-              {weeks.map((_, weekIndex) => (
-                <button
-                  key={weekIndex}
-                  onClick={() => handleWeekChange(weekIndex)}
-                  className={`w-3 h-3 rounded-full transition-colors ${
-                    weekIndex === currentWeek 
-                      ? 'bg-green-500' 
-                      : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
-                  }`}
-                  title={`Week ${weekIndex + 1}`}
-                />
-              ))}
-            </div>
+            <Button 
+              variant="outline" 
+              size="lg"
+              onClick={handleNext}
+              disabled={!canGoNext}
+              className="flex items-center gap-2 bg-slate-700 border-border text-white hover:bg-slate-600 disabled:opacity-50"
+              data-testid="button-next"
+            >
+              Next
+              <ChevronRight className="h-5 w-5" />
+            </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Current Week Display with Day Slider */}
-      {currentWeekData && currentWeekData.days.length > 0 && (
-        <Card>
+      {/* Current Day Display */}
+      {currentDayData && (
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-blue-500" />
-                Week {currentWeek + 1} - Day {safCurrentDay + 1} of {currentWeekData.days.length}
+            <CardTitle className="flex items-center justify-between text-foreground">
+              <div className="flex items-center gap-3">
+                <div className="bg-green-500 text-white rounded-full w-12 h-12 flex items-center justify-center text-xl font-bold">
+                  {(currentWeek * 7) + safCurrentDay + 1}
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold">{currentDayData.day.name}</h3>
+                  <p className="text-muted-foreground">{currentDayData.day.date}</p>
+                </div>
               </div>
-              <Badge variant="outline" className="text-xs">
-                {currentWeekData.days[safCurrentDay]?.day.name} - {currentWeekData.days[safCurrentDay]?.day.date}
+              <Badge variant="outline" className="text-lg px-4 py-2 bg-green-600 text-white border-green-500">
+                {currentDayData.total_calories_intake}
               </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {/* Day Navigation Controls */}
-            <div className="flex items-center justify-between mb-6">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handlePreviousDay}
-                disabled={currentDay === 0}
-                className="flex items-center gap-2"
-                data-testid="button-previous-day"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Previous Day
-              </Button>
-              
-              <div className="text-center">
-                <div className="text-lg font-semibold text-blue-600 dark:text-blue-400">
-                  {currentWeekData.days[safCurrentDay]?.day.name}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {currentWeekData.days[safCurrentDay]?.day.date}
-                </div>
-              </div>
-
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleNextDay}
-                disabled={currentDay === maxDayInWeek}
-                className="flex items-center gap-2"
-                data-testid="button-next-day"
-              >
-                Next Day
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Day Progress Indicators */}
-            <div className="flex items-center justify-center gap-2 mb-6">
-              {currentWeekData.days.map((day, dayIndex) => (
-                <button
-                  key={dayIndex}
-                  onClick={() => setCurrentDay(dayIndex)}
-                  className={`w-4 h-4 rounded-full transition-all duration-200 flex items-center justify-center text-xs font-bold ${
-                    dayIndex === safCurrentDay 
-                      ? 'bg-blue-500 text-white scale-110' 
-                      : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-600 dark:text-gray-300'
-                  }`}
-                  title={`${day.day.name} - ${day.day.date}`}
-                  data-testid={`indicator-day-${dayIndex}`}
+            {/* Enhanced Meals Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+              {currentDayData.meals.map((meal, mealIndex) => (
+                <div 
+                  key={mealIndex} 
+                  className="bg-gradient-to-br from-slate-700 to-slate-600 border-2 border-slate-500 rounded-xl p-5 hover:shadow-xl transition-all duration-300 hover:border-green-400 hover:scale-105"
                 >
-                  {dayIndex + 1}
-                </button>
-              ))}
-            </div>
-
-            {/* Current Day Content */}
-            {(() => {
-              const currentDayData = currentWeekData.days[safCurrentDay];
-              if (!currentDayData) return null;
-
-              return (
-                <div className="border rounded-lg p-6 bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
-                  {/* Day Header */}
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-full w-12 h-12 flex items-center justify-center text-lg font-bold shadow-lg">
-                        {(currentWeek * 7) + safCurrentDay + 1}
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-semibold">{currentDayData.day.name}</h3>
-                        <p className="text-sm text-muted-foreground">{currentDayData.day.date}</p>
-                      </div>
+                  {/* Meal Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-green-400 rounded-full animate-pulse"></div>
+                      <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">
+                        Meal {mealIndex + 1}
+                      </span>
                     </div>
-                    <Badge variant="outline" className="text-lg px-4 py-2 font-semibold">
-                      {currentDayData.total_calories_intake}
+                    <Badge variant="secondary" className="bg-green-600 text-white text-xs font-bold px-3 py-1">
+                      {meal.calories_intake}
                     </Badge>
                   </div>
-
-                  {/* Meals Display */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
-                    {currentDayData.meals.map((meal, mealIndex) => (
-                      <div key={mealIndex} className="p-4 border-2 border-blue-200 dark:border-blue-800 rounded-lg hover:shadow-lg transition-all duration-200 hover:border-blue-400 dark:hover:border-blue-600 hover:scale-105" data-testid={`meal-${mealIndex}`}>
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-                          <Badge variant="secondary" className="text-xs font-semibold">
-                            {meal.calories_intake}
-                          </Badge>
-                        </div>
-                        <div className="space-y-2">
-                          {meal.meal_description.map((item, itemIndex) => (
-                            <div key={itemIndex} className="text-sm p-3 rounded-md text-center border border-gray-300 dark:border-gray-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors cursor-pointer">
-                              {item}
-                            </div>
-                          ))}
-                        </div>
+                  
+                  {/* Meal Items */}
+                  <div className="space-y-3">
+                    {meal.meal_description.map((item, itemIndex) => (
+                      <div 
+                        key={itemIndex} 
+                        className="bg-card text-slate-200 text-sm p-3 rounded-lg text-center border border-border hover:border-green-500 hover:bg-slate-700 transition-all duration-200"
+                      >
+                        {item}
                       </div>
                     ))}
                   </div>
-
-                  {/* Daily Explanation */}
-                  {currentDayData.explanation && (
-                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-l-4 border-blue-500">
-                      <div className="flex items-start gap-3">
-                        <Target className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <h4 className="font-semibold text-sm text-blue-700 dark:text-blue-300 mb-1">
-                            Daily Focus
-                          </h4>
-                          <p className="text-sm text-blue-600 dark:text-blue-200">
-                            {currentDayData.explanation}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
-              );
-            })()}
+              ))}
+            </div>
+
+            {/* Daily Explanation */}
+            {currentDayData.explanation && (
+              <div className="p-6 bg-gradient-to-r from-blue-900/30 to-blue-800/20 rounded-xl border-l-4 border-blue-400">
+                <div className="flex items-start gap-3">
+                  <Target className="h-6 w-6 text-blue-400 mt-1 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-bold text-lg text-blue-300 mb-2">
+                      Daily Focus
+                    </h4>
+                    <p className="text-slate-200 leading-relaxed">
+                      {currentDayData.explanation}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
 
       {/* Overall Plan Summary */}
-      <Card>
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-purple-500" />
-            Complete Plan Overview
+          <CardTitle className="flex items-center gap-2 text-foreground">
+            <Target className="h-5 w-5 text-purple-400" />
+            Plan Overview
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+            <div className="text-center p-6 bg-gradient-to-br from-purple-900/30 to-purple-800/20 rounded-xl border border-purple-700">
+              <div className="text-3xl font-bold text-purple-400 mb-1">
                 {totalWeeks}
               </div>
-              <div className="text-sm text-muted-foreground">Weeks Planned</div>
+              <div className="text-sm text-muted-foreground">Week{totalWeeks > 1 ? 's' : ''} Planned</div>
             </div>
-            <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+            <div className="text-center p-6 bg-gradient-to-br from-blue-900/30 to-blue-800/20 rounded-xl border border-blue-700">
+              <div className="text-3xl font-bold text-blue-400 mb-1">
                 {totalDays}
               </div>
               <div className="text-sm text-muted-foreground">Total Days</div>
             </div>
-            <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+            <div className="text-center p-6 bg-gradient-to-br from-orange-900/30 to-orange-800/20 rounded-xl border border-orange-700">
+              <div className="text-3xl font-bold text-orange-400 mb-1">
                 {totalMeals}
               </div>
               <div className="text-sm text-muted-foreground">Total Meals</div>
             </div>
-            <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+            <div className="text-center p-6 bg-gradient-to-br from-green-900/30 to-green-800/20 rounded-xl border border-green-700">
+              <div className="text-3xl font-bold text-green-400 mb-1">
                 {avgCaloriesPerDay}
               </div>
               <div className="text-sm text-muted-foreground">Avg Calories/Day</div>
