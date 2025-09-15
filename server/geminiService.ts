@@ -468,7 +468,7 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
               responseMimeType: "application/json",
               responseSchema: weeklyGenerationSchema,
               temperature: Math.min(1.0, isFirstWeek ? 0.7 : 0.8 + (weekNum * 0.05)), // Cap temperature at 1.0
-              maxOutputTokens: 12000 // High limit for detailed, comprehensive plans
+              maxOutputTokens: 20000 // Very high limit for comprehensive multi-week plans
             },
             contents: weekPrompt
           });
