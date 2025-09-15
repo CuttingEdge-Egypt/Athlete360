@@ -23,6 +23,7 @@ interface NutritionPlanDay {
 }
 
 interface StructuredNutritionPlan {
+  instructions?: string;
   days: NutritionPlanDay[];
 }
 
@@ -184,6 +185,23 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
 
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
+      {/* Instructions Section */}
+      {nutritionData.instructions && (
+        <Card className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border-blue-600/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3 text-foreground">
+              <Target className="h-5 w-5 text-blue-400" />
+              Personalized Instructions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+              {nutritionData.instructions}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Consolidated Navigation Header */}
       <Card className="bg-gradient-to-r from-card to-slate-700 border-border">
         <CardHeader>

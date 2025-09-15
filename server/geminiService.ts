@@ -38,6 +38,7 @@ export interface NutritionPlanDay {
 }
 
 export interface StructuredNutritionPlan {
+  instructions: string;
   days: NutritionPlanDay[];
 }
 
@@ -185,10 +186,10 @@ export async function generateEnhancedNutritionPlan(
     
     // Enhanced prompt with all form data
     const prompt = isArabic ? 
-      `قم بإنشاء خطة تغذية شخصية لمدة ${period} أسابيع (${totalDays} أيام) لهذا الرياضي:
+      `قم بإنشاء خطة تغذية شخصية لمدة ${period} أسابيع (${totalDays} أيام) لهذا الرياضي الذي يلعب ${sportName}:
 
 الرياضي: ${name} (${genderText} من ${nationalityText})
-الرياضة: ${sportName}
+الرياضة التي يلعبها: ${sportName}
 الهدف: ${goal}
 الطول: ${height} سم
 الوزن الحالي: ${currentWeight} كغ
@@ -199,6 +200,7 @@ export async function generateEnhancedNutritionPlan(
 مهم جداً: أرجع JSON صالح فقط بهذا التركيب الدقيق بدون أي نص إضافي، بدون markdown، بدون شروحات:
 
 {
+  "instructions": "تعليمات شاملة وشخصية للرياضي بناءً على هدفه ومعلوماته - يجب أن تشمل نصائح عامة للتغذية والتدريب والاستشفاء لرياضة ${sportName}",
   "days": [
     {
       "day": {
@@ -275,10 +277,10 @@ export async function generateEnhancedNutritionPlan(
   "retryable": true,
   "suggestion": "ما يجب على المستخدم المحاولة بدلاً من ذلك"
 }` :
-      `Create a personalized ${period}-week nutrition plan (${totalDays} days) for this athlete:
+      `Create a personalized ${period}-week nutrition plan (${totalDays} days) for this athlete who plays ${sportName}:
 
 Athlete: ${name} (${genderText} from ${nationalityText})
-Sport: ${sportName}
+Sport they play: ${sportName}
 Goal: ${goal}
 Height: ${height}cm
 Current Weight: ${currentWeight}kg
@@ -289,6 +291,7 @@ Weight Goal: ${weightGoal}
 CRITICAL: Return ONLY valid JSON in this EXACT structure with no additional text, no markdown, no explanations:
 
 {
+  "instructions": "Comprehensive personalized instructions for the athlete based on their goal and information - should include general advice for nutrition, training, and recovery specific to ${sportName}",
   "days": [
     {
       "day": {
@@ -373,6 +376,9 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
     const weeklyGenerationSchema = {
       type: "object",
       properties: {
+        instructions: {
+          type: "string"
+        },
         days: {
           type: "array",
           items: {
@@ -407,7 +413,7 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
           }
         }
       },
-      required: ["days"]
+      required: ["instructions", "days"]
     };
     
     // Generate each week separately
@@ -473,6 +479,9 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
           ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
         
         weekPlan = {
+          instructions: isArabic ? 
+            `تعليمات عامة للرياضي ${name} الذي يلعب ${sportName}. ركز على ${goal} من خلال التغذية المتوازنة والتدريب المناسب والاستشفاء الجيد. استخدم الأطعمة ${nationalityText} التقليدية مع مراعاة احتياجات رياضة ${sportName}.` :
+            `General instructions for athlete ${name} who plays ${sportName}. Focus on ${goal} through balanced nutrition, proper training, and good recovery. Use traditional ${country} foods while considering the specific needs of ${sportName} sports.`,
           days: dayNames.map((dayName, dayIndex) => ({
             day: {
               date: new Date(Date.now() + (weekNum * 7 + dayIndex) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -529,6 +538,13 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
     
     // Combine all weeks into final structure
     const finalPlan: StructuredNutritionPlan = {
+      instructions: allWeeks.length > 0 && allWeeks[0].length > 0 ? 
+        (isArabic ? 
+          `تعليمات شاملة للرياضي ${name} الذي يلعب ${sportName}. ركز على ${goal} من خلال اتباع هذه الخطة الغذائية لمدة ${period} أسابيع. استخدم الأطعمة ${nationalityText} التقليدية مع مراعاة احتياجات تدريب ${sportName} والاستشفاء المناسب.` :
+          `Comprehensive instructions for athlete ${name} who plays ${sportName}. Focus on ${goal} by following this ${period}-week nutrition plan. Use traditional ${country} foods while considering ${sportName} training needs and proper recovery.`) :
+        (isArabic ? 
+          `تعليمات عامة للتغذية الرياضية للاعب ${sportName}` :
+          `General sports nutrition instructions for ${sportName} athlete`),
       days: allDays
     };
     
@@ -724,6 +740,7 @@ CRITICAL ERROR HANDLING:
       console.error("JSON parsing failed, using fallback structure:", parseError);
       // Fallback structure if parsing fails
       parsedPlan = {
+        instructions: `General nutrition instructions for ${sport} athlete from ${nationality}. Focus on balanced meals, proper hydration, and adequate recovery nutrition.`,
         days: [
           {
             day: {
