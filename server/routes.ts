@@ -9,7 +9,7 @@ import { z } from "zod";
 
 // Nutrition Plan Form Validation Schema
 const nutritionPlanSchema = z.object({
-  goal: z.string().min(3, "Goal must be at least 3 characters").max(100, "Goal too long"),
+  goal: z.string().min(3, "Goal must be at least 3 characters").max(1000, "Goal too long"),
   age: z.coerce.number().int().min(12, "Age must be at least 12").max(80, "Age must be 80 or younger"),
   height: z.coerce.number().min(120, "Height must be at least 120cm").max(250, "Height must be 250cm or less"),
   currentWeight: z.coerce.number().min(30, "Current weight must be at least 30kg").max(200, "Current weight must be 200kg or less"),
