@@ -41,6 +41,7 @@ export default function Home() {
   const [videoAnalysisData, setVideoAnalysisData] = useState<any>(null);
   const [nutritionPlanData, setNutritionPlanData] = useState<any>(null);
   const [showNutritionForm, setShowNutritionForm] = useState<boolean>(true);
+  const [nutritionProgressMessage, setNutritionProgressMessage] = useState<string>("");
   const [location] = useLocation();
 
   // Helper for required number validation that shows proper required messages
@@ -154,7 +155,57 @@ export default function Home() {
     };
   }, [toast]);
 
+  // Progress messages for nutrition plan generation
+  const nutritionProgressMessages = useMemo(() => {
+    const isArabic = i18n.language === 'ar';
+    return isArabic ? [
+      "بدء تحليل ملف التغذية الخاص بك...",
+      "جمع البيانات الغذائية المتخصصة...",
+      "تحليل احتياجاتك الرياضية...",
+      "إنشاء خطة أسبوعية متنوعة...",
+      "تحسين المحتوى الغذائي...",
+      "تنسيق الوجبات التقليدية...",
+      "إضافة لمسة شخصية للخطة...",
+      "مراجعة الخطة النهائية...",
+      "جاري الإنتهاء من خطتك..."
+    ] : [
+      "Analyzing your nutritional profile...",
+      "Gathering specialized dietary data...",
+      "Evaluating your athletic requirements...",
+      "Creating varied weekly meal plans...",
+      "Optimizing nutritional content...",
+      "Coordinating traditional cuisine...",
+      "Adding personal touches to your plan...",
+      "Reviewing final nutrition strategy...",
+      "Finalizing your custom plan..."
+    ];
+  }, [i18n.language]);
 
+  // Cycle through progress messages during nutrition plan generation
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    let messageIndex = 0;
+
+    if (generateNutritionPlanMutation.isPending) {
+      // Set initial message
+      setNutritionProgressMessage(nutritionProgressMessages[0]);
+      
+      // Update message every 5 seconds
+      interval = setInterval(() => {
+        messageIndex = (messageIndex + 1) % nutritionProgressMessages.length;
+        setNutritionProgressMessage(nutritionProgressMessages[messageIndex]);
+      }, 5000);
+    } else {
+      // Reset message when not generating
+      setNutritionProgressMessage("");
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [generateNutritionPlanMutation.isPending, nutritionProgressMessages]);
 
   // Check for payment success notification
   useEffect(() => {
@@ -1127,7 +1178,7 @@ export default function Home() {
                           ) : (
                             <Apple className="mr-2" size={20} />
                           )}
-                          {generateNutritionPlanMutation.isPending ? 'Generating...' : t('nutritionPlan.generate')}
+                          {generateNutritionPlanMutation.isPending ? nutritionProgressMessage : t('nutritionPlan.generate')}
                         </Button>
                       </div>
                     </form>
