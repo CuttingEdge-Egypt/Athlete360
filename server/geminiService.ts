@@ -291,7 +291,7 @@ Weight Goal: ${weightGoal}
 CRITICAL: Return ONLY valid JSON in this EXACT structure with no additional text, no markdown, no explanations:
 
 {
-  "instructions": "Comprehensive personalized instructions for the athlete based on their goal and information - should include general advice for nutrition, training, and recovery specific to ${sportName}",
+  "instructions": "SCIENTIFIC ANALYSIS & PERSONALIZED GUIDANCE: Provide detailed reasoning for this specific plan. Calculate BMI (${height}cm, ${currentWeight}kg), estimated BMR, and required caloric deficit for ${weightGoal} over ${period} weeks. Explain if this goal is realistic and safe. Justify why you chose specific calorie targets, macro ratios, meal timing, and ${nationalityText} food selections for ${sportName}. Address potential challenges and provide actionable tips for success. Be specific to this individual's stats and goal.",
   "days": [
     {
       "day": {
