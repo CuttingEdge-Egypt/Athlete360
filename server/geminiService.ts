@@ -451,17 +451,8 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
       
       while (attempt < maxAttempts) {
         try {
-          const timeoutMs = 120000; // 120 second timeout for gemini-2.5-pro high-quality generation
-          
-          // Create a promise that times out
-          const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(() => {
-              reject(new Error(`Timeout after ${timeoutMs}ms`));
-            }, timeoutMs);
-          });
-          
-          // Race between the API call and timeout
-          const apiPromise = genAI.models.generateContent({
+          // No timeout - let gemini-2.5-pro take as long as needed for comprehensive analysis
+          result = await genAI.models.generateContent({
             model: "gemini-2.5-pro", // Use highest quality model
             config: {
               systemInstruction: systemPrompt,
@@ -472,8 +463,6 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
             },
             contents: weekPrompt
           });
-          
-          result = await Promise.race([apiPromise, timeoutPromise]);
           
           const duration = Date.now() - startTime;
           console.log(`✅ Week ${weekNum + 1} generated successfully in ${duration}ms (attempt ${attempt + 1})`);
