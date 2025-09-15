@@ -544,57 +544,12 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
       try {
         weekPlan = JSON.parse(cleanedResponse);
         console.log(`✅ Week ${weekNum + 1} JSON parsed successfully`);
-      } catch (parseError) {
+      } catch (parseError: any) {
         console.error(`❌ JSON parsing failed for week ${weekNum + 1}:`, parseError);
         console.error(`❌ Failed JSON content: ${cleanedResponse}`);
-        // Enhanced fallback structure with form data (for 7 days only)
-        const dayNames = isArabic ? 
-          ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"] :
-          ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
         
-        weekPlan = {
-          instructions: isArabic ? 
-            `تعليمات عامة للرياضي ${name} الذي يلعب ${sportName}. ركز على ${goal} من خلال التغذية المتوازنة والتدريب المناسب والاستشفاء الجيد. استخدم الأطعمة ${nationalityText} التقليدية مع مراعاة احتياجات رياضة ${sportName}.` :
-            `General instructions for athlete ${name} who plays ${sportName}. Focus on ${goal} through balanced nutrition, proper training, and good recovery. Use traditional ${country} foods while considering the specific needs of ${sportName} sports.`,
-          days: dayNames.map((dayName, dayIndex) => ({
-            day: {
-              date: new Date(Date.now() + (weekNum * 7 + dayIndex) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-              name: dayName
-            },
-            meals: [
-              {
-                calories_intake: isArabic ? "500 سعرة حرارية" : "500 kcal",
-                meal_description: isArabic ? 
-                  [`أطعمة إفطار تقليدية متنوعة ${nationalityText}`, `مكونات الأسبوع ${weekNum + 1}`] :
-                  [`Traditional ${country} breakfast items (Week ${weekNum + 1})`, "Varied local ingredients"]
-              },
-              {
-                calories_intake: isArabic ? "300 سعرة حرارية" : "300 kcal", 
-                meal_description: [isArabic ? `خيارات وجبات خفيفة الأسبوع ${weekNum + 1}` : `Week ${weekNum + 1} healthy snack options`]
-              },
-              {
-                calories_intake: isArabic ? "700 سعرة حرارية" : "700 kcal",
-                meal_description: isArabic ? 
-                  [`غداء تقليدي متنوع ${nationalityText}`, `الأسبوع ${weekNum + 1} لتدريب ${sportName}`] :
-                  [`Traditional ${country} lunch (Week ${weekNum + 1})`, `Optimized for ${sportName} training`]
-              },
-              {
-                calories_intake: isArabic ? "200 سعرة حرارية" : "200 kcal",
-                meal_description: [isArabic ? `دفعة طاقة الأسبوع ${weekNum + 1}` : `Week ${weekNum + 1} afternoon energy boost`]
-              },
-              {
-                calories_intake: isArabic ? "600 سعرة حرارية" : "600 kcal",
-                meal_description: isArabic ? 
-                  [`عشاء تقليدي متنوع ${nationalityText}`, `محسن للاستشفاء - الأسبوع ${weekNum + 1}`] :
-                  [`Traditional ${country} dinner (Week ${weekNum + 1})`, "Optimized for recovery"]
-              }
-            ],
-            explanation: isArabic ? 
-              `خطة تغذية للأسبوع ${weekNum + 1} للرياضي ${sportName} تتضمن مأكولات ${nationalityText} متنوعة لهدف ${goal}` :
-              `Week ${weekNum + 1} nutrition plan for ${sportName} athlete incorporating varied ${country} cuisine for ${goal}`,
-            total_calories_intake: isArabic ? "2300 سعرة حرارية" : "2300 kcal"
-          }))
-        };
+        // NO FALLBACK - Declare generation failed
+        throw new Error(`AI_JSON_PARSE_FAILED: Week ${weekNum + 1} returned invalid JSON format. Raw response was ${responseText.length} chars, cleaned to ${cleanedResponse.length} chars. Parse error: ${parseError?.message || 'Unknown parse error'}`);
       }
       
       // Validate and potentially regenerate if too many duplicates

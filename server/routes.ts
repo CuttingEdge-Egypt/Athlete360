@@ -1847,14 +1847,14 @@ Return only valid JSON with the missing fields.`;
         userId,
         serviceType: "nutrition-plan",
         resultData: {
-          ...nutritionPlan,
+          ...(nutritionPlan as any),
           userInputs: { goal, sport: sportName, age, height, currentWeight, targetWeight, country, period, language },
           enhancedGeneration: true
         }
       });
 
       res.json({
-        ...nutritionPlan,
+        ...(nutritionPlan as any),
         userGoal: goal,
         period: period,
         language: language,
