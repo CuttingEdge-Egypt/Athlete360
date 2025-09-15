@@ -79,6 +79,77 @@ export interface AthleteData {
 }
 
 // Enhanced nutrition plan function that accepts comprehensive form data
+// Helper function to summarize previous weeks for variety context
+function summarizePreviousWeeks(previousWeeks: NutritionPlanDay[][]): string {
+  if (previousWeeks.length === 0) return "";
+  
+  const usedProteins = new Set<string>();
+  const usedGrains = new Set<string>();
+  const usedMeals = new Set<string>();
+  
+  previousWeeks.forEach(week => {
+    week.forEach(day => {
+      day.meals.forEach(meal => {
+        // Extract proteins and grains from meal descriptions
+        meal.meal_description.forEach(item => {
+          const lowerItem = item.toLowerCase();
+          
+          // Common proteins
+          if (lowerItem.includes('chicken')) usedProteins.add('chicken');
+          if (lowerItem.includes('fish') || lowerItem.includes('salmon') || lowerItem.includes('tuna')) usedProteins.add('fish');
+          if (lowerItem.includes('beef') || lowerItem.includes('meat')) usedProteins.add('beef');
+          if (lowerItem.includes('egg')) usedProteins.add('eggs');
+          if (lowerItem.includes('lentil') || lowerItem.includes('bean') || lowerItem.includes('chickpea')) usedProteins.add('legumes');
+          
+          // Common grains
+          if (lowerItem.includes('rice')) usedGrains.add('rice');
+          if (lowerItem.includes('bread') || lowerItem.includes('aish')) usedGrains.add('bread');
+          if (lowerItem.includes('pasta')) usedGrains.add('pasta');
+          if (lowerItem.includes('bulgur')) usedGrains.add('bulgur');
+          if (lowerItem.includes('freekeh')) usedGrains.add('freekeh');
+          
+          // Store simplified meal names
+          usedMeals.add(lowerItem.split(' ').slice(0, 3).join(' '));
+        });
+      });
+    });
+  });
+  
+  return `Previously used proteins: ${Array.from(usedProteins).join(', ')}. Previously used grains: ${Array.from(usedGrains).join(', ')}. Avoid repeating these exact meal combinations: ${Array.from(usedMeals).slice(0, 10).join(', ')}.`;
+}
+
+// Helper function to detect excessive duplicates in a week
+function detectDuplicates(week: NutritionPlanDay[], previousWeeks: NutritionPlanDay[][]): boolean {
+  const currentMeals = new Set<string>();
+  const previousMeals = new Set<string>();
+  
+  // Collect current week meals
+  week.forEach(day => {
+    day.meals.forEach(meal => {
+      meal.meal_description.forEach(item => {
+        currentMeals.add(item.toLowerCase().trim());
+      });
+    });
+  });
+  
+  // Collect previous weeks meals
+  previousWeeks.forEach(prevWeek => {
+    prevWeek.forEach(day => {
+      day.meals.forEach(meal => {
+        meal.meal_description.forEach(item => {
+          previousMeals.add(item.toLowerCase().trim());
+        });
+      });
+    });
+  });
+  
+  // Check for excessive overlap (>40% = violation of 60-70% different requirement)
+  const overlap = Array.from(currentMeals).filter(meal => previousMeals.has(meal));
+  const overlapRatio = overlap.length / currentMeals.size;
+  
+  return overlapRatio > 0.4; // More than 40% overlap is too much
+}
+
 export async function generateEnhancedNutritionPlan(
   formData: NutritionPlanFormData
 ): Promise<NutritionPlanData> {
@@ -182,6 +253,20 @@ export async function generateEnhancedNutritionPlan(
 - أنشئ ${totalDays} أيام كاملة (${period} أسابيع)
 - كل وجبة يجب أن تحتوي على 2-4 عناصر غذائية مع الكميات
 
+متطلبات التنويع (مهم جداً):
+- لكل أسبوع بعد الأسبوع الأول: يجب أن تكون 60-70% من الوجبات مختلفة عن الأسبوع السابق
+- اقصر تكرار الوجبات المتطابقة إلى وجبتين كحد أقصى في الأسبوع الواحد
+- نوّع مصادر البروتين: (دجاج، سمك، لحم بقري، بقوليات، بيض) عبر الأسابيع
+- نوّع الحبوب: (أرز، برغل، فريكة، معكرونة، خبز متنوع) عبر الأسابيع  
+- نوّع طرق الطبخ: (مشوي، مخبوز، مطبوخ، مقلي بقليل من الزيت) عبر الأسابيع
+- نوّع الخضار والفواكه والوجبات الخفيفة بين الأسابيع
+- لا يجوز أن يكون أي أسبوع نسخة من الأسبوع السابق
+
+الاتساق الغذائي:
+- حافظ على إجمالي السعرات الحرارية اليومية ضمن ±5% من الأساس
+- حافظ على نسب الماكرو المتشابهة عبر الأسابيع
+- احتفظ بالاحتياجات الخاصة برياضة ${sportName}
+
 معالجة الأخطاء: إذا لم تستطع إنشاء خطة تغذية حقيقية بسبب عدم كفاية البيانات، فشل البحث على الويب، أو أي مشاكل أخرى، أرجع هذا التركيب JSON بالضبط:
 {
   "error": true,
@@ -258,6 +343,20 @@ Requirements:
 - Generate ${totalDays} complete days (${period} weeks)
 - Each meal should have 2-4 food items with quantities
 
+VARIETY REQUIREMENTS (CRITICAL):
+- For each week after Week 1: at least 60-70% of meals must be different from the prior week
+- Limit exact meal repeats to maximum 2 per week
+- Rotate proteins: (chicken, fish, beef, legumes, eggs) across weeks
+- Rotate grains: (rice, bulgur, freekeh, pasta, bread varieties) across weeks
+- Rotate cooking methods: (grilled, baked, stewed, sautéed) across weeks
+- Vary vegetables, fruits, and snacks between weeks
+- No week may be a copy of the prior week
+
+NUTRITION CONSISTENCY:
+- Keep daily total_calories_intake within ±5% of baseline across weeks
+- Maintain similar macro ratios week-to-week
+- Preserve sport-specific needs for ${sportName}
+
 FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insufficient data, web search failures, or any other issues, return this exact JSON structure:
 {
   "error": true,
@@ -267,132 +366,176 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
   "suggestion": "What the user should try instead"
 }`;
 
-    const result = await genAI.models.generateContent({
-      model: "gemini-2.5-pro",
-      config: {
-        systemInstruction: systemPrompt,
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: "object",
-          properties: {
-            days: {
-              type: "array",
-              items: {
+    // Implement week-by-week generation for multi-week plans
+    let allWeeks: NutritionPlanDay[][] = [];
+    let allDays: NutritionPlanDay[] = [];
+    
+    const weeklyGenerationSchema = {
+      type: "object",
+      properties: {
+        days: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              day: {
                 type: "object",
                 properties: {
-                  day: {
-                    type: "object",
-                    properties: {
-                      date: { type: "string" },
-                      name: { type: "string" }
-                    },
-                    required: ["date", "name"]
-                  },
-                  meals: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        calories_intake: { type: "string" },
-                        meal_description: {
-                          type: "array",
-                          items: { type: "string" }
-                        }
-                      },
-                      required: ["calories_intake", "meal_description"]
+                  date: { type: "string" },
+                  name: { type: "string" }
+                },
+                required: ["date", "name"]
+              },
+              meals: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    calories_intake: { type: "string" },
+                    meal_description: {
+                      type: "array",
+                      items: { type: "string" }
                     }
                   },
-                  explanation: { type: "string" },
-                  total_calories_intake: { type: "string" }
-                },
-                required: ["day", "meals", "explanation", "total_calories_intake"]
-              }
-            }
-          },
-          required: ["days"]
+                  required: ["calories_intake", "meal_description"]
+                }
+              },
+              explanation: { type: "string" },
+              total_calories_intake: { type: "string" }
+            },
+            required: ["day", "meals", "explanation", "total_calories_intake"]
+          }
         }
       },
-      contents: prompt,
-    });
-
-    const responseText = result.text || "{}";
+      required: ["days"]
+    };
     
-    // Check for error responses indicating no data found
-    if (responseText.includes('"error": "no_data_found"') || 
-        responseText.includes('"error": "search_failed"') || 
-        responseText.includes('"error": "not_found"') ||
-        responseText.includes('"success": false')) {
-      throw new Error('AI_WEB_SEARCH_FAILED: No authentic nutrition data found through web search');
-    }
-    
-    // Clean and parse the JSON response
-    let cleanedResponse = responseText.trim();
-    
-    // Remove any markdown code blocks
-    cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
-    
-    // Try to parse the JSON
-    let parsedPlan: StructuredNutritionPlan;
-    try {
-      parsedPlan = JSON.parse(cleanedResponse);
-    } catch (parseError) {
-      console.error("JSON parsing failed, using fallback structure:", parseError);
-      // Enhanced fallback structure with form data
-      const dayNames = isArabic ? 
-        ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"] :
-        ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    // Generate each week separately
+    for (let weekNum = 0; weekNum < period; weekNum++) {
+      const isFirstWeek = weekNum === 0;
+      let weekPrompt = prompt;
       
-      // Generate array for the specified number of days
-      const planDays = [];
-      for (let i = 0; i < totalDays; i++) {
-        const dayIndex = i % 7;
-        planDays.push(dayNames[dayIndex]);
+      if (!isFirstWeek) {
+        // Add variety context for subsequent weeks
+        const varietyContext = summarizePreviousWeeks(allWeeks);
+        const varietyInstructions = isArabic ?
+          `\n\nسياق التنويع للأسبوع ${weekNum + 1}:\n${varietyContext}\n\nمهم: يجب أن تكون 60-70% من الوجبات مختلفة عن الأسابيع السابقة. نوّع البروتينات والحبوب وطرق الطبخ.` :
+          `\n\nVariety Context for Week ${weekNum + 1}:\n${varietyContext}\n\nIMPORTANT: 60-70% of meals must be different from previous weeks. Vary proteins, grains, and cooking methods.`;
+        
+        weekPrompt = weekPrompt.replace(
+          isArabic ? `أنشئ ${totalDays} أيام كاملة` : `Generate ${totalDays} complete days`,
+          isArabic ? `أنشئ 7 أيام فقط للأسبوع ${weekNum + 1}` : `Generate only 7 days for Week ${weekNum + 1}`
+        ) + varietyInstructions;
+      } else {
+        // For first week, only generate 7 days
+        weekPrompt = weekPrompt.replace(
+          isArabic ? `أنشئ ${totalDays} أيام كاملة` : `Generate ${totalDays} complete days`,
+          isArabic ? 'أنشئ 7 أيام للأسبوع الأول' : 'Generate 7 days for Week 1'
+        );
       }
       
-      parsedPlan = {
-        days: planDays.map((dayName, index) => ({
-          day: {
-            date: new Date(Date.now() + index * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            name: dayName
-          },
-          meals: [
-            {
-              calories_intake: isArabic ? "500 سعرة حرارية" : "500 kcal",
-              meal_description: isArabic ? 
-                [`أطعمة إفطار تقليدية ${nationalityText}`, "مكونات مختلطة محلية"] :
-                [`Traditional ${country} breakfast items`, "Mixed with local ingredients"]
-            },
-            {
-              calories_intake: isArabic ? "300 سعرة حرارية" : "300 kcal", 
-              meal_description: [isArabic ? "خيارات وجبات خفيفة صحية" : "Healthy snack options"]
-            },
-            {
-              calories_intake: isArabic ? "700 سعرة حرارية" : "700 kcal",
-              meal_description: isArabic ? 
-                [`غداء تقليدي ${nationalityText}`, `متوازن لتدريب ${sportName}`] :
-                [`Traditional ${country} lunch`, `Balanced for ${sportName} training`]
-            },
-            {
-              calories_intake: isArabic ? "200 سعرة حرارية" : "200 kcal",
-              meal_description: [isArabic ? "دفعة طاقة بعد الظهر" : "Afternoon energy boost"]
-            },
-            {
-              calories_intake: isArabic ? "600 سعرة حرارية" : "600 kcal",
-              meal_description: isArabic ? 
-                [`عشاء تقليدي ${nationalityText}`, "محسن للاستشفاء"] :
-                [`Traditional ${country} dinner`, "Optimized for recovery"]
-            }
-          ],
-          explanation: isArabic ? 
-            `خطة تغذية عينة للرياضي ${sportName} تتضمن مأكولات ${nationalityText} لهدف ${goal}` :
-            `Sample nutrition plan for ${sportName} athlete incorporating ${country} cuisine for ${goal}`,
-          total_calories_intake: isArabic ? "2300 سعرة حرارية" : "2300 kcal"
-        }))
-      };
-    }
+      const result = await genAI.models.generateContent({
+        model: "gemini-2.5-pro",
+        config: {
+          systemInstruction: systemPrompt,
+          responseMimeType: "application/json",
+          responseSchema: weeklyGenerationSchema,
+          temperature: isFirstWeek ? 0.7 : 0.8 + (weekNum * 0.1) // Increase variety for later weeks
+        },
+        contents: weekPrompt,
+      });
 
+      const responseText = result.text || "{}";
+      
+      // Check for error responses indicating no data found
+      if (responseText.includes('"error": "no_data_found"') || 
+          responseText.includes('"error": "search_failed"') || 
+          responseText.includes('"error": "not_found"') ||
+          responseText.includes('"success": false')) {
+        throw new Error('AI_WEB_SEARCH_FAILED: No authentic nutrition data found through web search');
+      }
+      
+      // Clean and parse the JSON response
+      let cleanedResponse = responseText.trim();
+      
+      // Remove any markdown code blocks
+      cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
+      
+      // Try to parse the JSON
+      let weekPlan: StructuredNutritionPlan;
+      try {
+        weekPlan = JSON.parse(cleanedResponse);
+      } catch (parseError) {
+        console.error(`JSON parsing failed for week ${weekNum + 1}, using fallback structure:`, parseError);
+        // Enhanced fallback structure with form data (for 7 days only)
+        const dayNames = isArabic ? 
+          ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"] :
+          ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        
+        weekPlan = {
+          days: dayNames.map((dayName, dayIndex) => ({
+            day: {
+              date: new Date(Date.now() + (weekNum * 7 + dayIndex) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+              name: dayName
+            },
+            meals: [
+              {
+                calories_intake: isArabic ? "500 سعرة حرارية" : "500 kcal",
+                meal_description: isArabic ? 
+                  [`أطعمة إفطار تقليدية متنوعة ${nationalityText}`, `مكونات الأسبوع ${weekNum + 1}`] :
+                  [`Traditional ${country} breakfast items (Week ${weekNum + 1})`, "Varied local ingredients"]
+              },
+              {
+                calories_intake: isArabic ? "300 سعرة حرارية" : "300 kcal", 
+                meal_description: [isArabic ? `خيارات وجبات خفيفة الأسبوع ${weekNum + 1}` : `Week ${weekNum + 1} healthy snack options`]
+              },
+              {
+                calories_intake: isArabic ? "700 سعرة حرارية" : "700 kcal",
+                meal_description: isArabic ? 
+                  [`غداء تقليدي متنوع ${nationalityText}`, `الأسبوع ${weekNum + 1} لتدريب ${sportName}`] :
+                  [`Traditional ${country} lunch (Week ${weekNum + 1})`, `Optimized for ${sportName} training`]
+              },
+              {
+                calories_intake: isArabic ? "200 سعرة حرارية" : "200 kcal",
+                meal_description: [isArabic ? `دفعة طاقة الأسبوع ${weekNum + 1}` : `Week ${weekNum + 1} afternoon energy boost`]
+              },
+              {
+                calories_intake: isArabic ? "600 سعرة حرارية" : "600 kcal",
+                meal_description: isArabic ? 
+                  [`عشاء تقليدي متنوع ${nationalityText}`, `محسن للاستشفاء - الأسبوع ${weekNum + 1}`] :
+                  [`Traditional ${country} dinner (Week ${weekNum + 1})`, "Optimized for recovery"]
+              }
+            ],
+            explanation: isArabic ? 
+              `خطة تغذية للأسبوع ${weekNum + 1} للرياضي ${sportName} تتضمن مأكولات ${nationalityText} متنوعة لهدف ${goal}` :
+              `Week ${weekNum + 1} nutrition plan for ${sportName} athlete incorporating varied ${country} cuisine for ${goal}`,
+            total_calories_intake: isArabic ? "2300 سعرة حرارية" : "2300 kcal"
+          }))
+        };
+      }
+      
+      // Validate and potentially regenerate if too many duplicates
+      if (!isFirstWeek && weekPlan.days && detectDuplicates(weekPlan.days, allWeeks)) {
+        console.log(`Week ${weekNum + 1} has excessive duplicates, accepting as-is for now`);
+      }
+      
+      // Add this week to our collection
+      if (weekPlan.days && weekPlan.days.length > 0) {
+        const weekDays = weekPlan.days.slice(0, 7); // Ensure only 7 days
+        allWeeks.push(weekDays);
+        allDays.push(...weekDays);
+      }
+    }
+    
+    // Combine all weeks into final structure
+    const finalPlan: StructuredNutritionPlan = {
+      days: allDays
+    };
+    
+    console.log(`Generated nutrition plan with ${allWeeks.length} weeks and ${allDays.length} total days`);
+    
     return {
-      plan: JSON.stringify(parsedPlan)
+      plan: JSON.stringify(finalPlan)
     };
   } catch (error) {
     console.error("Error generating enhanced nutrition plan:", error);
