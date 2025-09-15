@@ -372,6 +372,7 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
     // Implement week-by-week generation for multi-week plans
     let allWeeks: NutritionPlanDay[][] = [];
     let allDays: NutritionPlanDay[] = [];
+    let generatedPlans: StructuredNutritionPlan[] = [];
     
     const weeklyGenerationSchema = {
       type: "object",
@@ -461,13 +462,13 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
           
           // Race between the API call and timeout
           const apiPromise = genAI.models.generateContent({
-            model: attempt === 0 ? "gemini-2.5-pro" : "gemini-2.0-flash-exp", // Fallback to faster model
+            model: "gemini-2.0-flash-exp", // Use fast model for all attempts
             config: {
               systemInstruction: systemPrompt,
               responseMimeType: "application/json",
               responseSchema: weeklyGenerationSchema,
               temperature: Math.min(1.0, isFirstWeek ? 0.7 : 0.8 + (weekNum * 0.05)), // Cap temperature at 1.0
-              maxOutputTokens: 15000 // Much higher limit for multi-week plans
+              maxOutputTokens: 2000 // Reduced for faster generation
             },
             contents: weekPrompt
           });
@@ -562,18 +563,36 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
         const weekDays = weekPlan.days.slice(0, 7); // Ensure only 7 days
         allWeeks.push(weekDays);
         allDays.push(...weekDays);
+        generatedPlans.push(weekPlan); // Store the full plan including instructions
       }
     }
     
-    // Combine all weeks into final structure
+    // Combine all weeks into final structure - use actual AI-generated instructions
+    let finalInstructions = "";
+    
+    // Find the best instructions from generated plans (prefer scientific analysis)
+    for (let plan of generatedPlans) {
+      if (plan.instructions) {
+        if (plan.instructions.includes("SCIENTIFIC ANALYSIS") || plan.instructions.includes("BMI")) {
+          finalInstructions = plan.instructions;
+          break; // Use the first scientific analysis we find
+        }
+        // Fallback to any instructions if no scientific ones found
+        if (!finalInstructions) {
+          finalInstructions = plan.instructions;
+        }
+      }
+    }
+    
+    // If no AI-generated instructions found, use fallback
+    if (!finalInstructions) {
+      finalInstructions = isArabic ? 
+        `تعليمات عامة للتغذية الرياضية للاعب ${sportName}` :
+        `General sports nutrition instructions for ${sportName} athlete`;
+    }
+    
     const finalPlan: StructuredNutritionPlan = {
-      instructions: allWeeks.length > 0 && allWeeks[0].length > 0 ? 
-        (isArabic ? 
-          `تعليمات شاملة للرياضي ${name} الذي يلعب ${sportName}. ركز على ${goal} من خلال اتباع هذه الخطة الغذائية لمدة ${period} أسابيع. استخدم الأطعمة ${nationalityText} التقليدية مع مراعاة احتياجات تدريب ${sportName} والاستشفاء المناسب.` :
-          `Comprehensive instructions for athlete ${name} who plays ${sportName}. Focus on ${goal} by following this ${period}-week nutrition plan. Use traditional ${country} foods while considering ${sportName} training needs and proper recovery.`) :
-        (isArabic ? 
-          `تعليمات عامة للتغذية الرياضية للاعب ${sportName}` :
-          `General sports nutrition instructions for ${sportName} athlete`),
+      instructions: finalInstructions,
       days: allDays
     };
     
