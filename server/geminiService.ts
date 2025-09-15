@@ -540,15 +540,19 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
   } catch (error) {
     console.error("Error generating enhanced nutrition plan:", error);
     
-    // Return structured error response instead of throwing
-    return {
+    // Return structured error response in proper NutritionPlanData format
+    const errorResponse = {
       error: true,
       errorType: error instanceof Error && error.message.includes('AI_WEB_SEARCH_FAILED') ? "web_search_failed" : "parsing_error",
       errorMessage: `Unable to generate nutrition plan: ${error instanceof Error ? error.message : String(error)}`,
       retryable: true,
       suggestion: "Please try again or check if the athlete information is correct",
       days: []
-    } as any;
+    };
+    
+    return {
+      plan: JSON.stringify(errorResponse)
+    };
   }
 }
 
