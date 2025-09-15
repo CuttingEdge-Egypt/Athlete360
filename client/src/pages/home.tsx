@@ -159,25 +159,27 @@ export default function Home() {
   const nutritionProgressMessages = useMemo(() => {
     const isArabic = i18n.language === 'ar';
     return isArabic ? [
-      "بدء تحليل ملف التغذية الخاص بك...",
-      "جمع البيانات الغذائية المتخصصة...",
-      "تحليل احتياجاتك الرياضية...",
-      "إنشاء خطة أسبوعية متنوعة...",
-      "تحسين المحتوى الغذائي...",
-      "تنسيق الوجبات التقليدية...",
-      "إضافة لمسة شخصية للخطة...",
-      "مراجعة الخطة النهائية...",
-      "جاري الإنتهاء من خطتك..."
+      "بدء تحليل ملف التغذية الخاص بك... (هذا قد يستغرق 5-10 دقائق للخطط الطويلة)",
+      "جمع البيانات الغذائية المتخصصة... كل أسبوع يحتاج ~50 ثانية للإنشاء",
+      "تحليل احتياجاتك الرياضية... AI يعمل على تخصيص خطتك",
+      "إنشاء خطة أسبوعية متنوعة... هذا يستحق الانتظار!",
+      "تحسين المحتوى الغذائي... جاري تحليل الوجبات المتوازنة",
+      "تنسيق الوجبات التقليدية... مراعاة ثقافتك الغذائية",
+      "إضافة لمسة شخصية للخطة... تخصيص حسب أهدافك",
+      "مراجعة الخطة النهائية... ضمان الجودة والتنوع",
+      "جاري الإنتهاء من خطتك... تقريباً جاهز!",
+      "المعالجة النهائية... بناء خطة شاملة ومتوازنة"
     ] : [
-      "Analyzing your nutritional profile...",
-      "Gathering specialized dietary data...",
-      "Evaluating your athletic requirements...",
-      "Creating varied weekly meal plans...",
-      "Optimizing nutritional content...",
-      "Coordinating traditional cuisine...",
-      "Adding personal touches to your plan...",
-      "Reviewing final nutrition strategy...",
-      "Finalizing your custom plan..."
+      "Analyzing your nutritional profile... (This may take 5-10 minutes for longer plans)",
+      "Gathering specialized dietary data... Each week takes ~50 seconds to generate",
+      "Evaluating your athletic requirements... AI is customizing your plan",
+      "Creating varied weekly meal plans... This is worth the wait!",
+      "Optimizing nutritional content... Analyzing balanced meal composition",
+      "Coordinating traditional cuisine... Respecting your dietary culture",
+      "Adding personal touches to your plan... Customizing for your goals",
+      "Reviewing final nutrition strategy... Ensuring quality and variety",
+      "Finalizing your custom plan... Almost ready!",
+      "Final processing... Building comprehensive balanced plan"
     ];
   }, [i18n.language]);
 
@@ -190,11 +192,11 @@ export default function Home() {
       // Set initial message
       setNutritionProgressMessage(nutritionProgressMessages[0]);
       
-      // Update message every 5 seconds
+      // Update message every 20 seconds
       interval = setInterval(() => {
         messageIndex = (messageIndex + 1) % nutritionProgressMessages.length;
         setNutritionProgressMessage(nutritionProgressMessages[messageIndex]);
-      }, 5000);
+      }, 20000);
     } else {
       // Reset message when not generating
       setNutritionProgressMessage("");
