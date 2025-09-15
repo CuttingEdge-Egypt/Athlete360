@@ -218,7 +218,7 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
                   size="sm"
                   onClick={() => handleWeekChange(currentWeek - 1)}
                   disabled={currentWeek === 0}
-                  className="bg-slate-700 border-border text-white hover:bg-slate-600"
+                  className="bg-blue-600 border-blue-500 text-white hover:bg-blue-500 disabled:bg-blue-800 disabled:border-blue-700"
                   data-testid="button-week-previous"
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -247,7 +247,7 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
                   size="sm"
                   onClick={() => handleWeekChange(currentWeek + 1)}
                   disabled={currentWeek === totalWeeks - 1}
-                  className="bg-slate-700 border-border text-white hover:bg-slate-600"
+                  className="bg-orange-600 border-orange-500 text-white hover:bg-orange-500 disabled:bg-orange-800 disabled:border-orange-700"
                   data-testid="button-week-next"
                 >
                   <ChevronRight className="h-4 w-4" />
@@ -287,7 +287,7 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
                     size="sm"
                     onClick={() => handleDayChange(safCurrentDay - 1)}
                     disabled={safCurrentDay === 0}
-                    className="bg-slate-700 border-border text-white hover:bg-slate-600"
+                    className="bg-blue-600 border-blue-500 text-white hover:bg-blue-500 disabled:bg-blue-800 disabled:border-blue-700"
                     data-testid="button-day-previous"
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -316,7 +316,7 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
                     size="sm"
                     onClick={() => handleDayChange(safCurrentDay + 1)}
                     disabled={safCurrentDay === maxDayInWeek}
-                    className="bg-slate-700 border-border text-white hover:bg-slate-600"
+                    className="bg-orange-600 border-orange-500 text-white hover:bg-orange-500 disabled:bg-orange-800 disabled:border-orange-700"
                     data-testid="button-day-next"
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -335,15 +335,17 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
                 >
                   {/* Meal Header */}
                   <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <div className="w-4 h-4 bg-green-400 rounded-full animate-pulse"></div>
                       <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">
                         Meal {mealIndex + 1}
                       </span>
                     </div>
-                    <Badge variant="secondary" className="bg-green-600 text-white text-xs font-bold px-3 py-1">
-                      {meal.calories_intake}
-                    </Badge>
+                    <div className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full px-4 py-2 shadow-lg border-2 border-green-400">
+                      <span className="text-sm font-bold tracking-tight">
+                        {meal.calories_intake}
+                      </span>
+                    </div>
                   </div>
                   
                   {/* Meal Items */}
