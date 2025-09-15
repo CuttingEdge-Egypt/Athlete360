@@ -1754,7 +1754,9 @@ Return only valid JSON with the missing fields.`;
       }
 
       const formData = validationResult.data;
+      console.log('🔍 DEBUG: ZOD VALIDATION RESULT', { period: formData.period, rawBody: req.body.period });
       const { goal, sport, age, height, currentWeight, targetWeight, country, period, language } = formData;
+      console.log('🔍 DEBUG: DESTRUCTURED PERIOD', { period });
 
       // Check user tokens
       const user = await storage.getUser(userId);
@@ -1806,6 +1808,8 @@ Return only valid JSON with the missing fields.`;
         name: 'User' // Using generic name for privacy
       };
 
+      console.log('🔍 DEBUG: PERIOD BEFORE GENERATION', { period, enhancedFormDataPeriod: enhancedFormData.period });
+      
       // Generate personalized nutrition plan with overall timeout protection
       const overallTimeoutMs = period > 4 ? 600000 : 450000; // 10 minutes for long periods, 7.5 minutes for short periods
       const timeoutPromise = new Promise((_, reject) => {
