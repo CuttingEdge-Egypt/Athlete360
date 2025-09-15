@@ -57,6 +57,30 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
     
     // Handle nested structure from database
     if (parsedData && typeof parsedData === 'object') {
+      // Check for error condition first
+      if (parsedData.error) {
+        return (
+          <Card className="w-full max-w-4xl mx-auto bg-card border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-foreground">
+                <Apple className="h-5 w-5 text-red-400" />
+                Nutrition Plan Error
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-center py-12">
+              <div className="text-red-400 mb-4">
+                {parsedData.errorMessage || "Unable to generate nutrition plan"}
+              </div>
+              {parsedData.suggestion && (
+                <div className="text-muted-foreground text-sm">
+                  {parsedData.suggestion}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        );
+      }
+      
       if (parsedData.content) {
         if (typeof parsedData.content === 'string') {
           try {
