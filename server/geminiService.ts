@@ -291,7 +291,7 @@ Weight Goal: ${weightGoal}
 CRITICAL: Return ONLY valid JSON in this EXACT structure with no additional text, no markdown, no explanations:
 
 {
-  "instructions": "SCIENTIFIC ANALYSIS & PERSONALIZED GUIDANCE: Provide detailed reasoning for this specific plan. Calculate BMI (${height}cm, ${currentWeight}kg), estimated BMR, and required caloric deficit for ${weightGoal} over ${period} weeks. Explain if this goal is realistic and safe. Justify why you chose specific calorie targets, macro ratios, meal timing, and ${nationalityText} food selections for ${sportName}. Address potential challenges and provide actionable tips for success. Be specific to this individual's stats and goal.",
+  "instructions": "COMPREHENSIVE SCIENTIFIC ANALYSIS & EXPERT GUIDANCE: You are an elite sports nutritionist with deep expertise in ${nationalityText} cuisine and ${sportName} performance optimization. Conduct a thorough analysis for this ${height}cm, ${currentWeight}kg individual targeting ${targetWeight}kg over ${period} weeks.\n\n1. PHYSIOLOGICAL ANALYSIS: Calculate precise BMI, estimate BMR using Mifflin-St Jeor equation, determine TDEE for ${sportName} activity level, and compute required daily caloric deficit for ${weightGoal}. Assess if this timeline is medically safe (max 1-2 lbs/week).\n\n2. STRATEGIC NUTRITION DESIGN: Justify your calorie targets (explain the specific daily intake), macro distribution (protein g/kg body weight for muscle preservation, carb timing around training, fat percentage), and meal frequency. Explain why these ratios optimize fat loss while preserving lean mass for ${sportName}.\n\n3. CULTURAL CUISINE INTEGRATION: Detail why specific ${nationalityText} foods were selected, their nutritional profiles, preparation methods that enhance nutrient absorption, and how traditional cooking techniques align with modern sports nutrition principles.\n\n4. PERFORMANCE OPTIMIZATION: Address how this plan supports ${sportName} training demands, recovery protocols, hydration strategies, and nutrient timing for optimal performance during the weight loss phase.\n\n5. PRACTICAL IMPLEMENTATION: Provide specific guidance on portion control methods, meal prep strategies, dining out modifications, supplement considerations, progress tracking metrics, and troubleshooting common challenges. Include realistic expectations and timeline milestones.\n\nBe authoritative, evidence-based, and specific to this individual's unique profile.",
   "days": [
     {
       "day": {
@@ -447,11 +447,11 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
       // Attempt generation with timeout and retry logic
       let result;
       let attempt = 0;
-      const maxAttempts = 2;
+      const maxAttempts = 1; // No fallback models, single attempt with high-quality model
       
       while (attempt < maxAttempts) {
         try {
-          const timeoutMs = 75000; // 75 second timeout per attempt (based on observed ~50-55s actual times)
+          const timeoutMs = 120000; // 120 second timeout for gemini-2.5-pro high-quality generation
           
           // Create a promise that times out
           const timeoutPromise = new Promise((_, reject) => {
@@ -462,13 +462,13 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
           
           // Race between the API call and timeout
           const apiPromise = genAI.models.generateContent({
-            model: "gemini-2.0-flash-exp", // Use fast model for all attempts
+            model: "gemini-2.5-pro", // Use highest quality model
             config: {
               systemInstruction: systemPrompt,
               responseMimeType: "application/json",
               responseSchema: weeklyGenerationSchema,
               temperature: Math.min(1.0, isFirstWeek ? 0.7 : 0.8 + (weekNum * 0.05)), // Cap temperature at 1.0
-              maxOutputTokens: 2000 // Reduced for faster generation
+              maxOutputTokens: 12000 // High limit for detailed, comprehensive plans
             },
             contents: weekPrompt
           });
