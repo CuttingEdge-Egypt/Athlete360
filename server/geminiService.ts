@@ -440,16 +440,64 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
         );
       }
       
-      const result = await genAI.models.generateContent({
-        model: "gemini-2.5-pro",
-        config: {
-          systemInstruction: systemPrompt,
-          responseMimeType: "application/json",
-          responseSchema: weeklyGenerationSchema,
-          temperature: isFirstWeek ? 0.7 : 0.8 + (weekNum * 0.1) // Increase variety for later weeks
-        },
-        contents: weekPrompt,
-      });
+      console.log(`⏳ Starting Week ${weekNum + 1}/${period} nutrition generation...`);
+      const startTime = Date.now();
+      
+      // Attempt generation with timeout and retry logic
+      let result;
+      let attempt = 0;
+      const maxAttempts = 2;
+      
+      while (attempt < maxAttempts) {
+        try {
+          const timeoutMs = 30000; // 30 second timeout per attempt
+          
+          // Create a promise that times out
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => {
+              reject(new Error(`Timeout after ${timeoutMs}ms`));
+            }, timeoutMs);
+          });
+          
+          // Race between the API call and timeout
+          const apiPromise = genAI.models.generateContent({
+            model: attempt === 0 ? "gemini-2.5-pro" : "gemini-2.0-flash-exp", // Fallback to faster model
+            config: {
+              systemInstruction: systemPrompt,
+              responseMimeType: "application/json",
+              responseSchema: weeklyGenerationSchema,
+              temperature: Math.min(1.0, isFirstWeek ? 0.7 : 0.8 + (weekNum * 0.05)), // Cap temperature at 1.0
+              maxOutputTokens: 3500 // Cap output tokens
+            },
+            contents: weekPrompt
+          });
+          
+          result = await Promise.race([apiPromise, timeoutPromise]);
+          
+          const duration = Date.now() - startTime;
+          console.log(`✅ Week ${weekNum + 1} generated successfully in ${duration}ms (attempt ${attempt + 1})`);
+          break; // Success, exit retry loop
+          
+        } catch (error: any) {
+          attempt++;
+          const duration = Date.now() - startTime;
+          console.log(`❌ Week ${weekNum + 1} generation failed (attempt ${attempt}/${maxAttempts}) after ${duration}ms:`, error.message);
+          
+          if (attempt >= maxAttempts) {
+            console.log(`🚫 Week ${weekNum + 1} generation failed after ${maxAttempts} attempts`);
+            throw new Error(`AI_TIMEOUT: Nutrition plan generation for week ${weekNum + 1} timed out after ${maxAttempts} attempts`);
+          }
+          
+          // Exponential backoff before retry
+          const backoffMs = 2000 * Math.pow(2, attempt - 1);
+          console.log(`⏳ Retrying week ${weekNum + 1} in ${backoffMs}ms...`);
+          await new Promise(resolve => setTimeout(resolve, backoffMs));
+        }
+      }
+      
+      if (!result) {
+        throw new Error(`AI_TIMEOUT: No result after ${maxAttempts} attempts`);
+      }
 
       const responseText = result.text || "{}";
       

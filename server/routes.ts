@@ -1806,8 +1806,18 @@ Return only valid JSON with the missing fields.`;
         name: 'User' // Using generic name for privacy
       };
 
-      // Generate personalized nutrition plan with enhanced function
-      const nutritionPlan = await generateEnhancedNutritionPlan(enhancedFormData);
+      // Generate personalized nutrition plan with overall timeout protection
+      const overallTimeoutMs = 90000; // 90 second overall timeout
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error('ROUTE_TIMEOUT: Overall nutrition plan generation exceeded 90 seconds'));
+        }, overallTimeoutMs);
+      });
+      
+      const nutritionPlan = await Promise.race([
+        generateEnhancedNutritionPlan(enhancedFormData),
+        timeoutPromise
+      ]);
       
       // Check if the nutrition plan generation failed
       if ((nutritionPlan as any).error) {
