@@ -501,6 +501,10 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
 
       const responseText = result?.text || "{}";
       
+      // Debug: Log the raw response to see what Gemini is returning
+      console.log(`🔍 Week ${weekNum + 1} raw response length: ${responseText.length} chars`);
+      console.log(`🔍 Week ${weekNum + 1} raw response preview: ${responseText.substring(0, 200)}...`);
+      
       // Check for error responses indicating no data found
       if (responseText.includes('"error": "no_data_found"') || 
           responseText.includes('"error": "search_failed"') || 
@@ -509,18 +513,40 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
         throw new Error('AI_WEB_SEARCH_FAILED: No authentic nutrition data found through web search');
       }
       
-      // Clean and parse the JSON response
+      // Enhanced JSON cleaning and parsing
       let cleanedResponse = responseText.trim();
       
       // Remove any markdown code blocks
       cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
+      cleanedResponse = cleanedResponse.replace(/^```/, '').replace(/```$/, '');
+      
+      // Remove any leading/trailing non-JSON text
+      const jsonStart = cleanedResponse.indexOf('{');
+      const jsonEnd = cleanedResponse.lastIndexOf('}');
+      if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+        cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
+      }
+      
+      // Fix common JSON issues
+      cleanedResponse = cleanedResponse
+        .replace(/\n/g, ' ')  // Replace newlines with spaces
+        .replace(/\r/g, ' ')  // Replace carriage returns
+        .replace(/\t/g, ' ')  // Replace tabs
+        .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+        .replace(/,\s*}/g, '}') // Remove trailing commas before closing braces
+        .replace(/,\s*]/g, ']'); // Remove trailing commas before closing brackets
+      
+      console.log(`🔍 Week ${weekNum + 1} cleaned response length: ${cleanedResponse.length} chars`);
+      console.log(`🔍 Week ${weekNum + 1} cleaned response preview: ${cleanedResponse.substring(0, 300)}...`);
       
       // Try to parse the JSON
       let weekPlan: StructuredNutritionPlan;
       try {
         weekPlan = JSON.parse(cleanedResponse);
+        console.log(`✅ Week ${weekNum + 1} JSON parsed successfully`);
       } catch (parseError) {
-        console.error(`JSON parsing failed for week ${weekNum + 1}, using fallback structure:`, parseError);
+        console.error(`❌ JSON parsing failed for week ${weekNum + 1}:`, parseError);
+        console.error(`❌ Failed JSON content: ${cleanedResponse}`);
         // Enhanced fallback structure with form data (for 7 days only)
         const dayNames = isArabic ? 
           ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"] :
