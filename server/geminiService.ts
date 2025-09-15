@@ -450,7 +450,7 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
       
       while (attempt < maxAttempts) {
         try {
-          const timeoutMs = 30000; // 30 second timeout per attempt
+          const timeoutMs = 75000; // 75 second timeout per attempt (based on observed ~50-55s actual times)
           
           // Create a promise that times out
           const timeoutPromise = new Promise((_, reject) => {
@@ -499,7 +499,7 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
         throw new Error(`AI_TIMEOUT: No result after ${maxAttempts} attempts`);
       }
 
-      const responseText = result.text || "{}";
+      const responseText = result?.text || "{}";
       
       // Check for error responses indicating no data found
       if (responseText.includes('"error": "no_data_found"') || 

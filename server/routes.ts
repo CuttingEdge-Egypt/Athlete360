@@ -1807,7 +1807,7 @@ Return only valid JSON with the missing fields.`;
       };
 
       // Generate personalized nutrition plan with overall timeout protection
-      const overallTimeoutMs = 90000; // 90 second overall timeout
+      const overallTimeoutMs = period > 4 ? 600000 : 300000; // 10 minutes for long periods (>4 weeks), 5 minutes for short periods
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => {
           reject(new Error('ROUTE_TIMEOUT: Overall nutrition plan generation exceeded 90 seconds'));
