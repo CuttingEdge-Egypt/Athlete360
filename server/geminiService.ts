@@ -299,20 +299,7 @@ async function generateSingleWeek(params: GenerateSingleWeekParams): Promise<{
     `أنت خبير تغذية رياضية متخصص في تصميم خطط غذائية شخصية للرياضيين.` :
     `You are a sports nutrition expert specializing in personalized nutrition plans for athletes.`;
 
-  // Generate week-specific instruction context
-  const weekInstructionContext = isArabic ?
-    `مرحباً بك في الأسبوع ${weekNumber}. ${weekNumber === 1 ? 'الهدف هذا الأسبوع هو إنشاء أساس قوي للنظام الغذائي.' : 
-     weekNumber === 2 ? 'الأسبوع الثاني يركز على تطوير عادات غذائية مستدامة.' :
-     weekNumber === 3 ? 'الأسبوع الثالث يهدف إلى تعزيز النتائج وزيادة التنويع.' :
-     weekNumber === 4 ? 'الأسبوع الرابع والأخير يركز على الاستدامة طويلة المدى.' :
-     weekNumber <= period/2 ? `الأسبوع ${weekNumber} يركز على بناء وتطوير العادات الغذائية.` :
-     `الأسبوع ${weekNumber} يهدف إلى تحسين النتائج والوصول للأهداف.`}` :
-    `Welcome to Week ${weekNumber}. ${weekNumber === 1 ? 'The goal this week is to establish a strong foundation for your nutrition plan.' : 
-     weekNumber === 2 ? 'Week 2 focuses on developing sustainable eating habits.' :
-     weekNumber === 3 ? 'Week 3 aims to enhance results and increase variety.' :
-     weekNumber === 4 ? 'Week 4, the final week, focuses on long-term sustainability.' :
-     weekNumber <= period/2 ? `Week ${weekNumber} focuses on building and developing healthy nutrition habits.` :
-     `Week ${weekNumber} aims to optimize results and reach your goals.`}`;
+  // No week-specific instructions - only generate meal data for each week
 
   const prompt = isArabic ?
     `قم بإنشاء خطة غذائية للأسبوع رقم ${weekNumber} (7 أيام):
@@ -330,7 +317,7 @@ ${varietyContext}
 مهم جداً: أرجع JSON صالح فقط بهذا التركيب الدقيق:
 
 {
-  "instructions": "${weekInstructionContext} [أضف المزيد من التفاصيل حول الأهداف الغذائية والتنويع للأسبوع ${weekNumber}]",
+  "instructions": "Week ${weekNumber} meals only - no overall plan instructions needed",
   "days": [
     {
       "day": {
@@ -369,7 +356,7 @@ ${varietyContext}
 CRITICAL: Return ONLY valid JSON in this EXACT structure:
 
 {
-  "instructions": "${weekInstructionContext} [Add more details about nutrition goals and variety for Week ${weekNumber}]",
+  "instructions": "Week ${weekNumber} meals only - no overall plan instructions needed",
   "days": [
     {
       "day": {
@@ -525,9 +512,13 @@ export async function generateEnhancedNutritionPlan(
     // Language-specific prompts
     const isArabic = language === 'ar';
     
+    // Generate overall plan instructions (not week-specific)
+    const overallInstructions = isArabic ?
+      `هذه خطة تغذية شخصية لمدة ${period} أسابيع مصممة خصيصاً لك لتحقيق هدفك: ${goal}. الخطة تركز على الطعام ${nationalityText} التقليدي مع المكونات المناسبة لرياضة ${sportName}. اتبع الخطة بدقة واشرب 3-4 لتر من الماء يومياً. كل وجبة محسوبة السعرات لتحقيق هدفك من ${currentWeight}كغ إلى ${targetWeight}كغ. استشر طبيبك قبل البدء بأي نظام غذائي جديد.` :
+      `This is a personalized ${period}-week nutrition plan designed specifically for you to achieve your goal: ${goal}. The plan focuses on traditional ${nationalityText} foods with components suitable for ${sportName}. Follow the plan precisely and drink 3-4 liters of water daily. Each meal is calorie-calculated to help you reach your goal from ${currentWeight}kg to ${targetWeight}kg. Consult your doctor before starting any new nutrition plan.`;
+
     // Store all weeks and track variety
     const allWeeks: NutritionPlanDay[][] = [];
-    let combinedInstructions = '';
     
     // Generate week by week for better reliability and variety control
     for (let weekNum = 1; weekNum <= period; weekNum++) {
@@ -589,9 +580,7 @@ export async function generateEnhancedNutritionPlan(
       }
       
       allWeeks.push(weekResult.days);
-      if (weekNum === 1) {
-        combinedInstructions = weekResult.instructions;
-      }
+      // Instructions are now generated overall, not per week
       
       console.log(`✅ Week ${weekNum} generated: ${weekResult.days.length} days (attempt ${attempts})`);
     }
@@ -602,9 +591,7 @@ export async function generateEnhancedNutritionPlan(
     // Combine all weeks into final plan
     const allDays = allWeeks.flat();
     const finalPlan: StructuredNutritionPlan = {
-      instructions: combinedInstructions || (isArabic ? 
-        `تعليمات عامة للتغذية الرياضية للاعب ${sportName}` :
-        `General sports nutrition instructions for ${sportName} athlete`),
+      instructions: overallInstructions,
       days: allDays
     };
     
