@@ -31,6 +31,7 @@ type NutritionPlanRequest = z.infer<typeof nutritionPlanSchema>;
 // Development Plan Form Validation Schema
 const developmentPlanSchema = z.object({
   goal: z.string().min(3, "Goal must be at least 3 characters").max(1000, "Goal too long"),
+  age: z.coerce.number().min(13, "Age must be at least 13").max(99, "Age must be 99 or less"),
   height: z.coerce.number().min(120, "Height must be at least 120cm").max(250, "Height must be 250cm or less"),
   weight: z.coerce.number().min(30, "Weight must be at least 30kg").max(200, "Weight must be 200kg or less"),
   gender: z.enum(["male", "female"], { errorMap: () => ({ message: "Gender must be 'male' or 'female'" }) }),
@@ -1939,7 +1940,7 @@ Return only valid JSON with the missing fields.`;
         });
       }
 
-      const { goal, height, weight, gender, sport, language } = validationResult.data;
+      const { goal, age, height, weight, gender, sport, language } = validationResult.data;
 
       // Check if user has sufficient tokens
       const user = await storage.getUser(userId);
@@ -1957,11 +1958,12 @@ Return only valid JSON with the missing fields.`;
           goal,
           duration: "12 weeks", // Default duration
           language,
+          age,
           height,
           weight,
           gender,
           athleteData: {
-            bio: `${gender} ${sport} athlete, ${height}cm, ${weight}kg`,
+            bio: `${gender} ${sport} athlete, ${age} years old, ${height}cm, ${weight}kg`,
             rank: null,
             country: "Unknown",
             achievements: [],

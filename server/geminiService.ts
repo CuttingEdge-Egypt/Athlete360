@@ -2100,6 +2100,7 @@ function getSportFederationUrls(sport: string): string[] {
 export interface DevelopmentPlanFormData {
   athleteName?: string; // Optional, defaults to generic athlete
   goal: string;
+  age: number; // in years
   height: number; // in cm
   weight: number; // in kg
   gender: 'male' | 'female';
@@ -2207,7 +2208,7 @@ export async function generateDevelopmentPlan(
   formData: DevelopmentPlanFormData
 ): Promise<DevelopmentPlanData> {
   try {
-    const { goal, height, weight, gender, sport, language } = formData;
+    const { goal, age, height, weight, gender, sport, language } = formData;
     
     console.log(`🏋️ Generating structured development plan V1: goal=${goal}, sport=${sport}, language=${language}`);
     
@@ -2351,6 +2352,7 @@ export async function generateDevelopmentPlan(
 البيانات الأساسية:
 - الرياضة: ${sport}
 - الهدف: ${goal}
+- العمر: ${age} سنة
 - الجنس: ${genderText}
 - الطول: ${height} سم
 - الوزن: ${weight} كغ
@@ -2369,6 +2371,7 @@ export async function generateDevelopmentPlan(
 Basic Information:
 - Sport: ${sport}
 - Goal: ${goal}
+- Age: ${age} years
 - Gender: ${genderText}
 - Height: ${height}cm
 - Weight: ${weight}kg
