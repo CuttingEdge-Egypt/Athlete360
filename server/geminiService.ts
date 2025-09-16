@@ -2433,9 +2433,34 @@ Return JSON containing:
       contents: overviewPrompt
     });
 
-    const overview = JSON.parse(overviewResult?.text || "{}");
+    let overview;
+    try {
+      const overviewText = overviewResult?.text || "{}";
+      console.log(`📊 Overview response length: ${overviewText.length} characters`);
+      console.log(`📝 Overview response preview: ${overviewText.substring(0, 500)}`);
+      
+      overview = JSON.parse(overviewText);
+      console.log(`✅ Overview parsed successfully`);
+    } catch (parseError) {
+      console.error('❌ Failed to parse overview JSON:', parseError);
+      console.error('📝 Raw overview response:', overviewResult?.text || "EMPTY");
+      
+      // Fallback to default overview
+      overview = {
+        title: { 
+          en: `${sport} Development Plan`, 
+          ar: `خطة تطوير ${sport}` 
+        },
+        overview: `Comprehensive ${sport} training program focused on: ${goal}`,
+        structure: "Progressive weekly training schedule",
+        progressMetrics: ["Performance improvement", "Skill development"],
+        totalWeeks: 8
+      };
+      console.log(`🔧 Using fallback overview structure`);
+    }
+    
     const totalWeeks = overview.totalWeeks || 8;
-    console.log(`✅ Overview generated: ${totalWeeks} weeks planned`);
+    console.log(`✅ Overview ready: ${totalWeeks} weeks planned`);
 
     // Generate each week separately
     const weeks = [];
