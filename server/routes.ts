@@ -27,6 +27,18 @@ const nutritionPlanSchema = z.object({
 );
 
 type NutritionPlanRequest = z.infer<typeof nutritionPlanSchema>;
+
+// Development Plan Form Validation Schema
+const developmentPlanSchema = z.object({
+  goal: z.string().min(3, "Goal must be at least 3 characters").max(1000, "Goal too long"),
+  height: z.coerce.number().min(120, "Height must be at least 120cm").max(250, "Height must be 250cm or less"),
+  weight: z.coerce.number().min(30, "Weight must be at least 30kg").max(200, "Weight must be 200kg or less"),
+  gender: z.enum(["male", "female"], { errorMap: () => ({ message: "Gender must be 'male' or 'female'" }) }),
+  sport: z.string().min(2, "Sport must be specified").max(50, "Sport name too long"),
+  language: z.enum(["en", "ar"], { errorMap: () => ({ message: "Language must be 'en' or 'ar'" }) })
+});
+
+type DevelopmentPlanRequest = z.infer<typeof developmentPlanSchema>;
 import { seedDatabase } from "./seedData";
 import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, compareAthletes, generateRankHistory } from "./openaiService";
 import { generateNutritionPlan, generateEnhancedNutritionPlan, generateRankHistoryWithGemini, generateAthleteBiography, type NutritionPlanFormData } from "./geminiService";

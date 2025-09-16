@@ -1,5 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import fetch from 'node-fetch';
 
 // Initialize Gemini API clients
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
@@ -2092,4 +2093,196 @@ function getSportFederationUrls(sport: string): string[] {
     `https://www.olympic.org/sports/${sportLower}`,
     `https://en.wikipedia.org/wiki/World_${sport}_rankings`
   ];
+}
+
+// Development Plan Data Interfaces
+export interface DevelopmentPlanFormData {
+  goal: string;
+  height: number; // in cm
+  weight: number; // in kg
+  gender: 'male' | 'female';
+  sport: string;
+  language: 'en' | 'ar';
+}
+
+export interface DevelopmentPlanData {
+  plan: string;
+}
+
+// YouTube scraping function to fetch exercise videos
+async function scrapeYouTubeForExercise(exerciseName: string, sport: string): Promise<string | null> {
+  try {
+    const query = `${exerciseName} ${sport} exercise`;
+    const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+    
+    const response = await fetch(searchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    });
+    
+    if (!response.ok) {
+      console.log(`❌ YouTube search failed for "${exerciseName}": ${response.status}`);
+      return null;
+    }
+    
+    const html = await response.text();
+    
+    // Extract video ID from YouTube search results
+    const videoIdMatch = html.match(/"videoId":"([a-zA-Z0-9_-]{11})"/);
+    
+    if (videoIdMatch && videoIdMatch[1]) {
+      const videoId = videoIdMatch[1];
+      const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+      console.log(`✅ Found YouTube video for "${exerciseName}": ${videoUrl}`);
+      return videoUrl;
+    }
+    
+    console.log(`⚠️ No video found for "${exerciseName}"`);
+    return null;
+  } catch (error) {
+    console.error(`❌ Error scraping YouTube for "${exerciseName}":`, error);
+    return null;
+  }
+}
+
+// Function to extract exercise names using regex
+function extractExerciseNames(planText: string): string[] {
+  // Regex patterns to match exercise names
+  const exercisePatterns = [
+    /(?:\d+\.?\s*)?(\w+(?:\s+\w+)*(?:\s+exercise|\s+drill|\s+workout|\s+training))/gi,
+    /(?:\*\*|__)([^*_]+(?:exercise|drill|workout|training|stretch|push|pull|squat|lunge|jump|run)[^*_]*)(?:\*\*|__)/gi,
+    /(?:Exercise|Drill|Workout)\s*:\s*([^.\n]+)/gi,
+    /(?:\d+\.\s*)?([A-Z][a-z]+(?:\s+[A-Za-z]+)*(?=\s*:|\s*-|\s*\(|\n|$))/g
+  ];
+  
+  const exercises = new Set<string>();
+  
+  exercisePatterns.forEach(pattern => {
+    const matches = planText.match(pattern);
+    if (matches) {
+      matches.forEach(match => {
+        const cleaned = match
+          .replace(/^\d+\.\s*/, '') // Remove numbering
+          .replace(/[*_]+/g, '') // Remove markdown formatting
+          .replace(/Exercise:|Drill:|Workout:/gi, '') // Remove prefixes
+          .replace(/\s*:\s*.*$/, '') // Remove descriptions after colon
+          .replace(/\s*-\s*.*$/, '') // Remove descriptions after dash
+          .replace(/\s*\(.*\)$/, '') // Remove parentheses
+          .trim();
+        
+        if (cleaned.length > 3 && cleaned.length < 50) {
+          exercises.add(cleaned);
+        }
+      });
+    }
+  });
+  
+  return Array.from(exercises);
+}
+
+// Main development plan generation function
+export async function generateDevelopmentPlan(
+  formData: DevelopmentPlanFormData
+): Promise<DevelopmentPlanData> {
+  try {
+    const { goal, height, weight, gender, sport, language } = formData;
+    
+    console.log(`🏋️ Generating development plan: goal=${goal}, sport=${sport}, language=${language}`);
+    
+    const isArabic = language === 'ar';
+    const genderText = gender === 'male' ? (isArabic ? 'ذكر' : 'male') : (isArabic ? 'أنثى' : 'female');
+    
+    // Generate overall plan instructions  
+    const systemPrompt = isArabic ? 
+      `أنت خبير تدريب رياضي متخصص في تصميم برامج تطوير شخصية للرياضيين. تعامل مع الرياضيين بشكل احترافي واعط برامج تدريب دقيقة وعملية.` :
+      `You are a professional sports training expert specializing in personalized development programs for athletes. Work with athletes professionally and provide accurate, practical training programs.`;
+    
+    const prompt = isArabic ?
+      `قم بإنشاء برنامج تطوير تدريبي شامل ومفصل:
+
+الرياضي: ${genderText}
+الرياضة: ${sport}
+الهدف التطويري: ${goal}
+الطول: ${height} سم
+الوزن: ${weight} كغ
+
+متطلبات البرنامج:
+1. برنامج تدريبي مفصل يتضمن تمارين محددة
+2. اذكر المدة المطلوبة لتطبيق البرنامج
+3. اكتب اسم كل تمرين بوضوح في سطر منفصل
+4. اجعل أسماء التمارين واضحة ومحددة (مثل: تمرين القفز العمودي، تمرين الركض السريع)
+5. قسم البرنامج إلى مراحل زمنية واضحة
+6. اذكر كيفية قياس التقدم
+
+اكتب استجابة مفصلة وشاملة باللغة العربية:` :
+      `Create a comprehensive and detailed training development program:
+
+Athlete: ${genderText}
+Sport: ${sport}
+Development Goal: ${goal}
+Height: ${height}cm
+Weight: ${weight}kg
+
+Program Requirements:
+1. Detailed training program with specific exercises
+2. Mention the required duration to follow this program
+3. Write each exercise name clearly on a separate line
+4. Make exercise names clear and specific (e.g: Vertical Jump Training, Sprint Running)
+5. Divide the program into clear time phases
+6. Explain how to measure progress
+
+Write a detailed and comprehensive response in English:`;
+    
+    const startTime = Date.now();
+    
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      config: {
+        systemInstruction: systemPrompt,
+        temperature: 0.3,
+        maxOutputTokens: 4000
+      },
+      contents: prompt
+    });
+    
+    const duration = Date.now() - startTime;
+    console.log(`✅ Development plan generated in ${duration}ms`);
+    
+    const responseText = result?.text || "";
+    
+    if (!responseText) {
+      throw new Error('Empty response from AI');
+    }
+    
+    console.log(`📋 Extracting exercise names from plan...`);
+    
+    // Extract exercise names from the plan
+    const exerciseNames = extractExerciseNames(responseText);
+    console.log(`🎯 Found ${exerciseNames.length} exercises:`, exerciseNames);
+    
+    // Fetch YouTube videos for each exercise
+    let planWithVideos = responseText;
+    
+    for (const exerciseName of exerciseNames) {
+      console.log(`🔍 Searching YouTube for: "${exerciseName}"`);
+      const videoUrl = await scrapeYouTubeForExercise(exerciseName, sport);
+      
+      if (videoUrl) {
+        // Add video link after the exercise name in the plan
+        const exercisePattern = new RegExp(`(${exerciseName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        planWithVideos = planWithVideos.replace(exercisePattern, `$1\n🎥 Video: ${videoUrl}\n`);
+      }
+    }
+    
+    console.log(`✅ Development plan generation completed with ${exerciseNames.length} exercises`);
+    
+    return {
+      plan: planWithVideos
+    };
+    
+  } catch (error) {
+    console.error('Error generating development plan:', error);
+    throw error;
+  }
 }
