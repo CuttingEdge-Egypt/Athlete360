@@ -2395,13 +2395,19 @@ Return ONLY valid JSON in the required structure.`;
         responseMimeType: "application/json",
         responseSchema: responseSchema,
         temperature: 0.2,
-        maxOutputTokens: 20000  // Increased to handle large structured plans
+        maxOutputTokens: 8192  // Optimized for Gemini limits
       },
       contents: prompt
     });
 
     const duration = Date.now() - startTime;
     console.log(`✅ Structured development plan generated in ${duration}ms`);
+
+    // Check for truncation due to token limits
+    if (result?.response?.candidates?.[0]?.finishReason === "MAX_TOKENS") {
+      console.error('⚠️ Response was truncated due to maxOutputTokens limit');
+      throw new Error('AI_RESPONSE_TRUNCATED: Development plan response was cut off due to token limits. Please try again with a simpler request.');
+    }
 
     const responseText = result?.text || "";
     
