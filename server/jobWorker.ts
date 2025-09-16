@@ -131,11 +131,14 @@ export class JobWorker {
       // Check for cancellation after generation
       if (await this.isJobCancelled(job.id)) return;
 
+      // Parse the JSON plan data to object for frontend
+      const parsedPlan = JSON.parse(plan.plan);
+
       // Mark as completed with results
       await storage.updateJob(job.id, {
         status: 'completed',
         progress: 100,
-        result: { plan, language: params.language }
+        result: parsedPlan // Store the parsed plan object directly
       });
 
       console.log(`✅ Development plan job ${job.id} completed successfully`);
