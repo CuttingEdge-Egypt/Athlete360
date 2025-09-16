@@ -365,12 +365,8 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
   "suggestion": "What the user should try instead"
 }`;
 
-    // Implement week-by-week generation for multi-week plans
-    let allWeeks: NutritionPlanDay[][] = [];
-    let allDays: NutritionPlanDay[] = [];
-    let generatedPlans: StructuredNutritionPlan[] = [];
-    
-    const weeklyGenerationSchema = {
+    // Generate all weeks in one single API call for much faster performance
+    const allWeeksSchema = {
       type: "object",
       properties: {
         instructions: {
@@ -413,175 +409,120 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
       required: ["instructions", "days"]
     };
     
-    // Generate each week separately
-    for (let weekNum = 0; weekNum < period; weekNum++) {
-      const isFirstWeek = weekNum === 0;
-      let weekPrompt = prompt;
-      
-      if (!isFirstWeek) {
-        // Add variety context for subsequent weeks
-        const varietyContext = summarizePreviousWeeks(allWeeks);
-        const varietyInstructions = isArabic ?
-          `\n\nسياق التنويع للأسبوع ${weekNum + 1}:\n${varietyContext}\n\nمهم: يجب أن تكون 60-70% من الوجبات مختلفة عن الأسابيع السابقة. نوّع البروتينات والحبوب وطرق الطبخ.` :
-          `\n\nVariety Context for Week ${weekNum + 1}:\n${varietyContext}\n\nIMPORTANT: 60-70% of meals must be different from previous weeks. Vary proteins, grains, and cooking methods.`;
-        
-        weekPrompt = weekPrompt.replace(
-          isArabic ? `أنشئ ${totalDays} أيام كاملة` : `Generate ${totalDays} complete days`,
-          isArabic ? `أنشئ 7 أيام فقط للأسبوع ${weekNum + 1}` : `Generate only 7 days for Week ${weekNum + 1}`
-        ) + varietyInstructions;
-      } else {
-        // For first week, only generate 7 days
-        weekPrompt = weekPrompt.replace(
-          isArabic ? `أنشئ ${totalDays} أيام كاملة` : `Generate ${totalDays} complete days`,
-          isArabic ? 'أنشئ 7 أيام للأسبوع الأول' : 'Generate 7 days for Week 1'
-        );
-      }
-      
-      console.log(`⏳ Starting Week ${weekNum + 1}/${period} nutrition generation...`);
-      const startTime = Date.now();
-      
-      // Attempt generation with timeout and retry logic
-      let result;
-      let attempt = 0;
-      const maxAttempts = 1; // No fallback models, single attempt with high-quality model
-      
-      while (attempt < maxAttempts) {
-        try {
-          // No timeout - let gemini-2.5-pro take as long as needed for comprehensive analysis
-          result = await genAI.models.generateContent({
-            model: "gemini-2.5-pro", // Use highest quality model
-            config: {
-              systemInstruction: systemPrompt,
-              responseMimeType: "application/json",
-              responseSchema: weeklyGenerationSchema,
-              temperature: Math.min(1.0, isFirstWeek ? 0.7 : 0.8 + (weekNum * 0.05)), // Cap temperature at 1.0
-              maxOutputTokens: 20000 // Very high limit for comprehensive multi-week plans
-            },
-            contents: weekPrompt
-          });
-          
-          const duration = Date.now() - startTime;
-          console.log(`✅ Week ${weekNum + 1} generated successfully in ${duration}ms (attempt ${attempt + 1})`);
-          break; // Success, exit retry loop
-          
-        } catch (error: any) {
-          attempt++;
-          const duration = Date.now() - startTime;
-          console.log(`❌ Week ${weekNum + 1} generation failed (attempt ${attempt}/${maxAttempts}) after ${duration}ms:`, error.message);
-          
-          if (attempt >= maxAttempts) {
-            console.log(`🚫 Week ${weekNum + 1} generation failed after ${maxAttempts} attempts`);
-            throw new Error(`AI_TIMEOUT: Nutrition plan generation for week ${weekNum + 1} timed out after ${maxAttempts} attempts`);
-          }
-          
-          // Exponential backoff before retry
-          const backoffMs = 2000 * Math.pow(2, attempt - 1);
-          console.log(`⏳ Retrying week ${weekNum + 1} in ${backoffMs}ms...`);
-          await new Promise(resolve => setTimeout(resolve, backoffMs));
-        }
-      }
-      
-      if (!result) {
-        throw new Error(`AI_TIMEOUT: No result after ${maxAttempts} attempts`);
-      }
-
-      const responseText = result?.text || "{}";
-      
-      // Debug: Log the raw response to see what Gemini is returning
-      console.log(`🔍 Week ${weekNum + 1} raw response length: ${responseText.length} chars`);
-      console.log(`🔍 Week ${weekNum + 1} raw response preview: ${responseText.substring(0, 200)}...`);
-      
-      // Check for error responses indicating no data found
-      if (responseText.includes('"error": "no_data_found"') || 
-          responseText.includes('"error": "search_failed"') || 
-          responseText.includes('"error": "not_found"') ||
-          responseText.includes('"success": false')) {
-        throw new Error('AI_WEB_SEARCH_FAILED: No authentic nutrition data found through web search');
-      }
-      
-      // Enhanced JSON cleaning and parsing
-      let cleanedResponse = responseText.trim();
-      
-      // Remove any markdown code blocks
-      cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
-      cleanedResponse = cleanedResponse.replace(/^```/, '').replace(/```$/, '');
-      
-      // Remove any leading/trailing non-JSON text
-      const jsonStart = cleanedResponse.indexOf('{');
-      const jsonEnd = cleanedResponse.lastIndexOf('}');
-      if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
-        cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
-      }
-      
-      // Fix common JSON issues
-      cleanedResponse = cleanedResponse
-        .replace(/\n/g, ' ')  // Replace newlines with spaces
-        .replace(/\r/g, ' ')  // Replace carriage returns
-        .replace(/\t/g, ' ')  // Replace tabs
-        .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-        .replace(/,\s*}/g, '}') // Remove trailing commas before closing braces
-        .replace(/,\s*]/g, ']'); // Remove trailing commas before closing brackets
-      
-      console.log(`🔍 Week ${weekNum + 1} cleaned response length: ${cleanedResponse.length} chars`);
-      console.log(`🔍 Week ${weekNum + 1} cleaned response preview: ${cleanedResponse.substring(0, 300)}...`);
-      
-      // Try to parse the JSON
-      let weekPlan: StructuredNutritionPlan;
+    console.log(`⏳ Generating complete ${period}-week nutrition plan in one API call...`);
+    const startTime = Date.now();
+    
+    // Single API call to generate all weeks
+    let result;
+    let attempt = 0;
+    const maxAttempts = 1; // No fallback models, single attempt with high-quality model
+    
+    while (attempt < maxAttempts) {
       try {
-        weekPlan = JSON.parse(cleanedResponse);
-        console.log(`✅ Week ${weekNum + 1} JSON parsed successfully`);
-      } catch (parseError: any) {
-        console.error(`❌ JSON parsing failed for week ${weekNum + 1}:`, parseError);
-        console.error(`❌ Failed JSON content: ${cleanedResponse}`);
+        // No timeout - let gemini-2.5-pro take as long as needed for comprehensive analysis
+        result = await genAI.models.generateContent({
+          model: "gemini-2.5-pro", // Use highest quality model
+          config: {
+            systemInstruction: systemPrompt,
+            responseMimeType: "application/json",
+            responseSchema: allWeeksSchema,
+            temperature: 0.8, // Consistent temperature for all weeks
+            maxOutputTokens: 20000 // Very high limit for comprehensive multi-week plans
+          },
+          contents: prompt
+        });
         
-        // NO FALLBACK - Declare generation failed
-        throw new Error(`AI_JSON_PARSE_FAILED: Week ${weekNum + 1} returned invalid JSON format. Raw response was ${responseText.length} chars, cleaned to ${cleanedResponse.length} chars. Parse error: ${parseError?.message || 'Unknown parse error'}`);
-      }
-      
-      // Validate and potentially regenerate if too many duplicates
-      if (!isFirstWeek && weekPlan.days && detectDuplicates(weekPlan.days, allWeeks)) {
-        console.log(`Week ${weekNum + 1} has excessive duplicates, accepting as-is for now`);
-      }
-      
-      // Add this week to our collection
-      if (weekPlan.days && weekPlan.days.length > 0) {
-        const weekDays = weekPlan.days.slice(0, 7); // Ensure only 7 days
-        allWeeks.push(weekDays);
-        allDays.push(...weekDays);
-        generatedPlans.push(weekPlan); // Store the full plan including instructions
-      }
-    }
-    
-    // Combine all weeks into final structure - use actual AI-generated instructions
-    let finalInstructions = "";
-    
-    // Find the best instructions from generated plans (prefer scientific analysis)
-    for (let plan of generatedPlans) {
-      if (plan.instructions) {
-        if (plan.instructions.includes("SCIENTIFIC ANALYSIS") || plan.instructions.includes("BMI")) {
-          finalInstructions = plan.instructions;
-          break; // Use the first scientific analysis we find
+        const duration = Date.now() - startTime;
+        console.log(`✅ Complete ${period}-week plan generated successfully in ${duration}ms (attempt ${attempt + 1})`);
+        break; // Success, exit retry loop
+        
+      } catch (error: any) {
+        attempt++;
+        const duration = Date.now() - startTime;
+        console.log(`❌ ${period}-week plan generation failed (attempt ${attempt}/${maxAttempts}) after ${duration}ms:`, error.message);
+        
+        if (attempt >= maxAttempts) {
+          console.log(`🚫 ${period}-week plan generation failed after ${maxAttempts} attempts`);
+          throw new Error(`AI_TIMEOUT: Nutrition plan generation timed out after ${maxAttempts} attempts`);
         }
-        // Fallback to any instructions if no scientific ones found
-        if (!finalInstructions) {
-          finalInstructions = plan.instructions;
-        }
+        
+        // Exponential backoff before retry
+        const backoffMs = 2000 * Math.pow(2, attempt - 1);
+        console.log(`⏳ Retrying ${period}-week plan generation in ${backoffMs}ms...`);
+        await new Promise(resolve => setTimeout(resolve, backoffMs));
       }
     }
     
-    // If no AI-generated instructions found, use fallback
-    if (!finalInstructions) {
-      finalInstructions = isArabic ? 
-        `تعليمات عامة للتغذية الرياضية للاعب ${sportName}` :
-        `General sports nutrition instructions for ${sportName} athlete`;
+    if (!result) {
+      throw new Error(`AI_TIMEOUT: No result after ${maxAttempts} attempts`);
     }
+
+    const responseText = result?.text || "{}";
+    
+    // Debug: Log the raw response to see what Gemini is returning
+    console.log(`🔍 Complete plan raw response length: ${responseText.length} chars`);
+    console.log(`🔍 Complete plan raw response preview: ${responseText.substring(0, 200)}...`);
+    
+    // Check for error responses indicating no data found
+    if (responseText.includes('"error": "no_data_found"') || 
+        responseText.includes('"error": "search_failed"') || 
+        responseText.includes('"error": "not_found"') ||
+        responseText.includes('"success": false')) {
+      throw new Error('AI_WEB_SEARCH_FAILED: No authentic nutrition data found through web search');
+    }
+    
+    // Enhanced JSON cleaning and parsing
+    let cleanedResponse = responseText.trim();
+    
+    // Remove any markdown code blocks
+    cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
+    cleanedResponse = cleanedResponse.replace(/^```/, '').replace(/```$/, '');
+    
+    // Remove any leading/trailing non-JSON text
+    const jsonStart = cleanedResponse.indexOf('{');
+    const jsonEnd = cleanedResponse.lastIndexOf('}');
+    if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+      cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
+    }
+    
+    // Fix common JSON issues
+    cleanedResponse = cleanedResponse
+      .replace(/\n/g, ' ')  // Replace newlines with spaces
+      .replace(/\r/g, ' ')  // Replace carriage returns
+      .replace(/\t/g, ' ')  // Replace tabs
+      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+      .replace(/,\s*}/g, '}') // Remove trailing commas before closing braces
+      .replace(/,\s*]/g, ']'); // Remove trailing commas before closing brackets
+    
+    console.log(`🔍 Complete plan cleaned response length: ${cleanedResponse.length} chars`);
+    console.log(`🔍 Complete plan cleaned response preview: ${cleanedResponse.substring(0, 300)}...`);
+    
+    // Try to parse the JSON
+    let completePlan: StructuredNutritionPlan;
+    try {
+      completePlan = JSON.parse(cleanedResponse);
+      console.log(`✅ Complete ${period}-week plan JSON parsed successfully`);
+    } catch (parseError: any) {
+      console.error(`❌ JSON parsing failed for complete plan:`, parseError);
+      console.error(`❌ Failed JSON content: ${cleanedResponse}`);
+      
+      // NO FALLBACK - Declare generation failed
+      throw new Error(`AI_JSON_PARSE_FAILED: Complete plan returned invalid JSON format. Raw response was ${responseText.length} chars, cleaned to ${cleanedResponse.length} chars. Parse error: ${parseError?.message || 'Unknown parse error'}`);
+    }
+    
+    // Validate that we have the expected number of days
+    const expectedDays = period * 7;
+    const actualDays = completePlan.days ? completePlan.days.length : 0;
+    console.log(`📊 Generated ${actualDays} days (expected ${expectedDays})`);
     
     const finalPlan: StructuredNutritionPlan = {
-      instructions: finalInstructions,
-      days: allDays
+      instructions: completePlan.instructions || (isArabic ? 
+        `تعليمات عامة للتغذية الرياضية للاعب ${sportName}` :
+        `General sports nutrition instructions for ${sportName} athlete`),
+      days: completePlan.days || []
     };
     
-    console.log(`Generated nutrition plan with ${allWeeks.length} weeks and ${allDays.length} total days`);
+    console.log(`Generated nutrition plan with ${period} weeks and ${finalPlan.days.length} total days`);
     
     return {
       plan: JSON.stringify(finalPlan)
