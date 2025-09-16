@@ -45,6 +45,9 @@ export default function Home() {
   const [nutritionProgressMessage, setNutritionProgressMessage] = useState<string>("");
   const [developmentPlanData, setDevelopmentPlanData] = useState<any>(null);
   const [showDevelopmentForm, setShowDevelopmentForm] = useState<boolean>(true);
+  const [developmentJobId, setDevelopmentJobId] = useState<string | null>(null);
+  const [developmentProgress, setDevelopmentProgress] = useState<number>(0);
+  const [developmentProgressMessage, setDevelopmentProgressMessage] = useState<string>("");
   const [location] = useLocation();
 
   // Helper for required number validation that shows proper required messages
@@ -164,10 +167,10 @@ export default function Home() {
     }
   });
 
-  // Development plan generation mutation
-  const generateDevelopmentPlanMutation = useMutation({
+  // Development plan job creation mutation
+  const createDevelopmentPlanJobMutation = useMutation({
     mutationFn: async (data: DevelopmentPlanFormData) => {
-      const response = await fetch('/api/analysis/development-plan', {
+      const response = await fetch('/api/jobs/development-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -175,26 +178,75 @@ export default function Home() {
       });
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to generate development plan');
+        throw new Error(error.message || 'Failed to start development plan generation');
       }
       return response.json();
     },
     onSuccess: (result) => {
-      console.log('Development plan result:', result);
-      setDevelopmentPlanData(result);
-      setShowDevelopmentForm(false); // Hide form and show results
-      setActiveTab('development'); // Auto-switch to development tab to show results
+      console.log('Development plan job created:', result);
+      setDevelopmentJobId(result.jobId);
+      setDevelopmentProgress(0);
+      setDevelopmentProgressMessage("Starting development plan generation...");
       toast({
-        title: "Development Plan Generated!",
-        description: "Your personalized training plan is ready.",
+        title: "Generation Started!",
+        description: "Your development plan is being generated. This may take several minutes.",
       });
-      // Invalidate relevant queries to refresh user data
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/user-history'] });
     },
     onError: (error: Error) => {
       toast({
         title: "Generation Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Development plan job polling
+  const { data: developmentJobStatus, refetch: refetchJobStatus } = useQuery({
+    queryKey: ['/api/jobs', developmentJobId],
+    enabled: !!developmentJobId,
+    refetchInterval: (data) => {
+      // Stop polling if job is completed, failed, or cancelled
+      const status = data?.status;
+      return (status === 'completed' || status === 'failed' || status === 'cancelled') ? false : 2000;
+    },
+    queryFn: async () => {
+      if (!developmentJobId) return null;
+      const response = await fetch(`/api/jobs/${developmentJobId}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch job status');
+      }
+      return response.json();
+    }
+  });
+
+  // Cancel development plan job mutation
+  const cancelDevelopmentPlanJobMutation = useMutation({
+    mutationFn: async (jobId: string) => {
+      const response = await fetch(`/api/jobs/${jobId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to cancel job');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      setDevelopmentJobId(null);
+      setDevelopmentProgress(0);
+      setDevelopmentProgressMessage("");
+      toast({
+        title: "Generation Cancelled",
+        description: "Development plan generation was cancelled.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Cancellation Failed",
         description: error.message,
         variant: "destructive",
       });
@@ -210,8 +262,59 @@ export default function Home() {
   // Development plan form submission handler
   const onSubmitDevelopmentPlan = (data: DevelopmentPlanFormData) => {
     console.log('Development plan form submitted:', data);
-    generateDevelopmentPlanMutation.mutate(data);
+    createDevelopmentPlanJobMutation.mutate(data);
   };
+
+  // Handle development plan job completion
+  useEffect(() => {
+    if (developmentJobStatus) {
+      const { status, progress, results, error } = developmentJobStatus;
+      
+      setDevelopmentProgress(progress || 0);
+      
+      if (status === 'in_progress') {
+        const messages = [
+          "Analyzing your training requirements...",
+          "Creating personalized weekly schedules...",
+          "Designing progressive exercises...",
+          "Optimizing training intensity...",
+          "Adding instructional guidance...",
+          "Finalizing your development plan..."
+        ];
+        const messageIndex = Math.min(Math.floor((progress || 0) / 17), messages.length - 1);
+        setDevelopmentProgressMessage(messages[messageIndex]);
+      } else if (status === 'completed' && results) {
+        console.log('Development plan completed:', results);
+        setDevelopmentPlanData(results);
+        setShowDevelopmentForm(false);
+        setActiveTab('development');
+        setDevelopmentJobId(null);
+        setDevelopmentProgress(0);
+        setDevelopmentProgressMessage("");
+        toast({
+          title: "Development Plan Generated!",
+          description: "Your personalized training plan is ready.",
+        });
+        // Invalidate relevant queries to refresh user data
+        queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/user-history'] });
+      } else if (status === 'failed') {
+        console.error('Development plan generation failed:', error);
+        setDevelopmentJobId(null);
+        setDevelopmentProgress(0);
+        setDevelopmentProgressMessage("");
+        toast({
+          title: "Generation Failed",
+          description: error || "Development plan generation failed. Please try again.",
+          variant: "destructive",
+        });
+      } else if (status === 'cancelled') {
+        setDevelopmentJobId(null);
+        setDevelopmentProgress(0);
+        setDevelopmentProgressMessage("");
+      }
+    }
+  }, [developmentJobStatus, queryClient, toast, setActiveTab]);
 
   // Listen for queue notifications
   useEffect(() => {
