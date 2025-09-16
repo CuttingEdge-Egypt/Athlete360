@@ -1553,18 +1553,55 @@ export default function Home() {
                         <Button 
                           type="submit" 
                           className="w-full bg-athlete-accent hover:bg-athlete-accent-dark text-white"
-                          disabled={generateDevelopmentPlanMutation.isPending}
+                          disabled={createDevelopmentPlanJobMutation.isPending || !!developmentJobId}
                           data-testid="button-generate-development-plan"
                         >
-                          {generateDevelopmentPlanMutation.isPending ? (
+                          {createDevelopmentPlanJobMutation.isPending || !!developmentJobId ? (
                             <>
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              {t('developmentPlan.generating')}
+                              {developmentProgressMessage || t('developmentPlan.generating')}
                             </>
                           ) : (
-                            t('developmentPlan.generate')
+                            <>
+                              <CalendarDays className="mr-2 h-4 w-4" />
+                              {t('developmentPlan.generate')}
+                            </>
                           )}
                         </Button>
+                        
+                        {/* Cancel button when job is running */}
+                        {developmentJobId && (
+                          <Button 
+                            type="button"
+                            variant="outline"
+                            onClick={() => cancelDevelopmentPlanJobMutation.mutate(developmentJobId)}
+                            disabled={cancelDevelopmentPlanJobMutation.isPending}
+                            className="ml-4 bg-red-600 hover:bg-red-700 text-white border-red-600"
+                            data-testid="button-cancel-development-plan"
+                          >
+                            {cancelDevelopmentPlanJobMutation.isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              "Cancel"
+                            )}
+                          </Button>
+                        )}
+                        
+                        {/* Progress indicator */}
+                        {developmentJobId && (
+                          <div className="mt-6 space-y-2">
+                            <div className="flex justify-between text-sm text-gray-400">
+                              <span>{developmentProgressMessage}</span>
+                              <span>{developmentProgress}%</span>
+                            </div>
+                            <div className="w-full bg-gray-700 rounded-full h-2">
+                              <div 
+                                className="bg-athlete-accent h-2 rounded-full transition-all duration-500" 
+                                style={{ width: `${developmentProgress}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
                       </form>
                     </Form>
                   </CardContent>
