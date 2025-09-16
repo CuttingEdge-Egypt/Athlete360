@@ -321,3 +321,89 @@ export type InsertAthlete = z.infer<typeof insertAthleteSchema>;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 export type InsertPaymentReceipt = z.infer<typeof insertPaymentReceiptSchema>;
 export type InsertReferral = z.infer<typeof insertReferralSchema>;
+
+// Development Plan V1 JSON Schema - Comprehensive structured format
+export const videoSchema = z.object({
+  url: z.string().url(),
+  videoId: z.string(),
+  title: z.string().optional(),
+  channel: z.string().optional(),
+});
+
+export const exerciseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  prescription: z.object({
+    sets: z.number().optional(),
+    reps: z.union([z.string(), z.number()]).optional(),
+    restSec: z.number().optional(),
+    tempo: z.string().optional(),
+    durationMin: z.number().optional(),
+    intensity: z.string().optional(),
+  }).optional(),
+  equipment: z.array(z.string()).optional(),
+  video: videoSchema.optional(),
+  altVideos: z.array(videoSchema).optional(),
+  metrics: z.array(z.string()).optional(),
+});
+
+export const daySchema = z.object({
+  index: z.number(),
+  date: z.string().optional(),
+  title: z.string().optional(),
+  focus: z.string().optional(),
+  exercises: z.array(exerciseSchema),
+  notes: z.string().optional(),
+});
+
+export const weekSchema = z.object({
+  index: z.number(),
+  title: z.string().optional(),
+  summary: z.string().optional(),
+  counts: z.object({
+    days: z.number(),
+    videos: z.number(),
+    exercises: z.number(),
+  }),
+  days: z.array(daySchema),
+});
+
+export const developmentPlanV1Schema = z.object({
+  version: z.literal("1.0"),
+  id: z.string(),
+  language: z.enum(["en", "ar"]),
+  title: z.object({
+    en: z.string(),
+    ar: z.string().optional(),
+  }),
+  sport: z.string(),
+  goal: z.string(),
+  gender: z.string().optional(),
+  duration: z.object({
+    weeks: z.number(),
+    days: z.number(),
+  }),
+  counts: z.object({
+    weeks: z.number(),
+    videos: z.number(),
+    exercises: z.number(),
+  }),
+  intro: z.object({
+    overview: z.string(),
+    structure: z.string().optional(),
+    progressMetrics: z.array(z.string()).optional(),
+  }),
+  weeks: z.array(weekSchema),
+  attribution: z.object({
+    model: z.string(),
+    generatedAt: z.string(),
+  }),
+});
+
+export type Video = z.infer<typeof videoSchema>;
+export type Exercise = z.infer<typeof exerciseSchema>;
+export type Day = z.infer<typeof daySchema>;
+export type Week = z.infer<typeof weekSchema>;
+export type DevelopmentPlanV1 = z.infer<typeof developmentPlanV1Schema>;
