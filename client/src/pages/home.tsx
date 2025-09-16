@@ -268,7 +268,8 @@ export default function Home() {
   // Handle development plan job completion
   useEffect(() => {
     if (developmentJobStatus) {
-      const { status, progress, results, error } = developmentJobStatus;
+      const { status, progress, result, error } = developmentJobStatus;
+      const results = result; // Map result to results for backwards compatibility
       
       setDevelopmentProgress(progress || 0);
       
