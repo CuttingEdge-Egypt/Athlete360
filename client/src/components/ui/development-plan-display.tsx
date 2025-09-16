@@ -2,387 +2,412 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, Target, Dumbbell, Play, ChevronRight, ChevronLeft, ExternalLink } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Calendar, Clock, Target, Dumbbell, Play, ChevronRight, ChevronLeft, ExternalLink, Activity, Zap, Timer, Users } from 'lucide-react';
 import { useState } from 'react';
+import { DevelopmentPlanV1, Exercise, Week, Day } from '../../../../shared/schema';
 
 interface DevelopmentPlanDisplayProps {
-  plan: string;
+  plan: string; // JSON-stringified DevelopmentPlanV1
   language: string;
   sport?: string;
 }
 
-// Function to extract YouTube video URLs from plan text
-function extractYouTubeUrls(text: string): { url: string; videoId: string }[] {
-  // More robust regex that supports various YouTube URL formats and is language-agnostic
-  const youtubeRegex = /(https?:\/\/(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11}))(?:[&?][^\s\n]*)?/g;
-  const videos: { url: string; videoId: string }[] = [];
-  let match;
-  
-  while ((match = youtubeRegex.exec(text)) !== null) {
-    videos.push({
-      url: match[1],
-      videoId: match[2]
-    });
+// Helper function to parse the development plan JSON
+function parseDevelopmentPlan(planString: string): DevelopmentPlanV1 | null {
+  try {
+    return JSON.parse(planString) as DevelopmentPlanV1;
+  } catch (error) {
+    console.error('Failed to parse development plan JSON:', error);
+    return null;
   }
-  
-  return videos;
 }
 
-// Function to convert YouTube URLs to embedded iframes and clean the text
-function processTextWithVideos(text: string): { processedText: string; videos: { url: string; videoId: string; exerciseName: string }[] } {
-  const youtubeUrls = extractYouTubeUrls(text);
+// Helper function to get all exercises with videos from the plan
+function getAllExercisesWithVideos(plan: DevelopmentPlanV1): Exercise[] {
+  const exercises: Exercise[] = [];
   
-  // Deny list for non-exercise terms that should not be used as exercise names
-  const denyList = [
-    'age', 'height', 'weight', 'gender', 'goal', 'country', 'protein', 'hydration',
-    'male', 'female', 'athlete', 'program duration', 'weeks', 'test', 'method',
-    'schedule', 'adaptation', 'focus', 'intensity', 'recovery', 'rest', 'warm',
-    'cool', 'down', 'as a sports training', 'but with updated workout', 'with updated workout',
-    'your training', 'more on training', 'same as phase', 'primary goals',
-    'personalized', 'basketball', 'development', 'comprehensive', 'professional'
-  ];
-  
-  // Extract exercise names from the context around YouTube URLs
-  const videos = youtubeUrls.map((video, index) => {
-    const lines = text.split('\n');
-    let exerciseName = `Exercise ${index + 1}`;
-    
-    // Find the line with the video URL
-    const videoLineIndex = lines.findIndex(line => line.includes(video.url));
-    
-    if (videoLineIndex > 0) {
-      // Look for exercise name in the previous few lines
-      for (let i = videoLineIndex - 1; i >= Math.max(0, videoLineIndex - 3); i--) {
-        const line = lines[i].trim();
-        if (line && !line.includes('🎥') && !line.includes('Video:') && !line.includes('فيديو:')) {
-          // Clean up markdown and extract exercise name
-          const cleanLine = line
-            .replace(/^\d+\.\s*/, '')
-            .replace(/[*#]+/g, '')
-            .replace(/^\s*[-•]\s*/, '')
-            .replace(/[&]+/g, '') // Remove HTML entities
-            .trim();
-          
-          // Check if this is a valid exercise name (not in deny list and reasonable length)
-          const isValidExercise = cleanLine.length > 3 && 
-                                  cleanLine.length < 80 && 
-                                  !denyList.some(term => cleanLine.toLowerCase().includes(term.toLowerCase())) &&
-                                  !cleanLine.includes('--') && // Not a divider
-                                  !/^\d+$/.test(cleanLine) && // Not just a number
-                                  !/^(day|week)\s*\d+/i.test(cleanLine); // Not a day/week label
-          
-          if (isValidExercise) {
-            exerciseName = cleanLine;
-            break;
-          }
+  plan.weeks.forEach(week => {
+    week.days.forEach(day => {
+      day.exercises.forEach(exercise => {
+        if (exercise.video) {
+          exercises.push(exercise);
         }
-      }
-    }
-    
-    return { ...video, exerciseName };
+      });
+    });
   });
   
-  // Clean up text by removing YouTube URLs and markdown formatting
-  let processedText = text
-    // Remove video labels and URLs (more comprehensive)
-    .replace(/(?:🎥\s*(?:Video|فيديو):\s*)?(https?:\/\/(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)[a-zA-Z0-9_-]{11}[^\s\n]*)\s*/g, ' ')
-    // Remove any leftover video reference patterns
-    .replace(/🎥\s*(?:Video|فيديو)?\s*:?\s*/g, ' ')
-    // Clean up markdown formatting
-    .replace(/\*\*([^*]+)\*\*/g, '$1') // Bold
-    .replace(/\*([^*]+)\*/g, '$1') // Italic
-    .replace(/#{1,6}\s*([^\n]+)/g, '$1') // Headers
-    .replace(/^\s*[-•*]\s*/gm, '• ') // Bullet points
-    // Remove HTML entities that might have been introduced
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    // Clean up excessive spaces and normalize whitespace
-    .replace(/[ \t]+/g, ' ') // Multiple spaces/tabs to single space
-    .replace(/\s*\n\s*/g, '\n') // Normalize newlines
-    // Normalize paragraph spacing - preserve single line breaks within paragraphs, double line breaks between paragraphs
-    .replace(/\n\s*\n\s*\n+/g, '\n\n') // Reduce multiple blank lines to double newlines
-    .replace(/\n\s*\n/g, '\n\n') // Ensure consistent double newlines for paragraph breaks
-    .trim();
-  
-  return { processedText, videos };
+  return exercises;
 }
 
-// Function to parse sections from the development plan with Arabic day support
-function parsePlanSections(text: string) {
-  // Arabic day names mapping
-  const arabicDays = ['الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد'];
-  const arabicWeekWords = ['أسبوع', 'الأسبوع', 'برنامج'];
-  const sections: { title: string; content: string; type: 'general' | 'schedule' | 'week' | 'day' }[] = [];
-  const lines = text.split('\n');
-  let currentSection: { title: string; content: string; type: 'general' | 'schedule' | 'week' | 'day' } = { title: '', content: '', type: 'general' };
+// Helper function to get exercise prescription display text
+function getExercisePrescriptionText(exercise: Exercise): string {
+  if (!exercise.prescription) return '';
   
-  for (const line of lines) {
-    // Detect different section types
-    const isWeekSection = (line.includes('Week') && (line.includes('Program') || /Week\s*\d+/i.test(line))) ||
-                          arabicWeekWords.some(word => line.includes(word));
-    const isDaySection = /\b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b/i.test(line) || 
-                        arabicDays.some(day => line.includes(day));
-    const isHeaderSection = line.startsWith('###') || line.startsWith('**') || line.includes('Program');
-    
-    if (isHeaderSection || isWeekSection || isDaySection) {
-      if (currentSection.title || currentSection.content.trim()) {
-        sections.push(currentSection);
-      }
-      
-      let sectionType: 'general' | 'schedule' | 'week' | 'day' = 'general';
-      if (isWeekSection) sectionType = 'week';
-      else if (isDaySection) sectionType = 'day';
-      else if (isHeaderSection) sectionType = 'schedule';
-      
-      currentSection = {
-        title: line.replace(/[*#]/g, '').trim(),
-        content: '',
-        type: sectionType
-      };
-    } else if (line.trim()) {
-      currentSection.content += line + '\n';
+  const parts: string[] = [];
+  
+  if (exercise.prescription.sets) {
+    parts.push(`${exercise.prescription.sets} sets`);
+  }
+  
+  if (exercise.prescription.reps) {
+    parts.push(`${exercise.prescription.reps} reps`);
+  }
+  
+  if (exercise.prescription.restSec) {
+    const minutes = Math.floor(exercise.prescription.restSec / 60);
+    const seconds = exercise.prescription.restSec % 60;
+    if (minutes > 0) {
+      parts.push(`${minutes}:${seconds.toString().padStart(2, '0')} rest`);
+    } else {
+      parts.push(`${seconds}s rest`);
     }
   }
   
-  if (currentSection.title || currentSection.content.trim()) {
-    sections.push(currentSection);
+  if (exercise.prescription.intensity) {
+    parts.push(exercise.prescription.intensity);
   }
   
-  return sections;
+  return parts.join(' • ');
 }
 
 export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: DevelopmentPlanDisplayProps) {
   const { t } = useTranslation('home');
+  const [selectedWeekIndex, setSelectedWeekIndex] = useState(0);
+  const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
-  const [showAllVideos, setShowAllVideos] = useState(false);
   
-  // Log sport parameter for debugging
-  console.log('DevelopmentPlanDisplay received sport:', sport);
+  // Parse the development plan JSON
+  const parsedPlan = parseDevelopmentPlan(plan);
   
-  const { processedText, videos } = processTextWithVideos(plan);
-  const sections = parsePlanSections(processedText);
+  if (!parsedPlan) {
+    return (
+      <div className="space-y-8" data-testid="development-plan-error">
+        <Card className="bg-red-900/20 border-red-500/30">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3">
+              <Target className="h-6 w-6 text-red-400" />
+              <div>
+                <h3 className="text-lg font-semibold text-red-100">Invalid Development Plan</h3>
+                <p className="text-red-200">Unable to parse the development plan data. Please try generating a new plan.</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const { title, duration, counts, intro, weeks } = parsedPlan;
+  const allExercisesWithVideos = getAllExercisesWithVideos(parsedPlan);
   
-  // Remove duplicate videos
-  const uniqueVideos = videos.reduce((acc: typeof videos, video) => {
-    const exists = acc.find(v => v.videoId === video.videoId);
-    if (!exists) {
-      acc.push(video);
-    }
-    return acc;
-  }, []);
+  // Get current week and day
+  const currentWeek = weeks[selectedWeekIndex];
+  const currentDay = currentWeek?.days[selectedDayIndex];
   
-  // Extract key information from the plan
-  const programTitle = sections.find(s => s.title.includes('Week') || s.title.includes('Program'))?.title || 'Development Program';
-  const totalVideos = uniqueVideos.length;
+  // Get videos for the current day
+  const currentDayVideos = currentDay?.exercises.filter(ex => ex.video) || [];
   
   return (
     <div className="space-y-8" data-testid="development-plan-display">
-      {/* Program Overview Header - Compact */}
+      {/* Title with Weeks and Videos Count */}
       <Card className="bg-gradient-to-br from-athlete-accent/20 to-athlete-gray-800 border-athlete-accent/30">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <CardTitle className="text-xl text-white flex items-center gap-2">
-                <Target className="h-5 w-5 text-athlete-accent" />
-                {programTitle}
+            <div className="space-y-2">
+              <CardTitle className="text-2xl text-white flex items-center gap-3">
+                <Target className="h-6 w-6 text-athlete-accent" />
+                {title.en}
               </CardTitle>
-              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-300">
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="h-3 w-3 text-athlete-accent flex-shrink-0" />
-                  <span>12 Weeks</span>
+              <div className="flex flex-wrap items-center gap-6 text-sm text-gray-300">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-athlete-accent flex-shrink-0" />
+                  <span className="font-medium">{counts.weeks} Weeks</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Play className="h-3 w-3 text-athlete-accent flex-shrink-0" />
-                  <span>{totalVideos} Videos</span>
+                <div className="flex items-center gap-2">
+                  <Play className="h-4 w-4 text-athlete-accent flex-shrink-0" />
+                  <span className="font-medium">{counts.videos} Videos</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Dumbbell className="h-4 w-4 text-athlete-accent flex-shrink-0" />
+                  <span className="font-medium">{counts.exercises} Exercises</span>
                 </div>
               </div>
             </div>
-            <Badge className="bg-athlete-accent text-white px-2 py-1 text-sm">
+            <Badge className="bg-athlete-accent text-white px-3 py-1 text-sm font-medium">
               AI Generated
             </Badge>
           </div>
         </CardHeader>
       </Card>
 
-      {/* Video Gallery - Always Visible & Interactive */}
-      {uniqueVideos.length > 0 && (
-        <Card className="bg-athlete-gray-800 border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Play className="h-5 w-5 text-athlete-accent" />
-              Exercise Demonstration Videos
-              <Badge variant="secondary" className="ml-2 bg-athlete-accent text-white">
-                {uniqueVideos.length}
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            {/* Main Video Player */}
-            <div className="space-y-6">
-              <div className="bg-black rounded-xl overflow-hidden shadow-2xl">
-                <iframe
-                  src={`https://www.youtube.com/embed/${uniqueVideos[selectedVideoIndex]?.videoId}?rel=0&modestbranding=1`}
-                  title={`${uniqueVideos[selectedVideoIndex]?.exerciseName || 'Exercise Demo'}`}
-                  className="w-full aspect-video"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  data-testid={`main-video-${selectedVideoIndex}`}
-                />
-              </div>
-              
-              {/* Video Navigation Controls */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-lg font-semibold text-white">
-                      {uniqueVideos[selectedVideoIndex]?.exerciseName || 'Exercise Demo'}
-                    </h4>
-                    <p className="text-sm text-gray-400">Video {selectedVideoIndex + 1} of {uniqueVideos.length}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedVideoIndex(Math.max(0, selectedVideoIndex - 1))}
-                      disabled={selectedVideoIndex === 0}
-                      className="border-gray-600 text-gray-300 hover:bg-athlete-gray-700 hover:text-white"
-                      data-testid="video-prev-button"
-                    >
-                      <ChevronLeft className="h-4 w-4 mr-1" />
-                      Previous
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedVideoIndex(Math.min(uniqueVideos.length - 1, selectedVideoIndex + 1))}
-                      disabled={selectedVideoIndex === uniqueVideos.length - 1}
-                      className="border-gray-600 text-gray-300 hover:bg-athlete-gray-700 hover:text-white"
-                      data-testid="video-next-button"
-                    >
-                      Next
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </Button>
-                  </div>
-                </div>
-                
-                {/* Video Thumbnails Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {(showAllVideos ? uniqueVideos : uniqueVideos.slice(0, 8)).map((video, index) => (
-                    <button
-                      key={`${video.videoId}-${index}`}
-                      onClick={() => setSelectedVideoIndex(showAllVideos ? index : index)}
-                      className={`relative aspect-video rounded-lg overflow-hidden transition-all duration-200 ${
-                        selectedVideoIndex === index 
-                          ? 'ring-2 ring-athlete-accent shadow-lg scale-105 bg-athlete-accent/20' 
-                          : 'hover:scale-102 hover:shadow-md bg-gray-900'
-                      }`}
-                      data-testid={`video-thumbnail-${index}`}
-                    >
-                      <img
-                        src={`https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`}
-                        alt={`Exercise ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                        <Play className={`h-6 w-6 ${selectedVideoIndex === index ? 'text-athlete-accent' : 'text-white'}`} />
-                      </div>
-                      <div className="absolute bottom-2 left-2 right-2">
-                        <div className="bg-black/80 text-white text-xs px-2 py-1 rounded truncate">
-                          {video.exerciseName}
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                  {uniqueVideos.length > 8 && !showAllVideos && (
-                    <button
-                      onClick={() => setShowAllVideos(true)}
-                      className="aspect-video rounded-lg bg-athlete-gray-700 hover:bg-athlete-gray-600 flex items-center justify-center text-gray-300 transition-colors"
-                      data-testid="show-all-videos-button"
-                    >
-                      <div className="text-center">
-                        <ChevronRight className="h-6 w-6 mx-auto mb-1" />
-                        <div className="text-xs">+{uniqueVideos.length - 8} more</div>
-                      </div>
-                    </button>
-                  )}
-                  {showAllVideos && uniqueVideos.length > 8 && (
-                    <button
-                      onClick={() => setShowAllVideos(false)}
-                      className="aspect-video rounded-lg bg-athlete-gray-700 hover:bg-athlete-gray-600 flex items-center justify-center text-gray-300 transition-colors"
-                      data-testid="show-less-videos-button"
-                    >
-                      <div className="text-center">
-                        <ChevronLeft className="h-6 w-6 mx-auto mb-1" />
-                        <div className="text-xs">Show less</div>
-                      </div>
-                    </button>
-                  )}
-                </div>
-
-                {/* View in YouTube Button */}
-                <div className="flex justify-center pt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => window.open(uniqueVideos[selectedVideoIndex]?.url, '_blank')}
-                    className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white"
-                    data-testid="view-youtube-button"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Watch on YouTube
-                  </Button>
-                </div>
-              </div>
+      {/* Program Intro and Overall Explanation */}
+      <Card className="bg-athlete-gray-800 border-gray-700">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <Activity className="h-5 w-5 text-athlete-accent" />
+            Program Overview
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            <div className="bg-athlete-gray-700/50 rounded-lg p-4">
+              <p className="text-gray-200 leading-relaxed">{intro.overview}</p>
             </div>
-          </CardContent>
-        </Card>
-      )}
+            
+            {intro.structure && (
+              <div className="bg-gradient-to-r from-athlete-accent/10 to-transparent rounded-lg p-4">
+                <h4 className="text-athlete-accent font-semibold mb-2 flex items-center gap-2">
+                  <Target className="h-4 w-4" />
+                  Program Structure
+                </h4>
+                <p className="text-gray-200 leading-relaxed">{intro.structure}</p>
+              </div>
+            )}
+            
+            {intro.progressMetrics && intro.progressMetrics.length > 0 && (
+              <div>
+                <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-athlete-accent" />
+                  Progress Metrics
+                </h4>
+                <div className="grid gap-2">
+                  {intro.progressMetrics.map((metric, index) => (
+                    <div key={index} className="flex items-center gap-2 text-gray-200">
+                      <div className="w-1.5 h-1.5 bg-athlete-accent rounded-full" />
+                      <span>{metric}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Development Plan Content */}
+      {/* Program Days/Weeks Navigation */}
       <Card className="bg-athlete-gray-800 border-gray-700">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <Calendar className="h-5 w-5 text-athlete-accent" />
-            Training Program Details
+            Weekly Program Schedule
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="space-y-6">
-            {sections.map((section, index) => (
-              <div key={index} className={`${
-                section.type === 'day' ? 'bg-athlete-gray-700/50 rounded-lg p-4 border-l-4 border-athlete-accent' :
-                section.type === 'week' ? 'bg-gradient-to-r from-athlete-accent/10 to-transparent rounded-lg p-4' :
-                ''
-              }`}>
-                {section.title && (
-                  <h3 className={`font-bold mb-3 flex items-center gap-2 ${
-                    section.type === 'day' ? 'text-athlete-accent text-lg' :
-                    section.type === 'week' ? 'text-white text-xl' :
-                    section.type === 'schedule' ? 'text-athlete-accent text-lg border-l-4 border-athlete-accent pl-4' :
-                    'text-white text-base'
-                  }`}>
-                    {section.type === 'day' && <Calendar className="h-4 w-4" />}
-                    {section.type === 'week' && <Target className="h-5 w-5" />}
-                    {section.title}
-                  </h3>
-                )}
-                <div className={`leading-relaxed space-y-3 ${
-                  section.type === 'day' ? 'text-gray-100' : 'text-gray-200'
-                }`}>
-                  {section.content.trim().split('\n\n').filter(paragraph => paragraph.trim()).map((paragraph, pIndex) => (
-                    <p key={pIndex} className="whitespace-pre-wrap leading-relaxed">
-                      {paragraph.trim()}
-                    </p>
-                  ))}
+          <Tabs value={selectedWeekIndex.toString()} onValueChange={(value) => {
+            setSelectedWeekIndex(parseInt(value));
+            setSelectedDayIndex(0); // Reset to first day when week changes
+          }}>
+            <TabsList className="grid w-full bg-athlete-gray-700 mb-6" style={{
+              gridTemplateColumns: `repeat(${weeks.length}, minmax(0, 1fr))`
+            }}>
+              {weeks.map((week, index) => (
+                <TabsTrigger 
+                  key={week.index}
+                  value={index.toString()}
+                  className="data-[state=active]:bg-athlete-accent data-[state=active]:text-white text-gray-300"
+                  data-testid={`week-tab-${index}`}
+                >
+                  Week {week.index}
+                  {week.title && <span className="hidden sm:inline ml-1">- {week.title}</span>}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            {weeks.map((week, weekIndex) => (
+              <TabsContent key={week.index} value={weekIndex.toString()}>
+                <div className="space-y-6">
+                  {/* Week Overview */}
+                  <div className="bg-gradient-to-r from-athlete-accent/10 to-transparent rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-xl text-white font-semibold flex items-center gap-2">
+                        <Target className="h-5 w-5 text-athlete-accent" />
+                        Week {week.index}
+                        {week.title && <span>- {week.title}</span>}
+                      </h3>
+                      <div className="flex gap-4 text-sm text-gray-300">
+                        <span>{week.counts.days} Days</span>
+                        <span>{week.counts.exercises} Exercises</span>
+                        <span>{week.counts.videos} Videos</span>
+                      </div>
+                    </div>
+                    {week.summary && (
+                      <p className="text-gray-200 leading-relaxed">{week.summary}</p>
+                    )}
+                  </div>
+
+                  {/* Days Navigation */}
+                  <div className="space-y-4">
+                    <h4 className="text-lg text-white font-semibold">Training Days</h4>
+                    <Tabs value={selectedDayIndex.toString()} onValueChange={(value) => setSelectedDayIndex(parseInt(value))}>
+                      <TabsList className="grid w-full bg-athlete-gray-700 mb-4" style={{
+                        gridTemplateColumns: `repeat(${week.days.length}, minmax(0, 1fr))`
+                      }}>
+                        {week.days.map((day, index) => (
+                          <TabsTrigger 
+                            key={day.index}
+                            value={index.toString()}
+                            className="data-[state=active]:bg-athlete-accent data-[state=active]:text-white text-gray-300"
+                            data-testid={`day-tab-${index}`}
+                          >
+                            Day {day.index}
+                          </TabsTrigger>
+                        ))}
+                      </TabsList>
+
+                      {week.days.map((day, dayIndex) => (
+                        <TabsContent key={day.index} value={dayIndex.toString()}>
+                          <div className="space-y-6">
+                            {/* Day Header */}
+                            <div className="bg-athlete-gray-700/50 rounded-lg p-4 border-l-4 border-athlete-accent">
+                              <h4 className="text-lg text-athlete-accent font-semibold mb-2 flex items-center gap-2">
+                                <Calendar className="h-4 w-4" />
+                                Day {day.index}
+                                {day.title && <span>- {day.title}</span>}
+                              </h4>
+                              {day.focus && (
+                                <p className="text-gray-200 mb-2">
+                                  <span className="text-athlete-accent font-medium">Focus:</span> {day.focus}
+                                </p>
+                              )}
+                              {day.notes && (
+                                <p className="text-gray-200 text-sm bg-athlete-gray-800 p-3 rounded">
+                                  <span className="text-athlete-accent font-medium">Notes:</span> {day.notes}
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Exercises for Day */}
+                            <div className="space-y-4">
+                              <h5 className="text-white font-semibold flex items-center gap-2">
+                                <Dumbbell className="h-4 w-4 text-athlete-accent" />
+                                Exercises ({day.exercises.length})
+                              </h5>
+                              
+                              <div className="grid gap-4">
+                                {day.exercises.map((exercise, exerciseIndex) => (
+                                  <div key={exercise.id} className="bg-athlete-gray-700 rounded-lg p-4 hover:bg-athlete-gray-600 transition-colors">
+                                    <div className="flex items-start justify-between mb-3">
+                                      <h6 className="text-white font-medium text-lg">{exercise.name}</h6>
+                                      {exercise.video && (
+                                        <Badge className="bg-athlete-accent text-white ml-2">
+                                          <Play className="h-3 w-3 mr-1" />
+                                          Video
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    
+                                    {exercise.description && (
+                                      <p className="text-gray-300 mb-3 leading-relaxed">{exercise.description}</p>
+                                    )}
+                                    
+                                    {exercise.prescription && (
+                                      <div className="flex flex-wrap items-center gap-4 text-sm mb-3">
+                                        <span className="text-gray-300">{getExercisePrescriptionText(exercise)}</span>
+                                      </div>
+                                    )}
+                                    
+                                    {exercise.equipment && exercise.equipment.length > 0 && (
+                                      <div className="flex flex-wrap gap-2 mb-3">
+                                        {exercise.equipment.map((item, index) => (
+                                          <Badge key={index} variant="outline" className="text-gray-300 border-gray-500">
+                                            {item}
+                                          </Badge>
+                                        ))}
+                                      </div>
+                                    )}
+                                    
+                                    {exercise.tags && exercise.tags.length > 0 && (
+                                      <div className="flex flex-wrap gap-2">
+                                        {exercise.tags.map((tag, index) => (
+                                          <Badge key={index} variant="secondary" className="bg-athlete-accent/20 text-athlete-accent">
+                                            {tag}
+                                          </Badge>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Videos for Day Exercises (In Tabs) */}
+                            {currentDayVideos.length > 0 && (
+                              <Card className="bg-athlete-gray-700 border-gray-600">
+                                <CardHeader>
+                                  <CardTitle className="text-white flex items-center gap-2">
+                                    <Play className="h-5 w-5 text-athlete-accent" />
+                                    Exercise Videos for Day {day.index}
+                                    <Badge variant="secondary" className="ml-2 bg-athlete-accent text-white">
+                                      {currentDayVideos.length}
+                                    </Badge>
+                                  </CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-6">
+                                  <Tabs value={selectedVideoIndex.toString()} onValueChange={(value) => setSelectedVideoIndex(parseInt(value))}>
+                                    <TabsList className="grid w-full bg-athlete-gray-800 mb-4" style={{
+                                      gridTemplateColumns: `repeat(${Math.min(currentDayVideos.length, 4)}, minmax(0, 1fr))`
+                                    }}>
+                                      {currentDayVideos.slice(0, 4).map((exercise, index) => (
+                                        <TabsTrigger 
+                                          key={`video-tab-${index}`}
+                                          value={index.toString()}
+                                          className="data-[state=active]:bg-athlete-accent data-[state=active]:text-white text-gray-300 text-xs"
+                                          data-testid={`exercise-video-tab-${index}`}
+                                        >
+                                          {exercise.name.slice(0, 15)}...
+                                        </TabsTrigger>
+                                      ))}
+                                    </TabsList>
+
+                                    {currentDayVideos.map((exercise, index) => (
+                                      exercise.video && (
+                                        <TabsContent key={`video-content-${index}`} value={index.toString()}>
+                                          <div className="space-y-4">
+                                            <div className="bg-black rounded-lg overflow-hidden">
+                                              <iframe
+                                                src={`https://www.youtube.com/embed/${exercise.video.videoId}?rel=0&modestbranding=1`}
+                                                title={exercise.video.title || exercise.name}
+                                                className="w-full aspect-video"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                                data-testid={`exercise-video-${index}`}
+                                              />
+                                            </div>
+                                            
+                                            <div className="flex items-center justify-between">
+                                              <div>
+                                                <h6 className="text-white font-semibold">{exercise.name}</h6>
+                                                <p className="text-gray-400 text-sm">{exercise.video.title}</p>
+                                              </div>
+                                              <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => window.open(exercise.video!.url, '_blank')}
+                                                className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white"
+                                                data-testid={`watch-youtube-${index}`}
+                                              >
+                                                <ExternalLink className="h-4 w-4 mr-1" />
+                                                YouTube
+                                              </Button>
+                                            </div>
+                                          </div>
+                                        </TabsContent>
+                                      )
+                                    ))}
+                                  </Tabs>
+                                </CardContent>
+                              </Card>
+                            )}
+                          </div>
+                        </TabsContent>
+                      ))}
+                    </Tabs>
+                  </div>
                 </div>
-                {index < sections.length - 1 && section.type !== 'day' && (
-                  <hr className="border-gray-600 mt-4" />
-                )}
-              </div>
+              </TabsContent>
             ))}
-          </div>
+          </Tabs>
         </CardContent>
       </Card>
     </div>
