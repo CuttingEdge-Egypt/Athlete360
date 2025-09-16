@@ -2203,6 +2203,151 @@ function extractVideoId(url: string): string {
   return match?.[1] || '';
 }
 
+// Generate a single week of development plan
+async function generateSingleDevelopmentWeek(
+  weekNumber: number,
+  formData: DevelopmentPlanFormData,
+  genderText: string,
+  isArabic: boolean
+): Promise<any> {
+  const { goal, age, height, weight, sport } = formData;
+  
+  const systemPrompt = isArabic ? 
+    `أنت خبير تدريب رياضي متخصص في تصميم برامج التدريب. قم بإنشاء أسبوع واحد من خطة التدريب بتنسيق JSON.` :
+    `You are a professional sports training expert. Create one week of a training plan in JSON format.`;
+
+  // Schema for a single week
+  const weekSchema = {
+    type: "object",
+    properties: {
+      index: { type: "number" },
+      title: { type: "string" },
+      summary: { type: "string" },
+      counts: {
+        type: "object",
+        properties: {
+          days: { type: "number" },
+          videos: { type: "number" },
+          exercises: { type: "number" }
+        },
+        required: ["days", "exercises"]
+      },
+      days: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            index: { type: "number" },
+            title: { type: "string" },
+            focus: { type: "string" },
+            exercises: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  id: { type: "string" },
+                  name: { type: "string" },
+                  description: { type: "string" },
+                  tags: { type: "array", items: { type: "string" } },
+                  prescription: {
+                    type: "object",
+                    properties: {
+                      sets: { type: "number" },
+                      reps: { type: ["string", "number"] },
+                      restSec: { type: "number" },
+                      intensity: { type: "string" }
+                    }
+                  },
+                  equipment: { type: "array", items: { type: "string" } }
+                },
+                required: ["id", "name", "description"]
+              }
+            },
+            notes: { type: "string" }
+          },
+          required: ["index", "title", "exercises"]
+        }
+      }
+    },
+    required: ["index", "title", "summary", "days"]
+  };
+
+  const prompt = isArabic ?
+    `أنشئ الأسبوع ${weekNumber} من خطة تدريب رياضية:
+
+- الرياضة: ${sport}
+- الهدف: ${goal}
+- العمر: ${age} سنة
+- الجنس: ${genderText}
+- الطول: ${height} سم
+- الوزن: ${weight} كغ
+
+متطلبات الأسبوع ${weekNumber}:
+- 4-6 أيام تدريب
+- 5-8 تمارين لكل يوم
+- اجعل أسماء التمارين واضحة ومحددة
+- قدم وصف شامل لكل تمرين
+
+أرجع JSON صالح فقط.` :
+    `Create week ${weekNumber} of a training plan:
+
+- Sport: ${sport}
+- Goal: ${goal}
+- Age: ${age} years
+- Gender: ${genderText}
+- Height: ${height}cm
+- Weight: ${weight}kg
+
+Week ${weekNumber} requirements:
+- 4-6 training days
+- 5-8 exercises per day
+- Make exercise names clear and specific
+- Provide comprehensive description for each exercise
+
+Return ONLY valid JSON.`;
+
+  try {
+    console.log(`⏳ Generating Week ${weekNumber}...`);
+    const weekStart = Date.now();
+    
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: "application/json",
+        responseSchema: weekSchema,
+        temperature: 0.2,
+        maxOutputTokens: 2000  // Small enough for single week
+      },
+      contents: prompt
+    });
+
+    const weekDuration = Date.now() - weekStart;
+    console.log(`✅ Week ${weekNumber} generated in ${weekDuration}ms`);
+
+    // Check for truncation
+    const finishReason = (result as any)?.response?.candidates?.[0]?.finishReason || 
+                        (result as any)?.candidates?.[0]?.finishReason;
+    if (finishReason === "MAX_TOKENS") {
+      console.error(`⚠️ Week ${weekNumber} was truncated`);
+      throw new Error(`Week ${weekNumber} response was truncated`);
+    }
+
+    const responseText = result?.text || "";
+    if (!responseText) {
+      throw new Error(`Empty response for week ${weekNumber}`);
+    }
+
+    const weekPlan = JSON.parse(responseText);
+    weekPlan.index = weekNumber; // Ensure correct index
+    
+    return weekPlan;
+  } catch (error) {
+    console.error(`❌ Error generating Week ${weekNumber}:`, error);
+    throw error;
+  }
+}
+
 // Main development plan generation function - V1 structured JSON format
 export async function generateDevelopmentPlan(
   formData: DevelopmentPlanFormData
@@ -2218,18 +2363,43 @@ export async function generateDevelopmentPlan(
     // Generate unique ID for this plan
     const planId = `dev_plan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
-    // System prompt for structured JSON generation
-    const systemPrompt = isArabic ? 
-      `أنت خبير تدريب رياضي متخصص في تصميم برامج تطوير شخصية للرياضيين. ستقوم بإنشاء خطة تدريب مهيكلة بتنسيق JSON دقيق.` :
-      `You are a professional sports training expert specializing in personalized development programs for athletes. You will create a structured training plan in precise JSON format.`;
+    // First, generate the overview and plan structure
+    const overviewPrompt = isArabic ?
+      `أنشئ ملخص خطة تدريب رياضية:
 
-    // Create JSON schema for the response
-    const responseSchema = {
+- الرياضة: ${sport}
+- الهدف: ${goal}
+- العمر: ${age} سنة
+- المدة: 8-10 أسابيع
+
+أرجع JSON يحتوي على:
+{
+  "title": { "en": "English title", "ar": "العنوان بالعربية" },
+  "overview": "نظرة عامة على الخطة",
+  "structure": "هيكل البرنامج",
+  "progressMetrics": ["مؤشرات التقدم"],
+  "totalWeeks": 8
+}` :
+      `Create a training plan overview:
+
+- Sport: ${sport}
+- Goal: ${goal}
+- Age: ${age} years
+- Duration: 8-10 weeks
+
+Return JSON containing:
+{
+  "title": { "en": "English title", "ar": "Arabic title" },
+  "overview": "Plan overview",
+  "structure": "Program structure",
+  "progressMetrics": ["Progress metrics"],
+  "totalWeeks": 8
+}`;
+
+    console.log('📋 Generating plan overview...');
+    const overviewSchema = {
       type: "object",
       properties: {
-        version: { type: "string" },
-        id: { type: "string" },
-        language: { type: "string", enum: ["en", "ar"] },
         title: {
           type: "object",
           properties: {
@@ -2238,217 +2408,99 @@ export async function generateDevelopmentPlan(
           },
           required: ["en"]
         },
-        sport: { type: "string" },
-        goal: { type: "string" },
-        gender: { type: "string" },
-        duration: {
-          type: "object",
-          properties: {
-            weeks: { type: "number" },
-            days: { type: "number" }
-          },
-          required: ["weeks", "days"]
-        },
-        counts: {
-          type: "object",
-          properties: {
-            weeks: { type: "number" },
-            videos: { type: "number" },
-            exercises: { type: "number" }
-          },
-          required: ["weeks", "videos", "exercises"]
-        },
-        intro: {
-          type: "object",
-          properties: {
-            overview: { type: "string" },
-            structure: { type: "string" },
-            progressMetrics: {
-              type: "array",
-              items: { type: "string" }
-            }
-          },
-          required: ["overview"]
-        },
-        weeks: {
+        overview: { type: "string" },
+        structure: { type: "string" },
+        progressMetrics: {
           type: "array",
-          items: {
-            type: "object",
-            properties: {
-              index: { type: "number" },
-              title: { type: "string" },
-              summary: { type: "string" },
-              counts: {
-                type: "object",
-                properties: {
-                  days: { type: "number" },
-                  videos: { type: "number" },
-                  exercises: { type: "number" }
-                },
-                required: ["days", "videos", "exercises"]
-              },
-              days: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    index: { type: "number" },
-                    title: { type: "string" },
-                    focus: { type: "string" },
-                    exercises: {
-                      type: "array",
-                      items: {
-                        type: "object",
-                        properties: {
-                          id: { type: "string" },
-                          name: { type: "string" },
-                          description: { type: "string" },
-                          tags: {
-                            type: "array",
-                            items: { type: "string" }
-                          },
-                          prescription: {
-                            type: "object",
-                            properties: {
-                              sets: { type: "number" },
-                              reps: { type: ["string", "number"] },
-                              restSec: { type: "number" },
-                              intensity: { type: "string" }
-                            }
-                          },
-                          equipment: {
-                            type: "array", 
-                            items: { type: "string" }
-                          }
-                        },
-                        required: ["id", "name"]
-                      }
-                    },
-                    notes: { type: "string" }
-                  },
-                  required: ["index", "exercises"]
-                }
-              }
-            },
-            required: ["index", "days"]
-          }
+          items: { type: "string" }
         },
-        attribution: {
-          type: "object",
-          properties: {
-            model: { type: "string" },
-            generatedAt: { type: "string" }
-          },
-          required: ["model", "generatedAt"]
-        }
+        totalWeeks: { type: "number" }
       },
-      required: ["version", "id", "language", "title", "sport", "goal", "duration", "counts", "intro", "weeks", "attribution"]
+      required: ["title", "overview", "totalWeeks"]
     };
 
-    // Build the main prompt
-    const prompt = isArabic ?
-      `أنشئ خطة تطوير رياضي مهيكلة بتنسيق JSON للمواصفات التالية:
-
-البيانات الأساسية:
-- الرياضة: ${sport}
-- الهدف: ${goal}
-- العمر: ${age} سنة
-- الجنس: ${genderText}
-- الطول: ${height} سم
-- الوزن: ${weight} كغ
-
-متطلبات الخطة:
-1. مدة البرنامج: 8-12 أسبوع
-2. كل أسبوع يحتوي على 4-6 أيام تدريب
-3. كل يوم يحتوي على 5-8 تمارين محددة
-4. اجعل أسماء التمارين واضحة ومحددة (مثل: تمرين القرفصاء، تمرين القفز العمودي)
-5. قسم البرنامج إلى مراحل تطوير واضحة
-6. قدم وصف شامل لكل تمرين
-
-أرجع JSON صالح فقط بالتركيب المطلوب.` :
-      `Create a structured sports development plan in JSON format for the following specifications:
-
-Basic Information:
-- Sport: ${sport}
-- Goal: ${goal}
-- Age: ${age} years
-- Gender: ${genderText}
-- Height: ${height}cm
-- Weight: ${weight}kg
-
-Plan Requirements:
-1. Program duration: 8-12 weeks
-2. Each week contains 4-6 training days
-3. Each day contains 5-8 specific exercises
-4. Make exercise names clear and specific (e.g: Squat Exercise, Vertical Jump Training)
-5. Divide the program into clear development phases
-6. Provide comprehensive description for each exercise
-
-Return ONLY valid JSON in the required structure.`;
-
-    const startTime = Date.now();
-    
-    const result = await genAI.models.generateContent({
+    const overviewResult = await genAI.models.generateContent({
       model: "gemini-2.5-pro",
       config: {
-        systemInstruction: systemPrompt,
+        systemInstruction: isArabic ? 
+          `أنت خبير تدريب رياضي. قم بإنشاء ملخص خطة تدريب بتنسيق JSON.` :
+          `You are a sports training expert. Create a training plan overview in JSON format.`,
         responseMimeType: "application/json",
-        responseSchema: responseSchema,
+        responseSchema: overviewSchema,
         temperature: 0.2,
-        maxOutputTokens: 8192  // Optimized for Gemini limits
+        maxOutputTokens: 1000
       },
-      contents: prompt
+      contents: overviewPrompt
     });
 
-    const duration = Date.now() - startTime;
-    console.log(`✅ Structured development plan generated in ${duration}ms`);
+    const overview = JSON.parse(overviewResult?.text || "{}");
+    const totalWeeks = overview.totalWeeks || 8;
+    console.log(`✅ Overview generated: ${totalWeeks} weeks planned`);
 
-    // Check for truncation due to token limits
-    if (result?.response?.candidates?.[0]?.finishReason === "MAX_TOKENS") {
-      console.error('⚠️ Response was truncated due to maxOutputTokens limit');
-      throw new Error('AI_RESPONSE_TRUNCATED: Development plan response was cut off due to token limits. Please try again with a simpler request.');
-    }
-
-    const responseText = result?.text || "";
+    // Generate each week separately
+    const weeks = [];
+    console.log(`🏋️ Generating ${totalWeeks} weeks of training...`);
     
-    if (!responseText) {
-      throw new Error('Empty response from AI');
-    }
-
-    console.log(`📊 Raw response length: ${responseText.length} characters`);
-
-    // Parse the JSON response with enhanced error handling
-    let parsedPlan: DevelopmentPlanV1;
-    try {
-      parsedPlan = JSON.parse(responseText);
-      console.log(`📋 Parsed JSON plan with ${parsedPlan.weeks?.length || 0} weeks`);
-    } catch (parseError) {
-      console.error('❌ Failed to parse JSON response:', parseError);
-      console.error('📝 Response length:', responseText.length);
-      console.error('🔍 Last 200 characters:', responseText.slice(-200));
+    for (let weekNum = 1; weekNum <= totalWeeks; weekNum++) {
+      let weekResult;
+      let attempts = 0;
+      const maxAttempts = 2;
       
-      // Check if response seems truncated
-      if (responseText.length > 15000 && !responseText.trim().endsWith('}')) {
-        console.error('⚠️ Response appears to be truncated - ending doesn\'t look like complete JSON');
-        throw new Error('AI_RESPONSE_TRUNCATED: Development plan response was cut off during generation. Please try again.');
+      while (attempts < maxAttempts) {
+        attempts++;
+        try {
+          weekResult = await generateSingleDevelopmentWeek(
+            weekNum,
+            formData,
+            genderText,
+            isArabic
+          );
+          break; // Success
+        } catch (error) {
+          console.error(`❌ Attempt ${attempts} failed for week ${weekNum}:`, error);
+          if (attempts >= maxAttempts) {
+            throw new Error(`Failed to generate week ${weekNum} after ${maxAttempts} attempts`);
+          }
+        }
       }
       
-      // Check for common JSON issues
-      if (responseText.includes('\\"') || responseText.includes('\\n')) {
-        console.error('⚠️ Response contains escaped quotes that may cause parsing issues');
+      if (weekResult) {
+        weeks.push(weekResult);
+        console.log(`✅ Week ${weekNum}/${totalWeeks} completed`);
       }
-      
-      throw new Error('AI_JSON_PARSE_FAILED: Invalid JSON format from AI model');
     }
 
-    // Validate the structure matches our schema
-    try {
-      developmentPlanV1Schema.parse(parsedPlan);
-      console.log(`✅ Plan structure validated successfully`);
-    } catch (validationError) {
-      console.error('❌ Plan validation failed:', validationError);
-      throw new Error('AI_SCHEMA_VALIDATION_FAILED: Generated plan does not match expected structure');
-    }
+    // Construct the complete plan
+    const parsedPlan: DevelopmentPlanV1 = {
+      version: "1.0",
+      id: planId,
+      language: language as "en" | "ar",
+      title: overview.title || { en: `${sport} Development Plan`, ar: `خطة تطوير ${sport}` },
+      sport: sport,
+      goal: goal,
+      gender: gender,
+      duration: {
+        weeks: totalWeeks,
+        days: totalWeeks * 5 // Approximate
+      },
+      counts: {
+        weeks: totalWeeks,
+        videos: 0,
+        exercises: 0
+      },
+      intro: {
+        overview: overview.overview || "",
+        structure: overview.structure || "",
+        progressMetrics: overview.progressMetrics || []
+      },
+      weeks: weeks,
+      attribution: {
+        model: "gemini-2.5-pro",
+        generatedAt: new Date().toISOString()
+      }
+    };
+
+    console.log(`✅ Plan structure assembled with ${weeks.length} weeks`);
 
     // Extract all exercise names from the structured plan
     const allExercises: Exercise[] = [];
