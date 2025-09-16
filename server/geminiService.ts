@@ -2395,7 +2395,7 @@ Return ONLY valid JSON in the required structure.`;
         responseMimeType: "application/json",
         responseSchema: responseSchema,
         temperature: 0.2,
-        maxOutputTokens: 8000
+        maxOutputTokens: 20000  // Increased to handle large structured plans
       },
       contents: prompt
     });
@@ -2409,13 +2409,29 @@ Return ONLY valid JSON in the required structure.`;
       throw new Error('Empty response from AI');
     }
 
-    // Parse the JSON response
+    console.log(`📊 Raw response length: ${responseText.length} characters`);
+
+    // Parse the JSON response with enhanced error handling
     let parsedPlan: DevelopmentPlanV1;
     try {
       parsedPlan = JSON.parse(responseText);
-      console.log(`📋 Parsed JSON plan with ${parsedPlan.weeks.length} weeks`);
+      console.log(`📋 Parsed JSON plan with ${parsedPlan.weeks?.length || 0} weeks`);
     } catch (parseError) {
       console.error('❌ Failed to parse JSON response:', parseError);
+      console.error('📝 Response length:', responseText.length);
+      console.error('🔍 Last 200 characters:', responseText.slice(-200));
+      
+      // Check if response seems truncated
+      if (responseText.length > 15000 && !responseText.trim().endsWith('}')) {
+        console.error('⚠️ Response appears to be truncated - ending doesn\'t look like complete JSON');
+        throw new Error('AI_RESPONSE_TRUNCATED: Development plan response was cut off during generation. Please try again.');
+      }
+      
+      // Check for common JSON issues
+      if (responseText.includes('\\"') || responseText.includes('\\n')) {
+        console.error('⚠️ Response contains escaped quotes that may cause parsing issues');
+      }
+      
       throw new Error('AI_JSON_PARSE_FAILED: Invalid JSON format from AI model');
     }
 
