@@ -42,6 +42,8 @@ export default function Home() {
   const [nutritionPlanData, setNutritionPlanData] = useState<any>(null);
   const [showNutritionForm, setShowNutritionForm] = useState<boolean>(true);
   const [nutritionProgressMessage, setNutritionProgressMessage] = useState<string>("");
+  const [developmentPlanData, setDevelopmentPlanData] = useState<any>(null);
+  const [showDevelopmentForm, setShowDevelopmentForm] = useState<boolean>(true);
   const [location] = useLocation();
 
   // Helper for required number validation that shows proper required messages
@@ -79,6 +81,18 @@ export default function Home() {
   }), [t, i18n.language]);
 
   type NutritionPlanFormData = z.infer<typeof nutritionPlanSchema>;
+
+  // Development Plan form validation schema with translations
+  const developmentPlanSchema = useMemo(() => z.object({
+    goal: z.string().min(10, t('validation.goalRequired')).max(1000, t('validation.goalTooLong')),
+    height: requiredNumber(t('validation.heightRequired'), t('validation.heightInvalid'), 120, 250),
+    weight: requiredNumber(t('validation.weightRequired'), t('validation.weightInvalid'), 30, 300),
+    gender: z.enum(['male', 'female'], { required_error: t('validation.genderRequired') }),
+    sport: z.string().min(1, t('validation.sportRequired')),
+    language: z.string().default("en")
+  }), [t, i18n.language]);
+
+  type DevelopmentPlanFormData = z.infer<typeof developmentPlanSchema>;
 
   // Initialize form with validation
   const nutritionForm = useForm<NutritionPlanFormData>({
@@ -133,10 +147,66 @@ export default function Home() {
     },
   });
 
+  // Initialize development plan form with validation
+  const developmentForm = useForm<DevelopmentPlanFormData>({
+    resolver: zodResolver(developmentPlanSchema),
+    defaultValues: {
+      goal: "",
+      height: undefined,
+      weight: undefined,
+      gender: undefined,
+      sport: "",
+      language: i18n.language
+    }
+  });
+
+  // Development plan generation mutation
+  const generateDevelopmentPlanMutation = useMutation({
+    mutationFn: async (data: DevelopmentPlanFormData) => {
+      const response = await fetch('/api/analysis/development-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to generate development plan');
+      }
+      return response.json();
+    },
+    onSuccess: (result) => {
+      console.log('Development plan result:', result);
+      setDevelopmentPlanData(result);
+      setShowDevelopmentForm(false); // Hide form and show results
+      setActiveTab('development'); // Auto-switch to development tab to show results
+      toast({
+        title: "Development Plan Generated!",
+        description: "Your personalized training plan is ready.",
+      });
+      // Invalidate relevant queries to refresh user data
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user-history'] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Generation Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Form submission handler
   const onSubmitNutritionPlan = (data: NutritionPlanFormData) => {
     console.log('Nutrition plan form submitted:', data);
     generateNutritionPlanMutation.mutate(data);
+  };
+
+  // Development plan form submission handler
+  const onSubmitDevelopmentPlan = (data: DevelopmentPlanFormData) => {
+    console.log('Development plan form submitted:', data);
+    generateDevelopmentPlanMutation.mutate(data);
   };
 
   // Listen for queue notifications
@@ -1210,15 +1280,199 @@ export default function Home() {
             </TabsContent>
 
             <TabsContent value="development" className="space-y-8">
-              {/* Development Plan Placeholder */}
-              <Card className="bg-athlete-gray-800 border-gray-700">
-                <CardContent className="p-8 text-center">
-                  <CalendarDays className="mx-auto mb-4 text-athlete-accent" size={64} />
-                  <h2 className="text-2xl font-bold mb-4 text-white">{t('developmentPlan.title')}</h2>
-                  <p className="text-gray-400 text-lg mb-4">{t('developmentPlan.comingSoon')}</p>
-                  <p className="text-gray-500">{t('developmentPlan.description')}</p>
-                </CardContent>
-              </Card>
+              {showDevelopmentForm ? (
+                /* Development Plan Form */
+                <Card className="bg-athlete-gray-800 border-gray-700">
+                  <CardContent className="p-8">
+                    <h2 className="text-2xl font-bold mb-6 text-center text-white">{t('developmentPlan.title')}</h2>
+                    
+                    <Form {...developmentForm}>
+                      <form onSubmit={developmentForm.handleSubmit(onSubmitDevelopmentPlan)} className="space-y-6">
+                        {/* Goal Field */}
+                        <FormField
+                          control={developmentForm.control}
+                          name="goal"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-200">{t('developmentPlan.goal')}</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  {...field}
+                                  placeholder={t('developmentPlan.goalPlaceholder')}
+                                  className="bg-athlete-gray-700 border-gray-600 text-white min-h-[100px]"
+                                  data-testid="input-development-goal"
+                                />
+                              </FormControl>
+                              <FormMessage className="text-red-400" />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          {/* Height Field */}
+                          <FormField
+                            control={developmentForm.control}
+                            name="height"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-gray-200">{t('developmentPlan.height')}</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    {...field}
+                                    type="number" 
+                                    placeholder={t('developmentPlan.heightPlaceholder')}
+                                    className="bg-athlete-gray-700 border-gray-600 text-white"
+                                    data-testid="input-development-height"
+                                  />
+                                </FormControl>
+                                <FormMessage className="text-red-400" />
+                              </FormItem>
+                            )}
+                          />
+
+                          {/* Weight Field */}
+                          <FormField
+                            control={developmentForm.control}
+                            name="weight"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-gray-200">{t('developmentPlan.weight')}</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    {...field}
+                                    type="number" 
+                                    placeholder={t('developmentPlan.weightPlaceholder')}
+                                    className="bg-athlete-gray-700 border-gray-600 text-white"
+                                    data-testid="input-development-weight"
+                                  />
+                                </FormControl>
+                                <FormMessage className="text-red-400" />
+                              </FormItem>
+                            )}
+                          />
+
+                          {/* Gender Field */}
+                          <FormField
+                            control={developmentForm.control}
+                            name="gender"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-gray-200">{t('developmentPlan.gender')}</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white" data-testid="select-development-gender">
+                                      <SelectValue placeholder={t('developmentPlan.genderPlaceholder')} />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent className="bg-athlete-gray-700 border-gray-600">
+                                    <SelectItem value="male" className="text-white hover:bg-athlete-gray-600">
+                                      {t('developmentPlan.male')}
+                                    </SelectItem>
+                                    <SelectItem value="female" className="text-white hover:bg-athlete-gray-600">
+                                      {t('developmentPlan.female')}
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage className="text-red-400" />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Sport Field */}
+                        <FormField
+                          control={developmentForm.control}
+                          name="sport"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-200">{t('developmentPlan.sport')}</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  {...field}
+                                  placeholder={t('developmentPlan.sportPlaceholder')}
+                                  className="bg-athlete-gray-700 border-gray-600 text-white"
+                                  data-testid="input-development-sport"
+                                />
+                              </FormControl>
+                              <FormMessage className="text-red-400" />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Language Field */}
+                        <FormField
+                          control={developmentForm.control}
+                          name="language"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-200">{t('developmentPlan.language')}</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white" data-testid="select-development-language">
+                                    <SelectValue placeholder={t('developmentPlan.selectLanguage')} />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="bg-athlete-gray-700 border-gray-600">
+                                  <SelectItem value="en" className="text-white hover:bg-athlete-gray-600">English</SelectItem>
+                                  <SelectItem value="ar" className="text-white hover:bg-athlete-gray-600">العربية</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage className="text-red-400" />
+                            </FormItem>
+                          )}
+                        />
+
+                        <Button 
+                          type="submit" 
+                          className="w-full bg-athlete-accent hover:bg-athlete-accent-dark text-white"
+                          disabled={generateDevelopmentPlanMutation.isPending}
+                          data-testid="button-generate-development-plan"
+                        >
+                          {generateDevelopmentPlanMutation.isPending ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              {t('developmentPlan.generating')}
+                            </>
+                          ) : (
+                            t('developmentPlan.generate')
+                          )}
+                        </Button>
+                      </form>
+                    </Form>
+                  </CardContent>
+                </Card>
+              ) : (
+                /* Development Plan Display */
+                developmentPlanData && (
+                  <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                      <h2 className="text-2xl font-bold text-white">{t('developmentPlan.yourPlan')}</h2>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setShowDevelopmentForm(true);
+                          setDevelopmentPlanData(null);
+                        }}
+                        className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white"
+                        data-testid="button-new-development-plan"
+                      >
+                        <X className="mr-2 h-4 w-4" />
+                        {t('developmentPlan.generateNew')}
+                      </Button>
+                    </div>
+                    
+                    <Card className="bg-athlete-gray-800 border-gray-700">
+                      <CardContent className="p-8">
+                        <div className="prose prose-invert max-w-none">
+                          <div className="whitespace-pre-wrap text-gray-200 leading-relaxed">
+                            {developmentPlanData.plan}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )
+              )}
             </TabsContent>
 
           </Tabs>

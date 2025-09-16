@@ -117,9 +117,25 @@
     }
   },
   "developmentPlan": {
-    "title": "Development Plan",
-    "comingSoon": "Coming Soon",
-    "description": "Personalized development plans will be available soon."
+    "title": "Create Your Development Plan",
+    "goal": "Training Goal",
+    "height": "Height (cm)",
+    "weight": "Weight (kg)", 
+    "gender": "Gender",
+    "sport": "Sport",
+    "language": "Plan Language",
+    "generate": "Generate Development Plan",
+    "generating": "Generating Plan...",
+    "goalPlaceholder": "Be specific! What do you want to improve? (e.g., 'Improve kicking power and speed', 'Build endurance for competition', 'Develop better technique')",
+    "heightPlaceholder": "Enter your height in centimeters",
+    "weightPlaceholder": "Enter your weight in kilograms",
+    "genderPlaceholder": "Select your gender",
+    "sportPlaceholder": "Enter your sport (e.g., Taekwondo, Football, Basketball)",
+    "selectLanguage": "Select plan language",
+    "male": "Male",
+    "female": "Female",
+    "yourPlan": "Your Development Plan",
+    "generateNew": "Generate New Plan"
   },
   "referral": {
     "title": "You're using a referral link!",
@@ -168,10 +184,13 @@
     "ageInvalid": "Please enter a valid age between 13 and 99",
     "heightRequired": "Height is required",
     "heightInvalid": "Please enter a valid height between 120 and 250 cm",
+    "weightRequired": "Weight is required",
+    "weightInvalid": "Please enter a valid weight between 30 and 300 kg",
     "currentWeightRequired": "Current weight is required",
     "currentWeightInvalid": "Please enter a valid weight between 30 and 300 kg",
     "targetWeightRequired": "Target weight is required",
     "targetWeightInvalid": "Please enter a valid target weight between 30 and 300 kg",
+    "genderRequired": "Please select your gender",
     "countryRequired": "Please select a country for meal preferences"
   }
 }

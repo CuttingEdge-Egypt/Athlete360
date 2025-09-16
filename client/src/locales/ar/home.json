@@ -117,9 +117,25 @@
     }
   },
   "developmentPlan": {
-    "title": "خطة التطوير",
-    "comingSoon": "قريباً",
-    "description": "ستتوفر خطط التطوير الشخصية قريباً."
+    "title": "أنشئ خطة التطوير الخاصة بك",
+    "goal": "الهدف التدريبي",
+    "height": "الطول (سم)",
+    "weight": "الوزن (كيلو)",
+    "gender": "الجنس",
+    "sport": "الرياضة", 
+    "language": "لغة الخطة",
+    "generate": "إنشاء خطة التطوير",
+    "generating": "جاري إنشاء الخطة...",
+    "goalPlaceholder": "كن محدداً! ما الذي تريد تحسينه؟ (مثل: 'تحسين قوة وسرعة الركل'، 'بناء القدرة على التحمل للمنافسة'، 'تطوير التقنية')",
+    "heightPlaceholder": "أدخل طولك بالسنتيمتر",
+    "weightPlaceholder": "أدخل وزنك بالكيلوغرام",
+    "genderPlaceholder": "اختر الجنس",
+    "sportPlaceholder": "أدخل رياضتك (مثل: التايكوندو، كرة القدم، كرة السلة)",
+    "selectLanguage": "اختر لغة الخطة",
+    "male": "ذكر",
+    "female": "أنثى",
+    "yourPlan": "خطة التطوير الخاصة بك",
+    "generateNew": "إنشاء خطة جديدة"
   },
   "referral": {
     "title": "أنت تستخدم رابط إحالة!",
@@ -168,10 +184,13 @@
     "ageInvalid": "يرجى إدخال عمر صحيح بين 13 و 99 سنة",
     "heightRequired": "الطول مطلوب",
     "heightInvalid": "يرجى إدخال طول صحيح بين 120 و 250 سم",
+    "weightRequired": "الوزن مطلوب",
+    "weightInvalid": "يرجى إدخال وزن صحيح بين 30 و 300 كيلو",
     "currentWeightRequired": "الوزن الحالي مطلوب",
     "currentWeightInvalid": "يرجى إدخال وزن صحيح بين 30 و 300 كيلو",
     "targetWeightRequired": "الوزن المستهدف مطلوب",
     "targetWeightInvalid": "يرجى إدخال وزن مستهدف صحيح بين 30 و 300 كيلو",
+    "genderRequired": "يرجى اختيار الجنس",
     "countryRequired": "يرجى اختيار بلد لتفضيلات الوجبات"
   }
 }
