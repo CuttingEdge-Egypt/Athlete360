@@ -346,12 +346,12 @@ Requirements for Week ${weekNumber}:
     const weekStartTime = Date.now();
 
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-pro",
       config: {
         systemInstruction: systemPrompt,
         responseMimeType: "application/json",
         responseSchema: weekSchema,
-        temperature: 0.8,
+        temperature: 0.2,
         maxOutputTokens: 8000 // Reasonable limit for 7 days
       },
       contents: prompt
