@@ -8,6 +8,7 @@ import { useState } from 'react';
 interface DevelopmentPlanDisplayProps {
   plan: string;
   language: string;
+  sport?: string;
 }
 
 // Function to extract YouTube video URLs from plan text
@@ -28,86 +29,148 @@ function extractYouTubeUrls(text: string): { url: string; videoId: string }[] {
 }
 
 // Function to convert YouTube URLs to embedded iframes and clean the text
-function processTextWithVideos(text: string): { processedText: string; videos: { url: string; videoId: string }[] } {
-  const videos = extractYouTubeUrls(text);
+function processTextWithVideos(text: string): { processedText: string; videos: { url: string; videoId: string; exerciseName: string }[] } {
+  const youtubeUrls = extractYouTubeUrls(text);
   
-  // Remove YouTube URLs from the text with flexible patterns (including video labels in multiple languages)
+  // Extract exercise names from the context around YouTube URLs
+  const videos = youtubeUrls.map((video, index) => {
+    const lines = text.split('\n');
+    let exerciseName = `Exercise ${index + 1}`;
+    
+    // Find the line with the video URL
+    const videoLineIndex = lines.findIndex(line => line.includes(video.url));
+    
+    if (videoLineIndex > 0) {
+      // Look for exercise name in the previous few lines
+      for (let i = videoLineIndex - 1; i >= Math.max(0, videoLineIndex - 3); i--) {
+        const line = lines[i].trim();
+        if (line && !line.includes('🎥') && !line.includes('Video:') && !line.includes('فيديو:')) {
+          // Clean up markdown and extract exercise name
+          const cleanLine = line
+            .replace(/^\d+\.\s*/, '')
+            .replace(/[*#]+/g, '')
+            .replace(/^\s*[-•]\s*/, '')
+            .trim();
+          
+          if (cleanLine.length > 3 && cleanLine.length < 80) {
+            exerciseName = cleanLine;
+            break;
+          }
+        }
+      }
+    }
+    
+    return { ...video, exerciseName };
+  });
+  
+  // Clean up text by removing YouTube URLs and markdown formatting
   let processedText = text
-    // Remove Arabic and English video labels with URLs
+    // Remove video labels and URLs
     .replace(/(?:🎥\s*(?:Video|فيديو):\s*)?(https?:\/\/(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)[a-zA-Z0-9_-]{11}[^\s\n]*)\n?/g, '')
-    // Clean up extra newlines and spaces
+    // Clean up markdown formatting
+    .replace(/\*\*([^*]+)\*\*/g, '$1') // Bold
+    .replace(/\*([^*]+)\*/g, '$1') // Italic
+    .replace(/#{1,6}\s*([^\n]+)/g, '$1') // Headers
+    .replace(/^\s*[-•*]\s*/gm, '• ') // Bullet points
+    // Clean up extra whitespace
     .replace(/\n\s*\n\s*\n+/g, '\n\n')
+    .replace(/^\s+|\s+$/gm, '') // Trim each line
     .trim();
   
   return { processedText, videos };
 }
 
-// Function to parse sections from the development plan
+// Function to parse sections from the development plan with Arabic day support
 function parsePlanSections(text: string) {
-  const sections: { title: string; content: string; type: 'general' | 'schedule' }[] = [];
+  // Arabic day names mapping
+  const arabicDays = ['الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد'];
+  const arabicWeekWords = ['أسبوع', 'الأسبوع', 'برنامج'];
+  const sections: { title: string; content: string; type: 'general' | 'schedule' | 'week' | 'day' }[] = [];
   const lines = text.split('\n');
-  let currentSection: { title: string; content: string; type: 'general' | 'schedule' } = { title: '', content: '', type: 'general' };
+  let currentSection: { title: string; content: string; type: 'general' | 'schedule' | 'week' | 'day' } = { title: '', content: '', type: 'general' };
   
   for (const line of lines) {
-    if (line.startsWith('###') || line.startsWith('**') || line.includes('Week') || line.includes('Monday') || line.includes('Tuesday')) {
-      if (currentSection.title || currentSection.content) {
+    // Detect different section types
+    const isWeekSection = (line.includes('Week') && (line.includes('Program') || /Week\s*\d+/i.test(line))) ||
+                          arabicWeekWords.some(word => line.includes(word));
+    const isDaySection = /\b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b/i.test(line) || 
+                        arabicDays.some(day => line.includes(day));
+    const isHeaderSection = line.startsWith('###') || line.startsWith('**') || line.includes('Program');
+    
+    if (isHeaderSection || isWeekSection || isDaySection) {
+      if (currentSection.title || currentSection.content.trim()) {
         sections.push(currentSection);
       }
+      
+      let sectionType: 'general' | 'schedule' | 'week' | 'day' = 'general';
+      if (isWeekSection) sectionType = 'week';
+      else if (isDaySection) sectionType = 'day';
+      else if (isHeaderSection) sectionType = 'schedule';
+      
       currentSection = {
         title: line.replace(/[*#]/g, '').trim(),
         content: '',
-        type: line.includes('Week') || line.includes('Monday') || line.includes('Tuesday') || line.includes('Wednesday') || line.includes('Thursday') || line.includes('Friday') ? 'schedule' as const : 'general' as const
+        type: sectionType
       };
-    } else {
+    } else if (line.trim()) {
       currentSection.content += line + '\n';
     }
   }
   
-  if (currentSection.title || currentSection.content) {
+  if (currentSection.title || currentSection.content.trim()) {
     sections.push(currentSection);
   }
   
   return sections;
 }
 
-export function DevelopmentPlanDisplay({ plan, language }: DevelopmentPlanDisplayProps) {
+export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: DevelopmentPlanDisplayProps) {
   const { t } = useTranslation('home');
   const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
+  const [showAllVideos, setShowAllVideos] = useState(false);
+  
+  // Log sport parameter for debugging
+  console.log('DevelopmentPlanDisplay received sport:', sport);
   
   const { processedText, videos } = processTextWithVideos(plan);
   const sections = parsePlanSections(processedText);
   
+  // Remove duplicate videos
+  const uniqueVideos = videos.reduce((acc: typeof videos, video) => {
+    const exists = acc.find(v => v.videoId === video.videoId);
+    if (!exists) {
+      acc.push(video);
+    }
+    return acc;
+  }, []);
+  
   // Extract key information from the plan
   const programTitle = sections.find(s => s.title.includes('Week') || s.title.includes('Program'))?.title || 'Development Program';
-  const totalVideos = videos.length;
+  const totalVideos = uniqueVideos.length;
   
   return (
     <div className="space-y-8" data-testid="development-plan-display">
-      {/* Program Overview Header */}
+      {/* Program Overview Header - Compact */}
       <Card className="bg-gradient-to-br from-athlete-accent/20 to-athlete-gray-800 border-athlete-accent/30">
-        <CardHeader className="pb-4">
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <CardTitle className="text-2xl text-white flex items-center gap-2">
-                <Target className="h-6 w-6 text-athlete-accent" />
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <CardTitle className="text-xl text-white flex items-center gap-2">
+                <Target className="h-5 w-5 text-athlete-accent" />
                 {programTitle}
               </CardTitle>
-              <div className="flex flex-wrap gap-4 text-sm text-gray-300">
+              <div className="flex flex-wrap gap-3 text-sm text-gray-300">
                 <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4 text-athlete-accent" />
-                  <span>12-Week Program</span>
+                  <Calendar className="h-3 w-3 text-athlete-accent" />
+                  <span>12 Weeks</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Dumbbell className="h-4 w-4 text-athlete-accent" />
-                  <span>Strength & Agility</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Play className="h-4 w-4 text-athlete-accent" />
-                  <span>{totalVideos} Exercise Videos</span>
+                  <Play className="h-3 w-3 text-athlete-accent" />
+                  <span>{totalVideos} Videos</span>
                 </div>
               </div>
             </div>
-            <Badge className="bg-athlete-accent text-white px-3 py-1">
+            <Badge className="bg-athlete-accent text-white px-2 py-1 text-sm">
               AI Generated
             </Badge>
           </div>
@@ -115,14 +178,14 @@ export function DevelopmentPlanDisplay({ plan, language }: DevelopmentPlanDispla
       </Card>
 
       {/* Video Gallery - Always Visible & Interactive */}
-      {videos.length > 0 && (
+      {uniqueVideos.length > 0 && (
         <Card className="bg-athlete-gray-800 border-gray-700">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Play className="h-5 w-5 text-athlete-accent" />
               Exercise Demonstration Videos
               <Badge variant="secondary" className="ml-2 bg-athlete-accent text-white">
-                {videos.length}
+                {uniqueVideos.length}
               </Badge>
             </CardTitle>
           </CardHeader>
@@ -131,8 +194,8 @@ export function DevelopmentPlanDisplay({ plan, language }: DevelopmentPlanDispla
             <div className="space-y-6">
               <div className="bg-black rounded-xl overflow-hidden shadow-2xl">
                 <iframe
-                  src={`https://www.youtube.com/embed/${videos[selectedVideoIndex]?.videoId}?rel=0&modestbranding=1`}
-                  title={`Exercise Demo ${selectedVideoIndex + 1}`}
+                  src={`https://www.youtube.com/embed/${uniqueVideos[selectedVideoIndex]?.videoId}?rel=0&modestbranding=1`}
+                  title={`${uniqueVideos[selectedVideoIndex]?.exerciseName || 'Exercise Demo'}`}
                   className="w-full aspect-video"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
@@ -143,9 +206,12 @@ export function DevelopmentPlanDisplay({ plan, language }: DevelopmentPlanDispla
               {/* Video Navigation Controls */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-lg font-semibold text-white">
-                    Exercise Video {selectedVideoIndex + 1} of {videos.length}
-                  </h4>
+                  <div>
+                    <h4 className="text-lg font-semibold text-white">
+                      {uniqueVideos[selectedVideoIndex]?.exerciseName || 'Exercise Demo'}
+                    </h4>
+                    <p className="text-sm text-gray-400">Video {selectedVideoIndex + 1} of {uniqueVideos.length}</p>
+                  </div>
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
@@ -161,8 +227,8 @@ export function DevelopmentPlanDisplay({ plan, language }: DevelopmentPlanDispla
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setSelectedVideoIndex(Math.min(videos.length - 1, selectedVideoIndex + 1))}
-                      disabled={selectedVideoIndex === videos.length - 1}
+                      onClick={() => setSelectedVideoIndex(Math.min(uniqueVideos.length - 1, selectedVideoIndex + 1))}
+                      disabled={selectedVideoIndex === uniqueVideos.length - 1}
                       className="border-gray-600 text-gray-300 hover:bg-athlete-gray-700 hover:text-white"
                       data-testid="video-next-button"
                     >
@@ -174,10 +240,10 @@ export function DevelopmentPlanDisplay({ plan, language }: DevelopmentPlanDispla
                 
                 {/* Video Thumbnails Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {videos.slice(0, 8).map((video, index) => (
+                  {(showAllVideos ? uniqueVideos : uniqueVideos.slice(0, 8)).map((video, index) => (
                     <button
-                      key={video.videoId}
-                      onClick={() => setSelectedVideoIndex(index)}
+                      key={`${video.videoId}-${index}`}
+                      onClick={() => setSelectedVideoIndex(showAllVideos ? index : index)}
                       className={`relative aspect-video rounded-lg overflow-hidden transition-all duration-200 ${
                         selectedVideoIndex === index 
                           ? 'ring-2 ring-athlete-accent shadow-lg scale-105 bg-athlete-accent/20' 
@@ -195,18 +261,34 @@ export function DevelopmentPlanDisplay({ plan, language }: DevelopmentPlanDispla
                       </div>
                       <div className="absolute bottom-2 left-2 right-2">
                         <div className="bg-black/80 text-white text-xs px-2 py-1 rounded truncate">
-                          Exercise {index + 1}
+                          {video.exerciseName}
                         </div>
                       </div>
                     </button>
                   ))}
-                  {videos.length > 8 && (
-                    <div className="aspect-video rounded-lg bg-athlete-gray-700 flex items-center justify-center text-gray-300">
+                  {uniqueVideos.length > 8 && !showAllVideos && (
+                    <button
+                      onClick={() => setShowAllVideos(true)}
+                      className="aspect-video rounded-lg bg-athlete-gray-700 hover:bg-athlete-gray-600 flex items-center justify-center text-gray-300 transition-colors"
+                      data-testid="show-all-videos-button"
+                    >
                       <div className="text-center">
                         <ChevronRight className="h-6 w-6 mx-auto mb-1" />
-                        <div className="text-xs">+{videos.length - 8} more</div>
+                        <div className="text-xs">+{uniqueVideos.length - 8} more</div>
                       </div>
-                    </div>
+                    </button>
+                  )}
+                  {showAllVideos && uniqueVideos.length > 8 && (
+                    <button
+                      onClick={() => setShowAllVideos(false)}
+                      className="aspect-video rounded-lg bg-athlete-gray-700 hover:bg-athlete-gray-600 flex items-center justify-center text-gray-300 transition-colors"
+                      data-testid="show-less-videos-button"
+                    >
+                      <div className="text-center">
+                        <ChevronLeft className="h-6 w-6 mx-auto mb-1" />
+                        <div className="text-xs">Show less</div>
+                      </div>
+                    </button>
                   )}
                 </div>
 
@@ -214,7 +296,7 @@ export function DevelopmentPlanDisplay({ plan, language }: DevelopmentPlanDispla
                 <div className="flex justify-center pt-4">
                   <Button
                     variant="outline"
-                    onClick={() => window.open(videos[selectedVideoIndex]?.url, '_blank')}
+                    onClick={() => window.open(uniqueVideos[selectedVideoIndex]?.url, '_blank')}
                     className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white"
                     data-testid="view-youtube-button"
                   >
@@ -236,24 +318,33 @@ export function DevelopmentPlanDisplay({ plan, language }: DevelopmentPlanDispla
             Training Program Details
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-8">
-          <div className="prose prose-invert prose-lg max-w-none">
+        <CardContent className="p-6">
+          <div className="space-y-6">
             {sections.map((section, index) => (
-              <div key={index} className="mb-8">
+              <div key={index} className={`${
+                section.type === 'day' ? 'bg-athlete-gray-700/50 rounded-lg p-4 border-l-4 border-athlete-accent' :
+                section.type === 'week' ? 'bg-gradient-to-r from-athlete-accent/10 to-transparent rounded-lg p-4' :
+                ''
+              }`}>
                 {section.title && (
-                  <h3 className={`font-bold mb-4 ${
-                    section.type === 'schedule' 
-                      ? 'text-athlete-accent text-xl border-l-4 border-athlete-accent pl-4' 
-                      : 'text-white text-lg'
+                  <h3 className={`font-bold mb-3 flex items-center gap-2 ${
+                    section.type === 'day' ? 'text-athlete-accent text-lg' :
+                    section.type === 'week' ? 'text-white text-xl' :
+                    section.type === 'schedule' ? 'text-athlete-accent text-lg border-l-4 border-athlete-accent pl-4' :
+                    'text-white text-base'
                   }`}>
+                    {section.type === 'day' && <Calendar className="h-4 w-4" />}
+                    {section.type === 'week' && <Target className="h-5 w-5" />}
                     {section.title}
                   </h3>
                 )}
-                <div className="text-gray-200 leading-relaxed whitespace-pre-wrap">
+                <div className={`leading-relaxed whitespace-pre-wrap ${
+                  section.type === 'day' ? 'text-gray-100' : 'text-gray-200'
+                }`}>
                   {section.content.trim()}
                 </div>
-                {index < sections.length - 1 && (
-                  <hr className="border-gray-700 mt-6" />
+                {index < sections.length - 1 && section.type !== 'day' && (
+                  <hr className="border-gray-600 mt-4" />
                 )}
               </div>
             ))}

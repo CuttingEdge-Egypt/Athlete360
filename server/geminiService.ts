@@ -2112,7 +2112,7 @@ export interface DevelopmentPlanData {
 // YouTube scraping function to fetch exercise videos
 async function scrapeYouTubeForExercise(exerciseName: string, sport: string): Promise<string | null> {
   try {
-    const query = `${exerciseName} ${sport} exercise`;
+    const query = `${exerciseName} in ${sport} training`;
     const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
     
     const response = await fetch(searchUrl, {
