@@ -1407,11 +1407,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         competitionRecord: enhancedData?.currentRecord || "N/A"
       };
       
-      // Generate personalized development plan
-      const developmentPlan = await generateDevelopmentPlan(athlete.name, sportName, duration, goal, athleteDataForAnalysis);
+      // Generate personalized development plan using new JSON format
+      const developmentPlanData = {
+        athleteName: athlete.name,
+        sport: sportName,
+        goal,
+        duration,
+        language: "en" as const, // Default to English for now, can be made configurable
+        height: 175, // Default values since this is athlete-specific
+        weight: 70,
+        gender: "male" as const,
+        athleteData: athleteDataForAnalysis
+      };
       
-      // Check if the development plan generation failed
-      if (developmentPlan.error) {
+      const developmentPlan = await generateDevelopmentPlan(developmentPlanData);
+      
+      // Check if the development plan generation failed (should be JSON string or error object)
+      if (typeof developmentPlan === 'object' && developmentPlan.error) {
         // Refund tokens for failed analysis
         await refundTokensForFailedAnalysis(
           userId,
@@ -1423,42 +1435,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log(`🚫 FAILED: Development plan generation failed for ${athlete.name}, refunded ${tokenCost} tokens`);
         return res.status(500).json({
-          message: developmentPlan.errorMessage || developmentPlan.message || "Unable to generate authentic development plan at this time. Please try again later.",
+          message: (developmentPlan as any).errorMessage || "Unable to generate authentic development plan at this time. Please try again later.",
           error: true,
-          errorType: developmentPlan.errorType || "unknown",
-          retryable: developmentPlan.retryable || true,
-          suggestion: developmentPlan.suggestion || "Please try again later"
+          errorType: (developmentPlan as any).errorType || "unknown",
+          retryable: (developmentPlan as any).retryable || true,
+          suggestion: (developmentPlan as any).suggestion || "Please try again later"
         });
       }
       
-      // Store development plans in database for future use
-      if (developmentPlan.plan && developmentPlan.plan.length > 0) {
-        for (const weekPlan of developmentPlan.plan) {
-          if (weekPlan.activities && weekPlan.activities.length > 0) {
-            for (const activity of weekPlan.activities) {
-              try {
-                await storage.createDevelopmentPlan({
-                  athleteId,
-                  title: weekPlan.focus || 'Weekly Focus',
-                  description: activity,
-                  week: weekPlan.week
-                });
-              } catch (error) {
-                console.log(`Could not store development plan: ${error}`);
-              }
-            }
-          }
-        }
-      }
+      // Development plan should now be a JSON string representing the structured plan
+      // No need to store individual components since it's now a complete structured plan
 
       await storage.createAnalysisLog({
         userId,
         athleteId,
         serviceType: "development",
-        resultData: developmentPlan
+        resultData: { plan: developmentPlan }
       });
 
-      res.json(developmentPlan);
+      // Return the JSON string directly for the frontend to parse
+      res.json({ plan: developmentPlan });
     } catch (error) {
       console.error("Error generating development plan:", error);
       
@@ -1956,12 +1952,21 @@ Return only valid JSON with the missing fields.`;
       
       const developmentPlan = await Promise.race([
         generateDevelopmentPlan({
+          athleteName: `${gender} athlete`, // Generic athlete name for form-based generation
+          sport,
           goal,
+          duration: "12 weeks", // Default duration
+          language,
           height,
           weight,
           gender,
-          sport,
-          language
+          athleteData: {
+            bio: `${gender} ${sport} athlete, ${height}cm, ${weight}kg`,
+            rank: null,
+            country: "Unknown",
+            achievements: [],
+            competitionRecord: "N/A"
+          }
         }),
         new Promise((_, reject) => 
           setTimeout(() => reject(new Error('ROUTE_TIMEOUT')), 180000)
@@ -1969,7 +1974,7 @@ Return only valid JSON with the missing fields.`;
       ]);
       
       // Check if the development plan generation failed
-      if ((developmentPlan as any).error) {
+      if (typeof developmentPlan === 'object' && (developmentPlan as any).error) {
         console.log(`🚫 FAILED: Development plan generation failed - no tokens deducted`);
         return res.status(500).json({
           message: (developmentPlan as any).errorMessage || "Unable to generate development plan at this time. Please try again later.",
@@ -2016,7 +2021,7 @@ Return only valid JSON with the missing fields.`;
           userId,
           serviceType: "development-plan",
           resultData: {
-            ...(developmentPlan as any),
+            plan: developmentPlan,
             userInputs: { goal, sport, height, weight, gender, language },
             enhancedGeneration: true
           }
@@ -2027,7 +2032,7 @@ Return only valid JSON with the missing fields.`;
       }
 
       res.json({
-        ...(developmentPlan as any),
+        plan: developmentPlan,
         userGoal: goal,
         sport: sport,
         language: language,

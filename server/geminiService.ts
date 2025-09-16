@@ -2098,16 +2098,30 @@ function getSportFederationUrls(sport: string): string[] {
 
 // Development Plan Data Interfaces
 export interface DevelopmentPlanFormData {
+  athleteName?: string; // Optional, defaults to generic athlete
   goal: string;
   height: number; // in cm
   weight: number; // in kg
   gender: 'male' | 'female';
   sport: string;
   language: 'en' | 'ar';
+  duration?: string; // Optional, defaults to "12 weeks"
+  athleteData?: {
+    bio: string | null;
+    rank: number | null;
+    country: string | null;
+    achievements: string[] | null;
+    competitionRecord: string;
+  };
 }
 
 export interface DevelopmentPlanData {
   plan: string;
+  error?: boolean;
+  errorMessage?: string;
+  errorType?: string;
+  retryable?: boolean;
+  suggestion?: string;
 }
 
 // YouTube scraping function to fetch exercise videos
