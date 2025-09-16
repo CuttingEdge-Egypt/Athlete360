@@ -207,7 +207,7 @@ export default function Home() {
     enabled: !!developmentJobId,
     refetchInterval: (data) => {
       // Stop polling if job is completed, failed, or cancelled
-      const status = data?.status;
+      const status = data?.data?.status;
       return (status === 'completed' || status === 'failed' || status === 'cancelled') ? false : 2000;
     },
     queryFn: async () => {
