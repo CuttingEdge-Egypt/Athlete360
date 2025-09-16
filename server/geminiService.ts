@@ -2261,7 +2261,7 @@ async function generateSingleDevelopmentDay(
 - الجنس: ${genderText}
 
 متطلبات اليوم ${dayNumber}:
-- 4-6 تمارين مفصلة
+- 3 تمارين مفصلة فقط
 - أسماء تمارين واضحة ومحددة
 - وصف شامل لكل تمرين
 - معلومات الشدة والراحة والمعدات
@@ -2275,7 +2275,7 @@ async function generateSingleDevelopmentDay(
 - Gender: ${genderText}
 
 Day ${dayNumber} requirements:
-- 4-6 detailed exercises
+- Exactly 3 detailed exercises
 - Clear and specific exercise names
 - Comprehensive description for each exercise
 - Include intensity, rest, and equipment information
