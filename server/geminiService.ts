@@ -176,6 +176,10 @@ export async function generateEnhancedNutritionPlan(
     // Calculate total days based on period
     const totalDays = period * 7;
     
+    // Get current date for accurate nutrition plan scheduling
+    const currentDate = new Date();
+    const currentDateStr = currentDate.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    
     // Language-specific system prompt
     const isArabic = language === 'ar';
     const systemPrompt = isArabic ? 
@@ -201,7 +205,7 @@ export async function generateEnhancedNutritionPlan(
   "days": [
     {
       "day": {
-        "date": "2024-08-14",
+        "date": "${currentDateStr}",
         "name": "الاثنين"
       },
       "meals": [
@@ -291,7 +295,7 @@ CRITICAL: Return ONLY valid JSON in this EXACT structure with no additional text
   "days": [
     {
       "day": {
-        "date": "2024-08-14",
+        "date": "${currentDateStr}",
         "name": "Monday"
       },
       "meals": [
@@ -562,6 +566,10 @@ export async function generateNutritionPlan(
     // Calculate total days based on period (default 1 week for backward compatibility)
     const totalDays = period * 7;
     
+    // Get current date for accurate nutrition plan scheduling
+    const currentDate = new Date();
+    const currentDateStr = currentDate.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    
     const systemPrompt = `You are a professional sports nutritionist specializing in ${nationalityText} cuisine. Create a ${period}-week nutrition plan (${totalDays} days) in JSON format only. Do not include any text before or after the JSON. The response must be valid JSON without any markdown formatting.`;
     
     const prompt = `Create a personalized ${period}-week nutrition plan (${totalDays} days) for this athlete:
@@ -575,7 +583,7 @@ CRITICAL: Return ONLY valid JSON in this EXACT structure with no additional text
   "days": [
     {
       "day": {
-        "date": "2024-08-14",
+        "date": "${currentDateStr}",
         "name": "Monday"
       },
       "meals": [
