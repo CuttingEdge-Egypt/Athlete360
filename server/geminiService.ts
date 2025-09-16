@@ -119,6 +119,37 @@ function summarizePreviousWeeks(previousWeeks: NutritionPlanDay[][]): string {
   return `Previously used proteins: ${Array.from(usedProteins).join(', ')}. Previously used grains: ${Array.from(usedGrains).join(', ')}. Avoid repeating these exact meal combinations: ${Array.from(usedMeals).slice(0, 10).join(', ')}.`;
 }
 
+// Helper function to repair malformed JSON strings
+function repairJsonString(jsonStr: string): string {
+  try {
+    // Remove any trailing incomplete content after last }
+    const lastBraceIndex = jsonStr.lastIndexOf('}');
+    if (lastBraceIndex !== -1 && lastBraceIndex < jsonStr.length - 1) {
+      jsonStr = jsonStr.substring(0, lastBraceIndex + 1);
+    }
+    
+    // Fix common JSON issues
+    jsonStr = jsonStr
+      // Fix unescaped quotes in strings
+      .replace(/": "([^"]*)"([^",\]}]*)"([^",\]}]*)",/g, '": "$1\\"$2\\"$3",')
+      // Fix line breaks in strings
+      .replace(/": "([^"]*)\n([^"]*)",/g, '": "$1\\n$2",')
+      // Fix trailing commas
+      .replace(/,(\s*[}\]])/g, '$1')
+      // Fix missing quotes around property names
+      .replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":')
+      // Ensure proper string escaping for common characters
+      .replace(/\\(?!["\\/bfnrt])/g, '\\\\')
+      // Fix unterminated strings by finding unmatched quotes and closing them
+      .replace(/"([^"\\]*(\\.[^"\\]*)*)$/g, '"$1"');
+      
+    return jsonStr;
+  } catch (error) {
+    console.error('JSON repair failed:', error);
+    return jsonStr;
+  }
+}
+
 // Helper function to detect excessive duplicates in a week
 function detectDuplicates(week: NutritionPlanDay[], previousWeeks: NutritionPlanDay[][]): boolean {
   const currentMeals = new Set<string>();
@@ -362,16 +393,21 @@ Requirements for Week ${weekNumber}:
 
     const responseText = result?.text || "{}";
     
-    // Clean and parse the JSON response
+    // Clean and parse the JSON response with robust repair
     let cleanedResponse = responseText.trim();
     cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
     cleanedResponse = cleanedResponse.replace(/^```/, '').replace(/```$/, '');
+    
+    // Advanced JSON repair
+    cleanedResponse = repairJsonString(cleanedResponse);
 
     let weekPlan: { instructions: string; days: NutritionPlanDay[] };
     try {
       weekPlan = JSON.parse(cleanedResponse);
     } catch (parseError) {
       console.error(`❌ Week ${weekNumber} JSON parsing failed:`, parseError);
+      console.error(`❌ Problematic JSON (first 500 chars):`, cleanedResponse.substring(0, 500));
+      console.error(`❌ Problematic JSON (last 500 chars):`, cleanedResponse.substring(Math.max(0, cleanedResponse.length - 500)));
       throw new Error(`AI_JSON_PARSE_FAILED: Week ${weekNumber} returned invalid JSON`);
     }
 
