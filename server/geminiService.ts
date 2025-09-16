@@ -480,6 +480,8 @@ Requirements for Week ${weekNumber}:
     // Validate the response has 7 days
     if (!weekPlan.days || weekPlan.days.length !== 7) {
       console.error(`❌ Week ${weekNumber} returned ${weekPlan.days?.length || 0} days instead of 7`);
+      console.error(`❌ Week ${weekNumber} complete response:`, JSON.stringify(weekPlan, null, 2));
+      console.error(`❌ Week ${weekNumber} raw response (first 1000 chars):`, cleanedResponse.substring(0, 1000));
       throw new Error(`AI_INVALID_RESPONSE: Week ${weekNumber} must have exactly 7 days`);
     }
 
@@ -535,27 +537,63 @@ export async function generateEnhancedNutritionPlan(
       const weekStartDate = new Date(currentDate);
       weekStartDate.setDate(currentDate.getDate() + (weekNum - 1) * 7);
       
-      const previousWeeksSummary = summarizePreviousWeeks(allWeeks);
+      // Limit context to prevent token overflow - only use last 1-2 weeks
+      const recentWeeks = allWeeks.slice(-2); // Only last 2 weeks maximum
+      const previousWeeksSummary = summarizePreviousWeeks(recentWeeks);
       const varietyContext = weekNum > 1 ? 
-        `VARIETY REQUIREMENT: This week must be 60-70% different from previous weeks. ${previousWeeksSummary}` : 
+        `VARIETY REQUIREMENT: This week must be 60-70% different from recent weeks. ${previousWeeksSummary.substring(0, 800)}` : // Limit to 800 chars
         'This is the first week - establish a strong foundation.';
       
-      const weekResult = await generateSingleWeek({
-        weekNumber: weekNum,
-        startDate: weekStartDate,
-        formData,
-        nationalityText,
-        genderText,
-        isArabic,
-        varietyContext
-      });
+      // Try generating the week with retry logic
+      let weekResult: { instructions: string; days: NutritionPlanDay[] } | undefined;
+      let attempts = 0;
+      const maxAttempts = 3;
+      
+      while (attempts < maxAttempts) {
+        attempts++;
+        try {
+          // Use simpler context for retries
+          const retryVarietyContext = attempts > 1 ? 
+            'Generate varied meals different from previous weeks.' : 
+            varietyContext;
+            
+          weekResult = await generateSingleWeek({
+            weekNumber: weekNum,
+            startDate: weekStartDate,
+            formData,
+            nationalityText,
+            genderText,
+            isArabic,
+            varietyContext: retryVarietyContext
+          });
+          
+          // Success - break out of retry loop
+          break;
+          
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          console.log(`⚠️ Week ${weekNum} attempt ${attempts} failed:`, errorMessage);
+          
+          if (attempts === maxAttempts) {
+            throw error; // Final attempt failed
+          }
+          
+          // Wait before retry
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+        }
+      }
+      
+      // Ensure weekResult exists before proceeding
+      if (!weekResult) {
+        throw new Error(`Failed to generate Week ${weekNum} after ${maxAttempts} attempts`);
+      }
       
       allWeeks.push(weekResult.days);
       if (weekNum === 1) {
         combinedInstructions = weekResult.instructions;
       }
       
-      console.log(`✅ Week ${weekNum} generated: ${weekResult.days.length} days`);
+      console.log(`✅ Week ${weekNum} generated: ${weekResult.days.length} days (attempt ${attempts})`);
     }
     
     const duration = Date.now() - startTime;
