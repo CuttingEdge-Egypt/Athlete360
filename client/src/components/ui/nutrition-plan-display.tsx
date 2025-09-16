@@ -209,22 +209,6 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
 
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
-      {/* Instructions Section */}
-      {nutritionData.instructions && (
-        <Card className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border-blue-600/30">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3 text-foreground">
-              <Target className="h-5 w-5 text-blue-400" />
-              Personalized Instructions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-              {nutritionData.instructions}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Consolidated Navigation Header */}
       <Card className="bg-gradient-to-r from-card to-slate-700 border-border">
@@ -250,9 +234,15 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Week Slider */}
-          <div className="space-y-4">
-            <div className="text-center">
+        </CardContent>
+      </Card>
+
+      {/* Current Day Display */}
+      {currentDayData && (
+        <Card className="bg-card border-border">
+          <CardHeader>
+            {/* Week Slider - Inline above day/date */}
+            <div className="mb-4 text-center">
               <div className="text-sm text-muted-foreground mb-3">Select Week</div>
               <div className="flex items-center justify-center gap-3">
                 <Button
@@ -296,14 +286,7 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
                 </Button>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Current Day Display */}
-      {currentDayData && (
-        <Card className="bg-card border-border">
-          <CardHeader>
+            
             <CardTitle className="flex items-center justify-between text-foreground">
               <div className="flex items-center gap-3">
                 <div className="bg-green-500 text-white rounded-full w-12 h-12 flex items-center justify-center text-xl font-bold">
@@ -417,6 +400,23 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
                     <p className="text-slate-200 leading-relaxed">
                       {currentDayData.explanation}
                     </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Personalized Instructions - Moved after Daily Focus */}
+            {nutritionData.instructions && (
+              <div className="mt-6 p-6 bg-gradient-to-r from-purple-900/30 to-purple-800/20 rounded-xl border-l-4 border-purple-400">
+                <div className="flex items-start gap-3">
+                  <Target className="h-6 w-6 text-purple-400 mt-1 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-bold text-lg text-purple-300 mb-2">
+                      Personalized Instructions
+                    </h4>
+                    <div className="text-slate-200 leading-relaxed whitespace-pre-wrap">
+                      {nutritionData.instructions}
+                    </div>
                   </div>
                 </div>
               </div>

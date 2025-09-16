@@ -109,7 +109,11 @@
     "weekNavigation": {
       "week": "Week",
       "previous": "Previous Week",
-      "next": "Next Week"
+      "next": "Next Week",
+      "selectWeek": "Select Week",
+      "selectDay": "Select Day in Week",
+      "dailyFocus": "Daily Focus",
+      "personalizedInstructions": "Personalized Instructions"
     }
   },
   "developmentPlan": {

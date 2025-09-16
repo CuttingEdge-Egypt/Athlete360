@@ -346,7 +346,7 @@ Requirements for Week ${weekNumber}:
     const weekStartTime = Date.now();
 
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
       config: {
         systemInstruction: systemPrompt,
         responseMimeType: "application/json",
@@ -608,7 +608,7 @@ CRITICAL ERROR HANDLING:
 - Only provide nutrition plans if you can find authentic dietary information for the athlete's sport and nationality`;
 
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
       config: {
         systemInstruction: systemPrompt,
         responseMimeType: "application/json",
@@ -777,7 +777,7 @@ Return ONLY pure JSON (no markdown blocks):
 }`;
 
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         temperature: 0.1,
@@ -845,7 +845,7 @@ Return ONLY pure JSON:
 }`;
 
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         temperature: 0.1,
@@ -913,7 +913,7 @@ Return ONLY pure JSON:
 }`;
 
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         temperature: 0.1,
@@ -968,7 +968,7 @@ Return ONLY pure JSON:
 }`;
 
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         temperature: 0.1,
@@ -1034,7 +1034,7 @@ Return ONLY pure JSON:
 }`;
 
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         temperature: 0.1,
@@ -1139,7 +1139,7 @@ Return ONLY pure JSON:
 }`;
 
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         temperature: 0.1,
@@ -1353,7 +1353,7 @@ Otherwise, ALWAYS return the complete structure with available data.`;
 
     // Use GoogleGenAI with search tools enabled
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         temperature: 0.1,
@@ -1408,7 +1408,7 @@ export async function generateDetailedComparison(
     const sessionId = Math.random().toString(36).substring(7);
 
     const model = googleGenAI.getGenerativeModel({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
       generationConfig: {
         temperature: 0.1,
         maxOutputTokens: 8192,
@@ -1678,7 +1678,7 @@ Return ONLY valid JSON with no markdown formatting or additional text.`;
 
     // Use GoogleGenAI client with proper search grounding
     const model = googleGenAI.getGenerativeModel({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
       generationConfig: {
         temperature: 1,
         maxOutputTokens: 8000,
@@ -1780,7 +1780,7 @@ export async function generateAthleteBiography(name: string, sport: string, nati
 
   try {
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         temperature: 1,

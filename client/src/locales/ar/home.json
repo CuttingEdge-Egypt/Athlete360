@@ -109,7 +109,11 @@
     "weekNavigation": {
       "week": "الأسبوع",
       "previous": "الأسبوع السابق",
-      "next": "الأسبوع التالي"
+      "next": "الأسبوع التالي",
+      "selectWeek": "اختر الأسبوع",
+      "selectDay": "اختر اليوم في الأسبوع",
+      "dailyFocus": "التركيز اليومي",
+      "personalizedInstructions": "التعليمات الشخصية"
     }
   },
   "developmentPlan": {
