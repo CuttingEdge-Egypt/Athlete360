@@ -1762,14 +1762,7 @@ Return only valid JSON with the missing fields.`;
         return res.status(402).json({ message: "Insufficient tokens" });
       }
 
-      // Deduct tokens before processing
-      await storage.deductTokens(userId, tokenCost);
-      await storage.createTransaction({
-        userId,
-        action: "Personal Nutrition Plan Generation",
-        tokensDeducted: tokenCost,
-        serviceType: "nutrition-plan"
-      });
+      // Note: Tokens will be deducted AFTER successful generation
 
       console.log(`🍽️ Generating nutrition plan for user ${userId} with enhanced data: goal=${goal}, weight=${currentWeight}→${targetWeight}kg, period=${period}w, language=${language}`);
 
@@ -1821,16 +1814,7 @@ Return only valid JSON with the missing fields.`;
       
       // Check if the nutrition plan generation failed
       if ((nutritionPlan as any).error) {
-        // Refund tokens for failed analysis
-        await refundTokensForFailedAnalysis(
-          userId,
-          null, // No athleteId for form-based nutrition plans
-          tokenCost,
-          'nutrition-plan',
-          'Personal Nutrition Plan'
-        );
-        
-        console.log(`🚫 FAILED: Enhanced nutrition plan generation failed, refunded ${tokenCost} tokens`);
+        console.log(`🚫 FAILED: Enhanced nutrition plan generation failed - no tokens deducted`);
         return res.status(500).json({
           message: (nutritionPlan as any).errorMessage || "Unable to generate nutrition plan at this time. Please try again later.",
           error: true,
@@ -1840,18 +1824,51 @@ Return only valid JSON with the missing fields.`;
         });
       }
 
-      console.log(`✅ SUCCESS: Enhanced nutrition plan generated for user ${userId}`);
+      // SUCCESS: Now deduct tokens after confirmed successful generation
+      let tokenDeducted = false;
+      try {
+        await storage.deductTokens(userId, tokenCost);
+        tokenDeducted = true;
+        
+        await storage.createTransaction({
+          userId,
+          action: "Personal Nutrition Plan Generation",
+          tokensDeducted: tokenCost,
+          serviceType: "nutrition-plan"
+        });
 
-      // Create analysis log with enhanced data
-      await storage.createAnalysisLog({
-        userId,
-        serviceType: "nutrition-plan",
-        resultData: {
-          ...(nutritionPlan as any),
-          userInputs: { goal, sport: sportName, age, height, currentWeight, targetWeight, country, period, language },
-          enhancedGeneration: true
+        console.log(`✅ SUCCESS: Enhanced nutrition plan generated for user ${userId}, ${tokenCost} tokens deducted`);
+      } catch (deductionError) {
+        console.error("Error during token deduction or transaction creation:", deductionError);
+        
+        // If tokens were deducted but transaction failed, try to refund
+        if (tokenDeducted) {
+          try {
+            await storage.refundTokens(userId, tokenCost);
+            console.log(`🔄 REFUND: ${tokenCost} tokens refunded due to transaction error`);
+          } catch (refundError) {
+            console.error("Failed to refund tokens after transaction error:", refundError);
+          }
         }
-      });
+        
+        throw deductionError; // Re-throw to be caught by main catch block
+      }
+
+      // Create analysis log with enhanced data (non-fatal)
+      try {
+        await storage.createAnalysisLog({
+          userId,
+          serviceType: "nutrition-plan",
+          resultData: {
+            ...(nutritionPlan as any),
+            userInputs: { goal, sport: sportName, age, height, currentWeight, targetWeight, country, period, language },
+            enhancedGeneration: true
+          }
+        });
+      } catch (logError) {
+        console.error("Non-fatal error creating analysis log:", logError);
+        // Continue execution - logging failure shouldn't prevent successful response
+      }
 
       res.json({
         ...(nutritionPlan as any),
@@ -1864,24 +1881,35 @@ Return only valid JSON with the missing fields.`;
     } catch (error) {
       console.error("Error generating enhanced nutrition plan:", error);
       
-      // Ensure tokens are refunded on any uncaught errors
-      try {
-        await refundTokensForFailedAnalysis(
-          userId,
-          null,
-          tokenCost,
-          'nutrition-plan',
-          'Personal Nutrition Plan - System Error'
-        );
-        console.log(`🔄 EMERGENCY REFUND: ${tokenCost} tokens refunded due to system error`);
-      } catch (refundError) {
-        console.error("Failed to refund tokens after system error:", refundError);
+      // Most errors occur before token deduction, but check if this is a post-deduction error
+      const isPostDeductionError = error instanceof Error && 
+        (error.message.includes('transaction creation') || 
+         error.message.includes('analysis log'));
+      
+      if (isPostDeductionError) {
+        console.log(`🔄 FAILED: Post-deduction error occurred - tokens may have already been refunded`);
+      } else {
+        console.log(`🚫 FAILED: Enhanced nutrition plan generation failed - no tokens were deducted`);
+      }
+      
+      // Determine error message based on error type
+      let errorMessage = "Failed to generate nutrition plan. Please try again.";
+      let retryable = true;
+      
+      if (error instanceof Error) {
+        if (error.message.includes('AI_JSON_PARSE_FAILED')) {
+          errorMessage = "The nutrition plan was generated but had formatting issues. Please try again.";
+        } else if (error.message.includes('AI_TIMEOUT') || error.message.includes('ROUTE_TIMEOUT')) {
+          errorMessage = "Nutrition plan generation timed out. Please try again with a shorter period or try again later.";
+        } else if (isPostDeductionError) {
+          errorMessage = "The nutrition plan was generated successfully but there was an issue processing your request.";
+        }
       }
       
       res.status(500).json({ 
-        message: "Failed to generate nutrition plan. Your tokens have been refunded.",
+        message: errorMessage,
         error: true,
-        retryable: true
+        retryable: retryable
       });
     }
   }));

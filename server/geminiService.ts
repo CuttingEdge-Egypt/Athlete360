@@ -475,28 +475,114 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
       throw new Error('AI_WEB_SEARCH_FAILED: No authentic nutrition data found through web search');
     }
     
-    // Enhanced JSON cleaning and parsing
+    // Enhanced JSON cleaning and parsing for large responses
     let cleanedResponse = responseText.trim();
     
     // Remove any markdown code blocks
     cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
     cleanedResponse = cleanedResponse.replace(/^```/, '').replace(/```$/, '');
     
-    // Remove any leading/trailing non-JSON text
+    // Find JSON boundaries more carefully for large responses
     const jsonStart = cleanedResponse.indexOf('{');
-    const jsonEnd = cleanedResponse.lastIndexOf('}');
-    if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
-      cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
+    let jsonEnd = -1;
+    
+    // For large responses, find the proper closing brace by counting brackets
+    if (jsonStart !== -1) {
+      let braceCount = 0;
+      let inString = false;
+      let escaped = false;
+      
+      for (let i = jsonStart; i < cleanedResponse.length; i++) {
+        const char = cleanedResponse[i];
+        
+        if (escaped) {
+          escaped = false;
+          continue;
+        }
+        
+        if (char === '\\') {
+          escaped = true;
+          continue;
+        }
+        
+        if (char === '"') {
+          inString = !inString;
+          continue;
+        }
+        
+        if (!inString) {
+          if (char === '{') {
+            braceCount++;
+          } else if (char === '}') {
+            braceCount--;
+            if (braceCount === 0) {
+              jsonEnd = i;
+              break;
+            }
+          }
+        }
+      }
     }
     
-    // Fix common JSON issues
-    cleanedResponse = cleanedResponse
-      .replace(/\n/g, ' ')  // Replace newlines with spaces
-      .replace(/\r/g, ' ')  // Replace carriage returns
-      .replace(/\t/g, ' ')  // Replace tabs
-      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-      .replace(/,\s*}/g, '}') // Remove trailing commas before closing braces
-      .replace(/,\s*]/g, ']'); // Remove trailing commas before closing brackets
+    if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+      cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
+    } else {
+      // Fallback to simple approach if bracket counting fails
+      const simpleEnd = cleanedResponse.lastIndexOf('}');
+      if (jsonStart !== -1 && simpleEnd !== -1 && simpleEnd > jsonStart) {
+        cleanedResponse = cleanedResponse.substring(jsonStart, simpleEnd + 1);
+      }
+    }
+    
+    // More conservative JSON cleaning for large responses
+    // Only replace newlines and tabs that are NOT inside strings
+    let cleanedJSON = '';
+    let inString = false;
+    let escaped = false;
+    
+    for (let i = 0; i < cleanedResponse.length; i++) {
+      const char = cleanedResponse[i];
+      
+      if (escaped) {
+        cleanedJSON += char;
+        escaped = false;
+        continue;
+      }
+      
+      if (char === '\\') {
+        cleanedJSON += char;
+        escaped = true;
+        continue;
+      }
+      
+      if (char === '"') {
+        inString = !inString;
+        cleanedJSON += char;
+        continue;
+      }
+      
+      if (!inString) {
+        // Outside strings: normalize whitespace and remove trailing commas
+        if (char === '\n' || char === '\r' || char === '\t') {
+          cleanedJSON += ' ';
+        } else if (char === ',' && i + 1 < cleanedResponse.length) {
+          const nextNonSpace = cleanedResponse.substring(i + 1).match(/\S/);
+          if (nextNonSpace && (nextNonSpace[0] === '}' || nextNonSpace[0] === ']')) {
+            // Skip trailing comma
+            continue;
+          } else {
+            cleanedJSON += char;
+          }
+        } else {
+          cleanedJSON += char;
+        }
+      } else {
+        // Inside strings: preserve everything
+        cleanedJSON += char;
+      }
+    }
+    
+    cleanedResponse = cleanedJSON.replace(/\s+/g, ' ').trim(); // Normalize multiple spaces
     
     console.log(`🔍 Complete plan cleaned response length: ${cleanedResponse.length} chars`);
     console.log(`🔍 Complete plan cleaned response preview: ${cleanedResponse.substring(0, 300)}...`);
@@ -534,19 +620,34 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
   } catch (error) {
     console.error("Error generating enhanced nutrition plan:", error);
     
-    // Return structured error response in proper NutritionPlanData format
-    const errorResponse = {
-      error: true,
-      errorType: error instanceof Error && error.message.includes('AI_WEB_SEARCH_FAILED') ? "web_search_failed" : "parsing_error",
-      errorMessage: `Unable to generate nutrition plan: ${error instanceof Error ? error.message : String(error)}`,
-      retryable: true,
-      suggestion: "Please try again or check if the athlete information is correct",
-      days: []
-    };
+    // For critical errors (JSON parsing, timeout, etc.), re-throw so tokens aren't deducted
+    if (error instanceof Error) {
+      if (error.message.includes('AI_JSON_PARSE_FAILED') ||
+          error.message.includes('AI_TIMEOUT') ||
+          error.message.includes('ROUTE_TIMEOUT')) {
+        // Re-throw critical errors so route can handle them properly (no token deduction)
+        throw error;
+      }
+      
+      // Only convert web search failures to error response objects
+      if (error.message.includes('AI_WEB_SEARCH_FAILED')) {
+        const errorResponse = {
+          error: true,
+          errorType: "web_search_failed",
+          errorMessage: `Unable to generate nutrition plan: ${error.message}`,
+          retryable: true,
+          suggestion: "Please try again or check if the athlete information is correct",
+          days: []
+        };
+        
+        return {
+          plan: JSON.stringify(errorResponse)
+        };
+      }
+    }
     
-    return {
-      plan: JSON.stringify(errorResponse)
-    };
+    // For other unexpected errors, re-throw them
+    throw error;
   }
 }
 
