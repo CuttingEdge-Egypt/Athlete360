@@ -2273,30 +2273,40 @@ async function generateSingleDevelopmentWeek(
   };
 
   const prompt = isArabic ?
-    `أنشئ الأسبوع ${weekNumber} من خطة تدريب مبسطة:
+    `أنشئ الأسبوع ${weekNumber} من خطة تدريب شاملة ومفصلة:
 
 - الرياضة: ${sport}
 - الهدف: ${goal}
 - العمر: ${age} سنة
+- الجنس: ${genderText}
+- الطول: ${height} سم
+- الوزن: ${weight} كغ
 
 متطلبات الأسبوع ${weekNumber}:
-- 3-4 أيام تدريب فقط
-- 3-5 تمارين بسيطة لكل يوم
-- أسماء تمارين قصيرة ووصف مختصر
+- 5-6 أيام تدريب
+- 6-8 تمارين مفصلة لكل يوم
+- اجعل أسماء التمارين واضحة ومحددة
+- قدم وصف شامل لكل تمرين مع التفاصيل الكاملة
+- أضف معلومات عن الشدة والراحة والمعدات
 
-أرجع JSON صالح فقط.` :
-    `Create week ${weekNumber} of a simplified training plan:
+أرجع JSON صالح فقط بالهيكل المطلوب.` :
+    `Create week ${weekNumber} of a comprehensive and detailed training plan:
 
 - Sport: ${sport}
 - Goal: ${goal}
 - Age: ${age} years
+- Gender: ${genderText}
+- Height: ${height}cm
+- Weight: ${weight}kg
 
 Week ${weekNumber} requirements:
-- Only 3-4 training days
-- 3-5 simple exercises per day
-- Short exercise names and brief descriptions
+- 5-6 training days
+- 6-8 detailed exercises per day
+- Make exercise names clear and specific
+- Provide comprehensive description for each exercise with full details
+- Include intensity, rest, and equipment information
 
-Return ONLY valid JSON.`;
+Return ONLY valid JSON in the required structure.`;
 
   try {
     console.log(`⏳ Generating Week ${weekNumber}...`);
@@ -2309,7 +2319,7 @@ Return ONLY valid JSON.`;
         responseMimeType: "application/json",
         responseSchema: weekSchema,
         temperature: 0.2,
-        maxOutputTokens: 1500  // Reduced further to avoid truncation
+        maxOutputTokens: 8192  // Maximum supported by Gemini
       },
       contents: prompt
     });
@@ -2420,7 +2430,7 @@ Return JSON containing:
         responseMimeType: "application/json",
         responseSchema: overviewSchema,
         temperature: 0.2,
-        maxOutputTokens: 1000
+        maxOutputTokens: 4096  // Increased for overview generation
       },
       contents: overviewPrompt
     });
