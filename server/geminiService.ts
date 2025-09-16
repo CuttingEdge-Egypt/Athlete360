@@ -2203,9 +2203,10 @@ function extractVideoId(url: string): string {
   return match?.[1] || '';
 }
 
-// Generate a single week of development plan
-async function generateSingleDevelopmentWeek(
+// Generate a single day of development plan
+async function generateSingleDevelopmentDay(
   weekNumber: number,
+  dayNumber: number,
   formData: DevelopmentPlanFormData,
   genderText: string,
   isArabic: boolean
@@ -2216,136 +2217,109 @@ async function generateSingleDevelopmentWeek(
     `أنت خبير تدريب رياضي متخصص في تصميم برامج التدريب. قم بإنشاء أسبوع واحد من خطة التدريب بتنسيق JSON.` :
     `You are a professional sports training expert. Create one week of a training plan in JSON format.`;
 
-  // Schema for a single week
-  const weekSchema = {
+  // Schema for a single day
+  const daySchema = {
     type: "object",
     properties: {
       index: { type: "number" },
       title: { type: "string" },
-      summary: { type: "string" },
-      counts: {
-        type: "object",
-        properties: {
-          days: { type: "number" },
-          videos: { type: "number" },
-          exercises: { type: "number" }
-        },
-        required: ["days", "exercises"]
-      },
-      days: {
+      focus: { type: "string" },
+      exercises: {
         type: "array",
         items: {
           type: "object",
           properties: {
-            index: { type: "number" },
-            title: { type: "string" },
-            focus: { type: "string" },
-            exercises: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  id: { type: "string" },
-                  name: { type: "string" },
-                  description: { type: "string" },
-                  tags: { type: "array", items: { type: "string" } },
-                  prescription: {
-                    type: "object",
-                    properties: {
-                      sets: { type: "number" },
-                      reps: { type: ["string", "number"] },
-                      restSec: { type: "number" },
-                      intensity: { type: "string" }
-                    }
-                  },
-                  equipment: { type: "array", items: { type: "string" } }
-                },
-                required: ["id", "name", "description"]
+            id: { type: "string" },
+            name: { type: "string" },
+            description: { type: "string" },
+            tags: { type: "array", items: { type: "string" } },
+            prescription: {
+              type: "object",
+              properties: {
+                sets: { type: "number" },
+                reps: { type: ["string", "number"] },
+                restSec: { type: "number" },
+                intensity: { type: "string" }
               }
             },
-            notes: { type: "string" }
+            equipment: { type: "array", items: { type: "string" } }
           },
-          required: ["index", "title", "exercises"]
+          required: ["id", "name", "description"]
         }
-      }
+      },
+      notes: { type: "string" }
     },
-    required: ["index", "title", "summary", "days"]
+    required: ["index", "title", "exercises"]
   };
 
   const prompt = isArabic ?
-    `أنشئ الأسبوع ${weekNumber} من خطة تدريب شاملة ومفصلة:
+    `أنشئ اليوم ${dayNumber} من الأسبوع ${weekNumber} لخطة تدريب شاملة:
 
 - الرياضة: ${sport}
 - الهدف: ${goal}
 - العمر: ${age} سنة
 - الجنس: ${genderText}
-- الطول: ${height} سم
-- الوزن: ${weight} كغ
 
-متطلبات الأسبوع ${weekNumber}:
-- 5-6 أيام تدريب
-- 6-8 تمارين مفصلة لكل يوم
-- اجعل أسماء التمارين واضحة ومحددة
-- قدم وصف شامل لكل تمرين مع التفاصيل الكاملة
-- أضف معلومات عن الشدة والراحة والمعدات
+متطلبات اليوم ${dayNumber}:
+- 4-6 تمارين مفصلة
+- أسماء تمارين واضحة ومحددة
+- وصف شامل لكل تمرين
+- معلومات الشدة والراحة والمعدات
 
-أرجع JSON صالح فقط بالهيكل المطلوب.` :
-    `Create week ${weekNumber} of a comprehensive and detailed training plan:
+أرجع JSON صالح فقط.` :
+    `Create day ${dayNumber} of week ${weekNumber} for a comprehensive training plan:
 
 - Sport: ${sport}
 - Goal: ${goal}
 - Age: ${age} years
 - Gender: ${genderText}
-- Height: ${height}cm
-- Weight: ${weight}kg
 
-Week ${weekNumber} requirements:
-- 5-6 training days
-- 6-8 detailed exercises per day
-- Make exercise names clear and specific
-- Provide comprehensive description for each exercise with full details
+Day ${dayNumber} requirements:
+- 4-6 detailed exercises
+- Clear and specific exercise names
+- Comprehensive description for each exercise
 - Include intensity, rest, and equipment information
 
-Return ONLY valid JSON in the required structure.`;
+Return ONLY valid JSON.`;
 
   try {
-    console.log(`⏳ Generating Week ${weekNumber}...`);
-    const weekStart = Date.now();
+    console.log(`⏳ Generating Week ${weekNumber}, Day ${dayNumber}...`);
+    const dayStart = Date.now();
     
     const result = await genAI.models.generateContent({
       model: "gemini-2.5-pro",
       config: {
         systemInstruction: systemPrompt,
         responseMimeType: "application/json",
-        responseSchema: weekSchema,
+        responseSchema: daySchema,
         temperature: 0.2,
-        maxOutputTokens: 8192  // Maximum supported by Gemini
+        maxOutputTokens: 4096  // Sufficient for single day
       },
       contents: prompt
     });
 
-    const weekDuration = Date.now() - weekStart;
-    console.log(`✅ Week ${weekNumber} generated in ${weekDuration}ms`);
+    const dayDuration = Date.now() - dayStart;
+    console.log(`✅ Week ${weekNumber}, Day ${dayNumber} generated in ${dayDuration}ms`);
 
     // Check for truncation
     const finishReason = (result as any)?.response?.candidates?.[0]?.finishReason || 
                         (result as any)?.candidates?.[0]?.finishReason;
     if (finishReason === "MAX_TOKENS") {
-      console.error(`⚠️ Week ${weekNumber} was truncated`);
-      throw new Error(`Week ${weekNumber} response was truncated`);
+      console.error(`⚠️ Week ${weekNumber}, Day ${dayNumber} was truncated`);
+      throw new Error(`Week ${weekNumber}, Day ${dayNumber} response was truncated`);
     }
 
     const responseText = result?.text || "";
     if (!responseText) {
-      throw new Error(`Empty response for week ${weekNumber}`);
+      throw new Error(`Empty response for week ${weekNumber}, day ${dayNumber}`);
     }
 
-    const weekPlan = JSON.parse(responseText);
-    weekPlan.index = weekNumber; // Ensure correct index
+    const dayPlan = JSON.parse(responseText);
+    dayPlan.index = dayNumber; // Ensure correct index
     
-    return weekPlan;
+    return dayPlan;
   } catch (error) {
-    console.error(`❌ Error generating Week ${weekNumber}:`, error);
+    console.error(`❌ Error generating Week ${weekNumber}, Day ${dayNumber}:`, error);
     throw error;
   }
 }
@@ -2464,37 +2438,60 @@ Return JSON containing:
     const totalWeeks = overview.totalWeeks || 8;
     console.log(`✅ Overview ready: ${totalWeeks} weeks planned`);
 
-    // Generate each week separately
+    // Generate each week and day separately
     const weeks = [];
-    console.log(`🏋️ Generating ${totalWeeks} weeks of training...`);
+    const daysPerWeek = 5; // Standard 5-day training week
+    console.log(`🏋️ Generating ${totalWeeks} weeks of training (${daysPerWeek} days each)...`);
     
     for (let weekNum = 1; weekNum <= totalWeeks; weekNum++) {
-      let weekResult;
-      let attempts = 0;
-      const maxAttempts = 2;
+      const weekDays = [];
       
-      while (attempts < maxAttempts) {
-        attempts++;
-        try {
-          weekResult = await generateSingleDevelopmentWeek(
-            weekNum,
-            formData,
-            genderText,
-            isArabic
-          );
-          break; // Success
-        } catch (error) {
-          console.error(`❌ Attempt ${attempts} failed for week ${weekNum}:`, error);
-          if (attempts >= maxAttempts) {
-            throw new Error(`Failed to generate week ${weekNum} after ${maxAttempts} attempts`);
+      // Generate each day for this week
+      for (let dayNum = 1; dayNum <= daysPerWeek; dayNum++) {
+        let dayResult;
+        let attempts = 0;
+        const maxAttempts = 2;
+        
+        while (attempts < maxAttempts) {
+          attempts++;
+          try {
+            dayResult = await generateSingleDevelopmentDay(
+              weekNum,
+              dayNum,
+              formData,
+              genderText,
+              isArabic
+            );
+            break; // Success
+          } catch (error) {
+            console.error(`❌ Attempt ${attempts} failed for week ${weekNum}, day ${dayNum}:`, error);
+            if (attempts >= maxAttempts) {
+              throw new Error(`Failed to generate week ${weekNum}, day ${dayNum} after ${maxAttempts} attempts`);
+            }
           }
+        }
+        
+        if (dayResult) {
+          weekDays.push(dayResult);
+          console.log(`✅ Week ${weekNum}, Day ${dayNum} completed`);
         }
       }
       
-      if (weekResult) {
-        weeks.push(weekResult);
-        console.log(`✅ Week ${weekNum}/${totalWeeks} completed`);
-      }
+      // Construct week object
+      const weekResult = {
+        index: weekNum,
+        title: `Week ${weekNum}`,
+        summary: `Training week ${weekNum} focused on ${goal}`,
+        counts: {
+          days: weekDays.length,
+          videos: 0, // Will be calculated later
+          exercises: weekDays.reduce((total, day) => total + day.exercises.length, 0)
+        },
+        days: weekDays
+      };
+      
+      weeks.push(weekResult);
+      console.log(`✅ Week ${weekNum}/${totalWeeks} completed with ${weekDays.length} days`);
     }
 
     // Construct the complete plan
@@ -2528,6 +2525,12 @@ Return JSON containing:
     };
 
     console.log(`✅ Plan structure assembled with ${weeks.length} weeks`);
+    
+    // Update total exercise and day counts
+    parsedPlan.duration.days = weeks.reduce((total, week) => total + week.days.length, 0);
+    parsedPlan.counts.exercises = weeks.reduce((total, week) => total + week.counts.exercises, 0);
+    
+    console.log(`📊 Final plan: ${parsedPlan.counts.weeks} weeks, ${parsedPlan.duration.days} days, ${parsedPlan.counts.exercises} exercises`);
 
     // Extract all exercise names from the structured plan
     const allExercises: Exercise[] = [];
