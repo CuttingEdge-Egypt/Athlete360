@@ -1,6 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import fetch from 'node-fetch';
+import { DevelopmentPlanV1, developmentPlanV1Schema, Exercise, Video } from '../shared/schema.js';
 
 // Initialize Gemini API clients
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
@@ -2181,108 +2182,322 @@ function extractExerciseNames(planText: string): string[] {
   return Array.from(exercises);
 }
 
-// Main development plan generation function
+// Helper function to extract video ID from YouTube URL
+function extractVideoId(url: string): string {
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/);
+  return match?.[1] || '';
+}
+
+// Main development plan generation function - V1 structured JSON format
 export async function generateDevelopmentPlan(
   formData: DevelopmentPlanFormData
 ): Promise<DevelopmentPlanData> {
   try {
     const { goal, height, weight, gender, sport, language } = formData;
     
-    console.log(`🏋️ Generating development plan: goal=${goal}, sport=${sport}, language=${language}`);
+    console.log(`🏋️ Generating structured development plan V1: goal=${goal}, sport=${sport}, language=${language}`);
     
     const isArabic = language === 'ar';
     const genderText = gender === 'male' ? (isArabic ? 'ذكر' : 'male') : (isArabic ? 'أنثى' : 'female');
     
-    // Generate overall plan instructions  
+    // Generate unique ID for this plan
+    const planId = `dev_plan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // System prompt for structured JSON generation
     const systemPrompt = isArabic ? 
-      `أنت خبير تدريب رياضي متخصص في تصميم برامج تطوير شخصية للرياضيين. تعامل مع الرياضيين بشكل احترافي واعط برامج تدريب دقيقة وعملية.` :
-      `You are a professional sports training expert specializing in personalized development programs for athletes. Work with athletes professionally and provide accurate, practical training programs.`;
-    
+      `أنت خبير تدريب رياضي متخصص في تصميم برامج تطوير شخصية للرياضيين. ستقوم بإنشاء خطة تدريب مهيكلة بتنسيق JSON دقيق.` :
+      `You are a professional sports training expert specializing in personalized development programs for athletes. You will create a structured training plan in precise JSON format.`;
+
+    // Create JSON schema for the response
+    const responseSchema = {
+      type: "object",
+      properties: {
+        version: { type: "string", const: "1.0" },
+        id: { type: "string" },
+        language: { type: "string", enum: ["en", "ar"] },
+        title: {
+          type: "object",
+          properties: {
+            en: { type: "string" },
+            ar: { type: "string" }
+          },
+          required: ["en"]
+        },
+        sport: { type: "string" },
+        goal: { type: "string" },
+        gender: { type: "string" },
+        duration: {
+          type: "object",
+          properties: {
+            weeks: { type: "number" },
+            days: { type: "number" }
+          },
+          required: ["weeks", "days"]
+        },
+        counts: {
+          type: "object",
+          properties: {
+            weeks: { type: "number" },
+            videos: { type: "number" },
+            exercises: { type: "number" }
+          },
+          required: ["weeks", "videos", "exercises"]
+        },
+        intro: {
+          type: "object",
+          properties: {
+            overview: { type: "string" },
+            structure: { type: "string" },
+            progressMetrics: {
+              type: "array",
+              items: { type: "string" }
+            }
+          },
+          required: ["overview"]
+        },
+        weeks: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              index: { type: "number" },
+              title: { type: "string" },
+              summary: { type: "string" },
+              counts: {
+                type: "object",
+                properties: {
+                  days: { type: "number" },
+                  videos: { type: "number" },
+                  exercises: { type: "number" }
+                },
+                required: ["days", "videos", "exercises"]
+              },
+              days: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    index: { type: "number" },
+                    title: { type: "string" },
+                    focus: { type: "string" },
+                    exercises: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          id: { type: "string" },
+                          name: { type: "string" },
+                          description: { type: "string" },
+                          tags: {
+                            type: "array",
+                            items: { type: "string" }
+                          },
+                          prescription: {
+                            type: "object",
+                            properties: {
+                              sets: { type: "number" },
+                              reps: { type: ["string", "number"] },
+                              restSec: { type: "number" },
+                              intensity: { type: "string" }
+                            }
+                          },
+                          equipment: {
+                            type: "array", 
+                            items: { type: "string" }
+                          }
+                        },
+                        required: ["id", "name"]
+                      }
+                    },
+                    notes: { type: "string" }
+                  },
+                  required: ["index", "exercises"]
+                }
+              }
+            },
+            required: ["index", "days"]
+          }
+        },
+        attribution: {
+          type: "object",
+          properties: {
+            model: { type: "string" },
+            generatedAt: { type: "string" }
+          },
+          required: ["model", "generatedAt"]
+        }
+      },
+      required: ["version", "id", "language", "title", "sport", "goal", "duration", "counts", "intro", "weeks", "attribution"]
+    };
+
+    // Build the main prompt
     const prompt = isArabic ?
-      `قم بإنشاء برنامج تطوير تدريبي شامل ومفصل:
+      `أنشئ خطة تطوير رياضي مهيكلة بتنسيق JSON للمواصفات التالية:
 
-الرياضي: ${genderText}
-الرياضة: ${sport}
-الهدف التطويري: ${goal}
-الطول: ${height} سم
-الوزن: ${weight} كغ
+البيانات الأساسية:
+- الرياضة: ${sport}
+- الهدف: ${goal}
+- الجنس: ${genderText}
+- الطول: ${height} سم
+- الوزن: ${weight} كغ
 
-متطلبات البرنامج:
-1. برنامج تدريبي مفصل يتضمن تمارين محددة
-2. اذكر المدة المطلوبة لتطبيق البرنامج
-3. اكتب اسم كل تمرين بوضوح في سطر منفصل
-4. اجعل أسماء التمارين واضحة ومحددة (مثل: تمرين القفز العمودي، تمرين الركض السريع)
-5. قسم البرنامج إلى مراحل زمنية واضحة
-6. اذكر كيفية قياس التقدم
+متطلبات الخطة:
+1. مدة البرنامج: 8-12 أسبوع
+2. كل أسبوع يحتوي على 4-6 أيام تدريب
+3. كل يوم يحتوي على 5-8 تمارين محددة
+4. اجعل أسماء التمارين واضحة ومحددة (مثل: تمرين القرفصاء، تمرين القفز العمودي)
+5. قسم البرنامج إلى مراحل تطوير واضحة
+6. قدم وصف شامل لكل تمرين
 
-اكتب استجابة مفصلة وشاملة باللغة العربية:` :
-      `Create a comprehensive and detailed training development program:
+أرجع JSON صالح فقط بالتركيب المطلوب.` :
+      `Create a structured sports development plan in JSON format for the following specifications:
 
-Athlete: ${genderText}
-Sport: ${sport}
-Development Goal: ${goal}
-Height: ${height}cm
-Weight: ${weight}kg
+Basic Information:
+- Sport: ${sport}
+- Goal: ${goal}
+- Gender: ${genderText}
+- Height: ${height}cm
+- Weight: ${weight}kg
 
-Program Requirements:
-1. Detailed training program with specific exercises
-2. Mention the required duration to follow this program
-3. Write each exercise name clearly on a separate line
-4. Make exercise names clear and specific (e.g: Vertical Jump Training, Sprint Running)
-5. Divide the program into clear time phases
-6. Explain how to measure progress
+Plan Requirements:
+1. Program duration: 8-12 weeks
+2. Each week contains 4-6 training days
+3. Each day contains 5-8 specific exercises
+4. Make exercise names clear and specific (e.g: Squat Exercise, Vertical Jump Training)
+5. Divide the program into clear development phases
+6. Provide comprehensive description for each exercise
 
-Write a detailed and comprehensive response in English:`;
-    
+Return ONLY valid JSON in the required structure.`;
+
     const startTime = Date.now();
     
     const result = await genAI.models.generateContent({
       model: "gemini-2.5-pro",
       config: {
         systemInstruction: systemPrompt,
-        temperature: 0.3,
-        maxOutputTokens: 4000
+        responseMimeType: "application/json",
+        responseSchema: responseSchema,
+        temperature: 0.2,
+        maxOutputTokens: 8000
       },
       contents: prompt
     });
-    
+
     const duration = Date.now() - startTime;
-    console.log(`✅ Development plan generated in ${duration}ms`);
-    
+    console.log(`✅ Structured development plan generated in ${duration}ms`);
+
     const responseText = result?.text || "";
     
     if (!responseText) {
       throw new Error('Empty response from AI');
     }
-    
-    console.log(`📋 Extracting exercise names from plan...`);
-    
-    // Extract exercise names from the plan
-    const exerciseNames = extractExerciseNames(responseText);
-    console.log(`🎯 Found ${exerciseNames.length} exercises:`, exerciseNames);
-    
-    // Fetch YouTube videos for each exercise
-    let planWithVideos = responseText;
-    
-    for (const exerciseName of exerciseNames) {
-      console.log(`🔍 Searching YouTube for: "${exerciseName}"`);
-      const videoUrl = await scrapeYouTubeForExercise(exerciseName, sport);
+
+    // Parse the JSON response
+    let parsedPlan: DevelopmentPlanV1;
+    try {
+      parsedPlan = JSON.parse(responseText);
+      console.log(`📋 Parsed JSON plan with ${parsedPlan.weeks.length} weeks`);
+    } catch (parseError) {
+      console.error('❌ Failed to parse JSON response:', parseError);
+      throw new Error('AI_JSON_PARSE_FAILED: Invalid JSON format from AI model');
+    }
+
+    // Validate the structure matches our schema
+    try {
+      developmentPlanV1Schema.parse(parsedPlan);
+      console.log(`✅ Plan structure validated successfully`);
+    } catch (validationError) {
+      console.error('❌ Plan validation failed:', validationError);
+      throw new Error('AI_SCHEMA_VALIDATION_FAILED: Generated plan does not match expected structure');
+    }
+
+    // Extract all exercise names from the structured plan
+    const allExercises: Exercise[] = [];
+    parsedPlan.weeks.forEach(week => {
+      week.days.forEach(day => {
+        day.exercises.forEach(exercise => {
+          allExercises.push(exercise);
+        });
+      });
+    });
+
+    console.log(`🎯 Found ${allExercises.length} exercises across ${parsedPlan.weeks.length} weeks`);
+
+    // Enrich exercises with YouTube videos
+    let videosFound = 0;
+    for (const exercise of allExercises) {
+      console.log(`🔍 Searching YouTube for exercise: "${exercise.name}"`);
       
-      if (videoUrl) {
-        // Add video link after the exercise name in the plan
-        const exercisePattern = new RegExp(`(${exerciseName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-        planWithVideos = planWithVideos.replace(exercisePattern, `$1\n🎥 Video: ${videoUrl}\n`);
+      try {
+        const videoUrl = await scrapeYouTubeForExercise(exercise.name, sport);
+        
+        if (videoUrl) {
+          const videoId = extractVideoId(videoUrl);
+          exercise.video = {
+            url: videoUrl,
+            videoId: videoId,
+            title: `${exercise.name} - ${sport} Training`,
+            channel: 'Training Video'
+          };
+          videosFound++;
+          console.log(`✅ Video found for "${exercise.name}": ${videoUrl}`);
+        } else {
+          console.log(`⚠️ No video found for "${exercise.name}"`);
+        }
+      } catch (videoError) {
+        console.log(`⚠️ Error searching video for "${exercise.name}":`, videoError);
       }
     }
-    
-    console.log(`✅ Development plan generation completed with ${exerciseNames.length} exercises`);
-    
+
+    // Update counts in the plan
+    parsedPlan.counts.exercises = allExercises.length;
+    parsedPlan.counts.videos = videosFound;
+    parsedPlan.counts.weeks = parsedPlan.weeks.length;
+
+    // Update week counts
+    parsedPlan.weeks.forEach(week => {
+      let weekExercises = 0;
+      let weekVideos = 0;
+      
+      week.days.forEach(day => {
+        weekExercises += day.exercises.length;
+        weekVideos += day.exercises.filter(ex => ex.video).length;
+      });
+      
+      week.counts.exercises = weekExercises;
+      week.counts.videos = weekVideos;
+      week.counts.days = week.days.length;
+    });
+
+    // Set attribution
+    parsedPlan.attribution = {
+      model: "gemini-2.5-pro",
+      generatedAt: new Date().toISOString()
+    };
+
+    // Ensure ID is set
+    parsedPlan.id = planId;
+    parsedPlan.language = language as "en" | "ar";
+
+    console.log(`✅ Development plan V1 completed: ${parsedPlan.counts.weeks} weeks, ${parsedPlan.counts.exercises} exercises, ${parsedPlan.counts.videos} videos`);
+
     return {
-      plan: planWithVideos
+      plan: JSON.stringify(parsedPlan)
     };
     
   } catch (error) {
-    console.error('Error generating development plan:', error);
+    console.error('❌ Error generating structured development plan:', error);
+    
+    // Handle specific error types for proper token management
+    if (error instanceof Error) {
+      if (error.message.includes('AI_JSON_PARSE_FAILED') ||
+          error.message.includes('AI_SCHEMA_VALIDATION_FAILED') ||
+          error.message.includes('AI_TIMEOUT')) {
+        // Re-throw critical errors so tokens aren't deducted
+        throw error;
+      }
+    }
+    
     throw error;
   }
 }
