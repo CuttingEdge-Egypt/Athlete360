@@ -151,6 +151,245 @@ function detectDuplicates(week: NutritionPlanDay[], previousWeeks: NutritionPlan
   return overlapRatio > 0.4; // More than 40% overlap is too much
 }
 
+// Helper interface for single week generation
+interface GenerateSingleWeekParams {
+  weekNumber: number;
+  startDate: Date;
+  formData: NutritionPlanFormData;
+  nationalityText: string;
+  genderText: string;
+  isArabic: boolean;
+  varietyContext: string;
+}
+
+// Generate a single week's worth of nutrition plan (7 days)
+async function generateSingleWeek(params: GenerateSingleWeekParams): Promise<{
+  instructions: string;
+  days: NutritionPlanDay[];
+}> {
+  const {
+    weekNumber,
+    startDate,
+    formData,
+    nationalityText,
+    genderText,
+    isArabic,
+    varietyContext
+  } = params;
+
+  const {
+    goal,
+    age,
+    height,
+    currentWeight,
+    targetWeight,
+    period,
+    sportName,
+    country,
+    language,
+    name = 'User'
+  } = formData;
+
+  // Generate the 7 days for this week
+  const weekDays: NutritionPlanDay[] = [];
+  const dayNames = isArabic 
+    ? ['الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد']
+    : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+  for (let dayNum = 0; dayNum < 7; dayNum++) {
+    const dayDate = new Date(startDate);
+    dayDate.setDate(startDate.getDate() + dayNum);
+    const dayDateStr = dayDate.toISOString().split('T')[0];
+
+    weekDays.push({
+      day: {
+        date: dayDateStr,
+        name: dayNames[dayNum]
+      },
+      meals: [], // Will be filled by AI
+      explanation: '', // Will be filled by AI
+      total_calories_intake: '' // Will be filled by AI
+    });
+  }
+
+  // Build the prompt for this specific week
+  const systemPrompt = isArabic ? 
+    `أنت خبير تغذية رياضية متخصص في تصميم خطط غذائية شخصية للرياضيين.` :
+    `You are a sports nutrition expert specializing in personalized nutrition plans for athletes.`;
+
+  const prompt = isArabic ?
+    `قم بإنشاء خطة غذائية للأسبوع رقم ${weekNumber} (7 أيام):
+
+الرياضي: ${name} (${genderText} من ${nationalityText})
+الرياضة: ${sportName}
+الهدف: ${goal}
+الطول: ${height} سم
+الوزن الحالي: ${currentWeight} كغ
+الوزن المستهدف: ${targetWeight} كغ
+إجمالي الفترة: ${period} أسبوع
+
+${varietyContext}
+
+مهم جداً: أرجع JSON صالح فقط بهذا التركيب الدقيق:
+
+{
+  "instructions": "تعليمات الأسبوع ${weekNumber} مع شرح التنويع والأهداف الغذائية",
+  "days": [
+    {
+      "day": {
+        "date": "${weekDays[0].day.date}",
+        "name": "${weekDays[0].day.name}"
+      },
+      "meals": [
+        {
+          "calories_intake": "500 سعرة حرارية",
+          "meal_description": ["أطعمة ${nationalityText} تقليدية مع الكميات"]
+        }
+      ],
+      "explanation": "لماذا يدعم هذا اليوم أداء ${sportName}",
+      "total_calories_intake": "2300 سعرة حرارية"
+    }
+  ]
+}
+
+متطلبات الأسبوع ${weekNumber}:
+- 7 أيام كاملة (${dayNames.join('، ')})
+- 5 وجبات يومياً مناسبة لرياضة ${sportName}
+- استخدم أطعمة ${nationalityText} متنوعة
+- احسب السعرات حسب الهدف: ${goal}` :
+    `Create a nutrition plan for Week ${weekNumber} (7 days):
+
+Athlete: ${name} (${genderText} from ${nationalityText})
+Sport: ${sportName}
+Goal: ${goal}
+Height: ${height}cm
+Current Weight: ${currentWeight}kg
+Target Weight: ${targetWeight}kg
+Total Period: ${period} weeks
+
+${varietyContext}
+
+CRITICAL: Return ONLY valid JSON in this EXACT structure:
+
+{
+  "instructions": "Week ${weekNumber} instructions with variety and nutrition goals explanation",
+  "days": [
+    {
+      "day": {
+        "date": "${weekDays[0].day.date}",
+        "name": "${weekDays[0].day.name}"
+      },
+      "meals": [
+        {
+          "calories_intake": "500 kcal",
+          "meal_description": ["Traditional ${nationalityText} foods with quantities"]
+        }
+      ],
+      "explanation": "Why this daily plan supports ${sportName} performance",
+      "total_calories_intake": "2300 kcal"
+    }
+  ]
+}
+
+Requirements for Week ${weekNumber}:
+- 7 complete days (${dayNames.join(', ')})
+- 5 meals per day suitable for ${sportName}
+- Use varied ${nationalityText} foods
+- Calculate calories for goal: ${goal}`;
+
+  // JSON schema for the week response
+  const weekSchema = {
+    type: "object",
+    properties: {
+      instructions: {
+        type: "string"
+      },
+      days: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            day: {
+              type: "object",
+              properties: {
+                date: { type: "string" },
+                name: { type: "string" }
+              },
+              required: ["date", "name"]
+            },
+            meals: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  calories_intake: { type: "string" },
+                  meal_description: {
+                    type: "array",
+                    items: { type: "string" }
+                  }
+                },
+                required: ["calories_intake", "meal_description"]
+              }
+            },
+            explanation: { type: "string" },
+            total_calories_intake: { type: "string" }
+          },
+          required: ["day", "meals", "explanation", "total_calories_intake"]
+        }
+      }
+    },
+    required: ["instructions", "days"]
+  };
+
+  try {
+    console.log(`⏳ Generating Week ${weekNumber} nutrition plan...`);
+    const weekStartTime = Date.now();
+
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: "application/json",
+        responseSchema: weekSchema,
+        temperature: 0.8,
+        maxOutputTokens: 8000 // Reasonable limit for 7 days
+      },
+      contents: prompt
+    });
+
+    const duration = Date.now() - weekStartTime;
+    console.log(`✅ Week ${weekNumber} generated in ${duration}ms`);
+
+    const responseText = result?.text || "{}";
+    
+    // Clean and parse the JSON response
+    let cleanedResponse = responseText.trim();
+    cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
+    cleanedResponse = cleanedResponse.replace(/^```/, '').replace(/```$/, '');
+
+    let weekPlan: { instructions: string; days: NutritionPlanDay[] };
+    try {
+      weekPlan = JSON.parse(cleanedResponse);
+    } catch (parseError) {
+      console.error(`❌ Week ${weekNumber} JSON parsing failed:`, parseError);
+      throw new Error(`AI_JSON_PARSE_FAILED: Week ${weekNumber} returned invalid JSON`);
+    }
+
+    // Validate the response has 7 days
+    if (!weekPlan.days || weekPlan.days.length !== 7) {
+      console.error(`❌ Week ${weekNumber} returned ${weekPlan.days?.length || 0} days instead of 7`);
+      throw new Error(`AI_INVALID_RESPONSE: Week ${weekNumber} must have exactly 7 days`);
+    }
+
+    console.log(`✅ Week ${weekNumber} validated: ${weekPlan.days.length} days`);
+    return weekPlan;
+
+  } catch (error) {
+    console.error(`❌ Error generating Week ${weekNumber}:`, error);
+    throw error;
+  }
+}
+
 export async function generateEnhancedNutritionPlan(
   formData: NutritionPlanFormData
 ): Promise<NutritionPlanData> {
@@ -171,486 +410,65 @@ export async function generateEnhancedNutritionPlan(
 
     const nationalityText = country === 'International' ? 'international' : country;
     const genderText = gender === 'Unknown' ? 'athlete' : `${age} years old ${gender}`;
-    // Determine if weight change is needed (removed weightGoal from prompt per user request)
-    
-    // Calculate total days based on period
-    const totalDays = period * 7;
     
     // Get current date for accurate nutrition plan scheduling
     const currentDate = new Date();
     const currentDateStr = currentDate.toISOString().split('T')[0]; // Format: YYYY-MM-DD
     
-    // Language-specific system prompt
-    const isArabic = language === 'ar';
-    const systemPrompt = isArabic ? 
-      `أنت أخصائي تغذية رياضية محترف متخصص في المأكولات ${nationalityText === 'international' ? 'العالمية' : nationalityText}. قم بإنشاء خطة تغذية لمدة ${period} أسابيع (${totalDays} أيام) بصيغة JSON فقط. لا تشمل أي نص قبل أو بعد JSON. يجب أن تكون الاستجابة JSON صالحة بدون أي تنسيق markdown.` :
-      `You are a professional sports nutritionist specializing in ${nationalityText} cuisine. Create a ${period}-week nutrition plan (${totalDays} days) in JSON format only. Do not include any text before or after the JSON. The response must be valid JSON without any markdown formatting.`;
-    
-    // Enhanced prompt with all form data
-    const prompt = isArabic ? 
-      `قم بإنشاء خطة تغذية شخصية لمدة ${period} أسابيع (${totalDays} أيام) لهذا الرياضي الذي يلعب ${sportName}:
-
-الرياضي: ${name} (${genderText} من ${nationalityText})
-الرياضة التي يلعبها: ${sportName}
-الهدف: ${goal}
-الطول: ${height} سم
-الوزن الحالي: ${currentWeight} كغ
-الوزن المستهدف: ${targetWeight} كغ
-الفترة الزمنية: ${period} أسبوع
-
-مهم جداً: أرجع JSON صالح فقط بهذا التركيب الدقيق بدون أي نص إضافي، بدون markdown، بدون شروحات:
-
-{
-  "instructions": "نحن قمنا بتصميم هذه الخطة الغذائية خصيصاً لك بناءً على هدفك ومعلوماتك الشخصية. إليك كيفية تنفيذ هذه الخطة بنجاح وشرح لسبب اختيارنا لهذا التصميم. نحن أخذنا في الاعتبار احتياجاتك من التدريب والاستشفاء ${sportName === 'General Fitness' ? 'للياقة العامة' : `لرياضة ${sportName}`}.",
-  "days": [
-    {
-      "day": {
-        "date": "${currentDateStr}",
-        "name": "الاثنين"
-      },
-      "meals": [
-        {
-          "calories_intake": "500 سعرة حرارية",
-          "meal_description": [
-            "طبق إفطار تقليدي ${nationalityText} 100غ",
-            "عنصر آخر مع الكمية"
-          ]
-        },
-        {
-          "calories_intake": "300 سعرة حرارية",
-          "meal_description": [
-            "وجبة خفيفة في منتصف الصباح"
-          ]
-        },
-        {
-          "calories_intake": "700 سعرة حرارية",
-          "meal_description": [
-            "غداء تقليدي ${nationalityText}"
-          ]
-        },
-        {
-          "calories_intake": "200 سعرة حرارية",
-          "meal_description": [
-            "وجبة خفيفة بعد الظهر"
-          ]
-        },
-        {
-          "calories_intake": "600 سعرة حرارية",
-          "meal_description": [
-            "عشاء تقليدي ${nationalityText}"
-          ]
-        }
-      ],
-      "explanation": "شرح موجز لماذا تدعم هذه الخطة اليومية أداء ${sportName} مع الأطعمة ${nationalityText}",
-      "total_calories_intake": "2300 سعرة حرارية"
-    }
-  ]
-}
-
-المتطلبات:
-- استخدم الأطعمة التقليدية ${nationalityText} المناسبة لرياضيي ${sportName}
-- اشمل 5 وجبات يومياً (إفطار، وجبة خفيفة، غداء، وجبة خفيفة، عشاء)
-- ضع في الاعتبار احتياجات تدريب ${sportName} (القوة الانفجارية، الرشاقة، الاستشفاء)
-- احسب السعرات الحرارية بناءً على الهدف خلال ${period} أسبوع
-- قدم أحجام واقعية للحصص
-- أنشئ ${totalDays} أيام كاملة (${period} أسابيع)
-- كل وجبة يجب أن تحتوي على 2-4 عناصر غذائية مع الكميات
-
-متطلبات التنويع (مهم جداً):
-- لكل أسبوع بعد الأسبوع الأول: يجب أن تكون 60-70% من الوجبات مختلفة عن الأسبوع السابق
-- اقصر تكرار الوجبات المتطابقة إلى وجبتين كحد أقصى في الأسبوع الواحد
-- نوّع مصادر البروتين: (دجاج، سمك، لحم بقري، بقوليات، بيض) عبر الأسابيع
-- نوّع الحبوب: (أرز، برغل، فريكة، معكرونة، خبز متنوع) عبر الأسابيع  
-- نوّع طرق الطبخ: (مشوي، مخبوز، مطبوخ، مقلي بقليل من الزيت) عبر الأسابيع
-- نوّع الخضار والفواكه والوجبات الخفيفة بين الأسابيع
-- لا يجوز أن يكون أي أسبوع نسخة من الأسبوع السابق
-
-الاتساق الغذائي:
-- حافظ على إجمالي السعرات الحرارية اليومية ضمن ±5% من الأساس
-- حافظ على نسب الماكرو المتشابهة عبر الأسابيع
-- احتفظ بالاحتياجات الخاصة برياضة ${sportName}
-
-معالجة الأخطاء: إذا لم تستطع إنشاء خطة تغذية حقيقية بسبب عدم كفاية البيانات، فشل البحث على الويب، أو أي مشاكل أخرى، أرجع هذا التركيب JSON بالضبط:
-{
-  "error": true,
-  "errorType": "insufficient_data|web_search_failed|parsing_error|other",
-  "errorMessage": "السبب المحدد لفشل خطة التغذية",
-  "retryable": true,
-  "suggestion": "ما يجب على المستخدم المحاولة بدلاً من ذلك"
-}` :
-      `Create a personalized ${period}-week nutrition plan (${totalDays} days) for this athlete who plays ${sportName}:
-
-Athlete: ${name} (${genderText} from ${nationalityText})
-Sport they play: ${sportName}
-Goal: ${goal}
-Height: ${height}cm
-Current Weight: ${currentWeight}kg
-Target Weight: ${targetWeight}kg
-Timeframe: ${period} weeks
-
-CRITICAL: Return ONLY valid JSON in this EXACT structure with no additional text, no markdown, no explanations:
-
-{
-  "instructions": "We have designed this nutrition plan specifically for you based on your goal and personal information. Here's how to execute this plan successfully and why we crafted it this way. We considered your ${sportName === 'General Fitness' ? 'fitness' : sportName} training and recovery needs when developing this plan. We will guide you through the execution and explain our strategic choices to help you achieve your goals.",
-  "days": [
-    {
-      "day": {
-        "date": "${currentDateStr}",
-        "name": "Monday"
-      },
-      "meals": [
-        {
-          "calories_intake": "500 kcal",
-          "meal_description": [
-            "Traditional ${nationalityText} breakfast item 100g",
-            "Another item with quantity"
-          ]
-        },
-        {
-          "calories_intake": "300 kcal",
-          "meal_description": [
-            "Mid-morning snack items"
-          ]
-        },
-        {
-          "calories_intake": "700 kcal",
-          "meal_description": [
-            "Traditional ${nationalityText} lunch items"
-          ]
-        },
-        {
-          "calories_intake": "200 kcal",
-          "meal_description": [
-            "Afternoon snack"
-          ]
-        },
-        {
-          "calories_intake": "600 kcal",
-          "meal_description": [
-            "Traditional ${nationalityText} dinner items"
-          ]
-        }
-      ],
-      "explanation": "Brief explanation of why this daily plan supports ${sportName} performance with ${nationalityText} foods",
-      "total_calories_intake": "2300 kcal"
-    }
-  ]
-}
-
-Requirements:
-- Use traditional ${nationalityText} foods appropriate for ${sportName} athletes
-- Include 5 meals per day (breakfast, snack, lunch, snack, dinner)
-- Consider ${sportName} training needs (explosive power, agility, recovery)
-- Calculate calories based on the goal over ${period} weeks
-- Provide realistic portion sizes
-- Generate ${totalDays} complete days (${period} weeks)
-- Each meal should have 2-4 food items with quantities
-
-VARIETY REQUIREMENTS (CRITICAL):
-- For each week after Week 1: at least 60-70% of meals must be different from the prior week
-- Limit exact meal repeats to maximum 2 per week
-- Rotate proteins: (chicken, fish, beef, legumes, eggs) across weeks
-- Rotate grains: (rice, bulgur, freekeh, pasta, bread varieties) across weeks
-- Rotate cooking methods: (grilled, baked, stewed, sautéed) across weeks
-- Vary vegetables, fruits, and snacks between weeks
-- No week may be a copy of the prior week
-
-NUTRITION CONSISTENCY:
-- Keep daily total_calories_intake within ±5% of baseline across weeks
-- Maintain similar macro ratios week-to-week
-- Preserve sport-specific needs for ${sportName}
-
-FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insufficient data, web search failures, or any other issues, return this exact JSON structure:
-{
-  "error": true,
-  "errorType": "insufficient_data|web_search_failed|parsing_error|other",
-  "errorMessage": "Specific reason why nutrition plan failed",
-  "retryable": true,
-  "suggestion": "What the user should try instead"
-}`;
-
-    // Generate all weeks in one single API call for much faster performance
-    const allWeeksSchema = {
-      type: "object",
-      properties: {
-        instructions: {
-          type: "string"
-        },
-        days: {
-          type: "array",
-          items: {
-            type: "object",
-            properties: {
-              day: {
-                type: "object",
-                properties: {
-                  date: { type: "string" },
-                  name: { type: "string" }
-                },
-                required: ["date", "name"]
-              },
-              meals: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    calories_intake: { type: "string" },
-                    meal_description: {
-                      type: "array",
-                      items: { type: "string" }
-                    }
-                  },
-                  required: ["calories_intake", "meal_description"]
-                }
-              },
-              explanation: { type: "string" },
-              total_calories_intake: { type: "string" }
-            },
-            required: ["day", "meals", "explanation", "total_calories_intake"]
-          }
-        }
-      },
-      required: ["instructions", "days"]
-    };
-    
-    console.log(`⏳ Generating complete ${period}-week nutrition plan in one API call...`);
+    console.log(`🧵 Starting THREADED nutrition plan generation: ${period} weeks for ${sportName} athlete`);
     const startTime = Date.now();
     
-    // Single API call to generate all weeks
-    let result;
-    let attempt = 0;
-    const maxAttempts = 1; // No fallback models, single attempt with high-quality model
+    // Language-specific prompts
+    const isArabic = language === 'ar';
     
-    while (attempt < maxAttempts) {
-      try {
-        // No timeout - let gemini-2.5-pro take as long as needed for comprehensive analysis
-        result = await genAI.models.generateContent({
-          model: "gemini-2.5-pro", // Use highest quality model
-          config: {
-            systemInstruction: systemPrompt,
-            responseMimeType: "application/json",
-            responseSchema: allWeeksSchema,
-            temperature: 0.8, // Consistent temperature for all weeks
-            maxOutputTokens: 20000 // Very high limit for comprehensive multi-week plans
-          },
-          contents: prompt
-        });
-        
-        const duration = Date.now() - startTime;
-        console.log(`✅ Complete ${period}-week plan generated successfully in ${duration}ms (attempt ${attempt + 1})`);
-        break; // Success, exit retry loop
-        
-      } catch (error: any) {
-        attempt++;
-        const duration = Date.now() - startTime;
-        console.log(`❌ ${period}-week plan generation failed (attempt ${attempt}/${maxAttempts}) after ${duration}ms:`, error.message);
-        
-        if (attempt >= maxAttempts) {
-          console.log(`🚫 ${period}-week plan generation failed after ${maxAttempts} attempts`);
-          throw new Error(`AI_TIMEOUT: Nutrition plan generation timed out after ${maxAttempts} attempts`);
-        }
-        
-        // Exponential backoff before retry
-        const backoffMs = 2000 * Math.pow(2, attempt - 1);
-        console.log(`⏳ Retrying ${period}-week plan generation in ${backoffMs}ms...`);
-        await new Promise(resolve => setTimeout(resolve, backoffMs));
+    // Store all weeks and track variety
+    const allWeeks: NutritionPlanDay[][] = [];
+    let combinedInstructions = '';
+    
+    // Generate week by week for better reliability and variety control
+    for (let weekNum = 1; weekNum <= period; weekNum++) {
+      console.log(`📅 Generating week ${weekNum}/${period}...`);
+      
+      // Calculate start date for this week
+      const weekStartDate = new Date(currentDate);
+      weekStartDate.setDate(currentDate.getDate() + (weekNum - 1) * 7);
+      
+      const previousWeeksSummary = summarizePreviousWeeks(allWeeks);
+      const varietyContext = weekNum > 1 ? 
+        `VARIETY REQUIREMENT: This week must be 60-70% different from previous weeks. ${previousWeeksSummary}` : 
+        'This is the first week - establish a strong foundation.';
+      
+      const weekResult = await generateSingleWeek({
+        weekNumber: weekNum,
+        startDate: weekStartDate,
+        formData,
+        nationalityText,
+        genderText,
+        isArabic,
+        varietyContext
+      });
+      
+      allWeeks.push(weekResult.days);
+      if (weekNum === 1) {
+        combinedInstructions = weekResult.instructions;
       }
+      
+      console.log(`✅ Week ${weekNum} generated: ${weekResult.days.length} days`);
     }
     
-    if (!result) {
-      throw new Error(`AI_TIMEOUT: No result after ${maxAttempts} attempts`);
-    }
-
-    const responseText = result?.text || "{}";
+    const duration = Date.now() - startTime;
+    console.log(`🎉 THREADED generation complete: ${period} weeks in ${duration}ms`);
     
-    // Debug: Log the raw response to see what Gemini is returning
-    console.log(`🔍 Complete plan raw response length: ${responseText.length} chars`);
-    console.log(`🔍 Complete plan raw response preview: ${responseText.substring(0, 200)}...`);
-    
-    // Check for error responses indicating no data found
-    if (responseText.includes('"error": "no_data_found"') || 
-        responseText.includes('"error": "search_failed"') || 
-        responseText.includes('"error": "not_found"') ||
-        responseText.includes('"success": false')) {
-      throw new Error('AI_WEB_SEARCH_FAILED: No authentic nutrition data found through web search');
-    }
-    
-    // Enhanced JSON cleaning and parsing for large responses
-    let cleanedResponse = responseText.trim();
-    
-    // Remove any markdown code blocks
-    cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
-    cleanedResponse = cleanedResponse.replace(/^```/, '').replace(/```$/, '');
-    
-    // Find JSON boundaries more carefully for large responses
-    const jsonStart = cleanedResponse.indexOf('{');
-    let jsonEnd = -1;
-    
-    // For large responses, find the proper closing brace by counting brackets
-    if (jsonStart !== -1) {
-      let braceCount = 0;
-      let inString = false;
-      let escaped = false;
-      
-      for (let i = jsonStart; i < cleanedResponse.length; i++) {
-        const char = cleanedResponse[i];
-        
-        if (escaped) {
-          escaped = false;
-          continue;
-        }
-        
-        if (char === '\\') {
-          escaped = true;
-          continue;
-        }
-        
-        if (char === '"') {
-          inString = !inString;
-          continue;
-        }
-        
-        if (!inString) {
-          if (char === '{') {
-            braceCount++;
-          } else if (char === '}') {
-            braceCount--;
-            if (braceCount === 0) {
-              jsonEnd = i;
-              break;
-            }
-          }
-        }
-      }
-    }
-    
-    // Improved handling for large responses
-    if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
-      cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
-      console.log(`🔍 JSON boundaries found: start=${jsonStart}, end=${jsonEnd}, length=${jsonEnd - jsonStart + 1}`);
-    } else {
-      console.log(`⚠️ Bracket counting failed for large response. Raw length: ${cleanedResponse.length}, jsonStart: ${jsonStart}, jsonEnd: ${jsonEnd}`);
-      
-      // For large responses, find the LAST complete JSON structure
-      const allClosingBraces = [];
-      for (let i = cleanedResponse.length - 1; i >= jsonStart && i >= 0; i--) {
-        if (cleanedResponse[i] === '}') {
-          allClosingBraces.push(i);
-        }
-      }
-      
-      console.log(`🔍 Found ${allClosingBraces.length} closing braces to try`);
-      
-      // Try each closing brace from the end until we find valid JSON
-      let foundValidJson = false;
-      for (const endPos of allClosingBraces.slice(0, 10)) { // Try max 10 positions to avoid infinite loops
-        const testJson = cleanedResponse.substring(jsonStart, endPos + 1);
-        try {
-          const parsed = JSON.parse(testJson);
-          // Additional validation: ensure it has the expected structure
-          if (parsed && typeof parsed === 'object' && parsed.days && Array.isArray(parsed.days)) {
-            cleanedResponse = testJson;
-            jsonEnd = endPos;
-            foundValidJson = true;
-            console.log(`✅ Found valid JSON ending at position ${endPos}, length=${testJson.length}, days=${parsed.days.length}`);
-            break;
-          }
-        } catch (testError) {
-          // Continue trying other positions
-          continue;
-        }
-      }
-      
-      if (!foundValidJson) {
-        console.log(`❌ Could not find valid JSON with proper structure in ${cleanedResponse.length} char response`);
-        // Use the original fallback as absolute last resort  
-        const simpleEnd = cleanedResponse.lastIndexOf('}');
-        if (jsonStart !== -1 && simpleEnd !== -1 && simpleEnd > jsonStart) {
-          cleanedResponse = cleanedResponse.substring(jsonStart, simpleEnd + 1);
-          console.log(`🔧 Using fallback: substring from ${jsonStart} to ${simpleEnd}, length=${simpleEnd - jsonStart + 1}`);
-        }
-      }
-    }
-    
-    // More conservative JSON cleaning for large responses
-    // Only replace newlines and tabs that are NOT inside strings
-    let cleanedJSON = '';
-    let inString = false;
-    let escaped = false;
-    
-    for (let i = 0; i < cleanedResponse.length; i++) {
-      const char = cleanedResponse[i];
-      
-      if (escaped) {
-        cleanedJSON += char;
-        escaped = false;
-        continue;
-      }
-      
-      if (char === '\\') {
-        cleanedJSON += char;
-        escaped = true;
-        continue;
-      }
-      
-      if (char === '"') {
-        inString = !inString;
-        cleanedJSON += char;
-        continue;
-      }
-      
-      if (!inString) {
-        // Outside strings: normalize whitespace and remove trailing commas
-        if (char === '\n' || char === '\r' || char === '\t') {
-          cleanedJSON += ' ';
-        } else if (char === ',' && i + 1 < cleanedResponse.length) {
-          const nextNonSpace = cleanedResponse.substring(i + 1).match(/\S/);
-          if (nextNonSpace && (nextNonSpace[0] === '}' || nextNonSpace[0] === ']')) {
-            // Skip trailing comma
-            continue;
-          } else {
-            cleanedJSON += char;
-          }
-        } else {
-          cleanedJSON += char;
-        }
-      } else {
-        // Inside strings: preserve everything
-        cleanedJSON += char;
-      }
-    }
-    
-    cleanedResponse = cleanedJSON.replace(/\s+/g, ' ').trim(); // Normalize multiple spaces
-    
-    console.log(`🔍 Complete plan cleaned response length: ${cleanedResponse.length} chars`);
-    console.log(`🔍 Complete plan cleaned response preview: ${cleanedResponse.substring(0, 300)}...`);
-    
-    // Try to parse the JSON
-    let completePlan: StructuredNutritionPlan;
-    try {
-      completePlan = JSON.parse(cleanedResponse);
-      console.log(`✅ Complete ${period}-week plan JSON parsed successfully`);
-    } catch (parseError: any) {
-      console.error(`❌ JSON parsing failed for complete plan:`, parseError);
-      console.error(`❌ Failed JSON content: ${cleanedResponse}`);
-      
-      // NO FALLBACK - Declare generation failed
-      throw new Error(`AI_JSON_PARSE_FAILED: Complete plan returned invalid JSON format. Raw response was ${responseText.length} chars, cleaned to ${cleanedResponse.length} chars. Parse error: ${parseError?.message || 'Unknown parse error'}`);
-    }
-    
-    // Validate that we have the expected number of days
-    const expectedDays = period * 7;
-    const actualDays = completePlan.days ? completePlan.days.length : 0;
-    console.log(`📊 Generated ${actualDays} days (expected ${expectedDays})`);
-    
+    // Combine all weeks into final plan
+    const allDays = allWeeks.flat();
     const finalPlan: StructuredNutritionPlan = {
-      instructions: completePlan.instructions || (isArabic ? 
+      instructions: combinedInstructions || (isArabic ? 
         `تعليمات عامة للتغذية الرياضية للاعب ${sportName}` :
         `General sports nutrition instructions for ${sportName} athlete`),
-      days: completePlan.days || []
+      days: allDays
     };
     
-    console.log(`Generated nutrition plan with ${period} weeks and ${finalPlan.days.length} total days`);
+    console.log(`📊 Final plan: ${finalPlan.days.length} total days across ${period} weeks`);
     
     return {
       plan: JSON.stringify(finalPlan)
