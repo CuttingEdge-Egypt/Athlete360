@@ -524,13 +524,51 @@ FAILURE HANDLING: If you cannot generate authentic nutrition plan due to insuffi
       }
     }
     
+    // Improved handling for large responses
     if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
       cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
+      console.log(`🔍 JSON boundaries found: start=${jsonStart}, end=${jsonEnd}, length=${jsonEnd - jsonStart + 1}`);
     } else {
-      // Fallback to simple approach if bracket counting fails
-      const simpleEnd = cleanedResponse.lastIndexOf('}');
-      if (jsonStart !== -1 && simpleEnd !== -1 && simpleEnd > jsonStart) {
-        cleanedResponse = cleanedResponse.substring(jsonStart, simpleEnd + 1);
+      console.log(`⚠️ Bracket counting failed for large response. Raw length: ${cleanedResponse.length}, jsonStart: ${jsonStart}, jsonEnd: ${jsonEnd}`);
+      
+      // For large responses, find the LAST complete JSON structure
+      const allClosingBraces = [];
+      for (let i = cleanedResponse.length - 1; i >= jsonStart && i >= 0; i--) {
+        if (cleanedResponse[i] === '}') {
+          allClosingBraces.push(i);
+        }
+      }
+      
+      console.log(`🔍 Found ${allClosingBraces.length} closing braces to try`);
+      
+      // Try each closing brace from the end until we find valid JSON
+      let foundValidJson = false;
+      for (const endPos of allClosingBraces.slice(0, 10)) { // Try max 10 positions to avoid infinite loops
+        const testJson = cleanedResponse.substring(jsonStart, endPos + 1);
+        try {
+          const parsed = JSON.parse(testJson);
+          // Additional validation: ensure it has the expected structure
+          if (parsed && typeof parsed === 'object' && parsed.days && Array.isArray(parsed.days)) {
+            cleanedResponse = testJson;
+            jsonEnd = endPos;
+            foundValidJson = true;
+            console.log(`✅ Found valid JSON ending at position ${endPos}, length=${testJson.length}, days=${parsed.days.length}`);
+            break;
+          }
+        } catch (testError) {
+          // Continue trying other positions
+          continue;
+        }
+      }
+      
+      if (!foundValidJson) {
+        console.log(`❌ Could not find valid JSON with proper structure in ${cleanedResponse.length} char response`);
+        // Use the original fallback as absolute last resort  
+        const simpleEnd = cleanedResponse.lastIndexOf('}');
+        if (jsonStart !== -1 && simpleEnd !== -1 && simpleEnd > jsonStart) {
+          cleanedResponse = cleanedResponse.substring(jsonStart, simpleEnd + 1);
+          console.log(`🔧 Using fallback: substring from ${jsonStart} to ${simpleEnd}, length=${simpleEnd - jsonStart + 1}`);
+        }
       }
     }
     
