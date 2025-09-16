@@ -171,9 +171,7 @@ export async function generateEnhancedNutritionPlan(
 
     const nationalityText = country === 'International' ? 'international' : country;
     const genderText = gender === 'Unknown' ? 'athlete' : `${age} years old ${gender}`;
-    const weightGoal = currentWeight !== targetWeight ? 
-      `${currentWeight > targetWeight ? 'lose' : 'gain'} ${Math.abs(currentWeight - targetWeight)}kg` : 
-      'maintain current weight';
+    // Determine if weight change is needed (removed weightGoal from prompt per user request)
     
     // Calculate total days based on period
     const totalDays = period * 7;
@@ -195,12 +193,11 @@ export async function generateEnhancedNutritionPlan(
 الوزن الحالي: ${currentWeight} كغ
 الوزن المستهدف: ${targetWeight} كغ
 الفترة الزمنية: ${period} أسبوع
-هدف الوزن: ${weightGoal}
 
 مهم جداً: أرجع JSON صالح فقط بهذا التركيب الدقيق بدون أي نص إضافي، بدون markdown، بدون شروحات:
 
 {
-  "instructions": "تعليمات شاملة وشخصية للرياضي بناءً على هدفه ومعلوماته - يجب أن تشمل نصائح عامة للتغذية والتدريب والاستشفاء لرياضة ${sportName}",
+  "instructions": "نحن قمنا بتصميم هذه الخطة الغذائية خصيصاً لك بناءً على هدفك ومعلوماتك الشخصية. إليك كيفية تنفيذ هذه الخطة بنجاح وشرح لسبب اختيارنا لهذا التصميم. نحن أخذنا في الاعتبار احتياجاتك من التدريب والاستشفاء ${sportName === 'General Fitness' ? 'للياقة العامة' : `لرياضة ${sportName}`}.",
   "days": [
     {
       "day": {
@@ -250,7 +247,7 @@ export async function generateEnhancedNutritionPlan(
 - استخدم الأطعمة التقليدية ${nationalityText} المناسبة لرياضيي ${sportName}
 - اشمل 5 وجبات يومياً (إفطار، وجبة خفيفة، غداء، وجبة خفيفة، عشاء)
 - ضع في الاعتبار احتياجات تدريب ${sportName} (القوة الانفجارية، الرشاقة، الاستشفاء)
-- احسب السعرات الحرارية بناءً على هدف ${weightGoal} خلال ${period} أسبوع
+- احسب السعرات الحرارية بناءً على الهدف خلال ${period} أسبوع
 - قدم أحجام واقعية للحصص
 - أنشئ ${totalDays} أيام كاملة (${period} أسابيع)
 - كل وجبة يجب أن تحتوي على 2-4 عناصر غذائية مع الكميات
@@ -286,12 +283,11 @@ Height: ${height}cm
 Current Weight: ${currentWeight}kg
 Target Weight: ${targetWeight}kg
 Timeframe: ${period} weeks
-Weight Goal: ${weightGoal}
 
 CRITICAL: Return ONLY valid JSON in this EXACT structure with no additional text, no markdown, no explanations:
 
 {
-  "instructions": "COMPREHENSIVE SCIENTIFIC ANALYSIS & EXPERT GUIDANCE: You are an elite sports nutritionist with deep expertise in ${nationalityText} cuisine and ${sportName} performance optimization. Conduct a thorough analysis for this ${height}cm, ${currentWeight}kg individual targeting ${targetWeight}kg over ${period} weeks.\n\n1. PHYSIOLOGICAL ANALYSIS: Calculate precise BMI, estimate BMR using Mifflin-St Jeor equation, determine TDEE for ${sportName} activity level, and compute required daily caloric deficit for ${weightGoal}. Assess if this timeline is medically safe (max 1-2 lbs/week).\n\n2. STRATEGIC NUTRITION DESIGN: Justify your calorie targets (explain the specific daily intake), macro distribution (protein g/kg body weight for muscle preservation, carb timing around training, fat percentage), and meal frequency. Explain why these ratios optimize fat loss while preserving lean mass for ${sportName}.\n\n3. CULTURAL CUISINE INTEGRATION: Detail why specific ${nationalityText} foods were selected, their nutritional profiles, preparation methods that enhance nutrient absorption, and how traditional cooking techniques align with modern sports nutrition principles.\n\n4. PERFORMANCE OPTIMIZATION: Address how this plan supports ${sportName} training demands, recovery protocols, hydration strategies, and nutrient timing for optimal performance during the weight loss phase.\n\n5. PRACTICAL IMPLEMENTATION: Provide specific guidance on portion control methods, meal prep strategies, dining out modifications, supplement considerations, progress tracking metrics, and troubleshooting common challenges. Include realistic expectations and timeline milestones.\n\nBe authoritative, evidence-based, and specific to this individual's unique profile.",
+  "instructions": "We have designed this nutrition plan specifically for you based on your goal and personal information. Here's how to execute this plan successfully and why we crafted it this way. We considered your ${sportName === 'General Fitness' ? 'fitness' : sportName} training and recovery needs when developing this plan. We will guide you through the execution and explain our strategic choices to help you achieve your goals.",
   "days": [
     {
       "day": {
@@ -341,7 +337,7 @@ Requirements:
 - Use traditional ${nationalityText} foods appropriate for ${sportName} athletes
 - Include 5 meals per day (breakfast, snack, lunch, snack, dinner)
 - Consider ${sportName} training needs (explosive power, agility, recovery)
-- Calculate calories based on ${weightGoal} goal over ${period} weeks
+- Calculate calories based on the goal over ${period} weeks
 - Provide realistic portion sizes
 - Generate ${totalDays} complete days (${period} weeks)
 - Each meal should have 2-4 food items with quantities
