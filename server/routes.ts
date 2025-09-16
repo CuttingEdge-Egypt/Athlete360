@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import bodyParser from "body-parser";
 import { storage } from "./storage";
@@ -2070,6 +2070,177 @@ Return only valid JSON with the missing fields.`;
         message: errorMessage,
         error: true,
         retryable: retryable
+      });
+    }
+  }));
+
+  // Job-based development plan endpoints
+  
+  // Create development plan job
+  app.post('/api/jobs/development-plan', isAuthenticatedUniversal, asyncHandler(async (req: any, res: Response) => {
+    const tokenCost = SERVICE_TOKEN_COSTS['development-plan'] || 80;
+    const userId = req.user.claims.sub;
+    
+    try {
+      // Validate request body with Zod schema
+      const validationResult = developmentPlanSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = validationResult.error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
+        return res.status(400).json({ 
+          message: "Validation failed", 
+          errors: errors,
+          details: validationResult.error.errors
+        });
+      }
+
+      const { goal, age, height, weight, gender, sport, language } = validationResult.data;
+
+      // Check if user has sufficient tokens
+      const user = await storage.getUser(userId);
+      if (!user || (user.tokens || 0) < tokenCost) {
+        return res.status(402).json({ message: "Insufficient tokens" });
+      }
+
+      // Deduct tokens upfront to reserve them
+      await storage.deductTokens(userId, tokenCost);
+      let tokensDeducted = true;
+      
+      try {
+        // Create transaction record
+        await storage.createTransaction({
+          userId,
+          action: "Development Plan Job Creation",
+          tokensDeducted: tokenCost,
+          serviceType: "development-plan"
+        });
+
+        // Create the job with tokens already reserved
+        const job = await storage.createJob({
+          userId,
+          type: 'development-plan',
+          parameters: { goal, age, height, weight, gender, sport, language, tokenCost }
+        });
+
+        console.log(`📝 Created development plan job ${job.id} for user ${userId} (${tokenCost} tokens reserved)`);
+
+        // Return job ID immediately for polling
+        res.status(202).json({ 
+          jobId: job.id,
+          status: job.status,
+          message: "Development plan generation started. Use the jobId to check progress."
+        });
+
+      } catch (jobCreationError) {
+        // Refund tokens if job creation failed
+        if (tokensDeducted) {
+          try {
+            await storage.refundTokens(userId, tokenCost);
+            console.log(`🔄 REFUND: ${tokenCost} tokens refunded due to job creation failure`);
+          } catch (refundError) {
+            console.error("Failed to refund tokens after job creation error:", refundError);
+          }
+        }
+        throw jobCreationError;
+      }
+
+    } catch (error) {
+      console.error("Error creating development plan job:", error);
+      res.status(500).json({ 
+        message: "Failed to create development plan job. Please try again.",
+        error: true
+      });
+    }
+  }));
+
+  // Get job status and results
+  app.get('/api/jobs/:jobId', isAuthenticatedUniversal, asyncHandler(async (req: any, res: Response) => {
+    const { jobId } = req.params;
+    const userId = req.user.claims.sub;
+    
+    try {
+      const job = await storage.getJobById(jobId);
+      
+      if (!job) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+
+      // Ensure user can only access their own jobs
+      if (job.userId !== userId) {
+        return res.status(403).json({ message: "Unauthorized access to job" });
+      }
+
+      // Return job status and results
+      res.json({
+        id: job.id,
+        type: job.type,
+        status: job.status,
+        progress: job.progress,
+        result: job.result,
+        partialResult: job.partialResult,
+        error: job.error,
+        createdAt: job.createdAt,
+        updatedAt: job.updatedAt,
+        startedAt: job.startedAt,
+        completedAt: job.completedAt
+      });
+
+    } catch (error) {
+      console.error("Error fetching job:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch job status. Please try again.",
+        error: true
+      });
+    }
+  }));
+
+  // Cancel job
+  app.delete('/api/jobs/:jobId', isAuthenticatedUniversal, asyncHandler(async (req: any, res: Response) => {
+    const { jobId } = req.params;
+    const userId = req.user.claims.sub;
+    
+    try {
+      const job = await storage.getJobById(jobId);
+      
+      if (!job) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+
+      // Ensure user can only cancel their own jobs
+      if (job.userId !== userId) {
+        return res.status(403).json({ message: "Unauthorized access to job" });
+      }
+
+      // Check if job can be cancelled
+      if (job.status === 'completed' || job.status === 'failed') {
+        return res.status(400).json({ 
+          message: `Cannot cancel ${job.status} job`,
+          status: job.status
+        });
+      }
+
+      if (job.status === 'cancelled') {
+        return res.json({ 
+          message: "Job already cancelled",
+          status: job.status
+        });
+      }
+
+      // Cancel the job
+      const cancelledJob = await storage.cancelJob(jobId);
+      
+      console.log(`🛑 Job ${jobId} cancelled by user ${userId}`);
+
+      res.json({
+        id: cancelledJob.id,
+        status: cancelledJob.status,
+        message: "Job cancelled successfully"
+      });
+
+    } catch (error) {
+      console.error("Error cancelling job:", error);
+      res.status(500).json({ 
+        message: "Failed to cancel job. Please try again.",
+        error: true
       });
     }
   }));
