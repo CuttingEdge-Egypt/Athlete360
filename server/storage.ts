@@ -14,6 +14,7 @@ import {
   paymentReceipts,
   referrals,
   savedCards,
+  jobs,
   type User,
   type UpsertUser,
   type Sport,
@@ -30,12 +31,14 @@ import {
   type PaymentReceipt,
   type Referral,
   type SavedCard,
+  type Job,
   type InsertSport,
   type InsertAthlete,
   type InsertTransaction,
   type InsertPaymentReceipt,
   type InsertReferral,
   type InsertSavedCard,
+  type InsertJob,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, asc, sql, ilike, ne, notInArray } from "drizzle-orm";
@@ -144,6 +147,14 @@ export interface IStorage {
   createReferral(referral: InsertReferral): Promise<Referral>;
   getUserReferrals(userId: string): Promise<Referral[]>;
   getReferralCount(userId: string): Promise<number>;
+
+  // Jobs
+  createJob(job: InsertJob): Promise<Job>;
+  getJobById(id: string): Promise<Job | undefined>;
+  updateJob(id: string, updates: Partial<Job>): Promise<Job>;
+  getUserJobs(userId: string): Promise<Job[]>;
+  getQueuedJobs(): Promise<Job[]>;
+  cancelJob(id: string): Promise<Job>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -917,6 +928,172 @@ export class DatabaseStorage implements IStorage {
     
     return result[0]?.count || 0;
   }
+
+  // Jobs operations
+  async createJob(jobData: InsertJob): Promise<Job> {
+    const [job] = await db.insert(jobs).values(jobData).returning();
+    return job;
+  }
+
+  async getJobById(id: string): Promise<Job | undefined> {
+    const [job] = await db.select().from(jobs).where(eq(jobs.id, id));
+    return job;
+  }
+
+  async updateJob(id: string, updates: Partial<Job>): Promise<Job> {
+    const [job] = await db
+      .update(jobs)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(jobs.id, id))
+      .returning();
+    return job;
+  }
+
+  async getUserJobs(userId: string): Promise<Job[]> {
+    return await db
+      .select()
+      .from(jobs)
+      .where(eq(jobs.userId, userId))
+      .orderBy(desc(jobs.createdAt));
+  }
+
+  async getQueuedJobs(): Promise<Job[]> {
+    return await db
+      .select()
+      .from(jobs)
+      .where(eq(jobs.status, "queued"))
+      .orderBy(asc(jobs.createdAt));
+  }
+
+  async cancelJob(id: string): Promise<Job> {
+    const [job] = await db
+      .update(jobs)
+      .set({ 
+        status: "cancelled",
+        updatedAt: new Date(),
+        completedAt: new Date()
+      })
+      .where(eq(jobs.id, id))
+      .returning();
+    return job;
+  }
 }
 
-export const storage = new DatabaseStorage();
+// In-memory storage for jobs (preferred for job queue processing)
+export class MemJobStorage {
+  private jobs = new Map<string, Job>();
+  private nextId = 1;
+
+  async createJob(jobData: InsertJob): Promise<Job> {
+    const id = `job_${this.nextId++}`;
+    const now = new Date();
+    const job: Job = {
+      id,
+      userId: jobData.userId,
+      type: jobData.type,
+      status: "queued",
+      progress: 0,
+      parameters: jobData.parameters,
+      result: null,
+      partialResult: null,
+      error: null,
+      createdAt: now,
+      updatedAt: now,
+      startedAt: null,
+      completedAt: null,
+    };
+    this.jobs.set(id, job);
+    return job;
+  }
+
+  async getJobById(id: string): Promise<Job | undefined> {
+    return this.jobs.get(id);
+  }
+
+  async updateJob(id: string, updates: Partial<Job>): Promise<Job> {
+    const job = this.jobs.get(id);
+    if (!job) throw new Error(`Job ${id} not found`);
+    
+    // Prevent invalid state transitions
+    if (updates.status && job.status === "completed") {
+      throw new Error("Cannot update completed job");
+    }
+    if (updates.status && job.status === "cancelled") {
+      throw new Error("Cannot update cancelled job");
+    }
+    
+    const updatedJob: Job = {
+      ...job,
+      ...updates,
+      updatedAt: new Date(),
+    };
+    
+    // Set timestamps based on status changes
+    if (updates.status === "running" && !job.startedAt) {
+      updatedJob.startedAt = new Date();
+    }
+    if (updates.status === "completed" || updates.status === "failed" || updates.status === "cancelled") {
+      updatedJob.completedAt = new Date();
+    }
+    
+    this.jobs.set(id, updatedJob);
+    return updatedJob;
+  }
+
+  async getUserJobs(userId: string): Promise<Job[]> {
+    const userJobs = Array.from(this.jobs.values())
+      .filter(job => job.userId === userId)
+      .sort((a, b) => (b.createdAt || new Date()).getTime() - (a.createdAt || new Date()).getTime());
+    return userJobs;
+  }
+
+  async getQueuedJobs(): Promise<Job[]> {
+    const queuedJobs = Array.from(this.jobs.values())
+      .filter(job => job.status === "queued")
+      .sort((a, b) => (a.createdAt || new Date()).getTime() - (b.createdAt || new Date()).getTime());
+    return queuedJobs;
+  }
+
+  async cancelJob(id: string): Promise<Job> {
+    const job = this.jobs.get(id);
+    if (!job) throw new Error(`Job ${id} not found`);
+    
+    if (job.status === "completed" || job.status === "failed") {
+      throw new Error("Cannot cancel completed or failed job");
+    }
+    
+    return this.updateJob(id, { status: "cancelled" });
+  }
+}
+
+// Hybrid storage: Database for everything else, MemStorage for jobs
+export class HybridStorage extends DatabaseStorage {
+  private jobStorage = new MemJobStorage();
+
+  // Override job methods to use MemStorage
+  async createJob(jobData: InsertJob): Promise<Job> {
+    return this.jobStorage.createJob(jobData);
+  }
+
+  async getJobById(id: string): Promise<Job | undefined> {
+    return this.jobStorage.getJobById(id);
+  }
+
+  async updateJob(id: string, updates: Partial<Job>): Promise<Job> {
+    return this.jobStorage.updateJob(id, updates);
+  }
+
+  async getUserJobs(userId: string): Promise<Job[]> {
+    return this.jobStorage.getUserJobs(userId);
+  }
+
+  async getQueuedJobs(): Promise<Job[]> {
+    return this.jobStorage.getQueuedJobs();
+  }
+
+  async cancelJob(id: string): Promise<Job> {
+    return this.jobStorage.cancelJob(id);
+  }
+}
+
+export const storage = new HybridStorage();

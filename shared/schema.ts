@@ -190,6 +190,23 @@ export const analysisLogs = pgTable("analysis_logs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Jobs table for asynchronous processing
+export const jobs = pgTable("jobs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  type: varchar("type").notNull(), // "development-plan", "nutrition-plan", etc.
+  status: varchar("status").default("queued").notNull(), // "queued", "running", "completed", "failed", "cancelled"
+  progress: integer("progress").default(0), // Progress percentage (0-100)
+  parameters: jsonb("parameters").notNull(), // Input parameters as JSON
+  result: jsonb("result"), // Final result when completed
+  partialResult: jsonb("partial_result"), // Partial results during generation
+  error: text("error"), // Error message if failed
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+});
+
 // Relations
 export const sportsRelations = relations(sports, ({ many }) => ({
   athletes: many(athletes),
@@ -217,6 +234,14 @@ export const usersRelations = relations(users, ({ many }) => ({
   paymentReceipts: many(paymentReceipts),
   referralsMade: many(referrals, { relationName: "referrer" }),
   referralsReceived: many(referrals, { relationName: "referred" }),
+  jobs: many(jobs),
+}));
+
+export const jobsRelations = relations(jobs, ({ one }) => ({
+  user: one(users, {
+    fields: [jobs.userId],
+    references: [users.id],
+  }),
 }));
 
 export const paymentReceiptsRelations = relations(paymentReceipts, ({ one }) => ({
@@ -284,6 +309,12 @@ export const insertReferralSchema = createInsertSchema(referrals).pick({
   status: true,
 });
 
+export const insertJobSchema = createInsertSchema(jobs).pick({
+  userId: true,
+  type: true,
+  parameters: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 // Saved payment cards table
@@ -307,6 +338,7 @@ export type AthleteStrength = typeof athleteStrengths.$inferSelect;
 export type AthleteWeakness = typeof athleteWeaknesses.$inferSelect;
 export type DevelopmentPlan = typeof developmentPlans.$inferSelect;
 export type NutritionPlan = typeof nutritionPlans.$inferSelect;
+export type Job = typeof jobs.$inferSelect;
 
 export type BeatStrategy = typeof beatStrategies.$inferSelect;
 export type DynamicAnalysis = typeof dynamicAnalysis.$inferSelect;
@@ -321,6 +353,7 @@ export type InsertAthlete = z.infer<typeof insertAthleteSchema>;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 export type InsertPaymentReceipt = z.infer<typeof insertPaymentReceiptSchema>;
 export type InsertReferral = z.infer<typeof insertReferralSchema>;
+export type InsertJob = z.infer<typeof insertJobSchema>;
 
 // Development Plan V1 JSON Schema - Comprehensive structured format
 export const videoSchema = z.object({
