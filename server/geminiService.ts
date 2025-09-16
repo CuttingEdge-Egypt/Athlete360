@@ -133,7 +133,7 @@ function repairJsonString(jsonStr: string): string {
     
     // Step 2: Fix common JSON issues
     jsonStr = jsonStr
-      // Fix unescaped quotes in strings (handle quotes within meal descriptions)
+      // Fix unescaped quotes in Arabic meal descriptions
       .replace(/": "([^"]*)"([^",\]}]*)"([^",\]}]*)",/g, '": "$1\\"$2\\"$3",')
       // Fix line breaks in strings
       .replace(/": "([^"]*)\n([^"]*)",/g, '": "$1\\n$2",')
@@ -146,14 +146,53 @@ function repairJsonString(jsonStr: string): string {
       // Remove any standalone quotes at the end
       .replace(/\s*"?\s*$/, '');
       
-    // Step 3: Validate brace matching
+    // Step 3: Validate and fix array/object structure
     const openBraces = (jsonStr.match(/{/g) || []).length;
     const closeBraces = (jsonStr.match(/}/g) || []).length;
+    const openBrackets = (jsonStr.match(/\[/g) || []).length;
+    const closeBrackets = (jsonStr.match(/\]/g) || []).length;
     
-    // Add missing closing braces if needed
+    // Step 4: Fix incomplete JSON structure by analyzing the end
+    // Check if we have incomplete meals array
+    if (jsonStr.includes('"meals": [') && !jsonStr.includes('"meals": []')) {
+      // Find the last incomplete meal object
+      const mealsStartIndex = jsonStr.lastIndexOf('"meals": [');
+      if (mealsStartIndex !== -1) {
+        const afterMeals = jsonStr.substring(mealsStartIndex);
+        // Count braces after meals array starts
+        const mealsBraces = (afterMeals.match(/{/g) || []).length;
+        const mealsCloseBraces = (afterMeals.match(/}/g) || []).length;
+        
+        // If meals array is incomplete, try to fix it
+        if (mealsBraces > mealsCloseBraces) {
+          // Add missing closing braces for meal objects
+          const missingMealBraces = mealsBraces - mealsCloseBraces;
+          
+          // Find if we need to close the meals array too
+          const mealsArrayClosed = jsonStr.substring(mealsStartIndex).includes(']');
+          
+          if (!mealsArrayClosed) {
+            // Close meal objects and meals array
+            jsonStr += '}'.repeat(missingMealBraces) + ']';
+          } else {
+            // Just close meal objects
+            jsonStr += '}'.repeat(missingMealBraces);
+          }
+        }
+      }
+    }
+    
+    // Step 5: Add missing closing brackets and braces
+    if (openBrackets > closeBrackets) {
+      jsonStr += ']'.repeat(openBrackets - closeBrackets);
+    }
+    
     if (openBraces > closeBraces) {
       jsonStr += '}'.repeat(openBraces - closeBraces);
     }
+    
+    // Step 6: Remove excessive closing braces/brackets
+    jsonStr = jsonStr.replace(/}+$/, '}').replace(/]+$/, ']');
     
     return jsonStr.trim();
   } catch (error) {
