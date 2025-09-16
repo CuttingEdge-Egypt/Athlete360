@@ -40,8 +40,8 @@ const developmentPlanSchema = z.object({
 
 type DevelopmentPlanRequest = z.infer<typeof developmentPlanSchema>;
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, generateDevelopmentPlan, compareAthletes, generateRankHistory } from "./openaiService";
-import { generateNutritionPlan, generateEnhancedNutritionPlan, generateRankHistoryWithGemini, generateAthleteBiography, type NutritionPlanFormData } from "./geminiService";
+import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, compareAthletes, generateRankHistory } from "./openaiService";
+import { generateNutritionPlan, generateEnhancedNutritionPlan, generateRankHistoryWithGemini, generateAthleteBiography, generateDevelopmentPlan, type NutritionPlanFormData, type DevelopmentPlanFormData } from "./geminiService";
 import { analyzeVideoFile } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
 
@@ -1915,6 +1915,147 @@ Return only valid JSON with the missing fields.`;
           errorMessage = "Nutrition plan generation timed out. Please try again with a shorter period or try again later.";
         } else if (isPostDeductionError) {
           errorMessage = "The nutrition plan was generated successfully but there was an issue processing your request.";
+        }
+      }
+      
+      res.status(500).json({ 
+        message: errorMessage,
+        error: true,
+        retryable: retryable
+      });
+    }
+  }));
+
+  // Enhanced Development Plan endpoint for form-based generation
+  app.post('/api/analysis/development-plan', isAuthenticatedUniversal, asyncHandler(async (req: any, res) => {
+    const tokenCost = 50;
+    const userId = req.user.claims.sub;
+    
+    try {
+      // Validate request body with Zod schema
+      const validationResult = developmentPlanSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = validationResult.error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
+        return res.status(400).json({ 
+          message: "Validation failed", 
+          errors: errors,
+          details: validationResult.error.errors
+        });
+      }
+
+      const { goal, height, weight, gender, sport, language } = validationResult.data;
+
+      // Check if user has sufficient tokens
+      const user = await storage.getUser(userId);
+      if (!user || (user.tokens || 0) < tokenCost) {
+        return res.status(402).json({ message: "Insufficient tokens" });
+      }
+
+      // Generate development plan using Gemini
+      console.log(`🏋️ Generating development plan for user ${userId}: goal=${goal}, sport=${sport}, language=${language}`);
+      
+      const developmentPlan = await Promise.race([
+        generateDevelopmentPlan({
+          goal,
+          height,
+          weight,
+          gender,
+          sport,
+          language
+        }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('ROUTE_TIMEOUT')), 180000)
+        )
+      ]);
+      
+      // Check if the development plan generation failed
+      if ((developmentPlan as any).error) {
+        console.log(`🚫 FAILED: Development plan generation failed - no tokens deducted`);
+        return res.status(500).json({
+          message: (developmentPlan as any).errorMessage || "Unable to generate development plan at this time. Please try again later.",
+          error: true,
+          errorType: (developmentPlan as any).errorType || "unknown",
+          retryable: (developmentPlan as any).retryable || true,
+          suggestion: (developmentPlan as any).suggestion || "Please try again later"
+        });
+      }
+
+      // SUCCESS: Now deduct tokens after confirmed successful generation
+      let tokenDeducted = false;
+      try {
+        await storage.deductTokens(userId, tokenCost);
+        tokenDeducted = true;
+        
+        await storage.createTransaction({
+          userId,
+          action: "Personal Development Plan Generation",
+          tokensDeducted: tokenCost,
+          serviceType: "development-plan"
+        });
+
+        console.log(`✅ SUCCESS: Development plan generated for user ${userId}, ${tokenCost} tokens deducted`);
+      } catch (deductionError) {
+        console.error("Error during token deduction or transaction creation:", deductionError);
+        
+        // If tokens were deducted but transaction failed, try to refund
+        if (tokenDeducted) {
+          try {
+            await storage.refundTokens(userId, tokenCost);
+            console.log(`🔄 REFUND: ${tokenCost} tokens refunded due to transaction error`);
+          } catch (refundError) {
+            console.error("Failed to refund tokens after transaction error:", refundError);
+          }
+        }
+        
+        throw deductionError; // Re-throw to be caught by main catch block
+      }
+
+      // Create analysis log with enhanced data (non-fatal)
+      try {
+        await storage.createAnalysisLog({
+          userId,
+          serviceType: "development-plan",
+          resultData: {
+            ...(developmentPlan as any),
+            userInputs: { goal, sport, height, weight, gender, language },
+            enhancedGeneration: true
+          }
+        });
+      } catch (logError) {
+        console.error("Non-fatal error creating analysis log:", logError);
+        // Continue execution - logging failure shouldn't prevent successful response
+      }
+
+      res.json({
+        ...(developmentPlan as any),
+        userGoal: goal,
+        sport: sport,
+        language: language,
+        enhancedGeneration: true
+      });
+    } catch (error) {
+      console.error("Error generating development plan:", error);
+      
+      // Most errors occur before token deduction, but check if this is a post-deduction error
+      const isPostDeductionError = error instanceof Error && 
+        (error.message.includes('transaction creation') || 
+         error.message.includes('analysis log'));
+      
+      if (isPostDeductionError) {
+        console.log(`🔄 FAILED: Post-deduction error occurred - tokens may have already been refunded`);
+      } else {
+        console.log(`🚫 FAILED: Development plan generation failed - no tokens were deducted`);
+      }
+      
+      // Determine error message based on error type
+      let errorMessage = "Failed to generate development plan. Please try again.";
+      let retryable = true;
+      
+      if (error instanceof Error) {
+        if (error.message.includes('AI_TIMEOUT') || error.message.includes('ROUTE_TIMEOUT')) {
+          errorMessage = "Development plan generation timed out. Please try again later.";
+        } else if (isPostDeductionError) {
+          errorMessage = "The development plan was generated successfully but there was an issue processing your request.";
         }
       }
       
