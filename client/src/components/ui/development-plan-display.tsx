@@ -8,19 +8,17 @@ import { useState } from 'react';
 import { DevelopmentPlanV1, Exercise, Week, Day } from '../../../../shared/schema';
 
 interface DevelopmentPlanDisplayProps {
-  plan: string; // JSON-stringified DevelopmentPlanV1
+  plan: DevelopmentPlanV1; // Direct DevelopmentPlanV1 object
   language: string;
   sport?: string;
 }
 
-// Helper function to parse the development plan JSON
-function parseDevelopmentPlan(planString: string): DevelopmentPlanV1 | null {
-  try {
-    return JSON.parse(planString) as DevelopmentPlanV1;
-  } catch (error) {
-    console.error('Failed to parse development plan JSON:', error);
-    return null;
+// Helper function to get localized text with fallback
+function getLocalizedText(text: { en: string; ar?: string }, language: string): string {
+  if (language === 'ar' && text.ar) {
+    return text.ar;
   }
+  return text.en;
 }
 
 // Helper function to get all exercises with videos from the plan
@@ -77,10 +75,8 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
   
-  // Parse the development plan JSON
-  const parsedPlan = parseDevelopmentPlan(plan);
-  
-  if (!parsedPlan) {
+  // Validate that plan is a valid object
+  if (!plan || typeof plan !== 'object' || !plan.title || !plan.weeks) {
     return (
       <div className="space-y-8" data-testid="development-plan-error">
         <Card className="bg-red-900/20 border-red-500/30">
@@ -89,7 +85,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
               <Target className="h-6 w-6 text-red-400" />
               <div>
                 <h3 className="text-lg font-semibold text-red-100">Invalid Development Plan</h3>
-                <p className="text-red-200">Unable to parse the development plan data. Please try generating a new plan.</p>
+                <p className="text-red-200">The development plan data is invalid. Please try generating a new plan.</p>
               </div>
             </div>
           </CardContent>
@@ -98,8 +94,8 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
     );
   }
 
-  const { title, duration, counts, intro, weeks } = parsedPlan;
-  const allExercisesWithVideos = getAllExercisesWithVideos(parsedPlan);
+  const { title, duration, counts, intro, weeks } = plan;
+  const allExercisesWithVideos = getAllExercisesWithVideos(plan);
   
   // Get current week and day
   const currentWeek = weeks[selectedWeekIndex];
@@ -117,7 +113,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
             <div className="space-y-2">
               <CardTitle className="text-2xl text-white flex items-center gap-3">
                 <Target className="h-6 w-6 text-athlete-accent" />
-                {title.en}
+                {getLocalizedText(title, language)}
               </CardTitle>
               <div className="flex flex-wrap items-center gap-6 text-sm text-gray-300">
                 <div className="flex items-center gap-2">
