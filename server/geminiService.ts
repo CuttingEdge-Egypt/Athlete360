@@ -2273,36 +2273,28 @@ async function generateSingleDevelopmentWeek(
   };
 
   const prompt = isArabic ?
-    `أنشئ الأسبوع ${weekNumber} من خطة تدريب رياضية:
+    `أنشئ الأسبوع ${weekNumber} من خطة تدريب مبسطة:
 
 - الرياضة: ${sport}
 - الهدف: ${goal}
 - العمر: ${age} سنة
-- الجنس: ${genderText}
-- الطول: ${height} سم
-- الوزن: ${weight} كغ
 
 متطلبات الأسبوع ${weekNumber}:
-- 4-6 أيام تدريب
-- 5-8 تمارين لكل يوم
-- اجعل أسماء التمارين واضحة ومحددة
-- قدم وصف شامل لكل تمرين
+- 3-4 أيام تدريب فقط
+- 3-5 تمارين بسيطة لكل يوم
+- أسماء تمارين قصيرة ووصف مختصر
 
 أرجع JSON صالح فقط.` :
-    `Create week ${weekNumber} of a training plan:
+    `Create week ${weekNumber} of a simplified training plan:
 
 - Sport: ${sport}
 - Goal: ${goal}
 - Age: ${age} years
-- Gender: ${genderText}
-- Height: ${height}cm
-- Weight: ${weight}kg
 
 Week ${weekNumber} requirements:
-- 4-6 training days
-- 5-8 exercises per day
-- Make exercise names clear and specific
-- Provide comprehensive description for each exercise
+- Only 3-4 training days
+- 3-5 simple exercises per day
+- Short exercise names and brief descriptions
 
 Return ONLY valid JSON.`;
 
@@ -2317,7 +2309,7 @@ Return ONLY valid JSON.`;
         responseMimeType: "application/json",
         responseSchema: weekSchema,
         temperature: 0.2,
-        maxOutputTokens: 2000  // Small enough for single week
+        maxOutputTokens: 1500  // Reduced further to avoid truncation
       },
       contents: prompt
     });
