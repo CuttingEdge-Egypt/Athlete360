@@ -260,6 +260,21 @@ async function generateSingleWeek(params: GenerateSingleWeekParams): Promise<{
     `أنت خبير تغذية رياضية متخصص في تصميم خطط غذائية شخصية للرياضيين.` :
     `You are a sports nutrition expert specializing in personalized nutrition plans for athletes.`;
 
+  // Generate week-specific instruction context
+  const weekInstructionContext = isArabic ?
+    `مرحباً بك في الأسبوع ${weekNumber}. ${weekNumber === 1 ? 'الهدف هذا الأسبوع هو إنشاء أساس قوي للنظام الغذائي.' : 
+     weekNumber === 2 ? 'الأسبوع الثاني يركز على تطوير عادات غذائية مستدامة.' :
+     weekNumber === 3 ? 'الأسبوع الثالث يهدف إلى تعزيز النتائج وزيادة التنويع.' :
+     weekNumber === 4 ? 'الأسبوع الرابع والأخير يركز على الاستدامة طويلة المدى.' :
+     weekNumber <= period/2 ? `الأسبوع ${weekNumber} يركز على بناء وتطوير العادات الغذائية.` :
+     `الأسبوع ${weekNumber} يهدف إلى تحسين النتائج والوصول للأهداف.`}` :
+    `Welcome to Week ${weekNumber}. ${weekNumber === 1 ? 'The goal this week is to establish a strong foundation for your nutrition plan.' : 
+     weekNumber === 2 ? 'Week 2 focuses on developing sustainable eating habits.' :
+     weekNumber === 3 ? 'Week 3 aims to enhance results and increase variety.' :
+     weekNumber === 4 ? 'Week 4, the final week, focuses on long-term sustainability.' :
+     weekNumber <= period/2 ? `Week ${weekNumber} focuses on building and developing healthy nutrition habits.` :
+     `Week ${weekNumber} aims to optimize results and reach your goals.`}`;
+
   const prompt = isArabic ?
     `قم بإنشاء خطة غذائية للأسبوع رقم ${weekNumber} (7 أيام):
 
@@ -276,7 +291,7 @@ ${varietyContext}
 مهم جداً: أرجع JSON صالح فقط بهذا التركيب الدقيق:
 
 {
-  "instructions": "تعليمات الأسبوع ${weekNumber} مع شرح التنويع والأهداف الغذائية",
+  "instructions": "${weekInstructionContext} [أضف المزيد من التفاصيل حول الأهداف الغذائية والتنويع للأسبوع ${weekNumber}]",
   "days": [
     {
       "day": {
@@ -315,7 +330,7 @@ ${varietyContext}
 CRITICAL: Return ONLY valid JSON in this EXACT structure:
 
 {
-  "instructions": "Week ${weekNumber} instructions with variety and nutrition goals explanation",
+  "instructions": "${weekInstructionContext} [Add more details about nutrition goals and variety for Week ${weekNumber}]",
   "days": [
     {
       "day": {
