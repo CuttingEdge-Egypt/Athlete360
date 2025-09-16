@@ -101,12 +101,13 @@ export default function Home() {
     defaultValues: {
       goal: "",
       sport: selectedSport,
-      age: undefined,
-      height: undefined,
-      currentWeight: undefined,
-      targetWeight: undefined,
+      age: 0,
+      height: 0,
+      currentWeight: 0,
+      targetWeight: 0,
       country: selectedCountry || "",
-      period: undefined,
+      period: 0,
+      inbodyReport: undefined,
       language: i18n.language
     }
   });
@@ -153,9 +154,9 @@ export default function Home() {
     resolver: zodResolver(developmentPlanSchema),
     defaultValues: {
       goal: "",
-      height: undefined,
-      weight: undefined,
-      gender: undefined,
+      height: 0,
+      weight: 0,
+      gender: "male",
       sport: "",
       language: i18n.language
     }

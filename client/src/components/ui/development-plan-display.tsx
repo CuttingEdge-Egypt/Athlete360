@@ -32,6 +32,16 @@ function extractYouTubeUrls(text: string): { url: string; videoId: string }[] {
 function processTextWithVideos(text: string): { processedText: string; videos: { url: string; videoId: string; exerciseName: string }[] } {
   const youtubeUrls = extractYouTubeUrls(text);
   
+  // Deny list for non-exercise terms that should not be used as exercise names
+  const denyList = [
+    'age', 'height', 'weight', 'gender', 'goal', 'country', 'protein', 'hydration',
+    'male', 'female', 'athlete', 'program duration', 'weeks', 'test', 'method',
+    'schedule', 'adaptation', 'focus', 'intensity', 'recovery', 'rest', 'warm',
+    'cool', 'down', 'as a sports training', 'but with updated workout', 'with updated workout',
+    'your training', 'more on training', 'same as phase', 'primary goals',
+    'personalized', 'basketball', 'development', 'comprehensive', 'professional'
+  ];
+  
   // Extract exercise names from the context around YouTube URLs
   const videos = youtubeUrls.map((video, index) => {
     const lines = text.split('\n');
@@ -50,9 +60,18 @@ function processTextWithVideos(text: string): { processedText: string; videos: {
             .replace(/^\d+\.\s*/, '')
             .replace(/[*#]+/g, '')
             .replace(/^\s*[-•]\s*/, '')
+            .replace(/[&]+/g, '') // Remove HTML entities
             .trim();
           
-          if (cleanLine.length > 3 && cleanLine.length < 80) {
+          // Check if this is a valid exercise name (not in deny list and reasonable length)
+          const isValidExercise = cleanLine.length > 3 && 
+                                  cleanLine.length < 80 && 
+                                  !denyList.some(term => cleanLine.toLowerCase().includes(term.toLowerCase())) &&
+                                  !cleanLine.includes('--') && // Not a divider
+                                  !/^\d+$/.test(cleanLine) && // Not just a number
+                                  !/^(day|week)\s*\d+/i.test(cleanLine); // Not a day/week label
+          
+          if (isValidExercise) {
             exerciseName = cleanLine;
             break;
           }
@@ -65,16 +84,27 @@ function processTextWithVideos(text: string): { processedText: string; videos: {
   
   // Clean up text by removing YouTube URLs and markdown formatting
   let processedText = text
-    // Remove video labels and URLs
-    .replace(/(?:🎥\s*(?:Video|فيديو):\s*)?(https?:\/\/(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)[a-zA-Z0-9_-]{11}[^\s\n]*)\n?/g, '')
+    // Remove video labels and URLs (more comprehensive)
+    .replace(/(?:🎥\s*(?:Video|فيديو):\s*)?(https?:\/\/(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)[a-zA-Z0-9_-]{11}[^\s\n]*)\s*/g, ' ')
+    // Remove any leftover video reference patterns
+    .replace(/🎥\s*(?:Video|فيديو)?\s*:?\s*/g, ' ')
     // Clean up markdown formatting
     .replace(/\*\*([^*]+)\*\*/g, '$1') // Bold
     .replace(/\*([^*]+)\*/g, '$1') // Italic
     .replace(/#{1,6}\s*([^\n]+)/g, '$1') // Headers
     .replace(/^\s*[-•*]\s*/gm, '• ') // Bullet points
-    // Clean up extra whitespace
-    .replace(/\n\s*\n\s*\n+/g, '\n\n')
-    .replace(/^\s+|\s+$/gm, '') // Trim each line
+    // Remove HTML entities that might have been introduced
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    // Clean up excessive spaces and normalize whitespace
+    .replace(/[ \t]+/g, ' ') // Multiple spaces/tabs to single space
+    .replace(/\s*\n\s*/g, '\n') // Normalize newlines
+    // Normalize paragraph spacing - preserve single line breaks within paragraphs, double line breaks between paragraphs
+    .replace(/\n\s*\n\s*\n+/g, '\n\n') // Reduce multiple blank lines to double newlines
+    .replace(/\n\s*\n/g, '\n\n') // Ensure consistent double newlines for paragraph breaks
     .trim();
   
   return { processedText, videos };
@@ -159,13 +189,13 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                 <Target className="h-5 w-5 text-athlete-accent" />
                 {programTitle}
               </CardTitle>
-              <div className="flex flex-wrap gap-3 text-sm text-gray-300">
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3 text-athlete-accent" />
+              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-300">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="h-3 w-3 text-athlete-accent flex-shrink-0" />
                   <span>12 Weeks</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Play className="h-3 w-3 text-athlete-accent" />
+                <div className="flex items-center gap-1.5">
+                  <Play className="h-3 w-3 text-athlete-accent flex-shrink-0" />
                   <span>{totalVideos} Videos</span>
                 </div>
               </div>
@@ -338,10 +368,14 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                     {section.title}
                   </h3>
                 )}
-                <div className={`leading-relaxed whitespace-pre-wrap ${
+                <div className={`leading-relaxed space-y-3 ${
                   section.type === 'day' ? 'text-gray-100' : 'text-gray-200'
                 }`}>
-                  {section.content.trim()}
+                  {section.content.trim().split('\n\n').filter(paragraph => paragraph.trim()).map((paragraph, pIndex) => (
+                    <p key={pIndex} className="whitespace-pre-wrap leading-relaxed">
+                      {paragraph.trim()}
+                    </p>
+                  ))}
                 </div>
                 {index < sections.length - 1 && section.type !== 'day' && (
                   <hr className="border-gray-600 mt-4" />
