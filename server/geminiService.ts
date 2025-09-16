@@ -2226,7 +2226,7 @@ export async function generateDevelopmentPlan(
     const responseSchema = {
       type: "object",
       properties: {
-        version: { type: "string", const: "1.0" },
+        version: { type: "string" },
         id: { type: "string" },
         language: { type: "string", enum: ["en", "ar"] },
         title: {
