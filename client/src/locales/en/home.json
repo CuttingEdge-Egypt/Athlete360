@@ -119,6 +119,7 @@
   "developmentPlan": {
     "title": "Create Your Development Plan",
     "goal": "Training Goal",
+    "age": "Age",
     "height": "Height (cm)",
     "weight": "Weight (kg)", 
     "gender": "Gender",
@@ -127,6 +128,7 @@
     "generate": "Generate Development Plan",
     "generating": "Generating Plan...",
     "goalPlaceholder": "Be specific! What do you want to improve? (e.g., 'Improve kicking power and speed', 'Build endurance for competition', 'Develop better technique')",
+    "agePlaceholder": "Enter your age in years",
     "heightPlaceholder": "Enter your height in centimeters",
     "weightPlaceholder": "Enter your weight in kilograms",
     "genderPlaceholder": "Select your gender",
