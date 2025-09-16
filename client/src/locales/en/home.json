@@ -135,7 +135,10 @@
     "male": "Male",
     "female": "Female",
     "yourPlan": "Your Development Plan",
-    "generateNew": "Generate New Plan"
+    "generateNew": "Generate New Plan",
+    "exerciseVideo": "Exercise Demo Video",
+    "exerciseVideos": "Exercise Videos",
+    "video": "Video"
   },
   "referral": {
     "title": "You're using a referral link!",

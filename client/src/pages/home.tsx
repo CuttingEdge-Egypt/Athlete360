@@ -20,6 +20,7 @@ import { AnalysisPopup } from "@/components/ui/analysis-popup";
 import { AthleteComparison } from "@/components/ui/athlete-comparison";
 import { VideoAnalysisResults } from "@/components/ui/video-analysis-results";
 import { NutritionPlanDisplay } from "@/components/ui/nutrition-plan-display";
+import { DevelopmentPlanDisplay } from "@/components/ui/development-plan-display";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X } from "lucide-react";
@@ -1461,15 +1462,10 @@ export default function Home() {
                       </Button>
                     </div>
                     
-                    <Card className="bg-athlete-gray-800 border-gray-700">
-                      <CardContent className="p-8">
-                        <div className="prose prose-invert max-w-none">
-                          <div className="whitespace-pre-wrap text-gray-200 leading-relaxed">
-                            {developmentPlanData.plan}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <DevelopmentPlanDisplay 
+                      plan={developmentPlanData.plan}
+                      language={developmentPlanData.language || 'en'}
+                    />
                   </div>
                 )
               )}

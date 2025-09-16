@@ -135,7 +135,10 @@
     "male": "ذكر",
     "female": "أنثى",
     "yourPlan": "خطة التطوير الخاصة بك",
-    "generateNew": "إنشاء خطة جديدة"
+    "generateNew": "إنشاء خطة جديدة",
+    "exerciseVideo": "فيديو توضيحي للتمرين",
+    "exerciseVideos": "فيديوهات التمارين",
+    "video": "فيديو"
   },
   "referral": {
     "title": "أنت تستخدم رابط إحالة!",
