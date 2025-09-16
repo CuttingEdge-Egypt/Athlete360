@@ -112,7 +112,7 @@ export class JobWorker {
     if (await this.isJobCancelled(job.id)) return;
 
     try {
-      // Generate the development plan using existing geminiService
+      // Generate the development plan with progress tracking
       const plan = await generateDevelopmentPlan({
         goal: params.goal,
         age: params.age,
@@ -121,6 +121,11 @@ export class JobWorker {
         gender: params.gender,
         sport: params.sport,
         language: params.language
+      }, async (weekCompleted: number, totalWeeks: number) => {
+        // Update progress based on week completion
+        const progress = Math.round((weekCompleted / totalWeeks) * 95) + 5; // 5% start + 95% for generation
+        await storage.updateJob(job.id, { progress });
+        console.log(`📊 Job ${job.id} progress: ${progress}% (Week ${weekCompleted}/${totalWeeks} completed)`);
       });
 
       // Check for cancellation after generation

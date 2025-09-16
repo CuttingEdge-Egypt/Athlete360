@@ -2326,7 +2326,8 @@ Return ONLY valid JSON.`;
 
 // Main development plan generation function - V1 structured JSON format
 export async function generateDevelopmentPlan(
-  formData: DevelopmentPlanFormData
+  formData: DevelopmentPlanFormData,
+  onProgressUpdate?: (weekCompleted: number, totalWeeks: number) => Promise<void>
 ): Promise<DevelopmentPlanData> {
   try {
     const { goal, age, height, weight, gender, sport, language } = formData;
@@ -2492,6 +2493,11 @@ Return JSON containing:
       
       weeks.push(weekResult);
       console.log(`✅ Week ${weekNum}/${totalWeeks} completed with ${weekDays.length} days`);
+      
+      // Update progress via callback if provided
+      if (onProgressUpdate) {
+        await onProgressUpdate(weekNum, totalWeeks);
+      }
     }
 
     // Construct the complete plan
