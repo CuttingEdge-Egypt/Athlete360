@@ -122,28 +122,40 @@ function summarizePreviousWeeks(previousWeeks: NutritionPlanDay[][]): string {
 // Helper function to repair malformed JSON strings
 function repairJsonString(jsonStr: string): string {
   try {
-    // Remove any trailing incomplete content after last }
+    // Step 1: Find the actual JSON boundaries
+    const firstBraceIndex = jsonStr.indexOf('{');
     const lastBraceIndex = jsonStr.lastIndexOf('}');
-    if (lastBraceIndex !== -1 && lastBraceIndex < jsonStr.length - 1) {
-      jsonStr = jsonStr.substring(0, lastBraceIndex + 1);
+    
+    if (firstBraceIndex !== -1 && lastBraceIndex !== -1 && lastBraceIndex > firstBraceIndex) {
+      // Extract only the JSON content between the outermost braces
+      jsonStr = jsonStr.substring(firstBraceIndex, lastBraceIndex + 1);
     }
     
-    // Fix common JSON issues
+    // Step 2: Fix common JSON issues
     jsonStr = jsonStr
-      // Fix unescaped quotes in strings
+      // Fix unescaped quotes in strings (handle quotes within meal descriptions)
       .replace(/": "([^"]*)"([^",\]}]*)"([^",\]}]*)",/g, '": "$1\\"$2\\"$3",')
       // Fix line breaks in strings
       .replace(/": "([^"]*)\n([^"]*)",/g, '": "$1\\n$2",')
-      // Fix trailing commas
+      // Fix trailing commas before closing brackets/braces
       .replace(/,(\s*[}\]])/g, '$1')
       // Fix missing quotes around property names
       .replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":')
-      // Ensure proper string escaping for common characters
+      // Ensure proper string escaping for backslashes
       .replace(/\\(?!["\\/bfnrt])/g, '\\\\')
-      // Fix unterminated strings by finding unmatched quotes and closing them
-      .replace(/"([^"\\]*(\\.[^"\\]*)*)$/g, '"$1"');
+      // Remove any standalone quotes at the end
+      .replace(/\s*"?\s*$/, '');
       
-    return jsonStr;
+    // Step 3: Validate brace matching
+    const openBraces = (jsonStr.match(/{/g) || []).length;
+    const closeBraces = (jsonStr.match(/}/g) || []).length;
+    
+    // Add missing closing braces if needed
+    if (openBraces > closeBraces) {
+      jsonStr += '}'.repeat(openBraces - closeBraces);
+    }
+    
+    return jsonStr.trim();
   } catch (error) {
     console.error('JSON repair failed:', error);
     return jsonStr;
