@@ -86,6 +86,7 @@ export default function Home() {
   // Development Plan form validation schema with translations
   const developmentPlanSchema = useMemo(() => z.object({
     goal: z.string().min(10, t('validation.goalRequired')).max(1000, t('validation.goalTooLong')),
+    age: requiredNumber(t('validation.ageRequired'), t('validation.ageInvalid'), 13, 99),
     height: requiredNumber(t('validation.heightRequired'), t('validation.heightInvalid'), 120, 250),
     weight: requiredNumber(t('validation.weightRequired'), t('validation.weightInvalid'), 30, 300),
     gender: z.enum(['male', 'female'], { required_error: t('validation.genderRequired') }),
@@ -154,6 +155,7 @@ export default function Home() {
     resolver: zodResolver(developmentPlanSchema),
     defaultValues: {
       goal: "",
+      age: 0,
       height: 0,
       weight: 0,
       gender: "male",
@@ -1310,7 +1312,28 @@ export default function Home() {
                           )}
                         />
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                          {/* Age Field */}
+                          <FormField
+                            control={developmentForm.control}
+                            name="age"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-gray-200">{t('developmentPlan.age')}</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    {...field}
+                                    type="number" 
+                                    placeholder={t('developmentPlan.agePlaceholder')}
+                                    className="bg-athlete-gray-700 border-gray-600 text-white"
+                                    data-testid="input-development-age"
+                                  />
+                                </FormControl>
+                                <FormMessage className="text-red-400" />
+                              </FormItem>
+                            )}
+                          />
+
                           {/* Height Field */}
                           <FormField
                             control={developmentForm.control}
