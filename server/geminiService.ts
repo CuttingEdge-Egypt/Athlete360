@@ -2203,10 +2203,8 @@ function extractVideoId(url: string): string {
   return match?.[1] || '';
 }
 
-// Generate a single day of development plan
-async function generateSingleDevelopmentDay(
-  weekNumber: number,
-  dayNumber: number,
+// Generate goal-based development plan (no weeks, just pure goal analysis)
+async function generateGoalBasedDevelopmentPlan(
   formData: DevelopmentPlanFormData,
   genderText: string,
   isArabic: boolean
@@ -2214,125 +2212,166 @@ async function generateSingleDevelopmentDay(
   const { goal, age, height, weight, sport } = formData;
   
   const systemPrompt = isArabic ? 
-    `أنت خبير تدريب رياضي متخصص في تصميم برامج التدريب. قم بإنشاء أسبوع واحد من خطة التدريب بتنسيق JSON.` :
-    `You are a professional sports training expert. Create one week of a training plan in JSON format.`;
+    `أنت خبير تدريب رياضي متخصص في تحليل الأهداف وتصميم التمارين المخصصة. قم بتحليل هدف الرياضي وإنشاء 3 تمارين لكل ضعف أو مجال للتحسين. لا تفكر في أسابيع، فقط حلل الأهداف وأنشئ التمارين.` :
+    `You are a professional sports training expert specialized in goal analysis and creating targeted exercises. Analyze the athlete's goal and create 3 exercises for each weakness or area to improve. Don't think about weeks, just analyze goals and create exercises.`;
 
-  // Schema for a single day
-  const daySchema = {
+  // Schema for pure goal-based plan
+  const planSchema = {
     type: "object",
     properties: {
-      index: { type: "number" },
-      title: { type: "string" },
-      focus: { type: "string" },
-      exercises: {
+      title: {
+        type: "object",
+        properties: {
+          en: { type: "string" },
+          ar: { type: "string" }
+        }
+      },
+      overview: { type: "string" },
+      goalAnalysis: {
         type: "array",
+        minItems: 1,
+        maxItems: 4, // Allow 1-4 goal areas maximum
         items: {
           type: "object",
           properties: {
-            id: { type: "string" },
-            name: { type: "string" },
+            area: { type: "string" },
             description: { type: "string" },
-            tags: { type: "array", items: { type: "string" } },
-            prescription: {
-              type: "object",
-              properties: {
-                sets: { type: "number" },
-                reps: { type: ["string", "number"] },
-                restSec: { type: "number" },
-                intensity: { type: "string" }
+            exercises: {
+              type: "array",
+              minItems: 3,
+              maxItems: 3, // Enforce exactly 3 exercises per area
+              items: {
+                type: "object",
+                properties: {
+                  id: { type: "string" },
+                  name: { type: "string" },
+                  description: { type: "string" },
+                  tags: { type: "array", items: { type: "string" } },
+                  prescription: {
+                    type: "object",
+                    properties: {
+                      sets: { type: "number" },
+                      reps: { type: ["string", "number"] },
+                      restSec: { type: "number" },
+                      intensity: { type: "string" }
+                    }
+                  },
+                  equipment: { type: "array", items: { type: "string" } }
+                },
+                required: ["id", "name", "description"]
               }
-            },
-            equipment: { type: "array", items: { type: "string" } }
+            }
           },
-          required: ["id", "name", "description"]
+          required: ["area", "description", "exercises"]
         }
-      },
-      notes: { type: "string" }
+      }
     },
-    required: ["index", "title", "exercises"]
+    required: ["title", "overview", "goalAnalysis"]
   };
 
   const prompt = isArabic ?
-    `أنشئ اليوم ${dayNumber} من الأسبوع ${weekNumber} لخطة تدريب شاملة:
+    `حلل وأنشئ خطة تدريب قائمة على التحليل الهدف:
 
 - الرياضة: ${sport}
 - الهدف: ${goal}
 - العمر: ${age} سنة
 - الجنس: ${genderText}
 
-متطلبات اليوم ${dayNumber}:
-- 3 تمارين مفصلة فقط
-- أسماء تمارين واضحة ومحددة
-- وصف شامل لكل تمرين
-- معلومات الشدة والراحة والمعدات
+المطلوب:
+1. حلل الهدف "${goal}" وحدد المجالات/نقاط الضعف المحددة للعمل عليها
+2. لكل مجال، أنشئ 3 تمارين مخصصة بالضبط
+3. كل تمرين يجب أن يكون له اسم واضح ومحدد لسهولة العثور على فيديو تعليمي له
+4. ادرج معلومات الشدة والراحة والمعدات
+5. أنشئ عنوان جذاب وملخص للخطة
 
 أرجع JSON صالح فقط.` :
-    `Create day ${dayNumber} of week ${weekNumber} for a comprehensive training plan:
+    `Analyze and create a goal-based training plan:
 
 - Sport: ${sport}
 - Goal: ${goal}
 - Age: ${age} years
 - Gender: ${genderText}
 
-Day ${dayNumber} requirements:
-- Exactly 3 detailed exercises
-- Clear and specific exercise names
-- Comprehensive description for each exercise
-- Include intensity, rest, and equipment information
+Requirements:
+1. Analyze the goal "${goal}" and identify specific areas/weaknesses to work on
+2. For each area, create exactly 3 targeted exercises
+3. Each exercise must have a clear, specific name for easy video tutorial discovery
+4. Include intensity, rest, and equipment information
+5. Create an engaging title and overview for the plan
 
 Return ONLY valid JSON.`;
 
   try {
-    console.log(`⏳ Generating Week ${weekNumber}, Day ${dayNumber}...`);
-    const dayStart = Date.now();
+    console.log(`⏳ Generating goal-based development plan...`);
+    const planStart = Date.now();
     
     const result = await genAI.models.generateContent({
       model: "gemini-2.5-pro",
       config: {
         systemInstruction: systemPrompt,
         responseMimeType: "application/json",
-        responseSchema: daySchema,
+        responseSchema: planSchema,
         temperature: 0.2,
-        maxOutputTokens: 4096  // Sufficient for single day
+        maxOutputTokens: 8192  // More tokens for complete plan
       },
       contents: prompt
     });
 
-    const dayDuration = Date.now() - dayStart;
-    console.log(`✅ Week ${weekNumber}, Day ${dayNumber} generated in ${dayDuration}ms`);
+    const planDuration = Date.now() - planStart;
+    console.log(`✅ Goal-based plan generated in ${planDuration}ms`);
 
     // Check for truncation
     const finishReason = (result as any)?.response?.candidates?.[0]?.finishReason || 
                         (result as any)?.candidates?.[0]?.finishReason;
     if (finishReason === "MAX_TOKENS") {
-      console.error(`⚠️ Week ${weekNumber}, Day ${dayNumber} was truncated`);
-      throw new Error(`Week ${weekNumber}, Day ${dayNumber} response was truncated`);
+      console.error(`⚠️ Goal-based plan was truncated`);
+      throw new Error(`Goal-based plan response was truncated`);
     }
 
     const responseText = result?.text || "";
     if (!responseText) {
-      throw new Error(`Empty response for week ${weekNumber}, day ${dayNumber}`);
+      throw new Error(`Empty response for goal-based plan`);
     }
 
-    const dayPlan = JSON.parse(responseText);
-    dayPlan.index = dayNumber; // Ensure correct index
+    const plan = JSON.parse(responseText);
     
-    return dayPlan;
+    // Flatten exercises for compatibility and video integration
+    if (plan.goalAnalysis && Array.isArray(plan.goalAnalysis)) {
+      const allExercises: any[] = [];
+      
+      // Extract exercises from each goal area
+      plan.goalAnalysis.forEach((area: any) => {
+        if (area.exercises && Array.isArray(area.exercises)) {
+          area.exercises.forEach((exercise: any) => {
+            // Add the target area to each exercise for context
+            exercise.targetArea = area.area;
+            allExercises.push(exercise);
+          });
+        }
+      });
+      
+      // Add flattened exercises to plan root for backward compatibility
+      plan.exercises = allExercises;
+      
+      console.log(`📊 Flattened ${allExercises.length} exercises from ${plan.goalAnalysis.length} goal areas`);
+    }
+    
+    return plan;
   } catch (error) {
-    console.error(`❌ Error generating Week ${weekNumber}, Day ${dayNumber}:`, error);
+    console.error(`❌ Error generating goal-based plan:`, error);
     throw error;
   }
 }
 
-// Main development plan generation function - V1 structured JSON format
+// Main development plan generation function - Goal-based format (no weeks)
 export async function generateDevelopmentPlan(
   formData: DevelopmentPlanFormData,
-  onProgressUpdate?: (weekCompleted: number, totalWeeks: number) => Promise<void>
+  onProgressUpdate?: (currentStep: number, totalSteps: number) => Promise<void>
 ): Promise<DevelopmentPlanData> {
   try {
     const { goal, age, height, weight, gender, sport, language } = formData;
     
-    console.log(`🏋️ Generating structured development plan V1: goal=${goal}, sport=${sport}, language=${language}`);
+    console.log(`🎯 Generating goal-based development plan: goal=${goal}, sport=${sport}, language=${language}`);
     
     const isArabic = language === 'ar';
     const genderText = gender === 'male' ? (isArabic ? 'ذكر' : 'male') : (isArabic ? 'أنثى' : 'female');
@@ -2340,291 +2379,86 @@ export async function generateDevelopmentPlan(
     // Generate unique ID for this plan
     const planId = `dev_plan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
-    // First, generate the overview and plan structure
-    const overviewPrompt = isArabic ?
-      `أنشئ ملخص خطة تدريب رياضية:
-
-- الرياضة: ${sport}
-- الهدف: ${goal}
-- العمر: ${age} سنة
-- المدة: 8-10 أسابيع
-
-أرجع JSON يحتوي على:
-{
-  "title": { "en": "English title", "ar": "العنوان بالعربية" },
-  "overview": "نظرة عامة على الخطة",
-  "structure": "هيكل البرنامج",
-  "progressMetrics": ["مؤشرات التقدم"],
-  "totalWeeks": 8
-}` :
-      `Create a training plan overview:
-
-- Sport: ${sport}
-- Goal: ${goal}
-- Age: ${age} years
-- Duration: 8-10 weeks
-
-Return JSON containing:
-{
-  "title": { "en": "English title", "ar": "Arabic title" },
-  "overview": "Plan overview",
-  "structure": "Program structure",
-  "progressMetrics": ["Progress metrics"],
-  "totalWeeks": 8
-}`;
-
-    console.log('📋 Generating plan overview...');
-    const overviewSchema = {
-      type: "object",
-      properties: {
-        title: {
-          type: "object",
-          properties: {
-            en: { type: "string" },
-            ar: { type: "string" }
-          },
-          required: ["en"]
-        },
-        overview: { type: "string" },
-        structure: { type: "string" },
-        progressMetrics: {
-          type: "array",
-          items: { type: "string" }
-        },
-        totalWeeks: { type: "number" }
-      },
-      required: ["title", "overview", "totalWeeks"]
-    };
-
-    const overviewResult = await genAI.models.generateContent({
-      model: "gemini-2.5-pro",
-      config: {
-        systemInstruction: isArabic ? 
-          `أنت خبير تدريب رياضي. قم بإنشاء ملخص خطة تدريب بتنسيق JSON.` :
-          `You are a sports training expert. Create a training plan overview in JSON format.`,
-        responseMimeType: "application/json",
-        responseSchema: overviewSchema,
-        temperature: 0.2,
-        maxOutputTokens: 4096  // Increased for overview generation
-      },
-      contents: overviewPrompt
-    });
-
-    let overview;
-    try {
-      const overviewText = overviewResult?.text || "{}";
-      console.log(`📊 Overview response length: ${overviewText.length} characters`);
-      console.log(`📝 Overview response preview: ${overviewText.substring(0, 500)}`);
-      
-      overview = JSON.parse(overviewText);
-      console.log(`✅ Overview parsed successfully`);
-    } catch (parseError) {
-      console.error('❌ Failed to parse overview JSON:', parseError);
-      console.error('📝 Raw overview response:', overviewResult?.text || "EMPTY");
-      
-      // Fallback to default overview
-      overview = {
-        title: { 
-          en: `${sport} Development Plan`, 
-          ar: `خطة تطوير ${sport}` 
-        },
-        overview: `Comprehensive ${sport} training program focused on: ${goal}`,
-        structure: "Progressive weekly training schedule",
-        progressMetrics: ["Performance improvement", "Skill development"],
-        totalWeeks: 8
-      };
-      console.log(`🔧 Using fallback overview structure`);
+    // Step 1: Generate goal-based plan
+    if (onProgressUpdate) {
+      await onProgressUpdate(1, 3);
     }
     
-    const totalWeeks = overview.totalWeeks || 8;
-    console.log(`✅ Overview ready: ${totalWeeks} weeks planned`);
-
-    // Generate each week and day separately
-    const weeks = [];
-    const daysPerWeek = 5; // Standard 5-day training week
-    console.log(`🏋️ Generating ${totalWeeks} weeks of training (${daysPerWeek} days each)...`);
+    const goalBasedPlan = await generateGoalBasedDevelopmentPlan(formData, genderText, isArabic);
+    console.log(`✅ Goal analysis completed: ${goalBasedPlan.goalAnalysis?.length || 0} areas identified`);
     
-    for (let weekNum = 1; weekNum <= totalWeeks; weekNum++) {
-      const weekDays = [];
-      
-      // Generate each day for this week
-      for (let dayNum = 1; dayNum <= daysPerWeek; dayNum++) {
-        let dayResult;
-        let attempts = 0;
-        const maxAttempts = 2;
-        
-        while (attempts < maxAttempts) {
-          attempts++;
-          try {
-            dayResult = await generateSingleDevelopmentDay(
-              weekNum,
-              dayNum,
-              formData,
-              genderText,
-              isArabic
-            );
-            break; // Success
-          } catch (error) {
-            console.error(`❌ Attempt ${attempts} failed for week ${weekNum}, day ${dayNum}:`, error);
-            if (attempts >= maxAttempts) {
-              throw new Error(`Failed to generate week ${weekNum}, day ${dayNum} after ${maxAttempts} attempts`);
-            }
+    // Step 2: Find YouTube videos for all exercises
+    if (onProgressUpdate) {
+      await onProgressUpdate(2, 3);
+    }
+    
+    const totalExercises = goalBasedPlan.exercises?.length || 0;
+    console.log(`🔍 Finding YouTube videos for ${totalExercises} exercises...`);
+    
+    let videosFound = 0;
+    if (goalBasedPlan.exercises) {
+      for (const exercise of goalBasedPlan.exercises) {
+        try {
+          const videoUrl = await scrapeYouTubeForExercise(exercise.name, sport);
+          if (videoUrl) {
+            exercise.videoUrl = videoUrl;
+            exercise.videoId = extractVideoId(videoUrl);
+            videosFound++;
+            console.log(`✅ Video found for "${exercise.name}": ${videoUrl}`);
+          } else {
+            console.log(`⚠️ No video found for "${exercise.name}"`);
           }
+        } catch (error) {
+          console.error(`❌ Error finding video for "${exercise.name}":`, error);
         }
-        
-        if (dayResult) {
-          weekDays.push(dayResult);
-          console.log(`✅ Week ${weekNum}, Day ${dayNum} completed`);
-        }
-      }
-      
-      // Construct week object
-      const weekResult = {
-        index: weekNum,
-        title: `Week ${weekNum}`,
-        summary: `Training week ${weekNum} focused on ${goal}`,
-        counts: {
-          days: weekDays.length,
-          videos: 0, // Will be calculated later
-          exercises: weekDays.reduce((total, day) => total + day.exercises.length, 0)
-        },
-        days: weekDays
-      };
-      
-      weeks.push(weekResult);
-      console.log(`✅ Week ${weekNum}/${totalWeeks} completed with ${weekDays.length} days`);
-      
-      // Update progress via callback if provided
-      if (onProgressUpdate) {
-        await onProgressUpdate(weekNum, totalWeeks);
       }
     }
-
-    // Construct the complete plan
-    const parsedPlan: DevelopmentPlanV1 = {
+    
+    console.log(`📹 Found ${videosFound}/${totalExercises} videos`);
+    
+    // Step 3: Build final plan structure
+    if (onProgressUpdate) {
+      await onProgressUpdate(3, 3);
+    }
+    
+    const finalPlan = {
       version: "1.0",
       id: planId,
-      language: language as "en" | "ar",
-      title: overview.title || { en: `${sport} Development Plan`, ar: `خطة تطوير ${sport}` },
+      language: language,
+      title: goalBasedPlan.title || {
+        en: `${sport} Goal-Based Training Plan`,
+        ar: `خطة التدريب القائمة على الأهداف - ${sport}`
+      },
       sport: sport,
       goal: goal,
       gender: gender,
       duration: {
-        weeks: totalWeeks,
-        days: totalWeeks * 5 // Approximate
+        type: "goal-based",
+        description: isArabic ? 
+          "خطة قائمة على تحليل الأهداف ونقاط الضعف" : 
+          "Goal-based plan focusing on weakness analysis"
       },
       counts: {
-        weeks: totalWeeks,
-        videos: 0,
-        exercises: 0
+        goals: goalBasedPlan.goalAnalysis?.length || 0,
+        exercises: totalExercises,
+        videos: videosFound
       },
       intro: {
-        overview: overview.overview || "",
-        structure: overview.structure || "",
-        progressMetrics: overview.progressMetrics || []
+        overview: goalBasedPlan.overview || `Goal-focused ${sport} training program`,
+        structure: isArabic ? 
+          "برنامج منظم حسب المجالات والأهداف المحددة" :
+          "Organized by specific goal areas and targeted improvements"
       },
-      weeks: weeks,
-      attribution: {
-        model: "gemini-2.5-pro",
-        generatedAt: new Date().toISOString()
-      }
+      goalAnalysis: goalBasedPlan.goalAnalysis || [],
+      exercises: goalBasedPlan.exercises || []
     };
-
-    console.log(`✅ Plan structure assembled with ${weeks.length} weeks`);
     
-    // Update total exercise and day counts
-    parsedPlan.duration.days = weeks.reduce((total, week) => total + week.days.length, 0);
-    parsedPlan.counts.exercises = weeks.reduce((total, week) => total + week.counts.exercises, 0);
-    
-    console.log(`📊 Final plan: ${parsedPlan.counts.weeks} weeks, ${parsedPlan.duration.days} days, ${parsedPlan.counts.exercises} exercises`);
-
-    // Extract all exercise names from the structured plan
-    const allExercises: Exercise[] = [];
-    parsedPlan.weeks.forEach(week => {
-      week.days.forEach(day => {
-        day.exercises.forEach(exercise => {
-          allExercises.push(exercise);
-        });
-      });
-    });
-
-    console.log(`🎯 Found ${allExercises.length} exercises across ${parsedPlan.weeks.length} weeks`);
-
-    // Enrich exercises with YouTube videos
-    let videosFound = 0;
-    for (const exercise of allExercises) {
-      console.log(`🔍 Searching YouTube for exercise: "${exercise.name}"`);
-      
-      try {
-        const videoUrl = await scrapeYouTubeForExercise(exercise.name, sport);
-        
-        if (videoUrl) {
-          const videoId = extractVideoId(videoUrl);
-          exercise.video = {
-            url: videoUrl,
-            videoId: videoId,
-            title: `${exercise.name} - ${sport} Training`,
-            channel: 'Training Video'
-          };
-          videosFound++;
-          console.log(`✅ Video found for "${exercise.name}": ${videoUrl}`);
-        } else {
-          console.log(`⚠️ No video found for "${exercise.name}"`);
-        }
-      } catch (videoError) {
-        console.log(`⚠️ Error searching video for "${exercise.name}":`, videoError);
-      }
-    }
-
-    // Update counts in the plan
-    parsedPlan.counts.exercises = allExercises.length;
-    parsedPlan.counts.videos = videosFound;
-    parsedPlan.counts.weeks = parsedPlan.weeks.length;
-
-    // Update week counts
-    parsedPlan.weeks.forEach(week => {
-      let weekExercises = 0;
-      let weekVideos = 0;
-      
-      week.days.forEach(day => {
-        weekExercises += day.exercises.length;
-        weekVideos += day.exercises.filter(ex => ex.video).length;
-      });
-      
-      week.counts.exercises = weekExercises;
-      week.counts.videos = weekVideos;
-      week.counts.days = week.days.length;
-    });
-
-    // Set attribution
-    parsedPlan.attribution = {
-      model: "gemini-2.5-pro",
-      generatedAt: new Date().toISOString()
-    };
-
-    // Ensure ID is set
-    parsedPlan.id = planId;
-    parsedPlan.language = language as "en" | "ar";
-
-    console.log(`✅ Development plan V1 completed: ${parsedPlan.counts.weeks} weeks, ${parsedPlan.counts.exercises} exercises, ${parsedPlan.counts.videos} videos`);
-
+    console.log(`✅ Goal-based development plan completed: ${finalPlan.counts.goals} goals, ${finalPlan.counts.exercises} exercises, ${finalPlan.counts.videos} videos`);
     return {
-      plan: JSON.stringify(parsedPlan)
+      plan: JSON.stringify(finalPlan)
     };
-    
   } catch (error) {
-    console.error('❌ Error generating structured development plan:', error);
-    
-    // Handle specific error types for proper token management
-    if (error instanceof Error) {
-      if (error.message.includes('AI_JSON_PARSE_FAILED') ||
-          error.message.includes('AI_SCHEMA_VALIDATION_FAILED') ||
-          error.message.includes('AI_TIMEOUT')) {
-        // Re-throw critical errors so tokens aren't deducted
-        throw error;
-      }
-    }
-    
-    throw error;
+    console.error("Error generating goal-based development plan:", error);
+    throw new Error(`Failed to generate goal-based development plan: ${error instanceof Error ? error.message : String(error)}`);
   }
 }

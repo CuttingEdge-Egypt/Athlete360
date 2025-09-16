@@ -205,9 +205,9 @@ export default function Home() {
   const { data: developmentJobStatus, refetch: refetchJobStatus } = useQuery({
     queryKey: ['/api/jobs', developmentJobId],
     enabled: !!developmentJobId,
-    refetchInterval: (data) => {
+    refetchInterval: (query) => {
       // Stop polling if job is completed, failed, or cancelled
-      const status = data?.data?.status;
+      const status = query?.data?.status;
       return (status === 'completed' || status === 'failed' || status === 'cancelled') ? false : 2000;
     },
     queryFn: async () => {
@@ -284,6 +284,14 @@ export default function Home() {
         ];
         const messageIndex = Math.min(Math.floor((progress || 0) / 17), messages.length - 1);
         setDevelopmentProgressMessage(messages[messageIndex]);
+        
+        // Display incremental results if available during processing
+        if (results) {
+          console.log('Displaying incremental results:', results);
+          setDevelopmentPlanData(results);
+          setShowDevelopmentForm(false);
+          setActiveTab('development');
+        }
       } else if (status === 'completed' && results) {
         console.log('Development plan completed:', results);
         setDevelopmentPlanData(results);
