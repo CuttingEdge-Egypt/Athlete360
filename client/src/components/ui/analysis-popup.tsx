@@ -356,7 +356,9 @@ export function AnalysisPopup({
             <div className="flex items-center gap-4">
               <Badge variant="secondary" className="bg-purple-600 text-white px-3 py-1">
                 <Clock className="w-3 h-3 mr-1" />
-                {parsedData.duration}
+                {typeof parsedData.duration === 'string' ? parsedData.duration : 
+                 typeof parsedData.duration === 'object' ? (parsedData.duration.description || parsedData.duration.type || 'Goal-based plan') : 
+                 'Development Plan'}
               </Badge>
               {planItems.length > 0 && (
                 <span className="text-sm text-purple-300">
@@ -457,12 +459,12 @@ export function AnalysisPopup({
                             {Array.isArray(item.objectives) ? item.objectives.map((objective: string, idx: number) => (
                               <div key={idx} className="flex items-start gap-3 p-2 bg-blue-900/20 rounded-lg border-l-2 border-blue-500">
                                 <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                                <span className="text-sm text-blue-100">{objective}</span>
+                                <span className="text-sm text-blue-100">{typeof objective === 'string' ? objective : JSON.stringify(objective)}</span>
                               </div>
                             )) : (
                               <div className="flex items-start gap-3 p-2 bg-blue-900/20 rounded-lg border-l-2 border-blue-500">
                                 <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                                <span className="text-sm text-blue-100">{item.objectives}</span>
+                                <span className="text-sm text-blue-100">{typeof item.objectives === 'string' ? item.objectives : JSON.stringify(item.objectives)}</span>
                               </div>
                             )}
                           </div>
@@ -480,12 +482,12 @@ export function AnalysisPopup({
                             {Array.isArray(item.metrics) ? item.metrics.map((metric: string, idx: number) => (
                               <div key={idx} className="flex items-start gap-3 p-2 bg-green-900/20 rounded-lg border-l-2 border-green-500">
                                 <BarChart className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                                <span className="text-sm text-green-100">{metric}</span>
+                                <span className="text-sm text-green-100">{typeof metric === 'string' ? metric : JSON.stringify(metric)}</span>
                               </div>
                             )) : (
                               <div className="flex items-start gap-3 p-2 bg-green-900/20 rounded-lg border-l-2 border-green-500">
                                 <BarChart className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                                <span className="text-sm text-green-100">{item.metrics}</span>
+                                <span className="text-sm text-green-100">{typeof item.metrics === 'string' ? item.metrics : JSON.stringify(item.metrics)}</span>
                               </div>
                             )}
                           </div>
@@ -497,7 +499,9 @@ export function AnalysisPopup({
                         <div className="pt-2 border-t border-gray-600">
                           <div className="flex items-center gap-2 text-xs text-gray-400">
                             <Clock className="w-3 h-3" />
-                            Duration: {item.duration}
+                            Duration: {typeof item.duration === 'string' ? item.duration : 
+                                     typeof item.duration === 'object' ? (item.duration.description || item.duration.type || 'Duration info') : 
+                                     item.duration}
                           </div>
                         </div>
                       )}
