@@ -458,6 +458,33 @@ export default function Home() {
         } catch (error) {
           console.error('Failed to parse video analysis data from URL:', error);
         }
+      } else if (tab === 'development' && data) {
+        try {
+          let parsedData;
+          if (data === 'fromStorage') {
+            // Get data from sessionStorage
+            const storedData = sessionStorage.getItem('developmentPlanData');
+            if (storedData) {
+              parsedData = JSON.parse(storedData);
+              // Clean up sessionStorage after use
+              sessionStorage.removeItem('developmentPlanData');
+            } else {
+              throw new Error('No development plan data found in sessionStorage');
+            }
+          } else {
+            // Legacy URL-based approach
+            parsedData = JSON.parse(decodeURIComponent(data));
+          }
+          
+          console.log('Parsed development plan data:', parsedData);
+          setDevelopmentPlanData(parsedData);
+          setShowDevelopmentForm(false);
+          setActiveTab("development");
+          // Clean up URL after loading data
+          window.history.replaceState({}, '', window.location.pathname);
+        } catch (error) {
+          console.error('Failed to parse development plan data from URL:', error);
+        }
       }
     };
 
@@ -519,6 +546,33 @@ export default function Home() {
         window.history.replaceState({}, '', window.location.pathname);
       } catch (error) {
         console.error('Failed to parse video analysis data from URL:', error);
+      }
+    } else if (tab === 'development' && data) {
+      try {
+        let parsedData;
+        if (data === 'fromStorage') {
+          // Get data from sessionStorage
+          const storedData = sessionStorage.getItem('developmentPlanData');
+          if (storedData) {
+            parsedData = JSON.parse(storedData);
+            // Clean up sessionStorage after use
+            sessionStorage.removeItem('developmentPlanData');
+          } else {
+            throw new Error('No development plan data found in sessionStorage');
+          }
+        } else {
+          // Legacy URL-based approach
+          parsedData = JSON.parse(decodeURIComponent(data));
+        }
+        
+        console.log('Location change - Parsed development plan data:', parsedData);
+        setDevelopmentPlanData(parsedData);
+        setShowDevelopmentForm(false);
+        setActiveTab("development");
+        // Clean up URL after loading data
+        window.history.replaceState({}, '', window.location.pathname);
+      } catch (error) {
+        console.error('Failed to parse development plan data from URL:', error);
       }
     }
   }, [location]);

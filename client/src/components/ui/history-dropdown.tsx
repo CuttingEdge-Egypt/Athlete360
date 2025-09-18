@@ -116,6 +116,20 @@ export function HistoryDropdown() {
       // Navigate to video analysis page with data in sessionStorage
       sessionStorage.setItem('videoAnalysisData', JSON.stringify(item.resultData));
       setLocation('/video-analysis');
+    } else if (item.serviceType === 'development-plan') {
+      // Store development plan data in sessionStorage to avoid URL length limits
+      sessionStorage.setItem('developmentPlanData', JSON.stringify(item.resultData));
+      const url = "/?tab=development&data=fromStorage";
+      console.log('Navigating to development plan:', url);
+      
+      // Use both wouter navigation and manual URL update
+      setLocation(url);
+      
+      // Also update the URL directly and trigger event
+      setTimeout(() => {
+        window.history.pushState({}, '', url);
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      }, 100);
     } else {
       setShowAnalysisPopup(true);
     }
