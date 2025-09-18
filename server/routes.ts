@@ -4,7 +4,9 @@ import bodyParser from "body-parser";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { setupLocalAuth, isAuthenticatedUniversal } from "./localAuth";
-import { insertSportSchema, insertAthleteSchema } from "@shared/schema";
+import { insertSportSchema, insertAthleteSchema, users } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 // Nutrition Plan Form Validation Schema
@@ -3098,8 +3100,20 @@ Return only valid JSON with the missing fields.`;
         return res.status(400).json({ error: 'User ID required' });
       }
 
-      // Add tokens using storage method
-      const updatedUser = await storage.addTokensToUser(targetUserId, amount);
+      // For development: set both tokens and totalTokensPurchased to exact amount (clean slate)
+      const [updatedUser] = await db
+        .update(users)
+        .set({
+          tokens: amount,
+          totalTokensPurchased: amount,
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, targetUserId))
+        .returning();
+      
+      if (!updatedUser) {
+        return res.status(404).json({ error: 'User not found' });
+      }
 
       // Create transaction record
       await storage.createTransaction({
