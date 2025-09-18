@@ -2203,8 +2203,8 @@ function extractVideoId(url: string): string {
   return match?.[1] || '';
 }
 
-// Generate goal-based development plan (no weeks, just pure goal analysis)
-async function generateGoalBasedDevelopmentPlan(
+// Generate plan outline with goal analysis (first chunk - small)
+async function generatePlanOutline(
   formData: DevelopmentPlanFormData,
   genderText: string,
   isArabic: boolean
@@ -2212,11 +2212,11 @@ async function generateGoalBasedDevelopmentPlan(
   const { goal, age, height, weight, sport } = formData;
   
   const systemPrompt = isArabic ? 
-    `أنت خبير تدريب رياضي متخصص في تحليل الأهداف وتصميم التمارين المخصصة. قم بتحليل هدف الرياضي وإنشاء 3 تمارين لكل ضعف أو مجال للتحسين. لا تفكر في أسابيع، فقط حلل الأهداف وأنشئ التمارين.` :
-    `You are a professional sports training expert specialized in goal analysis and creating targeted exercises. Analyze the athlete's goal and create 3 exercises for each weakness or area to improve. Don't think about weeks, just analyze goals and create exercises.`;
+    `أنت خبير تدريب رياضي متخصص في تحليل الأهداف. حلل هدف الرياضي وحدد المجالات الرئيسية للتحسين فقط. لا تنشئ تمارين بعد، فقط حدد المجالات.` :
+    `You are a professional sports training expert specialized in goal analysis. Analyze the athlete's goal and identify the main areas for improvement only. Don't create exercises yet, just identify the areas.`;
 
-  // Schema for pure goal-based plan
-  const planSchema = {
+  // Schema for outline only
+  const outlineSchema = {
     type: "object",
     properties: {
       title: {
@@ -2227,50 +2227,27 @@ async function generateGoalBasedDevelopmentPlan(
         }
       },
       overview: { type: "string" },
-      goalAnalysis: {
+      goalAreas: {
         type: "array",
-        minItems: 1,
-        maxItems: 4, // Allow 1-4 goal areas maximum
+        minItems: 2,
+        maxItems: 4, // Allow 2-4 goal areas
         items: {
           type: "object",
           properties: {
+            id: { type: "string" },
             area: { type: "string" },
             description: { type: "string" },
-            exercises: {
-              type: "array",
-              minItems: 3,
-              maxItems: 3, // Enforce exactly 3 exercises per area
-              items: {
-                type: "object",
-                properties: {
-                  id: { type: "string" },
-                  name: { type: "string" },
-                  description: { type: "string" },
-                  tags: { type: "array", items: { type: "string" } },
-                  prescription: {
-                    type: "object",
-                    properties: {
-                      sets: { type: "number" },
-                      reps: { type: ["string", "number"] },
-                      restSec: { type: "number" },
-                      intensity: { type: "string" }
-                    }
-                  },
-                  equipment: { type: "array", items: { type: "string" } }
-                },
-                required: ["id", "name", "description"]
-              }
-            }
+            priority: { type: "number" }
           },
-          required: ["area", "description", "exercises"]
+          required: ["id", "area", "description", "priority"]
         }
       }
     },
-    required: ["title", "overview", "goalAnalysis"]
+    required: ["title", "overview", "goalAreas"]
   };
 
   const prompt = isArabic ?
-    `حلل وأنشئ خطة تدريب قائمة على التحليل الهدف:
+    `حلل الهدف وحدد المجالات الرئيسية للتحسين:
 
 - الرياضة: ${sport}
 - الهدف: ${goal}
@@ -2278,14 +2255,13 @@ async function generateGoalBasedDevelopmentPlan(
 - الجنس: ${genderText}
 
 المطلوب:
-1. حلل الهدف "${goal}" وحدد المجالات/نقاط الضعف المحددة للعمل عليها
-2. لكل مجال، أنشئ 3 تمارين مخصصة بالضبط
-3. كل تمرين يجب أن يكون له اسم واضح ومحدد لسهولة العثور على فيديو تعليمي له
-4. ادرج معلومات الشدة والراحة والمعدات
-5. أنشئ عنوان جذاب وملخص للخطة
+1. حلل الهدف "${goal}" وحدد 2-4 مجالات رئيسية للتحسين
+2. لكل مجال، اعط وصف مختصر وأولوية (1-4)
+3. أنشئ عنوان جذاب وملخص للخطة
+4. أعط كل مجال معرف فريد (goalId)
 
 أرجع JSON صالح فقط.` :
-    `Analyze and create a goal-based training plan:
+    `Analyze the goal and identify main improvement areas:
 
 - Sport: ${sport}
 - Goal: ${goal}
@@ -2293,72 +2269,248 @@ async function generateGoalBasedDevelopmentPlan(
 - Gender: ${genderText}
 
 Requirements:
-1. Analyze the goal "${goal}" and identify specific areas/weaknesses to work on
-2. For each area, create exactly 3 targeted exercises
-3. Each exercise must have a clear, specific name for easy video tutorial discovery
-4. Include intensity, rest, and equipment information
-5. Create an engaging title and overview for the plan
+1. Analyze the goal "${goal}" and identify 2-4 main improvement areas
+2. For each area, provide brief description and priority (1-4)
+3. Create an engaging title and overview for the plan
+4. Give each area a unique goalId
 
 Return ONLY valid JSON.`;
 
   try {
-    console.log(`⏳ Generating goal-based development plan...`);
-    const planStart = Date.now();
+    console.log(`⏳ Generating plan outline...`);
+    const start = Date.now();
     
     const result = await genAI.models.generateContent({
       model: "gemini-2.5-pro",
       config: {
         systemInstruction: systemPrompt,
         responseMimeType: "application/json",
-        responseSchema: planSchema,
+        responseSchema: outlineSchema,
         temperature: 0.2,
-        maxOutputTokens: 8192  // More tokens for complete plan
+        maxOutputTokens: 2048  // Small tokens for outline only
       },
       contents: prompt
     });
 
-    const planDuration = Date.now() - planStart;
-    console.log(`✅ Goal-based plan generated in ${planDuration}ms`);
+    const duration = Date.now() - start;
+    console.log(`✅ Plan outline generated in ${duration}ms`);
 
     // Check for truncation
     const finishReason = (result as any)?.response?.candidates?.[0]?.finishReason || 
                         (result as any)?.candidates?.[0]?.finishReason;
     if (finishReason === "MAX_TOKENS") {
-      console.error(`⚠️ Goal-based plan was truncated`);
-      throw new Error(`Goal-based plan response was truncated`);
+      console.error(`⚠️ Plan outline was truncated`);
+      throw new Error(`Plan outline response was truncated`);
     }
 
     const responseText = result?.text || "";
     if (!responseText) {
-      throw new Error(`Empty response for goal-based plan`);
+      throw new Error(`Empty response for plan outline`);
     }
 
-    const plan = JSON.parse(responseText);
-    
-    // Flatten exercises for compatibility and video integration
-    if (plan.goalAnalysis && Array.isArray(plan.goalAnalysis)) {
-      const allExercises: any[] = [];
-      
-      // Extract exercises from each goal area
-      plan.goalAnalysis.forEach((area: any) => {
-        if (area.exercises && Array.isArray(area.exercises)) {
-          area.exercises.forEach((exercise: any) => {
-            // Add the target area to each exercise for context
-            exercise.targetArea = area.area;
-            allExercises.push(exercise);
-          });
+    return JSON.parse(responseText);
+  } catch (error) {
+    console.error(`❌ Error generating plan outline:`, error);
+    throw error;
+  }
+}
+
+// Generate exercises for a specific goal area (per-goal chunk)
+async function generateGoalExercises(
+  goalArea: any,
+  formData: DevelopmentPlanFormData,
+  genderText: string,
+  isArabic: boolean
+): Promise<any[]> {
+  const { goal, age, sport } = formData;
+  
+  const systemPrompt = isArabic ? 
+    `أنت خبير تدريب رياضي. أنشئ 3 تمارين مخصصة للمجال المحدد فقط.` :
+    `You are a sports training expert. Create 3 targeted exercises for the specified area only.`;
+
+  // Schema for exercises in one goal area
+  const exercisesSchema = {
+    type: "object",
+    properties: {
+      exercises: {
+        type: "array",
+        minItems: 3,
+        maxItems: 3, // Exactly 3 exercises per area
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            description: { type: "string" },
+            tags: { type: "array", items: { type: "string" } },
+            prescription: {
+              type: "object",
+              properties: {
+                sets: { type: "number" },
+                reps: { type: ["string", "number"] },
+                restSec: { type: "number" },
+                intensity: { type: "string" }
+              }
+            },
+            equipment: { type: "array", items: { type: "string" } }
+          },
+          required: ["id", "name", "description"]
         }
-      });
+      }
+    },
+    required: ["exercises"]
+  };
+
+  const prompt = isArabic ?
+    `أنشئ 3 تمارين مخصصة للمجال: "${goalArea.area}"
+
+- الوصف: ${goalArea.description}
+- الرياضة: ${sport}
+- الهدف العام: ${goal}
+- العمر: ${age} سنة
+- الجنس: ${genderText}
+
+المطلوب:
+1. أنشئ 3 تمارين مخصصة بالضبط لهذا المجال
+2. كل تمرين يجب أن يكون له اسم واضح ومحدد لسهولة العثور على فيديو تعليمي له
+3. ادرج معلومات الشدة والراحة والمعدات
+4. أعط كل تمرين معرف فريد
+
+أرجع JSON صالح فقط.` :
+    `Create 3 targeted exercises for area: "${goalArea.area}"
+
+- Description: ${goalArea.description}
+- Sport: ${sport}
+- Overall Goal: ${goal}
+- Age: ${age} years
+- Gender: ${genderText}
+
+Requirements:
+1. Create exactly 3 targeted exercises for this area
+2. Each exercise must have a clear, specific name for easy video tutorial discovery
+3. Include intensity, rest, and equipment information
+4. Give each exercise a unique exerciseId
+
+Return ONLY valid JSON.`;
+
+  try {
+    console.log(`⏳ Generating exercises for goal area: ${goalArea.area}`);
+    const start = Date.now();
+    
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: "application/json",
+        responseSchema: exercisesSchema,
+        temperature: 0.3,
+        maxOutputTokens: 3072  // Medium tokens for 3 exercises
+      },
+      contents: prompt
+    });
+
+    const duration = Date.now() - start;
+    console.log(`✅ Exercises for "${goalArea.area}" generated in ${duration}ms`);
+
+    // Check for truncation
+    const finishReason = (result as any)?.response?.candidates?.[0]?.finishReason || 
+                        (result as any)?.candidates?.[0]?.finishReason;
+    if (finishReason === "MAX_TOKENS") {
+      console.error(`⚠️ Exercises for "${goalArea.area}" were truncated`);
+      throw new Error(`Exercises response was truncated for area: ${goalArea.area}`);
+    }
+
+    const responseText = result?.text || "";
+    if (!responseText) {
+      throw new Error(`Empty response for exercises in area: ${goalArea.area}`);
+    }
+
+    const data = JSON.parse(responseText);
+    
+    // Add targetArea to each exercise and ensure goalId consistency
+    const exercises = data.exercises.map((exercise: any) => ({
+      ...exercise,
+      targetArea: goalArea.area,
+      goalId: goalArea.id
+    }));
+
+    console.log(`📊 Generated ${exercises.length} exercises for "${goalArea.area}"`);
+    return exercises;
+  } catch (error) {
+    console.error(`❌ Error generating exercises for "${goalArea.area}":`, error);
+    throw error;
+  }
+}
+
+// Main chunked development plan generation function
+async function generateGoalBasedDevelopmentPlan(
+  formData: DevelopmentPlanFormData,
+  genderText: string,
+  isArabic: boolean,
+  onProgressUpdate?: (currentStep: number, totalSteps: number) => Promise<void>
+): Promise<any> {
+  try {
+    // Step 1: Generate plan outline (small API call)
+    if (onProgressUpdate) await onProgressUpdate(1, 10);
+    
+    const outline = await generatePlanOutline(formData, genderText, isArabic);
+    console.log(`✅ Plan outline completed: ${outline.goalAreas?.length || 0} areas identified`);
+    
+    // Step 2: Generate exercises for each goal area (chunked API calls)
+    const allExercises: any[] = [];
+    const goalAnalysis: any[] = [];
+    const totalAreas = outline.goalAreas?.length || 0;
+    
+    for (let i = 0; i < totalAreas; i++) {
+      const goalArea = outline.goalAreas[i];
       
-      // Add flattened exercises to plan root for backward compatibility
-      plan.exercises = allExercises;
+      if (onProgressUpdate) await onProgressUpdate(2 + i * 6, 10); // Progress 2,8 for 2 areas or 2,5,8 for 3 areas
       
-      console.log(`📊 Flattened ${allExercises.length} exercises from ${plan.goalAnalysis.length} goal areas`);
+      try {
+        const exercises = await generateGoalExercises(goalArea, formData, genderText, isArabic);
+        
+        // Build goal analysis entry
+        goalAnalysis.push({
+          area: goalArea.area,
+          description: goalArea.description,
+          priority: goalArea.priority,
+          id: goalArea.id,
+          exercises: exercises
+        });
+        
+        // Add to flat exercises list for compatibility
+        allExercises.push(...exercises);
+        
+        console.log(`✅ Completed exercises for area "${goalArea.area}": ${exercises.length} exercises`);
+      } catch (error) {
+        console.error(`❌ Failed to generate exercises for "${goalArea.area}":`, error);
+        // Continue with other areas, mark this one as failed
+        goalAnalysis.push({
+          area: goalArea.area,
+          description: goalArea.description,
+          priority: goalArea.priority,
+          id: goalArea.id,
+          exercises: [],
+          error: `Failed to generate exercises: ${error instanceof Error ? error.message : String(error)}`
+        });
+      }
     }
     
+    if (onProgressUpdate) await onProgressUpdate(9, 10);
+    
+    // Assemble final plan structure
+    const plan = {
+      title: outline.title,
+      overview: outline.overview,
+      goalAnalysis: goalAnalysis,
+      exercises: allExercises // Flat list for backward compatibility
+    };
+    
+    console.log(`✅ Chunked goal-based plan completed: ${goalAnalysis.length} areas, ${allExercises.length} total exercises`);
     return plan;
+    
   } catch (error) {
-    console.error(`❌ Error generating goal-based plan:`, error);
+    console.error(`❌ Error in chunked goal-based plan generation:`, error);
     throw error;
   }
 }
@@ -2379,18 +2531,12 @@ export async function generateDevelopmentPlan(
     // Generate unique ID for this plan
     const planId = `dev_plan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
-    // Step 1: Generate goal-based plan
-    if (onProgressUpdate) {
-      await onProgressUpdate(1, 3);
-    }
-    
-    const goalBasedPlan = await generateGoalBasedDevelopmentPlan(formData, genderText, isArabic);
+    // Step 1: Generate goal-based plan using chunked approach
+    const goalBasedPlan = await generateGoalBasedDevelopmentPlan(formData, genderText, isArabic, onProgressUpdate);
     console.log(`✅ Goal analysis completed: ${goalBasedPlan.goalAnalysis?.length || 0} areas identified`);
     
     // Step 2: Find YouTube videos for all exercises
-    if (onProgressUpdate) {
-      await onProgressUpdate(2, 3);
-    }
+    // Note: progress for chunked generation is handled inside generateGoalBasedDevelopmentPlan
     
     const totalExercises = goalBasedPlan.exercises?.length || 0;
     console.log(`🔍 Finding YouTube videos for ${totalExercises} exercises...`);
