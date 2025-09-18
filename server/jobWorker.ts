@@ -141,6 +141,14 @@ export class JobWorker {
         result: parsedPlan // Store the parsed plan object directly
       });
 
+      // Save to analysis logs for user history
+      await storage.createAnalysisLog({
+        userId: job.userId,
+        athleteId: null, // Development plans are not athlete-specific
+        serviceType: "development-plan",
+        resultData: parsedPlan
+      });
+
       console.log(`✅ Development plan job ${job.id} completed successfully`);
 
     } catch (error) {
