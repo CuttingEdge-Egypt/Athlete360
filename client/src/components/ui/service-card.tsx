@@ -281,7 +281,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
                 Analyzing...
               </>
             ) : (
-              `Generate ${service.title}`
+              "Generate"
             )}
           </Button>
           
