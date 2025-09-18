@@ -3066,6 +3066,122 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
+  // Dev Admin Middleware
+  const isDevAdmin = (req: Request, res: Response, next: Function) => {
+    // Reject in production unless explicitly allowed
+    if (process.env.NODE_ENV === 'production' && process.env.ALLOW_TEST_CREDITS !== 'true') {
+      return res.status(403).json({ error: 'Admin endpoints disabled in production' });
+    }
+
+    // Check for admin token
+    const adminToken = req.headers['x-admin-token'];
+    if (!adminToken || adminToken !== process.env.ADMIN_TEST_TOKEN && adminToken !== 'dev-admin-token') {
+      return res.status(403).json({ error: 'Admin authentication required' });
+    }
+
+    next();
+  };
+
+  // Admin Token Grant Endpoint (Development Only)
+  app.post('/api/admin/tokens/grant', isAuthenticatedUniversal, isDevAdmin, async (req, res) => {
+    try {
+      const grantSchema = z.object({
+        userId: z.string().optional(),
+        amount: z.number().int().min(1).max(10000),
+        reason: z.string().optional().default('Admin token grant')
+      });
+
+      const { userId, amount, reason } = grantSchema.parse(req.body);
+      const targetUserId = userId || (req.user as any)?.claims?.sub || (req.user as any)?.id;
+
+      if (!targetUserId) {
+        return res.status(400).json({ error: 'User ID required' });
+      }
+
+      // Add tokens using storage method
+      const updatedUser = await storage.addTokensToUser(targetUserId, amount);
+
+      // Create transaction record
+      await storage.createTransaction({
+        userId: targetUserId,
+        action: 'admin-grant',
+        tokensDeducted: -amount, // Negative for grant
+        serviceType: 'admin',
+        athleteId: null
+      });
+
+      console.log(`🎁 Admin granted ${amount} tokens to user ${targetUserId}: ${reason}`);
+
+      res.json({
+        success: true,
+        message: `Granted ${amount} tokens successfully`,
+        newBalance: updatedUser.tokens,
+        totalTokensPurchased: updatedUser.totalTokensPurchased
+      });
+
+    } catch (error) {
+      console.error('Error granting tokens:', error);
+      res.status(500).json({ 
+        error: 'Failed to grant tokens',
+        details: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  // Admin Token Reset Endpoint (Development Only)
+  app.post('/api/admin/tokens/reset', isAuthenticatedUniversal, isDevAdmin, async (req, res) => {
+    try {
+      const resetSchema = z.object({
+        userId: z.string().optional(),
+        to: z.number().int().min(0).max(100000)
+      });
+
+      const { userId, to } = resetSchema.parse(req.body);
+      const targetUserId = userId || (req.user as any)?.claims?.sub || (req.user as any)?.id;
+
+      if (!targetUserId) {
+        return res.status(400).json({ error: 'User ID required' });
+      }
+
+      // Get current balance to calculate delta
+      const currentUser = await storage.getUser(targetUserId);
+      if (!currentUser) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const currentBalance = currentUser.tokens || 0;
+      const delta = to - currentBalance;
+
+      // Update tokens using storage method
+      const updatedUser = await storage.updateUserTokens(targetUserId, to);
+
+      // Create transaction record
+      await storage.createTransaction({
+        userId: targetUserId,
+        action: 'admin-reset',
+        tokensDeducted: -delta, // Negative for increase, positive for decrease
+        serviceType: 'admin',
+        athleteId: null
+      });
+
+      console.log(`🔄 Admin reset tokens for user ${targetUserId}: ${currentBalance} → ${to}`);
+
+      res.json({
+        success: true,
+        message: `Reset tokens to ${to} successfully`,
+        previousBalance: currentBalance,
+        newBalance: updatedUser.tokens
+      });
+
+    } catch (error) {
+      console.error('Error resetting tokens:', error);
+      res.status(500).json({ 
+        error: 'Failed to reset tokens',
+        details: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   app.get('/api/test/scenarios', (req, res) => {
     res.json(TestingService.getTestScenarios());
   });
