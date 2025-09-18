@@ -1636,7 +1636,7 @@ export default function Home() {
                     </div>
                     
                     <DevelopmentPlanDisplay 
-                      plan={developmentPlanData.plan}
+                      plan={developmentPlanData}
                       language={developmentPlanData.language || 'en'}
                       sport={developmentForm.getValues('sport') || selectedSport || 'training'}
                     />
