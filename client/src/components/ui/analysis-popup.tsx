@@ -327,9 +327,18 @@ export function AnalysisPopup({
       );
     }
 
+    // Handle the new goal-based development plan structure
     let planItems: any[] = [];
     try {
-      planItems = Array.isArray(parsedData.plan) ? parsedData.plan : [];
+      // Check for new structure first (goalAnalysis array)
+      if (Array.isArray(parsedData.goalAnalysis)) {
+        planItems = parsedData.goalAnalysis;
+      } else if (Array.isArray(parsedData.plan)) {
+        // Fallback to old structure
+        planItems = parsedData.plan;
+      } else {
+        planItems = [];
+      }
     } catch (error) {
       console.error('Error processing development plan data:', error);
       planItems = [];
@@ -390,7 +399,7 @@ export function AnalysisPopup({
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-lg text-white flex items-center gap-2">
                           <Target className="w-5 h-5 text-purple-400" />
-                          {item.title || item.focus || item.phase || item.name || `Phase ${phaseNumber}`}
+                          {item.area || item.title || item.focus || item.phase || item.name || `Goal Area ${phaseNumber}`}
                         </CardTitle>
                         {isCurrentPhase && (
                           <Badge variant="secondary" className="bg-green-600 text-white">
@@ -401,24 +410,36 @@ export function AnalysisPopup({
                       </div>
                       {item.description && (
                         <p className="text-purple-200 bg-purple-900/30 p-3 rounded-lg italic border-l-4 border-purple-500">
-                          {item.description}
+                          {typeof item.description === 'string' ? item.description : JSON.stringify(item.description)}
                         </p>
                       )}
                     </CardHeader>
 
                     <CardContent className="space-y-4">
-                      {/* Activities Section */}
-                      {(item.activities || item.details || item.exercises || []).length > 0 && (
+                      {/* Exercises Section */}
+                      {(item.exercises || []).length > 0 && (
                         <div>
                           <h4 className="text-sm font-semibold text-purple-300 mb-3 flex items-center gap-2">
                             <Zap className="w-4 h-4" />
-                            Training Activities
+                            Training Exercises
                           </h4>
                           <div className="grid gap-2">
-                            {(item.activities || item.details || item.exercises || []).map((activity: string, idx: number) => (
+                            {(item.exercises || []).map((exercise: any, idx: number) => (
                               <div key={idx} className="flex items-start gap-3 p-2 bg-gray-800/50 rounded-lg">
                                 <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
-                                <span className="text-sm text-gray-300 leading-relaxed">{activity}</span>
+                                <div className="flex-1">
+                                  <div className="text-sm font-medium text-white">{exercise.name || exercise.title || `Exercise ${idx + 1}`}</div>
+                                  {exercise.description && (
+                                    <div className="text-sm text-gray-300 mt-1">{typeof exercise.description === 'string' ? exercise.description : JSON.stringify(exercise.description)}</div>
+                                  )}
+                                  {exercise.videoUrl && (
+                                    <div className="mt-2">
+                                      <Badge variant="outline" className="border-purple-400 text-purple-400 text-xs">
+                                        📹 Video Available
+                                      </Badge>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             ))}
                           </div>
