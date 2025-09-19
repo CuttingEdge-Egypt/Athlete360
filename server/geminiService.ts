@@ -2508,7 +2508,7 @@ async function generateGoalBasedDevelopmentPlan(
 ): Promise<any> {
   try {
     // Step 1: Generate plan outline (small API call)
-    if (onProgressUpdate) await onProgressUpdate(1, 10);
+    if (onProgressUpdate) await onProgressUpdate(10, 100);
     
     const outline = await generatePlanOutline(formData, genderText, isArabic);
     console.log(`✅ Plan outline completed: ${outline.goalAreas?.length || 0} areas identified`);
@@ -2521,7 +2521,7 @@ async function generateGoalBasedDevelopmentPlan(
     for (let i = 0; i < totalAreas; i++) {
       const goalArea = outline.goalAreas[i];
       
-      if (onProgressUpdate) await onProgressUpdate(2 + i * 6, 10); // Progress 2,8 for 2 areas or 2,5,8 for 3 areas
+      if (onProgressUpdate) await onProgressUpdate(20 + i * 20, 100); // Progress 20,40,60,80 based on areas
       
       try {
         const exercises = await generateGoalExercises(goalArea, formData, genderText, isArabic);
@@ -2553,7 +2553,7 @@ async function generateGoalBasedDevelopmentPlan(
       }
     }
     
-    if (onProgressUpdate) await onProgressUpdate(9, 10);
+    if (onProgressUpdate) await onProgressUpdate(99, 100);
     
     // Assemble final plan structure
     const plan = {
@@ -2621,7 +2621,7 @@ export async function generateDevelopmentPlan(
     
     // Step 3: Build final plan structure
     if (onProgressUpdate) {
-      await onProgressUpdate(3, 3);
+      await onProgressUpdate(91, 100);
     }
     
     const finalPlan = {
