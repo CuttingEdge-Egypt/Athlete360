@@ -741,7 +741,7 @@ export class DatabaseStorage implements IStorage {
           and(
             eq(transactions.userId, userId),
             // Exclude transactions that have analysis logs with result data
-            notInArray(transactions.serviceType, ['comparison', 'bio', 'rank', 'strengths', 'weaknesses', 'development', 'nutrition-plan', 'beat-strategies', 'video'])
+            notInArray(transactions.serviceType, ['comparison', 'bio', 'rank', 'strengths', 'weaknesses', 'development', 'development-plan', 'nutrition-plan', 'beat-strategies', 'video'])
           )
         )
         .orderBy(desc(transactions.createdAt))
@@ -757,7 +757,7 @@ export class DatabaseStorage implements IStorage {
             CASE 
               WHEN ${analysisLogs.serviceType} = 'video' THEN 200
               WHEN ${analysisLogs.serviceType} = 'comparison' THEN 100
-              WHEN ${analysisLogs.serviceType} = 'development' THEN 80
+              WHEN ${analysisLogs.serviceType} = 'development-plan' THEN 50
               WHEN ${analysisLogs.serviceType} = 'nutrition-plan' THEN 75
               WHEN ${analysisLogs.serviceType} = 'rank' THEN 70
               ELSE 50

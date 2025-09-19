@@ -226,7 +226,7 @@ const SERVICE_TOKEN_COSTS: { [key: string]: number } = {
   'rank': 70,
   'strengths': 50,
   'weaknesses': 50,
-  'development-plan': 80,
+  'development-plan': 50,
   'nutrition-plan': 75,
   'beat-strategies': 100,
   'video': 200,
