@@ -73,6 +73,7 @@ export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps
     const scoreAnalysis = analysisData.score_analysis ? parseAnalysisData(analysisData.score_analysis) : null;
     const yellowCardAnalysis = analysisData.yellow_card_analysis ? parseAnalysisData(analysisData.yellow_card_analysis) : null;
     const kickAnalysis = analysisData.kick_count_analysis ? parseAnalysisData(analysisData.kick_count_analysis) : null;
+    const adviceAnalysis = analysisData.advice_analysis ? parseAnalysisData(analysisData.advice_analysis) : null;
 
     const timestampRegex = /(\d{1,2}:\d{2}|\d{1,3}s|\d+\s*seconds?|\d+\s*min)/gi;
     
@@ -216,6 +217,7 @@ export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps
       finalScores: { blue: cumulativeBlueScore, red: cumulativeRedScore },
       finalCards: { blue: cumulativeBlueCards, red: cumulativeRedCards },
       kickCounts: { blue: blueKickCount, red: redKickCount },
+      adviceData: adviceAnalysis,
     };
   };
 
@@ -234,7 +236,8 @@ export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps
       yellowCardEvents: [], 
       finalScores: { blue: 0, red: 0 },
       finalCards: { blue: 0, red: 0 },
-      kickCounts: { blue: 0, red: 0 }
+      kickCounts: { blue: 0, red: 0 },
+      adviceData: null
     };
   }
 
@@ -440,6 +443,107 @@ export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps
                   </div>
                 </div>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Coaching Advice Section */}
+      {events.adviceData && events.adviceData.advice && (
+        <Card className="bg-athlete-gray-800 border-gray-700">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-green-400">
+              <Users className="h-5 w-5" />
+              Coaching Advice - Round {analysisData.roundAnalyzed}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {/* Round Analysis */}
+              {events.adviceData.round_analysis && (
+                <div className="p-4 bg-gray-700/50 rounded-lg border border-gray-600">
+                  <h4 className="text-sm font-semibold text-gray-300 mb-2">Round Overview</h4>
+                  <p className="text-gray-300 text-sm">{events.adviceData.round_analysis}</p>
+                </div>
+              )}
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Player 1 Advice */}
+                {events.adviceData.advice.player1 && (
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-semibold text-blue-400">
+                      {events.adviceData.advice.player1.name || 'Player 1 (Blue)'}
+                    </h4>
+                    
+                    {events.adviceData.advice.player1.strengths && events.adviceData.advice.player1.strengths.length > 0 && (
+                      <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                        <h5 className="text-sm font-semibold text-green-400 mb-2">Strengths</h5>
+                        <ul className="space-y-1">
+                          {events.adviceData.advice.player1.strengths.map((strength: string, index: number) => (
+                            <li key={index} className="text-sm text-gray-300">• {strength}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {events.adviceData.advice.player1.improvements && events.adviceData.advice.player1.improvements.length > 0 && (
+                      <div className="p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                        <h5 className="text-sm font-semibold text-orange-400 mb-2">Areas for Improvement</h5>
+                        <ul className="space-y-1">
+                          {events.adviceData.advice.player1.improvements.map((improvement: string, index: number) => (
+                            <li key={index} className="text-sm text-gray-300">• {improvement}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {events.adviceData.advice.player1.next_round_strategy && (
+                      <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                        <h5 className="text-sm font-semibold text-blue-400 mb-2">Next Round Strategy</h5>
+                        <p className="text-sm text-gray-300">{events.adviceData.advice.player1.next_round_strategy}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Player 2 Advice */}
+                {events.adviceData.advice.player2 && (
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-semibold text-red-400">
+                      {events.adviceData.advice.player2.name || 'Player 2 (Red)'}
+                    </h4>
+                    
+                    {events.adviceData.advice.player2.strengths && events.adviceData.advice.player2.strengths.length > 0 && (
+                      <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                        <h5 className="text-sm font-semibold text-green-400 mb-2">Strengths</h5>
+                        <ul className="space-y-1">
+                          {events.adviceData.advice.player2.strengths.map((strength: string, index: number) => (
+                            <li key={index} className="text-sm text-gray-300">• {strength}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {events.adviceData.advice.player2.improvements && events.adviceData.advice.player2.improvements.length > 0 && (
+                      <div className="p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                        <h5 className="text-sm font-semibold text-orange-400 mb-2">Areas for Improvement</h5>
+                        <ul className="space-y-1">
+                          {events.adviceData.advice.player2.improvements.map((improvement: string, index: number) => (
+                            <li key={index} className="text-sm text-gray-300">• {improvement}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {events.adviceData.advice.player2.next_round_strategy && (
+                      <div className="p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                        <h5 className="text-sm font-semibold text-red-400 mb-2">Next Round Strategy</h5>
+                        <p className="text-sm text-gray-300">{events.adviceData.advice.player2.next_round_strategy}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
