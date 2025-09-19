@@ -2,6 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import fetch from 'node-fetch';
 import { DevelopmentPlanV1, developmentPlanV1Schema, Exercise, Video } from '../shared/schema.js';
+import { cleanJsonResponse } from './jsonUtils.js';
 
 // Initialize Gemini API clients
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
@@ -1052,15 +1053,7 @@ Return ONLY pure JSON:
     });
 
     let responseText = result.text || "";
-    responseText = responseText.trim()
-      .replace(/^```json\s*/, '').replace(/\s*```$/, '')
-      .replace(/^```\s*/, '').replace(/\s*```$/, '');
-    
-    const jsonStart = responseText.indexOf('{');
-    const jsonEnd = responseText.lastIndexOf('}');
-    if (jsonStart !== -1 && jsonEnd !== -1 && jsonStart < jsonEnd) {
-      responseText = responseText.substring(jsonStart, jsonEnd + 1);
-    }
+    responseText = cleanJsonResponse(responseText);
 
     return {
       rawResponse: responseText,
