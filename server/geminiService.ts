@@ -2287,7 +2287,7 @@ Return ONLY valid JSON.`;
         responseMimeType: "application/json",
         responseSchema: outlineSchema,
         temperature: 0.2,
-        maxOutputTokens: 2048  // Small tokens for outline only
+        maxOutputTokens: 4096  // Increased tokens for outline generation
       },
       contents: prompt
     });
@@ -2295,12 +2295,69 @@ Return ONLY valid JSON.`;
     const duration = Date.now() - start;
     console.log(`✅ Plan outline generated in ${duration}ms`);
 
-    // Check for truncation
+    // Check for truncation and retry with simpler prompt if needed
     const finishReason = (result as any)?.response?.candidates?.[0]?.finishReason || 
                         (result as any)?.candidates?.[0]?.finishReason;
     if (finishReason === "MAX_TOKENS") {
-      console.error(`⚠️ Plan outline was truncated`);
-      throw new Error(`Plan outline response was truncated`);
+      console.error(`⚠️ Plan outline was truncated, retrying with simpler prompt...`);
+      
+      // Retry with much simpler prompt and smaller schema
+      const simplePrompt = isArabic ?
+        `حلل هدف "${goal}" في رياضة ${sport}. حدد 2-3 مجالات للتحسين فقط. أرجع JSON مختصر.` :
+        `Analyze "${goal}" for ${sport}. Identify 2-3 improvement areas only. Return concise JSON.`;
+        
+      const simpleSchema = {
+        type: "object",
+        properties: {
+          title: {
+            type: "object",
+            properties: {
+              en: { type: "string" },
+              ar: { type: "string" }
+            }
+          },
+          overview: { type: "string" },
+          goalAreas: {
+            type: "array",
+            maxItems: 3,
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                area: { type: "string" },
+                description: { type: "string" },
+                priority: { type: "number" }
+              }
+            }
+          }
+        }
+      };
+      
+      const retryResult = await genAI.models.generateContent({
+        model: "gemini-2.5-pro",
+        config: {
+          systemInstruction: "You are a sports trainer. Be concise.",
+          responseMimeType: "application/json",
+          responseSchema: simpleSchema,
+          temperature: 0.1,
+          maxOutputTokens: 2048
+        },
+        contents: simplePrompt
+      });
+      
+      const retryFinishReason = (retryResult as any)?.response?.candidates?.[0]?.finishReason || 
+                              (retryResult as any)?.candidates?.[0]?.finishReason;
+      if (retryFinishReason === "MAX_TOKENS") {
+        console.error(`⚠️ Even simple plan outline was truncated`);
+        throw new Error(`Plan outline response was truncated`);
+      }
+      
+      const retryResponseText = retryResult?.text || "";
+      if (!retryResponseText) {
+        throw new Error(`Empty response for simplified plan outline`);
+      }
+      
+      return JSON.parse(retryResponseText);
     }
 
     const responseText = result?.text || "";
