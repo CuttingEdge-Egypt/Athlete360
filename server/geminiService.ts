@@ -2553,7 +2553,7 @@ async function generateGoalBasedDevelopmentPlan(
       }
     }
     
-    if (onProgressUpdate) await onProgressUpdate(99, 100);
+    if (onProgressUpdate) await onProgressUpdate(91, 100);
     
     // Assemble final plan structure
     const plan = {
@@ -2621,7 +2621,7 @@ export async function generateDevelopmentPlan(
     
     // Step 3: Build final plan structure
     if (onProgressUpdate) {
-      await onProgressUpdate(91, 100);
+      await onProgressUpdate(99, 100);
     }
     
     const finalPlan = {
