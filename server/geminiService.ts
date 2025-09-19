@@ -985,15 +985,7 @@ Return ONLY pure JSON (no markdown blocks):
     });
 
     let responseText = result.text || "";
-    responseText = responseText.trim()
-      .replace(/^```json\s*/, '').replace(/\s*```$/, '')
-      .replace(/^```\s*/, '').replace(/\s*```$/, '');
-    
-    const jsonStart = responseText.indexOf('{');
-    const jsonEnd = responseText.lastIndexOf('}');
-    if (jsonStart !== -1 && jsonEnd !== -1 && jsonStart < jsonEnd) {
-      responseText = responseText.substring(jsonStart, jsonEnd + 1);
-    }
+    responseText = cleanJsonResponse(responseText);
 
     return {
       rawResponse: responseText,
@@ -1113,15 +1105,7 @@ Return ONLY pure JSON:
     });
 
     let responseText = result.text || "";
-    responseText = responseText.trim()
-      .replace(/^```json\s*/, '').replace(/\s*```$/, '')
-      .replace(/^```\s*/, '').replace(/\s*```$/, '');
-    
-    const jsonStart = responseText.indexOf('{');
-    const jsonEnd = responseText.lastIndexOf('}');
-    if (jsonStart !== -1 && jsonEnd !== -1 && jsonStart < jsonEnd) {
-      responseText = responseText.substring(jsonStart, jsonEnd + 1);
-    }
+    responseText = cleanJsonResponse(responseText);
 
     return {
       rawResponse: responseText,
@@ -1168,15 +1152,7 @@ Return ONLY pure JSON:
     });
 
     let responseText = result.text || "";
-    responseText = responseText.trim()
-      .replace(/^```json\s*/, '').replace(/\s*```$/, '')
-      .replace(/^```\s*/, '').replace(/\s*```$/, '');
-    
-    const jsonStart = responseText.indexOf('{');
-    const jsonEnd = responseText.lastIndexOf('}');
-    if (jsonStart !== -1 && jsonEnd !== -1 && jsonStart < jsonEnd) {
-      responseText = responseText.substring(jsonStart, jsonEnd + 1);
-    }
+    responseText = cleanJsonResponse(responseText);
 
     return {
       rawResponse: responseText,
@@ -1234,15 +1210,7 @@ Return ONLY pure JSON:
     });
 
     let responseText = result.text || "";
-    responseText = responseText.trim()
-      .replace(/^```json\s*/, '').replace(/\s*```$/, '')
-      .replace(/^```\s*/, '').replace(/\s*```$/, '');
-    
-    const jsonStart = responseText.indexOf('{');
-    const jsonEnd = responseText.lastIndexOf('}');
-    if (jsonStart !== -1 && jsonEnd !== -1 && jsonStart < jsonEnd) {
-      responseText = responseText.substring(jsonStart, jsonEnd + 1);
-    }
+    responseText = cleanJsonResponse(responseText);
 
     return {
       rawResponse: responseText,
@@ -1339,15 +1307,7 @@ Return ONLY pure JSON:
     });
 
     let responseText = result.text || "";
-    responseText = responseText.trim()
-      .replace(/^```json\s*/, '').replace(/\s*```$/, '')
-      .replace(/^```\s*/, '').replace(/\s*```$/, '');
-    
-    const jsonStart = responseText.indexOf('{');
-    const jsonEnd = responseText.lastIndexOf('}');
-    if (jsonStart !== -1 && jsonEnd !== -1 && jsonStart < jsonEnd) {
-      responseText = responseText.substring(jsonStart, jsonEnd + 1);
-    }
+    responseText = cleanJsonResponse(responseText);
 
     return {
       rawResponse: responseText,
