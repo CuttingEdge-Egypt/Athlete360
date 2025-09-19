@@ -1058,7 +1058,7 @@ export default function Home() {
                 className="data-[state=active]:bg-athlete-accent flex items-center gap-2"
               >
                 <Video size={16} />
-                {t('interface.videoAnalysis')}
+                Video Analysis
               </TabsTrigger>
             </TabsList>
 
