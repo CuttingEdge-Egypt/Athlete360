@@ -454,61 +454,138 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
               let headToHeadData = null;
               let detailsData = null;
               
-              // New modular approach - parse each tab separately
+              // Helper function to safely parse AI-generated JSON with cleanup
+              const safeParseJSON = (rawResponse: string, tabName: string) => {
+                if (!rawResponse?.trim()) {
+                  // Return fallback when rawResponse is missing or empty
+                  return getTabFallbackData(tabName);
+                }
+                
+                try {
+                  // First attempt: Direct parsing
+                  return JSON.parse(rawResponse);
+                } catch (error) {
+                  console.warn(`First parse attempt failed for ${tabName}:`, error instanceof Error ? error.message : 'Unknown error');
+                  
+                  try {
+                    // Second attempt: Clean up common issues
+                    let cleaned = rawResponse.trim();
+                    
+                    // Find the earliest valid opening brace
+                    const openBraceIndex = cleaned.indexOf('{');
+                    const openBracketIndex = cleaned.indexOf('[');
+                    const firstValidIndex = openBraceIndex >= 0 && openBracketIndex >= 0 
+                      ? Math.min(openBraceIndex, openBracketIndex)
+                      : Math.max(openBraceIndex, openBracketIndex);
+                    
+                    if (firstValidIndex > 0) {
+                      cleaned = cleaned.substring(firstValidIndex);
+                    }
+                    
+                    // Remove any text after the last } or ]
+                    const lastBrace = Math.max(cleaned.lastIndexOf('}'), cleaned.lastIndexOf(']'));
+                    if (lastBrace > 0 && lastBrace < cleaned.length - 1) {
+                      cleaned = cleaned.substring(0, lastBrace + 1);
+                    }
+                    
+                    // Fix common JSON issues
+                    cleaned = cleaned
+                      .replace(/[\r\n\t]/g, ' ') // Replace newlines/tabs with spaces
+                      .replace(/[\u201C\u201D]/g, '"') // Fix smart double quotes
+                      .replace(/[\u2018\u2019]/g, "'") // Fix smart single quotes
+                      .replace(/–/g, '-') // Fix em dashes
+                      .replace(/—/g, '-') // Fix en dashes
+                      .replace(/\u00A0/g, ' '); // Fix non-breaking spaces
+                      
+                    return JSON.parse(cleaned);
+                  } catch (secondError) {
+                    console.warn(`Cleanup parsing failed for ${tabName}:`, secondError instanceof Error ? secondError.message : 'Unknown error');
+                    
+                    // Third attempt: Extract JSON-like content with lazy regex
+                    try {
+                      const jsonMatch = rawResponse.match(/\{[\s\S]*?\}|\[[\s\S]*?\]/);
+                      if (jsonMatch) {
+                        const extracted = jsonMatch[0]
+                          .replace(/[\r\n\t]/g, ' ')
+                          .replace(/[\u201C\u201D]/g, '"')
+                          .replace(/[\u2018\u2019]/g, "'")
+                          .replace(/–/g, '-')
+                          .replace(/—/g, '-')
+                          .replace(/\u00A0/g, ' ');
+                        return JSON.parse(extracted);
+                      }
+                    } catch (thirdError) {
+                      console.warn(`Regex extraction failed for ${tabName}:`, thirdError instanceof Error ? thirdError.message : 'Unknown error');
+                    }
+                    
+                    // Final fallback: Return tab-specific default structure
+                    console.warn(`All parsing attempts failed for ${tabName}. Using fallback data.`);
+                    return getTabFallbackData(tabName);
+                  }
+                }
+              };
+
+              // Helper function to provide fallback data for each tab
+              const getTabFallbackData = (tabName: string) => {
+                switch (tabName) {
+                  case 'overview':
+                    return {
+                      athlete1: { name: "Athlete 1", country: "Unknown", rank: "N/A" },
+                      athlete2: { name: "Athlete 2", country: "Unknown", rank: "N/A" },
+                      overallAnalysis: "Analysis temporarily unavailable due to data parsing issues. Please try generating the comparison again."
+                    };
+                  case 'strengths':
+                    return {
+                      strengths: {
+                        athlete1: ["Data temporarily unavailable"],
+                        athlete2: ["Data temporarily unavailable"],
+                        summary: "Strengths analysis temporarily unavailable. Please try generating the comparison again."
+                      }
+                    };
+                  case 'weaknesses':
+                    return {
+                      weaknesses: {
+                        athlete1: ["Data temporarily unavailable"],
+                        athlete2: ["Data temporarily unavailable"], 
+                        summary: "Weaknesses analysis temporarily unavailable. Please try generating the comparison again."
+                      }
+                    };
+                  case 'competitionHistory':
+                    return {
+                      ranking: {
+                        comparison: "Competition history analysis temporarily unavailable. Please try generating the comparison again.",
+                        competitiveEdge: null,
+                        details: "Data parsing issues prevented loading this section."
+                      }
+                    };
+                  case 'headToHead':
+                    return {
+                      headToHead: {
+                        prediction: null,
+                        reasoning: "Head-to-head analysis temporarily unavailable. Please try generating the comparison again.",
+                        keyFactors: ["Data temporarily unavailable"]
+                      }
+                    };
+                  case 'details':
+                    return {
+                      detailedAnalysis: {
+                        technicalComparison: "Detailed technical analysis temporarily unavailable. Please try generating the comparison again.",
+                        conclusion: "Data parsing issues prevented loading this section."
+                      }
+                    };
+                  default:
+                    return { error: "Data temporarily unavailable" };
+                }
+              };
+
+              // New modular approach - parse each tab separately with robust error handling
               if (comparisonData.tabs) {
-                // Parse Overview tab
-                try {
-                  if (comparisonData.tabs.overview?.rawResponse) {
-                    overviewData = JSON.parse(comparisonData.tabs.overview.rawResponse);
-                  }
-                } catch (error) {
-                  console.warn('Could not parse Overview tab:', error instanceof Error ? error.message : 'Unknown error');
-                }
-
-                // Parse Strengths tab
-                try {
-                  if (comparisonData.tabs.strengths?.rawResponse) {
-                    strengthsData = JSON.parse(comparisonData.tabs.strengths.rawResponse);
-                  }
-                } catch (error) {
-                  console.warn('Could not parse Strengths tab:', error instanceof Error ? error.message : 'Unknown error');
-                }
-
-                // Parse Weaknesses tab
-                try {
-                  if (comparisonData.tabs.weaknesses?.rawResponse) {
-                    weaknessesData = JSON.parse(comparisonData.tabs.weaknesses.rawResponse);
-                  }
-                } catch (error) {
-                  console.warn('Could not parse Weaknesses tab:', error instanceof Error ? error.message : 'Unknown error');
-                }
-
-                // Parse Competition History tab
-                try {
-                  if (comparisonData.tabs.competitionHistory?.rawResponse) {
-                    competitionHistoryData = JSON.parse(comparisonData.tabs.competitionHistory.rawResponse);
-                  }
-                } catch (error) {
-                  console.warn('Could not parse Competition History tab:', error instanceof Error ? error.message : 'Unknown error');
-                }
-
-                // Parse Head-to-Head tab
-                try {
-                  if (comparisonData.tabs.headToHead?.rawResponse) {
-                    headToHeadData = JSON.parse(comparisonData.tabs.headToHead.rawResponse);
-                  }
-                } catch (error) {
-                  console.warn('Could not parse Head-to-Head tab:', error instanceof Error ? error.message : 'Unknown error');
-                }
-
-                // Parse Details tab
-                try {
-                  if (comparisonData.tabs.details?.rawResponse) {
-                    detailsData = JSON.parse(comparisonData.tabs.details.rawResponse);
-                  }
-                } catch (error) {
-                  console.warn('Could not parse Details tab:', error instanceof Error ? error.message : 'Unknown error');
-                }
+                overviewData = safeParseJSON(comparisonData.tabs.overview?.rawResponse, 'overview');
+                strengthsData = safeParseJSON(comparisonData.tabs.strengths?.rawResponse, 'strengths');
+                weaknessesData = safeParseJSON(comparisonData.tabs.weaknesses?.rawResponse, 'weaknesses');
+                competitionHistoryData = safeParseJSON(comparisonData.tabs.competitionHistory?.rawResponse, 'competitionHistory');
+                headToHeadData = safeParseJSON(comparisonData.tabs.headToHead?.rawResponse, 'headToHead');
+                detailsData = safeParseJSON(comparisonData.tabs.details?.rawResponse, 'details');
               } else {
                 // Legacy fallback for old response format
                 try {
