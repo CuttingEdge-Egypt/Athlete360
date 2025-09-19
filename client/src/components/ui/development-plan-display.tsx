@@ -137,7 +137,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
             <div className="space-y-2">
               <CardTitle className="text-3xl font-bold text-white flex items-center gap-3">
                 <Target className="h-7 w-7 text-emerald-400" />
-                <span className="text-white">
+                <span className="text-emerald-400">
                   {getLocalizedText(title, language)}
                 </span>
               </CardTitle>
