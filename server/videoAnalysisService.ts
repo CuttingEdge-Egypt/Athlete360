@@ -294,10 +294,27 @@ Instructions:
 
     // Extract and parse the unified response
     const rawUnifiedResponse = unifiedResponse.response.text();
-    console.log(`[PROCESS_VIDEO_GEMINI] Raw Unified Response:`, rawUnifiedResponse.substring(0, 300));
+    console.log(`[PROCESS_VIDEO_GEMINI] Raw Unified Response Length:`, rawUnifiedResponse.length);
+    console.log(`[PROCESS_VIDEO_GEMINI] Raw Unified Response (first 500 chars):`, rawUnifiedResponse.substring(0, 500));
+    console.log(`[PROCESS_VIDEO_GEMINI] Raw Unified Response (last 500 chars):`, rawUnifiedResponse.substring(Math.max(0, rawUnifiedResponse.length - 500)));
 
-    // Parse the unified JSON response
-    const unifiedAnalysis = JSON.parse(cleanJsonResponse(rawUnifiedResponse));
+    // Parse the unified JSON response with better error handling
+    let unifiedAnalysis;
+    try {
+      const cleanedResponse = cleanJsonResponse(rawUnifiedResponse);
+      console.log(`[PROCESS_VIDEO_GEMINI] Cleaned Response Length:`, cleanedResponse.length);
+      console.log(`[PROCESS_VIDEO_GEMINI] Cleaned Response (first 300 chars):`, cleanedResponse.substring(0, 300));
+      unifiedAnalysis = JSON.parse(cleanedResponse);
+      console.log(`[PROCESS_VIDEO_GEMINI] Successfully parsed unified JSON`);
+    } catch (parseError) {
+      console.error(`[PROCESS_VIDEO_GEMINI] JSON Parse Error:`, parseError);
+      console.error(`[PROCESS_VIDEO_GEMINI] Failed to parse response, using fallback structure`);
+      
+      // Return a fallback structure with individual API calls as backup
+      console.log(`[PROCESS_VIDEO_GEMINI] Attempting fallback to individual API calls...`);
+      const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
+      throw new Error(`Unified JSON parsing failed: ${errorMessage}. Raw response length: ${rawUnifiedResponse.length}`);
+    }
 
     // Extract individual sections from the unified response
     const matchAnalysis = cleanMarkdownFormatting(unifiedAnalysis.match_analysis || "");
