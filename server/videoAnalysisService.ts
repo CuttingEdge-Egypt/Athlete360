@@ -284,8 +284,43 @@ Return JSON format:
 }
 Return Time in Minutes and Seconds: MM:SS`;
 
-    // Make 5 parallel API calls (like Python version)
-    console.log(`[PROCESS_VIDEO_GEMINI] Making 5 parallel analysis calls...`);
+    const promptAdvice = `Act as an expert Taekwondo coach and analyze round ${roundToAnalyze} only. Provide specific coaching advice for each player based on their performance in this round.
+
+Focus on what each player did wrong, what they could improve, and what they should avoid in future rounds. Be specific about techniques, positioning, timing, and strategy.
+
+Return JSON format:
+{
+  "advice": {
+    "player1": {
+      "name": "Player 1 (Blue/Red)",
+      "improvements": [
+        "Specific advice point 1 about technique or strategy",
+        "Specific advice point 2 about positioning or timing",
+        "Specific advice point 3 about what to avoid"
+      ],
+      "strengths": [
+        "What they did well in this round"
+      ],
+      "next_round_strategy": "Overall strategy recommendation for next round"
+    },
+    "player2": {
+      "name": "Player 2 (Blue/Red)", 
+      "improvements": [
+        "Specific advice point 1 about technique or strategy",
+        "Specific advice point 2 about positioning or timing",
+        "Specific advice point 3 about what to avoid"
+      ],
+      "strengths": [
+        "What they did well in this round"
+      ],
+      "next_round_strategy": "Overall strategy recommendation for next round"
+    }
+  },
+  "round_analysis": "Overall analysis of what happened in this specific round and key coaching insights"
+}`;
+
+    // Make 6 parallel API calls (added coaching advice)
+    console.log(`[PROCESS_VIDEO_GEMINI] Making 6 parallel analysis calls...`);
     
     // Create separate model instances for different response types
     const textModel = genai.getGenerativeModel({
@@ -305,15 +340,16 @@ Return Time in Minutes and Seconds: MM:SS`;
       }
     });
     
-    const [responseMatch, responseScore, responsePunch, responseKickNo, responseYellowCards] = await Promise.all([
+    const [responseMatch, responseScore, responsePunch, responseKickNo, responseYellowCards, responseAdvice] = await Promise.all([
       textModel.generateContent([videoData, promptMatch]),
       jsonModel.generateContent([videoData, promptScore]),
       jsonModel.generateContent([videoData, promptPunch]),
       jsonModel.generateContent([videoData, promptKickNo]),
-      jsonModel.generateContent([videoData, promptYellowCards])
+      jsonModel.generateContent([videoData, promptYellowCards]),
+      jsonModel.generateContent([videoData, promptAdvice])
     ]);
 
-    console.log(`[PROCESS_VIDEO_GEMINI] All 5 analysis calls completed`);
+    console.log(`[PROCESS_VIDEO_GEMINI] All 6 analysis calls completed`);
 
     // Extract text responses with formatting cleanup
     const rawMatchAnalysis = responseMatch.response.text();
@@ -322,29 +358,33 @@ Return Time in Minutes and Seconds: MM:SS`;
     const rawPunchResponse = responsePunch.response.text();
     const rawKickCountResponse = responseKickNo.response.text();
     const rawYellowCardResponse = responseYellowCards.response.text();
+    const rawAdviceResponse = responseAdvice.response.text();
 
     // Log raw responses for debugging
     console.log(`[PROCESS_VIDEO_GEMINI] Raw Score Response:`, rawScoreResponse.substring(0, 200));
     console.log(`[PROCESS_VIDEO_GEMINI] Raw Kick Count Response:`, rawKickCountResponse.substring(0, 200));
     console.log(`[PROCESS_VIDEO_GEMINI] Raw Punch Response:`, rawPunchResponse.substring(0, 200));
     console.log(`[PROCESS_VIDEO_GEMINI] Raw Yellow Card Response:`, rawYellowCardResponse.substring(0, 200));
+    console.log(`[PROCESS_VIDEO_GEMINI] Raw Advice Response:`, rawAdviceResponse.substring(0, 200));
 
     // Clean the JSON responses
     const scoreAnalysis = cleanJsonResponse(rawScoreResponse);
     const punchAnalysis = cleanJsonResponse(rawPunchResponse);
     const kickCountAnalysis = cleanJsonResponse(rawKickCountResponse);
     const yellowCardAnalysis = cleanJsonResponse(rawYellowCardResponse);
+    const adviceAnalysis = cleanJsonResponse(rawAdviceResponse);
 
     console.log(`[PROCESS_VIDEO_GEMINI] Analysis completed successfully`);
 
-    // Return the tuple like Python version
+    // Return the tuple with added coaching advice
     return [
       null, // No uploaded file in this approach
       matchAnalysis,
       scoreAnalysis,
       punchAnalysis, 
       kickCountAnalysis,
-      yellowCardAnalysis
+      yellowCardAnalysis,
+      adviceAnalysis
     ];
 
   } catch (error) {
@@ -389,7 +429,8 @@ export async function analyzeVideoFile(
       responseScore,
       responsePunch,
       responseKickNo,
-      responseYellowCards
+      responseYellowCards,
+      responseAdvice
     ] = await processVideoGemini(tempFilePath, roundToAnalyze);
 
     videoFile = uploadedVideoFile;
@@ -403,6 +444,7 @@ export async function analyzeVideoFile(
       punch_analysis: responsePunch,
       kick_count_analysis: responseKickNo,
       yellow_card_analysis: responseYellowCards,
+      advice_analysis: responseAdvice,
       roundAnalyzed: roundToAnalyze,
       processedAt: new Date().toISOString()
     };
