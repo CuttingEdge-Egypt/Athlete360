@@ -42,12 +42,14 @@ export default function Home() {
   const [videoAnalysisData, setVideoAnalysisData] = useState<any>(null);
   const [nutritionPlanData, setNutritionPlanData] = useState<any>(null);
   const [showNutritionForm, setShowNutritionForm] = useState<boolean>(true);
-  const [nutritionProgressMessage, setNutritionProgressMessage] = useState<string>("");
   const [developmentPlanData, setDevelopmentPlanData] = useState<any>(null);
   const [showDevelopmentForm, setShowDevelopmentForm] = useState<boolean>(true);
   const [developmentJobId, setDevelopmentJobId] = useState<string | null>(null);
   const [developmentProgress, setDevelopmentProgress] = useState<number>(0);
   const [developmentProgressMessage, setDevelopmentProgressMessage] = useState<string>("");
+  const [nutritionJobId, setNutritionJobId] = useState<string | null>(null);
+  const [nutritionProgress, setNutritionProgress] = useState<number>(0);
+  const [nutritionJobProgressMessage, setNutritionJobProgressMessage] = useState<string>("");
   const [location] = useLocation();
 
   // Helper for required number validation that shows proper required messages
@@ -117,9 +119,10 @@ export default function Home() {
   });
 
   // Nutrition plan generation mutation
-  const generateNutritionPlanMutation = useMutation({
+  // Nutrition plan job creation mutation
+  const createNutritionPlanJobMutation = useMutation({
     mutationFn: async (data: NutritionPlanFormData) => {
-      const response = await fetch('/api/analysis/nutrition-plan', {
+      const response = await fetch('/api/jobs/nutrition-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -127,22 +130,19 @@ export default function Home() {
       });
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to generate nutrition plan');
+        throw new Error(error.message || 'Failed to start nutrition plan generation');
       }
       return response.json();
     },
     onSuccess: (result) => {
-      console.log('Nutrition plan result:', result);
-      setNutritionPlanData(result);
-      setShowNutritionForm(false); // Hide form and show results
-      setActiveTab('nutrition'); // Auto-switch to nutrition tab to show results
+      console.log('Nutrition plan job created:', result);
+      setNutritionJobId(result.jobId);
+      setNutritionProgress(0);
+      setNutritionJobProgressMessage("Starting nutrition plan generation...");
       toast({
-        title: "Nutrition Plan Generated!",
-        description: "Your personalized nutrition plan is ready.",
+        title: "Generation Started!",
+        description: "Your nutrition plan is being generated. This may take several minutes.",
       });
-      // Invalidate relevant queries to refresh user data
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/user-history'] });
     },
     onError: (error: Error) => {
       toast({
@@ -207,12 +207,33 @@ export default function Home() {
     enabled: !!developmentJobId,
     refetchInterval: (query) => {
       // Stop polling if job is completed, failed, or cancelled
-      const status = query?.data?.status;
+      const status = query.state?.data?.status;
       return (status === 'completed' || status === 'failed' || status === 'cancelled') ? false : 2000;
     },
     queryFn: async () => {
       if (!developmentJobId) return null;
       const response = await fetch(`/api/jobs/${developmentJobId}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch job status');
+      }
+      return response.json();
+    }
+  });
+
+  // Nutrition job status polling
+  const { data: nutritionJobStatus, refetch: refetchNutritionJobStatus } = useQuery({
+    queryKey: ['/api/jobs', nutritionJobId],
+    enabled: !!nutritionJobId,
+    refetchInterval: (query) => {
+      // Stop polling if job is completed, failed, or cancelled
+      const status = query.state?.data?.status;
+      return (status === 'completed' || status === 'failed' || status === 'cancelled') ? false : 2000;
+    },
+    queryFn: async () => {
+      if (!nutritionJobId) return null;
+      const response = await fetch(`/api/jobs/${nutritionJobId}`, {
         credentials: 'include'
       });
       if (!response.ok) {
@@ -253,10 +274,41 @@ export default function Home() {
     },
   });
 
+  // Cancel nutrition plan job mutation
+  const cancelNutritionPlanJobMutation = useMutation({
+    mutationFn: async (jobId: string) => {
+      const response = await fetch(`/api/jobs/${jobId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to cancel job');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      setNutritionJobId(null);
+      setNutritionProgress(0);
+      setNutritionJobProgressMessage("");
+      toast({
+        title: "Generation Cancelled",
+        description: "Nutrition plan generation was cancelled.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Cancellation Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Form submission handler
   const onSubmitNutritionPlan = (data: NutritionPlanFormData) => {
     console.log('Nutrition plan form submitted:', data);
-    generateNutritionPlanMutation.mutate(data);
+    createNutritionPlanJobMutation.mutate(data);
   };
 
   // Development plan form submission handler
@@ -328,6 +380,68 @@ export default function Home() {
     }
   }, [developmentJobStatus, queryClient, toast, setActiveTab]);
 
+  // Nutrition plan job status handling
+  useEffect(() => {
+    if (nutritionJobStatus) {
+      const { status, progress, result, error } = nutritionJobStatus;
+      
+      // Cap progress at 100% to prevent values like 138%
+      const cappedProgress = Math.min(Math.max(progress || 0, 0), 100);
+      setNutritionProgress(cappedProgress);
+      
+      if (status === 'in_progress') {
+        const messages = [
+          "🥗 Analyzing your nutritional goals and current dietary requirements...",
+          "🧠 AI is crafting your personalized nutrition strategy...",
+          "📊 Calculating optimal macronutrient distribution and meal timing...",
+          "🍎 Designing balanced meals for your specific goals...",
+          "🌍 Incorporating local cuisine and cultural preferences...",
+          "⚖️ Optimizing caloric intake for your target weight...",
+          "📋 Assembling your complete nutrition plan..."
+        ];
+        const messageIndex = Math.min(Math.floor((progress || 0) / 14), messages.length - 1);
+        setNutritionJobProgressMessage(messages[messageIndex]);
+        
+        // Display incremental results if available during processing
+        if (result) {
+          console.log('Displaying incremental nutrition results:', result);
+          setNutritionPlanData(result);
+          setShowNutritionForm(false);
+          setActiveTab('nutrition');
+        }
+      } else if (status === 'completed' && result) {
+        console.log('Nutrition plan completed:', result);
+        setNutritionPlanData(result);
+        setShowNutritionForm(false);
+        setActiveTab('nutrition');
+        setNutritionJobId(null);
+        setNutritionProgress(0);
+        setNutritionProgressMessage("");
+        toast({
+          title: "Nutrition Plan Generated!",
+          description: "Your personalized nutrition plan is ready.",
+        });
+        // Invalidate relevant queries to refresh user data
+        queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/user-history'] });
+      } else if (status === 'failed') {
+        console.error('Nutrition plan generation failed:', error);
+        setNutritionJobId(null);
+        setNutritionProgress(0);
+        setNutritionProgressMessage("");
+        toast({
+          title: "Generation Failed",
+          description: error || "Nutrition plan generation failed. Please try again.",
+          variant: "destructive",
+        });
+      } else if (status === 'cancelled') {
+        setNutritionJobId(null);
+        setNutritionProgress(0);
+        setNutritionProgressMessage("");
+      }
+    }
+  }, [nutritionJobStatus, queryClient, toast, setActiveTab]);
+
   // Listen for queue notifications
   useEffect(() => {
     const handleQueueNotification = (event: CustomEvent) => {
@@ -377,7 +491,7 @@ export default function Home() {
     let interval: NodeJS.Timeout;
     let messageIndex = 0;
 
-    if (generateNutritionPlanMutation.isPending) {
+    if (nutritionJobId && nutritionProgress < 100) {
       // Set initial message
       setNutritionProgressMessage(nutritionProgressMessages[0]);
       
@@ -396,7 +510,7 @@ export default function Home() {
         clearInterval(interval);
       }
     };
-  }, [generateNutritionPlanMutation.isPending, nutritionProgressMessages]);
+  }, [nutritionJobId, nutritionProgress]);
 
   // Check for payment success notification
   useEffect(() => {
@@ -1411,19 +1525,73 @@ export default function Home() {
                         />
                       </div>
 
+                      {/* Progress tracking for nutrition plan generation */}
+                      {nutritionJobId && (
+                        <div className="mb-6 p-6 bg-athlete-gray-750 border border-gray-600 rounded-lg shadow-lg">
+                          <div className="space-y-4">
+                            {/* Progress message with dynamic animation */}
+                            <div className="flex items-center justify-center space-x-3">
+                              <div className="flex space-x-1">
+                                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce delay-0"></div>
+                                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce delay-150"></div>
+                                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce delay-300"></div>
+                              </div>
+                              <p className="text-lg font-medium text-emerald-200 text-center">
+                                {nutritionJobProgressMessage || "Generating your personalized nutrition plan..."}
+                              </p>
+                            </div>
+                            
+                            {/* Progress bar */}
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-300 font-medium">Progress</span>
+                                <div className="flex items-center gap-2">
+                                  <div className="px-2 py-1 bg-emerald-500/20 rounded-full">
+                                    <span className="text-emerald-200 font-bold text-xs">{nutritionProgress}%</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="relative w-full bg-slate-700 rounded-full h-3 overflow-hidden shadow-inner">
+                                <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700"></div>
+                                <div 
+                                  className="bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-400 h-3 rounded-full transition-all duration-700 ease-out shadow-sm relative" 
+                                  style={{ width: `${nutritionProgress}%` }}
+                                >
+                                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Cancel button */}
+                            <div className="flex justify-center">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => cancelNutritionPlanJobMutation.mutate(nutritionJobId)}
+                                disabled={cancelNutritionPlanJobMutation.isPending}
+                                className="border-red-500/50 text-red-300 hover:bg-red-500/10 hover:border-red-500"
+                              >
+                                <X className="mr-2" size={16} />
+                                Cancel Generation
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       <div className="flex justify-center mt-8">
                         <Button 
                           type="submit"
                           data-testid="button-generate-nutrition-plan"
-                          disabled={generateNutritionPlanMutation.isPending}
+                          disabled={nutritionJobId !== null}
                           className="bg-athlete-accent hover:bg-blue-600 text-white px-8 py-3 text-lg"
                         >
-                          {generateNutritionPlanMutation.isPending ? (
+                          {nutritionJobId ? (
                             <Loader2 className="mr-2 animate-spin" size={20} />
                           ) : (
                             <Apple className="mr-2" size={20} />
                           )}
-                          {generateNutritionPlanMutation.isPending ? nutritionProgressMessage : t('nutritionPlan.generate')}
+                          {nutritionJobId ? "Generating..." : t('nutritionPlan.generate')}
                         </Button>
                       </div>
                     </form>
