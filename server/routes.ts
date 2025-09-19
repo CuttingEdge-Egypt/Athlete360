@@ -1858,6 +1858,82 @@ Return only valid JSON with the missing fields.`;
     }
   }));
 
+  // Create nutrition plan job
+  app.post('/api/jobs/nutrition-plan', isAuthenticatedUniversal, asyncHandler(async (req: any, res: Response) => {
+    const tokenCost = SERVICE_TOKEN_COSTS['nutrition-plan'] || 50;
+    const userId = req.user.claims.sub;
+    
+    try {
+      // Validate request body with Zod schema
+      const validationResult = nutritionPlanSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        const errors = validationResult.error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
+        return res.status(400).json({ 
+          message: "Validation failed", 
+          errors: errors,
+          details: validationResult.error.errors
+        });
+      }
+
+      const formData = validationResult.data;
+
+      // Check if user has sufficient tokens
+      const user = await storage.getUser(userId);
+      if (!user || (user.tokens || 0) < tokenCost) {
+        return res.status(402).json({ message: "Insufficient tokens" });
+      }
+
+      // Deduct tokens upfront to reserve them
+      await storage.deductTokens(userId, tokenCost);
+      let tokensDeducted = true;
+      
+      try {
+        // Create transaction record
+        await storage.createTransaction({
+          userId,
+          action: "Nutrition Plan Job Creation",
+          tokensDeducted: tokenCost,
+          serviceType: "nutrition-plan"
+        });
+
+        // Create the job with tokens already reserved
+        const job = await storage.createJob({
+          userId,
+          type: 'nutrition-plan',
+          parameters: { ...formData, tokenCost }
+        });
+
+        console.log(`🥗 Created nutrition plan job ${job.id} for user ${userId} (${tokenCost} tokens reserved)`);
+
+        // Return job ID immediately for polling
+        res.status(202).json({ 
+          jobId: job.id,
+          status: job.status,
+          message: "Nutrition plan generation started. Use the jobId to check progress."
+        });
+
+      } catch (jobCreationError) {
+        // Refund tokens if job creation failed
+        if (tokensDeducted) {
+          try {
+            await storage.refundTokens(userId, tokenCost);
+            console.log(`🔄 REFUND: ${tokenCost} tokens refunded due to job creation failure`);
+          } catch (refundError) {
+            console.error("Failed to refund tokens after job creation error:", refundError);
+          }
+        }
+        throw jobCreationError;
+      }
+
+    } catch (error) {
+      console.error("Error creating nutrition plan job:", error);
+      res.status(500).json({ 
+        message: "Failed to create nutrition plan job. Please try again.",
+        error: true
+      });
+    }
+  }));
+
   // Get job status and results
   app.get('/api/jobs/:jobId', isAuthenticatedUniversal, asyncHandler(async (req: any, res: Response) => {
     const { jobId } = req.params;

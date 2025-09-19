@@ -277,18 +277,21 @@ async function generateSingleWeek(params: GenerateSingleWeekParams): Promise<{
   // Generate the 7 days for this week
   const weekDays: NutritionPlanDay[] = [];
   const dayNames = isArabic 
-    ? ['الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد']
-    : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    ? ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
+    : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
   for (let dayNum = 0; dayNum < 7; dayNum++) {
     const dayDate = new Date(startDate);
     dayDate.setDate(startDate.getDate() + dayNum);
     const dayDateStr = dayDate.toISOString().split('T')[0];
+    
+    // Get the actual day of the week (0 = Sunday, 1 = Monday, etc.)
+    const actualDayOfWeek = dayDate.getDay();
 
     weekDays.push({
       day: {
         date: dayDateStr,
-        name: dayNames[dayNum]
+        name: dayNames[actualDayOfWeek] // Use actual day of week instead of dayNum
       },
       meals: [], // Will be filled by AI
       explanation: '', // Will be filled by AI
@@ -484,7 +487,8 @@ Requirements for Week ${weekNumber}:
 }
 
 export async function generateEnhancedNutritionPlan(
-  formData: NutritionPlanFormData
+  formData: NutritionPlanFormData,
+  onProgressUpdate?: (currentWeek: number, totalWeeks: number) => Promise<void>
 ): Promise<NutritionPlanData> {
   try {
     const {
@@ -525,6 +529,11 @@ export async function generateEnhancedNutritionPlan(
     // Generate week by week for better reliability and variety control
     for (let weekNum = 1; weekNum <= period; weekNum++) {
       console.log(`📅 Generating week ${weekNum}/${period}...`);
+      
+      // Update progress if callback provided
+      if (onProgressUpdate) {
+        await onProgressUpdate(weekNum - 1, period);
+      }
       
       // Calculate start date for this week
       const weekStartDate = new Date(currentDate);

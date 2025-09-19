@@ -1,5 +1,5 @@
 import { storage } from './storage';
-import { generateDevelopmentPlan } from './geminiService';
+import { generateDevelopmentPlan, generateEnhancedNutritionPlan } from './geminiService';
 import type { Job } from '@shared/schema';
 
 interface DevelopmentPlanJobParams {
@@ -10,6 +10,20 @@ interface DevelopmentPlanJobParams {
   gender: 'male' | 'female';
   sport: string;
   language: 'en' | 'ar';
+}
+
+interface NutritionPlanJobParams {
+  goal: string;
+  age: number;
+  height: number;
+  currentWeight: number;
+  targetWeight: number;
+  period: number;
+  sportName: string;
+  country: string;
+  language: string;
+  gender?: string;
+  name?: string;
 }
 
 export class JobWorker {
@@ -84,6 +98,8 @@ export class JobWorker {
       // Process based on job type
       if (job.type === 'development-plan') {
         await this.processDevelopmentPlan(job);
+      } else if (job.type === 'nutrition-plan') {
+        await this.processNutritionPlan(job);
       } else {
         throw new Error(`Unknown job type: ${job.type}`);
       }
@@ -160,6 +176,58 @@ export class JobWorker {
       });
       
       console.error(`❌ Development plan generation failed for job ${job.id}:`, error);
+      throw error;
+    }
+  }
+
+  private async processNutritionPlan(job: Job) {
+    const params = job.parameters as NutritionPlanJobParams;
+    console.log(`🥗 Processing nutrition plan for user ${job.userId}`);
+
+    // Update progress - starting generation
+    await storage.updateJob(job.id, { progress: 5 });
+
+    // Check for cancellation before starting
+    if (await this.isJobCancelled(job.id)) return;
+
+    try {
+      // Add progress tracking to nutrition plan generation
+      const plan = await generateEnhancedNutritionPlan(params, async (weekCompleted: number, totalWeeks: number) => {
+        // Update progress based on week completion
+        const progress = Math.round((weekCompleted / totalWeeks) * 90) + 10; // 10% start + 90% for generation
+        await storage.updateJob(job.id, { progress });
+        console.log(`📊 Job ${job.id} progress: ${progress}% (Week ${weekCompleted + 1}/${totalWeeks} completed)`);
+      });
+
+      // Check for cancellation after generation
+      if (await this.isJobCancelled(job.id)) return;
+
+      // Mark as completed with results
+      await storage.updateJob(job.id, {
+        status: 'completed',
+        progress: 100,
+        result: plan
+      });
+
+      // Save to analysis logs for user history
+      await storage.createAnalysisLog({
+        userId: job.userId,
+        athleteId: null, // Nutrition plans are not athlete-specific
+        serviceType: "nutrition-plan",
+        resultData: plan
+      });
+
+      console.log(`✅ Nutrition plan job ${job.id} completed successfully`);
+
+    } catch (error) {
+      // If generation fails, mark as failed
+      await storage.updateJob(job.id, {
+        status: 'failed',
+        error: error instanceof Error ? error.message : 'Nutrition plan generation failed',
+        progress: 0
+      });
+      
+      console.error(`❌ Nutrition plan generation failed for job ${job.id}:`, error);
       throw error;
     }
   }
