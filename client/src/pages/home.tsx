@@ -416,7 +416,7 @@ export default function Home() {
         setActiveTab('nutrition');
         setNutritionJobId(null);
         setNutritionProgress(0);
-        setNutritionProgressMessage("");
+        setNutritionJobProgressMessage("");
         toast({
           title: "Nutrition Plan Generated!",
           description: "Your personalized nutrition plan is ready.",
@@ -428,7 +428,7 @@ export default function Home() {
         console.error('Nutrition plan generation failed:', error);
         setNutritionJobId(null);
         setNutritionProgress(0);
-        setNutritionProgressMessage("");
+        setNutritionJobProgressMessage("");
         toast({
           title: "Generation Failed",
           description: error || "Nutrition plan generation failed. Please try again.",
@@ -437,7 +437,7 @@ export default function Home() {
       } else if (status === 'cancelled') {
         setNutritionJobId(null);
         setNutritionProgress(0);
-        setNutritionProgressMessage("");
+        setNutritionJobProgressMessage("");
       }
     }
   }, [nutritionJobStatus, queryClient, toast, setActiveTab]);
@@ -493,16 +493,16 @@ export default function Home() {
 
     if (nutritionJobId && nutritionProgress < 100) {
       // Set initial message
-      setNutritionProgressMessage(nutritionProgressMessages[0]);
+      setNutritionJobProgressMessage(nutritionProgressMessages[0]);
       
       // Update message every 20 seconds
       interval = setInterval(() => {
         messageIndex = (messageIndex + 1) % nutritionProgressMessages.length;
-        setNutritionProgressMessage(nutritionProgressMessages[messageIndex]);
+        setNutritionJobProgressMessage(nutritionProgressMessages[messageIndex]);
       }, 20000);
     } else {
       // Reset message when not generating
-      setNutritionProgressMessage("");
+      setNutritionJobProgressMessage("");
     }
 
     return () => {
