@@ -512,6 +512,8 @@ export async function generateEnhancedNutritionPlan(
     const currentDate = new Date();
     const currentDateStr = currentDate.toISOString().split('T')[0]; // Format: YYYY-MM-DD
     
+    console.log(`📅 DEBUG: Current date calculated as: ${currentDateStr}`);
+    console.log(`📅 DEBUG: Current date object: ${currentDate.toString()}`);
     console.log(`🧵 Starting THREADED nutrition plan generation: ${period} weeks for ${sportName} athlete`);
     const startTime = Date.now();
     
@@ -538,6 +540,8 @@ export async function generateEnhancedNutritionPlan(
       // Calculate start date for this week
       const weekStartDate = new Date(currentDate);
       weekStartDate.setDate(currentDate.getDate() + (weekNum - 1) * 7);
+      
+      console.log(`📅 DEBUG: Week ${weekNum} start date: ${weekStartDate.toISOString().split('T')[0]} (${weekStartDate.toString()})`);
       
       // Limit context to prevent token overflow - only use last 1-2 weeks
       const recentWeeks = allWeeks.slice(-2); // Only last 2 weeks maximum
