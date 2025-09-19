@@ -119,260 +119,193 @@ export async function processVideoGemini(videoFilePath: string, roundToAnalyze: 
     };
     
     console.log(`[PROCESS_VIDEO_GEMINI] Video prepared (${videoBase64.length} chars base64)`);
-    console.log(`[PROCESS_VIDEO_GEMINI] Starting 5 analysis calls...`);
+    console.log(`[PROCESS_VIDEO_GEMINI] Making single unified analysis call...`);
 
-    // Define prompts for each analysis type
-    const promptMatch = `Write me a match Analysis of what happened in round ${roundToAnalyze} in technical terms. Include the story of the round.
+    // Create a single unified prompt that requests all analyses in one structured JSON
+    const unifiedPrompt = `Analyze round ${roundToAnalyze} of this taekwondo match and provide a comprehensive analysis. Return a single JSON with all the following sections:
 
-IMPORTANT: Start directly with "**Match Analysis: Round ${roundToAnalyze}**" - DO NOT include any prefacing phrases like "Of course", "Here is", "Sure", or similar AI response patterns.
+IMPORTANT: Return a single valid JSON object with all the following sections. Do not include any markdown formatting or code blocks.
 
-Listen to any insights the commentator might have. Here is a template:
-
-Match Score:
-Give me the final score of the match.
-
-Kick Count & Types:
-This analysis is limited by the fast action and occasional obscured views, but here are some highlights. Precise numbers are hard to determine but I will use as many markers as possible.
-
-Player 1 (Blue): Describe their technique style.
-Count of spinning kicks: Estimate based on observation
-Number of front kicks: Estimate based on observation
-
-Player 2 (Red): Describe their technique style.  
-Count of Round housekicks: Estimate based on observation
-Number of Tipi-chaji: Estimate based on observation
-
-Punch Count:
-Mention if there were any punches in the match
-
-Match Brief & Technical Analysis:
-Provide detailed technical analysis of both players' approaches and strategies.
-
-Strategic Adaptation: How each player adapted during the round.
-
-Key Moments/Commentator Notes:
-Include any key insights from commentators.
-
-Summary:
-Explain who performed better and why.
-
-Take your time in processing to make sure the results are accurate.
-Make sure you're not scanning the yellow card as an actual score.`;
-
-    const promptScore = `Watch round ${roundToAnalyze} only. Identify when a player scored using the scoreboard. Focus on the scoreboard change for better accuracy. Listen to commentators they will help you reference which player scored how many points. Include final match score (from scoreboard) in the summary.
-
-IMPORTANT: Calculate total_points by adding up all individual kick scores. For example: if kicks are [1, 1, 2], then total_points = 1+1+2 = 4.
-
-Return JSON format:
 {
-  "players": [
-    {
-      "name": "Player 1",
-      "color": "Red/Blue"
-      "kicks": [
-        {
-          "timestamp": "MM:SS",
-          "score": 0
-        }
-      ],
-      "total_kicks": 0,
-      "total_points": 0
-    },
-    {
-      "name": "Player 2 (Red)", 
-      "kicks": [
-        {
-          "timestamp": "MM:SS",
-          "score": 0
-        }
-      ],
-      "total_kicks": 0,
-      "total_points": 0
-    }
-  ],
-  "summary": {
-    "total_match_score_blue": 0,
-    "total_match_score_red": 0
-  }
-}`;
-
-    const promptPunch = `Watch round ${roundToAnalyze} only. Watch this taekwondo match and tell me when a player performed a punch, a punch is when a player clenches their fist and tries to hit another player. If there are no punches found let the JSON be NONE.
-
-Return JSON format:
-{
-  "players": [
-    {
-      "name": "Player 1",
-      "Punch": [
-        {
-          "timestamp": "MM:SS",
-          "score": 0
-        }
-      ],
-      "total_punches": 0
-    },
-    {
-      "name": "Player 2",
-      "Punch": [
-        {
-          "timestamp": "MM:SS", 
-          "score": 0
-        }
-      ],
-      "total_punches": 0
-    }
-  ]
-}
-
-Return Time in Minutes and Seconds: MM:SS`;
-
-    const promptKickNo = `Watch round ${roundToAnalyze} only. Watch the taekwondo match and count the total number of kicks both players executed. Even if kicks doesn't hit the opponent or if they blocked it; count every time there is an attempt.
-
-IMPORTANT: This total_kick_number should match the total_kicks count from the scoring analysis.
-
-Return JSON format:
-{
-  "players": [
-    {
-      "name": "Player 1",
-      "kicks": [
-        {
-          "total_kick_number": 0
-        }
-      ]
-    },
-    {
-      "name": "Player 2",
-      "kicks": [
-        {
-          "total_kick_number": 0
-        }
-      ]
-    }
-  ]
-}`;
-
-    const promptYellowCards = `Watch round ${roundToAnalyze} only. This is a taekwondo match, following taekwondo rules. By looking at the scoreboard and watching when the referee gives a warning or 'yellow card' to a player, list all yellow cards with their exact timestamps.
-
-IMPORTANT: Calculate total_yellows by adding up all individual warning amounts. For example: if warnings are [1, 1, 1], then total_yellows = 1+1+1 = 3.
-
-Return JSON format:
-{
-  "players": [
-    {
-      "name": "Player 1",
-      "color": "Red/Blue"
-      "Yellow_cards": [
-        {
-          "timestamp": "MM:SS",
-          "Amount": 1
-        }
-      ],
-      "total_yellows": 0
-    },
-    {
-      "name": "Player 2 (Red)",
-      "Yellow_cards": [
-        {
-          "timestamp": "MM:SS",
-          "Amount": 1
-        }
-      ],
-      "total_yellows": 0
-    }
-  ]
-}
-Return Time in Minutes and Seconds: MM:SS`;
-
-    const promptAdvice = `Act as an expert Taekwondo coach and analyze round ${roundToAnalyze} only. Provide specific coaching advice for each player based on their performance in this round.
-
-Focus on what each player did wrong, what they could improve, and what they should avoid in future rounds. Be specific about techniques, positioning, timing, and strategy.
-
-Return JSON format:
-{
-  "advice": {
-    "player1": {
-      "name": "Player 1 (Blue/Red)",
-      "improvements": [
-        "Specific advice point 1 about technique or strategy",
-        "Specific advice point 2 about positioning or timing",
-        "Specific advice point 3 about what to avoid"
-      ],
-      "strengths": [
-        "What they did well in this round"
-      ],
-      "next_round_strategy": "Overall strategy recommendation for next round"
-    },
-    "player2": {
-      "name": "Player 2 (Blue/Red)", 
-      "improvements": [
-        "Specific advice point 1 about technique or strategy",
-        "Specific advice point 2 about positioning or timing",
-        "Specific advice point 3 about what to avoid"
-      ],
-      "strengths": [
-        "What they did well in this round"
-      ],
-      "next_round_strategy": "Overall strategy recommendation for next round"
+  "match_analysis": "Write a detailed match analysis of what happened in round ${roundToAnalyze} in technical terms. Include the story of the round, match score, kick count & types, punch count, technical analysis of both players' approaches, strategic adaptation, key moments/commentator notes, and summary of who performed better and why. Take your time to ensure accuracy and don't scan yellow cards as actual scores.",
+  
+  "score_analysis": {
+    "players": [
+      {
+        "name": "Player 1",
+        "color": "Blue/Red",
+        "kicks": [
+          {
+            "timestamp": "MM:SS",
+            "score": 0
+          }
+        ],
+        "total_kicks": 0,
+        "total_points": 0
+      },
+      {
+        "name": "Player 2",
+        "color": "Blue/Red", 
+        "kicks": [
+          {
+            "timestamp": "MM:SS",
+            "score": 0
+          }
+        ],
+        "total_kicks": 0,
+        "total_points": 0
+      }
+    ],
+    "summary": {
+      "total_match_score_blue": 0,
+      "total_match_score_red": 0
     }
   },
-  "round_analysis": "Overall analysis of what happened in this specific round and key coaching insights"
-}`;
-
-    // Make 6 parallel API calls (added coaching advice)
-    console.log(`[PROCESS_VIDEO_GEMINI] Making 6 parallel analysis calls...`);
-    
-    // Create separate model instances for different response types
-    const textModel = genai.getGenerativeModel({
-      model: "gemini-2.5-pro",
-      generationConfig: {
-        temperature: 0,
-        maxOutputTokens: 8192,
+  
+  "punch_analysis": {
+    "players": [
+      {
+        "name": "Player 1",
+        "Punch": [
+          {
+            "timestamp": "MM:SS",
+            "score": 0
+          }
+        ],
+        "total_punches": 0
+      },
+      {
+        "name": "Player 2",
+        "Punch": [
+          {
+            "timestamp": "MM:SS", 
+            "score": 0
+          }
+        ],
+        "total_punches": 0
       }
-    });
+    ]
+  },
+  
+  "kick_count_analysis": {
+    "players": [
+      {
+        "name": "Player 1",
+        "kicks": [
+          {
+            "total_kick_number": 0
+          }
+        ]
+      },
+      {
+        "name": "Player 2",
+        "kicks": [
+          {
+            "total_kick_number": 0
+          }
+        ]
+      }
+    ]
+  },
+  
+  "yellow_card_analysis": {
+    "players": [
+      {
+        "name": "Player 1",
+        "color": "Blue/Red",
+        "Yellow_cards": [
+          {
+            "timestamp": "MM:SS",
+            "Amount": 1
+          }
+        ],
+        "total_yellows": 0
+      },
+      {
+        "name": "Player 2",
+        "color": "Blue/Red",
+        "Yellow_cards": [
+          {
+            "timestamp": "MM:SS",
+            "Amount": 1
+          }
+        ],
+        "total_yellows": 0
+      }
+    ]
+  },
+  
+  "advice_analysis": {
+    "advice": {
+      "player1": {
+        "name": "Player 1 (Blue/Red)",
+        "improvements": [
+          "Specific advice point 1 about technique or strategy",
+          "Specific advice point 2 about positioning or timing",
+          "Specific advice point 3 about what to avoid"
+        ],
+        "strengths": [
+          "What they did well in this round"
+        ],
+        "next_round_strategy": "Overall strategy recommendation for next round"
+      },
+      "player2": {
+        "name": "Player 2 (Blue/Red)", 
+        "improvements": [
+          "Specific advice point 1 about technique or strategy",
+          "Specific advice point 2 about positioning or timing",
+          "Specific advice point 3 about what to avoid"
+        ],
+        "strengths": [
+          "What they did well in this round"
+        ],
+        "next_round_strategy": "Overall strategy recommendation for next round"
+      }
+    },
+    "round_analysis": "Overall analysis of what happened in this specific round and key coaching insights"
+  }
+}
 
-    const jsonModel = genai.getGenerativeModel({
+Instructions:
+1. Watch round ${roundToAnalyze} only
+2. Focus on scoreboard changes for accurate scoring
+3. Listen to commentators for additional insights
+4. Count all kick attempts (even blocked/missed ones)
+5. Look for punches (clenched fist hitting attempts)
+6. Watch for referee warnings/yellow cards on scoreboard
+7. Provide expert coaching advice for both players
+8. Calculate totals by adding up individual scores
+9. Use MM:SS format for timestamps
+10. Be thorough and accurate in your analysis`;
+
+    // Make single API call with unified analysis
+    const unifiedModel = genai.getGenerativeModel({
       model: "gemini-2.5-pro", 
       generationConfig: {
         temperature: 0,
-        maxOutputTokens: 8192,
+        maxOutputTokens: 4096,
         responseMimeType: "application/json",
       }
     });
     
-    const [responseMatch, responseScore, responsePunch, responseKickNo, responseYellowCards, responseAdvice] = await Promise.all([
-      textModel.generateContent([videoData, promptMatch]),
-      jsonModel.generateContent([videoData, promptScore]),
-      jsonModel.generateContent([videoData, promptPunch]),
-      jsonModel.generateContent([videoData, promptKickNo]),
-      jsonModel.generateContent([videoData, promptYellowCards]),
-      jsonModel.generateContent([videoData, promptAdvice])
-    ]);
+    const unifiedResponse = await unifiedModel.generateContent([videoData, unifiedPrompt]);
 
-    console.log(`[PROCESS_VIDEO_GEMINI] All 6 analysis calls completed`);
+    console.log(`[PROCESS_VIDEO_GEMINI] Unified analysis call completed`);
 
-    // Extract text responses with formatting cleanup
-    const rawMatchAnalysis = responseMatch.response.text();
-    const matchAnalysis = cleanMarkdownFormatting(rawMatchAnalysis);
-    const rawScoreResponse = responseScore.response.text();
-    const rawPunchResponse = responsePunch.response.text();
-    const rawKickCountResponse = responseKickNo.response.text();
-    const rawYellowCardResponse = responseYellowCards.response.text();
-    const rawAdviceResponse = responseAdvice.response.text();
+    // Extract and parse the unified response
+    const rawUnifiedResponse = unifiedResponse.response.text();
+    console.log(`[PROCESS_VIDEO_GEMINI] Raw Unified Response:`, rawUnifiedResponse.substring(0, 300));
 
-    // Log raw responses for debugging
-    console.log(`[PROCESS_VIDEO_GEMINI] Raw Score Response:`, rawScoreResponse.substring(0, 200));
-    console.log(`[PROCESS_VIDEO_GEMINI] Raw Kick Count Response:`, rawKickCountResponse.substring(0, 200));
-    console.log(`[PROCESS_VIDEO_GEMINI] Raw Punch Response:`, rawPunchResponse.substring(0, 200));
-    console.log(`[PROCESS_VIDEO_GEMINI] Raw Yellow Card Response:`, rawYellowCardResponse.substring(0, 200));
-    console.log(`[PROCESS_VIDEO_GEMINI] Raw Advice Response:`, rawAdviceResponse.substring(0, 200));
+    // Parse the unified JSON response
+    const unifiedAnalysis = JSON.parse(cleanJsonResponse(rawUnifiedResponse));
 
-    // Clean the JSON responses
-    const scoreAnalysis = cleanJsonResponse(rawScoreResponse);
-    const punchAnalysis = cleanJsonResponse(rawPunchResponse);
-    const kickCountAnalysis = cleanJsonResponse(rawKickCountResponse);
-    const yellowCardAnalysis = cleanJsonResponse(rawYellowCardResponse);
-    const adviceAnalysis = cleanJsonResponse(rawAdviceResponse);
+    // Extract individual sections from the unified response
+    const matchAnalysis = cleanMarkdownFormatting(unifiedAnalysis.match_analysis || "");
+    const scoreAnalysis = JSON.stringify(unifiedAnalysis.score_analysis || {"players": []});
+    const punchAnalysis = JSON.stringify(unifiedAnalysis.punch_analysis || {"players": []});
+    const kickCountAnalysis = JSON.stringify(unifiedAnalysis.kick_count_analysis || {"players": []});
+    const yellowCardAnalysis = JSON.stringify(unifiedAnalysis.yellow_card_analysis || {"players": []});
+    const adviceAnalysis = JSON.stringify(unifiedAnalysis.advice_analysis || {"advice": {"player1": {}, "player2": {}}});
 
     console.log(`[PROCESS_VIDEO_GEMINI] Analysis completed successfully`);
 
