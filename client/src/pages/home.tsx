@@ -271,7 +271,9 @@ export default function Home() {
       const { status, progress, result, error } = developmentJobStatus;
       const results = result; // Map result to results for backwards compatibility
       
-      setDevelopmentProgress(progress || 0);
+      // Cap progress at 100% to prevent values like 138%
+      const cappedProgress = Math.min(Math.max(progress || 0, 0), 100);
+      setDevelopmentProgress(cappedProgress);
       
       if (status === 'in_progress') {
         const messages = [
@@ -1632,36 +1634,66 @@ export default function Home() {
                           )}
                         </Button>
                         
-                        {/* Cancel button when job is running */}
+                        {/* Enhanced Progress indicator */}
                         {developmentJobId && (
-                          <Button 
-                            type="button"
-                            variant="outline"
-                            onClick={() => cancelDevelopmentPlanJobMutation.mutate(developmentJobId)}
-                            disabled={cancelDevelopmentPlanJobMutation.isPending}
-                            className="ml-4 bg-red-600 hover:bg-red-700 text-white border-red-600"
-                            data-testid="button-cancel-development-plan"
-                          >
-                            {cancelDevelopmentPlanJobMutation.isPending ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              "Cancel"
-                            )}
-                          </Button>
-                        )}
-                        
-                        {/* Progress indicator */}
-                        {developmentJobId && (
-                          <div className="mt-6 space-y-2">
-                            <div className="flex justify-between text-sm text-gray-400">
-                              <span>{developmentProgressMessage}</span>
-                              <span>{developmentProgress}%</span>
-                            </div>
-                            <div className="w-full bg-gray-700 rounded-full h-2">
-                              <div 
-                                className="bg-athlete-accent h-2 rounded-full transition-all duration-500" 
-                                style={{ width: `${developmentProgress}%` }}
-                              />
+                          <div className="mt-6 p-6 bg-gradient-to-r from-slate-800/80 to-slate-700/80 rounded-xl border border-slate-600/50 shadow-lg">
+                            <div className="space-y-4">
+                              {/* Progress Header with Cancel Button */}
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="relative">
+                                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-emerald-500/30 border-t-emerald-400"></div>
+                                    <div className="absolute inset-0 rounded-full h-6 w-6 bg-emerald-500/10"></div>
+                                  </div>
+                                  <div>
+                                    <p className="text-emerald-100 font-semibold">
+                                      {developmentProgressMessage || 'Generating your development plan...'}
+                                    </p>
+                                    <p className="text-slate-300 text-sm">This may take a few minutes</p>
+                                  </div>
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => cancelDevelopmentPlanJobMutation.mutate(developmentJobId)}
+                                  disabled={cancelDevelopmentPlanJobMutation.isPending}
+                                  className="bg-red-500/10 border-red-400/50 text-red-300 hover:bg-red-500/20 hover:border-red-400 transition-all duration-200"
+                                  data-testid="button-cancel-development-plan"
+                                >
+                                  {cancelDevelopmentPlanJobMutation.isPending ? (
+                                    <>
+                                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                                      Cancelling
+                                    </>
+                                  ) : (
+                                    <>
+                                      <X className="mr-2 h-3 w-3" />
+                                      Cancel
+                                    </>
+                                  )}
+                                </Button>
+                              </div>
+
+                              {/* Progress Bar with Percentage */}
+                              <div className="space-y-2">
+                                <div className="flex justify-between items-center text-sm">
+                                  <span className="text-slate-300 font-medium">Progress</span>
+                                  <div className="flex items-center gap-2">
+                                    <div className="px-2 py-1 bg-emerald-500/20 rounded-full">
+                                      <span className="text-emerald-200 font-bold text-xs">{developmentProgress}%</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="relative w-full bg-slate-700 rounded-full h-3 overflow-hidden shadow-inner">
+                                  <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700"></div>
+                                  <div 
+                                    className="bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-400 h-3 rounded-full transition-all duration-700 ease-out shadow-sm relative" 
+                                    style={{ width: `${developmentProgress}%` }}
+                                  >
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         )}

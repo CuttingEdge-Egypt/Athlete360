@@ -131,26 +131,34 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
   return (
     <div className="space-y-8" data-testid="development-plan-display">
       {/* Title with Goal Areas and Videos Count */}
-      <Card className="bg-gradient-to-br from-athlete-accent/20 to-athlete-gray-800 border-athlete-accent/30">
+      <Card className="bg-gradient-to-br from-emerald-500/20 via-athlete-accent/20 to-athlete-gray-800 border-emerald-500/40 shadow-lg">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <CardTitle className="text-2xl text-white flex items-center gap-3">
-                <Target className="h-6 w-6 text-athlete-accent" />
-                {getLocalizedText(title, language)}
+              <CardTitle className="text-3xl font-bold text-white flex items-center gap-3">
+                <Target className="h-7 w-7 text-emerald-400" />
+                <span className="bg-gradient-to-r from-emerald-400 to-athlete-accent bg-clip-text text-transparent">
+                  {getLocalizedText(title, language)}
+                </span>
               </CardTitle>
               <div className="flex flex-wrap items-center gap-6 text-sm text-gray-300">
                 <div className="flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-athlete-accent flex-shrink-0" />
-                  <span className="font-medium">{counts?.goals || goalAnalysis.length} Goal Areas</span>
+                  <div className="p-1.5 rounded-full bg-emerald-500/20">
+                    <Zap className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+                  </div>
+                  <span className="font-semibold text-emerald-100">{counts?.goals || goalAnalysis.length} Goal Areas</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Dumbbell className="h-4 w-4 text-athlete-accent flex-shrink-0" />
-                  <span className="font-medium">{counts?.exercises || 0} Exercises</span>
+                  <div className="p-1.5 rounded-full bg-blue-500/20">
+                    <Dumbbell className="h-4 w-4 text-blue-400 flex-shrink-0" />
+                  </div>
+                  <span className="font-semibold text-blue-100">{counts?.exercises || 0} Exercises</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Play className="h-4 w-4 text-athlete-accent flex-shrink-0" />
-                  <span className="font-medium">{counts?.videos || allExercisesWithVideos.length} Videos</span>
+                  <div className="p-1.5 rounded-full bg-purple-500/20">
+                    <Play className="h-4 w-4 text-purple-400 flex-shrink-0" />
+                  </div>
+                  <span className="font-semibold text-purple-100">{counts?.videos || allExercisesWithVideos.length} Videos</span>
                 </div>
               </div>
             </div>
@@ -159,27 +167,29 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
         
         {intro && intro.overview && (
           <CardContent className="pt-0">
-            <p className="text-gray-300 leading-relaxed">{intro.overview}</p>
+            <div className="p-4 bg-gradient-to-r from-slate-800/50 to-slate-700/50 rounded-lg border border-slate-600/30">
+              <p className="text-slate-100 leading-relaxed text-base font-medium">{intro.overview}</p>
+            </div>
           </CardContent>
         )}
       </Card>
 
       <Tabs defaultValue="goals" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-athlete-gray-800 border-athlete-gray-700">
+        <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-slate-800 to-slate-700 border-slate-600">
           <TabsTrigger 
             value="goals" 
-            className="data-[state=active]:bg-athlete-accent data-[state=active]:text-white text-gray-300"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white text-slate-300 font-semibold"
             data-testid="tab-goals"
           >
-            <Target className="h-4 w-4 mr-2" />
+            <Target className="h-5 w-5 mr-2" />
             Goal Areas
           </TabsTrigger>
           <TabsTrigger 
             value="videos" 
-            className="data-[state=active]:bg-athlete-accent data-[state=active]:text-white text-gray-300"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white text-slate-300 font-semibold"
             data-testid="tab-videos"
           >
-            <Play className="h-4 w-4 mr-2" />
+            <Play className="h-5 w-5 mr-2" />
             All Videos
           </TabsTrigger>
         </TabsList>
@@ -188,7 +198,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
         <TabsContent value="goals" className="space-y-6">
           {/* Goal Area Navigation */}
           {goalAnalysis.length > 1 && (
-            <Card className="bg-athlete-gray-800/50 border-athlete-gray-700">
+            <Card className="bg-gradient-to-r from-slate-800/70 to-slate-700/70 border-slate-600/50">
               <CardContent className="p-4">
                 <div className="flex flex-wrap gap-2">
                   {goalAnalysis.map((goal, index) => (
@@ -199,8 +209,8 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                       onClick={() => setSelectedGoalIndex(index)}
                       className={`${
                         selectedGoalIndex === index 
-                          ? "bg-athlete-accent hover:bg-athlete-accent/90 text-white border-athlete-accent" 
-                          : "bg-transparent border-athlete-gray-600 text-gray-300 hover:bg-athlete-gray-700"
+                          ? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white border-emerald-400 shadow-lg" 
+                          : "bg-transparent border-slate-600 text-slate-300 hover:bg-slate-700/50 hover:border-slate-500"
                       }`}
                       data-testid={`goal-button-${index}`}
                     >
@@ -215,13 +225,17 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
 
           {/* Current Goal Area Display */}
           {currentGoal && (
-            <Card className="bg-athlete-gray-800/30 border-athlete-gray-700">
-              <CardHeader>
-                <CardTitle className="text-xl text-white flex items-center gap-3">
-                  <Zap className="h-5 w-5 text-athlete-accent" />
-                  {currentGoal.area}
+            <Card className="bg-gradient-to-br from-slate-800/50 to-slate-700/50 border-emerald-500/30 shadow-lg">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-2xl font-bold text-white flex items-center gap-3">
+                  <div className="p-2 rounded-full bg-emerald-500/20">
+                    <Zap className="h-6 w-6 text-emerald-400" />
+                  </div>
+                  <span className="text-emerald-50">{currentGoal.area}</span>
                 </CardTitle>
-                <p className="text-gray-300 leading-relaxed">{currentGoal.description}</p>
+                <div className="p-3 bg-slate-900/30 rounded-lg border border-slate-600/30 mt-3">
+                  <p className="text-slate-100 leading-relaxed text-base">{currentGoal.description}</p>
+                </div>
               </CardHeader>
               
               <CardContent className="space-y-4">
@@ -236,17 +250,19 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                     )
                     .slice(0, 3) // Ensure final limit of 3
                     .map((exercise, exerciseIndex) => (
-                    <Card key={exercise.id || exerciseIndex} className="bg-athlete-gray-900/50 border-athlete-gray-600">
-                      <CardContent className="p-4">
+                    <Card key={exercise.id || exerciseIndex} className="bg-gradient-to-br from-slate-900/60 to-slate-800/60 border-slate-600/50 hover:border-slate-500/60 transition-all duration-200 shadow-md">
+                      <CardContent className="p-5">
                         <div className="space-y-3">
                           {/* Exercise Header */}
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <h4 className="font-semibold text-white flex items-center gap-2">
-                                <Dumbbell className="h-4 w-4 text-athlete-accent" />
-                                {exercise.name}
+                              <h4 className="font-bold text-lg text-white flex items-center gap-2">
+                                <div className="p-1.5 rounded-full bg-blue-500/20">
+                                  <Dumbbell className="h-4 w-4 text-blue-400" />
+                                </div>
+                                <span className="text-blue-50">{exercise.name}</span>
                               </h4>
-                              <p className="text-sm text-gray-300 mt-1 leading-relaxed">
+                              <p className="text-sm text-slate-200 mt-2 leading-relaxed pl-8">
                                 {exercise.description}
                               </p>
                             </div>
@@ -255,7 +271,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                                 size="sm"
                                 variant="outline"
                                 onClick={() => window.open(exercise.videoUrl, '_blank')}
-                                className="ml-4 bg-transparent border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white flex-shrink-0"
+                                className="ml-4 bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-300 hover:from-purple-500 hover:to-purple-600 hover:text-white flex-shrink-0 shadow-md"
                                 data-testid={`exercise-video-${exerciseIndex}`}
                               >
                                 <Play className="h-3 w-3 mr-1" />
