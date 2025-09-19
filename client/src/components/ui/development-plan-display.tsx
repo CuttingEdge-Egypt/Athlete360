@@ -280,30 +280,30 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                             )}
                           </div>
 
-                          {/* Exercise Details */}
-                          <div className="flex flex-wrap gap-2">
+                          {/* Enhanced Exercise Details */}
+                          <div className="flex flex-wrap gap-3">
                             {getExercisePrescriptionText(exercise) && (
-                              <Badge variant="secondary" className="bg-athlete-gray-700 text-gray-200">
-                                <Timer className="h-3 w-3 mr-1" />
+                              <Badge variant="secondary" className="bg-gradient-to-r from-blue-600/80 to-blue-500/80 text-white font-semibold text-sm px-3 py-1.5 shadow-md border border-blue-400/30">
+                                <Timer className="h-4 w-4 mr-2" />
                                 {getExercisePrescriptionText(exercise)}
                               </Badge>
                             )}
                             {exercise.equipment && exercise.equipment.length > 0 && (
-                              <Badge variant="outline" className="border-athlete-gray-600 text-gray-300">
-                                <Activity className="h-3 w-3 mr-1" />
+                              <Badge variant="outline" className="bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-100 font-semibold text-sm px-3 py-1.5 shadow-md">
+                                <Activity className="h-4 w-4 mr-2" />
                                 {exercise.equipment.join(', ')}
                               </Badge>
                             )}
                           </div>
 
-                          {/* Exercise Tags */}
+                          {/* Enhanced Exercise Tags */}
                           {exercise.tags && exercise.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
+                            <div className="flex flex-wrap gap-2">
                               {exercise.tags.map((tag, tagIndex) => (
                                 <Badge
                                   key={tagIndex}
                                   variant="outline"
-                                  className="text-xs border-athlete-accent/50 text-athlete-accent bg-athlete-accent/10"
+                                  className="text-sm font-medium border-2 border-emerald-400/60 text-emerald-100 bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 px-3 py-1 shadow-sm hover:bg-emerald-500/30 transition-colors duration-200"
                                 >
                                   {tag}
                                 </Badge>
@@ -334,7 +334,11 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                           {exercise.name}
                         </h4>
                         {exercise.targetArea && (
-                          <p className="text-sm text-gray-400 mt-1">Target Area: {exercise.targetArea}</p>
+                          <div className="mt-2">
+                            <Badge variant="outline" className="bg-gradient-to-r from-amber-500/20 to-amber-600/20 border-amber-400 text-amber-100 font-medium text-xs px-2 py-1">
+                              Target: {exercise.targetArea}
+                            </Badge>
+                          </div>
                         )}
                         <p className="text-sm text-gray-300 mt-1">{exercise.description}</p>
                       </div>

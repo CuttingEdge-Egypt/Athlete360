@@ -277,14 +277,15 @@ export default function Home() {
       
       if (status === 'in_progress') {
         const messages = [
-          "Analyzing your training requirements...",
-          "Creating personalized weekly schedules...",
-          "Designing progressive exercises...",
-          "Optimizing training intensity...",
-          "Adding instructional guidance...",
-          "Finalizing your development plan..."
+          "🎯 Analyzing your training goals and current fitness level...",
+          "🧠 AI is crafting your personalized training strategy...",
+          "💪 Designing targeted exercises for your specific weaknesses...",
+          "📊 Calculating optimal sets, reps, and rest periods...",
+          "🎬 Finding the perfect instructional videos for each exercise...",
+          "⚡ Optimizing training intensity and progression...",
+          "📋 Assembling your complete development plan..."
         ];
-        const messageIndex = Math.min(Math.floor((progress || 0) / 17), messages.length - 1);
+        const messageIndex = Math.min(Math.floor((progress || 0) / 14), messages.length - 1);
         setDevelopmentProgressMessage(messages[messageIndex]);
         
         // Display incremental results if available during processing
