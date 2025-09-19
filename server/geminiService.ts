@@ -283,7 +283,12 @@ async function generateSingleWeek(params: GenerateSingleWeekParams): Promise<{
   for (let dayNum = 0; dayNum < 7; dayNum++) {
     const dayDate = new Date(startDate);
     dayDate.setDate(startDate.getDate() + dayNum);
-    const dayDateStr = dayDate.toISOString().split('T')[0];
+    
+    // Timezone-safe date formatting to avoid UTC shifts
+    const year = dayDate.getFullYear();
+    const month = String(dayDate.getMonth() + 1).padStart(2, '0');
+    const day = String(dayDate.getDate()).padStart(2, '0');
+    const dayDateStr = `${year}-${month}-${day}`;
     
     // Get the actual day of the week (0 = Sunday, 1 = Monday, etc.)
     const actualDayOfWeek = dayDate.getDay();
@@ -319,7 +324,9 @@ async function generateSingleWeek(params: GenerateSingleWeekParams): Promise<{
 
 ${varietyContext}
 
-مهم جداً: أرجع JSON صالح فقط بهذا التركيب الدقيق:
+⚠️ مهم جداً: استخدم التواريخ المحددة بالضبط كما هو مذكور أدناه - لا تغير التواريخ!
+
+مهم جداً: أرجع JSON صالح فقط بهذا التركيب الدقيق مع التواريخ المحددة:
 
 {
   "instructions": "Week ${weekNumber} meals only - no overall plan instructions needed",
@@ -358,7 +365,10 @@ Total Period: ${period} weeks
 
 ${varietyContext}
 
-CRITICAL: Return ONLY valid JSON in this EXACT structure:
+⚠️ CRITICAL: Use EXACT dates as specified below - DO NOT change the dates!
+Week ${weekNumber} MUST include these exact dates: ${weekDays.map(d => `${d.day.name} ${d.day.date}`).join(', ')}
+
+CRITICAL: Return ONLY valid JSON in this EXACT structure with the EXACT dates provided:
 
 {
   "instructions": "Week ${weekNumber} meals only - no overall plan instructions needed",
@@ -477,6 +487,22 @@ Requirements for Week ${weekNumber}:
       throw new Error(`AI_INVALID_RESPONSE: Week ${weekNumber} must have exactly 7 days`);
     }
 
+    // Enforce correct dates: overwrite AI-generated dates with our pre-calculated ones
+    console.log(`🔧 Enforcing correct dates for Week ${weekNumber}...`);
+    for (let i = 0; i < Math.min(weekPlan.days.length, weekDays.length); i++) {
+      const expectedDay = weekDays[i];
+      const actualDay = weekPlan.days[i];
+      
+      if (actualDay.day.date !== expectedDay.day.date || actualDay.day.name !== expectedDay.day.name) {
+        console.log(`⚠️  Date mismatch detected: Expected ${expectedDay.day.name} ${expectedDay.day.date}, got ${actualDay.day.name} ${actualDay.day.date}`);
+        console.log(`🔧 Correcting to: ${expectedDay.day.name} ${expectedDay.day.date}`);
+        
+        // Overwrite with correct date and name
+        weekPlan.days[i].day.date = expectedDay.day.date;
+        weekPlan.days[i].day.name = expectedDay.day.name;
+      }
+    }
+    
     console.log(`✅ Week ${weekNumber} validated: ${weekPlan.days.length} days`);
     return weekPlan;
 
@@ -512,7 +538,12 @@ export async function generateEnhancedNutritionPlan(
     const today = new Date();
     // Reset time to start of day to ensure consistent date calculations
     today.setHours(0, 0, 0, 0);
-    const currentDateStr = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    
+    // Timezone-safe date formatting to avoid UTC shifts
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const currentDateStr = `${year}-${month}-${day}`;
     
     console.log(`🧵 Starting THREADED nutrition plan generation: ${period} weeks for ${sportName} athlete`);
     const startTime = Date.now();
@@ -604,12 +635,37 @@ export async function generateEnhancedNutritionPlan(
     
     // Combine all weeks into final plan
     const allDays = allWeeks.flat();
+    
+    // Final assembly validation
+    const expectedTotalDays = period * 7;
+    if (allDays.length !== expectedTotalDays) {
+      console.error(`❌ Final plan validation failed: Expected ${expectedTotalDays} days but got ${allDays.length} days`);
+      throw new Error(`AI_ASSEMBLY_FAILED: Expected ${expectedTotalDays} days but got ${allDays.length} days`);
+    }
+    
+    // Verify dates form a contiguous sequence starting from today
+    for (let i = 0; i < allDays.length; i++) {
+      const expectedDate = new Date(today);
+      expectedDate.setDate(today.getDate() + i);
+      
+      // Timezone-safe expected date formatting
+      const expectedYear = expectedDate.getFullYear();
+      const expectedMonth = String(expectedDate.getMonth() + 1).padStart(2, '0');
+      const expectedDay = String(expectedDate.getDate()).padStart(2, '0');
+      const expectedDateStr = `${expectedYear}-${expectedMonth}-${expectedDay}`;
+      
+      if (allDays[i].day.date !== expectedDateStr) {
+        console.error(`❌ Date sequence validation failed: Day ${i+1} expected ${expectedDateStr} but got ${allDays[i].day.date}`);
+        throw new Error(`AI_DATE_SEQUENCE_FAILED: Day ${i+1} has incorrect date ${allDays[i].day.date}, expected ${expectedDateStr}`);
+      }
+    }
+    
     const finalPlan: StructuredNutritionPlan = {
       instructions: overallInstructions,
       days: allDays
     };
     
-    console.log(`📊 Final plan: ${finalPlan.days.length} total days across ${period} weeks`);
+    console.log(`📊 Final plan validated: ${finalPlan.days.length} total days across ${period} weeks, starting from ${currentDateStr}`);
     
     return {
       plan: JSON.stringify(finalPlan)

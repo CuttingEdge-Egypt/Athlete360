@@ -79,9 +79,9 @@ export default function Home() {
     targetWeight: requiredNumber(t('validation.targetWeightRequired'), t('validation.targetWeightInvalid'), 30, 300),
     country: z.string().min(1, t('validation.countryRequired')),
     period: z.preprocess(
-      (v) => v === '' || v == null ? undefined : Number(v),
+      (v) => v === '' || v == null ? 1 : Number(v),
       z.number().int().min(1).max(52)
-    ).optional(),
+    ),
     inbodyReport: z.any().optional(),
     language: z.string().default("en")
   }), [t, i18n.language]);
@@ -112,7 +112,7 @@ export default function Home() {
       currentWeight: undefined,
       targetWeight: undefined,
       country: selectedCountry || "",
-      period: undefined,
+      period: 1,
       inbodyReport: undefined,
       language: i18n.language
     }
