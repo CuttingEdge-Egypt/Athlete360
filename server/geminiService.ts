@@ -508,12 +508,12 @@ export async function generateEnhancedNutritionPlan(
     const nationalityText = country === 'International' ? 'international' : country;
     const genderText = gender === 'Unknown' ? 'athlete' : `${age} years old ${gender}`;
     
-    // Get current date for accurate nutrition plan scheduling
-    const currentDate = new Date();
-    const currentDateStr = currentDate.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    // Get current date for accurate nutrition plan scheduling - ALWAYS start from TODAY
+    const today = new Date();
+    // Reset time to start of day to ensure consistent date calculations
+    today.setHours(0, 0, 0, 0);
+    const currentDateStr = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
     
-    console.log(`📅 DEBUG: Current date calculated as: ${currentDateStr}`);
-    console.log(`📅 DEBUG: Current date object: ${currentDate.toString()}`);
     console.log(`🧵 Starting THREADED nutrition plan generation: ${period} weeks for ${sportName} athlete`);
     const startTime = Date.now();
     
@@ -537,11 +537,10 @@ export async function generateEnhancedNutritionPlan(
         await onProgressUpdate(weekNum - 1, period);
       }
       
-      // Calculate start date for this week
-      const weekStartDate = new Date(currentDate);
-      weekStartDate.setDate(currentDate.getDate() + (weekNum - 1) * 7);
+      // Calculate start date for this week - Week 1 starts TODAY
+      const weekStartDate = new Date(today);
+      weekStartDate.setDate(today.getDate() + (weekNum - 1) * 7);
       
-      console.log(`📅 DEBUG: Week ${weekNum} start date: ${weekStartDate.toISOString().split('T')[0]} (${weekStartDate.toString()})`);
       
       // Limit context to prevent token overflow - only use last 1-2 weeks
       const recentWeeks = allWeeks.slice(-2); // Only last 2 weeks maximum
