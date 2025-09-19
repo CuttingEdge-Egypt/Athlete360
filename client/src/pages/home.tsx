@@ -1466,7 +1466,7 @@ export default function Home() {
                                   {...field}
                                   data-testid="input-nutrition-period"
                                   type="number"
-                                  placeholder="4"
+                                  placeholder=""
                                   className="bg-athlete-gray-700 border-gray-600 text-white"
                                 />
                               </FormControl>
