@@ -18,13 +18,12 @@ import { TokenModal } from "@/components/ui/token-modal";
 
 import { AnalysisPopup } from "@/components/ui/analysis-popup";
 import { AthleteComparison } from "@/components/ui/athlete-comparison";
-import { VideoAnalysisUpload } from "@/components/ui/video-analysis-upload";
 import { VideoAnalysisResults } from "@/components/ui/video-analysis-results";
 import { NutritionPlanDisplay } from "@/components/ui/nutrition-plan-display";
 import { DevelopmentPlanDisplay } from "@/components/ui/development-plan-display";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X, Video } from "lucide-react";
+import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X } from "lucide-react";
 import type { Sport, Athlete } from "@shared/schema";
 import GenerationQueue from "@/components/ui/generation-queue";
 import { CountrySelect } from "@/components/ui/country-select";
@@ -1019,7 +1018,7 @@ export default function Home() {
 
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-6xl mx-auto">
-            <TabsList className="grid w-full grid-cols-5 bg-athlete-gray-800 mb-8">
+            <TabsList className="grid w-full grid-cols-4 bg-athlete-gray-800 mb-8">
               <TabsTrigger 
                 value="analysis" 
                 data-testid="tab-analysis"
@@ -1051,14 +1050,6 @@ export default function Home() {
               >
                 <CalendarDays size={16} />
                 {t('interface.developmentPlan')}
-              </TabsTrigger>
-              <TabsTrigger 
-                value="video" 
-                data-testid="tab-video"
-                className="data-[state=active]:bg-athlete-accent flex items-center gap-2"
-              >
-                <Video size={16} />
-                Video Analysis
               </TabsTrigger>
             </TabsList>
 
@@ -1906,33 +1897,6 @@ export default function Home() {
                     />
                   </div>
                 )
-              )}
-            </TabsContent>
-
-            <TabsContent value="video" className="space-y-8">
-              {/* Video Analysis Section */}
-              {videoAnalysisData ? (
-                <div className="space-y-6">
-                  <div className="flex justify-between items-center">
-                    <h2 className="text-2xl font-bold text-white">{t('interface.videoAnalysis')}</h2>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setVideoAnalysisData(null);
-                        sessionStorage.removeItem('videoAnalysisData');
-                      }}
-                      className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white"
-                      data-testid="button-new-video-analysis"
-                    >
-                      <X className="mr-2 h-4 w-4" />
-                      Upload New Video
-                    </Button>
-                  </div>
-                  
-                  <VideoAnalysisResults analysisData={videoAnalysisData} />
-                </div>
-              ) : (
-                <VideoAnalysisUpload />
               )}
             </TabsContent>
 
