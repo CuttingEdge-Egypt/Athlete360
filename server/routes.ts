@@ -3047,8 +3047,51 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
+  // Multer error handling wrapper
+  const handleMulterError = (req: any, res: any, next: any) => {
+    upload.single('video')(req, res, (error: any) => {
+      if (error) {
+        console.error('[MULTER ERROR]', error);
+        
+        if (error instanceof multer.MulterError) {
+          if (error.code === 'LIMIT_FILE_SIZE') {
+            return res.status(413).json({ 
+              message: "File too large. Maximum file size is 100MB." 
+            });
+          }
+          if (error.code === 'LIMIT_FILE_COUNT') {
+            return res.status(400).json({ 
+              message: "Too many files uploaded." 
+            });
+          }
+          if (error.code === 'LIMIT_UNEXPECTED_FILE') {
+            return res.status(400).json({ 
+              message: "Unexpected file field." 
+            });
+          }
+          return res.status(400).json({ 
+            message: `File upload error: ${error.message}` 
+          });
+        }
+        
+        // Handle file filter errors
+        if (error.message === 'Only video files are allowed') {
+          return res.status(400).json({ 
+            message: "Invalid file type. Please upload a video file (MP4, MOV, AVI, etc.)." 
+          });
+        }
+        
+        return res.status(500).json({ 
+          message: `Upload error: ${error.message}` 
+        });
+      }
+      
+      next();
+    });
+  };
+
   // Video Analysis endpoint
-  app.post('/api/analysis/video', isAuthenticated, upload.single('video'), async (req: any, res) => {
+  app.post('/api/analysis/video', isAuthenticated, handleMulterError, async (req: any, res) => {
     const tokenCost = 200; // Video analysis costs more tokens
     const requestId = `req_${Date.now()}`;
     
