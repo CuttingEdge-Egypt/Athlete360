@@ -33,15 +33,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
       return;
     }
 
-    // Validate file size (25MB limit to match backend)
-    if (file.size > 25 * 1024 * 1024) {
-      toast({
-        title: "File Too Large",
-        description: "Video files must be under 25MB",
-        variant: "destructive",
-      });
-      return;
-    }
+    // Note: Backend now supports up to 500MB, no client-side size restriction needed
 
     setUploadedFile(file);
     toast({
@@ -260,7 +252,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
                     <p className="text-gray-400 text-sm">or click to browse</p>
                   </div>
                   <p className="text-xs text-gray-500">
-                    Supports MP4, MOV, AVI (max 25MB)
+                    Supports MP4, MOV, AVI (max 500MB)
                   </p>
                 </div>
               )}

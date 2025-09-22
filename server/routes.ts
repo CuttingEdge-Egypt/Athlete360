@@ -164,7 +164,7 @@ const upload = multer({
     }
   }),
   limits: {
-    fileSize: 25 * 1024 * 1024, // Reduced to 25MB limit to prevent memory exhaustion
+    fileSize: 500 * 1024 * 1024, // 500MB limit - generous limit since we use Files API (no memory loading)
     files: 1,
     fieldSize: 1024, // 1KB for other form fields
   },
@@ -3077,7 +3077,7 @@ Return only valid JSON with the missing fields.`;
         if (error instanceof multer.MulterError) {
           if (error.code === 'LIMIT_FILE_SIZE') {
             return res.status(413).json({ 
-              message: "File too large. Maximum file size is 25MB." 
+              message: "File too large. Maximum file size is 500MB." 
             });
           }
           if (error.code === 'LIMIT_FILE_COUNT') {
