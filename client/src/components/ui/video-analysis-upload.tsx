@@ -114,7 +114,9 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
       const response = await fetch('/api/analysis/video', {
         method: 'POST',
         body: formData,
-        credentials: 'include'
+        credentials: 'include',
+        // Set a longer timeout for video analysis (10 minutes)
+        signal: AbortSignal.timeout(600000)
       });
 
       const result = await response.json();
