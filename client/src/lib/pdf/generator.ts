@@ -304,14 +304,14 @@ const generateRankPDF = (pdf: jsPDF, data: any): number => {
           // Generate manual table for this phase's competitions
           if (phase.key_achievements && Array.isArray(phase.key_achievements) && phase.key_achievements.length > 0) {
             try {
-              console.log('Processing achievements for phase:', phase.period);
               
-              // Table configuration
+              // Table configuration - wider table that respects page borders
               const tableStartX = pdfTheme.spacing.margin + 15;
               const tableStartY = currentY;
-              const columnWidths = [20, 75, 30, 25]; // Year, Event, Result, Tier
-              const rowHeight = 10;
-              const headerHeight = 12;
+              const availableWidth = 190 - 15; // Page width minus margins and indentation 
+              const columnWidths = [18, 85, 35, 37]; // Year, Event, Result, Tier - totals 175
+              const rowHeight = 12; // Slightly taller rows
+              const headerHeight = 14;
               
               // Draw table header
               pdf.setFillColor(0, 0, 0); // Black background
@@ -340,12 +340,19 @@ const generateRankPDF = (pdf: jsPDF, data: any): number => {
               
               // Draw table rows
               phase.key_achievements.forEach((achievement: any, index: number) => {
-                const rowData = [
+                const rawRowData = [
                   String(achievement.year || ''),
-                  String(achievement.event_name || '').substring(0, 35), // Truncate long names
+                  String(achievement.event_name || ''),
                   String(achievement.result || ''),
                   String(achievement.event_tier || '')
                 ];
+                
+                // Fit text to column widths
+                const rowData = rawRowData.map((text, colIndex) => {
+                  const maxWidth = columnWidths[colIndex] - 4; // Account for padding
+                  const lines = pdf.splitTextToSize(text, maxWidth);
+                  return lines.length > 1 ? lines[0] : text; // Use first line if wrapped
+                });
                 
                 // Alternate row background
                 if (index % 2 === 1) {
@@ -362,10 +369,11 @@ const generateRankPDF = (pdf: jsPDF, data: any): number => {
                   cellX += width;
                 });
                 
-                // Add text content
+                // Add text content with proper positioning
                 let textX = tableStartX + 2;
                 rowData.forEach((text, colIndex) => {
-                  pdf.text(text, textX, currentRowY + 7);
+                  // Center text vertically in cell
+                  pdf.text(text, textX, currentRowY + (rowHeight / 2) + 2);
                   textX += columnWidths[colIndex];
                 });
                 
@@ -378,7 +386,6 @@ const generateRankPDF = (pdf: jsPDF, data: any): number => {
               pdf.rect(tableStartX, tableStartY, columnWidths.reduce((a, b) => a + b, 0), headerHeight + (phase.key_achievements.length * rowHeight));
               
               currentY = currentRowY + 5;
-              console.log('Manual table generated successfully for phase:', phase.period);
               
             } catch (tableError) {
               console.error('Manual table generation error:', tableError);
@@ -386,7 +393,6 @@ const generateRankPDF = (pdf: jsPDF, data: any): number => {
               currentY += 5;
             }
           } else {
-            console.log('No key_achievements found for phase:', phase.period);
             currentY = addText(pdf, '• No competitions recorded for this phase', currentY, { indent: 15 });
             currentY += 5;
           }
