@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { RankChart } from "./rank-chart";
 import { Download, Share2, User, Trophy, Star, AlertTriangle, Calendar, Swords, Video, Award, TrendingUp, Clock, Target, PlayCircle, Zap, Shield, CheckCircle, BarChart, Medal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface AnalysisResultProps {
   type: string;
@@ -56,12 +58,80 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     }
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     toast({
       title: "Export Started",
       description: "Your PDF export is being generated...",
     });
-    // TODO: Implement actual PDF export using react-pdf or similar
+
+    try {
+      // Find the card content to export
+      const element = document.querySelector(`[data-testid="analysis-content-${type}"]`) as HTMLElement;
+      if (!element) {
+        toast({
+          title: "Export Error",
+          description: "Could not find content to export",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Create canvas from the content
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#1f2937', // Match our dark theme
+      });
+
+      // Create PDF
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      // Calculate dimensions to fit the content properly
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 295; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+
+      let position = 0;
+
+      // Add the first page
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Add additional pages if content is longer than one page
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Generate filename based on type and current date
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0];
+      const filename = `${getTitle(type).replace(/\s+/g, '_')}_${dateStr}.pdf`;
+
+      // Save the PDF
+      pdf.save(filename);
+
+      toast({
+        title: "Export Successful",
+        description: `PDF has been downloaded as ${filename}`,
+      });
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast({
+        title: "Export Failed",
+        description: "There was an error generating the PDF. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleShare = () => {
@@ -1158,7 +1228,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
           </Badge>
         )}
       </CardHeader>
-      <CardContent>
+      <CardContent data-testid={`analysis-content-${type}`}>
         {renderAnalysisContent()}
       </CardContent>
     </Card>
