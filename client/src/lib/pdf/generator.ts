@@ -305,17 +305,50 @@ const generateRankPDF = (pdf: jsPDF, data: any): number => {
           if (phase.key_achievements && Array.isArray(phase.key_achievements) && phase.key_achievements.length > 0) {
             try {
               
-              // Table configuration - wider table that respects page borders
-              const tableStartX = pdfTheme.spacing.margin + 15;
-              const tableStartY = currentY;
-              const availableWidth = 190 - 15; // Page width minus margins and indentation 
+              // Table configuration - centered table that respects page borders
               const columnWidths = [18, 85, 35, 37]; // Year, Event, Result, Tier - totals 175
+              const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
+              const pageWidth = pdfTheme.layout.pageWidth;
+              const tableStartX = (pageWidth - tableWidth) / 2; // Center the table
+              const tableStartY = currentY;
               const rowHeight = 12; // Slightly taller rows
               const headerHeight = 14;
               
+              // Check if table will fit on current page, if not create new page
+              const tableHeight = headerHeight + (phase.key_achievements.length * rowHeight);
+              const remainingPageSpace = pdfTheme.layout.pageHeight - currentY - pdfTheme.spacing.margin;
+              
+              let actualTableStartY = tableStartY;
+              
+              if (tableHeight > remainingPageSpace) {
+                pdf.addPage();
+                
+                // Draw page border on new page
+                pdf.setDrawColor(pdfTheme.colors.primary);
+                pdf.setLineWidth(pdfTheme.layout.borderWidth);
+                pdf.rect(
+                  pdfTheme.spacing.margin, 
+                  pdfTheme.spacing.margin, 
+                  pdfTheme.layout.pageWidth - (pdfTheme.spacing.margin * 2), 
+                  pdfTheme.layout.pageHeight - (pdfTheme.spacing.margin * 2)
+                );
+                
+                currentY = 40; // Start near top of new page
+                actualTableStartY = currentY;
+                
+                // Re-add phase header on new page
+                currentY = addText(pdf, `${phase.period}: ${phase.phase_name}`, currentY, { 
+                  weight: 'bold', 
+                  fontSize: pdfTheme.fonts.sizes.subheader,
+                  indent: 10,
+                  extraSpacing: 3
+                });
+                actualTableStartY = currentY;
+              }
+              
               // Draw table header
               pdf.setFillColor(0, 0, 0); // Black background
-              pdf.rect(tableStartX, tableStartY, columnWidths.reduce((a, b) => a + b, 0), headerHeight, 'F');
+              pdf.rect(tableStartX, actualTableStartY, columnWidths.reduce((a, b) => a + b, 0), headerHeight, 'F');
               
               // Header text
               pdf.setTextColor(255, 255, 255); // White text
@@ -323,20 +356,20 @@ const generateRankPDF = (pdf: jsPDF, data: any): number => {
               pdf.setFontSize(9);
               
               let headerX = tableStartX + 2;
-              pdf.text('Year', headerX, tableStartY + 8);
+              pdf.text('Year', headerX, actualTableStartY + 8);
               headerX += columnWidths[0];
-              pdf.text('Event', headerX, tableStartY + 8);
+              pdf.text('Event', headerX, actualTableStartY + 8);
               headerX += columnWidths[1];
-              pdf.text('Result', headerX, tableStartY + 8);
+              pdf.text('Result', headerX, actualTableStartY + 8);
               headerX += columnWidths[2];
-              pdf.text('Tier', headerX, tableStartY + 8);
+              pdf.text('Tier', headerX, actualTableStartY + 8);
               
               // Reset text color for table content
               pdf.setTextColor(0, 0, 0);
               pdf.setFont(pdfTheme.fonts.primary, 'normal');
               pdf.setFontSize(8);
               
-              let currentRowY = tableStartY + headerHeight;
+              let currentRowY = actualTableStartY + headerHeight;
               
               // Draw table rows
               phase.key_achievements.forEach((achievement: any, index: number) => {
@@ -383,12 +416,11 @@ const generateRankPDF = (pdf: jsPDF, data: any): number => {
               // Draw table border
               pdf.setDrawColor(0, 0, 0);
               pdf.setLineWidth(0.5);
-              pdf.rect(tableStartX, tableStartY, columnWidths.reduce((a, b) => a + b, 0), headerHeight + (phase.key_achievements.length * rowHeight));
+              pdf.rect(tableStartX, actualTableStartY, columnWidths.reduce((a, b) => a + b, 0), headerHeight + (phase.key_achievements.length * rowHeight));
               
               currentY = currentRowY + 5;
               
             } catch (tableError) {
-              console.error('Manual table generation error:', tableError);
               currentY = addText(pdf, `• Competition data for ${phase.period} could not be displayed`, currentY, { indent: 15 });
               currentY += 5;
             }
