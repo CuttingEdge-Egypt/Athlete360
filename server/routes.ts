@@ -1,6 +1,8 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import bodyParser from "body-parser";
+import path from "path";
+import fs from "fs";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { setupLocalAuth, isAuthenticatedUniversal } from "./localAuth";
@@ -144,17 +146,36 @@ function generatePaymentResultHTML(data: PaymentResultData): string {
 // All LLM implementations now use GPT-5 with temperature 1.0 (default minimum)
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// Configure multer for video file uploads
+// Configure multer for video file uploads with disk storage
 const upload = multer({
-  storage: multer.memoryStorage(),
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      const uploadPath = path.join(process.cwd(), 'temp', 'uploads');
+      // Ensure directory exists
+      if (!fs.existsSync(uploadPath)) {
+        fs.mkdirSync(uploadPath, { recursive: true });
+      }
+      cb(null, uploadPath);
+    },
+    filename: (req, file, cb) => {
+      // Generate unique filename with timestamp and random string
+      const uniqueName = `video_${Date.now()}_${Math.random().toString(36).substring(7)}.${file.originalname.split('.').pop()}`;
+      cb(null, uniqueName);
+    }
+  }),
   limits: {
-    fileSize: 100 * 1024 * 1024, // 100MB limit
+    fileSize: 25 * 1024 * 1024, // Reduced to 25MB limit to prevent memory exhaustion
+    files: 1,
+    fieldSize: 1024, // 1KB for other form fields
   },
   fileFilter: (req, file, cb) => {
+    console.log(`[MULTER] Processing file: ${file.originalname}, MIME type: ${file.mimetype}, Size: ${file.size || 'unknown'}`);
+    
     // Accept video files
     if (file.mimetype.startsWith('video/')) {
       cb(null, true);
     } else {
+      console.log(`[MULTER] Rejected file: ${file.originalname} - Invalid MIME type: ${file.mimetype}`);
       cb(new Error('Only video files are allowed'));
     }
   }
@@ -3056,7 +3077,7 @@ Return only valid JSON with the missing fields.`;
         if (error instanceof multer.MulterError) {
           if (error.code === 'LIMIT_FILE_SIZE') {
             return res.status(413).json({ 
-              message: "File too large. Maximum file size is 100MB." 
+              message: "File too large. Maximum file size is 25MB." 
             });
           }
           if (error.code === 'LIMIT_FILE_COUNT') {
