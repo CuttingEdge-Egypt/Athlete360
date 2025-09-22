@@ -3260,16 +3260,6 @@ Return only valid JSON with the missing fields.`;
           }
         }
       }
-    } catch (error) {
-      console.error(`[VIDEO ROUTE ${requestId}] Unhandled error in video processing:`, error);
-      if (!res.headersSent) {
-        res.status(500).json({ 
-          message: "Internal server error during video analysis",
-          error: error instanceof Error ? error.message : String(error),
-          requestId
-        });
-      }
-    }
   });
 
   // Dev Admin Middleware
