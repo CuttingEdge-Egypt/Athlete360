@@ -44,7 +44,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 // Remove unused import
@@ -1064,52 +1063,17 @@ export function AnalysisPopup({
     });
 
     try {
-      // Find the dialog content to export
-      const element = document.querySelector(`[data-testid="popup-analysis-content-${type}"]`) as HTMLElement;
-      if (!element) {
-        toast({
-          title: "Export Error",
-          description: "Could not find content to export",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Create canvas from the content
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#1f2937', // Match our dark theme
-      });
-
-      // Create PDF
-      const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
       });
 
-      // Calculate dimensions to fit the content properly
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 295; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-
-      let position = 0;
-
-      // Add the first page
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      // Add additional pages if content is longer than one page
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
+      // Parse the analysis data
+      const parsedData = parseAnalysisData(data);
+      
+      // Generate PDF content based on analysis type
+      await generatePDFContent(pdf, type, parsedData, createdAt, athleteName);
 
       // Generate filename based on type, athlete name and current date
       const now = new Date();
@@ -1134,6 +1098,447 @@ export function AnalysisPopup({
     } finally {
       setIsExporting(false);
     }
+  };
+
+  // Helper function to generate PDF content based on analysis type
+  const generatePDFContent = async (pdf: jsPDF, analysisType: string, data: any, createdAt?: string, athleteName?: string) => {
+    const pageWidth = 210;
+    const pageHeight = 297;
+    const margin = 20;
+    const maxWidth = pageWidth - (margin * 2);
+    let currentY = margin;
+
+    // Helper function to add text with automatic page breaks
+    const addText = (text: string, x: number, y: number, options: any = {}) => {
+      const lines = pdf.splitTextToSize(text, maxWidth - x + margin);
+      
+      for (let i = 0; i < lines.length; i++) {
+        if (currentY > pageHeight - margin) {
+          pdf.addPage();
+          currentY = margin;
+        }
+        
+        pdf.text(lines[i], x, currentY);
+        currentY += options.lineHeight || 7;
+      }
+      
+      return currentY;
+    };
+
+    // Add header
+    pdf.setFontSize(20);
+    pdf.setFont('helvetica', 'bold');
+    currentY = addText(getTitle(analysisType), margin, currentY, { lineHeight: 10 });
+    
+    // Add athlete name if available
+    if (athleteName) {
+      pdf.setFontSize(16);
+      pdf.setFont('helvetica', 'normal');
+      currentY = addText(`Athlete: ${athleteName}`, margin, currentY + 5, { lineHeight: 8 });
+    }
+    
+    // Add generation date
+    if (createdAt) {
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      currentY = addText(`Generated on: ${new Date(createdAt).toLocaleDateString()}`, margin, currentY + 3, { lineHeight: 7 });
+    }
+    
+    currentY += 15;
+
+    // Generate content based on analysis type
+    switch (analysisType) {
+      case 'bio':
+        await generateBioPDF(pdf, data, addText, margin, currentY);
+        break;
+      case 'rank':
+        await generateRankPDF(pdf, data, addText, margin, currentY);
+        break;
+      case 'strengths':
+        await generateStrengthsPDF(pdf, data, addText, margin, currentY);
+        break;
+      case 'weaknesses':
+        await generateWeaknessesPDF(pdf, data, addText, margin, currentY);
+        break;
+      case 'development':
+      case 'development-plan':
+        await generateDevelopmentPDF(pdf, data, addText, margin, currentY);
+        break;
+      case 'nutrition':
+      case 'nutrition-plan':
+        await generateNutritionPDF(pdf, data, addText, margin, currentY);
+        break;
+      case 'beat':
+      case 'beat-strategies':
+        await generateBeatStrategiesPDF(pdf, data, addText, margin, currentY);
+        break;
+      default:
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'normal');
+        addText('Analysis data not available for PDF export.', margin, currentY);
+    }
+  };
+
+  // Bio analysis PDF generation (same as in analysis-result.tsx)
+  const generateBioPDF = async (pdf: jsPDF, data: any, addText: Function, margin: number, startY: number) => {
+    let currentY = startY;
+    
+    let bioData = data.data;
+    
+    if (typeof bioData === 'string') {
+      try {
+        bioData = JSON.parse(bioData);
+      } catch (e) {
+        bioData = { bio: bioData };
+      }
+    }
+
+    if (!bioData || typeof bioData !== 'object') {
+      bioData = { bio: "Analysis data could not be parsed properly" };
+    }
+
+    const name = bioData.name || "Athlete Profile";
+    const bio = bioData.bio || "";
+    const playersStory = bioData.playersStory || "";
+    const achievements = Array.isArray(bioData.achievements) ? bioData.achievements : [];
+    const recentNews = bioData.personalInfo?.recentNews || bioData.recentNews || [];
+
+    // Parse bio sections
+    const parseBioSections = (bioText: string) => {
+      if (!bioText) return {};
+      
+      const sections: any = {};
+      
+      const introMatch = bioText.match(/^(.*?)\n\n/);
+      if (introMatch) {
+        sections.introduction = introMatch[1].trim();
+      }
+      
+      const storyMatch = bioText.match(/Players' overall story and what they're known for[\s\S]*?\n\n([\s\S]*?)(?:\n\n|$)/);
+      if (storyMatch) {
+        sections.overallStory = storyMatch[1].trim();
+      } else {
+        const parts = bioText.split('\n\n');
+        if (parts.length > 1) {
+          sections.overallStory = parts.slice(1, -1).join('\n\n');
+        }
+      }
+      
+      const careerMatch = bioText.match(/career record|rankings|record/i);
+      if (careerMatch) {
+        const careerText = bioText.substring(careerMatch.index || 0);
+        const endMatch = careerText.match(/\n\n/);
+        sections.careerRecord = endMatch ? careerText.substring(0, endMatch.index) : careerText;
+      }
+      
+      return sections;
+    };
+
+    const bioSections = parseBioSections(bio);
+
+    // Introduction
+    if (bioSections.introduction) {
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      currentY = addText("Introduction", margin, currentY, { lineHeight: 8 });
+      currentY += 3;
+      
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      currentY = addText(bioSections.introduction, margin, currentY, { lineHeight: 6 });
+      currentY += 8;
+    }
+
+    // Player's Story
+    const storyText = playersStory && playersStory.trim() ? playersStory : bioSections.overallStory;
+    if (storyText) {
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      currentY = addText("Player's Story", margin, currentY, { lineHeight: 8 });
+      currentY += 3;
+      
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      currentY = addText(storyText, margin, currentY, { lineHeight: 6 });
+      currentY += 8;
+    }
+
+    // Career Record
+    if (bioSections.careerRecord) {
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      currentY = addText("Career Record and Rankings", margin, currentY, { lineHeight: 8 });
+      currentY += 3;
+      
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      currentY = addText(bioSections.careerRecord, margin, currentY, { lineHeight: 6 });
+      currentY += 8;
+    }
+
+    // Achievements
+    if (achievements.length > 0) {
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      currentY = addText("Notable Achievements", margin, currentY, { lineHeight: 8 });
+      currentY += 3;
+      
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      
+      achievements.forEach((achievementObj: any) => {
+        const text = achievementObj?.achievement || '';
+        const medal = achievementObj?.medal || 'Participation';
+        
+        if (text) {
+          currentY = addText(`• ${medal}: ${text}`, margin + 5, currentY, { lineHeight: 6 });
+          currentY += 2;
+        }
+      });
+      currentY += 5;
+    }
+
+    // Recent Competitions
+    if (recentNews.length > 0) {
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      currentY = addText("Recent Competitions (2024-2025)", margin, currentY, { lineHeight: 8 });
+      currentY += 3;
+      
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      
+      recentNews.forEach((newsItem: string) => {
+        currentY = addText(`• ${newsItem}`, margin + 5, currentY, { lineHeight: 6 });
+        currentY += 2;
+      });
+    }
+  };
+
+  // Additional PDF generation functions for other analysis types
+  const generateRankPDF = async (pdf: jsPDF, data: any, addText: Function, margin: number, startY: number) => {
+    let currentY = startY;
+    
+    let athlete, rankingProgression, careerSummary;
+    
+    if (data.athlete && data.rankingProgression !== undefined && data.careerSummary) {
+      athlete = data.athlete;
+      rankingProgression = data.rankingProgression;
+      careerSummary = data.careerSummary;
+    } else if (data.currentRank || data.peakRank || data.history) {
+      athlete = {
+        name: 'Unknown Athlete',
+        currentRanking: data.currentRank,
+        peakRanking: data.peakRank,
+        officialRecord: data.competitionRecord || 'N/A'
+      };
+      rankingProgression = data.history || [];
+      careerSummary = {
+        totalCompetitions: 'N/A',
+        majorTitles: 'N/A',
+        rankingTrend: 'N/A',
+        notableAchievements: data.recommendations || []
+      };
+    } else {
+      currentY = addText("Ranking data not available for PDF export.", margin, currentY);
+      return;
+    }
+
+    // Career Overview
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    currentY = addText("Career Overview", margin, currentY, { lineHeight: 8 });
+    currentY += 5;
+    
+    pdf.setFontSize(11);
+    pdf.setFont('helvetica', 'normal');
+    currentY = addText(`Current Rank: ${athlete.currentRanking || 'N/A'}`, margin, currentY, { lineHeight: 6 });
+    currentY = addText(`Peak Rank: ${athlete.peakRanking || 'N/A'}`, margin, currentY, { lineHeight: 6 });
+    currentY = addText(`Official Record: ${athlete.officialRecord || 'N/A'}`, margin, currentY, { lineHeight: 6 });
+    currentY = addText(`Total Competitions: ${careerSummary.totalCompetitions || 'N/A'}`, margin, currentY, { lineHeight: 6 });
+    currentY += 8;
+
+    // Ranking Progression
+    if (rankingProgression && rankingProgression.length > 0) {
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      currentY = addText("Ranking Progression", margin, currentY, { lineHeight: 8 });
+      currentY += 3;
+      
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      
+      rankingProgression.forEach((entry: any) => {
+        const competition = entry.competition || entry.tournament || 'Event';
+        const date = entry.date || entry.month || 'Date unknown';
+        const result = entry.result || entry.placement || 'Result unknown';
+        const ranking = entry.ranking || entry.rank || 'N/A';
+        
+        currentY = addText(`• ${competition} (${date})`, margin + 5, currentY, { lineHeight: 6 });
+        currentY = addText(`  Result: ${result} | Rank: #${ranking}`, margin + 10, currentY, { lineHeight: 6 });
+        currentY += 2;
+      });
+      currentY += 5;
+    }
+
+    // Career Summary
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    currentY = addText("Career Summary", margin, currentY, { lineHeight: 8 });
+    currentY += 3;
+    
+    pdf.setFontSize(11);
+    pdf.setFont('helvetica', 'normal');
+    currentY = addText(`Major Titles: ${careerSummary.majorTitles || 'N/A'}`, margin, currentY, { lineHeight: 6 });
+    currentY = addText(`Ranking Trend: ${careerSummary.rankingTrend || 'N/A'}`, margin, currentY, { lineHeight: 6 });
+    currentY = addText(`Current Form: ${careerSummary.currentForm || 'N/A'}`, margin, currentY, { lineHeight: 6 });
+    
+    // Notable Achievements
+    if (careerSummary.notableAchievements && careerSummary.notableAchievements.length > 0) {
+      currentY += 8;
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      currentY = addText("Notable Achievements", margin, currentY, { lineHeight: 8 });
+      currentY += 3;
+      
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      
+      careerSummary.notableAchievements.forEach((achievement: string) => {
+        currentY = addText(`• ${achievement}`, margin + 5, currentY, { lineHeight: 6 });
+        currentY += 2;
+      });
+    }
+  };
+
+  const generateStrengthsPDF = async (pdf: jsPDF, data: any, addText: Function, margin: number, startY: number) => {
+    let currentY = startY;
+    
+    let strengths: any[] = [];
+    
+    if (data.strengths && Array.isArray(data.strengths)) {
+      strengths = data.strengths;
+    } else if (typeof data === 'string') {
+      try {
+        const parsed = JSON.parse(data);
+        strengths = parsed.strengths || [];
+      } catch (e) {
+        currentY = addText("Could not parse strengths data for PDF export.", margin, currentY);
+        return;
+      }
+    }
+
+    if (strengths.length === 0) {
+      currentY = addText("No strengths data available for PDF export.", margin, currentY);
+      return;
+    }
+
+    strengths.forEach((strength: any, index: number) => {
+      // Strength title
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      currentY = addText(`${index + 1}. ${strength.title}`, margin, currentY, { lineHeight: 7 });
+      
+      // Rating and category
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      const ratingText = `Rating: ${strength.rating || 'N/A'}/100 | Category: ${strength.category || 'N/A'}`;
+      currentY = addText(ratingText, margin + 5, currentY, { lineHeight: 6 });
+      currentY += 2;
+      
+      // Description
+      if (strength.description) {
+        pdf.setFontSize(11);
+        pdf.setFont('helvetica', 'normal');
+        currentY = addText(strength.description, margin + 5, currentY, { lineHeight: 6 });
+        currentY += 3;
+      }
+      
+      // Evidence
+      if (strength.evidence) {
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'italic');
+        currentY = addText(`Evidence: ${strength.evidence}`, margin + 5, currentY, { lineHeight: 6 });
+        currentY += 5;
+      }
+    });
+  };
+
+  const generateWeaknessesPDF = async (pdf: jsPDF, data: any, addText: Function, margin: number, startY: number) => {
+    let currentY = startY;
+    
+    let weaknesses: any[] = [];
+    
+    if (data.weaknesses && Array.isArray(data.weaknesses)) {
+      weaknesses = data.weaknesses;
+    } else if (typeof data === 'string') {
+      try {
+        const parsed = JSON.parse(data);
+        weaknesses = parsed.weaknesses || [];
+      } catch (e) {
+        currentY = addText("Could not parse weaknesses data for PDF export.", margin, currentY);
+        return;
+      }
+    }
+
+    if (weaknesses.length === 0) {
+      currentY = addText("No weaknesses data available for PDF export.", margin, currentY);
+      return;
+    }
+
+    weaknesses.forEach((weakness: any, index: number) => {
+      // Weakness title
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      currentY = addText(`${index + 1}. ${weakness.title}`, margin, currentY, { lineHeight: 7 });
+      
+      // Severity and category
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      const severityText = `Severity: ${weakness.severity || 'N/A'}/100 | Category: ${weakness.category || 'N/A'}`;
+      currentY = addText(severityText, margin + 5, currentY, { lineHeight: 6 });
+      currentY += 2;
+      
+      // Description
+      if (weakness.description) {
+        pdf.setFontSize(11);
+        pdf.setFont('helvetica', 'normal');
+        currentY = addText(weakness.description, margin + 5, currentY, { lineHeight: 6 });
+        currentY += 3;
+      }
+      
+      // Evidence
+      if (weakness.evidence) {
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'italic');
+        currentY = addText(`Evidence: ${weakness.evidence}`, margin + 5, currentY, { lineHeight: 6 });
+        currentY += 5;
+      }
+    });
+  };
+
+  const generateDevelopmentPDF = async (pdf: jsPDF, data: any, addText: Function, margin: number, startY: number) => {
+    let currentY = startY;
+    
+    pdf.setFontSize(11);
+    pdf.setFont('helvetica', 'normal');
+    currentY = addText("Development plan content would be formatted here based on the specific data structure.", margin, currentY, { lineHeight: 6 });
+  };
+
+  const generateNutritionPDF = async (pdf: jsPDF, data: any, addText: Function, margin: number, startY: number) => {
+    let currentY = startY;
+    
+    pdf.setFontSize(11);
+    pdf.setFont('helvetica', 'normal');
+    currentY = addText("Nutrition plan content would be formatted here based on the specific data structure.", margin, currentY, { lineHeight: 6 });
+  };
+
+  const generateBeatStrategiesPDF = async (pdf: jsPDF, data: any, addText: Function, margin: number, startY: number) => {
+    let currentY = startY;
+    
+    pdf.setFontSize(11);
+    pdf.setFont('helvetica', 'normal');
+    currentY = addText("Beat strategies content would be formatted here based on the specific data structure.", margin, currentY, { lineHeight: 6 });
   };
 
   const handleShare = () => {
