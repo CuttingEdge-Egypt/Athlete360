@@ -100,25 +100,65 @@ function cleanJsonResponse(responseText: string): string {
   return '{"players": []}';
 }
 
-// Process video with Gemini using base64 encoding (working approach)
+// Upload video file to Gemini using Files API to avoid memory issues
+async function uploadFileToGemini(videoFilePath: string) {
+  console.log(`[UPLOAD_TO_GEMINI] Starting file upload: ${videoFilePath}`);
+  
+  try {
+    // Import GoogleGenerativeAI inside the function to avoid import issues
+    const { GoogleGenerativeAI, GoogleAIFileManager } = require('@google/generative-ai');
+    
+    const fileManager = new GoogleAIFileManager(process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY);
+    
+    // Upload the file
+    const uploadResponse = await fileManager.uploadFile(videoFilePath, {
+      mimeType: 'video/mp4',
+      displayName: `video_analysis_${Date.now()}`,
+    });
+    
+    console.log(`[UPLOAD_TO_GEMINI] File uploaded successfully: ${uploadResponse.file.uri}`);
+    
+    // Wait for processing to complete
+    let file = await fileManager.getFile(uploadResponse.file.name);
+    while (file.state === 'PROCESSING') {
+      console.log(`[UPLOAD_TO_GEMINI] File still processing, waiting...`);
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      file = await fileManager.getFile(uploadResponse.file.name);
+    }
+    
+    if (file.state === 'FAILED') {
+      throw new Error(`File processing failed: ${file.error?.message || 'Unknown error'}`);
+    }
+    
+    console.log(`[UPLOAD_TO_GEMINI] File ready for analysis: ${file.uri}`);
+    return file;
+    
+  } catch (error) {
+    console.error(`[UPLOAD_TO_GEMINI] Upload failed:`, error);
+    throw error;
+  }
+}
+
+// Process video with Gemini using Files API (memory-efficient approach)
 export async function processVideoGemini(videoFilePath: string, roundToAnalyze: number) {
   console.log(`[PROCESS_VIDEO_GEMINI] Starting video analysis for round ${roundToAnalyze}`);
   console.log(`[PROCESS_VIDEO_GEMINI] Video file: ${videoFilePath}`);
   
+  let uploadedFile = null;
+  
   try {
-    // Read video file and convert to base64 for Gemini API
-    console.log(`[PROCESS_VIDEO_GEMINI] Reading video file...`);
-    const videoBuffer = fs.readFileSync(videoFilePath);
-    const videoBase64 = videoBuffer.toString('base64');
+    // Upload file to Gemini without loading into memory
+    console.log(`[PROCESS_VIDEO_GEMINI] Uploading video file to Gemini...`);
+    uploadedFile = await uploadFileToGemini(videoFilePath);
     
-    const videoData = {
-      inlineData: {
-        data: videoBase64,
-        mimeType: "video/mp4"
+    const videoFile = {
+      fileData: {
+        mimeType: uploadedFile.mimeType,
+        fileUri: uploadedFile.uri
       }
     };
     
-    console.log(`[PROCESS_VIDEO_GEMINI] Video prepared (${videoBase64.length} chars base64)`);
+    console.log(`[PROCESS_VIDEO_GEMINI] Video ready for analysis: ${uploadedFile.uri}`);
     console.log(`[PROCESS_VIDEO_GEMINI] Starting 5 analysis calls...`);
 
     // Define prompts for each analysis type
@@ -306,11 +346,11 @@ Return Time in Minutes and Seconds: MM:SS`;
     });
     
     const [responseMatch, responseScore, responsePunch, responseKickNo, responseYellowCards] = await Promise.all([
-      textModel.generateContent([videoData, promptMatch]),
-      jsonModel.generateContent([videoData, promptScore]),
-      jsonModel.generateContent([videoData, promptPunch]),
-      jsonModel.generateContent([videoData, promptKickNo]),
-      jsonModel.generateContent([videoData, promptYellowCards])
+      textModel.generateContent([videoFile, promptMatch]),
+      jsonModel.generateContent([videoFile, promptScore]),
+      jsonModel.generateContent([videoFile, promptPunch]),
+      jsonModel.generateContent([videoFile, promptKickNo]),
+      jsonModel.generateContent([videoFile, promptYellowCards])
     ]);
 
     console.log(`[PROCESS_VIDEO_GEMINI] All 5 analysis calls completed`);
@@ -350,6 +390,19 @@ Return Time in Minutes and Seconds: MM:SS`;
   } catch (error) {
     console.error(`[PROCESS_VIDEO_GEMINI] Error:`, error);
     throw error;
+  } finally {
+    // Clean up uploaded file from Gemini
+    if (uploadedFile) {
+      try {
+        console.log(`[PROCESS_VIDEO_GEMINI] Cleaning up uploaded file: ${uploadedFile.uri}`);
+        const { GoogleAIFileManager } = require('@google/generative-ai');
+        const fileManager = new GoogleAIFileManager(process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY);
+        await fileManager.deleteFile(uploadedFile.name);
+        console.log(`[PROCESS_VIDEO_GEMINI] Uploaded file cleaned up successfully`);
+      } catch (cleanupError) {
+        console.warn(`[PROCESS_VIDEO_GEMINI] Failed to cleanup uploaded file:`, cleanupError);
+      }
+    }
   }
 }
 
