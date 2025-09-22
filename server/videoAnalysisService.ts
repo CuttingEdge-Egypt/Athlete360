@@ -355,32 +355,23 @@ Return Time in Minutes and Seconds: MM:SS`;
 
 // Main function that matches the Python API pattern
 export async function analyzeVideoFile(
-  videoBuffer: Buffer,
+  videoFilePath: string,
   filename: string,
   roundToAnalyze: number
 ) {
-  console.log(`[ANALYZE_VIDEO_FILE] Starting video analysis for ${filename} (${videoBuffer.length} bytes)`);
+  console.log(`[ANALYZE_VIDEO_FILE] Starting video analysis for ${filename} at ${videoFilePath}`);
   console.log(`[ANALYZE_VIDEO_FILE] Round: ${roundToAnalyze}`);
   
-  let tempFilePath = null;
+  if (!fs.existsSync(videoFilePath)) {
+    throw new Error(`Video file not found: ${videoFilePath}`);
+  }
+  
+  const fileStats = fs.statSync(videoFilePath);
+  console.log(`[ANALYZE_VIDEO_FILE] Video file size: ${fileStats.size} bytes`);
+  
   let videoFile = null;
 
   try {
-    // Save the uploaded video file temporarily (like Python)
-    const tempDir = path.join(process.cwd(), 'temp');
-    if (!fs.existsSync(tempDir)) {
-      console.log(`[ANALYZE_VIDEO_FILE] Creating temp directory: ${tempDir}`);
-      fs.mkdirSync(tempDir, { recursive: true });
-    }
-
-    // Create unique filename like Python uuid.uuid4()
-    const uuid = `video_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    tempFilePath = path.join(tempDir, `${uuid}.mp4`);
-    
-    console.log(`[ANALYZE_VIDEO_FILE] Saving video to: ${tempFilePath}`);
-    fs.writeFileSync(tempFilePath, videoBuffer);
-    console.log(`[ANALYZE_VIDEO_FILE] Video saved successfully, size: ${fs.statSync(tempFilePath).size} bytes`);
-
     // Send the video and round number to Gemini for processing (like Python)
     console.log(`[ANALYZE_VIDEO_FILE] Calling processVideoGemini...`);
     const [
@@ -390,7 +381,7 @@ export async function analyzeVideoFile(
       responsePunch,
       responseKickNo,
       responseYellowCards
-    ] = await processVideoGemini(tempFilePath, roundToAnalyze);
+    ] = await processVideoGemini(videoFilePath, roundToAnalyze);
 
     videoFile = uploadedVideoFile;
 
@@ -413,17 +404,8 @@ export async function analyzeVideoFile(
     throw new Error(`Video analysis failed: ${error instanceof Error ? error.message : String(error)}`);
 
   } finally {
-    // Clean up the temporary local file (like Python)
-    if (tempFilePath && fs.existsSync(tempFilePath)) {
-      try {
-        fs.unlinkSync(tempFilePath);
-        console.log(`[ANALYZE_VIDEO_FILE] Cleaned up temporary file: ${tempFilePath}`);
-      } catch (cleanupError) {
-        console.warn(`[ANALYZE_VIDEO_FILE] Failed to cleanup temp file:`, cleanupError);
-      }
-    }
-
-    // No need to delete file from Gemini storage since we use base64 approach
-    console.log(`[ANALYZE_VIDEO_FILE] Cleanup complete`);
+    // Note: File cleanup is handled by the route handler
+    // since we're using the original multer file path
+    console.log(`[ANALYZE_VIDEO_FILE] Analysis complete`);
   }
 }
