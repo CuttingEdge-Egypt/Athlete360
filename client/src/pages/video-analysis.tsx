@@ -6,7 +6,7 @@ import { useLocation } from "wouter";
 
 export default function VideoAnalysis() {
   const [historyAnalysisData, setHistoryAnalysisData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Start with loading true to prevent flash
   const [hasError, setHasError] = useState(false);
   const [location] = useLocation();
   const [isInitialized, setIsInitialized] = useState(false);
@@ -25,11 +25,11 @@ export default function VideoAnalysis() {
     
     const loadData = async () => {
       try {
-        // Only show loading if not already initialized
-        if (!isInitialized) {
+        // Always show loading initially to prevent flash
+        if (isMounted) {
           setIsLoading(true);
+          setHasError(false);
         }
-        setHasError(false);
         
         // Check URL parameters for history data first
         const urlParams = new URLSearchParams(window.location.search);
@@ -87,10 +87,15 @@ export default function VideoAnalysis() {
           }
         }
 
-        // Mark as initialized and stop loading immediately
+        // Mark as initialized and stop loading with small delay to prevent flash
         if (isMounted) {
-          setIsLoading(false);
-          setIsInitialized(true);
+          // Small delay to ensure smooth transition
+          setTimeout(() => {
+            if (isMounted) {
+              setIsLoading(false);
+              setIsInitialized(true);
+            }
+          }, 100);
         }
       } catch (error) {
         // Log quietly in development only
@@ -100,6 +105,7 @@ export default function VideoAnalysis() {
         if (isMounted) {
           setHasError(true);
           setIsLoading(false);
+          setIsInitialized(true);
         }
       }
     };

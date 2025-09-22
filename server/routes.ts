@@ -3180,6 +3180,10 @@ Return only valid JSON with the missing fields.`;
         const analysisStartTime = Date.now();
         
         // Process video with Gemini using file path instead of buffer
+        if (!videoFilePath) {
+          throw new Error('Video file path is not available');
+        }
+        
         const analysisResults = await analyzeVideoFile(
           videoFilePath, // Use file path instead of buffer
           req.file.originalname,
@@ -3215,7 +3219,7 @@ Return only valid JSON with the missing fields.`;
         try {
           console.log(`[ROUTE ${requestId}] Saving error log to database...`);
           await storage.createAnalysisLog({
-            userId,
+            userId: req.user.claims.sub,
             athleteId: null,
             serviceType: "video",
             resultData: {
