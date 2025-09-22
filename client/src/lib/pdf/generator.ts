@@ -92,12 +92,12 @@ const addFooter = (pdf: jsPDF, pageNum: number) => {
 const addSectionHeader = (pdf: jsPDF, title: string, currentY: number): number => {
   pdf.setFont(pdfTheme.fonts.primary, 'bold');
   pdf.setFontSize(pdfTheme.fonts.sizes.subheader);
-  pdf.text(title, pdfTheme.spacing.margin + 10, currentY);
+  pdf.text(title, pdfTheme.spacing.margin + 5, currentY);
   
   // Add underline
   const textWidth = pdf.getTextWidth(title);
   pdf.setLineWidth(0.5);
-  pdf.line(pdfTheme.spacing.margin + 10, currentY + 2, pdfTheme.spacing.margin + 10 + textWidth, currentY + 2);
+  pdf.line(pdfTheme.spacing.margin + 5, currentY + 2, pdfTheme.spacing.margin + 5 + textWidth, currentY + 2);
   
   return currentY + pdfTheme.spacing.sectionGap;
 };
@@ -105,16 +105,17 @@ const addSectionHeader = (pdf: jsPDF, title: string, currentY: number): number =
 const addText = (pdf: jsPDF, text: string, currentY: number, options: any = {}): number => {
   const { margin } = pdfTheme.spacing;
   const maxWidth = 190;  // Increased width due to smaller margins
+  const leftIndent = options.indent || 10; // Content indentation from margin
   
   pdf.setFont(pdfTheme.fonts.primary, options.weight || 'normal');
   pdf.setFontSize(options.fontSize || pdfTheme.fonts.sizes.body);
   
   if (text.length > 100) {
-    const lines = pdf.splitTextToSize(text, maxWidth);
-    pdf.text(lines, margin + 5, currentY, { maxWidth: maxWidth, lineHeightFactor: 1.2 });
+    const lines = pdf.splitTextToSize(text, maxWidth - leftIndent);
+    pdf.text(lines, margin + leftIndent, currentY, { maxWidth: maxWidth - leftIndent, lineHeightFactor: 1.2 });
     return currentY + (lines.length * pdfTheme.spacing.lineHeight) + (options.extraSpacing || 0);
   } else {
-    pdf.text(text, margin + 5, currentY, { maxWidth: maxWidth });
+    pdf.text(text, margin + leftIndent, currentY, { maxWidth: maxWidth - leftIndent });
     return currentY + pdfTheme.spacing.lineHeight + (options.extraSpacing || 0);
   }
 };
@@ -213,16 +214,16 @@ const generateBioPDF = (pdf: jsPDF, data: any): number => {
   currentY = addSectionHeader(pdf, 'Athlete Information', currentY);
   
   if (athleteInfo.name) {
-    currentY = addText(pdf, `Name: ${athleteInfo.name}`, currentY, { weight: 'bold' });
+    currentY = addText(pdf, `Name: ${athleteInfo.name}`, currentY, { weight: 'bold', indent: 10 });
   }
   if (athleteInfo.country) {
-    currentY = addText(pdf, `Country: ${athleteInfo.country}`, currentY);
+    currentY = addText(pdf, `Country: ${athleteInfo.country}`, currentY, { indent: 10 });
   }
   if (athleteInfo.sport) {
-    currentY = addText(pdf, `Sport: ${athleteInfo.sport}`, currentY);
+    currentY = addText(pdf, `Sport: ${athleteInfo.sport}`, currentY, { indent: 10 });
   }
   if (athleteInfo.rank) {
-    currentY = addText(pdf, `Current Rank: ${athleteInfo.rank}`, currentY);
+    currentY = addText(pdf, `Current Rank: ${athleteInfo.rank}`, currentY, { indent: 10 });
   }
   
   currentY += pdfTheme.spacing.sectionGap;
@@ -230,12 +231,18 @@ const generateBioPDF = (pdf: jsPDF, data: any): number => {
   // Bio Content
   if (bioSections.introduction) {
     currentY = addSectionHeader(pdf, 'Current Status', currentY);
-    currentY = addText(pdf, bioSections.introduction, currentY, { extraSpacing: pdfTheme.spacing.paragraphGap });
+    currentY = addText(pdf, bioSections.introduction, currentY, { 
+      indent: 10,
+      extraSpacing: pdfTheme.spacing.paragraphGap 
+    });
   }
   
   if (bioSections.overallStory) {
     currentY = addSectionHeader(pdf, 'Career Overview', currentY);
-    currentY = addText(pdf, bioSections.overallStory, currentY, { extraSpacing: pdfTheme.spacing.paragraphGap });
+    currentY = addText(pdf, bioSections.overallStory, currentY, { 
+      indent: 10,
+      extraSpacing: pdfTheme.spacing.paragraphGap 
+    });
   }
   
   // Achievements
@@ -245,7 +252,7 @@ const generateBioPDF = (pdf: jsPDF, data: any): number => {
     athleteInfo.achievements.forEach((achievement: any) => {
       const achievementText = typeof achievement === 'string' ? achievement : 
         `${achievement.year || ''} - ${achievement.event || achievement.competition || ''}: ${achievement.result || achievement.medal || ''}`;
-      currentY = addText(pdf, `• ${achievementText}`, currentY);
+      currentY = addText(pdf, `• ${achievementText}`, currentY, { indent: 15 });
     });
   }
   
@@ -257,88 +264,105 @@ const generateRankPDF = (pdf: jsPDF, data: any): number => {
   
   try {
     const athleteInfo = extractAthleteInfo(data);
-    const competitions = extractCompetitions(data);
     
     // Athlete Information
     currentY = addSectionHeader(pdf, 'Athlete Information', currentY);
     
     if (athleteInfo.name) {
-      currentY = addText(pdf, `Name: ${athleteInfo.name}`, currentY, { weight: 'bold' });
+      currentY = addText(pdf, `Name: ${athleteInfo.name}`, currentY, { weight: 'bold', indent: 10 });
     }
     if (athleteInfo.country) {
-      currentY = addText(pdf, `Country: ${athleteInfo.country}`, currentY);
+      currentY = addText(pdf, `Country: ${athleteInfo.country}`, currentY, { indent: 10 });
     }
     if (athleteInfo.sport) {
-      currentY = addText(pdf, `Sport: ${athleteInfo.sport}`, currentY);
+      currentY = addText(pdf, `Sport: ${athleteInfo.sport}`, currentY, { indent: 10 });
     }
     
     currentY += pdfTheme.spacing.sectionGap;
     
-    // Career Phases
+    // Career Phases with individual tables for each phase
     if (data.career_phases && Array.isArray(data.career_phases)) {
-      currentY = addSectionHeader(pdf, 'Career Phases', currentY);
+      currentY = addSectionHeader(pdf, 'Career Phases & Competition History', currentY);
       
-      data.career_phases.forEach((phase: any) => {
+      data.career_phases.forEach((phase: any, phaseIndex: number) => {
         if (phase.period && phase.phase_name) {
-          currentY = addText(pdf, `${phase.period}: ${phase.phase_name}`, currentY, { weight: 'bold' });
+          // Phase header
+          currentY = addText(pdf, `${phase.period}: ${phase.phase_name}`, currentY, { 
+            weight: 'bold', 
+            fontSize: pdfTheme.fonts.sizes.subheader,
+            indent: 10,
+            extraSpacing: 3
+          });
+          
           if (phase.description) {
-            currentY = addText(pdf, phase.description, currentY, { extraSpacing: pdfTheme.spacing.paragraphGap });
+            currentY = addText(pdf, phase.description, currentY, { 
+              indent: 15,
+              extraSpacing: 5
+            });
+          }
+          
+          // Generate table for this phase's competitions
+          if (phase.key_achievements && Array.isArray(phase.key_achievements) && phase.key_achievements.length > 0) {
+            const phaseTableData = phase.key_achievements.map((achievement: any) => [
+              String(achievement.year || ''),
+              String(achievement.event_name || achievement.competition || ''),
+              String(achievement.result || achievement.medal || ''),
+              String(achievement.event_tier || '')
+            ]);
+            
+            try {
+              pdf.autoTable({
+                head: [['Year', 'Event', 'Result', 'Tier']],
+                body: phaseTableData,
+                startY: currentY,
+                margin: { left: pdfTheme.spacing.margin + 15, right: pdfTheme.spacing.margin },
+                styles: {
+                  fontSize: 9,
+                  cellPadding: 2,
+                  overflow: 'linebreak',
+                  halign: 'left'
+                },
+                headStyles: {
+                  fillColor: [0, 0, 0],
+                  textColor: [255, 255, 255],
+                  fontSize: 9,
+                  fontStyle: 'bold'
+                },
+                columnStyles: {
+                  0: { cellWidth: 20 },
+                  1: { cellWidth: 75 },
+                  2: { cellWidth: 30 },
+                  3: { cellWidth: 25 }
+                },
+                tableWidth: 150
+              });
+              
+              if (pdf.lastAutoTable) {
+                currentY = pdf.lastAutoTable.finalY + 8;
+              }
+            } catch (tableError) {
+              console.error('Phase table generation error:', tableError);
+              currentY = addText(pdf, `• Competition data for ${phase.period} could not be displayed`, currentY, { indent: 15 });
+              currentY += 5;
+            }
+          } else {
+            currentY = addText(pdf, '• No competitions recorded for this phase', currentY, { indent: 15 });
+            currentY += 5;
+          }
+          
+          // Add spacing between phases
+          if (phaseIndex < data.career_phases.length - 1) {
+            currentY += pdfTheme.spacing.sectionGap;
           }
         }
       });
-    }
-    
-    // Competition History Table
-    if (competitions.length > 0) {
-      currentY += pdfTheme.spacing.sectionGap;
-      currentY = addSectionHeader(pdf, 'Competition History', currentY);
-      
-      const tableData = competitions.map(comp => [
-        String(comp.year || ''),
-        String(comp.event || ''),
-        String(comp.result || ''),
-        String(comp.tier || '')
-      ]);
-      
-      try {
-        pdf.autoTable({
-          head: [['Year', 'Event', 'Result', 'Tier']],
-          body: tableData,
-          startY: currentY,
-          margin: { left: pdfTheme.spacing.margin + 5 },
-          styles: {
-            fontSize: pdfTheme.fonts.sizes.body,
-            cellPadding: 3,
-            overflow: 'linebreak',
-            cellWidth: 'wrap'
-          },
-          headStyles: {
-            fillColor: [0, 0, 0], // Black color as RGB array
-            textColor: [255, 255, 255],
-            fontSize: pdfTheme.fonts.sizes.body,
-          },
-          columnStyles: {
-            0: { cellWidth: 25 },
-            1: { cellWidth: 90 }, // Increased for longer event names
-            2: { cellWidth: 35 },
-            3: { cellWidth: 30 },
-          }
-        });
-        
-        if (pdf.lastAutoTable) {
-          currentY = pdf.lastAutoTable.finalY + pdfTheme.spacing.sectionGap;
-        }
-      } catch (tableError) {
-        console.error('Table generation error:', tableError);
-        currentY = addText(pdf, 'Competition history table could not be generated.', currentY);
-      }
     } else {
-      currentY = addText(pdf, 'No competition history available.', currentY);
+      currentY = addText(pdf, 'No career phase information available.', currentY, { indent: 10 });
     }
     
   } catch (error) {
     console.error('Rank PDF generation error:', error);
-    currentY = addText(pdf, 'Error generating competitive history report.', currentY);
+    currentY = addText(pdf, 'Error generating competitive history report.', currentY, { indent: 10 });
   }
   
   return currentY;
@@ -353,13 +377,13 @@ const generateStrengthsPDF = (pdf: jsPDF, data: any): number => {
   currentY = addSectionHeader(pdf, 'Athlete Information', currentY);
   
   if (athleteInfo.name) {
-    currentY = addText(pdf, `Name: ${athleteInfo.name}`, currentY, { weight: 'bold' });
+    currentY = addText(pdf, `Name: ${athleteInfo.name}`, currentY, { weight: 'bold', indent: 10 });
   }
   if (athleteInfo.country) {
-    currentY = addText(pdf, `Country: ${athleteInfo.country}`, currentY);
+    currentY = addText(pdf, `Country: ${athleteInfo.country}`, currentY, { indent: 10 });
   }
   if (athleteInfo.sport) {
-    currentY = addText(pdf, `Sport: ${athleteInfo.sport}`, currentY);
+    currentY = addText(pdf, `Sport: ${athleteInfo.sport}`, currentY, { indent: 10 });
   }
   
   currentY += pdfTheme.spacing.sectionGap;
@@ -382,24 +406,28 @@ const generateStrengthsPDF = (pdf: jsPDF, data: any): number => {
     currentY = addSectionHeader(pdf, 'Strengths Analysis', currentY);
     
     strengths.forEach((strength: any, index: number) => {
-      currentY = addText(pdf, `${index + 1}. ${strength.title || strength.name || 'Strength'}`, currentY, { weight: 'bold' });
+      currentY = addText(pdf, `${index + 1}. ${strength.title || strength.name || 'Strength'}`, currentY, { 
+        weight: 'bold',
+        indent: 10,
+        fontSize: pdfTheme.fonts.sizes.body + 1
+      });
       
       if (strength.description) {
-        currentY = addText(pdf, strength.description, currentY);
+        currentY = addText(pdf, strength.description, currentY, { indent: 15 });
       }
       
       if (strength.evidence && Array.isArray(strength.evidence)) {
-        currentY = addText(pdf, 'Evidence:', currentY, { weight: 'bold' });
+        currentY = addText(pdf, 'Evidence:', currentY, { weight: 'bold', indent: 15 });
         strength.evidence.forEach((evidence: any) => {
           const evidenceText = typeof evidence === 'string' ? evidence : evidence.description || evidence.text || '';
-          currentY = addText(pdf, `• ${evidenceText}`, currentY);
+          currentY = addText(pdf, `• ${evidenceText}`, currentY, { indent: 20 });
         });
       }
       
       currentY += pdfTheme.spacing.paragraphGap;
     });
   } else {
-    currentY = addText(pdf, 'No strengths data available for analysis.', currentY);
+    currentY = addText(pdf, 'No strengths data available for analysis.', currentY, { indent: 10 });
   }
   
   return currentY;
@@ -414,13 +442,13 @@ const generateWeaknessesPDF = (pdf: jsPDF, data: any): number => {
   currentY = addSectionHeader(pdf, 'Athlete Information', currentY);
   
   if (athleteInfo.name) {
-    currentY = addText(pdf, `Name: ${athleteInfo.name}`, currentY, { weight: 'bold' });
+    currentY = addText(pdf, `Name: ${athleteInfo.name}`, currentY, { weight: 'bold', indent: 10 });
   }
   if (athleteInfo.country) {
-    currentY = addText(pdf, `Country: ${athleteInfo.country}`, currentY);
+    currentY = addText(pdf, `Country: ${athleteInfo.country}`, currentY, { indent: 10 });
   }
   if (athleteInfo.sport) {
-    currentY = addText(pdf, `Sport: ${athleteInfo.sport}`, currentY);
+    currentY = addText(pdf, `Sport: ${athleteInfo.sport}`, currentY, { indent: 10 });
   }
   
   currentY += pdfTheme.spacing.sectionGap;
@@ -443,24 +471,28 @@ const generateWeaknessesPDF = (pdf: jsPDF, data: any): number => {
     currentY = addSectionHeader(pdf, 'Areas for Improvement', currentY);
     
     weaknesses.forEach((weakness: any, index: number) => {
-      currentY = addText(pdf, `${index + 1}. ${weakness.title || weakness.name || 'Area for Improvement'}`, currentY, { weight: 'bold' });
+      currentY = addText(pdf, `${index + 1}. ${weakness.title || weakness.name || 'Area for Improvement'}`, currentY, { 
+        weight: 'bold',
+        indent: 10,
+        fontSize: pdfTheme.fonts.sizes.body + 1
+      });
       
       if (weakness.description) {
-        currentY = addText(pdf, weakness.description, currentY);
+        currentY = addText(pdf, weakness.description, currentY, { indent: 15 });
       }
       
       if (weakness.evidence && Array.isArray(weakness.evidence)) {
-        currentY = addText(pdf, 'Evidence:', currentY, { weight: 'bold' });
+        currentY = addText(pdf, 'Evidence:', currentY, { weight: 'bold', indent: 15 });
         weakness.evidence.forEach((evidence: any) => {
           const evidenceText = typeof evidence === 'string' ? evidence : evidence.description || evidence.text || '';
-          currentY = addText(pdf, `• ${evidenceText}`, currentY);
+          currentY = addText(pdf, `• ${evidenceText}`, currentY, { indent: 20 });
         });
       }
       
       currentY += pdfTheme.spacing.paragraphGap;
     });
   } else {
-    currentY = addText(pdf, 'No areas for improvement identified in this analysis.', currentY);
+    currentY = addText(pdf, 'No areas for improvement identified in this analysis.', currentY, { indent: 10 });
   }
   
   return currentY;
