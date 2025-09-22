@@ -3112,7 +3112,7 @@ Return only valid JSON with the missing fields.`;
   };
 
   // Video Analysis endpoint with extended timeout
-  app.post('/api/analysis/video', isAuthenticated, handleMulterError, (req: any, res) => {
+  app.post('/api/analysis/video', isAuthenticated, handleMulterError, async (req: any, res) => {
     // Set a long timeout for video processing (10 minutes)
     req.setTimeout(600000); // 10 minutes
     res.setTimeout(600000); // 10 minutes
@@ -3129,9 +3129,6 @@ Return only valid JSON with the missing fields.`;
       mimetype: req.file.mimetype, 
       size: req.file.size 
     } : 'No file');
-
-    // Handle the actual processing asynchronously
-    (async () => {
 
     let videoFilePath: string | null = null;
     
@@ -3263,8 +3260,8 @@ Return only valid JSON with the missing fields.`;
           }
         }
       }
-    })().catch(error => {
-      console.error(`[VIDEO ROUTE ${requestId}] Unhandled error in async processing:`, error);
+    } catch (error) {
+      console.error(`[VIDEO ROUTE ${requestId}] Unhandled error in video processing:`, error);
       if (!res.headersSent) {
         res.status(500).json({ 
           message: "Internal server error during video analysis",
@@ -3272,7 +3269,7 @@ Return only valid JSON with the missing fields.`;
           requestId
         });
       }
-    });
+    }
   });
 
   // Dev Admin Middleware
