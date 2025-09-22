@@ -5,6 +5,7 @@ import { RankChart } from "./rank-chart";
 import { Download, Share2, User, Trophy, Star, AlertTriangle, Calendar, Swords, Video, Award, TrendingUp, Clock, Target, PlayCircle, Zap, Shield, CheckCircle, BarChart, Medal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 interface AnalysisResultProps {
   type: string;
@@ -57,6 +58,31 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     }
   };
 
+  // Professional PDF Theme System
+  const pdfTheme = {
+    colors: {
+      black: '#000000',
+      textPrimary: '#222222',
+      textSecondary: '#555555',
+      line: '#D9D9D9',
+      accent: '#1E3A8A',
+      background: '#FFFFFF'
+    },
+    fonts: {
+      title: 16,
+      h1: 14,
+      h2: 12,
+      body: 10,
+      small: 9
+    },
+    spacing: {
+      pageMargin: 18,
+      sectionGap: 8,
+      lineHeight: 5,
+      headerHeight: 10
+    }
+  };
+
   const handleExport = async () => {
     toast({
       title: "Export Started",
@@ -70,16 +96,18 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
         format: 'a4',
       });
 
-      // Parse the analysis data
+      // Parse the analysis data and extract identity info
       const parsedData = parseAnalysisData(data);
+      const identity = extractIdentity(parsedData);
       
       // Generate PDF content based on analysis type
-      await generatePDFContent(pdf, type, parsedData, createdAt);
+      await generateProfessionalPDF(pdf, type, parsedData, identity, createdAt);
 
       // Generate filename based on type and current date
       const now = new Date();
       const dateStr = now.toISOString().split('T')[0];
-      const filename = `${getTitle(type).replace(/\s+/g, '_')}_${dateStr}.pdf`;
+      const cleanAthleteName = identity.name ? identity.name.replace(/[^a-zA-Z0-9]/g, '_') : 'Athlete';
+      const filename = `${cleanAthleteName}_${getTitle(type).replace(/\s+/g, '_')}_${dateStr}.pdf`;
 
       // Save the PDF
       pdf.save(filename);
@@ -98,75 +126,291 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     }
   };
 
-  // Helper function to generate PDF content based on analysis type
-  const generatePDFContent = async (pdf: jsPDF, analysisType: string, data: any, createdAt?: string) => {
-    const pageWidth = 210;
-    const pageHeight = 297;
-    const margin = 20;
-    const maxWidth = pageWidth - (margin * 2);
-    let currentY = margin;
+  // Data Extraction Functions
+  const extractIdentity = (data: any) => {
+    // Try multiple data paths for athlete information
+    let name = '';
+    let country = '';
+    let sport = '';
 
-    // Helper function to add text with automatic page breaks
-    const addText = (text: string, x: number, y: number, options: any = {}) => {
-      const lines = pdf.splitTextToSize(text, maxWidth - x + margin);
-      
-      for (let i = 0; i < lines.length; i++) {
-        if (currentY > pageHeight - margin) {
-          pdf.addPage();
-          currentY = margin;
-        }
-        
-        pdf.text(lines[i], x, currentY);
-        currentY += options.lineHeight || 7;
-      }
-      
-      return currentY;
-    };
-
-    // Add header
-    pdf.setFontSize(20);
-    pdf.setFont('helvetica', 'bold');
-    currentY = addText(getTitle(analysisType), margin, currentY, { lineHeight: 10 });
+    // Check various possible data paths
+    if (data.athlete_name) name = data.athlete_name;
+    if (data.nationality) country = data.nationality;
+    if (data.sport) sport = data.sport;
     
-    // Add generation date
-    if (createdAt) {
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'normal');
-      currentY = addText(`Generated on: ${new Date(createdAt).toLocaleDateString()}`, margin, currentY + 5, { lineHeight: 7 });
+    // For bio analysis, check nested data
+    if (data.data && typeof data.data === 'object') {
+      if (data.data.name) name = data.data.name;
+      if (data.data.country) country = data.data.country;
+      if (data.data.sport) sport = data.data.sport;
+    }
+
+    // Extract from bio text if available
+    if (data.bio && typeof data.bio === 'string') {
+      const bioMatch = data.bio.match(/(\w+(?:\s+\w+)*)\s+is a\s+(\w+)\s+athlete from\s+(\w+)/i);
+      if (bioMatch) {
+        name = bioMatch[1];
+        sport = bioMatch[2];
+        country = bioMatch[3];
+      }
+    }
+
+    return { name, country, sport };
+  };
+
+  const extractRank = (data: any) => {
+    let currentRank = 'N/A';
+    let peakRank = 'N/A';
+    
+    if (data.current_ranking) currentRank = data.current_ranking;
+    if (data.peak_ranking) peakRank = data.peak_ranking;
+    if (data.currentRank) currentRank = data.currentRank;
+    if (data.peakRank) peakRank = data.peakRank;
+    
+    return { currentRank, peakRank };
+  };
+
+  const extractAchievements = (data: any) => {
+    let achievements: any[] = [];
+    
+    if (data.data && data.data.achievements && Array.isArray(data.data.achievements)) {
+      achievements = data.data.achievements;
+    } else if (data.achievements && Array.isArray(data.achievements)) {
+      achievements = data.achievements;
     }
     
-    currentY += 10;
+    return achievements;
+  };
 
-    // Generate content based on analysis type
-    switch (analysisType) {
-      case 'bio':
-        await generateBioPDF(pdf, data, addText, margin, currentY);
-        break;
-      case 'rank':
-        await generateRankPDF(pdf, data, addText, margin, currentY);
-        break;
-      case 'strengths':
-        await generateStrengthsPDF(pdf, data, addText, margin, currentY);
-        break;
-      case 'weaknesses':
-        await generateWeaknessesPDF(pdf, data, addText, margin, currentY);
-        break;
-      case 'development':
-        await generateDevelopmentPDF(pdf, data, addText, margin, currentY);
-        break;
-      default:
-        pdf.setFontSize(12);
-        pdf.setFont('helvetica', 'normal');
-        addText('Analysis data not available for PDF export.', margin, currentY);
+  const extractCareerPhases = (data: any) => {
+    if (data.career_phases && Array.isArray(data.career_phases)) {
+      return data.career_phases;
+    }
+    return [];
+  };
+
+  // PDF Layout Helper Functions
+  const drawPageFrame = (pdf: jsPDF) => {
+    const margin = pdfTheme.spacing.pageMargin;
+    pdf.setDrawColor(pdfTheme.colors.black);
+    pdf.setLineWidth(0.5);
+    pdf.rect(margin - 2, margin - 2, 210 - (margin - 2) * 2, 297 - (margin - 2) * 2);
+  };
+
+  const drawHeaderBar = (pdf: jsPDF, title: string, subtitle?: string) => {
+    const margin = pdfTheme.spacing.pageMargin;
+    const headerHeight = pdfTheme.spacing.headerHeight;
+    
+    // Draw black rectangle
+    pdf.setFillColor(pdfTheme.colors.black);
+    pdf.rect(margin, margin, 210 - margin * 2, headerHeight, 'F');
+    
+    // Add white title text
+    pdf.setTextColor(pdfTheme.colors.background);
+    pdf.setFontSize(pdfTheme.fonts.title);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(title, margin + 5, margin + 6);
+    
+    // Add subtitle if provided
+    if (subtitle) {
+      pdf.setFontSize(pdfTheme.fonts.small);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(subtitle, margin + 5, margin + 8.5);
+    }
+    
+    // Reset text color
+    pdf.setTextColor(pdfTheme.colors.textPrimary);
+    
+    return margin + headerHeight + pdfTheme.spacing.sectionGap;
+  };
+
+  const addIdentitySection = (pdf: jsPDF, identity: any, currentY: number) => {
+    const margin = pdfTheme.spacing.pageMargin;
+    
+    pdf.setFontSize(pdfTheme.fonts.h2);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Athlete Information', margin, currentY);
+    currentY += 6;
+    
+    pdf.setFontSize(pdfTheme.fonts.body);
+    pdf.setFont('helvetica', 'normal');
+    
+    if (identity.name) {
+      pdf.text(`Name: ${identity.name}`, margin + 5, currentY);
+      currentY += pdfTheme.spacing.lineHeight;
+    }
+    
+    if (identity.country) {
+      pdf.text(`Country: ${identity.country}`, margin + 5, currentY);
+      currentY += pdfTheme.spacing.lineHeight;
+    }
+    
+    if (identity.sport) {
+      pdf.text(`Sport: ${identity.sport}`, margin + 5, currentY);
+      currentY += pdfTheme.spacing.lineHeight;
+    }
+    
+    return currentY + pdfTheme.spacing.sectionGap;
+  };
+
+  const addSection = (pdf: jsPDF, title: string, currentY: number, content?: string) => {
+    const margin = pdfTheme.spacing.pageMargin;
+    const maxWidth = 210 - margin * 2 - 10;
+    
+    // Check if we need a new page
+    if (currentY > 250) {
+      pdf.addPage();
+      drawPageFrame(pdf);
+      currentY = margin + 5;
+    }
+    
+    pdf.setFontSize(pdfTheme.fonts.h2);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(pdfTheme.colors.textPrimary);
+    pdf.text(title, margin, currentY);
+    currentY += 6;
+    
+    if (content) {
+      pdf.setFontSize(pdfTheme.fonts.body);
+      pdf.setFont('helvetica', 'normal');
+      
+      const lines = pdf.splitTextToSize(content, maxWidth);
+      for (const line of lines) {
+        if (currentY > 270) {
+          pdf.addPage();
+          drawPageFrame(pdf);
+          currentY = margin + 5;
+        }
+        pdf.text(line, margin + 5, currentY);
+        currentY += pdfTheme.spacing.lineHeight;
+      }
+    }
+    
+    return currentY + pdfTheme.spacing.sectionGap;
+  };
+
+  const addBulletList = (pdf: jsPDF, items: string[], currentY: number) => {
+    const margin = pdfTheme.spacing.pageMargin;
+    const maxWidth = 210 - margin * 2 - 15;
+    
+    pdf.setFontSize(pdfTheme.fonts.body);
+    pdf.setFont('helvetica', 'normal');
+    
+    for (const item of items) {
+      if (currentY > 270) {
+        pdf.addPage();
+        drawPageFrame(pdf);
+        currentY = margin + 5;
+      }
+      
+      const lines = pdf.splitTextToSize(`• ${item}`, maxWidth);
+      for (const line of lines) {
+        pdf.text(line, margin + 5, currentY);
+        currentY += pdfTheme.spacing.lineHeight;
+      }
+      currentY += 2;
+    }
+    
+    return currentY;
+  };
+
+  const addResultTag = (pdf: jsPDF, text: string, x: number, y: number) => {
+    pdf.setFillColor(pdfTheme.colors.accent);
+    pdf.setTextColor(pdfTheme.colors.background);
+    pdf.setFontSize(pdfTheme.fonts.small);
+    pdf.setFont('helvetica', 'bold');
+    
+    const textWidth = pdf.getTextWidth(text);
+    pdf.roundedRect(x, y - 3, textWidth + 4, 5, 1, 1, 'F');
+    pdf.text(text, x + 2, y);
+    
+    pdf.setTextColor(pdfTheme.colors.textPrimary);
+  };
+
+  const addFooter = (pdf: jsPDF, reportType: string, athleteName: string) => {
+    const totalPages = pdf.getNumberOfPages();
+    
+    for (let i = 1; i <= totalPages; i++) {
+      pdf.setPage(i);
+      
+      const footerY = 287;
+      const margin = pdfTheme.spacing.pageMargin;
+      
+      pdf.setFontSize(pdfTheme.fonts.small);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(pdfTheme.colors.textSecondary);
+      
+      const leftText = `Athlete360 | ${reportType}`;
+      const centerText = athleteName;
+      const rightText = `Page ${i} of ${totalPages} | Generated ${new Date().toLocaleDateString()}`;
+      
+      pdf.text(leftText, margin, footerY);
+      pdf.text(centerText, 105, footerY, { align: 'center' });
+      pdf.text(rightText, 210 - margin, footerY, { align: 'right' });
+      
+      drawPageFrame(pdf);
     }
   };
 
-  // Bio analysis PDF generation
-  const generateBioPDF = async (pdf: jsPDF, data: any, addText: Function, margin: number, startY: number) => {
-    let currentY = startY;
+  // Main Professional PDF Generator
+  const generateProfessionalPDF = async (pdf: jsPDF, analysisType: string, data: any, identity: any, createdAt?: string) => {
+    // Initialize first page with header and frame
+    let currentY = drawHeaderBar(pdf, getTitle(analysisType));
+    drawPageFrame(pdf);
     
-    // Access the nested data object where the actual bio information is
-    let bioData = data.data;
+    // Add athlete identity section
+    currentY = addIdentitySection(pdf, identity, currentY);
+    
+    // Add ranking information if available for bio and rank reports
+    if ((analysisType === 'bio' || analysisType === 'rank') && data) {
+      const rankInfo = extractRank(data);
+      if (rankInfo.currentRank !== 'N/A' || rankInfo.peakRank !== 'N/A') {
+        const margin = pdfTheme.spacing.pageMargin;
+        pdf.setFontSize(pdfTheme.fonts.body);
+        pdf.setFont('helvetica', 'normal');
+        
+        if (rankInfo.currentRank !== 'N/A') {
+          pdf.text(`Current Rank: `, margin + 5, currentY);
+          addResultTag(pdf, rankInfo.currentRank, margin + 50, currentY);
+          currentY += pdfTheme.spacing.lineHeight + 2;
+        }
+        
+        if (rankInfo.peakRank !== 'N/A') {
+          pdf.text(`Peak Rank: `, margin + 5, currentY);
+          addResultTag(pdf, rankInfo.peakRank, margin + 45, currentY);
+          currentY += pdfTheme.spacing.lineHeight + 2;
+        }
+        
+        currentY += pdfTheme.spacing.sectionGap;
+      }
+    }
+    
+    // Generate content based on analysis type
+    switch (analysisType) {
+      case 'bio':
+        currentY = await generateBioPDF(pdf, data, currentY);
+        break;
+      case 'rank':
+        currentY = await generateCompetitiveHistoryPDF(pdf, data, currentY);
+        break;
+      case 'strengths':
+        currentY = await generateStrengthsPDF(pdf, data, currentY);
+        break;
+      case 'weaknesses':
+        currentY = await generateWeaknessesPDF(pdf, data, currentY);
+        break;
+      default:
+        currentY = addSection(pdf, 'Analysis Content', currentY, 'Analysis data not available for PDF export.');
+    }
+    
+    // Add footer with pagination
+    addFooter(pdf, getTitle(analysisType), identity.name || 'Athlete');
+  };
+
+  // Bio Analysis PDF Generator
+  const generateBioPDF = async (pdf: jsPDF, data: any, currentY: number) => {
+    // Extract bio data
+    let bioData = data.data || data;
     
     if (typeof bioData === 'string') {
       try {
@@ -176,207 +420,147 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
       }
     }
 
-    if (!bioData || typeof bioData !== 'object') {
-      bioData = { bio: "Analysis data could not be parsed properly" };
-    }
-
-    const name = bioData.name || "Athlete Profile";
-    const bio = bioData.bio || "";
-    const playersStory = bioData.playersStory || "";
-    const achievements = Array.isArray(bioData.achievements) ? bioData.achievements : [];
-    const recentNews = bioData.personalInfo?.recentNews || bioData.recentNews || [];
-
-    // Athlete name
-    if (name !== "Athlete Profile") {
-      pdf.setFontSize(16);
-      pdf.setFont('helvetica', 'bold');
-      currentY = addText(name, margin, currentY, { lineHeight: 8 });
-      currentY += 5;
-    }
+    const bio = bioData.bio || '';
+    const achievements = extractAchievements(data);
 
     // Parse bio sections
     const bioSections = parseBioSections(bio);
 
-    // Introduction
+    // Introduction section
     if (bioSections.introduction) {
-      pdf.setFontSize(14);
-      pdf.setFont('helvetica', 'bold');
-      currentY = addText("Introduction", margin, currentY, { lineHeight: 8 });
-      currentY += 3;
-      
-      pdf.setFontSize(11);
-      pdf.setFont('helvetica', 'normal');
-      currentY = addText(bioSections.introduction, margin, currentY, { lineHeight: 6 });
-      currentY += 8;
+      currentY = addSection(pdf, 'Introduction', currentY, bioSections.introduction);
     }
 
-    // Player's Story
-    const storyText = playersStory && playersStory.trim() ? playersStory : bioSections.overallStory;
-    if (storyText) {
-      pdf.setFontSize(14);
-      pdf.setFont('helvetica', 'bold');
-      currentY = addText("Player's Story", margin, currentY, { lineHeight: 8 });
-      currentY += 3;
-      
-      pdf.setFontSize(11);
-      pdf.setFont('helvetica', 'normal');
-      currentY = addText(storyText, margin, currentY, { lineHeight: 6 });
-      currentY += 8;
+    // Player's story section
+    if (bioSections.overallStory) {
+      currentY = addSection(pdf, "Player's Story", currentY, bioSections.overallStory);
     }
 
-    // Career Record
+    // Career record section
     if (bioSections.careerRecord) {
-      pdf.setFontSize(14);
-      pdf.setFont('helvetica', 'bold');
-      currentY = addText("Career Record and Rankings", margin, currentY, { lineHeight: 8 });
-      currentY += 3;
-      
-      pdf.setFontSize(11);
-      pdf.setFont('helvetica', 'normal');
-      currentY = addText(bioSections.careerRecord, margin, currentY, { lineHeight: 6 });
-      currentY += 8;
+      currentY = addSection(pdf, 'Career Record and Rankings', currentY, bioSections.careerRecord);
     }
 
-    // Achievements
+    // Notable achievements
     if (achievements.length > 0) {
-      pdf.setFontSize(14);
-      pdf.setFont('helvetica', 'bold');
-      currentY = addText("Notable Achievements", margin, currentY, { lineHeight: 8 });
-      currentY += 3;
+      currentY = addSection(pdf, 'Notable Achievements', currentY);
       
-      pdf.setFontSize(11);
-      pdf.setFont('helvetica', 'normal');
+      const achievementStrings = achievements.map((achievement: any) => {
+        const text = achievement?.achievement || achievement?.text || '';
+        const medal = achievement?.medal || 'Participation';
+        return text ? `${medal}: ${text}` : '';
+      }).filter(Boolean);
       
-      achievements.forEach((achievementObj: any) => {
-        const text = achievementObj?.achievement || '';
-        const medal = achievementObj?.medal || 'Participation';
-        
-        if (text) {
-          currentY = addText(`• ${medal}: ${text}`, margin + 5, currentY, { lineHeight: 6 });
-          currentY += 2;
-        }
-      });
-      currentY += 5;
+      currentY = addBulletList(pdf, achievementStrings, currentY);
     }
 
-    // Recent Competitions
-    if (recentNews.length > 0) {
-      pdf.setFontSize(14);
-      pdf.setFont('helvetica', 'bold');
-      currentY = addText("Recent Competitions (2024-2025)", margin, currentY, { lineHeight: 8 });
-      currentY += 3;
-      
-      pdf.setFontSize(11);
-      pdf.setFont('helvetica', 'normal');
-      
-      recentNews.forEach((newsItem: string) => {
-        currentY = addText(`• ${newsItem}`, margin + 5, currentY, { lineHeight: 6 });
-        currentY += 2;
-      });
-    }
+    return currentY;
   };
 
-  // Rank analysis PDF generation
-  const generateRankPDF = async (pdf: jsPDF, data: any, addText: Function, margin: number, startY: number) => {
-    let currentY = startY;
-
-    // Handle different data formats
-    let athlete, rankingProgression, careerSummary;
+  // Helper function to parse bio sections
+  const parseBioSections = (bioText: string) => {
+    if (!bioText) return {};
     
-    if (data.athlete && data.rankingProgression !== undefined && data.careerSummary) {
-      athlete = data.athlete;
-      rankingProgression = data.rankingProgression;
-      careerSummary = data.careerSummary;
-    } else if (data.currentRank || data.peakRank || data.history) {
-      athlete = {
-        name: 'Unknown Athlete',
-        currentRanking: data.currentRank,
-        peakRanking: data.peakRank,
-        officialRecord: data.competitionRecord || 'N/A'
-      };
-      rankingProgression = data.history || [];
-      careerSummary = {
-        totalCompetitions: 'N/A',
-        majorTitles: 'N/A',
-        rankingTrend: 'N/A',
-        notableAchievements: data.recommendations || []
-      };
+    const sections: any = {};
+    
+    // Extract introduction (first paragraph)
+    const introMatch = bioText.match(/^(.*?)\n\n/);
+    if (introMatch) {
+      sections.introduction = introMatch[1].trim();
+    }
+    
+    // Extract player's story
+    const storyMatch = bioText.match(/Players' overall story and what they're known for[\s\S]*?\n\n([\s\S]*?)(?:\n\n|$)/);
+    if (storyMatch) {
+      sections.overallStory = storyMatch[1].trim();
     } else {
-      currentY = addText("Ranking data not available for PDF export.", margin, currentY);
-      return;
+      // Fallback: use middle sections
+      const parts = bioText.split('\n\n');
+      if (parts.length > 2) {
+        sections.overallStory = parts.slice(1, -1).join('\n\n');
+      }
     }
-
-    // Career Overview
-    pdf.setFontSize(14);
-    pdf.setFont('helvetica', 'bold');
-    currentY = addText("Career Overview", margin, currentY, { lineHeight: 8 });
-    currentY += 5;
     
-    pdf.setFontSize(11);
-    pdf.setFont('helvetica', 'normal');
-    currentY = addText(`Current Rank: ${athlete.currentRanking || 'N/A'}`, margin, currentY, { lineHeight: 6 });
-    currentY = addText(`Peak Rank: ${athlete.peakRanking || 'N/A'}`, margin, currentY, { lineHeight: 6 });
-    currentY = addText(`Official Record: ${athlete.officialRecord || 'N/A'}`, margin, currentY, { lineHeight: 6 });
-    currentY = addText(`Total Competitions: ${careerSummary.totalCompetitions || 'N/A'}`, margin, currentY, { lineHeight: 6 });
-    currentY += 8;
-
-    // Ranking Progression
-    if (rankingProgression && rankingProgression.length > 0) {
-      pdf.setFontSize(14);
-      pdf.setFont('helvetica', 'bold');
-      currentY = addText("Ranking Progression", margin, currentY, { lineHeight: 8 });
-      currentY += 3;
-      
-      pdf.setFontSize(11);
-      pdf.setFont('helvetica', 'normal');
-      
-      rankingProgression.forEach((entry: any) => {
-        const competition = entry.competition || entry.tournament || 'Event';
-        const date = entry.date || entry.month || 'Date unknown';
-        const result = entry.result || entry.placement || 'Result unknown';
-        const ranking = entry.ranking || entry.rank || 'N/A';
-        
-        currentY = addText(`• ${competition} (${date})`, margin + 5, currentY, { lineHeight: 6 });
-        currentY = addText(`  Result: ${result} | Rank: #${ranking}`, margin + 10, currentY, { lineHeight: 6 });
-        currentY += 2;
-      });
-      currentY += 5;
+    // Extract career record information
+    const careerMatch = bioText.match(/career record|rankings|record/i);
+    if (careerMatch) {
+      const careerText = bioText.substring(careerMatch.index || 0);
+      const endMatch = careerText.match(/\n\n/);
+      sections.careerRecord = endMatch ? careerText.substring(0, endMatch.index) : careerText;
     }
-
-    // Career Summary
-    pdf.setFontSize(14);
-    pdf.setFont('helvetica', 'bold');
-    currentY = addText("Career Summary", margin, currentY, { lineHeight: 8 });
-    currentY += 3;
     
-    pdf.setFontSize(11);
-    pdf.setFont('helvetica', 'normal');
-    currentY = addText(`Major Titles: ${careerSummary.majorTitles || 'N/A'}`, margin, currentY, { lineHeight: 6 });
-    currentY = addText(`Ranking Trend: ${careerSummary.rankingTrend || 'N/A'}`, margin, currentY, { lineHeight: 6 });
-    currentY = addText(`Current Form: ${careerSummary.currentForm || 'N/A'}`, margin, currentY, { lineHeight: 6 });
-    
-    // Notable Achievements
-    if (careerSummary.notableAchievements && careerSummary.notableAchievements.length > 0) {
-      currentY += 8;
-      pdf.setFontSize(14);
-      pdf.setFont('helvetica', 'bold');
-      currentY = addText("Notable Achievements", margin, currentY, { lineHeight: 8 });
-      currentY += 3;
-      
-      pdf.setFontSize(11);
-      pdf.setFont('helvetica', 'normal');
-      
-      careerSummary.notableAchievements.forEach((achievement: string) => {
-        currentY = addText(`• ${achievement}`, margin + 5, currentY, { lineHeight: 6 });
-        currentY += 2;
-      });
-    }
+    return sections;
   };
 
-  // Strengths analysis PDF generation
-  const generateStrengthsPDF = async (pdf: jsPDF, data: any, addText: Function, margin: number, startY: number) => {
-    let currentY = startY;
+  // Competitive History PDF Generator
+  const generateCompetitiveHistoryPDF = async (pdf: jsPDF, data: any, currentY: number) => {
+    const careerPhases = extractCareerPhases(data);
     
+    if (careerPhases.length === 0) {
+      return addSection(pdf, 'Career Phases', currentY, 'No competitive history data available.');
+    }
+
+    // Career phases overview
+    currentY = addSection(pdf, 'Career Overview', currentY);
+    
+    for (const phase of careerPhases) {
+      currentY = addSection(pdf, `${phase.phase_name} (${phase.period})`, currentY);
+      
+      // Add key achievements table for this phase
+      if (phase.key_achievements && phase.key_achievements.length > 0) {
+        const margin = pdfTheme.spacing.pageMargin;
+        
+        // Create table data
+        const tableData = phase.key_achievements.map((achievement: any) => [
+          achievement.year || 'N/A',
+          achievement.event_name || 'Event',
+          achievement.result || 'Result',
+          achievement.event_tier || 'Tier'
+        ]);
+
+        // Use jspdf-autotable for professional table
+        autoTable(pdf, {
+          startY: currentY,
+          head: [['Year', 'Competition', 'Result', 'Tier']],
+          body: tableData,
+          theme: 'grid',
+          headStyles: {
+            fillColor: [0, 0, 0],
+            textColor: [255, 255, 255],
+            fontSize: pdfTheme.fonts.small,
+            fontStyle: 'bold'
+          },
+          bodyStyles: {
+            fontSize: pdfTheme.fonts.small,
+            textColor: [34, 34, 34]
+          },
+          margin: { left: margin, right: margin },
+          styles: {
+            cellPadding: 2,
+            lineColor: [217, 217, 217],
+            lineWidth: 0.5
+          }
+        });
+        
+        currentY = (pdf as any).lastAutoTable.finalY + pdfTheme.spacing.sectionGap;
+        
+        // Add notes if available
+        const notesItems = phase.key_achievements
+          .filter((achievement: any) => achievement.notes)
+          .map((achievement: any) => `${achievement.year}: ${achievement.notes}`);
+          
+        if (notesItems.length > 0) {
+          currentY = addSection(pdf, 'Key Notes', currentY);
+          currentY = addBulletList(pdf, notesItems, currentY);
+        }
+      }
+    }
+
+    return currentY;
+  };
+
+  // Strengths Analysis PDF Generator
+  const generateStrengthsPDF = async (pdf: jsPDF, data: any, currentY: number) => {
     let strengths: any[] = [];
     
     if (data.strengths && Array.isArray(data.strengths)) {
@@ -386,56 +570,91 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
         const parsed = JSON.parse(data);
         strengths = parsed.strengths || [];
       } catch (e) {
-        currentY = addText("Could not parse strengths data for PDF export.", margin, currentY);
-        return;
+        return addSection(pdf, 'Strengths', currentY, 'Could not parse strengths data for PDF export.');
       }
     }
 
     if (strengths.length === 0) {
-      currentY = addText("No strengths data available for PDF export.", margin, currentY);
-      return;
+      return addSection(pdf, 'Strengths', currentY, 'No strengths data available for PDF export.');
     }
 
-    pdf.setFontSize(14);
-    pdf.setFont('helvetica', 'bold');
-    currentY = addText("Strengths Analysis", margin, currentY, { lineHeight: 8 });
-    currentY += 5;
+    currentY = addSection(pdf, 'Strengths Analysis', currentY);
 
-    strengths.forEach((strength: any, index: number) => {
-      // Strength title
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'bold');
-      currentY = addText(`${index + 1}. ${strength.title}`, margin, currentY, { lineHeight: 7 });
+    for (let i = 0; i < strengths.length; i++) {
+      const strength = strengths[i];
+      const margin = pdfTheme.spacing.pageMargin;
       
-      // Rating and category
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'normal');
-      const ratingText = `Rating: ${strength.rating || 'N/A'}/100 | Category: ${strength.category || 'N/A'}`;
-      currentY = addText(ratingText, margin + 5, currentY, { lineHeight: 6 });
-      currentY += 2;
+      // Check for page break
+      if (currentY > 250) {
+        pdf.addPage();
+        drawPageFrame(pdf);
+        currentY = margin + 5;
+      }
+      
+      // Strength title with rating
+      pdf.setFontSize(pdfTheme.fonts.h2);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`${i + 1}. ${strength.title}`, margin, currentY);
+      
+      // Rating tag
+      if (strength.rating) {
+        addResultTag(pdf, `${strength.rating}/100`, 210 - margin - 25, currentY);
+      }
+      
+      currentY += 6;
+      
+      // Category
+      if (strength.category) {
+        pdf.setFontSize(pdfTheme.fonts.small);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(pdfTheme.colors.textSecondary);
+        pdf.text(`Category: ${strength.category}`, margin + 5, currentY);
+        currentY += 4;
+      }
       
       // Description
       if (strength.description) {
-        pdf.setFontSize(11);
+        pdf.setFontSize(pdfTheme.fonts.body);
         pdf.setFont('helvetica', 'normal');
-        currentY = addText(strength.description, margin + 5, currentY, { lineHeight: 6 });
+        pdf.setTextColor(pdfTheme.colors.textPrimary);
+        
+        const lines = pdf.splitTextToSize(strength.description, 210 - margin * 2 - 10);
+        for (const line of lines) {
+          pdf.text(line, margin + 5, currentY);
+          currentY += pdfTheme.spacing.lineHeight;
+        }
         currentY += 3;
       }
       
-      // Evidence
+      // Evidence section
       if (strength.evidence) {
-        pdf.setFontSize(10);
+        pdf.setFontSize(pdfTheme.fonts.small);
         pdf.setFont('helvetica', 'italic');
-        currentY = addText(`Evidence: ${strength.evidence}`, margin + 5, currentY, { lineHeight: 6 });
-        currentY += 5;
+        pdf.setTextColor(pdfTheme.colors.textSecondary);
+        pdf.text('Evidence:', margin + 5, currentY);
+        currentY += 4;
+        
+        pdf.setFont('helvetica', 'normal');
+        const evidenceLines = pdf.splitTextToSize(strength.evidence, 210 - margin * 2 - 15);
+        for (const line of evidenceLines) {
+          if (currentY > 270) {
+            pdf.addPage();
+            drawPageFrame(pdf);
+            currentY = margin + 5;
+          }
+          pdf.text(line, margin + 10, currentY);
+          currentY += pdfTheme.spacing.lineHeight;
+        }
       }
-    });
+      
+      currentY += pdfTheme.spacing.sectionGap;
+    }
+
+    return currentY;
   };
 
-  // Weaknesses analysis PDF generation
-  const generateWeaknessesPDF = async (pdf: jsPDF, data: any, addText: Function, margin: number, startY: number) => {
-    let currentY = startY;
-    
+  // Weaknesses Analysis PDF Generator
+  const generateWeaknessesPDF = async (pdf: jsPDF, data: any, currentY: number) => {
     let weaknesses: any[] = [];
     
     if (data.weaknesses && Array.isArray(data.weaknesses)) {
@@ -445,60 +664,89 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
         const parsed = JSON.parse(data);
         weaknesses = parsed.weaknesses || [];
       } catch (e) {
-        currentY = addText("Could not parse weaknesses data for PDF export.", margin, currentY);
-        return;
+        return addSection(pdf, 'Weaknesses', currentY, 'Could not parse weaknesses data for PDF export.');
       }
     }
 
     if (weaknesses.length === 0) {
-      currentY = addText("No weaknesses data available for PDF export.", margin, currentY);
-      return;
+      return addSection(pdf, 'Weaknesses', currentY, 'No weaknesses data available for PDF export.');
     }
 
-    pdf.setFontSize(14);
-    pdf.setFont('helvetica', 'bold');
-    currentY = addText("Weaknesses Analysis", margin, currentY, { lineHeight: 8 });
-    currentY += 5;
+    currentY = addSection(pdf, 'Weaknesses Analysis', currentY);
 
-    weaknesses.forEach((weakness: any, index: number) => {
-      // Weakness title
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'bold');
-      currentY = addText(`${index + 1}. ${weakness.title}`, margin, currentY, { lineHeight: 7 });
+    for (let i = 0; i < weaknesses.length; i++) {
+      const weakness = weaknesses[i];
+      const margin = pdfTheme.spacing.pageMargin;
       
-      // Severity and category
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'normal');
-      const severityText = `Severity: ${weakness.severity || 'N/A'}/100 | Category: ${weakness.category || 'N/A'}`;
-      currentY = addText(severityText, margin + 5, currentY, { lineHeight: 6 });
-      currentY += 2;
+      // Check for page break
+      if (currentY > 250) {
+        pdf.addPage();
+        drawPageFrame(pdf);
+        currentY = margin + 5;
+      }
+      
+      // Weakness title with severity
+      pdf.setFontSize(pdfTheme.fonts.h2);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`${i + 1}. ${weakness.title}`, margin, currentY);
+      
+      // Severity tag
+      if (weakness.severity) {
+        addResultTag(pdf, `${weakness.severity}/100`, 210 - margin - 25, currentY);
+      }
+      
+      currentY += 6;
+      
+      // Category
+      if (weakness.category) {
+        pdf.setFontSize(pdfTheme.fonts.small);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(pdfTheme.colors.textSecondary);
+        pdf.text(`Category: ${weakness.category}`, margin + 5, currentY);
+        currentY += 4;
+      }
       
       // Description
       if (weakness.description) {
-        pdf.setFontSize(11);
+        pdf.setFontSize(pdfTheme.fonts.body);
         pdf.setFont('helvetica', 'normal');
-        currentY = addText(weakness.description, margin + 5, currentY, { lineHeight: 6 });
+        pdf.setTextColor(pdfTheme.colors.textPrimary);
+        
+        const lines = pdf.splitTextToSize(weakness.description, 210 - margin * 2 - 10);
+        for (const line of lines) {
+          pdf.text(line, margin + 5, currentY);
+          currentY += pdfTheme.spacing.lineHeight;
+        }
         currentY += 3;
       }
       
-      // Evidence
+      // Evidence section
       if (weakness.evidence) {
-        pdf.setFontSize(10);
+        pdf.setFontSize(pdfTheme.fonts.small);
         pdf.setFont('helvetica', 'italic');
-        currentY = addText(`Evidence: ${weakness.evidence}`, margin + 5, currentY, { lineHeight: 6 });
-        currentY += 5;
+        pdf.setTextColor(pdfTheme.colors.textSecondary);
+        pdf.text('Evidence:', margin + 5, currentY);
+        currentY += 4;
+        
+        pdf.setFont('helvetica', 'normal');
+        const evidenceLines = pdf.splitTextToSize(weakness.evidence, 210 - margin * 2 - 15);
+        for (const line of evidenceLines) {
+          if (currentY > 270) {
+            pdf.addPage();
+            drawPageFrame(pdf);
+            currentY = margin + 5;
+          }
+          pdf.text(line, margin + 10, currentY);
+          currentY += pdfTheme.spacing.lineHeight;
+        }
       }
-    });
+      
+      currentY += pdfTheme.spacing.sectionGap;
+    }
+
+    return currentY;
   };
 
-  // Development plan PDF generation
-  const generateDevelopmentPDF = async (pdf: jsPDF, data: any, addText: Function, margin: number, startY: number) => {
-    let currentY = startY;
-    
-    pdf.setFontSize(11);
-    pdf.setFont('helvetica', 'normal');
-    currentY = addText("Development plan content would be formatted here based on the specific data structure.", margin, currentY, { lineHeight: 6 });
-  };
 
   const handleShare = () => {
     if (shareUrl) {
@@ -517,8 +765,8 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     }
   };
 
-  // Helper function to parse bio sections from the text
-  const parseBioSections = (bioText: string) => {
+  // Helper function to parse bio sections from the text for display
+  const parseBioSectionsForDisplay = (bioText: string) => {
     if (!bioText) return {};
     
     const sections: any = {};
@@ -614,7 +862,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     
     
     // Parse bio content to extract different sections
-    const bioSections = parseBioSections(bio);
+    const bioSections = parseBioSectionsForDisplay(bio);
 
     // Always render structured sections - never show raw JSON
     return (
