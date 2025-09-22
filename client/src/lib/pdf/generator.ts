@@ -20,10 +20,10 @@ const pdfTheme = {
     }
   },
   spacing: {
-    margin: 20,
-    lineHeight: 4,
-    sectionGap: 10,
-    paragraphGap: 6,
+    margin: 10,  // Reduced from 20 to make borders closer to edges
+    lineHeight: 5,  // Increased slightly for better readability
+    sectionGap: 12,
+    paragraphGap: 8,
   },
   layout: {
     pageWidth: 210,
@@ -104,17 +104,17 @@ const addSectionHeader = (pdf: jsPDF, title: string, currentY: number): number =
 
 const addText = (pdf: jsPDF, text: string, currentY: number, options: any = {}): number => {
   const { margin } = pdfTheme.spacing;
-  const maxWidth = 170;
+  const maxWidth = 190;  // Increased width due to smaller margins
   
   pdf.setFont(pdfTheme.fonts.primary, options.weight || 'normal');
   pdf.setFontSize(options.fontSize || pdfTheme.fonts.sizes.body);
   
   if (text.length > 100) {
     const lines = pdf.splitTextToSize(text, maxWidth);
-    pdf.text(lines, margin + 10, currentY);
+    pdf.text(lines, margin + 5, currentY, { maxWidth: maxWidth, lineHeightFactor: 1.2 });
     return currentY + (lines.length * pdfTheme.spacing.lineHeight) + (options.extraSpacing || 0);
   } else {
-    pdf.text(text, margin + 10, currentY);
+    pdf.text(text, margin + 5, currentY, { maxWidth: maxWidth });
     return currentY + pdfTheme.spacing.lineHeight + (options.extraSpacing || 0);
   }
 };
@@ -255,71 +255,90 @@ const generateBioPDF = (pdf: jsPDF, data: any): number => {
 const generateRankPDF = (pdf: jsPDF, data: any): number => {
   let currentY = 60;
   
-  const athleteInfo = extractAthleteInfo(data);
-  const competitions = extractCompetitions(data);
-  
-  // Athlete Information
-  currentY = addSectionHeader(pdf, 'Athlete Information', currentY);
-  
-  if (athleteInfo.name) {
-    currentY = addText(pdf, `Name: ${athleteInfo.name}`, currentY, { weight: 'bold' });
-  }
-  if (athleteInfo.country) {
-    currentY = addText(pdf, `Country: ${athleteInfo.country}`, currentY);
-  }
-  if (athleteInfo.sport) {
-    currentY = addText(pdf, `Sport: ${athleteInfo.sport}`, currentY);
-  }
-  
-  currentY += pdfTheme.spacing.sectionGap;
-  
-  // Career Phases
-  if (data.career_phases && Array.isArray(data.career_phases)) {
-    currentY = addSectionHeader(pdf, 'Career Phases', currentY);
+  try {
+    const athleteInfo = extractAthleteInfo(data);
+    const competitions = extractCompetitions(data);
     
-    data.career_phases.forEach((phase: any) => {
-      currentY = addText(pdf, `${phase.period}: ${phase.phase_name}`, currentY, { weight: 'bold' });
-      if (phase.description) {
-        currentY = addText(pdf, phase.description, currentY, { extraSpacing: pdfTheme.spacing.paragraphGap });
-      }
-    });
-  }
-  
-  // Competition History Table
-  if (competitions.length > 0) {
+    // Athlete Information
+    currentY = addSectionHeader(pdf, 'Athlete Information', currentY);
+    
+    if (athleteInfo.name) {
+      currentY = addText(pdf, `Name: ${athleteInfo.name}`, currentY, { weight: 'bold' });
+    }
+    if (athleteInfo.country) {
+      currentY = addText(pdf, `Country: ${athleteInfo.country}`, currentY);
+    }
+    if (athleteInfo.sport) {
+      currentY = addText(pdf, `Sport: ${athleteInfo.sport}`, currentY);
+    }
+    
     currentY += pdfTheme.spacing.sectionGap;
-    currentY = addSectionHeader(pdf, 'Competition History', currentY);
     
-    const tableData = competitions.map(comp => [
-      comp.year,
-      comp.event,
-      comp.result,
-      comp.tier || ''
-    ]);
+    // Career Phases
+    if (data.career_phases && Array.isArray(data.career_phases)) {
+      currentY = addSectionHeader(pdf, 'Career Phases', currentY);
+      
+      data.career_phases.forEach((phase: any) => {
+        if (phase.period && phase.phase_name) {
+          currentY = addText(pdf, `${phase.period}: ${phase.phase_name}`, currentY, { weight: 'bold' });
+          if (phase.description) {
+            currentY = addText(pdf, phase.description, currentY, { extraSpacing: pdfTheme.spacing.paragraphGap });
+          }
+        }
+      });
+    }
     
-    pdf.autoTable({
-      head: [['Year', 'Event', 'Result', 'Tier']],
-      body: tableData,
-      startY: currentY,
-      margin: { left: pdfTheme.spacing.margin + 10 },
-      styles: {
-        fontSize: pdfTheme.fonts.sizes.body,
-        cellPadding: 3,
-      },
-      headStyles: {
-        fillColor: pdfTheme.colors.primary,
-        textColor: 255,
-        fontSize: pdfTheme.fonts.sizes.body,
-      },
-      columnStyles: {
-        0: { cellWidth: 25 },
-        1: { cellWidth: 80 },
-        2: { cellWidth: 35 },
-        3: { cellWidth: 30 },
+    // Competition History Table
+    if (competitions.length > 0) {
+      currentY += pdfTheme.spacing.sectionGap;
+      currentY = addSectionHeader(pdf, 'Competition History', currentY);
+      
+      const tableData = competitions.map(comp => [
+        String(comp.year || ''),
+        String(comp.event || ''),
+        String(comp.result || ''),
+        String(comp.tier || '')
+      ]);
+      
+      try {
+        pdf.autoTable({
+          head: [['Year', 'Event', 'Result', 'Tier']],
+          body: tableData,
+          startY: currentY,
+          margin: { left: pdfTheme.spacing.margin + 5 },
+          styles: {
+            fontSize: pdfTheme.fonts.sizes.body,
+            cellPadding: 3,
+            overflow: 'linebreak',
+            cellWidth: 'wrap'
+          },
+          headStyles: {
+            fillColor: [0, 0, 0], // Black color as RGB array
+            textColor: [255, 255, 255],
+            fontSize: pdfTheme.fonts.sizes.body,
+          },
+          columnStyles: {
+            0: { cellWidth: 25 },
+            1: { cellWidth: 90 }, // Increased for longer event names
+            2: { cellWidth: 35 },
+            3: { cellWidth: 30 },
+          }
+        });
+        
+        if (pdf.lastAutoTable) {
+          currentY = pdf.lastAutoTable.finalY + pdfTheme.spacing.sectionGap;
+        }
+      } catch (tableError) {
+        console.error('Table generation error:', tableError);
+        currentY = addText(pdf, 'Competition history table could not be generated.', currentY);
       }
-    });
+    } else {
+      currentY = addText(pdf, 'No competition history available.', currentY);
+    }
     
-    currentY = pdf.lastAutoTable.finalY + pdfTheme.spacing.sectionGap;
+  } catch (error) {
+    console.error('Rank PDF generation error:', error);
+    currentY = addText(pdf, 'Error generating competitive history report.', currentY);
   }
   
   return currentY;
