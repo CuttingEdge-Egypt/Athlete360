@@ -318,11 +318,11 @@ const generateRankPDF = (pdf: jsPDF, data: any): number => {
               console.log('Phase table data prepared:', phaseTableData);
               
               // Use autoTable to generate the competition table
-              pdf.autoTable({
+              (pdf as any).autoTable({
                 head: [['Year', 'Event', 'Result', 'Tier']],
                 body: phaseTableData,
                 startY: currentY,
-                margin: { left: pdfTheme.spacing.margin + 15, right: pdfTheme.spacing.margin },
+                margin: { left: pdfTheme.spacing.margin + 15 },
                 styles: {
                   fontSize: 9,
                   cellPadding: 2,
@@ -340,13 +340,12 @@ const generateRankPDF = (pdf: jsPDF, data: any): number => {
                   1: { cellWidth: 75 },
                   2: { cellWidth: 30 },
                   3: { cellWidth: 25 }
-                },
-                tableWidth: 150
+                }
               });
               
               // Update currentY position after table
-              if (pdf.lastAutoTable) {
-                currentY = pdf.lastAutoTable.finalY + 8;
+              if ((pdf as any).lastAutoTable) {
+                currentY = (pdf as any).lastAutoTable.finalY + 8;
               } else {
                 currentY += 40; // fallback spacing
               }
