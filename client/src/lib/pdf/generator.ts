@@ -286,7 +286,36 @@ const generateRankPDF = (pdf: jsPDF, data: any): number => {
       
       data.career_phases.forEach((phase: any, phaseIndex: number) => {
         if (phase.period && phase.phase_name) {
-          // Phase header
+          
+          // Check if we have competitions data for this phase
+          if (phase.key_achievements && Array.isArray(phase.key_achievements) && phase.key_achievements.length > 0) {
+            // Calculate total space needed for header + table
+            const phaseHeaderHeight = 25; // Approximate height for phase header and description
+            const rowHeight = 12;
+            const tableHeaderHeight = 14;
+            const tableHeight = tableHeaderHeight + (phase.key_achievements.length * rowHeight);
+            const totalNeededSpace = phaseHeaderHeight + tableHeight;
+            const remainingPageSpace = pdfTheme.layout.pageHeight - currentY - pdfTheme.spacing.margin;
+            
+            // If header + table won't fit, move to new page BEFORE adding header
+            if (totalNeededSpace > remainingPageSpace) {
+              pdf.addPage();
+              
+              // Draw page border on new page
+              pdf.setDrawColor(pdfTheme.colors.primary);
+              pdf.setLineWidth(pdfTheme.layout.borderWidth);
+              pdf.rect(
+                pdfTheme.spacing.margin, 
+                pdfTheme.spacing.margin, 
+                pdfTheme.layout.pageWidth - (pdfTheme.spacing.margin * 2), 
+                pdfTheme.layout.pageHeight - (pdfTheme.spacing.margin * 2)
+              );
+              
+              currentY = 40; // Start near top of new page
+            }
+          }
+          
+          // Phase header (now guaranteed to be on same page as table)
           currentY = addText(pdf, `${phase.period}: ${phase.phase_name}`, currentY, { 
             weight: 'bold', 
             fontSize: pdfTheme.fonts.sizes.subheader,
@@ -310,32 +339,10 @@ const generateRankPDF = (pdf: jsPDF, data: any): number => {
               const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
               const pageWidth = pdfTheme.layout.pageWidth;
               const tableStartX = (pageWidth - tableWidth) / 2; // Center the table
-              const tableStartY = currentY;
               const rowHeight = 12; // Slightly taller rows
               const headerHeight = 14;
               
-              // Check if table will fit on current page, if not create new page
-              const tableHeight = headerHeight + (phase.key_achievements.length * rowHeight);
-              const remainingPageSpace = pdfTheme.layout.pageHeight - currentY - pdfTheme.spacing.margin;
-              
-              let actualTableStartY = tableStartY;
-              
-              if (tableHeight > remainingPageSpace) {
-                pdf.addPage();
-                
-                // Draw page border on new page
-                pdf.setDrawColor(pdfTheme.colors.primary);
-                pdf.setLineWidth(pdfTheme.layout.borderWidth);
-                pdf.rect(
-                  pdfTheme.spacing.margin, 
-                  pdfTheme.spacing.margin, 
-                  pdfTheme.layout.pageWidth - (pdfTheme.spacing.margin * 2), 
-                  pdfTheme.layout.pageHeight - (pdfTheme.spacing.margin * 2)
-                );
-                
-                currentY = 40; // Start near top of new page
-                actualTableStartY = currentY;
-              }
+              const actualTableStartY = currentY;
               
               // Draw table header
               pdf.setFillColor(0, 0, 0); // Black background
