@@ -3107,6 +3107,7 @@ Return only valid JSON with the missing fields.`;
         });
       }
       
+      console.log('[DEBUG] handleMulterError - calling next(), file processed successfully');
       next();
     });
   };
