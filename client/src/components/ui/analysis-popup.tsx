@@ -43,7 +43,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import jsPDF from "jspdf";
+import { generateProfessionalPdf } from "@/lib/pdf/generator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 // Remove unused import
@@ -1063,17 +1063,16 @@ export function AnalysisPopup({
     });
 
     try {
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
-
       // Parse the analysis data
       const parsedData = parseAnalysisData(data);
       
-      // Generate PDF content based on analysis type
-      await generatePDFContent(pdf, type, parsedData, createdAt, athleteName);
+      // Use the professional PDF generator
+      const pdfBlob = await generateProfessionalPdf({
+        type,
+        data: parsedData,
+        createdAt,
+        athleteName
+      });
 
       // Generate filename based on type, athlete name and current date
       const now = new Date();
@@ -1081,8 +1080,15 @@ export function AnalysisPopup({
       const cleanAthleteName = athleteName ? athleteName.replace(/[^a-zA-Z0-9]/g, '_') : 'Analysis';
       const filename = `${cleanAthleteName}_${getTitle(type).replace(/\s+/g, '_')}_${dateStr}.pdf`;
 
-      // Save the PDF
-      pdf.save(filename);
+      // Create download link and trigger download
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
 
       toast({
         title: "Export Successful",
@@ -1100,8 +1106,8 @@ export function AnalysisPopup({
     }
   };
 
-  // Helper function to generate PDF content based on analysis type
-  const generatePDFContent = async (pdf: jsPDF, analysisType: string, data: any, createdAt?: string, athleteName?: string) => {
+  // Legacy PDF functions (unused - kept for reference)
+  const generatePDFContent = async (pdf: any, analysisType: string, data: any, createdAt?: string, athleteName?: string) => {
     const pageWidth = 210;
     const pageHeight = 297;
     const margin = 20;
