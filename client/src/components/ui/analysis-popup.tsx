@@ -1064,7 +1064,10 @@ export function AnalysisPopup({
 
     try {
       // Parse the analysis data
+      console.log('Original data before parsing:', data);
       const parsedData = parseAnalysisData(data);
+      console.log('Parsed data after parsing:', parsedData);
+      console.log('PDF generation type:', type);
       
       // Use the professional PDF generator
       const pdfBlob = await generateProfessionalPdf({

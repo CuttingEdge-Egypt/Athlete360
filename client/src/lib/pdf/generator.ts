@@ -303,14 +303,21 @@ const generateRankPDF = (pdf: jsPDF, data: any): number => {
           
           // Generate table for this phase's competitions
           if (phase.key_achievements && Array.isArray(phase.key_achievements) && phase.key_achievements.length > 0) {
-            const phaseTableData = phase.key_achievements.map((achievement: any) => [
-              String(achievement.year || ''),
-              String(achievement.event_name || achievement.competition || ''),
-              String(achievement.result || achievement.medal || ''),
-              String(achievement.event_tier || '')
-            ]);
-            
             try {
+              const phaseTableData = phase.key_achievements.map((achievement: any) => {
+                // Debug log to see the achievement structure
+                console.log('Processing achievement:', achievement);
+                return [
+                  String(achievement.year || ''),
+                  String(achievement.event_name || ''),
+                  String(achievement.result || ''),
+                  String(achievement.event_tier || '')
+                ];
+              });
+              
+              console.log('Phase table data prepared:', phaseTableData);
+              
+              // Use autoTable to generate the competition table
               pdf.autoTable({
                 head: [['Year', 'Event', 'Result', 'Tier']],
                 body: phaseTableData,
@@ -337,15 +344,22 @@ const generateRankPDF = (pdf: jsPDF, data: any): number => {
                 tableWidth: 150
               });
               
+              // Update currentY position after table
               if (pdf.lastAutoTable) {
                 currentY = pdf.lastAutoTable.finalY + 8;
+              } else {
+                currentY += 40; // fallback spacing
               }
+              
+              console.log('Phase table generated successfully');
+              
             } catch (tableError) {
               console.error('Phase table generation error:', tableError);
               currentY = addText(pdf, `• Competition data for ${phase.period} could not be displayed`, currentY, { indent: 15 });
               currentY += 5;
             }
           } else {
+            console.log('No key_achievements found for phase:', phase.period);
             currentY = addText(pdf, '• No competitions recorded for this phase', currentY, { indent: 15 });
             currentY += 5;
           }
