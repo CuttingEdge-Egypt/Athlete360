@@ -335,15 +335,6 @@ const generateRankPDF = (pdf: jsPDF, data: any): number => {
                 
                 currentY = 40; // Start near top of new page
                 actualTableStartY = currentY;
-                
-                // Re-add phase header on new page
-                currentY = addText(pdf, `${phase.period}: ${phase.phase_name}`, currentY, { 
-                  weight: 'bold', 
-                  fontSize: pdfTheme.fonts.sizes.subheader,
-                  indent: 10,
-                  extraSpacing: 3
-                });
-                actualTableStartY = currentY;
               }
               
               // Draw table header
