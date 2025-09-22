@@ -3112,7 +3112,11 @@ Return only valid JSON with the missing fields.`;
   };
 
   // Video Analysis endpoint with extended timeout
-  app.post('/api/analysis/video', isAuthenticated, handleMulterError, async (req: any, res) => {
+  app.post('/api/analysis/video', isAuthenticated, (req: any, res: any, next: any) => {
+    console.log('[DEBUG] Video route middleware chain - starting');
+    handleMulterError(req, res, next);
+  }, async (req: any, res) => {
+    console.log('[DEBUG] Video route handler - entered');
     // Set a long timeout for video processing (10 minutes)
     req.setTimeout(600000); // 10 minutes
     res.setTimeout(600000); // 10 minutes
