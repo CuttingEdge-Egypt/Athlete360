@@ -1054,6 +1054,105 @@ export function AnalysisPopup({
   const [showCustomizePlanModal, setShowCustomizePlanModal] = useState(false);
   const queryClient = useQueryClient();
 
+  const handleExport = async () => {
+    if (isExporting) return;
+    
+    setIsExporting(true);
+    toast({
+      title: "Export Started",
+      description: "Your PDF export is being generated...",
+    });
+
+    try {
+      // Find the dialog content to export
+      const element = document.querySelector(`[data-testid="popup-analysis-content-${type}"]`) as HTMLElement;
+      if (!element) {
+        toast({
+          title: "Export Error",
+          description: "Could not find content to export",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Create canvas from the content
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#1f2937', // Match our dark theme
+      });
+
+      // Create PDF
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      // Calculate dimensions to fit the content properly
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 295; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+
+      let position = 0;
+
+      // Add the first page
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Add additional pages if content is longer than one page
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Generate filename based on type, athlete name and current date
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0];
+      const cleanAthleteName = athleteName ? athleteName.replace(/[^a-zA-Z0-9]/g, '_') : 'Analysis';
+      const filename = `${cleanAthleteName}_${getTitle(type).replace(/\s+/g, '_')}_${dateStr}.pdf`;
+
+      // Save the PDF
+      pdf.save(filename);
+
+      toast({
+        title: "Export Successful",
+        description: `PDF has been downloaded as ${filename}`,
+      });
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast({
+        title: "Export Failed",
+        description: "There was an error generating the PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleShare = () => {
+    if (shareUrl) {
+      navigator.clipboard.writeText(shareUrl);
+      toast({
+        title: "Link Copied",
+        description: "Share link has been copied to clipboard",
+      });
+    } else {
+      const generatedUrl = `${window.location.origin}/shared/${Date.now()}`;
+      navigator.clipboard.writeText(generatedUrl);
+      toast({
+        title: "Share Link Generated",
+        description: "Your analysis share link has been copied to clipboard",
+      });
+    }
+  };
+
 
 
 
@@ -1190,7 +1289,7 @@ export function AnalysisPopup({
             </div>
             <div className="flex space-x-2">
               <Button 
-                onClick={() => {}}
+                onClick={handleExport}
                 size="sm"
                 className="bg-athlete-success hover:bg-green-600 text-white"
                 disabled={isExporting}
@@ -1199,7 +1298,7 @@ export function AnalysisPopup({
                 {isExporting ? "Exporting..." : "Export PDF"}
               </Button>
               <Button 
-                onClick={() => {}}
+                onClick={handleShare}
                 size="sm"
                 variant="outline"
                 className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white"
@@ -1211,7 +1310,7 @@ export function AnalysisPopup({
           </div>
         </DialogHeader>
 
-        <div className="p-6">
+        <div className="p-6" data-testid={`popup-analysis-content-${type}`}>
           {renderAnalysisContent()}
         </div>
       </DialogContent>
