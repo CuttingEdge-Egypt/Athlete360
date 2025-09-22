@@ -301,59 +301,87 @@ const generateRankPDF = (pdf: jsPDF, data: any): number => {
             });
           }
           
-          // Generate table for this phase's competitions
+          // Generate manual table for this phase's competitions
           if (phase.key_achievements && Array.isArray(phase.key_achievements) && phase.key_achievements.length > 0) {
             try {
-              const phaseTableData = phase.key_achievements.map((achievement: any) => {
-                // Debug log to see the achievement structure
-                console.log('Processing achievement:', achievement);
-                return [
+              console.log('Processing achievements for phase:', phase.period);
+              
+              // Table configuration
+              const tableStartX = pdfTheme.spacing.margin + 15;
+              const tableStartY = currentY;
+              const columnWidths = [20, 75, 30, 25]; // Year, Event, Result, Tier
+              const rowHeight = 10;
+              const headerHeight = 12;
+              
+              // Draw table header
+              pdf.setFillColor(0, 0, 0); // Black background
+              pdf.rect(tableStartX, tableStartY, columnWidths.reduce((a, b) => a + b, 0), headerHeight, 'F');
+              
+              // Header text
+              pdf.setTextColor(255, 255, 255); // White text
+              pdf.setFont(pdfTheme.fonts.primary, 'bold');
+              pdf.setFontSize(9);
+              
+              let headerX = tableStartX + 2;
+              pdf.text('Year', headerX, tableStartY + 8);
+              headerX += columnWidths[0];
+              pdf.text('Event', headerX, tableStartY + 8);
+              headerX += columnWidths[1];
+              pdf.text('Result', headerX, tableStartY + 8);
+              headerX += columnWidths[2];
+              pdf.text('Tier', headerX, tableStartY + 8);
+              
+              // Reset text color for table content
+              pdf.setTextColor(0, 0, 0);
+              pdf.setFont(pdfTheme.fonts.primary, 'normal');
+              pdf.setFontSize(8);
+              
+              let currentRowY = tableStartY + headerHeight;
+              
+              // Draw table rows
+              phase.key_achievements.forEach((achievement: any, index: number) => {
+                const rowData = [
                   String(achievement.year || ''),
-                  String(achievement.event_name || ''),
+                  String(achievement.event_name || '').substring(0, 35), // Truncate long names
                   String(achievement.result || ''),
                   String(achievement.event_tier || '')
                 ];
-              });
-              
-              console.log('Phase table data prepared:', phaseTableData);
-              
-              // Use autoTable to generate the competition table
-              (pdf as any).autoTable({
-                head: [['Year', 'Event', 'Result', 'Tier']],
-                body: phaseTableData,
-                startY: currentY,
-                margin: { left: pdfTheme.spacing.margin + 15 },
-                styles: {
-                  fontSize: 9,
-                  cellPadding: 2,
-                  overflow: 'linebreak',
-                  halign: 'left'
-                },
-                headStyles: {
-                  fillColor: [0, 0, 0],
-                  textColor: [255, 255, 255],
-                  fontSize: 9,
-                  fontStyle: 'bold'
-                },
-                columnStyles: {
-                  0: { cellWidth: 20 },
-                  1: { cellWidth: 75 },
-                  2: { cellWidth: 30 },
-                  3: { cellWidth: 25 }
+                
+                // Alternate row background
+                if (index % 2 === 1) {
+                  pdf.setFillColor(240, 240, 240); // Light gray
+                  pdf.rect(tableStartX, currentRowY, columnWidths.reduce((a, b) => a + b, 0), rowHeight, 'F');
                 }
+                
+                // Draw cell borders
+                pdf.setDrawColor(200, 200, 200);
+                pdf.setLineWidth(0.2);
+                let cellX = tableStartX;
+                columnWidths.forEach((width, colIndex) => {
+                  pdf.rect(cellX, currentRowY, width, rowHeight);
+                  cellX += width;
+                });
+                
+                // Add text content
+                let textX = tableStartX + 2;
+                rowData.forEach((text, colIndex) => {
+                  pdf.text(text, textX, currentRowY + 7);
+                  textX += columnWidths[colIndex];
+                });
+                
+                currentRowY += rowHeight;
               });
               
-              // Update currentY position after table
-              if ((pdf as any).lastAutoTable) {
-                currentY = (pdf as any).lastAutoTable.finalY + 8;
-              } else {
-                currentY += 40; // fallback spacing
-              }
+              // Draw table border
+              pdf.setDrawColor(0, 0, 0);
+              pdf.setLineWidth(0.5);
+              pdf.rect(tableStartX, tableStartY, columnWidths.reduce((a, b) => a + b, 0), headerHeight + (phase.key_achievements.length * rowHeight));
               
-              console.log('Phase table generated successfully');
+              currentY = currentRowY + 5;
+              console.log('Manual table generated successfully for phase:', phase.period);
               
             } catch (tableError) {
-              console.error('Phase table generation error:', tableError);
+              console.error('Manual table generation error:', tableError);
               currentY = addText(pdf, `• Competition data for ${phase.period} could not be displayed`, currentY, { indent: 15 });
               currentY += 5;
             }
