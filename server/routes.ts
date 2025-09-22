@@ -3126,6 +3126,8 @@ Return only valid JSON with the missing fields.`;
       size: req.file.size 
     } : 'No file');
 
+    let videoFilePath: string | null = null;
+    
     try {
       console.log(`[VIDEO ROUTE ${requestId}] Starting video analysis request`);
       const userId = req.user.claims.sub;
@@ -3142,70 +3144,114 @@ Return only valid JSON with the missing fields.`;
       }
 
       console.log(`[ROUTE ${requestId}] File validation passed: ${req.file.originalname} (${req.file.size} bytes)`);
+      console.log(`[ROUTE ${requestId}] File saved to: ${req.file.path}`);
+      
+      videoFilePath = req.file.path;
 
       // Check if user has enough tokens
       console.log(`[ROUTE ${requestId}] Checking user tokens...`);
       const user = await storage.getUser(userId);
-      if (!user || (user.tokens || 0) < tokenCost) {
-        console.log(`[ROUTE ${requestId}] Insufficient tokens: User has ${user?.tokens || 0}, needs ${tokenCost}`);
-        return res.status(402).json({ message: "Insufficient tokens" });
+        if (!user || (user.tokens || 0) < tokenCost) {
+          console.log(`[ROUTE ${requestId}] Insufficient tokens: User has ${user?.tokens || 0}, needs ${tokenCost}`);
+          return res.status(402).json({ message: "Insufficient tokens" });
+        }
+
+        console.log(`[ROUTE ${requestId}] Token check passed: User has ${user.tokens} tokens`);
+
+        // Deduct tokens
+        console.log(`[ROUTE ${requestId}] Deducting ${tokenCost} tokens...`);
+        await storage.deductTokens(userId, tokenCost);
+        console.log(`[ROUTE ${requestId}] Tokens deducted successfully`);
+
+        // Create transaction
+        console.log(`[ROUTE ${requestId}] Creating transaction record...`);
+        await storage.createTransaction({
+          userId,
+          action: "Video Analysis",
+          tokensDeducted: tokenCost,
+          athleteId: null, // No specific athlete for video analysis
+          serviceType: "video"
+        });
+        console.log(`[ROUTE ${requestId}] Transaction record created`);
+
+        console.log(`[ROUTE ${requestId}] Starting video analysis processing...`);
+        console.log(`[ROUTE ${requestId}] Video file details - Path: ${videoFilePath}, Size: ${req.file.size} bytes, Type: ${req.file.mimetype}`);
+        
+        const analysisStartTime = Date.now();
+        
+        // Process video with Gemini using file path instead of buffer
+        const analysisResults = await analyzeVideoFile(
+          videoFilePath, // Use file path instead of buffer
+          req.file.originalname,
+          round
+        );
+
+        const analysisTime = Date.now() - analysisStartTime;
+        console.log(`[ROUTE ${requestId}] Video analysis completed in ${analysisTime}ms`);
+
+        // Save analysis log
+        console.log(`[ROUTE ${requestId}] Saving analysis log to database...`);
+        await storage.createAnalysisLog({
+          userId,
+          athleteId: null,
+          serviceType: "video",
+          resultData: analysisResults
+        });
+        console.log(`[ROUTE ${requestId}] Analysis log saved to database`);
+
+        console.log(`[ROUTE ${requestId}] Sending successful response`);
+        res.json({
+          success: true,
+          message: "Video analysis completed successfully",
+          data: analysisResults
+        });
+
+      } catch (error) {
+        console.error(`[ROUTE ${requestId}] Error during video analysis:`, error);
+        console.error(`[ROUTE ${requestId}] Error stack:`, error instanceof Error ? error.stack : 'No stack trace');
+        console.error(`[ROUTE ${requestId}] Error type:`, typeof error);
+        
+        // Save error to database for debugging
+        try {
+          console.log(`[ROUTE ${requestId}] Saving error log to database...`);
+          await storage.createAnalysisLog({
+            userId,
+            athleteId: null,
+            serviceType: "video",
+            resultData: {
+              error: true,
+              errorMessage: error instanceof Error ? error.message : String(error),
+              errorType: error instanceof Error ? error.constructor.name : typeof error,
+              timestamp: new Date().toISOString(),
+              requestId,
+              fileName: req.file?.originalname,
+              fileSize: req.file?.size,
+              filePath: videoFilePath
+            }
+          });
+          console.log(`[ROUTE ${requestId}] Error log saved to database`);
+        } catch (dbError) {
+          console.error(`[ROUTE ${requestId}] Failed to save error log to database:`, dbError);
+        }
+        
+        res.status(500).json({ 
+          message: "Failed to analyze video",
+          error: error instanceof Error ? error.message : String(error),
+          requestId
+        });
+        
+      } finally {
+        // Clean up temporary file
+        if (videoFilePath && fs.existsSync(videoFilePath)) {
+          try {
+            console.log(`[ROUTE ${requestId}] Cleaning up temporary file: ${videoFilePath}`);
+            fs.unlinkSync(videoFilePath);
+            console.log(`[ROUTE ${requestId}] Temporary file cleaned up successfully`);
+          } catch (cleanupError) {
+            console.error(`[ROUTE ${requestId}] Failed to clean up temporary file:`, cleanupError);
+          }
+        }
       }
-
-      console.log(`[ROUTE ${requestId}] Token check passed: User has ${user.tokens} tokens`);
-
-      // Deduct tokens
-      console.log(`[ROUTE ${requestId}] Deducting ${tokenCost} tokens...`);
-      await storage.deductTokens(userId, tokenCost);
-      console.log(`[ROUTE ${requestId}] Tokens deducted successfully`);
-
-      // Create transaction
-      console.log(`[ROUTE ${requestId}] Creating transaction record...`);
-      await storage.createTransaction({
-        userId,
-        action: "Video Analysis",
-        tokensDeducted: tokenCost,
-        athleteId: null, // No specific athlete for video analysis
-        serviceType: "video"
-      });
-      console.log(`[ROUTE ${requestId}] Transaction record created`);
-
-      console.log(`[ROUTE ${requestId}] Starting video analysis processing...`);
-      const analysisStartTime = Date.now();
-      
-      // Process video with Gemini
-      const analysisResults = await analyzeVideoFile(
-        req.file.buffer,
-        req.file.originalname,
-        round
-      );
-
-      const analysisTime = Date.now() - analysisStartTime;
-      console.log(`[ROUTE ${requestId}] Video analysis completed in ${analysisTime}ms`);
-
-      // Save analysis log
-      console.log(`[ROUTE ${requestId}] Saving analysis log to database...`);
-      await storage.createAnalysisLog({
-        userId,
-        athleteId: null,
-        serviceType: "video",
-        resultData: analysisResults
-      });
-      console.log(`[ROUTE ${requestId}] Analysis log saved to database`);
-
-      console.log(`[ROUTE ${requestId}] Sending successful response`);
-      res.json({
-        success: true,
-        message: "Video analysis completed successfully",
-        data: analysisResults
-      });
-
-    } catch (error) {
-      console.error(`[ROUTE ${requestId}] Error processing video analysis:`, error);
-      res.status(500).json({ 
-        message: "Failed to analyze video",
-        error: error instanceof Error ? error.message : String(error)
-      });
-    }
   });
 
   // Dev Admin Middleware
