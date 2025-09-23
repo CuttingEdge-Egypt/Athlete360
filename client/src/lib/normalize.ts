@@ -548,16 +548,80 @@ export function normalizeComparison(raw: any): ComparisonViewModel | null {
       tabs.overview = overviewContent;
     }
     
-    // Strengths section
-    if (strengthsData) {
+    // Strengths section - always try to extract from detailed analysis
+    if (detailedAnalysis) {
+      let strengthsContent = '';
+      
+      // Extract from athlete physical attributes strengths first
+      [detailedAnalysis.athlete1, detailedAnalysis.athlete2].forEach((athlete, index) => {
+        if (!athlete) return;
+        
+        const name = athlete.name || `Athlete ${index + 1}`;
+        strengthsContent += `**${name} Strengths:**\n\n`;
+        
+        if (athlete.physicalAttributes?.strengths && Array.isArray(athlete.physicalAttributes.strengths)) {
+          athlete.physicalAttributes.strengths.forEach((strength: string, strengthIndex: number) => {
+            strengthsContent += `${strengthIndex + 1}. ${strength}\n`;
+          });
+          strengthsContent += '\n';
+        }
+        
+        // Also include technical skills as strengths
+        if (athlete.technicalSkills && Array.isArray(athlete.technicalSkills)) {
+          strengthsContent += `**Technical Strengths:**\n`;
+          athlete.technicalSkills.forEach((skill: any, skillIndex: number) => {
+            strengthsContent += `${skillIndex + 1}. **${skill.skill}** (${skill.proficiency || 'N/A'}%)\n`;
+            if (skill.description) strengthsContent += `   ${skill.description}\n`;
+            strengthsContent += '\n';
+          });
+        }
+        
+        strengthsContent += '---\n\n';
+      });
+      
+      tabs.strengths = strengthsContent;
+    } else if (strengthsData) {
       tabs.strengths = formatStrengthsData(strengthsData, detailedAnalysis);
-    } else if (detailedAnalysis) {
-      tabs.strengths = formatAthleteAnalysis(detailedAnalysis.athlete1, detailedAnalysis.athlete2, 'strengths');
     }
     
-    // Weaknesses section  
+    // Weaknesses section - extract from detailed analysis  
     if (detailedAnalysis) {
-      tabs.weaknesses = formatAthleteAnalysis(detailedAnalysis.athlete1, detailedAnalysis.athlete2, 'weaknesses');
+      let weaknessesContent = '';
+      
+      [detailedAnalysis.athlete1, detailedAnalysis.athlete2].forEach((athlete, index) => {
+        if (!athlete) return;
+        
+        const name = athlete.name || `Athlete ${index + 1}`;
+        weaknessesContent += `**${name} Areas for Improvement:**\n\n`;
+        
+        // Look for lower proficiency technical skills as potential weaknesses
+        if (athlete.technicalSkills && Array.isArray(athlete.technicalSkills)) {
+          const lowerSkills = athlete.technicalSkills.filter((skill: any) => skill.proficiency < 90);
+          if (lowerSkills.length > 0) {
+            weaknessesContent += `**Technical Areas to Develop:**\n`;
+            lowerSkills.forEach((skill: any, skillIndex: number) => {
+              weaknessesContent += `${skillIndex + 1}. ${skill.skill} (${skill.proficiency || 'N/A'}%)\n`;
+              if (skill.description) weaknessesContent += `   Current level: ${skill.description}\n`;
+              weaknessesContent += '\n';
+            });
+          }
+        }
+        
+        // Add performance-based analysis
+        if (athlete.recentPerformance) {
+          weaknessesContent += `**Performance Analysis:**\n`;
+          if (athlete.recentPerformance.losses) {
+            const winRate = athlete.recentPerformance.wins && athlete.recentPerformance.losses ? 
+              (parseInt(athlete.recentPerformance.wins) / (parseInt(athlete.recentPerformance.wins) + parseInt(athlete.recentPerformance.losses)) * 100).toFixed(1) : 'N/A';
+            weaknessesContent += `• Win rate: ${winRate}% - Room for improvement in consistency\n`;
+          }
+          weaknessesContent += '\n';
+        }
+        
+        weaknessesContent += '---\n\n';
+      });
+      
+      tabs.weaknesses = weaknessesContent;
     }
     
     // Technical Details section
