@@ -732,7 +732,11 @@ function PlayerAdviceSection({ adviceData, language = 'english' }: PlayerAdviceS
       const arabicTitles: Record<string, string> = {
         'Advice for Each Player': 'نصائح لكل لاعب',
         'General Observations': 'ملاحظات عامة',
-        'TACTICAL': 'تكتيكي'
+        'TACTICAL': 'تكتيكي',
+        'TECHNICAL': 'تقني',
+        'MENTAL': 'عقلي',
+        'Issues:': 'المشاكل:',
+        'Improvements:': 'التحسينات:'
       };
       return arabicTitles[key] || key;
     }
@@ -862,7 +866,6 @@ function PlayerAdviceSection({ adviceData, language = 'english' }: PlayerAdviceS
                           : 'text-white'
                       }`}
                     >
-                      <Target className="mr-2" size={18} />
                       {player.name} ({player.color})
                     </CardTitle>
                   </CardHeader>
@@ -875,7 +878,7 @@ function PlayerAdviceSection({ adviceData, language = 'english' }: PlayerAdviceS
                       </h4>
                       {player.tactical_advice?.issues?.length > 0 && (
                         <div>
-                          <p className="text-red-300 text-xs font-medium">Issues:</p>
+                          <p className="text-red-300 text-xs font-medium">{getTitle('Issues:')}</p>
                           <ul className="text-gray-300 text-sm space-y-1 ml-4">
                             {player.tactical_advice.issues.map((issue, i) => (
                               <li key={i} className="list-disc" data-testid={`tactical-issue-${index}-${i}`}>
@@ -887,7 +890,7 @@ function PlayerAdviceSection({ adviceData, language = 'english' }: PlayerAdviceS
                       )}
                       {player.tactical_advice?.improvements?.length > 0 && (
                         <div>
-                          <p className="text-green-300 text-xs font-medium">Improvements:</p>
+                          <p className="text-green-300 text-xs font-medium">{getTitle('Improvements:')}</p>
                           <ul className="text-gray-300 text-sm space-y-1 ml-4">
                             {player.tactical_advice.improvements.map((improvement, i) => (
                               <li key={i} className="list-disc" data-testid={`tactical-improvement-${index}-${i}`}>
@@ -903,11 +906,11 @@ function PlayerAdviceSection({ adviceData, language = 'english' }: PlayerAdviceS
                     <div className="space-y-2">
                       <h4 className="text-blue-400 font-semibold text-sm flex items-center">
                         <Brain className="mr-1" size={14} />
-                        TECHNICAL
+                        {getTitle('TECHNICAL')}
                       </h4>
                       {player.technical_advice?.issues?.length > 0 && (
                         <div>
-                          <p className="text-red-300 text-xs font-medium">Issues:</p>
+                          <p className="text-red-300 text-xs font-medium">{getTitle('Issues:')}</p>
                           <ul className="text-gray-300 text-sm space-y-1 ml-4">
                             {player.technical_advice.issues.map((issue, i) => (
                               <li key={i} className="list-disc" data-testid={`technical-issue-${index}-${i}`}>
@@ -919,7 +922,7 @@ function PlayerAdviceSection({ adviceData, language = 'english' }: PlayerAdviceS
                       )}
                       {player.technical_advice?.improvements?.length > 0 && (
                         <div>
-                          <p className="text-green-300 text-xs font-medium">Improvements:</p>
+                          <p className="text-green-300 text-xs font-medium">{getTitle('Improvements:')}</p>
                           <ul className="text-gray-300 text-sm space-y-1 ml-4">
                             {player.technical_advice.improvements.map((improvement, i) => (
                               <li key={i} className="list-disc" data-testid={`technical-improvement-${index}-${i}`}>
@@ -935,11 +938,11 @@ function PlayerAdviceSection({ adviceData, language = 'english' }: PlayerAdviceS
                     <div className="space-y-2">
                       <h4 className="text-purple-400 font-semibold text-sm flex items-center">
                         <MessageSquare className="mr-1" size={14} />
-                        MENTAL
+                        {getTitle('MENTAL')}
                       </h4>
                       {player.mental_advice?.issues?.length > 0 && (
                         <div>
-                          <p className="text-red-300 text-xs font-medium">Issues:</p>
+                          <p className="text-red-300 text-xs font-medium">{getTitle('Issues:')}</p>
                           <ul className="text-gray-300 text-sm space-y-1 ml-4">
                             {player.mental_advice.issues.map((issue, i) => (
                               <li key={i} className="list-disc" data-testid={`mental-issue-${index}-${i}`}>
@@ -951,7 +954,7 @@ function PlayerAdviceSection({ adviceData, language = 'english' }: PlayerAdviceS
                       )}
                       {player.mental_advice?.improvements?.length > 0 && (
                         <div>
-                          <p className="text-green-300 text-xs font-medium">Improvements:</p>
+                          <p className="text-green-300 text-xs font-medium">{getTitle('Improvements:')}</p>
                           <ul className="text-gray-300 text-sm space-y-1 ml-4">
                             {player.mental_advice.improvements.map((improvement, i) => (
                               <li key={i} className="list-disc" data-testid={`mental-improvement-${index}-${i}`}>
