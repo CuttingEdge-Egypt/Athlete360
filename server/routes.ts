@@ -3290,8 +3290,32 @@ Return only valid JSON with the missing fields.`;
       const fileStats = fs.statSync(videoFilePath);
       console.log(`[VIDEO ROUTE ${requestId}] File size: ${fileStats.size} bytes`);
       
-      // Extract round number from parsed form fields (default to 1 if not provided)
-      const round = parseInt(uploadResult.fields?.roundToAnalyze) || 1;
+      // Extract round number - simple fallback parsing from raw request body
+      let round = 1; // default
+      try {
+        // Try to extract from complex parser first
+        if (uploadResult.fields?.roundToAnalyze) {
+          round = parseInt(uploadResult.fields.roundToAnalyze);
+          console.log(`[VIDEO ROUTE ${requestId}] Round from complex parser: ${round}`);
+        } else {
+          // Fallback: extract from raw request body
+          const contentType = req.headers['content-type'] || '';
+          const boundary = contentType.split('boundary=')[1];
+          if (boundary) {
+            // Read the uploaded file back to extract form fields
+            const fileContent = fs.readFileSync(videoFilePath);
+            const fileString = fileContent.toString('latin1');
+            const roundMatch = fileString.match(/name="roundToAnalyze"\r?\n\r?\n(\d+)/);
+            if (roundMatch) {
+              round = parseInt(roundMatch[1]);
+              console.log(`[VIDEO ROUTE ${requestId}] Round from fallback parser: ${round}`);
+            }
+          }
+        }
+      } catch (parseError) {
+        console.log(`[VIDEO ROUTE ${requestId}] Round parsing failed, using default: 1`);
+        round = 1;
+      }
       
       console.log(`[ROUTE ${requestId}] User: ${userId}, File: ${fileName}, Round: ${round}`);
 
