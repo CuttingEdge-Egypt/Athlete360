@@ -5,8 +5,17 @@ import { setupVite, serveStatic, log } from "./vite";
 import { jobWorker } from "./jobWorker";
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// Apply body parsers to all routes EXCEPT video upload (Multer handles that)
+app.use((req, res, next) => {
+  if (req.path === '/api/analysis/video') {
+    // Skip body parsers for video upload route - Multer handles multipart
+    next();
+  } else {
+    express.json()(req, res, () => {
+      express.urlencoded({ extended: false })(req, res, next);
+    });
+  }
+});
 
 // Serve static files from attached_assets
 app.use('/attached_assets', express.static(path.join(process.cwd(), 'attached_assets')));
