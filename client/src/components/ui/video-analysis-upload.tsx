@@ -115,13 +115,13 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
       // Update loading message for processing phase
       setLoadingMessage('Processing video with Gemini AI...')
       
-      // Set up timeout control
+      // Set up timeout control - increased to 20 minutes for large video uploads + AI processing
       controller = new AbortController();
       timeoutId = setTimeout(() => {
         if (controller) {
-          controller.abort();
+          controller.abort(new Error('Request timeout - video analysis took too long'));
         }
-      }, 600000); // 10 minutes
+      }, 1200000); // 20 minutes
       
       const response = await fetch('/api/analysis/video', {
         method: 'POST',
