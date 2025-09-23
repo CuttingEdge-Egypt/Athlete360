@@ -63,7 +63,9 @@ export default function Landing() {
             <span className="text-xl font-bold">{t('landing.navigation.brand')}</span>
           </div>
           <div className="flex items-center gap-3">
-            <LanguageSwitcher />
+            {/* Language switcher - leftmost for Arabic */}
+            {language === 'ar' && <LanguageSwitcher />}
+            
             <Button 
               onClick={() => setLocation('/signup')}
               data-testid="button-signup"
@@ -80,6 +82,9 @@ export default function Landing() {
             >
               {t('landing.navigation.signIn')}
             </Button>
+            
+            {/* Language switcher - rightmost for English */}
+            {language === 'en' && <LanguageSwitcher />}
           </div>
         </div>
       </nav>
