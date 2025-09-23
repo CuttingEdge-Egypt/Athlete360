@@ -46,6 +46,8 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentQueueId, setCurrentQueueId] = useState<string | null>(null);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
+  const [progressPhase, setProgressPhase] = useState<string>("");
+  const [progressPercent, setProgressPercent] = useState(0);
   
   const IconComponent = iconMap[service.icon as keyof typeof iconMap] || User;
 
@@ -64,6 +66,8 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
           setIsProcessing(false);
           setCurrentQueueId(null);
           setAbortController(null);
+          setProgressPhase("");
+          setProgressPercent(0);
           
           toast({
             title: "Generation Cancelled",
@@ -89,6 +93,8 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         throw new Error("Analysis already in progress");
       }
       setIsProcessing(true);
+      setProgressPhase("Preparing analysis...");
+      setProgressPercent(10);
       
       // Create abort controller for this request
       const controller = new AbortController();
@@ -98,14 +104,34 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       const queueId = (window as any).generationQueue?.add?.(athlete.name, service.id, true);
       setCurrentQueueId(queueId);
       
+      // Update progress phases
+      setProgressPhase("Deducting tokens...");
+      setProgressPercent(20);
+      
       try {
         // Use standard analysis endpoints for all services
         const url = forceUpdate 
           ? `/api/analysis/${athlete.id}/${service.id}?forceUpdate=true`
           : `/api/analysis/${athlete.id}/${service.id}`;
         
+        setProgressPhase("Fetching athlete data...");
+        setProgressPercent(40);
+        
+        // Add a small delay to show the progress phase
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        setProgressPhase("AI processing...");
+        setProgressPercent(60);
+        
         const response = await apiRequest("POST", url, undefined, { signal: controller.signal });
+        
+        setProgressPhase("Finalizing results...");
+        setProgressPercent(90);
+        
         const result = await response.json();
+        
+        setProgressPhase("Complete!");
+        setProgressPercent(100);
         
         // Update queue with success
         if (queueId) {
@@ -155,6 +181,8 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         setIsProcessing(false);
         setCurrentQueueId(null);
         setAbortController(null);
+        setProgressPhase("");
+        setProgressPercent(0);
         return;
       }
       
@@ -163,6 +191,8 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       setIsProcessing(false);
       setCurrentQueueId(null);
       setAbortController(null);
+      setProgressPhase("");
+      setProgressPercent(0);
       
       toast({
         title: "Analysis Complete",
@@ -190,6 +220,8 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       setIsProcessing(false);
       setCurrentQueueId(null);
       setAbortController(null);
+      setProgressPhase("");
+      setProgressPercent(0);
       
       // Don't show error for cancelled requests
       if (error instanceof Error && error.name === 'AbortError') {
@@ -276,10 +308,22 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
             }}
           >
             {(analysisMutation.isPending || isProcessing) ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Analyzing...
-              </>
+              <div className="space-y-2 py-1">
+                <div className="flex items-center justify-center">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <span className="text-sm">
+                    {progressPhase || "Analyzing..."}
+                  </span>
+                </div>
+                {progressPercent > 0 && (
+                  <div className="w-full bg-gray-600 rounded-full h-2">
+                    <div 
+                      className="bg-white h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${progressPercent}%` }}
+                    ></div>
+                  </div>
+                )}
+              </div>
             ) : (
               "Generate"
             )}
