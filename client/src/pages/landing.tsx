@@ -376,7 +376,7 @@ export default function Landing() {
           onOpenChange={(open) => setPreviewModal({ open, serviceType: open ? previewModal.serviceType : null })}
           type={previewModal.serviceType}
           data={selectedAnalysis?.resultData}
-          athleteName={selectedAnalysis ? "Sample Athlete" : undefined}
+          athleteName={selectedAnalysis ? t('common.sampleAthlete') : undefined}
           createdAt={selectedAnalysis?.createdAt}
           shared={true}
         />

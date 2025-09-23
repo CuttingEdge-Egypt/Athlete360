@@ -59,7 +59,8 @@
     "searchingWithAI": "Searching with AI...",
     "loading": "Loading...",
     "error": "An error occurred",
-    "unknownCountry": "Unknown Country"
+    "unknownCountry": "Unknown Country",
+    "sampleAthlete": "Sample Athlete"
   },
   "tabs": {
     "overview": "Overview",

@@ -59,7 +59,8 @@
     "searchingWithAI": "البحث باستخدام الذكاء الاصطناعي...",
     "loading": "جارٍ التحميل...",
     "error": "حدث خطأ",
-    "unknownCountry": "بلد غير معروف"
+    "unknownCountry": "بلد غير معروف",
+    "sampleAthlete": "رياضي تجريبي"
   },
   "tabs": {
     "overview": "نظرة عامة",
