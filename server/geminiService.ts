@@ -1736,7 +1736,8 @@ Otherwise, ALWAYS return the full detailedAnalysis and headToHead structure even
 export async function generateRankHistoryWithGemini(
   athleteName: string,
   sport: string,
-  nationality?: string
+  nationality?: string,
+  language: string = 'en'
 ): Promise<GeminiRankResponse> {
   try {
     console.log(`Generating rank history with Gemini 2.5 Pro for ${athleteName} in ${sport}`);
@@ -1750,17 +1751,31 @@ export async function generateRankHistoryWithGemini(
     const currentMonth = currentDate.toLocaleString('en-US', { month: 'long' });
     const formattedCurrentDate = `${currentMonth} ${currentYear}`;
     
-    const prompt = `As an expert sports analyst, your task is to generate a comprehensive rank history analysis for athlete "${athleteName}" from ${nationality || 'unknown nationality'} in ${sport}.
+    // Language-specific instructions
+    const isArabic = language === 'ar';
+    const languageInstruction = isArabic 
+      ? `IMPORTANT LANGUAGE REQUIREMENT: You MUST respond in Arabic language. All text content in the JSON response including ranking_system_overview, analysis_narrative, phase_name, and notes should be written in Arabic. Write naturally in Arabic with proper grammar and structure.
 
-**CURRENT DATE CONTEXT**: Today is ${formattedCurrentDate}. Use this as your reference point for determining what is "current" and "recent" in your analysis.
+**التعليمات:**
 
-**Instructions:**
+1. **حلل، لا تسرد فقط:** لا تكتف بسرد إنجازات الرياضي. هدفك الأساسي هو إنشاء سردية تشرح **تأثير** هذه الإنجازات على ترتيب الرياضي ومكانته في رياضته.
+2. **اشرح "السبب":** استخدم نظرة عامة على نظام التصنيف لتوضيح *لماذا* أدت نتائج معينة إلى تغييرات كبيرة في الترتيب. اشرح كيف يوفر الفوز في الأحداث الكبرى دفعات نقاط كبيرة مقارنة بالأحداث الأقل مستوى.
+3. **استنتج المسار:** بناءً على النتائج، استنتج المسار المحتمل لترتيب الرياضي. استخدم عبارات مثل "هذا ربما دفعهم إلى أفضل 50" أو "هذا كان سيرسخ موقعهم بين النخبة" أو "هذا الأداء وضع ترتيبهم الأولي في المستوى الكبير".
+4. **اتبع التسلسل الزمني:** هيكل تحليلك زمنياً باستخدام مراحل مهنية. خصص قسماً لكل مرحلة، واشرح التقدم خلال تلك الفترة.
+5. **حافظ على نبرة مهنية:** اكتب التحليل بطريقة واضحة ومهنية وثاقبة، كما هو متوقع من صحفي رياضي أو محلل.`
+      : `**Instructions:**
 
 1. **Analyze, Don't Just List:** Do not simply list the athlete's achievements. Your primary goal is to create a narrative that explains the **impact** of these achievements on the athlete's ranking and standing within their sport.
 2. **Explain the "Why":** Use the ranking_system_overview to explain *why* certain results led to significant changes in rank. Explain how winning major events provides substantial point boosts compared to lower-tier events.
 3. **Infer the Trajectory:** Based on the results, infer the athlete's likely ranking trajectory. Use phrases like "this likely propelled them into the top 50," "this would have solidified their position among the elite," or "this performance established their initial senior ranking."
 4. **Follow the Chronology:** Structure your analysis chronologically using career phases. Dedicate a section to each phase, explaining the progression during that period.
-5. **Maintain a Professional Tone:** Write the analysis in a clear, professional, and insightful manner, as would be expected from a sports journalist or analyst.
+5. **Maintain a Professional Tone:** Write the analysis in a clear, professional, and insightful manner, as would be expected from a sports journalist or analyst.`;
+    
+    const prompt = `As an expert sports analyst, your task is to generate a comprehensive rank history analysis for athlete "${athleteName}" from ${nationality || 'unknown nationality'} in ${sport}.
+
+**CURRENT DATE CONTEXT**: Today is ${formattedCurrentDate}. Use this as your reference point for determining what is "current" and "recent" in your analysis.
+
+${languageInstruction}
 
 **REQUIRED JSON STRUCTURE:**
 {
@@ -1879,20 +1894,37 @@ Return ONLY valid JSON with no markdown formatting or additional text.`;
 }
 
 // Bio generation functions using Gemini 2.5 Pro
-export async function generateAthleteBiography(name: string, sport: string, nationality?: string): Promise<AthleteData> {
+export async function generateAthleteBiography(name: string, sport: string, nationality?: string, language: string = 'en'): Promise<AthleteData> {
   const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const nationalityContext = nationality ? ` from ${nationality}` : '';
   
-  const prompt = `Today's date is ${currentDate}.
-    
-    Using Google search, find factual, up-to-date information about the athlete "${name}"${nationalityContext}, who competes in ${sport}.
-    
-    Create a detailed biography structured with the following headings:
+  // Language-specific instructions
+  const isArabic = language === 'ar';
+  const languageInstruction = isArabic 
+    ? `IMPORTANT LANGUAGE REQUIREMENT: You MUST respond in Arabic language. All text content in the JSON response including bio, playersStory, achievement descriptions, and recent news should be written in Arabic. Write naturally in Arabic with proper grammar and structure.
+
+    Structure the biography with these Arabic headings:
+    - فقرة تعريفية
+    - قصة اللاعب الشاملة وما يُعرف به في ${sport}
+    - عنوان "المنافسات الأخيرة:"
+    - عنوان "السجل المهني والتصنيفات:"
+    - عنوان "الإنجازات البارزة:"`
+    : `Create a detailed biography structured with the following headings:
     - An introductory paragraph
     - Players' overall story and what they're known for in ${sport}
     - A heading "Recent Competitions:"
     - A heading "Career Record and Rankings:"
-    - A heading "Notable Achievements:"
+    - A heading "Notable Achievements:"`;
+
+  const medalTypes = isArabic 
+    ? '"ذهبية" | "فضية" | "برونزية" | "مشاركة"'
+    : '"Gold" | "Silver" | "Bronze" | "Participation"';
+
+  const prompt = `Today's date is ${currentDate}.
+    
+    Using Google search, find factual, up-to-date information about the athlete "${name}"${nationalityContext}, who competes in ${sport}.
+    
+    ${languageInstruction}
 
     Only mention information that is 100% accurate and verifiable.
 
@@ -1922,7 +1954,7 @@ export async function generateAthleteBiography(name: string, sport: string, nati
       "achievements": [
         {
           "achievement": "achievement description",
-          "medal": "Gold" | "Silver" | "Bronze" | "Participation"
+          "medal": ${medalTypes}
         }
       ],
       "recentNews": ["array of recent news or competition results"]
