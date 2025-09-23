@@ -104,18 +104,22 @@ const addSectionHeader = (pdf: jsPDF, title: string, currentY: number): number =
 
 const addText = (pdf: jsPDF, text: string, currentY: number, options: any = {}): number => {
   const { margin } = pdfTheme.spacing;
-  const maxWidth = 190;  // Increased width due to smaller margins
+  const { pageWidth } = pdfTheme.layout;
   const leftIndent = options.indent || 10; // Content indentation from margin
+  const maxWidth = pageWidth - (margin * 2) - leftIndent - 5; // Proper calculation for max width respecting borders
   
   pdf.setFont(pdfTheme.fonts.primary, options.weight || 'normal');
   pdf.setFontSize(options.fontSize || pdfTheme.fonts.sizes.body);
   
   if (text.length > 100) {
-    const lines = pdf.splitTextToSize(text, maxWidth - leftIndent);
-    pdf.text(lines, margin + leftIndent, currentY, { maxWidth: maxWidth - leftIndent, lineHeightFactor: 1.2 });
+    const lines = pdf.splitTextToSize(text, maxWidth);
+    // Use proper line spacing without lineHeightFactor to avoid spacing issues
+    lines.forEach((line: string, index: number) => {
+      pdf.text(line, margin + leftIndent, currentY + (index * pdfTheme.spacing.lineHeight));
+    });
     return currentY + (lines.length * pdfTheme.spacing.lineHeight) + (options.extraSpacing || 0);
   } else {
-    pdf.text(text, margin + leftIndent, currentY, { maxWidth: maxWidth - leftIndent });
+    pdf.text(text, margin + leftIndent, currentY);
     return currentY + pdfTheme.spacing.lineHeight + (options.extraSpacing || 0);
   }
 };
