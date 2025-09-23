@@ -52,7 +52,7 @@ import { paymobService } from "./paymobService";
 
 import { TestingService } from "./testingService";
 import OpenAI from "openai";
-import multer from "multer";
+import { Readable } from "stream";
 
 // HTML generation function for payment result pages
 interface PaymentResultData {
@@ -146,40 +146,78 @@ function generatePaymentResultHTML(data: PaymentResultData): string {
 // All LLM implementations now use GPT-5 with temperature 1.0 (default minimum)
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// Configure multer for video file uploads with disk storage
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => {
-      const uploadPath = path.join(process.cwd(), 'temp', 'uploads');
-      // Ensure directory exists
-      if (!fs.existsSync(uploadPath)) {
-        fs.mkdirSync(uploadPath, { recursive: true });
-      }
-      cb(null, uploadPath);
-    },
-    filename: (req, file, cb) => {
-      // Generate unique filename with timestamp and random string
-      const uniqueName = `video_${Date.now()}_${Math.random().toString(36).substring(7)}.${file.originalname.split('.').pop()}`;
-      cb(null, uniqueName);
-    }
-  }),
-  limits: {
-    fileSize: 500 * 1024 * 1024, // 500MB limit - restored to original working value
-    files: 1,
-    fieldSize: 10 * 1024 * 1024, // 10MB for form fields - fixed from broken 1KB limit
-  },
-  fileFilter: (req, file, cb) => {
-    console.log(`[MULTER] Processing file: ${file.originalname}, MIME type: ${file.mimetype}, Size: ${file.size || 'unknown'}`);
-    
-    // Accept video files
-    if (file.mimetype.startsWith('video/')) {
-      cb(null, true);
-    } else {
-      console.log(`[MULTER] Rejected file: ${file.originalname} - Invalid MIME type: ${file.mimetype}`);
-      cb(new Error('Only video files are allowed'));
-    }
+// Simple direct video upload handler - Sept 15 approach without Multer
+async function handleDirectVideoUpload(req: any): Promise<string> {
+  console.log('[DIRECT_UPLOAD] Starting video upload without Multer');
+  
+  // Parse multipart form data manually
+  const boundary = req.headers['content-type'].split('boundary=')[1];
+  if (!boundary) {
+    throw new Error('No multipart boundary found');
   }
-});
+  
+  const uploadPath = path.join(process.cwd(), 'temp', 'uploads');
+  if (!fs.existsSync(uploadPath)) {
+    fs.mkdirSync(uploadPath, { recursive: true });
+  }
+  
+  return new Promise((resolve, reject) => {
+    let buffer = Buffer.alloc(0);
+    let fileStarted = false;
+    let fileName = '';
+    let filePath = '';
+    
+    req.on('data', (chunk: Buffer) => {
+      buffer = Buffer.concat([buffer, chunk]);
+      
+      // Look for filename in headers if not started
+      if (!fileStarted) {
+        const bufferString = buffer.toString();
+        const filenameMatch = bufferString.match(/filename="([^"]+)"/);
+        
+        if (filenameMatch) {
+          fileName = filenameMatch[1];
+          const timestamp = Date.now();
+          const ext = path.extname(fileName);
+          filePath = path.join(uploadPath, `video_${timestamp}${ext}`);
+          
+          // Find where file content starts (after double CRLF)
+          const headerEnd = bufferString.indexOf('\r\n\r\n');
+          if (headerEnd !== -1) {
+            // Extract just the file content
+            const fileStart = headerEnd + 4;
+            buffer = buffer.slice(fileStart);
+            fileStarted = true;
+            console.log(`[DIRECT_UPLOAD] Found file: ${fileName}, saving to: ${filePath}`);
+          }
+        }
+      }
+    });
+    
+    req.on('end', () => {
+      if (fileStarted && filePath) {
+        // Remove the boundary ending from buffer
+        const boundaryEnd = `\r\n--${boundary}--\r\n`;
+        const lastBoundary = buffer.lastIndexOf(Buffer.from(boundaryEnd));
+        if (lastBoundary !== -1) {
+          buffer = buffer.slice(0, lastBoundary);
+        }
+        
+        // Write file directly to disk
+        fs.writeFileSync(filePath, buffer);
+        console.log(`[DIRECT_UPLOAD] File saved: ${filePath} (${buffer.length} bytes)`);
+        resolve(filePath);
+      } else {
+        reject(new Error('No file data received'));
+      }
+    });
+    
+    req.on('error', (error) => {
+      console.error('[DIRECT_UPLOAD] Upload error:', error);
+      reject(error);
+    });
+  });
+}
 
 // Helper function to detect failed AI analyses
 function isAnalysisFailed(data: any): boolean {
@@ -3068,61 +3106,10 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
-  // Multer error handling wrapper
-  const handleMulterError = (req: any, res: any, next: any) => {
-    upload.single('video')(req, res, (error: any) => {
-      if (error) {
-        console.error('[MULTER ERROR]', error);
-        
-        if (error instanceof multer.MulterError) {
-          if (error.code === 'LIMIT_FILE_SIZE') {
-            return res.status(413).json({ 
-              message: "File too large. Maximum file size is 500MB.",
-              code: 'LIMIT_FILE_SIZE'
-            });
-          }
-          if (error.code === 'LIMIT_FIELD_VALUE') {
-            return res.status(413).json({ 
-              message: "Form field too large. Maximum field size is 10MB.",
-              code: 'LIMIT_FIELD_VALUE'
-            });
-          }
-          if (error.code === 'LIMIT_FILE_COUNT') {
-            return res.status(400).json({ 
-              message: "Too many files uploaded.",
-              code: 'LIMIT_FILE_COUNT'
-            });
-          }
-          if (error.code === 'LIMIT_UNEXPECTED_FILE') {
-            return res.status(400).json({ 
-              message: "Unexpected file field.",
-              code: 'LIMIT_UNEXPECTED_FILE'
-            });
-          }
-          return res.status(400).json({ 
-            message: `File upload error: ${error.message}`,
-            code: error.code
-          });
-        }
-        
-        // Handle file filter errors
-        if (error.message === 'Only video files are allowed') {
-          return res.status(400).json({ 
-            message: "Invalid file type. Please upload a video file (MP4, MOV, AVI, etc.)." 
-          });
-        }
-        
-        return res.status(500).json({ 
-          message: `Upload error: ${error.message}` 
-        });
-      }
-      
-      next();
-    });
-  };
 
-  // Video Analysis endpoint with extended timeout - using Multer directly
-  app.post('/api/analysis/video', isAuthenticated, upload.single('video'), async (req: any, res) => {
+  // Video Analysis endpoint - Direct upload like Sept 15 Python implementation
+  // Video Analysis endpoint - Direct upload like Sept 15 Python implementation
+  app.post('/api/analysis/video', isAuthenticated, async (req: any, res) => {
     // Set a long timeout for video processing (10 minutes)
     req.setTimeout(600000); // 10 minutes
     res.setTimeout(600000); // 10 minutes
@@ -3133,134 +3120,144 @@ Return only valid JSON with the missing fields.`;
     console.log(`[VIDEO ROUTE ${requestId}] ===== VIDEO ANALYSIS REQUEST STARTED =====`);
     console.log(`[VIDEO ROUTE ${requestId}] Request received at ${new Date().toISOString()}`);
     console.log(`[VIDEO ROUTE ${requestId}] Headers:`, req.headers);
-    console.log(`[VIDEO ROUTE ${requestId}] Body keys:`, Object.keys(req.body || {}));
-    console.log(`[VIDEO ROUTE ${requestId}] File info:`, req.file ? { 
-      originalname: req.file.originalname, 
-      mimetype: req.file.mimetype, 
-      size: req.file.size 
-    } : 'No file');
-
+    
     let videoFilePath: string | null = null;
+    let fileName = '';
     
     try {
-      console.log(`[VIDEO ROUTE ${requestId}] Starting video analysis request`);
+      console.log(`[VIDEO ROUTE ${requestId}] Starting direct video upload (Sept 15 approach - no Multer)`);
       const userId = req.user.claims.sub;
-      const { roundToAnalyze } = req.body;
       
-      console.log(`[ROUTE ${requestId}] User: ${userId}, File: ${req.file?.originalname}, Round: ${roundToAnalyze}`);
+      // Handle direct file upload without Multer - like Python version
+      console.log(`[VIDEO ROUTE ${requestId}] Processing video upload directly...`);
+      videoFilePath = await handleDirectVideoUpload(req);
+      fileName = path.basename(videoFilePath);
       
-      // Validate required fields - set default round if not provided
-      const round = roundToAnalyze ? parseInt(roundToAnalyze) : 1;
+      console.log(`[VIDEO ROUTE ${requestId}] Direct upload complete: ${videoFilePath}`);
+      const fileStats = fs.statSync(videoFilePath);
+      console.log(`[VIDEO ROUTE ${requestId}] File size: ${fileStats.size} bytes`);
       
-      if (!req.file) {
-        console.log(`[ROUTE ${requestId}] Validation failed: No video file uploaded`);
-        return res.status(400).json({ message: "No video file uploaded" });
-      }
-
-      console.log(`[ROUTE ${requestId}] File validation passed: ${req.file.originalname} (${req.file.size} bytes)`);
-      console.log(`[ROUTE ${requestId}] File saved to: ${req.file.path}`);
+      // Default to round 1 like Sept 15 implementation
+      const round = 1;
       
-      videoFilePath = req.file.path;
+      console.log(`[ROUTE ${requestId}] User: ${userId}, File: ${fileName}, Round: ${round}`);
 
       // Check if user has enough tokens
       console.log(`[ROUTE ${requestId}] Checking user tokens...`);
       const user = await storage.getUser(userId);
-        if (!user || (user.tokens || 0) < tokenCost) {
-          console.log(`[ROUTE ${requestId}] Insufficient tokens: User has ${user?.tokens || 0}, needs ${tokenCost}`);
-          return res.status(402).json({ message: "Insufficient tokens" });
+      if (!user || (user.tokens || 0) < tokenCost) {
+        console.log(`[ROUTE ${requestId}] Insufficient tokens: User has ${user?.tokens || 0}, needs ${tokenCost}`);
+        // Clean up uploaded file
+        if (videoFilePath && fs.existsSync(videoFilePath)) {
+          fs.unlinkSync(videoFilePath);
         }
+        return res.status(402).json({ message: "Insufficient tokens" });
+      }
 
-        console.log(`[ROUTE ${requestId}] Token check passed: User has ${user.tokens} tokens`);
+      console.log(`[ROUTE ${requestId}] Token check passed: User has ${user.tokens} tokens`);
 
-        // Deduct tokens
-        console.log(`[ROUTE ${requestId}] Deducting ${tokenCost} tokens...`);
-        await storage.deductTokens(userId, tokenCost);
-        console.log(`[ROUTE ${requestId}] Tokens deducted successfully`);
+      // Deduct tokens
+      console.log(`[ROUTE ${requestId}] Deducting ${tokenCost} tokens...`);
+      await storage.deductTokens(userId, tokenCost);
+      console.log(`[ROUTE ${requestId}] Tokens deducted successfully`);
 
-        // Create transaction
-        console.log(`[ROUTE ${requestId}] Creating transaction record...`);
-        await storage.createTransaction({
-          userId,
-          action: "Video Analysis",
-          tokensDeducted: tokenCost,
-          athleteId: null, // No specific athlete for video analysis
-          serviceType: "video"
-        });
-        console.log(`[ROUTE ${requestId}] Transaction record created`);
+      // Create transaction
+      console.log(`[ROUTE ${requestId}] Creating transaction record...`);
+      await storage.createTransaction({
+        userId,
+        action: "Video Analysis",
+        tokensDeducted: tokenCost,
+        athleteId: null, // No specific athlete for video analysis
+        serviceType: "video"
+      });
+      console.log(`[ROUTE ${requestId}] Transaction record created`);
 
-        console.log(`[ROUTE ${requestId}] Starting video analysis processing...`);
-        console.log(`[ROUTE ${requestId}] Video file details - Path: ${videoFilePath}, Size: ${req.file.size} bytes, Type: ${req.file.mimetype}`);
-        
-        const analysisStartTime = Date.now();
-        
-        // Process video with Gemini using file path instead of buffer
-        if (!videoFilePath) {
-          throw new Error('Video file path is not available');
-        }
-        
-        const analysisResults = await analyzeVideoFile(
-          videoFilePath, // Use file path instead of buffer
-          req.file.originalname,
-          round
-        );
+      console.log(`[ROUTE ${requestId}] Starting video analysis processing...`);
+      console.log(`[ROUTE ${requestId}] Video file details - Path: ${videoFilePath}, Size: ${fileStats.size} bytes`);
+      
+      const analysisStartTime = Date.now();
+      
+      // Process video with Gemini using file path - exactly like Sept 15 Python version
+      if (!videoFilePath) {
+        throw new Error('Video file path is not available');
+      }
+      
+      const analysisResults = await analyzeVideoFile(
+        videoFilePath, // Direct file path like Python version
+        fileName,
+        round
+      );
 
-        const analysisTime = Date.now() - analysisStartTime;
-        console.log(`[ROUTE ${requestId}] Video analysis completed in ${analysisTime}ms`);
+      const analysisTime = Date.now() - analysisStartTime;
+      console.log(`[ROUTE ${requestId}] Video analysis completed in ${analysisTime}ms`);
 
-        // Save analysis log
-        console.log(`[ROUTE ${requestId}] Saving analysis log to database...`);
+      // Save analysis log
+      console.log(`[ROUTE ${requestId}] Saving analysis log to database...`);
+      await storage.createAnalysisLog({
+        userId,
+        athleteId: null,
+        serviceType: "video",
+        resultData: analysisResults
+      });
+      console.log(`[ROUTE ${requestId}] Analysis log saved to database`);
+
+      console.log(`[ROUTE ${requestId}] Sending successful response`);
+      res.json({
+        success: true,
+        message: "Video analysis completed successfully",
+        data: analysisResults
+      });
+
+    } catch (error) {
+      console.error(`[ROUTE ${requestId}] Error during video analysis:`, error);
+      console.error(`[ROUTE ${requestId}] Error stack:`, error instanceof Error ? error.stack : 'No stack trace');
+      console.error(`[ROUTE ${requestId}] Error type:`, typeof error);
+      
+      // Save error to database for debugging
+      try {
+        console.log(`[ROUTE ${requestId}] Saving error log to database...`);
         await storage.createAnalysisLog({
-          userId,
+          userId: req.user.claims.sub,
           athleteId: null,
           serviceType: "video",
-          resultData: analysisResults
+          resultData: {
+            error: true,
+            errorMessage: error instanceof Error ? error.message : String(error),
+            errorType: error instanceof Error ? error.constructor.name : typeof error,
+            timestamp: new Date().toISOString(),
+            requestId,
+            fileName: fileName,
+            fileSize: videoFilePath && fs.existsSync(videoFilePath) ? fs.statSync(videoFilePath).size : 0,
+            filePath: videoFilePath
+          }
         });
-        console.log(`[ROUTE ${requestId}] Analysis log saved to database`);
-
-        console.log(`[ROUTE ${requestId}] Sending successful response`);
-        res.json({
-          success: true,
-          message: "Video analysis completed successfully",
-          data: analysisResults
-        });
-
-      } catch (error) {
-        console.error(`[ROUTE ${requestId}] Error during video analysis:`, error);
-        console.error(`[ROUTE ${requestId}] Error stack:`, error instanceof Error ? error.stack : 'No stack trace');
-        console.error(`[ROUTE ${requestId}] Error type:`, typeof error);
-        
-        // Save error to database for debugging
+        console.log(`[ROUTE ${requestId}] Error log saved to database`);
+      } catch (dbError) {
+        console.error(`[ROUTE ${requestId}] Failed to save error log to database:`, dbError);
+      }
+      
+      res.status(500).json({ 
+        message: "Failed to analyze video",
+        error: error instanceof Error ? error.message : String(error),
+        requestId
+      });
+      
+    } finally {
+      // Clean up video file after processing
+      console.log(`[ROUTE ${requestId}] Cleaning up temporary files...`);
+      
+      if (videoFilePath && fs.existsSync(videoFilePath)) {
         try {
-          console.log(`[ROUTE ${requestId}] Saving error log to database...`);
-          await storage.createAnalysisLog({
-            userId: req.user.claims.sub,
-            athleteId: null,
-            serviceType: "video",
-            resultData: {
-              error: true,
-              errorMessage: error instanceof Error ? error.message : String(error),
-              errorType: error instanceof Error ? error.constructor.name : typeof error,
-              timestamp: new Date().toISOString(),
-              requestId,
-              fileName: req.file?.originalname,
-              fileSize: req.file?.size,
-              filePath: videoFilePath
-            }
-          });
-          console.log(`[ROUTE ${requestId}] Error log saved to database`);
-        } catch (dbError) {
-          console.error(`[ROUTE ${requestId}] Failed to save error log to database:`, dbError);
+          fs.unlinkSync(videoFilePath);
+          console.log(`[ROUTE ${requestId}] Deleted temporary file: ${videoFilePath}`);
+        } catch (cleanupError) {
+          console.error(`[ROUTE ${requestId}] Failed to delete temporary file:`, cleanupError);
         }
-        
-        res.status(500).json({ 
-          message: "Failed to analyze video",
-          error: error instanceof Error ? error.message : String(error),
-          requestId
-        });
-        
-      } finally {
-        // Clean up temporary file
-        if (videoFilePath && fs.existsSync(videoFilePath)) {
+      }
+      
+      console.log(`[ROUTE ${requestId}] ===== VIDEO ANALYSIS REQUEST COMPLETED =====`);
+    }
+  });        if (videoFilePath && fs.existsSync(videoFilePath)) {
           try {
             console.log(`[ROUTE ${requestId}] Cleaning up temporary file: ${videoFilePath}`);
             fs.unlinkSync(videoFilePath);
