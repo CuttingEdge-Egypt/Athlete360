@@ -286,15 +286,28 @@ const generateBioPDF = (pdf: jsPDF, data: any): number => {
   if (athleteInfo.sport) {
     currentY = addText(pdf, `Sport: ${athleteInfo.sport}`, currentY, { indent: 10 });
   }
+  
+  currentY += pdfTheme.spacing.sectionGap;
+  
+  // Current Status Section
+  currentY = addSectionHeader(pdf, 'Current Status', currentY);
+  
+  // Determine active/inactive status based on data
+  const isActive = data.data?.active_period?.end_year === "September 2025" || 
+                   data.data?.active_period?.end_year === "Present" ||
+                   data.active_period?.end_year === "September 2025" ||
+                   data.active_period?.end_year === "Present" ||
+                   !data.data?.active_period?.end_year ||
+                   !data.active_period?.end_year;
+  
+  const statusText = isActive ? "Active" : "Inactive";
+  currentY = addText(pdf, `Status: ${statusText}`, currentY, { weight: 'bold', indent: 10 });
+  
   if (athleteInfo.rank) {
     currentY = addText(pdf, `Current Rank: ${athleteInfo.rank}`, currentY, { indent: 10 });
   }
   
-  currentY += pdfTheme.spacing.sectionGap;
-  
-  // Bio Content
   if (bioSections.introduction) {
-    currentY = addSectionHeader(pdf, 'Current Status', currentY);
     currentY = addText(pdf, bioSections.introduction, currentY, { 
       indent: 10,
       extraSpacing: pdfTheme.spacing.paragraphGap 
