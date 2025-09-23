@@ -914,7 +914,8 @@ export function AnalysisPopup({
     }
     
     // Parse bio content to extract different sections
-    const bioSections = parseBioSections(bio);
+    // Handle both string and object bio formats (Arabic responses come as objects)
+    const bioSections = typeof bio === 'string' ? parseBioSections(bio) : bio;
 
     return (
       <div className="space-y-8 max-w-none">
@@ -1245,7 +1246,8 @@ export function AnalysisPopup({
       return sections;
     };
 
-    const bioSections = parseBioSections(bio);
+    // Handle both string and object bio formats (Arabic responses come as objects)
+    const bioSections = typeof bio === 'string' ? parseBioSections(bio) : bio;
 
     // Introduction
     if (bioSections.introduction) {
