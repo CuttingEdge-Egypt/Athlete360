@@ -81,5 +81,13 @@
   "languages": {
     "english": "English",
     "arabic": "العربية"
+  },
+  "analysis": {
+    "bio": {
+      "title": "Complete Athlete Biography",
+      "header": "Biography Analysis",
+      "introduction": "Introduction",
+      "playersStory": "Player's Story"
+    }
   }
 }

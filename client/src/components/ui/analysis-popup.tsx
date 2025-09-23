@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -85,6 +86,7 @@ export function AnalysisPopup({
   shareUrl,
   onRefresh,
 }: AnalysisPopupProps) {
+  const { t } = useTranslation();
 
   // Utility function to parse analysis data consistently
   const parseAnalysisData = (rawData: any) => {
@@ -819,7 +821,7 @@ export function AnalysisPopup({
           {/* Bio Analysis Header */}
           <div className="flex items-center space-x-3 mb-6">
             <User className="text-athlete-accent" size={32} />
-            <h2 className="text-2xl font-bold text-athlete-accent">Biography Analysis</h2>
+            <h2 className="text-2xl font-bold text-athlete-accent">{t("analysis.bio.header", "Biography Analysis")}</h2>
           </div>
 
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-accent border-gray-600 shadow-xl">
@@ -842,7 +844,7 @@ export function AnalysisPopup({
               <CardContent className="p-8">
                 <h3 className="text-3xl font-bold text-cyan-400 mb-6 flex items-center">
                   <Star className="mr-4 text-cyan-400" size={32} />
-                  Player's Story
+                  {t("analysis.bio.playersStory", "Player's Story")}
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <p className="text-gray-200 leading-relaxed text-lg">{playersStory}</p>
@@ -951,7 +953,7 @@ export function AnalysisPopup({
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-emerald-400 mb-6 flex items-center">
                 <User className="mr-4 text-emerald-400" size={32} />
-                Introduction
+                {t("analysis.bio.introduction", "Introduction")}
               </h3>
               <div className="prose prose-invert max-w-none">
                 <p className="text-gray-200 leading-relaxed text-lg">{bioSections.introduction}</p>
@@ -966,7 +968,7 @@ export function AnalysisPopup({
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-cyan-400 mb-6 flex items-center">
                 <Star className="mr-4 text-cyan-400" size={32} />
-                Player's Story
+                {t("analysis.bio.playersStory", "Player's Story")}
               </h3>
               <div className="prose prose-invert max-w-none">
                 <p className="text-gray-200 leading-relaxed text-lg">{playersStory || bioSections.overallStory}</p>
@@ -1249,7 +1251,7 @@ export function AnalysisPopup({
     if (bioSections.introduction) {
       pdf.setFontSize(14);
       pdf.setFont('helvetica', 'bold');
-      currentY = addText("Introduction", margin, currentY, { lineHeight: 8 });
+      currentY = addText(t("analysis.bio.introduction", "Introduction"), margin, currentY, { lineHeight: 8 });
       currentY += 3;
       
       pdf.setFontSize(11);
@@ -1263,7 +1265,7 @@ export function AnalysisPopup({
     if (storyText) {
       pdf.setFontSize(14);
       pdf.setFont('helvetica', 'bold');
-      currentY = addText("Player's Story", margin, currentY, { lineHeight: 8 });
+      currentY = addText(t("analysis.bio.playersStory", "Player's Story"), margin, currentY, { lineHeight: 8 });
       currentY += 3;
       
       pdf.setFontSize(11);
@@ -1607,7 +1609,7 @@ export function AnalysisPopup({
   const getTitle = (type: string) => {
     switch (type) {
       case "bio":
-        return "Complete Athlete Biography";
+        return t("analysis.bio.title", "Complete Athlete Biography");
       case "rank":
         return "Competitive History";
       case "strengths":

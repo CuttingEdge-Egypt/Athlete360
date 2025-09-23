@@ -81,5 +81,13 @@
   "languages": {
     "english": "English",
     "arabic": "العربية"
+  },
+  "analysis": {
+    "bio": {
+      "title": "سيرة ذاتية شاملة للرياضي",
+      "header": "تحليل السيرة الذاتية",
+      "introduction": "مقدمة",
+      "playersStory": "قصة اللاعب"
+    }
   }
 }
