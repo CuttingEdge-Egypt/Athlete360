@@ -1185,6 +1185,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const tokenCost = 50;
     const userId = req.user.claims.sub;
     const athleteId = req.params.athleteId;
+    const language = req.body.language || 'en'; // Extract language from request body
     try {
 
       const user = await storage.getUser(userId);
@@ -1250,7 +1251,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         try {
           // Generate athlete-specific strengths analysis
-          const strengthsAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'strengths', athleteDataForAnalysis);
+          const strengthsAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'strengths', athleteDataForAnalysis, undefined, language);
         
         const aiStrengths = strengthsAnalysis.strengths?.length > 0 
           ? strengthsAnalysis.strengths.map((strength: any, index: number) => ({
@@ -1348,6 +1349,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const tokenCost = 50;
     const userId = req.user.claims.sub;
     const athleteId = req.params.athleteId;
+    const language = req.body.language || 'en'; // Extract language from request body
     try {
 
       const user = await storage.getUser(userId);
@@ -1414,7 +1416,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         try {
           // Generate personalized weaknesses analysis
-          const weaknessesAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'weaknesses', athleteDataForAnalysis);
+          const weaknessesAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'weaknesses', athleteDataForAnalysis, undefined, language);
         
         const aiWeaknesses = weaknessesAnalysis.weaknesses?.length > 0 
           ? weaknessesAnalysis.weaknesses.map((weakness: any, index: number) => ({
@@ -2186,6 +2188,7 @@ Return only valid JSON with the missing fields.`;
     const tokenCost = 100;
     const userId = req.user.claims.sub;
     const athleteId = req.params.athleteId;
+    const language = req.body.language || 'en'; // Extract language from request body
     try {
 
       const user = await storage.getUser(userId);
@@ -2234,7 +2237,7 @@ Return only valid JSON with the missing fields.`;
       };
       
       // Generate athlete-specific beat strategies
-      const strategiesAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'beat-strategies', athleteDataForAnalysis);
+      const strategiesAnalysis = await generateSpecificAnalysis(athlete.name, sportName, 'beat-strategies', athleteDataForAnalysis, undefined, language);
       
       let beatStrategies;
       if (strategiesAnalysis.strategies?.length > 0) {

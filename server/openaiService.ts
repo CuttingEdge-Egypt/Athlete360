@@ -1366,16 +1366,22 @@ RESPONSE FORMAT REQUIREMENTS:
 }
 
 // GPT-5 implementation of specific analysis generation  
-export async function generateSpecificAnalysis(athleteName: string, sport: string, analysisType: string, athleteData?: any, customPrompt?: string): Promise<any> {
+export async function generateSpecificAnalysis(athleteName: string, sport: string, analysisType: string, athleteData?: any, customPrompt?: string, language: string = 'en'): Promise<any> {
   let prompt = '';
   
   if (analysisType === 'rank' && athleteData) {
     // Use the new enhanced rank history generation
     return await generateRankHistory(athleteName, sport, athleteData.country);
   } else if (analysisType === 'strengths' && athleteData) {
+    // Language-specific instructions
+    const isArabic = language === 'ar';
+    const languageInstruction = isArabic 
+      ? `\n\nIMPORTANT LANGUAGE REQUIREMENT: You MUST respond in Arabic language. All text content in the JSON response including title, description, and evidence should be written in Arabic. Write naturally in Arabic with proper grammar and structure. Keep JSON field names in English, but translate all string values to Arabic.`
+      : '';
+
     prompt = `You are an expert ${sport} coach and analyst. Research and analyze the specific competitive strengths of athlete "${athleteName}" from ${athleteData.country || 'unknown country'}.
 
-CRITICAL: Return only valid JSON. No extra text or explanations.
+CRITICAL: Return only valid JSON. No extra text or explanations.${languageInstruction}
 
 Use the following athlete information for personalized analysis:
 - Name: ${athleteName}
@@ -1418,9 +1424,15 @@ CRITICAL ERROR HANDLING:
 - If the athlete/information does not exist, respond with exactly: {"error": "not_found", "success": false}
 - Only provide data if you find authentic, verifiable information through web search`;
   } else if (analysisType === 'weaknesses' && athleteData) {
+    // Language-specific instructions
+    const isArabic = language === 'ar';
+    const languageInstruction = isArabic 
+      ? `\n\nIMPORTANT LANGUAGE REQUIREMENT: You MUST respond in Arabic language. All text content in the JSON response including title, description, and evidence should be written in Arabic. Write naturally in Arabic with proper grammar and structure. Keep JSON field names in English, but translate all string values to Arabic.`
+      : '';
+
     prompt = `You are an expert ${sport} coach and analyst. Research and analyze the specific weaknesses and areas for improvement for athlete "${athleteName}" from ${athleteData.country || 'unknown country'}.
 
-CRITICAL: Return only valid JSON. No extra text or explanations.
+CRITICAL: Return only valid JSON. No extra text or explanations.${languageInstruction}
 
 Use the following athlete information for personalized analysis:
 - Name: ${athleteName}
@@ -1462,7 +1474,13 @@ CRITICAL ERROR HANDLING:
 - If the athlete/information does not exist, respond with exactly: {"error": "not_found", "success": false}
 - Only provide data if you find authentic, verifiable information through web search`;
   } else if (analysisType === 'beat-strategies' && athleteData) {
-    prompt = `As an expert ${sport} coach specializing in tactical analysis, develop specific strategies to defeat athlete "${athleteName}".
+    // Language-specific instructions
+    const isArabic = language === 'ar';
+    const languageInstruction = isArabic 
+      ? `\n\nIMPORTANT LANGUAGE REQUIREMENT: You MUST respond in Arabic language. All text content in the JSON response including title, description, and execution should be written in Arabic. Write naturally in Arabic with proper grammar and structure. Keep JSON field names in English, but translate all string values to Arabic.`
+      : '';
+
+    prompt = `As an expert ${sport} coach specializing in tactical analysis, develop specific strategies to defeat athlete "${athleteName}".${languageInstruction}
 
     Athlete Profile for Analysis:
     - Name: ${athleteName}
