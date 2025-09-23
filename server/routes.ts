@@ -3121,8 +3121,8 @@ Return only valid JSON with the missing fields.`;
     });
   };
 
-  // Video Analysis endpoint with extended timeout
-  app.post('/api/analysis/video', isAuthenticated, handleMulterError, async (req: any, res) => {
+  // Video Analysis endpoint with extended timeout - using Multer directly
+  app.post('/api/analysis/video', isAuthenticated, upload.single('video'), async (req: any, res) => {
     // Set a long timeout for video processing (10 minutes)
     req.setTimeout(600000); // 10 minutes
     res.setTimeout(600000); // 10 minutes
