@@ -705,9 +705,49 @@ function PlayerAdviceSection({ adviceData }: PlayerAdviceSectionProps) {
   useEffect(() => {
     if (adviceData) {
       try {
-        const parsed = typeof adviceData === 'string' 
-          ? JSON.parse(adviceData) 
-          : adviceData;
+        // Use the same robust parsing logic as other components
+        let parsed = adviceData;
+        
+        if (typeof adviceData === 'string') {
+          // Check if it's a markdown-wrapped JSON string
+          if (adviceData.includes('```json') || adviceData.includes('```')) {
+            // Extract JSON from markdown code blocks
+            let content = adviceData;
+            if (content.startsWith('```json') && content.endsWith('```')) {
+              content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+            } else if (content.startsWith('```') && content.endsWith('```')) {
+              content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
+            }
+            // Try to parse the extracted content as JSON
+            parsed = JSON.parse(content.trim());
+          } else {
+            // Try to parse as direct JSON
+            try {
+              parsed = JSON.parse(adviceData);
+            } catch (directParseError) {
+              // If direct parse fails, check if it's wrapped in a content field object
+              try {
+                const contentWrapper = JSON.parse(adviceData);
+                if (contentWrapper.content) {
+                  // Extract JSON from markdown code blocks in content
+                  let content = contentWrapper.content;
+                  if (content.startsWith('```json') && content.endsWith('```')) {
+                    content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+                  } else if (content.startsWith('```') && content.endsWith('```')) {
+                    content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
+                  }
+                  parsed = JSON.parse(content.trim());
+                } else {
+                  parsed = contentWrapper;
+                }
+              } catch (wrapperParseError) {
+                // If all parsing fails, use the original string
+                throw new Error('Could not parse advice data');
+              }
+            }
+          }
+        }
+        
         setParsedAdviceData(parsed);
         setHasParsingError(false);
       } catch (error) {
