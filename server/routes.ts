@@ -164,9 +164,9 @@ const upload = multer({
     }
   }),
   limits: {
-    fileSize: 100 * 1024 * 1024, // 100MB limit - optimized for testing
+    fileSize: 500 * 1024 * 1024, // 500MB limit - restored to original working value
     files: 1,
-    fieldSize: 10 * 1024 * 1024, // 10MB for form fields (was 1KB - too restrictive!)
+    fieldSize: 10 * 1024 * 1024, // 10MB for form fields - fixed from broken 1KB limit
   },
   fileFilter: (req, file, cb) => {
     console.log(`[MULTER] Processing file: ${file.originalname}, MIME type: ${file.mimetype}, Size: ${file.size || 'unknown'}`);
@@ -3077,7 +3077,7 @@ Return only valid JSON with the missing fields.`;
         if (error instanceof multer.MulterError) {
           if (error.code === 'LIMIT_FILE_SIZE') {
             return res.status(413).json({ 
-              message: "File too large. Maximum file size is 100MB.",
+              message: "File too large. Maximum file size is 500MB.",
               code: 'LIMIT_FILE_SIZE'
             });
           }
@@ -3117,17 +3117,12 @@ Return only valid JSON with the missing fields.`;
         });
       }
       
-      console.log('[DEBUG] handleMulterError - calling next(), file processed successfully');
       next();
     });
   };
 
   // Video Analysis endpoint with extended timeout
-  app.post('/api/analysis/video', isAuthenticated, (req: any, res: any, next: any) => {
-    console.log('[DEBUG] Video route middleware chain - starting');
-    handleMulterError(req, res, next);
-  }, async (req: any, res) => {
-    console.log('[DEBUG] Video route handler - entered');
+  app.post('/api/analysis/video', isAuthenticated, handleMulterError, async (req: any, res) => {
     // Set a long timeout for video processing (10 minutes)
     req.setTimeout(600000); // 10 minutes
     res.setTimeout(600000); // 10 minutes
