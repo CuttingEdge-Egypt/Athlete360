@@ -1615,7 +1615,7 @@ export function AnalysisPopup({
         return "Areas for Improvement";
       case "development":
       case "development-plan":
-        return "12-Week Development Program";
+        return "Development Plan";
       case "nutrition":
       case "nutrition-plan":
         return "Personalized Nutrition Plan";
