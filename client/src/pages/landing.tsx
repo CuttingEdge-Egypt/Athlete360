@@ -1,15 +1,43 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus, Gift, UserPlus, TrendingDown, Target, Calendar, Video, Users, Twitter, Instagram, Linkedin, Mail, MessageCircle, Eye } from "lucide-react";
+import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus, Gift, UserPlus, TrendingDown, Target, Calendar, Video, Users, Twitter, Instagram, Linkedin, Mail, MessageCircle, Eye, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { AnalysisPopup } from "@/components/ui/analysis-popup";
+
+interface PreviewAnalysisItem {
+  serviceType: string;
+  resultData: any;
+  createdAt: string;
+}
+
+interface PreviewApiResponse {
+  success: boolean;
+  data: PreviewAnalysisItem[];
+  count: number;
+}
 
 export default function Landing() {
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [, setLocation] = useLocation();
   const [previewModal, setPreviewModal] = useState<{ open: boolean; serviceType: string | null }>({ open: false, serviceType: null });
+
+  // Fetch preview data for the selected service type
+  const { data: previewData, isLoading: previewLoading } = useQuery<PreviewApiResponse>({
+    queryKey: ['/api/preview/latest-by-type', previewModal.serviceType],
+    enabled: previewModal.open && !!previewModal.serviceType,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Get the specific analysis data for the selected service type
+  const getAnalysisForPreview = () => {
+    if (!previewData?.data || !previewModal.serviceType) return null;
+    return previewData.data.find((item: any) => item.serviceType === previewModal.serviceType);
+  };
+
+  const selectedAnalysis = getAnalysisForPreview();
 
   useEffect(() => {
     // Check if there's a referral code in the URL
@@ -373,6 +401,36 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* Analysis Preview Modal */}
+      {previewModal.serviceType && (
+        <AnalysisPopup
+          open={previewModal.open}
+          onOpenChange={(open) => setPreviewModal({ open, serviceType: open ? previewModal.serviceType : null })}
+          type={previewModal.serviceType}
+          data={selectedAnalysis?.resultData}
+          athleteName={selectedAnalysis ? "Sample Athlete" : undefined}
+          createdAt={selectedAnalysis?.createdAt}
+          shared={true}
+        />
+      )}
+
+      {/* Loading Modal for Preview */}
+      <Dialog open={previewModal.open && previewLoading}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-center space-x-2">
+              <Loader2 className="animate-spin" size={20} />
+              <span>Loading Preview...</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="text-center py-8">
+            <p className="text-gray-400">
+              Fetching the latest {previewModal.serviceType} analysis for preview
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Footer */}
       <footer className="bg-athlete-primary border-t border-gray-800 py-12">
