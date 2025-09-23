@@ -28,6 +28,55 @@
     "title": "About Athlete360 AI",
     "description": "Revolutionary sports analytics platform that combines artificial intelligence with deep athletic insights to provide unprecedented analysis of any athlete's performance, strengths, and development opportunities."
   },
+  "landing": {
+    "navigation": {
+      "brand": "Athlete360",
+      "signUp": "Sign Up",
+      "signIn": "Sign In"
+    },
+    "hero": {
+      "title": "Athlete360",
+      "subtitle": "AI-Powered Athlete Analytics & Performance Optimization Platform",
+      "description": "Analyze any athlete's performance, get tactical insights, create development plans, and unlock the secrets to athletic excellence with our revolutionary AI system.",
+      "ctaStart": "Start Free Trial - 1000 Tokens",
+      "ctaSignIn": "Sign In to Continue"
+    },
+    "referralBanner": {
+      "title": "You're using a referral link!",
+      "description": "Your friend will get 100 bonus tokens when you sign up!\nYou'll start with 1000 free tokens."
+    },
+    "howToBeat": {
+      "title": "How to Beat",
+      "description": "Strategic insights on how to defeat specific opponents or improve matchups"
+    },
+    "developmentPlan": {
+      "title": "Development Plan",
+      "description": "Personalized training roadmap with specific goals and timelines"
+    },
+    "pricing": {
+      "title": "Ready to Transform Your Athletic Analysis?",
+      "subtitle": "Get 1000 tokens to start your journey",
+      "price": "$25",
+      "period": "/month",
+      "features": {
+        "unlimited": "Unlimited athlete analysis",
+        "allServices": "Access to all 9 analysis services", 
+        "comparison": "Advanced athlete comparison",
+        "videoAnalysis": "Professional video analysis",
+        "support": "Priority customer support"
+      },
+      "getStarted": "Get Started Now"
+    },
+    "footer": {
+      "description": "The world's most advanced AI-powered athlete analysis platform. Unlock performance insights, strategic advantages, and development opportunities for any athlete.",
+      "quickLinks": "Quick Links",
+      "services": "Services",
+      "support": "Support", 
+      "contact": "Contact",
+      "followUs": "Follow Us",
+      "copyright": "© 2024 Athlete360. All rights reserved."
+    }
+  },
   "services": {
     "bioAnalysis": {
       "title": "Bio Analysis",
@@ -64,6 +113,14 @@
     "nutritionPlan": {
       "title": "Nutrition Plan",
       "description": "Personalized nutrition planning and meal guidance"
+    },
+    "howToBeat": {
+      "title": "How to Beat",
+      "description": "Strategic insights on how to defeat specific opponents or improve matchups"
+    },
+    "developmentPlan": {
+      "title": "Development Plan",
+      "description": "Personalized training roadmap with specific goals and timelines"
     }
   },
   "interface": {
@@ -150,7 +207,12 @@
     "clear": "Clear",
     "cancel": "Cancel", 
     "clearHistory": "Clear History",
-    "clearing": "Clearing..."
+    "clearing": "Clearing...",
+    "signUp": "Sign Up",
+    "signIn": "Sign In",
+    "startFreeTrial": "Start Free Trial - 1000 Tokens",
+    "signInToContinue": "Sign In to Continue",
+    "preview": "Preview"
   },
   "dialogs": {
     "clearHistory": {
