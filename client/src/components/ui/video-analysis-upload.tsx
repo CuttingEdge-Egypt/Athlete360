@@ -325,6 +325,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
               <li>• Punch attempts and violations</li>
               <li>• Yellow cards and penalties</li>
               <li>• Technical match analysis with expert commentary</li>
+              <li>• AI-powered improvement advice for each player</li>
             </ul>
           </div>
         </CardContent>
