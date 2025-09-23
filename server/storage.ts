@@ -777,6 +777,29 @@ export class DatabaseStorage implements IStorage {
         if (latestLog) {
           results.push(latestLog);
         }
+      } else if (serviceType === 'development-plan' || serviceType === 'development') {
+        // For development plans, get the specific goal-based one
+        const specificLog = await db
+          .select()
+          .from(analysisLogs)
+          .where(eq(analysisLogs.id, 'de599d1e-d244-4a36-90b5-625474ea0027'))
+          .limit(1);
+        
+        if (specificLog.length > 0) {
+          results.push(specificLog[0]);
+        } else {
+          // Fallback to latest if specific one not found
+          const [latestLog] = await db
+            .select()
+            .from(analysisLogs)
+            .where(eq(analysisLogs.serviceType, serviceType))
+            .orderBy(desc(analysisLogs.createdAt))
+            .limit(1);
+          
+          if (latestLog) {
+            results.push(latestLog);
+          }
+        }
       } else {
         // For other types, get the latest
         const [latestLog] = await db

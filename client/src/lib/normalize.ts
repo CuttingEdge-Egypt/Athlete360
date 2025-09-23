@@ -178,8 +178,6 @@ export function normalizeDevelopmentPlan(raw: any): GoalBasedPlan | null {
     const parsed = safeJsonParse(raw);
     const content = extractContent(parsed);
     
-    console.log('DEV PLAN - Raw:', typeof raw, raw);
-    console.log('DEV PLAN - Content:', content);
     
     if (!content) return null;
     
@@ -204,30 +202,7 @@ export function normalizeDevelopmentPlan(raw: any): GoalBasedPlan | null {
     
     if (Array.isArray(goals)) {
       goalAnalysis = goals.map((goal: any, index: number) => {
-        // Handle weekly structure
-        if (goal.week && goal.focus && goal.activities) {
-          const exercises: Exercise[] = Array.isArray(goal.activities) 
-            ? goal.activities.map((activity: string, exIndex: number) => ({
-                id: generateId(),
-                name: `Week ${goal.week} Activity ${exIndex + 1}`,
-                description: activity,
-                targetArea: goal.focus,
-                tags: [`Week ${goal.week}`, goal.focus],
-                prescription: undefined,
-                equipment: [],
-                videoUrl: undefined,
-                videoId: undefined
-              }))
-            : [];
-          
-          return {
-            area: `Week ${goal.week}: ${goal.focus}`,
-            description: `Training focus for week ${goal.week}`,
-            exercises
-          };
-        }
-        
-        // Handle regular goal structure
+        // Handle goal-based structure
         const area = goal.area || goal.name || goal.title || `Goal ${index + 1}`;
         const description = goal.description || goal.overview || goal.summary || "";
         
@@ -238,7 +213,7 @@ export function normalizeDevelopmentPlan(raw: any): GoalBasedPlan | null {
           exercises = exerciseData.map((ex: any, exIndex: number) => ({
             id: ex.id || generateId(),
             name: ex.name || ex.title || `Exercise ${exIndex + 1}`,
-            description: ex.description || ex.details || ex,
+            description: ex.description || ex.details || (typeof ex === 'string' ? ex : ''),
             targetArea: ex.targetArea || ex.target || area,
             tags: ex.tags || [],
             prescription: ex.prescription || (ex.sets || ex.reps ? {
@@ -419,10 +394,8 @@ export function normalizeComparison(raw: any): ComparisonViewModel | null {
             const parsedResponse = JSON.parse(tab.rawResponse);
             
             // Extract meaningful data from parsed response
-            console.log('COMPARISON - Parsed Response:', parsedResponse);
             if (parsedResponse.detailedAnalysis) {
               const analysis = parsedResponse.detailedAnalysis;
-              console.log('COMPARISON - Analysis:', analysis);
               tabs = {
                 overview: parsedResponse.overallAnalysis || 
                          parsedResponse.summary || 
@@ -433,7 +406,6 @@ export function normalizeComparison(raw: any): ComparisonViewModel | null {
                            parsedResponse.directComparison ||
                            formatHeadToHead(analysis.athlete1, analysis.athlete2)
               };
-              console.log('COMPARISON - Final tabs:', tabs);
             }
           } catch (e) {
             console.error('Failed to parse rawResponse:', e);
