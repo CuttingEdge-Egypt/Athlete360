@@ -48,6 +48,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { VideoAnalysisResults } from "@/components/ui/video-analysis-results";
 import { DevelopmentPlanDisplay } from "@/components/ui/development-plan-display";
+import { normalizeDevelopmentPlan, normalizeNutritionPlan, normalizeComparison } from "@/lib/normalize";
 import {
   Select,
   SelectContent,
@@ -1654,22 +1655,41 @@ export function AnalysisPopup({
       return <div className="text-gray-400 text-center py-8">Comparison analysis data not available</div>;
     }
 
-    const parsedData = parseAnalysisData(data);
+    const normalizedComparison = normalizeComparison(data);
     
-    if (parsedData.tabs) {
+    if (normalizedComparison && normalizedComparison.tabs) {
       return (
         <div className="space-y-6">
+          {/* Athletes Header */}
+          {normalizedComparison.athleteNames && normalizedComparison.athleteNames.length > 0 && (
+            <Card className="bg-athlete-gray-800 border-gray-700">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-center space-x-4">
+                  {normalizedComparison.athleteNames.map((name, index) => (
+                    <div key={index} className="flex items-center">
+                      <User className="mr-2" size={20} />
+                      <span className="text-white font-medium">{name}</span>
+                      {index < normalizedComparison.athleteNames!.length - 1 && (
+                        <span className="mx-4 text-gray-400">vs</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Overview Tab */}
-          {parsedData.tabs.overview && (
+          {normalizedComparison.tabs.overview && (
             <Card className="bg-athlete-gray-800 border-gray-700">
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center">
                   <User className="mr-3" size={24} />
-                  Athlete Comparison Overview
+                  Comparison Overview
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <div className="whitespace-pre-wrap text-gray-300 leading-relaxed">
-                    {typeof parsedData.tabs.overview === 'string' ? parsedData.tabs.overview : JSON.stringify(parsedData.tabs.overview, null, 2)}
+                    {normalizedComparison.tabs.overview}
                   </div>
                 </div>
               </CardContent>
@@ -1677,16 +1697,16 @@ export function AnalysisPopup({
           )}
 
           {/* Strengths Comparison */}
-          {parsedData.tabs.strengths && (
+          {normalizedComparison.tabs.strengths && (
             <Card className="bg-athlete-gray-800 border-gray-700">
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-green-400 mb-4 flex items-center">
                   <Star className="mr-3" size={24} />
-                  Strengths Comparison
+                  Strengths Analysis
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <div className="whitespace-pre-wrap text-gray-300 leading-relaxed">
-                    {typeof parsedData.tabs.strengths === 'string' ? parsedData.tabs.strengths : JSON.stringify(parsedData.tabs.strengths, null, 2)}
+                    {normalizedComparison.tabs.strengths}
                   </div>
                 </div>
               </CardContent>
@@ -1694,16 +1714,16 @@ export function AnalysisPopup({
           )}
 
           {/* Weaknesses Comparison */}
-          {parsedData.tabs.weaknesses && (
+          {normalizedComparison.tabs.weaknesses && (
             <Card className="bg-athlete-gray-800 border-gray-700">
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-red-400 mb-4 flex items-center">
                   <AlertTriangle className="mr-3" size={24} />
-                  Weaknesses Comparison
+                  Areas for Improvement
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <div className="whitespace-pre-wrap text-gray-300 leading-relaxed">
-                    {typeof parsedData.tabs.weaknesses === 'string' ? parsedData.tabs.weaknesses : JSON.stringify(parsedData.tabs.weaknesses, null, 2)}
+                    {normalizedComparison.tabs.weaknesses}
                   </div>
                 </div>
               </CardContent>
@@ -1711,16 +1731,16 @@ export function AnalysisPopup({
           )}
 
           {/* Head-to-Head */}
-          {parsedData.tabs.headToHead && (
+          {normalizedComparison.tabs.headToHead && (
             <Card className="bg-athlete-gray-800 border-gray-700">
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-purple-400 mb-4 flex items-center">
                   <Target className="mr-3" size={24} />
-                  Head-to-Head Analysis
+                  Direct Comparison
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <div className="whitespace-pre-wrap text-gray-300 leading-relaxed">
-                    {typeof parsedData.tabs.headToHead === 'string' ? parsedData.tabs.headToHead : JSON.stringify(parsedData.tabs.headToHead, null, 2)}
+                    {normalizedComparison.tabs.headToHead}
                   </div>
                 </div>
               </CardContent>
@@ -1739,10 +1759,10 @@ export function AnalysisPopup({
               <User className="mr-3" size={24} />
               Athlete Comparison Analysis
             </h3>
-            <div className="prose prose-invert max-w-none">
-              <pre className="whitespace-pre-wrap text-gray-300 leading-relaxed">
-                {typeof parsedData === 'string' ? parsedData : JSON.stringify(parsedData, null, 2)}
-              </pre>
+            <div className="text-center py-8">
+              <User className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <p className="text-gray-400">Comparison data could not be processed.</p>
+              <p className="text-gray-500 text-sm mt-2">Please try generating a new comparison analysis.</p>
             </div>
           </CardContent>
         </Card>
@@ -1762,14 +1782,12 @@ export function AnalysisPopup({
 
     // Special handling for nutrition plans
     if (type === "nutrition" || type === "nutrition-plan") {
-      const parsedData = parseAnalysisData(data);
-      const planData = parsedData.plan || parsedData;
+      const normalizedPlan = normalizeNutritionPlan(data);
       
-      // Check if it's a valid nutrition plan structure (has 'days' property)
-      if (planData && planData.days) {
-        return <NutritionPlanDisplay plan={planData} />;
+      if (normalizedPlan) {
+        return <NutritionPlanDisplay plan={normalizedPlan} />;
       } else {
-        // Fallback to display formatted nutrition data
+        // Fallback to user-friendly empty state
         return (
           <div className="space-y-6">
             <Card className="bg-athlete-gray-800 border-gray-700">
@@ -1778,10 +1796,10 @@ export function AnalysisPopup({
                   <Apple className="mr-3" size={24} />
                   Nutrition Plan Analysis
                 </h3>
-                <div className="prose prose-invert max-w-none">
-                  <pre className="whitespace-pre-wrap text-gray-300 leading-relaxed">
-                    {typeof planData === 'string' ? planData : JSON.stringify(planData, null, 2)}
-                  </pre>
+                <div className="text-center py-8">
+                  <Apple className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <p className="text-gray-400">Nutrition plan data could not be processed.</p>
+                  <p className="text-gray-500 text-sm mt-2">Please try generating a new nutrition plan.</p>
                 </div>
               </CardContent>
             </Card>
@@ -1807,13 +1825,12 @@ export function AnalysisPopup({
 
     // Special handling for development plan
     if (type === "development" || type === "development-plan") {
-      const parsedData = parseAnalysisData(data);
+      const normalizedPlan = normalizeDevelopmentPlan(data);
       
-      // Check if it's a valid development plan structure
-      if (parsedData && parsedData.title && parsedData.goalAnalysis) {
-        return <DevelopmentPlanDisplay plan={parsedData} language="en" />;
+      if (normalizedPlan) {
+        return <DevelopmentPlanDisplay plan={normalizedPlan} language="en" />;
       } else {
-        // Fallback to display raw data if structure doesn't match
+        // Fallback to user-friendly empty state
         return (
           <div className="space-y-6">
             <Card className="bg-athlete-gray-800 border-gray-700">
@@ -1822,10 +1839,10 @@ export function AnalysisPopup({
                   <Calendar className="mr-3" size={24} />
                   Development Plan Analysis
                 </h3>
-                <div className="prose prose-invert max-w-none">
-                  <pre className="whitespace-pre-wrap text-gray-300 leading-relaxed">
-                    {typeof parsedData === 'string' ? parsedData : JSON.stringify(parsedData, null, 2)}
-                  </pre>
+                <div className="text-center py-8">
+                  <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <p className="text-gray-400">Development plan data could not be processed.</p>
+                  <p className="text-gray-500 text-sm mt-2">Please try generating a new development plan.</p>
                 </div>
               </CardContent>
             </Card>
