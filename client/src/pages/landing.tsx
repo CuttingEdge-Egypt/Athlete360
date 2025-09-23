@@ -6,6 +6,9 @@ import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { AnalysisPopup } from "@/components/ui/analysis-popup";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/lib/LanguageProvider";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
 interface PreviewAnalysisItem {
   serviceType: string;
@@ -23,6 +26,8 @@ export default function Landing() {
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [, setLocation] = useLocation();
   const [previewModal, setPreviewModal] = useState<{ open: boolean; serviceType: string | null }>({ open: false, serviceType: null });
+  const { t } = useTranslation(['home', 'common']);
+  const { language } = useLanguage();
 
   // Fetch all preview data (not filtered by service type)
   const { data: previewData, isLoading: previewLoading } = useQuery<PreviewApiResponse>({
@@ -55,16 +60,17 @@ export default function Landing() {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <Trophy className="text-athlete-accent text-2xl" />
-            <span className="text-xl font-bold">Athlete360</span>
+            <span className="text-xl font-bold">{t('landing.navigation.brand')}</span>
           </div>
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             <Button 
               onClick={() => setLocation('/signup')}
               data-testid="button-signup"
               className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white"
             >
               <UserPlus className="mr-2 h-4 w-4" />
-              Sign Up
+              {t('landing.navigation.signUp')}
             </Button>
             <Button 
               onClick={() => setLocation('/login')}
@@ -72,7 +78,7 @@ export default function Landing() {
               variant="outline"
               className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white"
             >
-              Sign In
+              {t('landing.navigation.signIn')}
             </Button>
           </div>
         </div>
@@ -84,14 +90,14 @@ export default function Landing() {
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-7xl font-bold mb-6 text-white">
               <span className="bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">
-                Athlete360
+                {t('landing.hero.title')}
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-300 mb-8">
-              AI-Powered Athlete Analytics & Performance Optimization Platform
+              {t('landing.hero.subtitle')}
             </p>
             <p className="text-lg text-gray-400 mb-8 max-w-2xl mx-auto">
-              Analyze any athlete's performance, get tactical insights, create development plans, and unlock the secrets to athletic excellence with our revolutionary AI system.
+              {t('landing.hero.description')}
             </p>
             
             {/* CTA Buttons */}
@@ -103,7 +109,7 @@ export default function Landing() {
                 className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white px-8 py-4 text-lg font-semibold"
               >
                 <UserPlus className="mr-2 h-5 w-5" />
-                Start Free Trial - 1000 Tokens
+                {t('landing.hero.ctaStart')}
               </Button>
               <Button 
                 onClick={() => setLocation('/login')}
@@ -112,7 +118,7 @@ export default function Landing() {
                 variant="outline"
                 className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white px-8 py-4 text-lg font-semibold"
               >
-                Sign In to Continue
+                {t('landing.hero.ctaSignIn')}
               </Button>
             </div>
             
@@ -121,11 +127,10 @@ export default function Landing() {
               <div className="bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-400/30 rounded-lg p-4 mb-12 max-w-lg mx-auto">
                 <div className="flex items-center justify-center gap-2 text-green-400 mb-2">
                   <Gift className="h-5 w-5" />
-                  <span className="font-semibold">You're using a referral link!</span>
+                  <span className="font-semibold">{t('landing.referralBanner.title')}</span>
                 </div>
                 <p className="text-sm text-gray-300">
-                  Your friend will get 100 bonus tokens when you sign up!<br/>
-                  You'll start with 1000 free tokens.
+                  {t('landing.referralBanner.description')}
                 </p>
               </div>
             )}
@@ -138,8 +143,8 @@ export default function Landing() {
                     <ChartPie className="text-2xl text-athlete-accent" size={32} />
                     <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">50 tokens</span>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-white">Bio Analysis</h3>
-                  <p className="text-gray-400 text-sm mb-3">Complete athlete biography with career highlights and achievements</p>
+                  <h3 className="text-lg font-semibold mb-2 text-white">{t('services.bioAnalysis.title')}</h3>
+                  <p className="text-gray-400 text-sm mb-3">{t('services.bioAnalysis.description')}</p>
                   <Button 
                     onClick={() => setPreviewModal({ open: true, serviceType: 'bio' })}
                     data-testid="button-preview-bio"
@@ -148,7 +153,7 @@ export default function Landing() {
                     className="w-full border-blue-400/50 text-blue-400 hover:bg-blue-400/10"
                   >
                     <Eye className="mr-2" size={14} />
-                    Preview
+                    {t('actions.preview')}
                   </Button>
                 </CardContent>
               </Card>
@@ -159,8 +164,8 @@ export default function Landing() {
                     <Trophy className="text-2xl text-athlete-warning" size={32} />
                     <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">70 tokens</span>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-white">Rank History</h3>
-                  <p className="text-gray-400 text-sm mb-3">Interactive charts showing ranking progression and improvement recommendations</p>
+                  <h3 className="text-lg font-semibold mb-2 text-white">{t('services.rankHistory.title')}</h3>
+                  <p className="text-gray-400 text-sm mb-3">{t('services.rankHistory.description')}</p>
                   <Button 
                     onClick={() => setPreviewModal({ open: true, serviceType: 'rank' })}
                     data-testid="button-preview-rank"
@@ -169,7 +174,7 @@ export default function Landing() {
                     className="w-full border-yellow-400/50 text-yellow-400 hover:bg-yellow-400/10"
                   >
                     <Eye className="mr-2" size={14} />
-                    Preview
+                    {t('actions.preview')}
                   </Button>
                 </CardContent>
               </Card>
@@ -180,8 +185,8 @@ export default function Landing() {
                     <Star className="text-2xl text-athlete-success" size={32} />
                     <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">50 tokens</span>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-white">Strengths</h3>
-                  <p className="text-gray-400 text-sm mb-3">Detailed analysis of key strengths and competitive advantages</p>
+                  <h3 className="text-lg font-semibold mb-2 text-white">{t('services.strengths.title')}</h3>
+                  <p className="text-gray-400 text-sm mb-3">{t('services.strengths.description')}</p>
                   <Button 
                     onClick={() => setPreviewModal({ open: true, serviceType: 'strengths' })}
                     data-testid="button-preview-strengths"
@@ -190,7 +195,7 @@ export default function Landing() {
                     className="w-full border-green-400/50 text-green-400 hover:bg-green-400/10"
                   >
                     <Eye className="mr-2" size={14} />
-                    Preview
+                    {t('actions.preview')}
                   </Button>
                 </CardContent>
               </Card>
@@ -201,8 +206,8 @@ export default function Landing() {
                     <TrendingDown className="text-2xl text-red-400" size={32} />
                     <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">50 tokens</span>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-white">Weaknesses</h3>
-                  <p className="text-gray-400 text-sm mb-3">In-depth analysis of areas needing improvement and targeted solutions</p>
+                  <h3 className="text-lg font-semibold mb-2 text-white">{t('services.weaknesses.title')}</h3>
+                  <p className="text-gray-400 text-sm mb-3">{t('services.weaknesses.description')}</p>
                   <Button 
                     onClick={() => setPreviewModal({ open: true, serviceType: 'weaknesses' })}
                     data-testid="button-preview-weaknesses"
@@ -211,7 +216,7 @@ export default function Landing() {
                     className="w-full border-red-400/50 text-red-400 hover:bg-red-400/10"
                   >
                     <Eye className="mr-2" size={14} />
-                    Preview
+                    {t('actions.preview')}
                   </Button>
                 </CardContent>
               </Card>
@@ -234,7 +239,7 @@ export default function Landing() {
                     className="w-full border-purple-400/50 text-purple-400 hover:bg-purple-400/10"
                   >
                     <Eye className="mr-2" size={14} />
-                    Preview
+                    {t('actions.preview')}
                   </Button>
                 </CardContent>
               </Card>
@@ -255,7 +260,7 @@ export default function Landing() {
                     className="w-full border-blue-400/50 text-blue-400 hover:bg-blue-400/10"
                   >
                     <Eye className="mr-2" size={14} />
-                    Preview
+                    {t('actions.preview')}
                   </Button>
                 </CardContent>
               </Card>
@@ -276,7 +281,7 @@ export default function Landing() {
                     className="w-full border-green-400/50 text-green-400 hover:bg-green-400/10"
                   >
                     <Eye className="mr-2" size={14} />
-                    Preview
+                    {t('actions.preview')}
                   </Button>
                 </CardContent>
               </Card>
@@ -302,7 +307,7 @@ export default function Landing() {
                         className="border-orange-400/50 text-orange-400 hover:bg-orange-400/10"
                       >
                         <Eye className="mr-2" size={14} />
-                        Preview
+                        {t('actions.preview')}
                       </Button>
                     </div>
                   </CardContent>
@@ -325,7 +330,7 @@ export default function Landing() {
                         className="border-purple-400/50 text-purple-400 hover:bg-purple-400/10"
                       >
                         <Eye className="mr-2" size={14} />
-                        Preview
+                        {t('actions.preview')}
                       </Button>
                     </div>
                   </CardContent>
