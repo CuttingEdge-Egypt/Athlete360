@@ -184,6 +184,7 @@ export const analysisLogs = pgTable("analysis_logs", {
   userId: varchar("user_id").notNull().references(() => users.id),
   athleteId: varchar("athlete_id").references(() => athletes.id), // Made nullable for general video analysis
   serviceType: varchar("service_type").notNull(),
+  language: varchar("language").default("en"), // Language of the analysis (en/ar)
   resultData: jsonb("result_data"),
   shared: boolean("shared").default(false),
   shareUrl: varchar("share_url"),

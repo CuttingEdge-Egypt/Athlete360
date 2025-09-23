@@ -1062,6 +1062,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId,
         athleteId,
         serviceType: "bio",
+        language,
         resultData: bioAnalysis
       });
 
@@ -1171,6 +1172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId,
         athleteId,
         serviceType: "rank",
+        language,
         resultData: rankData
       });
 
@@ -1333,6 +1335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId,
         athleteId,
         serviceType: "strengths",
+        language,
         resultData: strengthsData
       });
 
@@ -1501,6 +1504,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId,
         athleteId,
         serviceType: "weaknesses",
+        language,
         resultData: weaknessesData
       });
 
@@ -2291,6 +2295,7 @@ Return only valid JSON with the missing fields.`;
         userId,
         athleteId,
         serviceType: "beat",
+        language,
         resultData: beatStrategies
       });
 
