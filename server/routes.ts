@@ -3481,6 +3481,45 @@ Return only valid JSON with the missing fields.`;
     res.json(TestingService.getTestScenarios());
   });
 
+  // Public endpoint for analysis previews - no authentication required
+  app.get('/api/preview/latest-by-type', async (req, res) => {
+    try {
+      const serviceTypes = [
+        'bio',
+        'strengths', 
+        'weaknesses',
+        'beat-strategies',
+        'comparison',
+        'nutrition-plan',
+        'development-plan',
+        'video'
+      ];
+      
+      // Get the latest analysis for each type
+      const latestAnalyses = await storage.getLatestAnalysisByType(serviceTypes);
+      
+      // Filter out sensitive data and format for preview
+      const previewData = latestAnalyses.map(log => ({
+        serviceType: log.serviceType,
+        resultData: log.resultData,
+        createdAt: log.createdAt
+      }));
+      
+      res.json({
+        success: true,
+        data: previewData,
+        count: previewData.length
+      });
+    } catch (error) {
+      console.error('Error fetching analysis previews:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch analysis previews',
+        data: [],
+        count: 0
+      });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
