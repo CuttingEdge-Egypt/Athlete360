@@ -115,6 +115,61 @@ function extractCalories(text: string): string {
   return match ? match[1] : "0";
 }
 
+// Helper to format athlete analysis for comparison
+function formatAthleteAnalysis(athlete1: any, athlete2: any, type: 'strengths' | 'weaknesses'): string {
+  if (!athlete1 || !athlete2) return '';
+  
+  const sections = [];
+  
+  if (athlete1[type] && Array.isArray(athlete1[type])) {
+    sections.push(`**${athlete1.name || 'Athlete 1'} ${type}:**`);
+    athlete1[type].forEach((item: any, index: number) => {
+      if (typeof item === 'object') {
+        sections.push(`${index + 1}. ${item.skill || item.title || item.name || 'Item'}: ${item.description || item.details || ''}`);
+      } else if (typeof item === 'string') {
+        sections.push(`${index + 1}. ${item}`);
+      }
+    });
+    sections.push('');
+  }
+  
+  if (athlete2[type] && Array.isArray(athlete2[type])) {
+    sections.push(`**${athlete2.name || 'Athlete 2'} ${type}:**`);
+    athlete2[type].forEach((item: any, index: number) => {
+      if (typeof item === 'object') {
+        sections.push(`${index + 1}. ${item.skill || item.title || item.name || 'Item'}: ${item.description || item.details || ''}`);
+      } else if (typeof item === 'string') {
+        sections.push(`${index + 1}. ${item}`);
+      }
+    });
+  }
+  
+  return sections.join('\n');
+}
+
+// Helper to format head-to-head comparison
+function formatHeadToHead(athlete1: any, athlete2: any): string {
+  if (!athlete1 || !athlete2) return '';
+  
+  const sections = [
+    `**Direct Comparison: ${athlete1.name || 'Athlete 1'} vs ${athlete2.name || 'Athlete 2'}**`,
+    '',
+    `**Current Form:**`,
+    `• ${athlete1.name || 'Athlete 1'}: ${athlete1.currentForm || 'No data available'}`,
+    `• ${athlete2.name || 'Athlete 2'}: ${athlete2.currentForm || 'No data available'}`,
+    ''
+  ];
+  
+  if (athlete1.ranking && athlete2.ranking) {
+    sections.push(`**Rankings:**`);
+    sections.push(`• ${athlete1.name || 'Athlete 1'}: ${athlete1.ranking}`);
+    sections.push(`• ${athlete2.name || 'Athlete 2'}: ${athlete2.ranking}`);
+    sections.push('');
+  }
+  
+  return sections.join('\n');
+}
+
 /**
  * Normalize development plan data to GoalBasedPlan format
  */
@@ -123,9 +178,6 @@ export function normalizeDevelopmentPlan(raw: any): GoalBasedPlan | null {
     const parsed = safeJsonParse(raw);
     const content = extractContent(parsed);
     
-    console.log('Development Plan normalization - raw:', typeof raw, raw);
-    console.log('Development Plan normalization - parsed:', parsed);
-    console.log('Development Plan normalization - content:', content);
     
     if (!content) return null;
     
@@ -141,15 +193,39 @@ export function normalizeDevelopmentPlan(raw: any): GoalBasedPlan | null {
       title = { en: content.name };
     }
     
-    // Extract goal analysis
+    // Extract goal analysis - handle weekly structure
     let goalAnalysis: GoalArea[] = [];
     
     // Try different possible structures
     const goals = content.goalAnalysis || content.goals || content.goal_analysis || 
-                 content.areas || content.sections || content.phases;
+                 content.areas || content.sections || content.phases || content.plan;
     
     if (Array.isArray(goals)) {
       goalAnalysis = goals.map((goal: any, index: number) => {
+        // Handle weekly structure
+        if (goal.week && goal.focus && goal.activities) {
+          const exercises: Exercise[] = Array.isArray(goal.activities) 
+            ? goal.activities.map((activity: string, exIndex: number) => ({
+                id: generateId(),
+                name: `Week ${goal.week} Activity ${exIndex + 1}`,
+                description: activity,
+                targetArea: goal.focus,
+                tags: [`Week ${goal.week}`, goal.focus],
+                prescription: undefined,
+                equipment: [],
+                videoUrl: undefined,
+                videoId: undefined
+              }))
+            : [];
+          
+          return {
+            area: `Week ${goal.week}: ${goal.focus}`,
+            description: `Training focus for week ${goal.week}`,
+            exercises
+          };
+        }
+        
+        // Handle regular goal structure
         const area = goal.area || goal.name || goal.title || `Goal ${index + 1}`;
         const description = goal.description || goal.overview || goal.summary || "";
         
@@ -160,7 +236,7 @@ export function normalizeDevelopmentPlan(raw: any): GoalBasedPlan | null {
           exercises = exerciseData.map((ex: any, exIndex: number) => ({
             id: ex.id || generateId(),
             name: ex.name || ex.title || `Exercise ${exIndex + 1}`,
-            description: ex.description || ex.details || "",
+            description: ex.description || ex.details || ex,
             targetArea: ex.targetArea || ex.target || area,
             tags: ex.tags || [],
             prescription: ex.prescription || (ex.sets || ex.reps ? {
@@ -322,9 +398,6 @@ export function normalizeComparison(raw: any): ComparisonViewModel | null {
     const parsed = safeJsonParse(raw);
     const content = extractContent(parsed);
     
-    console.log('Comparison normalization - raw:', typeof raw, raw);
-    console.log('Comparison normalization - parsed:', parsed);
-    console.log('Comparison normalization - content:', content);
     
     if (!content) return null;
     
@@ -332,7 +405,43 @@ export function normalizeComparison(raw: any): ComparisonViewModel | null {
     
     // Handle existing tabs structure
     if (content.tabs && typeof content.tabs === 'object') {
-      tabs = content.tabs;
+      // Check if tabs contain rawResponse data
+      const tabKeys = Object.keys(content.tabs);
+      let hasRawResponse = false;
+      
+      for (const key of tabKeys) {
+        const tab = content.tabs[key];
+        if (tab && tab.rawResponse && typeof tab.rawResponse === 'string') {
+          hasRawResponse = true;
+          try {
+            const parsedResponse = JSON.parse(tab.rawResponse);
+            
+            // Extract meaningful data from parsed response
+            if (parsedResponse.detailedAnalysis) {
+              const analysis = parsedResponse.detailedAnalysis;
+              tabs = {
+                overview: parsedResponse.overallAnalysis || 
+                         parsedResponse.summary || 
+                         `Comparison between ${analysis.athlete1?.name || 'Athlete 1'} and ${analysis.athlete2?.name || 'Athlete 2'}`,
+                strengths: formatAthleteAnalysis(analysis.athlete1, analysis.athlete2, 'strengths'),
+                weaknesses: formatAthleteAnalysis(analysis.athlete1, analysis.athlete2, 'weaknesses'), 
+                headToHead: parsedResponse.headToHeadComparison || 
+                           parsedResponse.directComparison ||
+                           formatHeadToHead(analysis.athlete1, analysis.athlete2)
+              };
+            }
+          } catch (e) {
+            console.error('Failed to parse rawResponse:', e);
+            tabs[key] = tab.rawResponse.substring(0, 1000) + '...';
+          }
+          break;
+        }
+      }
+      
+      if (!hasRawResponse) {
+        // Use tabs directly
+        tabs = content.tabs;
+      }
     } else {
       // Build tabs from various possible keys
       tabs = {
