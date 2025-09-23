@@ -3264,7 +3264,7 @@ Return only valid JSON with the missing fields.`;
 
   // Video Analysis endpoint - Direct upload like Sept 15 Python implementation
   // Video Analysis endpoint - Direct upload like Sept 15 Python implementation
-  app.post('/api/analysis/video', isAuthenticated, upload.single('video'), async (req: any, res) => {
+  app.post('/api/analysis/video', isAuthenticated, async (req: any, res) => {
     // Set a long timeout for video processing (10 minutes)
     req.setTimeout(600000); // 10 minutes
     res.setTimeout(600000); // 10 minutes
@@ -3283,32 +3283,20 @@ Return only valid JSON with the missing fields.`;
       console.log(`[VIDEO ROUTE ${requestId}] Starting direct video upload (Sept 15 approach - no Multer)`);
       const userId = req.user.claims.sub;
       
-      // Use Multer for simpler multipart form parsing
-      console.log(`[VIDEO ROUTE ${requestId}] Processing video upload with Multer...`);
-      if (!req.file) {
-        throw new Error('No video file uploaded');
-      }
-      
-      // Save uploaded file to temp directory
-      const uploadPath = path.join(process.cwd(), 'temp', 'uploads');
-      if (!fs.existsSync(uploadPath)) {
-        fs.mkdirSync(uploadPath, { recursive: true });
-      }
-      
-      const timestamp = Date.now();
-      const ext = path.extname(req.file.originalname);
-      videoFilePath = path.join(uploadPath, `video_${timestamp}${ext}`);
-      fileName = `video_${timestamp}${ext}`;
-      
-      // Write buffer to file
-      fs.writeFileSync(videoFilePath, req.file.buffer);
+      // Handle direct file upload without Multer - like Python version
+      console.log(`[VIDEO ROUTE ${requestId}] Processing video upload directly...`);
+      const uploadResult = await handleDirectVideoUpload(req);
+      videoFilePath = uploadResult.filePath;
+      fileName = path.basename(videoFilePath);
       
       console.log(`[VIDEO ROUTE ${requestId}] Direct upload complete: ${videoFilePath}`);
       const fileStats = fs.statSync(videoFilePath);
       console.log(`[VIDEO ROUTE ${requestId}] File size: ${fileStats.size} bytes`);
       
-      // Extract round number from form body (Multer parses form fields into req.body)
-      const round = parseInt(req.body?.roundToAnalyze) || 1;
+      // Extract round number from parsed form fields (default to 1 if not provided)
+      console.log(`[ROUTE ${requestId}] DEBUG: uploadResult.fields =`, uploadResult.fields);
+      console.log(`[ROUTE ${requestId}] DEBUG: roundToAnalyze field =`, uploadResult.fields?.roundToAnalyze);
+      const round = parseInt(uploadResult.fields?.roundToAnalyze) || 1;
       
       console.log(`[ROUTE ${requestId}] User: ${userId}, File: ${fileName}, Round: ${round}`);
 
