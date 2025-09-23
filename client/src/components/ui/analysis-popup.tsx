@@ -1669,7 +1669,7 @@ export function AnalysisPopup({
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <pre className="whitespace-pre-wrap text-gray-300 leading-relaxed">
-                    {parsedData.tabs.overview}
+                    {typeof parsedData.tabs.overview === 'string' ? parsedData.tabs.overview : JSON.stringify(parsedData.tabs.overview, null, 2)}
                   </pre>
                 </div>
               </CardContent>
@@ -1686,7 +1686,7 @@ export function AnalysisPopup({
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <pre className="whitespace-pre-wrap text-gray-300 leading-relaxed">
-                    {parsedData.tabs.strengths}
+                    {typeof parsedData.tabs.strengths === 'string' ? parsedData.tabs.strengths : JSON.stringify(parsedData.tabs.strengths, null, 2)}
                   </pre>
                 </div>
               </CardContent>
@@ -1703,7 +1703,7 @@ export function AnalysisPopup({
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <pre className="whitespace-pre-wrap text-gray-300 leading-relaxed">
-                    {parsedData.tabs.weaknesses}
+                    {typeof parsedData.tabs.weaknesses === 'string' ? parsedData.tabs.weaknesses : JSON.stringify(parsedData.tabs.weaknesses, null, 2)}
                   </pre>
                 </div>
               </CardContent>
@@ -1720,7 +1720,7 @@ export function AnalysisPopup({
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <pre className="whitespace-pre-wrap text-gray-300 leading-relaxed">
-                    {parsedData.tabs.headToHead}
+                    {typeof parsedData.tabs.headToHead === 'string' ? parsedData.tabs.headToHead : JSON.stringify(parsedData.tabs.headToHead, null, 2)}
                   </pre>
                 </div>
               </CardContent>
@@ -1762,7 +1762,9 @@ export function AnalysisPopup({
 
     // Special handling for nutrition plans
     if (type === "nutrition" || type === "nutrition-plan") {
-      return <NutritionPlanDisplay plan={data.plan || data} />;
+      const parsedData = parseAnalysisData(data);
+      const planData = parsedData.plan || parsedData;
+      return <NutritionPlanDisplay plan={planData} />;
     }
 
     // Special handling for strategic combat analysis
@@ -1782,7 +1784,31 @@ export function AnalysisPopup({
 
     // Special handling for development plan
     if (type === "development" || type === "development-plan") {
-      return <DevelopmentPlanDisplay plan={data} language="en" />;
+      const parsedData = parseAnalysisData(data);
+      
+      // Check if it's a valid development plan structure
+      if (parsedData && parsedData.title && parsedData.goalAnalysis) {
+        return <DevelopmentPlanDisplay plan={parsedData} language="en" />;
+      } else {
+        // Fallback to display raw data if structure doesn't match
+        return (
+          <div className="space-y-6">
+            <Card className="bg-athlete-gray-800 border-gray-700">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center">
+                  <Calendar className="mr-3" size={24} />
+                  Development Plan Analysis
+                </h3>
+                <div className="prose prose-invert max-w-none">
+                  <pre className="whitespace-pre-wrap text-gray-300 leading-relaxed">
+                    {typeof parsedData === 'string' ? parsedData : JSON.stringify(parsedData, null, 2)}
+                  </pre>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+      }
     }
 
     // Special handling for video analysis

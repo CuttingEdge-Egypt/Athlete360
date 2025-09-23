@@ -742,14 +742,14 @@ export class DatabaseStorage implements IStorage {
           results.push(latestLog);
         }
       } else if (serviceType === 'weaknesses') {
-        // For weaknesses, get a result with substantial content (length > 500)
+        // For weaknesses, get a result with substantial content (length > 600)
         const [latestLog] = await db
           .select()
           .from(analysisLogs)
           .where(
             and(
               eq(analysisLogs.serviceType, serviceType),
-              sql`LENGTH(${analysisLogs.resultData}::text) > 500`
+              sql`LENGTH(${analysisLogs.resultData}::text) > 600`
             )
           )
           .orderBy(desc(analysisLogs.createdAt))
