@@ -62,24 +62,35 @@ export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps
           return jsonString;
         }
         
+        // Check if it's a markdown-wrapped JSON string
+        if (jsonString.includes('```json') || jsonString.includes('```')) {
+          // Extract JSON from markdown code blocks
+          let content = jsonString;
+          if (content.startsWith('```json') && content.endsWith('```')) {
+            content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+          } else if (content.startsWith('```') && content.endsWith('```')) {
+            content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
+          }
+          // Try to parse the extracted content as JSON
+          return JSON.parse(content.trim());
+        }
+        
         // First try to parse as direct JSON
         try {
           return JSON.parse(jsonString);
         } catch (directParseError) {
-          // If direct parse fails, check if it's wrapped in a content field
+          // If direct parse fails, check if it's wrapped in a content field object
           try {
             const contentWrapper = JSON.parse(jsonString);
             if (contentWrapper.content) {
-              // Extract JSON from markdown code blocks
+              // Extract JSON from markdown code blocks in content
               let content = contentWrapper.content;
-              // Remove markdown code block wrapper if present
               if (content.startsWith('```json') && content.endsWith('```')) {
                 content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
               } else if (content.startsWith('```') && content.endsWith('```')) {
                 content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
               }
-              // Try to parse the extracted content as JSON
-              return JSON.parse(content);
+              return JSON.parse(content.trim());
             }
             return contentWrapper;
           } catch (wrapperParseError) {
