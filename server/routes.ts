@@ -284,10 +284,7 @@ async function handleDirectVideoUpload(req: any): Promise<{ filePath: string, fi
               // Close the stream and finish
               fileStream.end(() => {
                 console.log(`[DIRECT_UPLOAD] File saved: ${filePath} (${bytesWritten} bytes)`);
-                // Check if we have all the data we need
-                if (filePath && (formFields.roundToAnalyze || Object.keys(formFields).length > 0)) {
-                  guardedResolve({ filePath, fields: formFields });
-                }
+                // Don't resolve here - wait for all form fields to be processed in 'end' event
               });
             }
           } else {
@@ -319,10 +316,7 @@ async function handleDirectVideoUpload(req: any): Promise<{ filePath: string, fi
             headersParsed = false;
             headerBuffer = Buffer.alloc(0);
             
-            // Check if we have all the data we need
-            if (filePath && formFields.roundToAnalyze) {
-              guardedResolve({ filePath, fields: formFields });
-            }
+            // Don't resolve here - continue processing other parts
           } else {
             // Continue accumulating field data
             currentFieldBuffer = Buffer.concat([currentFieldBuffer, chunk]);
@@ -333,6 +327,9 @@ async function handleDirectVideoUpload(req: any): Promise<{ filePath: string, fi
     
     req.on('end', () => {
       if (settled) return;
+      
+      console.log(`[DIRECT_UPLOAD] Upload end - form fields extracted:`, formFields);
+      console.log(`[DIRECT_UPLOAD] roundToAnalyze value:`, formFields.roundToAnalyze);
       
       if (fileStream && !fileStream.destroyed && !fileStream.writableEnded) {
         fileStream.end(() => {
@@ -3294,8 +3291,6 @@ Return only valid JSON with the missing fields.`;
       console.log(`[VIDEO ROUTE ${requestId}] File size: ${fileStats.size} bytes`);
       
       // Extract round number from parsed form fields (default to 1 if not provided)
-      console.log(`[ROUTE ${requestId}] DEBUG: uploadResult.fields =`, uploadResult.fields);
-      console.log(`[ROUTE ${requestId}] DEBUG: roundToAnalyze field =`, uploadResult.fields?.roundToAnalyze);
       const round = parseInt(uploadResult.fields?.roundToAnalyze) || 1;
       
       console.log(`[ROUTE ${requestId}] User: ${userId}, File: ${fileName}, Round: ${round}`);
