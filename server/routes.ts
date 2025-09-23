@@ -3470,23 +3470,24 @@ Return only valid JSON with the missing fields.`;
       // Check user tokens before processing
       console.log(`[ROUTE ${requestId}] Checking user tokens...`);
       const user = await storage.getUser(userId);
-      if (!user || user.tokens < tokenCost) {
-        console.log(`[ROUTE ${requestId}] Insufficient tokens: ${user?.tokens || 0} < ${tokenCost}`);
+      const userTokens = user?.tokens || 0;
+      if (!user || userTokens < tokenCost) {
+        console.log(`[ROUTE ${requestId}] Insufficient tokens: ${userTokens} < ${tokenCost}`);
         return res.status(402).json({
           message: "Insufficient tokens for video advice analysis",
           required: tokenCost,
-          available: user?.tokens || 0
+          available: userTokens
         });
       }
       
-      console.log(`[ROUTE ${requestId}] Token check passed: User has ${user.tokens} tokens`);
+      console.log(`[ROUTE ${requestId}] Token check passed: User has ${userTokens} tokens`);
       
       // Deduct tokens
       console.log(`[ROUTE ${requestId}] Deducting ${tokenCost} tokens...`);
-      console.log(`DEDUCTING ${tokenCost} tokens from user ${userId}: ${user.tokens} → ${user.tokens - tokenCost}`);
+      console.log(`DEDUCTING ${tokenCost} tokens from user ${userId}: ${userTokens} → ${userTokens - tokenCost}`);
       
-      await storage.updateUserTokens(userId, user.tokens - tokenCost);
-      console.log(`DEDUCTION RESULT: User now has ${user.tokens - tokenCost}/5000 tokens`);
+      await storage.updateUserTokens(userId, userTokens - tokenCost);
+      console.log(`DEDUCTION RESULT: User now has ${userTokens - tokenCost}/5000 tokens`);
       console.log(`[ROUTE ${requestId}] Tokens deducted successfully`);
       
       // Create transaction record
@@ -3526,16 +3527,13 @@ Return only valid JSON with the missing fields.`;
         await storage.createAnalysisLog({
           userId: req.user.claims.sub,
           athleteId: null,
-          analysisType: 'video-advice',
-          status: 'failed',
-          tokensUsed: 0, // No tokens charged for failed analysis
-          errorMessage: error instanceof Error ? error.message : String(error),
-          requestData: JSON.stringify({ 
+          serviceType: 'video-advice',
+          resultData: JSON.stringify({ 
             fileName,
             timestamp: new Date().toISOString(),
-            error: error instanceof Error ? error.message : String(error)
-          }),
-          responseData: null
+            error: error instanceof Error ? error.message : String(error),
+            status: 'failed'
+          })
         });
         console.log(`[ROUTE ${requestId}] Error log saved to database`);
       } catch (dbError) {

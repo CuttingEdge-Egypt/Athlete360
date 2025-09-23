@@ -1,7 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw, Volume2, Trophy } from "lucide-react";
+import { Play, Pause, RotateCcw, Volume2, Trophy, Brain, Target, MessageSquare, Loader2 } from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useMutation } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 
 interface VideoPlayerAnalysisProps {
   videoFile: File;
@@ -620,6 +623,297 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
           </div>
         </CardContent>
       </Card>
+
+      {/* Player Advice Section - After Match Analysis */}
+      <PlayerAdviceSection 
+        videoFile={videoFile}
+        roundToAnalyze={analysisData.roundAnalyzed || 1}
+      />
     </div>
+  );
+}
+
+// Player Advice Section Component
+interface PlayerAdviceSectionProps {
+  videoFile: File;
+  roundToAnalyze: number;
+}
+
+interface PlayerAdvice {
+  name: string;
+  color: string;
+  tactical_advice: {
+    issues: string[];
+    improvements: string[];
+  };
+  technical_advice: {
+    issues: string[];
+    improvements: string[];
+  };
+  mental_advice: {
+    issues: string[];
+    improvements: string[];
+  };
+}
+
+interface AdviceData {
+  players: PlayerAdvice[];
+  general_observations: string;
+}
+
+function PlayerAdviceSection({ videoFile, roundToAnalyze }: PlayerAdviceSectionProps) {
+  const [adviceData, setAdviceData] = useState<AdviceData | null>(null);
+  const { toast } = useToast();
+
+  const generateAdviceMutation = useMutation({
+    mutationFn: async () => {
+      const formData = new FormData();
+      formData.append('video', videoFile);
+      formData.append('round', roundToAnalyze.toString());
+
+      const response = await apiRequest('/api/analysis/video/advice', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to generate advice');
+      }
+
+      return response.json();
+    },
+    onSuccess: (data) => {
+      console.log("Advice generation completed:", data);
+      
+      try {
+        const parsedAdvice = typeof data.advice_analysis === 'string' 
+          ? JSON.parse(data.advice_analysis) 
+          : data.advice_analysis;
+        
+        setAdviceData(parsedAdvice);
+        toast({
+          title: "Advice Generated",
+          description: "Player improvement advice has been generated successfully!"
+        });
+      } catch (error) {
+        console.error("Error parsing advice data:", error);
+        toast({
+          title: "Parsing Error",
+          description: "Generated advice could not be parsed properly."
+        });
+      }
+    },
+    onError: (error: any) => {
+      console.error("Error generating advice:", error);
+      toast({
+        title: "Generation Failed",
+        description: error.message || "Failed to generate player advice. Please try again."
+      });
+    }
+  });
+
+  const handleGenerateAdvice = () => {
+    generateAdviceMutation.mutate();
+  };
+
+  return (
+    <Card className="bg-athlete-gray-800 border-gray-700">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-white flex items-center">
+            <Brain className="mr-2 text-purple-400" size={20} />
+            Advice for Each Player
+          </CardTitle>
+          {!adviceData && (
+            <Button
+              onClick={handleGenerateAdvice}
+              disabled={generateAdviceMutation.isPending}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+              data-testid="generate-advice-button"
+            >
+              {generateAdviceMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Brain className="mr-2 h-4 w-4" />
+                  Generate Player Advice
+                </>
+              )}
+            </Button>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent>
+        {!adviceData && !generateAdviceMutation.isPending && (
+          <div className="text-gray-400 text-center py-8" data-testid="advice-empty-state">
+            <Brain className="mx-auto mb-4 text-purple-400" size={48} />
+            <p className="text-lg mb-2">Generate AI-Powered Improvement Advice</p>
+            <p className="text-sm">Get tactical, technical, and mental improvement suggestions for each player</p>
+          </div>
+        )}
+
+        {generateAdviceMutation.isPending && (
+          <div className="text-center py-8" data-testid="advice-loading">
+            <Loader2 className="mx-auto mb-4 text-purple-400 animate-spin" size={48} />
+            <p className="text-gray-300 text-lg mb-2">Analyzing player performance...</p>
+            <p className="text-gray-400 text-sm">This may take a few moments</p>
+          </div>
+        )}
+
+        {adviceData && (
+          <div className="space-y-6" data-testid="advice-results">
+            {/* General Observations */}
+            {adviceData.general_observations && (
+              <Card className="bg-gray-900/50 border-gray-600">
+                <CardHeader>
+                  <CardTitle className="text-white text-lg flex items-center">
+                    <MessageSquare className="mr-2 text-blue-400" size={18} />
+                    General Observations
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-300 leading-relaxed" data-testid="general-observations">
+                    {adviceData.general_observations}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Player Advice Cards */}
+            <div className="grid md:grid-cols-2 gap-6">
+              {adviceData.players?.map((player, index) => (
+                <Card 
+                  key={index}
+                  className={`border-2 ${
+                    player.color?.toLowerCase() === 'blue' 
+                      ? 'bg-blue-900/20 border-blue-500/50' 
+                      : player.color?.toLowerCase() === 'red'
+                      ? 'bg-red-900/20 border-red-500/50'
+                      : 'bg-gray-900/50 border-gray-600'
+                  }`}
+                  data-testid={`player-advice-${index}`}
+                >
+                  <CardHeader>
+                    <CardTitle 
+                      className={`text-lg flex items-center ${
+                        player.color?.toLowerCase() === 'blue' 
+                          ? 'text-blue-300' 
+                          : player.color?.toLowerCase() === 'red'
+                          ? 'text-red-300'
+                          : 'text-white'
+                      }`}
+                    >
+                      <Target className="mr-2" size={18} />
+                      {player.name} ({player.color})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Tactical Advice */}
+                    <div className="space-y-2">
+                      <h4 className="text-yellow-400 font-semibold text-sm flex items-center">
+                        <Target className="mr-1" size={14} />
+                        TACTICAL
+                      </h4>
+                      {player.tactical_advice?.issues?.length > 0 && (
+                        <div>
+                          <p className="text-red-300 text-xs font-medium">Issues:</p>
+                          <ul className="text-gray-300 text-sm space-y-1 ml-4">
+                            {player.tactical_advice.issues.map((issue, i) => (
+                              <li key={i} className="list-disc" data-testid={`tactical-issue-${index}-${i}`}>
+                                {issue}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {player.tactical_advice?.improvements?.length > 0 && (
+                        <div>
+                          <p className="text-green-300 text-xs font-medium">Improvements:</p>
+                          <ul className="text-gray-300 text-sm space-y-1 ml-4">
+                            {player.tactical_advice.improvements.map((improvement, i) => (
+                              <li key={i} className="list-disc" data-testid={`tactical-improvement-${index}-${i}`}>
+                                {improvement}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Technical Advice */}
+                    <div className="space-y-2">
+                      <h4 className="text-blue-400 font-semibold text-sm flex items-center">
+                        <Brain className="mr-1" size={14} />
+                        TECHNICAL
+                      </h4>
+                      {player.technical_advice?.issues?.length > 0 && (
+                        <div>
+                          <p className="text-red-300 text-xs font-medium">Issues:</p>
+                          <ul className="text-gray-300 text-sm space-y-1 ml-4">
+                            {player.technical_advice.issues.map((issue, i) => (
+                              <li key={i} className="list-disc" data-testid={`technical-issue-${index}-${i}`}>
+                                {issue}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {player.technical_advice?.improvements?.length > 0 && (
+                        <div>
+                          <p className="text-green-300 text-xs font-medium">Improvements:</p>
+                          <ul className="text-gray-300 text-sm space-y-1 ml-4">
+                            {player.technical_advice.improvements.map((improvement, i) => (
+                              <li key={i} className="list-disc" data-testid={`technical-improvement-${index}-${i}`}>
+                                {improvement}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Mental Advice */}
+                    <div className="space-y-2">
+                      <h4 className="text-purple-400 font-semibold text-sm flex items-center">
+                        <MessageSquare className="mr-1" size={14} />
+                        MENTAL
+                      </h4>
+                      {player.mental_advice?.issues?.length > 0 && (
+                        <div>
+                          <p className="text-red-300 text-xs font-medium">Issues:</p>
+                          <ul className="text-gray-300 text-sm space-y-1 ml-4">
+                            {player.mental_advice.issues.map((issue, i) => (
+                              <li key={i} className="list-disc" data-testid={`mental-issue-${index}-${i}`}>
+                                {issue}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {player.mental_advice?.improvements?.length > 0 && (
+                        <div>
+                          <p className="text-green-300 text-xs font-medium">Improvements:</p>
+                          <ul className="text-gray-300 text-sm space-y-1 ml-4">
+                            {player.mental_advice.improvements.map((improvement, i) => (
+                              <li key={i} className="list-disc" data-testid={`mental-improvement-${index}-${i}`}>
+                                {improvement}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
