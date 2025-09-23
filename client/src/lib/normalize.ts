@@ -147,25 +147,85 @@ function formatAthleteAnalysis(athlete1: any, athlete2: any, type: 'strengths' |
   return sections.join('\n');
 }
 
-// Helper to format head-to-head comparison
+// Helper to format comprehensive head-to-head comparison
 function formatHeadToHead(athlete1: any, athlete2: any): string {
   if (!athlete1 || !athlete2) return '';
   
   const sections = [
-    `**Direct Comparison: ${athlete1.name || 'Athlete 1'} vs ${athlete2.name || 'Athlete 2'}**`,
-    '',
-    `**Current Form:**`,
-    `• ${athlete1.name || 'Athlete 1'}: ${athlete1.currentForm || 'No data available'}`,
-    `• ${athlete2.name || 'Athlete 2'}: ${athlete2.currentForm || 'No data available'}`,
+    `**Head-to-Head Analysis: ${athlete1.name || 'Athlete 1'} vs ${athlete2.name || 'Athlete 2'}**`,
     ''
   ];
   
-  if (athlete1.ranking && athlete2.ranking) {
-    sections.push(`**Rankings:**`);
-    sections.push(`• ${athlete1.name || 'Athlete 1'}: ${athlete1.ranking}`);
-    sections.push(`• ${athlete2.name || 'Athlete 2'}: ${athlete2.ranking}`);
+  // Current Form Analysis
+  if (athlete1.currentForm || athlete2.currentForm) {
+    sections.push(`**Current Form Analysis:**`);
+    sections.push(`• **${athlete1.name || 'Athlete 1'}:** ${athlete1.currentForm || 'Form data not available'}`);
+    sections.push(`• **${athlete2.name || 'Athlete 2'}:** ${athlete2.currentForm || 'Form data not available'}`);
     sections.push('');
   }
+  
+  // Physical Matchup
+  if (athlete1.physicalAttributes && athlete2.physicalAttributes) {
+    sections.push(`**Physical Matchup:**`);
+    
+    if (athlete1.physicalAttributes.height && athlete2.physicalAttributes.height) {
+      sections.push(`• **Height:** ${athlete1.name} (${athlete1.physicalAttributes.height}) vs ${athlete2.name} (${athlete2.physicalAttributes.height})`);
+    }
+    
+    if (athlete1.physicalAttributes.weight && athlete2.physicalAttributes.weight) {
+      sections.push(`• **Weight Class:** ${athlete1.name} (${athlete1.physicalAttributes.weight}) vs ${athlete2.name} (${athlete2.physicalAttributes.weight})`);
+    }
+    
+    if (athlete1.physicalAttributes.stance && athlete2.physicalAttributes.stance) {
+      sections.push(`• **Fighting Stance:** ${athlete1.name} (${athlete1.physicalAttributes.stance}) vs ${athlete2.name} (${athlete2.physicalAttributes.stance})`);
+    }
+    sections.push('');
+  }
+  
+  // Technical Skills Comparison
+  if (athlete1.technicalSkills && athlete2.technicalSkills) {
+    sections.push(`**Technical Skills Showdown:**`);
+    
+    // Get top skills for each athlete
+    const topSkills1 = athlete1.technicalSkills.slice(0, 2);
+    const topSkills2 = athlete2.technicalSkills.slice(0, 2);
+    
+    sections.push(`**${athlete1.name} Key Strengths:**`);
+    topSkills1.forEach((skill: any, index: number) => {
+      sections.push(`${index + 1}. ${skill.skill} (${skill.proficiency || 'N/A'}%) - ${skill.description?.substring(0, 100)}...`);
+    });
+    sections.push('');
+    
+    sections.push(`**${athlete2.name} Key Strengths:**`);
+    topSkills2.forEach((skill: any, index: number) => {
+      sections.push(`${index + 1}. ${skill.skill} (${skill.proficiency || 'N/A'}%) - ${skill.description?.substring(0, 100)}...`);
+    });
+    sections.push('');
+  }
+  
+  // Performance Records
+  if (athlete1.recentPerformance && athlete2.recentPerformance) {
+    sections.push(`**Competition Records:**`);
+    
+    if (athlete1.recentPerformance.wins && athlete1.recentPerformance.losses) {
+      const winRate1 = ((parseInt(athlete1.recentPerformance.wins) / (parseInt(athlete1.recentPerformance.wins) + parseInt(athlete1.recentPerformance.losses))) * 100).toFixed(1);
+      sections.push(`• **${athlete1.name}:** ${athlete1.recentPerformance.wins}W-${athlete1.recentPerformance.losses}L (${winRate1}% win rate)`);
+    }
+    
+    if (athlete2.recentPerformance.wins && athlete2.recentPerformance.losses) {
+      const winRate2 = ((parseInt(athlete2.recentPerformance.wins) / (parseInt(athlete2.recentPerformance.wins) + parseInt(athlete2.recentPerformance.losses))) * 100).toFixed(1);
+      sections.push(`• **${athlete2.name}:** ${athlete2.recentPerformance.wins}W-${athlete2.recentPerformance.losses}L (${winRate2}% win rate)`);
+    }
+    
+    if (athlete1.recentPerformance.lastCompetition && athlete2.recentPerformance.lastCompetition) {
+      sections.push(`• **Recent Major Results:** ${athlete1.name} (${athlete1.recentPerformance.lastCompetition}) vs ${athlete2.name} (${athlete2.recentPerformance.lastCompetition})`);
+    }
+    sections.push('');
+  }
+  
+  // Strategic Analysis
+  sections.push(`**Strategic Matchup Preview:**`);
+  sections.push(`This head-to-head comparison reveals key tactical considerations for both athletes. The technical skill differential, physical attributes, and recent form all contribute to the potential outcome of a direct confrontation between these elite competitors.`);
   
   return sections.join('\n');
 }
@@ -594,28 +654,58 @@ export function normalizeComparison(raw: any): ComparisonViewModel | null {
         const name = athlete.name || `Athlete ${index + 1}`;
         weaknessesContent += `**${name} Areas for Improvement:**\n\n`;
         
-        // Look for lower proficiency technical skills as potential weaknesses
+        // Extract comprehensive weaknesses analysis
         if (athlete.technicalSkills && Array.isArray(athlete.technicalSkills)) {
-          const lowerSkills = athlete.technicalSkills.filter((skill: any) => skill.proficiency < 90);
-          if (lowerSkills.length > 0) {
-            weaknessesContent += `**Technical Areas to Develop:**\n`;
-            lowerSkills.forEach((skill: any, skillIndex: number) => {
-              weaknessesContent += `${skillIndex + 1}. ${skill.skill} (${skill.proficiency || 'N/A'}%)\n`;
-              if (skill.description) weaknessesContent += `   Current level: ${skill.description}\n`;
+          // Get skills that could be improved (below 95%)
+          const improvableSkills = athlete.technicalSkills.filter((skill: any) => skill.proficiency < 95);
+          
+          if (improvableSkills.length > 0) {
+            weaknessesContent += `**Technical Development Areas:**\n`;
+            improvableSkills.forEach((skill: any, skillIndex: number) => {
+              weaknessesContent += `${skillIndex + 1}. **${skill.skill}** (${skill.proficiency || 'N/A'}%)\n`;
+              if (skill.description) {
+                weaknessesContent += `   Analysis: Areas for refinement in ${skill.skill.toLowerCase()}\n`;
+              }
+              if (skill.evidence) {
+                weaknessesContent += `   Improvement Focus: Build consistency in execution\n`;
+              }
               weaknessesContent += '\n';
             });
           }
         }
         
-        // Add performance-based analysis
+        // Add performance-based weaknesses
         if (athlete.recentPerformance) {
-          weaknessesContent += `**Performance Analysis:**\n`;
-          if (athlete.recentPerformance.losses) {
-            const winRate = athlete.recentPerformance.wins && athlete.recentPerformance.losses ? 
-              (parseInt(athlete.recentPerformance.wins) / (parseInt(athlete.recentPerformance.wins) + parseInt(athlete.recentPerformance.losses)) * 100).toFixed(1) : 'N/A';
-            weaknessesContent += `• Win rate: ${winRate}% - Room for improvement in consistency\n`;
+          weaknessesContent += `**Performance Areas for Development:**\n`;
+          
+          if (athlete.recentPerformance.losses && athlete.recentPerformance.wins) {
+            const losses = parseInt(athlete.recentPerformance.losses);
+            const wins = parseInt(athlete.recentPerformance.wins);
+            const winRate = ((wins / (wins + losses)) * 100).toFixed(1);
+            
+            weaknessesContent += `1. **Consistency Under Pressure** (${winRate}% win rate)\n`;
+            weaknessesContent += `   Analysis: ${losses} losses suggest opportunities to improve performance in high-stakes situations\n\n`;
           }
-          weaknessesContent += '\n';
+          
+          if (athlete.recentPerformance.form && athlete.recentPerformance.form.includes('recent')) {
+            weaknessesContent += `2. **Sustained Peak Performance**\n`;
+            weaknessesContent += `   Analysis: Maintaining top form across extended competition periods\n\n`;
+          }
+        }
+        
+        // Add strategic weaknesses if possible to infer
+        if (athlete.physicalAttributes) {
+          weaknessesContent += `**Strategic Development Areas:**\n`;
+          
+          if (athlete.physicalAttributes.weight) {
+            weaknessesContent += `1. **Weight Class Strategy**\n`;
+            weaknessesContent += `   Analysis: Optimizing performance across weight categories (${athlete.physicalAttributes.weight})\n\n`;
+          }
+          
+          if (athlete.physicalAttributes.stance && athlete.physicalAttributes.stance.includes('adaptable')) {
+            weaknessesContent += `2. **Predictability Management**\n`;
+            weaknessesContent += `   Analysis: While adaptable, maintaining unpredictability against seasoned opponents\n\n`;
+          }
         }
         
         weaknessesContent += '---\n\n';

@@ -1688,9 +1688,10 @@ export function AnalysisPopup({
                   Comparison Overview
                 </h3>
                 <div className="prose prose-invert max-w-none">
-                  <div className="whitespace-pre-wrap text-gray-300 leading-relaxed">
-                    {normalizedComparison.tabs.overview}
-                  </div>
+                  <div 
+                    className="whitespace-pre-wrap text-gray-300 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: normalizedComparison.tabs.overview }}
+                  />
                 </div>
               </CardContent>
             </Card>
