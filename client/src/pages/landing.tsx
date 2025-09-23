@@ -1,12 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus, Gift, UserPlus, TrendingDown, Target, Calendar, Video, Users, Twitter, Instagram, Linkedin, Mail, MessageCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus, Gift, UserPlus, TrendingDown, Target, Calendar, Video, Users, Twitter, Instagram, Linkedin, Mail, MessageCircle, Eye } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Landing() {
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [, setLocation] = useLocation();
+  const [previewModal, setPreviewModal] = useState<{ open: boolean; serviceType: string | null }>({ open: false, serviceType: null });
 
   useEffect(() => {
     // Check if there's a referral code in the URL
@@ -173,7 +176,17 @@ export default function Landing() {
                   <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">50 tokens</span>
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-white">Bio Analysis</h3>
-                <p className="text-gray-400 text-sm">Complete athlete biography with career highlights and achievements</p>
+                <p className="text-gray-400 text-sm mb-3">Complete athlete biography with career highlights and achievements</p>
+                <Button 
+                  onClick={() => setPreviewModal({ open: true, serviceType: 'bio' })}
+                  data-testid="button-preview-bio"
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full border-blue-400/50 text-blue-400 hover:bg-blue-400/10"
+                >
+                  <Eye className="mr-2" size={14} />
+                  Preview
+                </Button>
               </CardContent>
             </Card>
 
@@ -184,7 +197,17 @@ export default function Landing() {
                   <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">70 tokens</span>
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-white">Rank History</h3>
-                <p className="text-gray-400 text-sm">Interactive charts showing ranking progression and improvement recommendations</p>
+                <p className="text-gray-400 text-sm mb-3">Interactive charts showing ranking progression and improvement recommendations</p>
+                <Button 
+                  onClick={() => setPreviewModal({ open: true, serviceType: 'rank' })}
+                  data-testid="button-preview-rank"
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full border-yellow-400/50 text-yellow-400 hover:bg-yellow-400/10"
+                >
+                  <Eye className="mr-2" size={14} />
+                  Preview
+                </Button>
               </CardContent>
             </Card>
 
@@ -195,7 +218,17 @@ export default function Landing() {
                   <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">50 tokens</span>
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-white">Strengths</h3>
-                <p className="text-gray-400 text-sm">Detailed analysis of key strengths and competitive advantages</p>
+                <p className="text-gray-400 text-sm mb-3">Detailed analysis of key strengths and competitive advantages</p>
+                <Button 
+                  onClick={() => setPreviewModal({ open: true, serviceType: 'strengths' })}
+                  data-testid="button-preview-strengths"
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full border-green-400/50 text-green-400 hover:bg-green-400/10"
+                >
+                  <Eye className="mr-2" size={14} />
+                  Preview
+                </Button>
               </CardContent>
             </Card>
 
@@ -206,7 +239,17 @@ export default function Landing() {
                   <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">50 tokens</span>
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-white">Weaknesses</h3>
-                <p className="text-gray-400 text-sm">In-depth analysis of areas needing improvement and targeted solutions</p>
+                <p className="text-gray-400 text-sm mb-3">In-depth analysis of areas needing improvement and targeted solutions</p>
+                <Button 
+                  onClick={() => setPreviewModal({ open: true, serviceType: 'weaknesses' })}
+                  data-testid="button-preview-weaknesses"
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full border-red-400/50 text-red-400 hover:bg-red-400/10"
+                >
+                  <Eye className="mr-2" size={14} />
+                  Preview
+                </Button>
               </CardContent>
             </Card>
           </div>
@@ -220,7 +263,17 @@ export default function Landing() {
                   <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">80 tokens</span>
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-white">How to Beat</h3>
-                <p className="text-gray-400 text-sm">Strategic insights on how to defeat specific opponents or improve matchups</p>
+                <p className="text-gray-400 text-sm mb-3">Strategic insights on how to defeat specific opponents or improve matchups</p>
+                <Button 
+                  onClick={() => setPreviewModal({ open: true, serviceType: 'beat-strategies' })}
+                  data-testid="button-preview-beat"
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full border-purple-400/50 text-purple-400 hover:bg-purple-400/10"
+                >
+                  <Eye className="mr-2" size={14} />
+                  Preview
+                </Button>
               </CardContent>
             </Card>
 
@@ -231,7 +284,17 @@ export default function Landing() {
                   <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">80 tokens</span>
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-white">Development Plan</h3>
-                <p className="text-gray-400 text-sm">Personalized training roadmap with specific goals and timelines</p>
+                <p className="text-gray-400 text-sm mb-3">Personalized training roadmap with specific goals and timelines</p>
+                <Button 
+                  onClick={() => setPreviewModal({ open: true, serviceType: 'development-plan' })}
+                  data-testid="button-preview-development"
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full border-blue-400/50 text-blue-400 hover:bg-blue-400/10"
+                >
+                  <Eye className="mr-2" size={14} />
+                  Preview
+                </Button>
               </CardContent>
             </Card>
 
@@ -242,7 +305,17 @@ export default function Landing() {
                   <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">90 tokens</span>
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-white">Nutrition Plan</h3>
-                <p className="text-gray-400 text-sm">Comprehensive meal planning based on body composition and goals</p>
+                <p className="text-gray-400 text-sm mb-3">Comprehensive meal planning based on body composition and goals</p>
+                <Button 
+                  onClick={() => setPreviewModal({ open: true, serviceType: 'nutrition-plan' })}
+                  data-testid="button-preview-nutrition"
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full border-green-400/50 text-green-400 hover:bg-green-400/10"
+                >
+                  <Eye className="mr-2" size={14} />
+                  Preview
+                </Button>
               </CardContent>
             </Card>
           </div>
@@ -258,7 +331,19 @@ export default function Landing() {
                   </div>
                   <h3 className="text-2xl font-semibold mb-3 text-white">Video Analysis</h3>
                   <p className="text-gray-300 mb-4">Frame-by-frame performance breakdown with AI-powered insights</p>
-                  <span className="bg-orange-500 text-white text-sm px-4 py-2 rounded-full font-semibold">120 tokens</span>
+                  <div className="flex items-center justify-center space-x-4 mb-4">
+                    <span className="bg-orange-500 text-white text-sm px-4 py-2 rounded-full font-semibold">120 tokens</span>
+                    <Button 
+                      onClick={() => setPreviewModal({ open: true, serviceType: 'video' })}
+                      data-testid="button-preview-video"
+                      variant="outline" 
+                      size="sm" 
+                      className="border-orange-400/50 text-orange-400 hover:bg-orange-400/10"
+                    >
+                      <Eye className="mr-2" size={14} />
+                      Preview
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -269,7 +354,19 @@ export default function Landing() {
                   </div>
                   <h3 className="text-2xl font-semibold mb-3 text-white">Compare Athletes</h3>
                   <p className="text-gray-300 mb-4">Head-to-head analysis comparing any two athletes across all performance metrics</p>
-                  <span className="bg-purple-500 text-white text-sm px-4 py-2 rounded-full font-semibold">150 tokens</span>
+                  <div className="flex items-center justify-center space-x-4 mb-4">
+                    <span className="bg-purple-500 text-white text-sm px-4 py-2 rounded-full font-semibold">150 tokens</span>
+                    <Button 
+                      onClick={() => setPreviewModal({ open: true, serviceType: 'comparison' })}
+                      data-testid="button-preview-comparison"
+                      variant="outline" 
+                      size="sm" 
+                      className="border-purple-400/50 text-purple-400 hover:bg-purple-400/10"
+                    >
+                      <Eye className="mr-2" size={14} />
+                      Preview
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </div>
