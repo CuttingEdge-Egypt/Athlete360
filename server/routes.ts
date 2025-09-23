@@ -147,11 +147,13 @@ function generatePaymentResultHTML(data: PaymentResultData): string {
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Simple direct video upload handler - Sept 15 approach without Multer
+// Stream directly to disk instead of buffering in memory
 async function handleDirectVideoUpload(req: any): Promise<string> {
-  console.log('[DIRECT_UPLOAD] Starting video upload without Multer');
+  console.log('[DIRECT_UPLOAD] Starting video upload - streaming to disk');
   
-  // Parse multipart form data manually
-  const boundary = req.headers['content-type'].split('boundary=')[1];
+  // Parse multipart form data boundary
+  const contentType = req.headers['content-type'] || '';
+  const boundary = contentType.split('boundary=')[1];
   if (!boundary) {
     throw new Error('No multipart boundary found');
   }
@@ -162,58 +164,88 @@ async function handleDirectVideoUpload(req: any): Promise<string> {
   }
   
   return new Promise((resolve, reject) => {
-    let buffer = Buffer.alloc(0);
-    let fileStarted = false;
-    let fileName = '';
+    let headerBuffer = Buffer.alloc(0);
+    let fileStream: fs.WriteStream | null = null;
     let filePath = '';
+    let fileName = '';
+    let headersParsed = false;
+    let bytesWritten = 0;
+    const boundaryBuffer = Buffer.from(`\r\n--${boundary}`);
     
     req.on('data', (chunk: Buffer) => {
-      buffer = Buffer.concat([buffer, chunk]);
-      
-      // Look for filename in headers if not started
-      if (!fileStarted) {
-        const bufferString = buffer.toString();
-        const filenameMatch = bufferString.match(/filename="([^"]+)"/);
+      if (!headersParsed) {
+        // Accumulate header data
+        headerBuffer = Buffer.concat([headerBuffer, chunk]);
+        const headerString = headerBuffer.toString();
         
-        if (filenameMatch) {
-          fileName = filenameMatch[1];
-          const timestamp = Date.now();
-          const ext = path.extname(fileName);
-          filePath = path.join(uploadPath, `video_${timestamp}${ext}`);
-          
-          // Find where file content starts (after double CRLF)
-          const headerEnd = bufferString.indexOf('\r\n\r\n');
-          if (headerEnd !== -1) {
-            // Extract just the file content
+        // Look for end of headers (double CRLF)
+        const headerEnd = headerString.indexOf('\r\n\r\n');
+        if (headerEnd !== -1) {
+          // Extract filename from headers
+          const filenameMatch = headerString.match(/filename="([^"]+)"/);
+          if (filenameMatch) {
+            fileName = filenameMatch[1];
+            const timestamp = Date.now();
+            const ext = path.extname(fileName);
+            filePath = path.join(uploadPath, `video_${timestamp}${ext}`);
+            
+            console.log(`[DIRECT_UPLOAD] Starting stream to: ${filePath}`);
+            fileStream = fs.createWriteStream(filePath);
+            
+            // Write the file content that was in this chunk
             const fileStart = headerEnd + 4;
-            buffer = buffer.slice(fileStart);
-            fileStarted = true;
-            console.log(`[DIRECT_UPLOAD] Found file: ${fileName}, saving to: ${filePath}`);
+            const fileContent = headerBuffer.slice(fileStart);
+            fileStream.write(fileContent);
+            bytesWritten += fileContent.length;
+            
+            headersParsed = true;
+          }
+        }
+      } else if (fileStream) {
+        // Stream directly to file
+        // Check if this chunk contains the boundary (end of file)
+        const boundaryIndex = chunk.indexOf(boundaryBuffer);
+        if (boundaryIndex !== -1) {
+          // Write only up to the boundary
+          const fileData = chunk.slice(0, boundaryIndex);
+          fileStream.write(fileData);
+          bytesWritten += fileData.length;
+          
+          // Close the stream
+          fileStream.end();
+          console.log(`[DIRECT_UPLOAD] File saved: ${filePath} (${bytesWritten} bytes)`);
+          resolve(filePath);
+        } else {
+          // Write entire chunk
+          fileStream.write(chunk);
+          bytesWritten += chunk.length;
+          
+          // Log progress every 10MB
+          if (bytesWritten % (10 * 1024 * 1024) < chunk.length) {
+            console.log(`[DIRECT_UPLOAD] Progress: ${Math.round(bytesWritten / 1024 / 1024)}MB written`);
           }
         }
       }
     });
     
     req.on('end', () => {
-      if (fileStarted && filePath) {
-        // Remove the boundary ending from buffer
-        const boundaryEnd = `\r\n--${boundary}--\r\n`;
-        const lastBoundary = buffer.lastIndexOf(Buffer.from(boundaryEnd));
-        if (lastBoundary !== -1) {
-          buffer = buffer.slice(0, lastBoundary);
-        }
-        
-        // Write file directly to disk
-        fs.writeFileSync(filePath, buffer);
-        console.log(`[DIRECT_UPLOAD] File saved: ${filePath} (${buffer.length} bytes)`);
+      if (fileStream && !fileStream.destroyed) {
+        fileStream.end();
+        console.log(`[DIRECT_UPLOAD] Upload complete: ${filePath} (${bytesWritten} bytes)`);
         resolve(filePath);
-      } else {
-        reject(new Error('No file data received'));
+      } else if (!headersParsed) {
+        reject(new Error('No file data received or headers not parsed'));
       }
     });
     
     req.on('error', (error: Error) => {
       console.error('[DIRECT_UPLOAD] Upload error:', error);
+      if (fileStream) {
+        fileStream.destroy();
+      }
+      if (filePath && fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
       reject(error);
     });
   });
