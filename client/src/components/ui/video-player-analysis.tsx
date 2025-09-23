@@ -671,7 +671,7 @@ function PlayerAdviceSection({ videoFile, roundToAnalyze }: PlayerAdviceSectionP
       formData.append('video', videoFile);
       formData.append('round', roundToAnalyze.toString());
 
-      const response = await apiRequest('/api/analysis/video/advice', {
+      const response = await fetch('/api/analysis/video/advice', {
         method: 'POST',
         body: formData,
       });
