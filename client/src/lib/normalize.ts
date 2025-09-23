@@ -411,6 +411,48 @@ export function normalizeNutritionPlan(raw: any): StructuredNutritionPlan | null
 }
 
 /**
+ * Robust JSON parser with multiple fallback strategies for corrupted data
+ */
+function parseCorruptedJson(jsonString: string, context: string): any | null {
+  if (!jsonString || typeof jsonString !== 'string') return null;
+  
+  // First, try normal JSON parsing
+  try {
+    return JSON.parse(jsonString);
+  } catch (e: any) {
+    console.warn(`First parse attempt failed for ${context}:`, e.message);
+  }
+  
+  // Try to clean up common JSON corruption issues
+  try {
+    let cleaned = jsonString
+      .replace(/\n/g, '\\n')           // Escape newlines
+      .replace(/\r/g, '\\r')           // Escape carriage returns
+      .replace(/\t/g, '\\t')           // Escape tabs
+      .replace(/[\x00-\x1F]/g, '')     // Remove control characters
+      .replace(/([^\\])"/g, '$1\\"')   // Escape unescaped quotes
+      .replace(/,(\s*[}\]])/g, '$1');  // Remove trailing commas
+      
+    return JSON.parse(cleaned);
+  } catch (e: any) {
+    console.warn(`Cleanup parsing failed for ${context}:`, e.message);
+  }
+  
+  // Try regex extraction for key data
+  try {
+    const strengthsMatch = jsonString.match(/"strengths":\s*{[^}]+}/);
+    if (strengthsMatch) {
+      return JSON.parse(`{${strengthsMatch[0]}}`);
+    }
+  } catch (e: any) {
+    console.warn(`Regex extraction failed for ${context}:`, e.message);
+  }
+  
+  console.error(`All parsing attempts failed for ${context}. Using fallback data.`);
+  return null;
+}
+
+/**
  * Normalize comparison data to ComparisonViewModel format
  */
 export function normalizeComparison(raw: any): ComparisonViewModel | null {
@@ -418,120 +460,169 @@ export function normalizeComparison(raw: any): ComparisonViewModel | null {
     const parsed = safeJsonParse(raw);
     const content = extractContent(parsed);
     
-    
     if (!content) return null;
     
-    let tabs: any = {};
+    let detailedAnalysis: any = null;
+    let overallAnalysis: any = null;
+    let strengthsData: any = null;
+    let athleteNames: string[] = [];
     
-    // Handle existing tabs structure
+    // Extract data from tabs structure
     if (content.tabs && typeof content.tabs === 'object') {
       const tabKeys = Object.keys(content.tabs);
-      let detailedAnalysis: any = null;
-      let overallAnalysis: any = null;
-      let strengthsData: any = null;
       
-      // Process each tab individually
       for (const key of tabKeys) {
         const tab = content.tabs[key];
-        if (tab) {
-          try {
-            let parsedResponse: any;
-            
-            // Handle different rawResponse formats
-            if (tab.rawResponse && typeof tab.rawResponse === 'string' && tab.rawResponse.trim().length > 0) {
-              // It's a JSON string, parse it
-              try {
-                parsedResponse = JSON.parse(tab.rawResponse);
-              } catch (parseError) {
-                console.error(`JSON parse error for ${key}:`, parseError, tab.rawResponse.substring(0, 200));
-                continue;
-              }
-            } else if (tab.rawResponse && typeof tab.rawResponse === 'object' && Object.keys(tab.rawResponse).length > 0) {
-              // It's already parsed JSON object
-              parsedResponse = tab.rawResponse;
-            } else {
-              // Skip empty, null, or invalid tabs
-              console.log(`Skipping ${key} tab - no valid rawResponse data`);
-              continue;
-            }
-            
-            // Extract data based on tab content and key
-            if (key === 'details' && parsedResponse.detailedAnalysis) {
+        if (!tab?.rawResponse) continue;
+        
+        let parsedResponse: any = null;
+        
+        // Parse rawResponse with robust handling
+        if (typeof tab.rawResponse === 'string') {
+          parsedResponse = parseCorruptedJson(tab.rawResponse, key);
+        } else if (typeof tab.rawResponse === 'object') {
+          parsedResponse = tab.rawResponse;
+        }
+        
+        if (!parsedResponse) continue;
+        
+        // Extract data based on tab type
+        switch (key) {
+          case 'details':
+            if (parsedResponse.detailedAnalysis) {
               detailedAnalysis = parsedResponse.detailedAnalysis;
-            } else if (key === 'overview' && (parsedResponse.overallAnalysis || parsedResponse.athlete1)) {
+            }
+            break;
+          case 'overview':
+            if (parsedResponse.overallAnalysis || parsedResponse.athlete1) {
               overallAnalysis = parsedResponse;
-            } else if (key === 'strengths' && parsedResponse.strengths) {
+              // Extract athlete names from overview
+              if (parsedResponse.athlete1?.name && parsedResponse.athlete2?.name) {
+                athleteNames = [parsedResponse.athlete1.name, parsedResponse.athlete2.name];
+              }
+            }
+            break;
+          case 'strengths':
+            if (parsedResponse.strengths) {
               strengthsData = parsedResponse.strengths;
             }
-            
-            // Debug log what we found
-            console.log(`Tab ${key} processed:`, {
-              hasDetailedAnalysis: !!parsedResponse.detailedAnalysis,
-              hasOverallAnalysis: !!parsedResponse.overallAnalysis,
-              hasStrengths: !!parsedResponse.strengths,
-              hasAthlete1: !!parsedResponse.athlete1
-            });
-          } catch (e) {
-            console.error(`Failed to process tab ${key}:`, e);
-          }
+            break;
         }
       }
-      
-      // Build tabs from extracted data
-      if (detailedAnalysis || overallAnalysis || strengthsData) {
-        tabs = {
-          overview: overallAnalysis?.overallAnalysis?.summary || 
-                   (detailedAnalysis ? `Comparison between ${detailedAnalysis.athlete1?.name || 'Athlete 1'} and ${detailedAnalysis.athlete2?.name || 'Athlete 2'}` : 
-                    'Athlete comparison analysis'),
-          strengths: strengthsData ? formatStrengthsData(strengthsData, detailedAnalysis) : 
-                     (detailedAnalysis ? formatAthleteAnalysis(detailedAnalysis.athlete1, detailedAnalysis.athlete2, 'strengths') : 
-                      'Strength analysis not available'),
-          weaknesses: detailedAnalysis ? formatAthleteAnalysis(detailedAnalysis.athlete1, detailedAnalysis.athlete2, 'weaknesses') : 
-                      'Weakness analysis not available',
-          headToHead: detailedAnalysis ? formatHeadToHead(detailedAnalysis.athlete1, detailedAnalysis.athlete2) :
-                      (overallAnalysis?.headToHeadComparison || 'Head-to-head analysis not available')
-        };
-      } else {
-        // Use tabs directly as fallback
-        tabs = content.tabs;
-      }
-    } else {
-      // Build tabs from various possible keys
-      tabs = {
-        overview: content.overview || content.summary || content.comparison || 
-                 content.introduction || content.analysis,
-        strengths: content.strengths || content.advantages || content.positives,
-        weaknesses: content.weaknesses || content.disadvantages || content.negatives ||
-                   content.areas_for_improvement,
-        headToHead: content.headToHead || content.head_to_head || content.versus ||
-                   content.direct_comparison || content.matchup
-      };
     }
     
-    // Convert objects to strings if needed and apply markdown formatting
-    Object.keys(tabs).forEach(key => {
-      if (tabs[key] && typeof tabs[key] === 'object') {
-        tabs[key] = JSON.stringify(tabs[key], null, 2);
+    // Extract athlete names from detailed analysis if not found in overview
+    if (athleteNames.length === 0 && detailedAnalysis) {
+      if (detailedAnalysis.athlete1?.name && detailedAnalysis.athlete2?.name) {
+        athleteNames = [detailedAnalysis.athlete1.name, detailedAnalysis.athlete2.name];
       }
-      // Convert markdown-style asterisks to HTML bold tags
+    }
+    
+    // Build comprehensive tabs with all sections
+    const tabs: any = {};
+    
+    // Overview section with ranking and prediction
+    if (overallAnalysis) {
+      let overviewContent = '';
+      
+      if (overallAnalysis.overallAnalysis?.summary) {
+        overviewContent += `**Overall Analysis:**\n${overallAnalysis.overallAnalysis.summary}\n\n`;
+      }
+      
+      if (overallAnalysis.overallAnalysis?.betterAthlete && overallAnalysis.overallAnalysis?.reasonsWhy) {
+        const winner = overallAnalysis.overallAnalysis.betterAthlete === 'athlete1' ? athleteNames[0] : athleteNames[1];
+        overviewContent += `**Predicted Winner:** ${winner || 'Athlete 1'}\n\n`;
+        overviewContent += `**Key Reasons:**\n`;
+        overallAnalysis.overallAnalysis.reasonsWhy.forEach((reason: string, index: number) => {
+          overviewContent += `${index + 1}. ${reason}\n`;
+        });
+        overviewContent += '\n';
+      }
+      
+      if (overallAnalysis.athlete1?.rank && overallAnalysis.athlete2?.rank) {
+        overviewContent += `**Current Rankings:**\n`;
+        overviewContent += `• ${athleteNames[0] || 'Athlete 1'}: ${overallAnalysis.athlete1.rank}\n`;
+        overviewContent += `• ${athleteNames[1] || 'Athlete 2'}: ${overallAnalysis.athlete2.rank}\n\n`;
+      }
+      
+      tabs.overview = overviewContent;
+    }
+    
+    // Strengths section
+    if (strengthsData) {
+      tabs.strengths = formatStrengthsData(strengthsData, detailedAnalysis);
+    } else if (detailedAnalysis) {
+      tabs.strengths = formatAthleteAnalysis(detailedAnalysis.athlete1, detailedAnalysis.athlete2, 'strengths');
+    }
+    
+    // Weaknesses section  
+    if (detailedAnalysis) {
+      tabs.weaknesses = formatAthleteAnalysis(detailedAnalysis.athlete1, detailedAnalysis.athlete2, 'weaknesses');
+    }
+    
+    // Technical Details section
+    if (detailedAnalysis) {
+      let detailsContent = '';
+      
+      [detailedAnalysis.athlete1, detailedAnalysis.athlete2].forEach((athlete, index) => {
+        if (!athlete) return;
+        
+        const name = athlete.name || `Athlete ${index + 1}`;
+        detailsContent += `**${name} - Technical Profile:**\n\n`;
+        
+        if (athlete.physicalAttributes) {
+          detailsContent += `**Physical Attributes:**\n`;
+          const attrs = athlete.physicalAttributes;
+          if (attrs.height) detailsContent += `• Height: ${attrs.height}\n`;
+          if (attrs.weight) detailsContent += `• Weight: ${attrs.weight}\n`;
+          if (attrs.stance) detailsContent += `• Stance: ${attrs.stance}\n`;
+          detailsContent += '\n';
+        }
+        
+        if (athlete.technicalSkills && Array.isArray(athlete.technicalSkills)) {
+          detailsContent += `**Technical Skills:**\n`;
+          athlete.technicalSkills.forEach((skill: any, skillIndex: number) => {
+            detailsContent += `${skillIndex + 1}. **${skill.skill}** (${skill.proficiency || 'N/A'}%)\n`;
+            if (skill.description) detailsContent += `   ${skill.description}\n`;
+            if (skill.evidence) detailsContent += `   *Evidence:* ${skill.evidence}\n`;
+            detailsContent += '\n';
+          });
+        }
+        
+        if (athlete.recentPerformance) {
+          detailsContent += `**Recent Performance:**\n`;
+          const perf = athlete.recentPerformance;
+          if (perf.wins && perf.losses) detailsContent += `• Record: ${perf.wins} wins, ${perf.losses} losses\n`;
+          if (perf.lastCompetition) detailsContent += `• Last Competition: ${perf.lastCompetition}\n`;
+          if (perf.form) detailsContent += `• Current Form: ${perf.form}\n`;
+          detailsContent += '\n';
+        }
+        
+        detailsContent += '---\n\n';
+      });
+      
+      tabs.details = detailsContent;
+    }
+    
+    // Head-to-Head section
+    if (detailedAnalysis) {
+      tabs.headToHead = formatHeadToHead(detailedAnalysis.athlete1, detailedAnalysis.athlete2);
+    }
+    
+    // Competition History section (if available)
+    // This would be populated from competition data if it exists
+    
+    // Apply markdown formatting to all sections
+    Object.keys(tabs).forEach(key => {
       if (typeof tabs[key] === 'string') {
         tabs[key] = tabs[key].replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       }
     });
     
-    // Extract athlete names
-    let athleteNames: string[] = [];
-    if (content.athletes && Array.isArray(content.athletes)) {
-      athleteNames = content.athletes.map((athlete: any) => 
-        typeof athlete === 'string' ? athlete : athlete.name || 'Athlete');
-    } else if (content.athlete1 && content.athlete2) {
-      athleteNames = [content.athlete1, content.athlete2];
-    }
-    
     return {
       tabs,
       athleteNames,
-      summary: content.summary || content.conclusion
+      summary: overallAnalysis?.overallAnalysis?.summary || 'Comprehensive athlete comparison analysis'
     };
   } catch (error) {
     console.error('Failed to normalize comparison data:', error);

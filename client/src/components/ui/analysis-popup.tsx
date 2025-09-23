@@ -1696,7 +1696,7 @@ export function AnalysisPopup({
             </Card>
           )}
 
-          {/* Strengths Comparison */}
+          {/* Strengths Analysis */}
           {normalizedComparison.tabs.strengths && (
             <Card className="bg-athlete-gray-800 border-gray-700">
               <CardContent className="p-6">
@@ -1714,7 +1714,7 @@ export function AnalysisPopup({
             </Card>
           )}
 
-          {/* Weaknesses Comparison */}
+          {/* Weaknesses Analysis */}
           {normalizedComparison.tabs.weaknesses && (
             <Card className="bg-athlete-gray-800 border-gray-700">
               <CardContent className="p-6">
@@ -1732,13 +1732,31 @@ export function AnalysisPopup({
             </Card>
           )}
 
+          {/* Technical Details */}
+          {normalizedComparison.tabs.details && (
+            <Card className="bg-athlete-gray-800 border-gray-700">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center">
+                  <Brain className="mr-3" size={24} />
+                  Technical Details & Analysis
+                </h3>
+                <div className="prose prose-invert max-w-none">
+                  <div 
+                    className="whitespace-pre-wrap text-gray-300 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: normalizedComparison.tabs.details }}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Head-to-Head */}
           {normalizedComparison.tabs.headToHead && (
             <Card className="bg-athlete-gray-800 border-gray-700">
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-purple-400 mb-4 flex items-center">
                   <Target className="mr-3" size={24} />
-                  Direct Comparison
+                  Head-to-Head Analysis
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <div 
