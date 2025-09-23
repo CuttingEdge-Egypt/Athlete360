@@ -3099,7 +3099,9 @@ Return only valid JSON with the missing fields.`;
       
       // Extract round number from form body - Multer handles this automatically!
       const round = Number(req.body.roundToAnalyze) || 1;
-      console.log(`[VIDEO ROUTE ${requestId}] Round selected: ${round} (from req.body.roundToAnalyze: ${req.body.roundToAnalyze})`)
+      const language = req.body.language || 'english';
+      console.log(`[VIDEO ROUTE ${requestId}] Round selected: ${round} (from req.body.roundToAnalyze: ${req.body.roundToAnalyze})`);
+      console.log(`[VIDEO ROUTE ${requestId}] Language selected: ${language}`);
       
       console.log(`[ROUTE ${requestId}] User: ${userId}, File: ${fileName}, Round: ${round}`);
 
@@ -3146,7 +3148,8 @@ Return only valid JSON with the missing fields.`;
       const analysisResults = await analyzeVideoComprehensive(
         videoFilePath, // Direct file path like Python version
         fileName,
-        round
+        round,
+        language
       );
 
       const analysisTime = Date.now() - analysisStartTime;

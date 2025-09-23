@@ -6,6 +6,7 @@ import { Play, Pause, RotateCcw, Volume2, Trophy, Brain, Target, MessageSquare }
 interface VideoPlayerAnalysisProps {
   videoFile: File;
   analysisData: any;
+  language?: string;
 }
 
 interface ScoreEvent {
@@ -23,13 +24,27 @@ interface YellowCardEvent {
   player: 'blue' | 'red';
 }
 
-export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnalysisProps) {
+export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'english' }: VideoPlayerAnalysisProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [videoUrl, setVideoUrl] = useState<string>("");
+
+  // Translation function for data box titles
+  const getDataBoxTitle = (key: string): string => {
+    if (language === 'arabic') {
+      const arabicTitles: Record<string, string> = {
+        'BLUE SCORE': 'النقاط الزرقاء',
+        'RED SCORE': 'النقاط الحمراء', 
+        'TOTAL KICKS': 'إجمالي الركلات',
+        'WARNINGS': 'إنذارات'
+      };
+      return arabicTitles[key] || key;
+    }
+    return key;
+  };
 
   // Parse analysis data and extract scoring/card events with cumulative tracking
   const parseAnalysisEvents = () => {
@@ -479,7 +494,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
           {/* Blue Score */}
           <Card className="bg-blue-900/20 border-blue-500/30" data-testid="blue-score-card">
             <CardContent className="p-4 text-center">
-              <div className="text-blue-400 font-semibold text-sm mb-2">BLUE SCORE</div>
+              <div className="text-blue-400 font-semibold text-sm mb-2">{getDataBoxTitle('BLUE SCORE')}</div>
               <div className="text-4xl font-bold text-blue-300" data-testid="blue-score">{currentStats.blueScore}</div>
             </CardContent>
           </Card>
@@ -487,7 +502,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
           {/* Blue Kicks */}
           <Card className="bg-blue-900/20 border-blue-500/30" data-testid="blue-kicks-card">
             <CardContent className="p-4 text-center">
-              <div className="text-blue-400 font-semibold text-sm mb-2">TOTAL KICKS</div>
+              <div className="text-blue-400 font-semibold text-sm mb-2">{getDataBoxTitle('TOTAL KICKS')}</div>
               <div className="text-2xl font-bold text-blue-300" data-testid="blue-kicks">{blueKicks}</div>
             </CardContent>
           </Card>
@@ -495,7 +510,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
           {/* Blue Yellow Cards */}
           <Card className="bg-blue-900/20 border-blue-500/30" data-testid="blue-cards-card">
             <CardContent className="p-4 text-center">
-              <div className="text-blue-400 font-semibold text-sm mb-2">WARNINGS</div>
+              <div className="text-blue-400 font-semibold text-sm mb-2">{getDataBoxTitle('WARNINGS')}</div>
               <div className="text-2xl font-bold text-yellow-400" data-testid="blue-cards">{currentStats.blueCards}</div>
             </CardContent>
           </Card>
@@ -618,7 +633,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
           {/* Red Score */}
           <Card className="bg-red-900/20 border-red-500/30" data-testid="red-score-card">
             <CardContent className="p-4 text-center">
-              <div className="text-red-400 font-semibold text-sm mb-2">RED SCORE</div>
+              <div className="text-red-400 font-semibold text-sm mb-2">{getDataBoxTitle('RED SCORE')}</div>
               <div className="text-4xl font-bold text-red-300" data-testid="red-score">{currentStats.redScore}</div>
             </CardContent>
           </Card>
@@ -626,7 +641,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
           {/* Red Kicks */}
           <Card className="bg-red-900/20 border-red-500/30" data-testid="red-kicks-card">
             <CardContent className="p-4 text-center">
-              <div className="text-red-400 font-semibold text-sm mb-2">TOTAL KICKS</div>
+              <div className="text-red-400 font-semibold text-sm mb-2">{getDataBoxTitle('TOTAL KICKS')}</div>
               <div className="text-2xl font-bold text-red-300" data-testid="red-kicks">{redKicks}</div>
             </CardContent>
           </Card>
@@ -634,7 +649,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
           {/* Red Yellow Cards */}
           <Card className="bg-red-900/20 border-red-500/30" data-testid="red-cards-card">
             <CardContent className="p-4 text-center">
-              <div className="text-red-400 font-semibold text-sm mb-2">WARNINGS</div>
+              <div className="text-red-400 font-semibold text-sm mb-2">{getDataBoxTitle('WARNINGS')}</div>
               <div className="text-2xl font-bold text-yellow-400" data-testid="red-cards">{currentStats.redCards}</div>
             </CardContent>
           </Card>

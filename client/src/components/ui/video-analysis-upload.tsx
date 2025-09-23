@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Video, Upload, Loader2, Play, FileVideo } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AnalysisResult } from "./analysis-result";
@@ -16,6 +17,7 @@ interface VideoAnalysisUploadProps {
 export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [roundToAnalyze, setRoundToAnalyze] = useState(1);
+  const [language, setLanguage] = useState<string>("english");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Analyzing Video...');
   const [analysisResult, setAnalysisResult] = useState<any>(null);
@@ -101,6 +103,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
     const formData = new FormData();
     formData.append('video', uploadedFile);
     formData.append('roundToAnalyze', roundToAnalyze.toString());
+    formData.append('language', language);
 
     // Create an AbortController for manual timeout control
     let controller: AbortController | null = null;
@@ -195,6 +198,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
                 setAnalysisResult(null);
                 setUploadedFile(null);
                 setRoundToAnalyze(1);
+                setLanguage("english");
               }}
               variant="outline"
               data-testid="button-analyze-new"
@@ -211,6 +215,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
         <VideoPlayerAnalysis 
           videoFile={uploadedFile}
           analysisData={analysisResult}
+          language={language}
         />
       </div>
     );
@@ -307,6 +312,30 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
                 </Button>
               ))}
             </div>
+          </div>
+
+          {/* Language Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="language" className="text-white font-medium">
+              Analysis Language
+            </Label>
+            <Select 
+              value={language} 
+              onValueChange={setLanguage}
+              data-testid="select-language"
+            >
+              <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white">
+                <SelectValue placeholder="Select language" />
+              </SelectTrigger>
+              <SelectContent className="bg-athlete-gray-700 border-gray-600">
+                <SelectItem value="english" className="text-white hover:bg-athlete-gray-600">
+                  English
+                </SelectItem>
+                <SelectItem value="arabic" className="text-white hover:bg-athlete-gray-600">
+                  العربية (Arabic)
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Analysis Button */}

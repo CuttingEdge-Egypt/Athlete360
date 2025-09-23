@@ -536,7 +536,8 @@ Watch the entire round carefully and provide actionable, specific advice that co
 export async function analyzeVideoComprehensive(
   videoFilePath: string,
   filename: string,
-  roundToAnalyze: number
+  roundToAnalyze: number,
+  language: string = 'english'
 ) {
   console.log(`[ANALYZE_COMPREHENSIVE] Starting comprehensive video analysis for ${filename} at ${videoFilePath}`);
   console.log(`[ANALYZE_COMPREHENSIVE] Round: ${roundToAnalyze}`);
@@ -565,8 +566,15 @@ export async function analyzeVideoComprehensive(
     console.log(`[ANALYZE_COMPREHENSIVE] Video ready for analysis: ${uploadedFile.uri}`);
     console.log(`[ANALYZE_COMPREHENSIVE] Starting all analyses in parallel...`);
 
+    // Language instruction for match analysis and advice
+    const languageInstruction = language === 'arabic' 
+      ? `Write your response in Arabic (العربية). Use proper Arabic terminology for taekwondo techniques and match analysis.`
+      : `Write your response in English.`;
+      
     // Define all prompts (reusing existing prompts from processVideoGemini and generatePlayerAdvice)
     const promptMatch = `Write me a match Analysis of what happened in round ${roundToAnalyze} in technical terms. Include the story of the round.
+
+${languageInstruction}
 
 IMPORTANT: Start directly with "**Match Analysis: Round ${roundToAnalyze}**" - DO NOT include any prefacing phrases like "Of course", "Here is", "Sure", or similar AI response patterns.
 
@@ -684,6 +692,8 @@ IMPORTANT: Return ONLY valid JSON in the following structure:
 }`;
 
     const promptAdvice = `Analyze round ${roundToAnalyze} of this combat sports match and provide detailed improvement advice for each player. Focus on tactical, technical, and mental aspects.
+
+${languageInstruction}
 
 IMPORTANT: Return ONLY a valid JSON response in the following structure:
 
