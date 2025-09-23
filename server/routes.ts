@@ -47,7 +47,7 @@ type DevelopmentPlanRequest = z.infer<typeof developmentPlanSchema>;
 import { seedDatabase } from "./seedData";
 import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, compareAthletes, generateRankHistory } from "./openaiService";
 import { generateNutritionPlan, generateEnhancedNutritionPlan, generateRankHistoryWithGemini, generateAthleteBiography, generateDevelopmentPlan, type NutritionPlanFormData, type DevelopmentPlanFormData } from "./geminiService";
-import { analyzeVideoFile } from "./videoAnalysisService";
+import { analyzeVideoFile, analyzeVideoComprehensive } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
 
 import { TestingService } from "./testingService";
@@ -3286,7 +3286,7 @@ Return only valid JSON with the missing fields.`;
         throw new Error('Video file path is not available');
       }
       
-      const analysisResults = await analyzeVideoFile(
+      const analysisResults = await analyzeVideoComprehensive(
         videoFilePath, // Direct file path like Python version
         fileName,
         round
