@@ -166,7 +166,7 @@ const upload = multer({
   limits: {
     fileSize: 500 * 1024 * 1024, // 500MB limit - generous limit since we use Files API (no memory loading)
     files: 1,
-    fieldSize: 1024, // 1KB for other form fields
+    fieldSize: 10 * 1024 * 1024, // 10MB for form fields (was 1KB - too restrictive!)
   },
   fileFilter: (req, file, cb) => {
     console.log(`[MULTER] Processing file: ${file.originalname}, MIME type: ${file.mimetype}, Size: ${file.size || 'unknown'}`);
@@ -3077,21 +3077,31 @@ Return only valid JSON with the missing fields.`;
         if (error instanceof multer.MulterError) {
           if (error.code === 'LIMIT_FILE_SIZE') {
             return res.status(413).json({ 
-              message: "File too large. Maximum file size is 500MB." 
+              message: "File too large. Maximum file size is 500MB.",
+              code: 'LIMIT_FILE_SIZE'
+            });
+          }
+          if (error.code === 'LIMIT_FIELD_SIZE') {
+            return res.status(413).json({ 
+              message: "Form field too large. Maximum field size is 10MB.",
+              code: 'LIMIT_FIELD_SIZE'
             });
           }
           if (error.code === 'LIMIT_FILE_COUNT') {
             return res.status(400).json({ 
-              message: "Too many files uploaded." 
+              message: "Too many files uploaded.",
+              code: 'LIMIT_FILE_COUNT'
             });
           }
           if (error.code === 'LIMIT_UNEXPECTED_FILE') {
             return res.status(400).json({ 
-              message: "Unexpected file field." 
+              message: "Unexpected file field.",
+              code: 'LIMIT_UNEXPECTED_FILE'
             });
           }
           return res.status(400).json({ 
-            message: `File upload error: ${error.message}` 
+            message: `File upload error: ${error.message}`,
+            code: error.code
           });
         }
         
