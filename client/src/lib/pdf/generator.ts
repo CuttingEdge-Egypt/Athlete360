@@ -42,6 +42,31 @@ declare module 'jspdf' {
   }
 }
 
+// Text normalization function to fix Unicode spacing issues
+const normalizeText = (text: string): string => {
+  return text
+    .replace(/[\u2011\u2013\u2014]/g, '-')  // Non-breaking hyphen, en dash, em dash → regular hyphen
+    .replace(/[\u2018\u2019]/g, "'")        // Curly single quotes → straight quote
+    .replace(/[\u201C\u201D]/g, '"')        // Curly double quotes → straight quote
+    .replace(/\u00A0/g, ' ')               // Non-breaking space → regular space
+    .replace(/[\u200B\u200C\u200D]/g, '')  // Zero-width spaces → removed
+    .replace(/\s+/g, ' ')                  // Multiple spaces → single space
+    .trim();
+};
+
+// Page space checking function
+const ensurePageSpace = (pdf: jsPDF, currentY: number, blockHeight: number): number => {
+  const { margin } = pdfTheme.spacing;
+  const { pageHeight } = pdfTheme.layout;
+  
+  if (currentY + blockHeight > pageHeight - margin) {
+    pdf.addPage();
+    drawPageFrame(pdf);
+    return 40; // Start near top of new page
+  }
+  return currentY;
+};
+
 // Layout helper functions
 const drawPageFrame = (pdf: jsPDF) => {
   const { margin } = pdfTheme.spacing;
@@ -56,18 +81,46 @@ const drawHeaderBar = (pdf: jsPDF, title: string, subtitle: string) => {
   const { margin } = pdfTheme.spacing;
   const { pageWidth } = pdfTheme.layout;
   
+  // Normalize text and calculate text width for wrapping
+  const normalizedTitle = normalizeText(title);
+  const normalizedSubtitle = normalizeText(subtitle);
+  const headerTextWidth = pageWidth - 2 * margin - 20; // Padding inside bar
+  
+  // Split title and subtitle to fit within header bar
+  pdf.setFont(pdfTheme.fonts.primary, 'bold');
+  pdf.setFontSize(pdfTheme.fonts.sizes.header);
+  const titleLines = pdf.splitTextToSize(normalizedTitle, headerTextWidth);
+  
+  pdf.setFontSize(pdfTheme.fonts.sizes.body);
+  const subtitleLines = pdf.splitTextToSize(normalizedSubtitle, headerTextWidth);
+  
+  // Calculate header bar height based on number of lines
+  const lineHeight = 6;
+  const baseHeight = 10;
+  const headerHeight = baseHeight + (titleLines.length * lineHeight) + (subtitleLines.length * lineHeight);
+  
   // Black header rectangle
   pdf.setFillColor(pdfTheme.colors.primary);
-  pdf.rect(margin + 5, margin + 5, pageWidth - 2 * margin - 10, 25, 'F');
+  pdf.rect(margin + 5, margin + 5, pageWidth - 2 * margin - 10, headerHeight, 'F');
   
   // White text on black background
   pdf.setTextColor(255, 255, 255);
+  
+  // Draw title lines
   pdf.setFont(pdfTheme.fonts.primary, 'bold');
   pdf.setFontSize(pdfTheme.fonts.sizes.header);
-  pdf.text(title, margin + 10, margin + 18);
+  let currentY = margin + 15;
+  titleLines.forEach((line: string) => {
+    pdf.text(line, margin + 10, currentY);
+    currentY += lineHeight;
+  });
   
+  // Draw subtitle lines
   pdf.setFontSize(pdfTheme.fonts.sizes.body);
-  pdf.text(subtitle, margin + 10, margin + 25);
+  subtitleLines.forEach((line: string) => {
+    pdf.text(line, margin + 10, currentY);
+    currentY += lineHeight;
+  });
   
   // Reset text color
   pdf.setTextColor(pdfTheme.colors.text);
@@ -90,12 +143,14 @@ const addFooter = (pdf: jsPDF, pageNum: number) => {
 };
 
 const addSectionHeader = (pdf: jsPDF, title: string, currentY: number): number => {
+  const normalizedTitle = normalizeText(title);
+  
   pdf.setFont(pdfTheme.fonts.primary, 'bold');
   pdf.setFontSize(pdfTheme.fonts.sizes.subheader);
-  pdf.text(title, pdfTheme.spacing.margin + 5, currentY);
+  pdf.text(normalizedTitle, pdfTheme.spacing.margin + 5, currentY);
   
   // Add underline
-  const textWidth = pdf.getTextWidth(title);
+  const textWidth = pdf.getTextWidth(normalizedTitle);
   pdf.setLineWidth(0.5);
   pdf.line(pdfTheme.spacing.margin + 5, currentY + 2, pdfTheme.spacing.margin + 5 + textWidth, currentY + 2);
   
@@ -108,20 +163,25 @@ const addText = (pdf: jsPDF, text: string, currentY: number, options: any = {}):
   const leftIndent = options.indent || 10; // Content indentation from margin
   const maxWidth = pageWidth - (margin * 2) - leftIndent - 5; // Proper calculation for max width respecting borders
   
+  // Normalize text to fix Unicode spacing issues
+  const normalizedText = normalizeText(text);
+  
   pdf.setFont(pdfTheme.fonts.primary, options.weight || 'normal');
   pdf.setFontSize(options.fontSize || pdfTheme.fonts.sizes.body);
   
-  if (text.length > 100) {
-    const lines = pdf.splitTextToSize(text, maxWidth);
-    // Use proper line spacing without lineHeightFactor to avoid spacing issues
-    lines.forEach((line: string, index: number) => {
-      pdf.text(line, margin + leftIndent, currentY + (index * pdfTheme.spacing.lineHeight));
-    });
-    return currentY + (lines.length * pdfTheme.spacing.lineHeight) + (options.extraSpacing || 0);
-  } else {
-    pdf.text(text, margin + leftIndent, currentY);
-    return currentY + pdfTheme.spacing.lineHeight + (options.extraSpacing || 0);
-  }
+  // Always wrap by width, not character count
+  const lines = pdf.splitTextToSize(normalizedText, maxWidth);
+  
+  // Check if we need a new page for this block of text
+  const blockHeight = lines.length * pdfTheme.spacing.lineHeight + (options.extraSpacing || 0);
+  currentY = ensurePageSpace(pdf, currentY, blockHeight);
+  
+  // Render all lines with consistent spacing
+  lines.forEach((line: string, index: number) => {
+    pdf.text(line, margin + leftIndent, currentY + (index * pdfTheme.spacing.lineHeight));
+  });
+  
+  return currentY + (lines.length * pdfTheme.spacing.lineHeight) + (options.extraSpacing || 0);
 };
 
 // Data extraction functions
@@ -358,13 +418,13 @@ const generateRankPDF = (pdf: jsPDF, data: any): number => {
               pdf.setFontSize(9);
               
               let headerX = tableStartX + 2;
-              pdf.text('Year', headerX, actualTableStartY + 8);
+              pdf.text(normalizeText('Year'), headerX, actualTableStartY + 8);
               headerX += columnWidths[0];
-              pdf.text('Event', headerX, actualTableStartY + 8);
+              pdf.text(normalizeText('Event'), headerX, actualTableStartY + 8);
               headerX += columnWidths[1];
-              pdf.text('Result', headerX, actualTableStartY + 8);
+              pdf.text(normalizeText('Result'), headerX, actualTableStartY + 8);
               headerX += columnWidths[2];
-              pdf.text('Tier', headerX, actualTableStartY + 8);
+              pdf.text(normalizeText('Tier'), headerX, actualTableStartY + 8);
               
               // Reset text color for table content
               pdf.setTextColor(0, 0, 0);
@@ -376,10 +436,10 @@ const generateRankPDF = (pdf: jsPDF, data: any): number => {
               // Draw table rows
               phase.key_achievements.forEach((achievement: any, index: number) => {
                 const rawRowData = [
-                  String(achievement.year || ''),
-                  String(achievement.event_name || ''),
-                  String(achievement.result || ''),
-                  String(achievement.event_tier || '')
+                  normalizeText(String(achievement.year || '')),
+                  normalizeText(String(achievement.event_name || '')),
+                  normalizeText(String(achievement.result || '')),
+                  normalizeText(String(achievement.event_tier || ''))
                 ];
                 
                 // Fit text to column widths
