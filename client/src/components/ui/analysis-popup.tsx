@@ -1668,9 +1668,9 @@ export function AnalysisPopup({
                   Athlete Comparison Overview
                 </h3>
                 <div className="prose prose-invert max-w-none">
-                  <pre className="whitespace-pre-wrap text-gray-300 leading-relaxed">
+                  <div className="whitespace-pre-wrap text-gray-300 leading-relaxed">
                     {typeof parsedData.tabs.overview === 'string' ? parsedData.tabs.overview : JSON.stringify(parsedData.tabs.overview, null, 2)}
-                  </pre>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -1685,9 +1685,9 @@ export function AnalysisPopup({
                   Strengths Comparison
                 </h3>
                 <div className="prose prose-invert max-w-none">
-                  <pre className="whitespace-pre-wrap text-gray-300 leading-relaxed">
+                  <div className="whitespace-pre-wrap text-gray-300 leading-relaxed">
                     {typeof parsedData.tabs.strengths === 'string' ? parsedData.tabs.strengths : JSON.stringify(parsedData.tabs.strengths, null, 2)}
-                  </pre>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -1702,9 +1702,9 @@ export function AnalysisPopup({
                   Weaknesses Comparison
                 </h3>
                 <div className="prose prose-invert max-w-none">
-                  <pre className="whitespace-pre-wrap text-gray-300 leading-relaxed">
+                  <div className="whitespace-pre-wrap text-gray-300 leading-relaxed">
                     {typeof parsedData.tabs.weaknesses === 'string' ? parsedData.tabs.weaknesses : JSON.stringify(parsedData.tabs.weaknesses, null, 2)}
-                  </pre>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -1719,9 +1719,9 @@ export function AnalysisPopup({
                   Head-to-Head Analysis
                 </h3>
                 <div className="prose prose-invert max-w-none">
-                  <pre className="whitespace-pre-wrap text-gray-300 leading-relaxed">
+                  <div className="whitespace-pre-wrap text-gray-300 leading-relaxed">
                     {typeof parsedData.tabs.headToHead === 'string' ? parsedData.tabs.headToHead : JSON.stringify(parsedData.tabs.headToHead, null, 2)}
-                  </pre>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -1764,7 +1764,30 @@ export function AnalysisPopup({
     if (type === "nutrition" || type === "nutrition-plan") {
       const parsedData = parseAnalysisData(data);
       const planData = parsedData.plan || parsedData;
-      return <NutritionPlanDisplay plan={planData} />;
+      
+      // Check if it's a valid nutrition plan structure (has 'days' property)
+      if (planData && planData.days) {
+        return <NutritionPlanDisplay plan={planData} />;
+      } else {
+        // Fallback to display formatted nutrition data
+        return (
+          <div className="space-y-6">
+            <Card className="bg-athlete-gray-800 border-gray-700">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-green-400 mb-4 flex items-center">
+                  <Apple className="mr-3" size={24} />
+                  Nutrition Plan Analysis
+                </h3>
+                <div className="prose prose-invert max-w-none">
+                  <pre className="whitespace-pre-wrap text-gray-300 leading-relaxed">
+                    {typeof planData === 'string' ? planData : JSON.stringify(planData, null, 2)}
+                  </pre>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+      }
     }
 
     // Special handling for strategic combat analysis
