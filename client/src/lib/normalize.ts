@@ -437,28 +437,42 @@ export function normalizeComparison(raw: any): ComparisonViewModel | null {
           try {
             let parsedResponse: any;
             
-            // Handle string rawResponse or direct object
-            if (tab.rawResponse && typeof tab.rawResponse === 'string') {
-              parsedResponse = JSON.parse(tab.rawResponse);
-            } else if (tab.rawResponse && typeof tab.rawResponse === 'object') {
+            // Handle different rawResponse formats
+            if (tab.rawResponse && typeof tab.rawResponse === 'string' && tab.rawResponse.trim().length > 0) {
+              // It's a JSON string, parse it
+              try {
+                parsedResponse = JSON.parse(tab.rawResponse);
+              } catch (parseError) {
+                console.error(`JSON parse error for ${key}:`, parseError, tab.rawResponse.substring(0, 200));
+                continue;
+              }
+            } else if (tab.rawResponse && typeof tab.rawResponse === 'object' && Object.keys(tab.rawResponse).length > 0) {
+              // It's already parsed JSON object
               parsedResponse = tab.rawResponse;
             } else {
-              // Skip empty or invalid tabs
+              // Skip empty, null, or invalid tabs
+              console.log(`Skipping ${key} tab - no valid rawResponse data`);
               continue;
             }
             
-            // Extract data based on tab content
-            if (parsedResponse.detailedAnalysis) {
+            // Extract data based on tab content and key
+            if (key === 'details' && parsedResponse.detailedAnalysis) {
               detailedAnalysis = parsedResponse.detailedAnalysis;
-            }
-            if (parsedResponse.overallAnalysis || parsedResponse.athlete1) {
+            } else if (key === 'overview' && (parsedResponse.overallAnalysis || parsedResponse.athlete1)) {
               overallAnalysis = parsedResponse;
-            }
-            if (parsedResponse.strengths) {
+            } else if (key === 'strengths' && parsedResponse.strengths) {
               strengthsData = parsedResponse.strengths;
             }
+            
+            // Debug log what we found
+            console.log(`Tab ${key} processed:`, {
+              hasDetailedAnalysis: !!parsedResponse.detailedAnalysis,
+              hasOverallAnalysis: !!parsedResponse.overallAnalysis,
+              hasStrengths: !!parsedResponse.strengths,
+              hasAthlete1: !!parsedResponse.athlete1
+            });
           } catch (e) {
-            console.error(`Failed to parse rawResponse for ${key}:`, e, tab.rawResponse);
+            console.error(`Failed to process tab ${key}:`, e);
           }
         }
       }
@@ -494,10 +508,14 @@ export function normalizeComparison(raw: any): ComparisonViewModel | null {
       };
     }
     
-    // Convert objects to strings if needed
+    // Convert objects to strings if needed and apply markdown formatting
     Object.keys(tabs).forEach(key => {
       if (tabs[key] && typeof tabs[key] === 'object') {
         tabs[key] = JSON.stringify(tabs[key], null, 2);
+      }
+      // Convert markdown-style asterisks to HTML bold tags
+      if (typeof tabs[key] === 'string') {
+        tabs[key] = tabs[key].replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       }
     });
     

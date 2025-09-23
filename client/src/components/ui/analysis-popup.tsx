@@ -1705,9 +1705,10 @@ export function AnalysisPopup({
                   Strengths Analysis
                 </h3>
                 <div className="prose prose-invert max-w-none">
-                  <div className="whitespace-pre-wrap text-gray-300 leading-relaxed">
-                    {normalizedComparison.tabs.strengths}
-                  </div>
+                  <div 
+                    className="whitespace-pre-wrap text-gray-300 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: normalizedComparison.tabs.strengths }}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -1722,9 +1723,10 @@ export function AnalysisPopup({
                   Areas for Improvement
                 </h3>
                 <div className="prose prose-invert max-w-none">
-                  <div className="whitespace-pre-wrap text-gray-300 leading-relaxed">
-                    {normalizedComparison.tabs.weaknesses}
-                  </div>
+                  <div 
+                    className="whitespace-pre-wrap text-gray-300 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: normalizedComparison.tabs.weaknesses }}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -1739,9 +1741,10 @@ export function AnalysisPopup({
                   Direct Comparison
                 </h3>
                 <div className="prose prose-invert max-w-none">
-                  <div className="whitespace-pre-wrap text-gray-300 leading-relaxed">
-                    {normalizedComparison.tabs.headToHead}
-                  </div>
+                  <div 
+                    className="whitespace-pre-wrap text-gray-300 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: normalizedComparison.tabs.headToHead }}
+                  />
                 </div>
               </CardContent>
             </Card>
