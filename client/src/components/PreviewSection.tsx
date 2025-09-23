@@ -162,7 +162,7 @@ export default function PreviewSection() {
   const [isVisible, setIsVisible] = useState(false);
   
   const { data, isLoading, error } = useQuery<PreviewData>({
-    queryKey: ['/api/preview/recent-generations', { limit: 6 }],
+    queryKey: ['/api/preview/recent-generations?limit=6'],
     refetchInterval: 30000, // Refresh every 30 seconds to show new content
     staleTime: 15000, // Consider data stale after 15 seconds
   });
