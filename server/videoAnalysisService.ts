@@ -747,7 +747,7 @@ Be detailed and specific in your observations and recommendations.`;
     const results = await Promise.allSettled(analysisPromises);
     console.log(`[ANALYZE_COMPREHENSIVE] All 6 analysis calls completed`);
 
-    // Process results with error handling
+    // Process results with robust error handling for each analysis type
     const responses = results.map((result, index) => {
       const analysisNames = ['Match', 'Score', 'Punch', 'Kick Count', 'Yellow Cards', 'Advice'];
       if (result.status === 'fulfilled') {
@@ -756,7 +756,13 @@ Be detailed and specific in your observations and recommendations.`;
         return text;
       } else {
         console.error(`[ANALYZE_COMPREHENSIVE] ${analysisNames[index]} analysis failed:`, result.reason);
-        return null;
+        // Return safe defaults for failed analyses
+        if (index === 0) return null; // Match analysis (required)
+        if (index === 5) return JSON.stringify({ // Advice (safe default)
+          players: [],
+          general_observations: "Player advice generation failed, but match analysis completed successfully."
+        });
+        return JSON.stringify({ players: [] }); // Other analyses (safe default)
       }
     });
 
