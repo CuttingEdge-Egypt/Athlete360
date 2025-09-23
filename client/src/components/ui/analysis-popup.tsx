@@ -44,6 +44,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { generateProfessionalPdf } from "@/lib/pdf/generator";
+import { jsPDF } from "jspdf";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { VideoAnalysisResults } from "@/components/ui/video-analysis-results";

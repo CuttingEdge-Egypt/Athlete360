@@ -69,6 +69,7 @@ interface ComparisonViewModel {
     strengths?: string;
     weaknesses?: string;
     headToHead?: string;
+    details?: string;
   };
   athleteNames?: string[];
   summary?: string;
