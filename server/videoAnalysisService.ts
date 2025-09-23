@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleAIFileManager } from '@google/generative-ai/server';
 import fs from 'fs';
 import path from 'path';
 
@@ -105,10 +106,11 @@ async function uploadFileToGemini(videoFilePath: string) {
   console.log(`[UPLOAD_TO_GEMINI] Starting file upload: ${videoFilePath}`);
   
   try {
-    // Import GoogleGenerativeAI inside the function to avoid import issues
-    const { GoogleGenerativeAI, GoogleAIFileManager } = require('@google/generative-ai');
-    
-    const fileManager = new GoogleAIFileManager(process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY);
+    const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error('GOOGLE_API_KEY or GEMINI_API_KEY environment variable is required');
+    }
+    const fileManager = new GoogleAIFileManager(apiKey);
     
     // Upload the file
     const uploadResponse = await fileManager.uploadFile(videoFilePath, {
@@ -395,8 +397,11 @@ Return Time in Minutes and Seconds: MM:SS`;
     if (uploadedFile) {
       try {
         console.log(`[PROCESS_VIDEO_GEMINI] Cleaning up uploaded file: ${uploadedFile.uri}`);
-        const { GoogleAIFileManager } = require('@google/generative-ai');
-        const fileManager = new GoogleAIFileManager(process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY);
+        const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+          throw new Error('GOOGLE_API_KEY or GEMINI_API_KEY environment variable is required');
+        }
+        const fileManager = new GoogleAIFileManager(apiKey);
         await fileManager.deleteFile(uploadedFile.name);
         console.log(`[PROCESS_VIDEO_GEMINI] Uploaded file cleaned up successfully`);
       } catch (cleanupError) {
