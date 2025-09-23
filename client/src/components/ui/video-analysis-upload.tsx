@@ -102,10 +102,6 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
     formData.append('video', uploadedFile);
     formData.append('roundToAnalyze', roundToAnalyze.toString());
 
-    // Create an AbortController for manual timeout control
-    let controller: AbortController | null = null;
-    let timeoutId: NodeJS.Timeout | null = null;
-
     try {
       // Update queue status
       if (queueId && (window as any).generationQueue) {
@@ -115,19 +111,12 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
       // Update loading message for processing phase
       setLoadingMessage('Processing video with Gemini AI...')
       
-      // Set up timeout control - increased to 20 minutes for large video uploads + AI processing
-      controller = new AbortController();
-      timeoutId = setTimeout(() => {
-        if (controller) {
-          controller.abort(new Error('Request timeout - video analysis took too long'));
-        }
-      }, 1200000); // 20 minutes
-      
       const response = await fetch('/api/analysis/video', {
         method: 'POST',
         body: formData,
         credentials: 'include',
-        signal: controller.signal
+        // Set a longer timeout for video analysis (10 minutes)
+        signal: AbortSignal.timeout(600000)
       });
 
       const result = await response.json();
@@ -174,10 +163,6 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
         (window as any).generationQueue.update(queueId, 'error', null, error instanceof Error ? error.message : 'Unknown error');
       }
     } finally {
-      // Clean up timeout and intervals
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
       clearInterval(messageInterval);
       setIsAnalyzing(false);
       setLoadingMessage('Analyzing Video...');
@@ -340,7 +325,6 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
               <li>• Punch attempts and violations</li>
               <li>• Yellow cards and penalties</li>
               <li>• Technical match analysis with expert commentary</li>
-              <li>• AI-powered improvement advice for each player</li>
             </ul>
           </div>
         </CardContent>

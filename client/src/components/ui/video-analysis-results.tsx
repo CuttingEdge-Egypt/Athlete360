@@ -57,47 +57,7 @@ export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps
   const parseAnalysisEvents = () => {
     const parseAnalysisData = (jsonString: string) => {
       try {
-        // If it's already parsed, return as-is
-        if (typeof jsonString !== 'string') {
-          return jsonString;
-        }
-        
-        // Check if it's a markdown-wrapped JSON string
-        if (jsonString.includes('```json') || jsonString.includes('```')) {
-          // Extract JSON from markdown code blocks
-          let content = jsonString;
-          if (content.startsWith('```json') && content.endsWith('```')) {
-            content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-          } else if (content.startsWith('```') && content.endsWith('```')) {
-            content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
-          }
-          // Try to parse the extracted content as JSON
-          return JSON.parse(content.trim());
-        }
-        
-        // First try to parse as direct JSON
-        try {
-          return JSON.parse(jsonString);
-        } catch (directParseError) {
-          // If direct parse fails, check if it's wrapped in a content field object
-          try {
-            const contentWrapper = JSON.parse(jsonString);
-            if (contentWrapper.content) {
-              // Extract JSON from markdown code blocks in content
-              let content = contentWrapper.content;
-              if (content.startsWith('```json') && content.endsWith('```')) {
-                content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-              } else if (content.startsWith('```') && content.endsWith('```')) {
-                content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
-              }
-              return JSON.parse(content.trim());
-            }
-            return contentWrapper;
-          } catch (wrapperParseError) {
-            // If all parsing fails, return the original string wrapped in content
-            return { content: jsonString };
-          }
-        }
+        return typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
       } catch (error) {
         // Silently handle parse errors - data will be treated as plain text
         return { content: jsonString };
