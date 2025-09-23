@@ -57,7 +57,36 @@ export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps
   const parseAnalysisEvents = () => {
     const parseAnalysisData = (jsonString: string) => {
       try {
-        return typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
+        // If it's already parsed, return as-is
+        if (typeof jsonString !== 'string') {
+          return jsonString;
+        }
+        
+        // First try to parse as direct JSON
+        try {
+          return JSON.parse(jsonString);
+        } catch (directParseError) {
+          // If direct parse fails, check if it's wrapped in a content field
+          try {
+            const contentWrapper = JSON.parse(jsonString);
+            if (contentWrapper.content) {
+              // Extract JSON from markdown code blocks
+              let content = contentWrapper.content;
+              // Remove markdown code block wrapper if present
+              if (content.startsWith('```json') && content.endsWith('```')) {
+                content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+              } else if (content.startsWith('```') && content.endsWith('```')) {
+                content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
+              }
+              // Try to parse the extracted content as JSON
+              return JSON.parse(content);
+            }
+            return contentWrapper;
+          } catch (wrapperParseError) {
+            // If all parsing fails, return the original string wrapped in content
+            return { content: jsonString };
+          }
+        }
       } catch (error) {
         // Silently handle parse errors - data will be treated as plain text
         return { content: jsonString };
