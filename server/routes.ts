@@ -931,6 +931,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const tokenCost = 50;
     const userId = req.user.claims.sub;
     const athleteId = req.params.athleteId;
+    const language = req.body?.language || 'en'; // Extract language from request body
     try {
       const forceUpdate = req.query.forceUpdate === 'true'; // Check for force update parameter
 
@@ -982,8 +983,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         try {
           let gptBioAnalysis;
-          // Get language parameter from request body or query, default to 'en'
-          const language = req.body?.language || req.query?.language || 'en';
           
           if (forceUpdate) {
             try {
@@ -1080,6 +1079,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const athleteId = req.params.athleteId;
+      const language = req.body?.language || 'en'; // Extract language from request body
       const forceUpdate = req.query.forceUpdate === 'true'; // Check for force update parameter
 
       // Check tokens and deduct
