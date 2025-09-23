@@ -88,6 +88,80 @@
       "header": "Biography Analysis",
       "introduction": "Introduction",
       "playersStory": "Player's Story"
+    },
+    "achievements": {
+      "title": "Notable Achievements"
+    },
+    "recentNews": {
+      "title": "Recent News"
+    },
+    "rankingSystem": {
+      "title": "Ranking System Overview"
+    },
+    "careerPhases": {
+      "title": "Career Phases",
+      "subtitle": "Professional career progression through different phases"
+    },
+    "strengths": {
+      "title": "Competitive Strengths Profile"
+    },
+    "weaknesses": {
+      "title": "Areas for Improvement",
+      "unableToGenerate": "Unable to generate authentic weaknesses analysis at this time."
+    },
+    "combat": {
+      "title": "Strategic Combat Analysis",
+      "noData": "Strategic combat analysis data is not available",
+      "strategiesTitle": "Combat Strategies",
+      "tacticalAnalysis": "Advanced tactical analysis with {{count}} strategic approaches",
+      "risk": "Risk",
+      "strategicOverview": "Strategic Overview",
+      "executionPlan": "Execution Plan",
+      "successProbability": "Success Probability",
+      "analysisComplete": "Strategic Analysis Complete",
+      "tacticalApproaches": "{{count}} tactical approaches identified for optimal performance advantage"
+    },
+    "evidence": "Evidence",
+    "analysisFor": "Analysis for",
+    "generatedOn": "Generated on",
+    "exportPdf": "Export PDF",
+    "exporting": "Exporting...",
+    "share": "Share",
+    "exportFailed": "Export Failed",
+    "exportError": "There was an error generating the PDF. Please try again.",
+    "strengths": {
+      "athleteStrengths": "Athlete Strengths",
+      "strengthLevel": "Strength Level",
+      "impact": "impact",
+      "noData": "No strengths analysis data available",
+      "generateNew": "Generate a new analysis to see detailed insights.",
+      "noPdfData": "No strengths data available for PDF export.",
+      "unableToGenerate": "Unable to generate authentic strengths analysis at this time."
+    },
+    "development": {
+      "program": "Development Program",
+      "plan": "Development Plan",
+      "goalBased": "Goal-based plan",
+      "trainingExercises": "Training Exercises",
+      "videoAvailable": "Video Available",
+      "keyObjectives": "Key Objectives",
+      "current": "Current",
+      "noData": "No development plan data available",
+      "generateNew": "Generate a new analysis to see your personalized development program.",
+      "unableToGenerate": "Unable to generate authentic development plan at this time.",
+      "analysisTitle": "Development Plan Analysis",
+      "phases": "{{count}} Phase",
+      "phases_other": "{{count}} Phases"
+    },
+    "rank": {
+      "progression": "Ranking Progression",
+      "unavailable": "⚠ Rank Analysis Unavailable",
+      "unableToGenerate": "Unable to generate authentic rank history at this time."
+    },
+    "unavailable": "⚠ Analysis Unavailable",
+    "tryAgainLater": "Please try again later or contact support if the issue persists.",
+    "nutrition": {
+      "plan": "Personalized Nutrition Plan"
     }
   }
 }

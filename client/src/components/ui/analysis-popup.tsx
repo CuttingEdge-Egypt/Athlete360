@@ -152,15 +152,15 @@ export function AnalysisPopup({
     const parsedData = parseAnalysisData(dataToUse);
     
     // Check for error state first
-    if (parsedData.error || parsedData.message?.includes('Unable to generate')) {
+    if (parsedData.error || (parsedData.message && (parsedData.message.includes('Unable to generate') || parsedData.message.includes('تعذر إنشاء')))) {
       return (
         <div className="p-6 text-center">
-          <div className="text-red-400 mb-4">⚠ Analysis Unavailable</div>
+          <div className="text-red-400 mb-4">{t("analysis.unavailable", "⚠ Analysis Unavailable")}</div>
           <p className="text-gray-300 mb-4">
-            {parsedData.message || 'Unable to generate authentic strengths analysis at this time.'}
+            {parsedData.message || t("analysis.strengths.unableToGenerate", "Unable to generate authentic strengths analysis at this time.")}
           </p>
           <p className="text-sm text-gray-400">
-            Please try again later or contact support if the issue persists.
+            {t("analysis.tryAgainLater", "Please try again later or contact support if the issue persists.")}
           </p>
         </div>
       );
@@ -177,7 +177,7 @@ export function AnalysisPopup({
 
     return (
       <div className="space-y-6">
-        <h3 className="text-lg font-semibold text-white">Athlete Strengths</h3>
+        <h3 className="text-lg font-semibold text-white">{t("analysis.strengths.athleteStrengths", "Athlete Strengths")}</h3>
         
         {strengths.length > 0 ? strengths.map((strength: any, index: number) => {
           // Only render if we have authentic strength data
@@ -208,7 +208,7 @@ export function AnalysisPopup({
                             : 'bg-gray-600 text-white'
                           }
                         >
-                          {strength.impact} impact
+                          {strength.impact} {t("analysis.strengths.impact", "impact")}
                         </Badge>
                       )}
                     </div>
@@ -223,7 +223,7 @@ export function AnalysisPopup({
                   <div className="bg-athlete-gray-800 rounded-lg p-4 border-l-4 border-athlete-success">
                     <h4 className="font-semibold text-white mb-2 flex items-center">
                       <Award className="w-4 h-4 mr-2" />
-                      Evidence
+                      {t("analysis.evidence", "Evidence")}
                     </h4>
                     <p className="text-sm text-gray-300 italic">
                       {strength.evidence}
@@ -235,7 +235,7 @@ export function AnalysisPopup({
                 {strength.rating && (
                   <div className="mt-4">
                     <div className="flex justify-between text-sm text-gray-400 mb-1">
-                      <span>Strength Level</span>
+                      <span>{t("analysis.strengths.strengthLevel", "Strength Level")}</span>
                       <span>{strength.rating}%</span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
@@ -255,8 +255,8 @@ export function AnalysisPopup({
         }).filter(Boolean) : (
           <div className="text-gray-400 text-center py-8">
             <Star className="w-12 h-12 mx-auto mb-4 text-gray-500" />
-            <p>No strengths analysis data available</p>
-            <p className="text-sm mt-2">Generate a new analysis to see detailed insights.</p>
+            <p>{t("analysis.strengths.noData", "No strengths analysis data available")}</p>
+            <p className="text-sm mt-2">{t("analysis.strengths.generateNew", "Generate a new analysis to see detailed insights.")}</p>
           </div>
         )}
       </div>
@@ -269,15 +269,15 @@ export function AnalysisPopup({
     
     const parsedData = parseAnalysisData(dataToUse);
     
-    if (parsedData.error || parsedData.message?.includes('Unable to generate')) {
+    if (parsedData.error || (parsedData.message && (parsedData.message.includes('Unable to generate') || parsedData.message.includes('تعذر إنشاء')))) {
       return (
         <div className="p-6 text-center">
-          <div className="text-red-400 mb-4">⚠ Analysis Unavailable</div>
+          <div className="text-red-400 mb-4">{t("analysis.unavailable", "⚠ Analysis Unavailable")}</div>
           <p className="text-gray-300 mb-4">
-            {parsedData.message || 'Unable to generate authentic weaknesses analysis at this time.'}
+            {parsedData.message || t("analysis.weaknesses.unableToGenerate", "Unable to generate authentic weaknesses analysis at this time.")}
           </p>
           <p className="text-sm text-gray-400">
-            Please try again later or contact support if the issue persists.
+            {t("analysis.tryAgainLater", "Please try again later or contact support if the issue persists.")}
           </p>
         </div>
       );
@@ -293,7 +293,7 @@ export function AnalysisPopup({
 
     return (
       <div className="space-y-6">
-        <h3 className="text-lg font-semibold text-white">Areas for Improvement</h3>
+        <h3 className="text-lg font-semibold text-white">{t("analysis.weaknesses.title", "Areas for Improvement")}</h3>
         
         <div className="space-y-4">
           {weaknesses.length > 0 ? weaknesses.map((weakness: any, index: number) => (
@@ -306,7 +306,7 @@ export function AnalysisPopup({
           )) : (
             <div className="text-gray-400 text-center py-8">
               <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-gray-500" />
-              <p>No weaknesses analysis data available</p>
+              <p>{t("analysis.weaknesses.noData", "No weaknesses analysis data available")}</p>
             </div>
           )}
         </div>
@@ -317,15 +317,15 @@ export function AnalysisPopup({
   const renderDevelopmentPlan = (data: any) => {
     const parsedData = parseAnalysisData(data);
     
-    if (parsedData.error || parsedData.message?.includes('Unable to generate')) {
+    if (parsedData.error || (parsedData.message && (parsedData.message.includes('Unable to generate') || parsedData.message.includes('تعذر إنشاء')))) {
       return (
         <div className="p-6 text-center">
-          <div className="text-red-400 mb-4">⚠ Analysis Unavailable</div>
+          <div className="text-red-400 mb-4">{t("analysis.unavailable", "⚠ Analysis Unavailable")}</div>
           <p className="text-gray-300 mb-4">
-            {parsedData.message || 'Unable to generate authentic development plan at this time.'}
+            {parsedData.message || t("analysis.development.unableToGenerate", "Unable to generate authentic development plan at this time.")}
           </p>
           <p className="text-sm text-gray-400">
-            Please try again later or contact support if the issue persists.
+            {t("analysis.tryAgainLater", "Please try again later or contact support if the issue persists.")}
           </p>
         </div>
       );
@@ -355,18 +355,18 @@ export function AnalysisPopup({
           <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-lg p-4 border border-purple-500/30">
             <div className="flex items-center gap-3 mb-2">
               <Calendar className="w-5 h-5 text-purple-400" />
-              <h3 className="text-lg font-semibold text-white">Development Program</h3>
+              <h3 className="text-lg font-semibold text-white">{t("analysis.development.program", "Development Program")}</h3>
             </div>
             <div className="flex items-center gap-4">
               <Badge variant="secondary" className="bg-purple-600 text-white px-3 py-1">
                 <Clock className="w-3 h-3 mr-1" />
                 {typeof parsedData.duration === 'string' ? parsedData.duration : 
-                 typeof parsedData.duration === 'object' ? (parsedData.duration.description || parsedData.duration.type || 'Goal-based plan') : 
-                 'Development Plan'}
+                 typeof parsedData.duration === 'object' ? (parsedData.duration.description || parsedData.duration.type || t("analysis.development.goalBased", "Goal-based plan")) : 
+                 t("analysis.development.plan", "Development Plan")}
               </Badge>
               {planItems.length > 0 && (
                 <span className="text-sm text-purple-300">
-                  {planItems.length} Phase{planItems.length !== 1 ? 's' : ''}
+                  {t("analysis.development.phases", "{{count}} Phase", { count: planItems.length })}
                 </span>
               )}
             </div>
@@ -410,7 +410,7 @@ export function AnalysisPopup({
                         {isCurrentPhase && (
                           <Badge variant="secondary" className="bg-green-600 text-white">
                             <PlayCircle className="w-3 h-3 mr-1" />
-                            Current
+                            {t("analysis.development.current", "Current")}
                           </Badge>
                         )}
                       </div>
@@ -427,7 +427,7 @@ export function AnalysisPopup({
                         <div>
                           <h4 className="text-sm font-semibold text-purple-300 mb-3 flex items-center gap-2">
                             <Zap className="w-4 h-4" />
-                            Training Exercises
+                            {t("analysis.development.trainingExercises", "Training Exercises")}
                           </h4>
                           <div className="grid gap-2">
                             {(item.exercises || []).map((exercise: any, idx: number) => (
@@ -441,7 +441,7 @@ export function AnalysisPopup({
                                   {exercise.videoUrl && (
                                     <div className="mt-2">
                                       <Badge variant="outline" className="border-purple-400 text-purple-400 text-xs">
-                                        📹 Video Available
+                                        📹 {t("analysis.development.videoAvailable", "Video Available")}
                                       </Badge>
                                     </div>
                                   )}
@@ -457,7 +457,7 @@ export function AnalysisPopup({
                         <div>
                           <h4 className="text-sm font-semibold text-blue-300 mb-3 flex items-center gap-2">
                             <Shield className="w-4 h-4" />
-                            Key Objectives
+                            {t("analysis.development.keyObjectives", "Key Objectives")}
                           </h4>
                           <div className="grid gap-2">
                             {Array.isArray(item.objectives) ? item.objectives.map((objective: string, idx: number) => (
@@ -520,8 +520,8 @@ export function AnalysisPopup({
         {planItems.length === 0 && (
           <div className="text-gray-400 text-center py-12">
             <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-500" />
-            <p className="text-lg font-medium mb-2">No development plan data available</p>
-            <p className="text-sm">Generate a new analysis to see your personalized development program.</p>
+            <p className="text-lg font-medium mb-2">{t("analysis.development.noData", "No development plan data available")}</p>
+            <p className="text-sm">{t("analysis.development.generateNew", "Generate a new analysis to see your personalized development program.")}</p>
           </div>
         )}
       </div>
@@ -539,15 +539,15 @@ export function AnalysisPopup({
     let careerSummary: any = {};
     
     // Handle different data formats and error states
-    if (parsedData.error || parsedData.message?.includes('Unable to generate')) {
+    if (parsedData.error || (parsedData.message && (parsedData.message.includes('Unable to generate') || parsedData.message.includes('تعذر إنشاء')))) {
       return (
         <div className="p-6 text-center">
-          <div className="text-red-400 mb-4">⚠ Rank Analysis Unavailable</div>
+          <div className="text-red-400 mb-4">{t("analysis.rank.unavailable", "⚠ Rank Analysis Unavailable")}</div>
           <p className="text-gray-300 mb-4">
-            {parsedData.message || 'Unable to generate authentic rank history at this time.'}
+            {parsedData.message || t("analysis.rank.unableToGenerate", "Unable to generate authentic rank history at this time.")}
           </p>
           <p className="text-sm text-gray-400">
-            Please try again later or contact support if the issue persists.
+            {t("analysis.tryAgainLater", "Please try again later or contact support if the issue persists.")}
           </p>
         </div>
       );
@@ -650,7 +650,7 @@ export function AnalysisPopup({
             <CardHeader>
               <CardTitle className="text-xl text-white flex items-center">
                 <BarChart className="mr-3 text-yellow-400" size={24} />
-                Ranking System Overview
+                {t("analysis.rankingSystem.title", "Ranking System Overview")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -665,9 +665,9 @@ export function AnalysisPopup({
             <CardHeader>
               <CardTitle className="text-2xl text-gray-100 flex items-center">
                 <Trophy className="mr-3 text-blue-400" size={24} />
-                Career Phases
+                {t("analysis.careerPhases.title", "Career Phases")}
               </CardTitle>
-              <div className="text-sm text-gray-400">Professional career progression through different phases</div>
+              <div className="text-sm text-gray-400">{t("analysis.careerPhases.subtitle", "Professional career progression through different phases")}</div>
             </CardHeader>
             <CardContent>
               <div className="relative">
@@ -832,7 +832,7 @@ export function AnalysisPopup({
               </h3>
               <div className="prose prose-invert max-w-none">
                 <p className="text-gray-200 leading-relaxed text-lg">
-                  {bio || "No biography data available."}
+                  {bio || t("analysis.bio.noData", "No biography data available.")}
                 </p>
               </div>
             </CardContent>
@@ -859,7 +859,7 @@ export function AnalysisPopup({
               <CardContent className="p-8">
                 <h3 className="text-3xl font-bold text-athlete-warning mb-6 flex items-center">
                   <Award className="mr-4 text-athlete-warning" size={32} />
-                  Notable Achievements
+                  {t("analysis.achievements.title", "Notable Achievements")}
                 </h3>
                 <div className="grid gap-4">
                   {achievements.map((achievementObj: any, index: number) => {
@@ -892,7 +892,7 @@ export function AnalysisPopup({
               <CardContent className="p-8">
                 <h3 className="text-3xl font-bold text-purple-400 mb-6 flex items-center">
                   <Calendar className="mr-4 text-purple-400" size={32} />
-                  Recent News
+                  {t("analysis.recentNews.title", "Recent News")}
                 </h3>
                 <div className="space-y-4">
                   {recentNews.map((news: string, index: number) => (
@@ -1103,8 +1103,8 @@ export function AnalysisPopup({
     } catch (error) {
       console.error('PDF export error:', error);
       toast({
-        title: "Export Failed",
-        description: "There was an error generating the PDF. Please try again.",
+        title: t("analysis.exportFailed", "Export Failed"),
+        description: t("analysis.exportError", "There was an error generating the PDF. Please try again."),
         variant: "destructive",
       });
     } finally {
@@ -1293,7 +1293,7 @@ export function AnalysisPopup({
     if (achievements.length > 0) {
       pdf.setFontSize(14);
       pdf.setFont('helvetica', 'bold');
-      currentY = addText("Notable Achievements", margin, currentY, { lineHeight: 8 });
+      currentY = addText(t("analysis.achievements.title", "Notable Achievements"), margin, currentY, { lineHeight: 8 });
       currentY += 3;
       
       pdf.setFontSize(11);
@@ -1375,7 +1375,7 @@ export function AnalysisPopup({
     if (rankingProgression && rankingProgression.length > 0) {
       pdf.setFontSize(14);
       pdf.setFont('helvetica', 'bold');
-      currentY = addText("Ranking Progression", margin, currentY, { lineHeight: 8 });
+      currentY = addText(t("analysis.rank.progression", "Ranking Progression"), margin, currentY, { lineHeight: 8 });
       currentY += 3;
       
       pdf.setFontSize(11);
@@ -1411,7 +1411,7 @@ export function AnalysisPopup({
       currentY += 8;
       pdf.setFontSize(14);
       pdf.setFont('helvetica', 'bold');
-      currentY = addText("Notable Achievements", margin, currentY, { lineHeight: 8 });
+      currentY = addText(t("analysis.achievements.title", "Notable Achievements"), margin, currentY, { lineHeight: 8 });
       currentY += 3;
       
       pdf.setFontSize(11);
@@ -1442,7 +1442,7 @@ export function AnalysisPopup({
     }
 
     if (strengths.length === 0) {
-      currentY = addText("No strengths data available for PDF export.", margin, currentY);
+      currentY = addText(t("analysis.strengths.noPdfData", "No strengths data available for PDF export."), margin, currentY);
       return;
     }
 
@@ -1471,7 +1471,7 @@ export function AnalysisPopup({
       if (strength.evidence) {
         pdf.setFontSize(10);
         pdf.setFont('helvetica', 'italic');
-        currentY = addText(`Evidence: ${strength.evidence}`, margin + 5, currentY, { lineHeight: 6 });
+        currentY = addText(`${t("analysis.evidence", "Evidence")}: ${strength.evidence}`, margin + 5, currentY, { lineHeight: 6 });
         currentY += 5;
       }
     });
@@ -1495,7 +1495,7 @@ export function AnalysisPopup({
     }
 
     if (weaknesses.length === 0) {
-      currentY = addText("No weaknesses data available for PDF export.", margin, currentY);
+      currentY = addText(t("analysis.weaknesses.noPdfData", "No weaknesses data available for PDF export."), margin, currentY);
       return;
     }
 
@@ -1615,18 +1615,18 @@ export function AnalysisPopup({
       case "rank":
         return "Competitive History";
       case "strengths":
-        return "Competitive Strengths Profile";
+        return t("analysis.strengths.title", "Competitive Strengths Profile");
       case "weaknesses":
-        return "Areas for Improvement";
+        return t("analysis.weaknesses.title", "Areas for Improvement");
       case "development":
       case "development-plan":
-        return "Development Plan";
+        return t("analysis.development.plan", "Development Plan");
       case "nutrition":
       case "nutrition-plan":
-        return "Personalized Nutrition Plan";
+        return t("analysis.nutrition.plan", "Personalized Nutrition Plan");
       case "beat":
       case "beat-strategies":
-        return "Strategic Combat Analysis";
+        return t("analysis.combat.title", "Strategic Combat Analysis");
       case "video":
       case "video-analysis":
         return "Dynamic Performance Analysis";
@@ -1726,7 +1726,7 @@ export function AnalysisPopup({
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-red-400 mb-4 flex items-center">
                   <AlertTriangle className="mr-3" size={24} />
-                  Areas for Improvement
+                  {t("analysis.weaknesses.title", "Areas for Improvement")}
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <div 
@@ -1864,7 +1864,7 @@ export function AnalysisPopup({
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center">
                   <Calendar className="mr-3" size={24} />
-                  Development Plan Analysis
+                  {t("analysis.development.analysisTitle", "Development Plan Analysis")}
                 </h3>
                 <div className="text-center py-8">
                   <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-4" />
@@ -1918,8 +1918,8 @@ export function AnalysisPopup({
                   {getTitle(type)}
                 </DialogTitle>
                 <DialogDescription className="text-gray-400 mt-1">
-                  {athleteName && `Analysis for ${athleteName}`}
-                  {createdAt && ` • Generated on ${new Date(createdAt).toLocaleDateString()}`}
+                  {athleteName && `${t("analysis.analysisFor", "Analysis for")} ${athleteName}`}
+                  {createdAt && ` • ${t("analysis.generatedOn", "Generated on")} ${new Date(createdAt).toLocaleDateString()}`}
                 </DialogDescription>
               </div>
             </div>
@@ -1931,7 +1931,7 @@ export function AnalysisPopup({
                 disabled={isExporting}
               >
                 <Download className="mr-2" size={16} />
-                {isExporting ? "Exporting..." : "Export PDF"}
+                {isExporting ? t("analysis.exporting", "Exporting...") : t("analysis.exportPdf", "Export PDF")}
               </Button>
               <Button 
                 onClick={handleShare}
@@ -1940,7 +1940,7 @@ export function AnalysisPopup({
                 className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white"
               >
                 <Share2 className="mr-2" size={16} />
-                Share
+                {t("analysis.share", "Share")}
               </Button>
             </div>
           </div>

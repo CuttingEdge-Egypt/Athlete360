@@ -13,6 +13,7 @@ import {
   Award,
   ChevronRight,
 } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 interface Strategy {
   strategy: string;
@@ -31,45 +32,80 @@ interface StrategicCombatDisplayProps {
 }
 
 export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
+  const { t } = useTranslation();
   if (!data || !data.strategies || !Array.isArray(data.strategies)) {
     return (
       <div className="text-center text-gray-400 py-8">
         <AlertTriangle className="mx-auto mb-4" size={48} />
-        <p>Strategic combat analysis data is not available</p>
+        <p>{t("analysis.combat.noData", "Strategic combat analysis data is not available")}</p>
       </div>
     );
   }
 
-  const getRiskColor = (risk: string) => {
+  const normalizeRiskLevel = (risk: string): 'low' | 'medium' | 'high' | 'unknown' => {
     const riskLower = risk.toLowerCase();
-    if (riskLower.includes('low')) return 'bg-green-500/20 text-green-400 border-green-500/30';
-    if (riskLower.includes('medium')) return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-    if (riskLower.includes('high')) return 'bg-red-500/20 text-red-400 border-red-500/30';
-    return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+    // English terms
+    if (riskLower.includes('low') || riskLower.includes('minimal')) return 'low';
+    if (riskLower.includes('medium') || riskLower.includes('moderate')) return 'medium';
+    if (riskLower.includes('high') || riskLower.includes('severe')) return 'high';
+    // Arabic terms
+    if (riskLower.includes('منخفض') || riskLower.includes('قليل')) return 'low';
+    if (riskLower.includes('متوسط') || riskLower.includes('معتدل')) return 'medium';
+    if (riskLower.includes('عالي') || riskLower.includes('مرتفع')) return 'high';
+    return 'unknown';
+  };
+
+  const getRiskColor = (risk: string) => {
+    const level = normalizeRiskLevel(risk);
+    switch (level) {
+      case 'low': return 'bg-green-500/20 text-green-400 border-green-500/30';
+      case 'medium': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+      case 'high': return 'bg-red-500/20 text-red-400 border-red-500/30';
+      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+    }
+  };
+
+  const normalizeSuccessLevel = (probability: string): 'low' | 'medium' | 'high' | 'unknown' => {
+    const probLower = probability.toLowerCase();
+    // English terms
+    if (probLower.includes('high') || probLower.includes('excellent')) return 'high';
+    if (probLower.includes('medium') || probLower.includes('moderate')) return 'medium';
+    if (probLower.includes('low') || probLower.includes('poor')) return 'low';
+    // Arabic terms
+    if (probLower.includes('عالي') || probLower.includes('مرتفع') || probLower.includes('ممتاز')) return 'high';
+    if (probLower.includes('متوسط') || probLower.includes('معتدل')) return 'medium';
+    if (probLower.includes('منخفض') || probLower.includes('قليل') || probLower.includes('ضعيف')) return 'low';
+    return 'unknown';
   };
 
   const getSuccessColor = (probability: string) => {
-    const probLower = probability.toLowerCase();
-    if (probLower.includes('high')) return 'text-green-400';
-    if (probLower.includes('medium')) return 'text-yellow-400';
-    if (probLower.includes('low')) return 'text-red-400';
-    return 'text-gray-400';
+    const level = normalizeSuccessLevel(probability);
+    switch (level) {
+      case 'high': return 'text-green-400';
+      case 'medium': return 'text-yellow-400';
+      case 'low': return 'text-red-400';
+      default: return 'text-gray-400';
+    }
   };
 
   const getSuccessProgress = (probability: string) => {
-    const probLower = probability.toLowerCase();
-    if (probLower.includes('high')) return 75;
-    if (probLower.includes('medium')) return 50;
-    if (probLower.includes('low')) return 25;
-    return 0;
+    const level = normalizeSuccessLevel(probability);
+    switch (level) {
+      case 'high': return 75;
+      case 'medium': return 50;
+      case 'low': return 25;
+      default: return 0;
+    }
   };
 
   const getRiskIcon = (risk: string) => {
-    const riskLower = risk.toLowerCase();
-    if (riskLower.includes('low')) return <Shield className="w-4 h-4" />;
-    if (riskLower.includes('medium')) return <AlertTriangle className="w-4 h-4" />;
-    if (riskLower.includes('high')) return <Zap className="w-4 h-4" />;
-    return <Target className="w-4 h-4" />;
+    const level = normalizeRiskLevel(risk);
+    switch (level) {
+      case 'low': return <Shield className="w-4 h-4" />;
+      case 'medium': return <AlertTriangle className="w-4 h-4" />;
+      case 'high': return <Zap className="w-4 h-4" />;
+      default: return <Target className="w-4 h-4" />;
+    }
   };
 
   return (
@@ -78,10 +114,10 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
       <div className="text-center space-y-2 mb-8">
         <div className="flex items-center justify-center space-x-2 text-red-400">
           <Target size={24} />
-          <h2 className="text-2xl font-bold">Combat Strategies</h2>
+          <h2 className="text-2xl font-bold">{t("analysis.combat.strategiesTitle", "Combat Strategies")}</h2>
         </div>
         <p className="text-gray-400">
-          Advanced tactical analysis with {data.strategies.length} strategic approaches
+          {t("analysis.combat.tacticalAnalysis", "Advanced tactical analysis with {{count}} strategic approaches", { count: data.strategies.length })}
         </p>
       </div>
 
@@ -110,7 +146,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
                     data-testid={`risk-badge-${index}`}
                   >
                     {getRiskIcon(strategy.risk_level)}
-                    <span className="ml-1">{strategy.risk_level} Risk</span>
+                    <span className="ml-1">{strategy.risk_level} {t("analysis.combat.risk", "Risk")}</span>
                   </Badge>
                 </div>
               </div>
@@ -121,7 +157,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
               <div className="space-y-2">
                 <h4 className="text-sm font-semibold text-gray-300 flex items-center">
                   <Brain className="w-4 h-4 mr-2 text-blue-400" />
-                  Strategic Overview
+                  {t("analysis.combat.strategicOverview", "Strategic Overview")}
                 </h4>
                 <p className="text-gray-300 leading-relaxed text-sm bg-athlete-gray-900/50 p-3 rounded-md">
                   {strategy.description}
@@ -134,7 +170,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
               <div className="space-y-2">
                 <h4 className="text-sm font-semibold text-gray-300 flex items-center">
                   <Zap className="w-4 h-4 mr-2 text-yellow-400" />
-                  Execution Plan
+                  {t("analysis.combat.executionPlan", "Execution Plan")}
                 </h4>
                 <p className="text-gray-300 leading-relaxed text-sm bg-athlete-gray-900/50 p-3 rounded-md">
                   {strategy.execution}
@@ -148,7 +184,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-semibold text-gray-300 flex items-center">
                     <TrendingUp className="w-4 h-4 mr-2 text-green-400" />
-                    Success Probability
+                    {t("analysis.combat.successProbability", "Success Probability")}
                   </h4>
                   <span 
                     className={`text-sm font-semibold ${getSuccessColor(strategy.success_probability)}`}
@@ -174,9 +210,9 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
           <div className="flex items-center space-x-3">
             <Award className="text-red-400" size={20} />
             <div>
-              <h3 className="text-white font-semibold">Strategic Analysis Complete</h3>
+              <h3 className="text-white font-semibold">{t("analysis.combat.analysisComplete", "Strategic Analysis Complete")}</h3>
               <p className="text-gray-300 text-sm">
-                {data.strategies.length} tactical approaches identified for optimal performance advantage
+                {t("analysis.combat.tacticalApproaches", "{{count}} tactical approaches identified for optimal performance advantage", { count: data.strategies.length })}
               </p>
             </div>
           </div>

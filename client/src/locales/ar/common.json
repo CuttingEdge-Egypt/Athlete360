@@ -88,6 +88,80 @@
       "header": "تحليل السيرة الذاتية",
       "introduction": "مقدمة",
       "playersStory": "قصة اللاعب"
+    },
+    "achievements": {
+      "title": "الإنجازات البارزة"
+    },
+    "recentNews": {
+      "title": "أخبار حديثة"
+    },
+    "rankingSystem": {
+      "title": "نظرة عامة على نظام التصنيف"
+    },
+    "careerPhases": {
+      "title": "مراحل المسيرة المهنية",
+      "subtitle": "تطور المسيرة المهنية عبر مراحل مختلفة"
+    },
+    "strengths": {
+      "title": "ملف نقاط القوة التنافسية"
+    },
+    "weaknesses": {
+      "title": "مجالات التحسين",
+      "unableToGenerate": "تعذر إنشاء تحليل نقاط ضعف أصيل في هذا الوقت."
+    },
+    "combat": {
+      "title": "تحليل القتال الاستراتيجي",
+      "noData": "بيانات تحليل القتال الاستراتيجي غير متوفرة",
+      "strategiesTitle": "استراتيجيات القتال",
+      "tacticalAnalysis": "تحليل تكتيكي متقدم مع {{count}} نهج استراتيجي",
+      "risk": "مخاطرة",
+      "strategicOverview": "نظرة عامة استراتيجية",
+      "executionPlan": "خطة التنفيذ",
+      "successProbability": "احتمالية النجاح",
+      "analysisComplete": "اكتمل التحليل الاستراتيجي",
+      "tacticalApproaches": "تم تحديد {{count}} نهج تكتيكي لتحقيق ميزة الأداء المطلوبة"
+    },
+    "evidence": "دليل",
+    "analysisFor": "تحليل لـ",
+    "generatedOn": "تم الإنشاء في",
+    "exportPdf": "تصدير PDF",
+    "exporting": "جارٍ التصدير...",
+    "share": "مشاركة",
+    "exportFailed": "فشل في التصدير",
+    "exportError": "حدث خطأ أثناء إنشاء ملف PDF. يرجى المحاولة مرة أخرى.",
+    "strengths": {
+      "athleteStrengths": "نقاط قوة الرياضي",
+      "strengthLevel": "مستوى القوة",
+      "noData": "لا تتوفر بيانات تحليل نقاط القوة",
+      "generateNew": "قم بإنشاء تحليل جديد لرؤية رؤى تفصيلية.",
+      "noPdfData": "لا تتوفر بيانات نقاط القوة لتصدير PDF.",
+      "unableToGenerate": "تعذر إنشاء تحليل نقاط قوة أصيل في هذا الوقت.",
+      "impact": "تأثير"
+    },
+    "development": {
+      "program": "برنامج التطوير",
+      "plan": "خطة التطوير",
+      "goalBased": "خطة قائمة على الأهداف",
+      "trainingExercises": "تمارين التدريب",
+      "videoAvailable": "فيديو متاح",
+      "keyObjectives": "الأهداف الرئيسية",
+      "current": "الحالي",
+      "noData": "لا تتوفر بيانات خطة التطوير",
+      "generateNew": "قم بإنشاء تحليل جديد لرؤية برنامج التطوير الشخصي.",
+      "unableToGenerate": "تعذر إنشاء خطة تطوير أصيلة في هذا الوقت.",
+      "analysisTitle": "تحليل خطة التطوير",
+      "phases": "مرحلة واحدة",
+      "phases_other": "{{count}} مراحل"
+    },
+    "rank": {
+      "progression": "تقدم الترتيب",
+      "unavailable": "⚠ تحليل الترتيب غير متاح",
+      "unableToGenerate": "تعذر إنشاء تاريخ ترتيب أصيل في هذا الوقت."
+    },
+    "unavailable": "⚠ التحليل غير متاح",
+    "tryAgainLater": "يرجى المحاولة مرة أخرى لاحقاً أو الاتصال بالدعم إذا استمرت المشكلة.",
+    "nutrition": {
+      "plan": "خطة تغذية شخصية"
     }
   }
 }
