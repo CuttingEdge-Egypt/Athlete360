@@ -102,6 +102,10 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
     formData.append('video', uploadedFile);
     formData.append('roundToAnalyze', roundToAnalyze.toString());
 
+    // Create an AbortController for manual timeout control
+    let controller: AbortController | null = null;
+    let timeoutId: NodeJS.Timeout | null = null;
+
     try {
       // Update queue status
       if (queueId && (window as any).generationQueue) {
@@ -111,12 +115,19 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
       // Update loading message for processing phase
       setLoadingMessage('Processing video with Gemini AI...')
       
+      // Set up timeout control
+      controller = new AbortController();
+      timeoutId = setTimeout(() => {
+        if (controller) {
+          controller.abort();
+        }
+      }, 600000); // 10 minutes
+      
       const response = await fetch('/api/analysis/video', {
         method: 'POST',
         body: formData,
         credentials: 'include',
-        // Set a longer timeout for video analysis (10 minutes)
-        signal: AbortSignal.timeout(600000)
+        signal: controller.signal
       });
 
       const result = await response.json();
@@ -163,6 +174,10 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
         (window as any).generationQueue.update(queueId, 'error', null, error instanceof Error ? error.message : 'Unknown error');
       }
     } finally {
+      // Clean up timeout and intervals
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       clearInterval(messageInterval);
       setIsAnalyzing(false);
       setLoadingMessage('Analyzing Video...');
