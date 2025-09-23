@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Clock, Target, AlertTriangle, Calendar, Users } from "lucide-react";
+import { Trophy, Clock, Target, AlertTriangle, Calendar, Users, Brain, MessageSquare } from "lucide-react";
+
+// Import the PlayerAdviceSection from VideoPlayerAnalysis
+import { PlayerAdviceSection } from "@/components/ui/video-player-analysis";
 
 interface VideoAnalysisResultsProps {
   analysisData: any;
@@ -484,6 +487,12 @@ export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps
           </CardContent>
         </Card>
       )}
+
+      {/* Player Advice Section */}
+      <PlayerAdviceSection 
+        adviceData={analysisData.advice_analysis}
+        language="english" 
+      />
     </div>
   );
 }

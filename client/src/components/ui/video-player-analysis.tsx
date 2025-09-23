@@ -722,7 +722,7 @@ interface AdviceData {
   general_observations: string;
 }
 
-function PlayerAdviceSection({ adviceData, language = 'english' }: PlayerAdviceSectionProps) {
+export function PlayerAdviceSection({ adviceData, language = 'english' }: PlayerAdviceSectionProps) {
   const [parsedAdviceData, setParsedAdviceData] = useState<AdviceData | null>(null);
   const [hasParsingError, setHasParsingError] = useState(false);
 
