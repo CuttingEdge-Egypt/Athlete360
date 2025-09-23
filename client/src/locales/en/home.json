@@ -55,7 +55,9 @@
     },
     "pricing": {
       "title": "Ready to Transform Your Athletic Analysis?",
+      "journeyTitle": "Start Your Journey",
       "subtitle": "Get 1000 tokens to start your journey",
+      "tokenDescription": "Get 1,000 tokens to analyze any athlete",
       "price": "$25",
       "period": "/month",
       "features": {

@@ -343,9 +343,9 @@ export default function Landing() {
             {/* Subscription Pricing */}
             <Card className="bg-gray-800/30 border-gray-700 backdrop-blur-sm max-w-md mx-auto">
               <CardContent className="p-8 text-center">
-                <h2 className="text-2xl font-bold mb-4 text-athlete-accent">Start Your Journey</h2>
-                <div className="text-4xl font-bold mb-2 text-white">$25<span className="text-lg text-gray-400">/month</span></div>
-                <p className="text-gray-300 mb-6">Get 1,000 tokens to analyze any athlete</p>
+                <h2 className="text-2xl font-bold mb-4 text-athlete-accent">{t('landing.pricing.journeyTitle')}</h2>
+                <div className="text-4xl font-bold mb-2 text-white">{t('landing.pricing.price')}<span className="text-lg text-gray-400">{t('landing.pricing.period')}</span></div>
+                <p className="text-gray-300 mb-6">{t('landing.pricing.tokenDescription')}</p>
                 <div className="space-y-3">
                   <Button 
                     onClick={() => setLocation('/signup')}
@@ -353,7 +353,7 @@ export default function Landing() {
                     className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 py-4 text-lg font-semibold"
                   >
                     <UserPlus className="mr-2" size={20} />
-                    Start Free Trial
+                    {t('landing.hero.ctaStart')}
                   </Button>
                   <Button 
                     onClick={() => setLocation('/login')}
@@ -361,7 +361,7 @@ export default function Landing() {
                     variant="outline"
                     className="w-full border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white py-4 text-lg font-semibold"
                   >
-                    Sign In <ArrowRight className="ml-2" size={20} />
+                    {t('landing.navigation.signIn')} <ArrowRight className="ml-2" size={20} />
                   </Button>
                 </div>
               </CardContent>
