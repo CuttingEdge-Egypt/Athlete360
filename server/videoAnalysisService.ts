@@ -411,6 +411,127 @@ Return Time in Minutes and Seconds: MM:SS`;
   }
 }
 
+// New function to generate advice for each player
+export async function generatePlayerAdvice(videoFilePath: string, roundToAnalyze: number) {
+  console.log(`[GENERATE_PLAYER_ADVICE] Starting advice generation for round ${roundToAnalyze}`);
+  console.log(`[GENERATE_PLAYER_ADVICE] Video file: ${videoFilePath}`);
+  
+  let uploadedFile = null;
+  
+  try {
+    // Upload file to Gemini without loading into memory
+    console.log(`[GENERATE_PLAYER_ADVICE] Uploading video file to Gemini...`);
+    uploadedFile = await uploadFileToGemini(videoFilePath);
+    
+    const videoFile = {
+      fileData: {
+        mimeType: uploadedFile.mimeType,
+        fileUri: uploadedFile.uri
+      }
+    };
+    
+    console.log(`[GENERATE_PLAYER_ADVICE] Video ready for advice analysis: ${uploadedFile.uri}`);
+    
+    // Prompt for player advice generation
+    const advicePrompt = `Analyze round ${roundToAnalyze} of this combat sports match and provide detailed improvement advice for each player. Focus on tactical, technical, and mental aspects.
+
+IMPORTANT: Return ONLY a valid JSON response in the following structure:
+
+{
+  "players": [
+    {
+      "name": "Player 1",
+      "color": "Red/Blue",
+      "tactical_advice": {
+        "issues": ["List of tactical mistakes or weaknesses observed"],
+        "improvements": ["Specific tactical recommendations for improvement"]
+      },
+      "technical_advice": {
+        "issues": ["List of technical mistakes in technique, form, or execution"],
+        "improvements": ["Specific technical skills to work on"]
+      },
+      "mental_advice": {
+        "issues": ["Mental/psychological issues observed (hesitation, aggression, focus)"],
+        "improvements": ["Mental training and mindset recommendations"]
+      }
+    },
+    {
+      "name": "Player 2", 
+      "color": "Red/Blue",
+      "tactical_advice": {
+        "issues": ["List of tactical mistakes or weaknesses observed"],
+        "improvements": ["Specific tactical recommendations for improvement"]
+      },
+      "technical_advice": {
+        "issues": ["List of technical mistakes in technique, form, or execution"],
+        "improvements": ["Specific technical skills to work on"]
+      },
+      "mental_advice": {
+        "issues": ["Mental/psychological issues observed (hesitation, aggression, focus)"],
+        "improvements": ["Mental training and mindset recommendations"]
+      }
+    }
+  ],
+  "general_observations": "Overall observations about the match and areas both players could improve on"
+}
+
+FOCUS ON:
+- Tactical errors: Poor timing, distance management, strategy choices, defensive lapses
+- Technical flaws: Incorrect form, missed opportunities, execution problems
+- Mental aspects: Visible hesitation, over-aggression, loss of focus, confidence issues
+
+Watch the entire round carefully and provide actionable, specific advice that coaches could use to help these athletes improve.`;
+
+    console.log(`[GENERATE_PLAYER_ADVICE] Sending advice prompt to Gemini...`);
+    
+    const result = await model.generateContent([
+      videoFile,
+      advicePrompt
+    ]);
+
+    if (!result.response) {
+      throw new Error('No response received from Gemini');
+    }
+
+    const rawAdviceResponse = result.response.text();
+    console.log(`[GENERATE_PLAYER_ADVICE] Raw response length: ${rawAdviceResponse?.length || 0}`);
+    
+    if (!rawAdviceResponse || rawAdviceResponse.trim() === '') {
+      throw new Error('Empty response received from Gemini');
+    }
+
+    // Clean the JSON response
+    const adviceAnalysis = cleanJsonResponse(rawAdviceResponse);
+    console.log(`[GENERATE_PLAYER_ADVICE] Advice generation completed successfully`);
+
+    return {
+      advice_analysis: adviceAnalysis,
+      roundAnalyzed: roundToAnalyze,
+      processedAt: new Date().toISOString()
+    };
+
+  } catch (error) {
+    console.error(`[GENERATE_PLAYER_ADVICE] Error:`, error);
+    throw error;
+  } finally {
+    // Clean up uploaded file from Gemini
+    if (uploadedFile) {
+      try {
+        console.log(`[GENERATE_PLAYER_ADVICE] Cleaning up uploaded file: ${uploadedFile.uri}`);
+        const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+          throw new Error('GOOGLE_API_KEY or GEMINI_API_KEY environment variable is required');
+        }
+        const fileManager = new GoogleAIFileManager(apiKey);
+        await fileManager.deleteFile(uploadedFile.name);
+        console.log(`[GENERATE_PLAYER_ADVICE] Uploaded file cleaned up successfully`);
+      } catch (cleanupError) {
+        console.warn(`[GENERATE_PLAYER_ADVICE] Failed to cleanup uploaded file:`, cleanupError);
+      }
+    }
+  }
+}
+
 // Main function that matches the Python API pattern
 export async function analyzeVideoFile(
   videoFilePath: string,
