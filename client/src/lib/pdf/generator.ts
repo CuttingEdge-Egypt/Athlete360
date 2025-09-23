@@ -20,10 +20,10 @@ const pdfTheme = {
     }
   },
   spacing: {
-    margin: 10,  // Reduced from 20 to make borders closer to edges
-    lineHeight: 5,  // Increased slightly for better readability
-    sectionGap: 12,
-    paragraphGap: 8,
+    margin: 15,  // Better margins to respect page borders
+    lineHeight: 6,  // Improved line height for better text spacing
+    sectionGap: 15,
+    paragraphGap: 10,
   },
   layout: {
     pageWidth: 210,
