@@ -146,12 +146,10 @@ function generatePaymentResultHTML(data: PaymentResultData): string {
 // All LLM implementations now use GPT-5 with temperature 1.0 (default minimum)
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// Enhanced direct video upload handler - extracts both file and form fields
-// Stream directly to disk instead of buffering in memory
+// Simple direct video upload handler that properly extracts form fields
 async function handleDirectVideoUpload(req: any): Promise<{ filePath: string, fields: Record<string, string> }> {
-  console.log('[DIRECT_UPLOAD] Starting video upload - streaming to disk');
+  console.log('[DIRECT_UPLOAD] Starting video upload with form field extraction');
   
-  // Parse multipart form data boundary
   const contentType = req.headers['content-type'] || '';
   const boundary = contentType.split('boundary=')[1];
   if (!boundary) {
@@ -164,195 +162,82 @@ async function handleDirectVideoUpload(req: any): Promise<{ filePath: string, fi
   }
   
   return new Promise((resolve, reject) => {
-    let headerBuffer = Buffer.alloc(0);
-    let fileStream: fs.WriteStream | null = null;
-    let filePath = '';
-    let fileName = '';
-    let headersParsed = false;
-    let bytesWritten = 0;
-    let settled = false; // Guard against multiple promise settlements
-    let currentPartName = '';
-    let isCurrentPartFile = false;
-    let formFields: Record<string, string> = {};
-    let currentFieldBuffer = Buffer.alloc(0);
-    const boundaryBuffer = Buffer.from(`\r\n--${boundary}`);
+    let chunks: Buffer[] = [];
+    let totalSize = 0;
     const MAX_UPLOAD_SIZE = 500 * 1024 * 1024; // 500MB limit
     
-    // Centralized cleanup function
-    const cleanup = (removeFile: boolean = true) => {
-      if (fileStream && !fileStream.destroyed) {
-        fileStream.destroy();
-      }
-      if (removeFile && filePath && fs.existsSync(filePath)) {
-        try {
-          fs.unlinkSync(filePath);
-          console.log('[DIRECT_UPLOAD] Cleaned up partial file');
-        } catch (cleanupError) {
-          console.error('[DIRECT_UPLOAD] Error cleaning up partial file:', cleanupError);
-        }
-      }
-    };
-    
-    // Guarded resolve/reject functions
-    const guardedResolve = (value: { filePath: string, fields: Record<string, string> }) => {
-      if (!settled) {
-        settled = true;
-        resolve(value);
-      }
-    };
-    
-    const guardedReject = (error: Error, removeFile: boolean = true) => {
-      if (!settled) {
-        settled = true;
-        cleanup(removeFile);
-        reject(error);
-      }
-    };
+    // Collect all data first
     
     req.on('data', (chunk: Buffer) => {
-      if (settled) return; // Stop processing if already settled
+      totalSize += chunk.length;
       
       // Check upload size limit
-      if (bytesWritten + chunk.length > MAX_UPLOAD_SIZE) {
-        guardedReject(new Error(`Upload size exceeds limit of ${MAX_UPLOAD_SIZE} bytes`));
+      if (totalSize > MAX_UPLOAD_SIZE) {
+        reject(new Error(`Upload size exceeds limit of ${MAX_UPLOAD_SIZE} bytes`));
         return;
       }
-      
-      if (!headersParsed) {
-        // Accumulate header data
-        headerBuffer = Buffer.concat([headerBuffer, chunk]);
-        const headerString = headerBuffer.toString();
-        
-        // Look for end of headers (double CRLF)
-        const headerEnd = headerString.indexOf('\r\n\r\n');
-        if (headerEnd !== -1) {
-          // Extract form field name and determine if it's a file
-          const nameMatch = headerString.match(/name="([^"]+)"/);
-          const filenameMatch = headerString.match(/filename="([^"]+)"/);
-          
-          if (nameMatch) {
-            currentPartName = nameMatch[1];
-            isCurrentPartFile = !!filenameMatch;
-            
-            if (isCurrentPartFile && filenameMatch) {
-              // This is a file field
-              fileName = filenameMatch[1];
-              const timestamp = Date.now();
-              const ext = path.extname(fileName);
-              filePath = path.join(uploadPath, `video_${timestamp}${ext}`);
-              
-              console.log(`[DIRECT_UPLOAD] Starting stream to: ${filePath}`);
-              fileStream = fs.createWriteStream(filePath);
-              
-              // Add error handler for the file stream
-              fileStream.on('error', (err) => {
-                console.error('[DIRECT_UPLOAD] File stream error:', err);
-                guardedReject(err);
-              });
-              
-              // Write the file content that was in this chunk
-              const fileStart = headerEnd + 4;
-              const fileContent = headerBuffer.slice(fileStart);
-              // Check if stream is still writable before writing
-              if (fileStream && !fileStream.destroyed && fileStream.writable && !settled) {
-                fileStream.write(fileContent);
-                bytesWritten += fileContent.length;
-              }
-            } else {
-              // This is a regular form field - start collecting data
-              console.log(`[DIRECT_UPLOAD] Found form field: ${currentPartName}`);
-              const fieldStart = headerEnd + 4;
-              currentFieldBuffer = headerBuffer.slice(fieldStart);
-            }
-            
-            headersParsed = true;
-          }
-        }
-      } else if (headersParsed && !settled) {
-        // Process the current part based on type
-        const boundaryIndex = chunk.indexOf(boundaryBuffer);
-        
-        if (isCurrentPartFile && fileStream && !fileStream.destroyed && fileStream.writable) {
-          // Stream file data to disk
-          if (boundaryIndex !== -1) {
-            // End of this part - write final data and finish file
-            const fileData = chunk.slice(0, boundaryIndex);
-            if (!fileStream.destroyed && fileStream.writable && !settled) {
-              fileStream.write(fileData);
-              bytesWritten += fileData.length;
-              
-              // Close the stream and finish
-              fileStream.end(() => {
-                console.log(`[DIRECT_UPLOAD] File saved: ${filePath} (${bytesWritten} bytes)`);
-                // Don't resolve here - wait for all form fields to be processed in 'end' event
-              });
-            }
-          } else {
-            // Continue streaming file data
-            if (!fileStream.destroyed && fileStream.writable && !settled) {
-              fileStream.write(chunk);
-              bytesWritten += chunk.length;
-              
-              // Log progress every 10MB
-              if (bytesWritten % (10 * 1024 * 1024) < chunk.length) {
-                console.log(`[DIRECT_UPLOAD] Progress: ${Math.round(bytesWritten / 1024 / 1024)}MB written`);
-              }
-            }
-          }
-        } else if (!isCurrentPartFile && currentPartName) {
-          // Accumulate form field data
-          if (boundaryIndex !== -1) {
-            // End of this part - save field value
-            const fieldData = chunk.slice(0, boundaryIndex);
-            currentFieldBuffer = Buffer.concat([currentFieldBuffer, fieldData]);
-            const fieldValue = currentFieldBuffer.toString('utf8').trim();
-            formFields[currentPartName] = fieldValue;
-            console.log(`[DIRECT_UPLOAD] Form field ${currentPartName}: ${fieldValue}`);
-            
-            // Reset for next part
-            currentFieldBuffer = Buffer.alloc(0);
-            currentPartName = '';
-            isCurrentPartFile = false;
-            headersParsed = false;
-            headerBuffer = Buffer.alloc(0);
-            
-            // Don't resolve here - continue processing other parts
-          } else {
-            // Continue accumulating field data
-            currentFieldBuffer = Buffer.concat([currentFieldBuffer, chunk]);
-          }
-        }
-      }
+      chunks.push(chunk);
     });
     
     req.on('end', () => {
-      if (settled) return;
+      const fullData = Buffer.concat(chunks);
+      const dataString = fullData.toString('latin1');
       
-      console.log(`[DIRECT_UPLOAD] Upload end - form fields extracted:`, formFields);
-      console.log(`[DIRECT_UPLOAD] roundToAnalyze value:`, formFields.roundToAnalyze);
+      console.log('[DIRECT_UPLOAD] Processing multipart data...');
       
-      if (fileStream && !fileStream.destroyed && !fileStream.writableEnded) {
-        fileStream.end(() => {
-          console.log(`[DIRECT_UPLOAD] Upload complete: ${filePath} (${bytesWritten} bytes)`);
-          guardedResolve({ filePath, fields: formFields });
-        });
-      } else if (!headersParsed) {
-        guardedReject(new Error('No file data received or headers not parsed'));
-      } else {
-        // No file stream but have data
-        guardedResolve({ filePath, fields: formFields });
+      // Extract form fields
+      const formFields: Record<string, string> = {};
+      
+      // Find roundToAnalyze field
+      const roundMatch = dataString.match(/name="roundToAnalyze"\r?\n\r?\n(\d+)/);
+      if (roundMatch) {
+        formFields.roundToAnalyze = roundMatch[1];
+        console.log(`[DIRECT_UPLOAD] Found roundToAnalyze: ${roundMatch[1]}`);
       }
+      
+      // Extract video file
+      const fileNameMatch = dataString.match(/filename="([^"]+)"/);
+      if (!fileNameMatch) {
+        reject(new Error('No video file found in upload'));
+        return;
+      }
+      
+      const fileName = fileNameMatch[1];
+      const timestamp = Date.now();
+      const ext = path.extname(fileName);
+      const filePath = path.join(uploadPath, `video_${timestamp}${ext}`);
+      
+      // Find video data boundaries
+      const videoStartMarker = 'Content-Type: video';
+      const videoStartIdx = dataString.indexOf(videoStartMarker);
+      if (videoStartIdx === -1) {
+        reject(new Error('Could not find video content'));
+        return;
+      }
+      
+      // Video content starts after headers (double CRLF)
+      const contentStart = dataString.indexOf('\r\n\r\n', videoStartIdx) + 4;
+      // Video content ends before next boundary
+      const nextBoundary = `--${boundary}`;
+      const contentEndIdx = dataString.indexOf(nextBoundary, contentStart);
+      
+      if (contentEndIdx === -1) {
+        reject(new Error('Could not find end of video content'));
+        return;
+      }
+      
+      // Extract and save video
+      const videoBuffer = fullData.slice(contentStart, contentEndIdx - 2); // -2 for \r\n
+      fs.writeFileSync(filePath, videoBuffer);
+      console.log(`[DIRECT_UPLOAD] Video saved: ${filePath} (${videoBuffer.length} bytes)`);
+      console.log(`[DIRECT_UPLOAD] Form fields extracted:`, formFields);
+      
+      resolve({ filePath, fields: formFields });
     });
     
-    // Handle client disconnect/abort
-    req.on('aborted', () => {
-      console.log('[DIRECT_UPLOAD] Request aborted by client');
-      guardedReject(new Error('Upload aborted by client'));
-    });
-
     req.on('error', (error: Error) => {
       console.error('[DIRECT_UPLOAD] Upload error:', error);
-      guardedReject(error);
+      reject(error);
     });
   });
 }
@@ -3290,32 +3175,9 @@ Return only valid JSON with the missing fields.`;
       const fileStats = fs.statSync(videoFilePath);
       console.log(`[VIDEO ROUTE ${requestId}] File size: ${fileStats.size} bytes`);
       
-      // Extract round number - simple fallback parsing from raw request body
-      let round = 1; // default
-      try {
-        // Try to extract from complex parser first
-        if (uploadResult.fields?.roundToAnalyze) {
-          round = parseInt(uploadResult.fields.roundToAnalyze);
-          console.log(`[VIDEO ROUTE ${requestId}] Round from complex parser: ${round}`);
-        } else {
-          // Fallback: extract from raw request body
-          const contentType = req.headers['content-type'] || '';
-          const boundary = contentType.split('boundary=')[1];
-          if (boundary) {
-            // Read the uploaded file back to extract form fields
-            const fileContent = fs.readFileSync(videoFilePath);
-            const fileString = fileContent.toString('latin1');
-            const roundMatch = fileString.match(/name="roundToAnalyze"\r?\n\r?\n(\d+)/);
-            if (roundMatch) {
-              round = parseInt(roundMatch[1]);
-              console.log(`[VIDEO ROUTE ${requestId}] Round from fallback parser: ${round}`);
-            }
-          }
-        }
-      } catch (parseError) {
-        console.log(`[VIDEO ROUTE ${requestId}] Round parsing failed, using default: 1`);
-        round = 1;
-      }
+      // Extract round number from form fields
+      const round = parseInt(uploadResult.fields?.roundToAnalyze) || 1;
+      console.log(`[VIDEO ROUTE ${requestId}] Round selected: ${round} (from form field: ${uploadResult.fields?.roundToAnalyze})`)
       
       console.log(`[ROUTE ${requestId}] User: ${userId}, File: ${fileName}, Round: ${round}`);
 
