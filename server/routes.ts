@@ -212,7 +212,7 @@ async function handleDirectVideoUpload(req: any): Promise<string> {
       }
     });
     
-    req.on('error', (error) => {
+    req.on('error', (error: Error) => {
       console.error('[DIRECT_UPLOAD] Upload error:', error);
       reject(error);
     });
@@ -3257,16 +3257,6 @@ Return only valid JSON with the missing fields.`;
       
       console.log(`[ROUTE ${requestId}] ===== VIDEO ANALYSIS REQUEST COMPLETED =====`);
     }
-  });        if (videoFilePath && fs.existsSync(videoFilePath)) {
-          try {
-            console.log(`[ROUTE ${requestId}] Cleaning up temporary file: ${videoFilePath}`);
-            fs.unlinkSync(videoFilePath);
-            console.log(`[ROUTE ${requestId}] Temporary file cleaned up successfully`);
-          } catch (cleanupError) {
-            console.error(`[ROUTE ${requestId}] Failed to clean up temporary file:`, cleanupError);
-          }
-        }
-      }
   });
 
   // Dev Admin Middleware
