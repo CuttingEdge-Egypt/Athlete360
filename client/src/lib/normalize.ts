@@ -178,6 +178,8 @@ export function normalizeDevelopmentPlan(raw: any): GoalBasedPlan | null {
     const parsed = safeJsonParse(raw);
     const content = extractContent(parsed);
     
+    console.log('DEV PLAN - Raw:', typeof raw, raw);
+    console.log('DEV PLAN - Content:', content);
     
     if (!content) return null;
     
@@ -417,8 +419,10 @@ export function normalizeComparison(raw: any): ComparisonViewModel | null {
             const parsedResponse = JSON.parse(tab.rawResponse);
             
             // Extract meaningful data from parsed response
+            console.log('COMPARISON - Parsed Response:', parsedResponse);
             if (parsedResponse.detailedAnalysis) {
               const analysis = parsedResponse.detailedAnalysis;
+              console.log('COMPARISON - Analysis:', analysis);
               tabs = {
                 overview: parsedResponse.overallAnalysis || 
                          parsedResponse.summary || 
@@ -429,6 +433,7 @@ export function normalizeComparison(raw: any): ComparisonViewModel | null {
                            parsedResponse.directComparison ||
                            formatHeadToHead(analysis.athlete1, analysis.athlete2)
               };
+              console.log('COMPARISON - Final tabs:', tabs);
             }
           } catch (e) {
             console.error('Failed to parse rawResponse:', e);
