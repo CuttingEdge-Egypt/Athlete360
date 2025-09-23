@@ -170,9 +170,50 @@ async function handleDirectVideoUpload(req: any): Promise<string> {
     let fileName = '';
     let headersParsed = false;
     let bytesWritten = 0;
+    let settled = false; // Guard against multiple promise settlements
     const boundaryBuffer = Buffer.from(`\r\n--${boundary}`);
+    const MAX_UPLOAD_SIZE = 500 * 1024 * 1024; // 500MB limit
+    
+    // Centralized cleanup function
+    const cleanup = (removeFile: boolean = true) => {
+      if (fileStream && !fileStream.destroyed) {
+        fileStream.destroy();
+      }
+      if (removeFile && filePath && fs.existsSync(filePath)) {
+        try {
+          fs.unlinkSync(filePath);
+          console.log('[DIRECT_UPLOAD] Cleaned up partial file');
+        } catch (cleanupError) {
+          console.error('[DIRECT_UPLOAD] Error cleaning up partial file:', cleanupError);
+        }
+      }
+    };
+    
+    // Guarded resolve/reject functions
+    const guardedResolve = (value: string) => {
+      if (!settled) {
+        settled = true;
+        resolve(value);
+      }
+    };
+    
+    const guardedReject = (error: Error, removeFile: boolean = true) => {
+      if (!settled) {
+        settled = true;
+        cleanup(removeFile);
+        reject(error);
+      }
+    };
     
     req.on('data', (chunk: Buffer) => {
+      if (settled) return; // Stop processing if already settled
+      
+      // Check upload size limit
+      if (bytesWritten + chunk.length > MAX_UPLOAD_SIZE) {
+        guardedReject(new Error(`Upload size exceeds limit of ${MAX_UPLOAD_SIZE} bytes`));
+        return;
+      }
+      
       if (!headersParsed) {
         // Accumulate header data
         headerBuffer = Buffer.concat([headerBuffer, chunk]);
@@ -192,61 +233,78 @@ async function handleDirectVideoUpload(req: any): Promise<string> {
             console.log(`[DIRECT_UPLOAD] Starting stream to: ${filePath}`);
             fileStream = fs.createWriteStream(filePath);
             
+            // Add error handler for the file stream
+            fileStream.on('error', (err) => {
+              console.error('[DIRECT_UPLOAD] File stream error:', err);
+              guardedReject(err);
+            });
+            
             // Write the file content that was in this chunk
             const fileStart = headerEnd + 4;
             const fileContent = headerBuffer.slice(fileStart);
-            fileStream.write(fileContent);
-            bytesWritten += fileContent.length;
+            // Check if stream is still writable before writing
+            if (fileStream && !fileStream.destroyed && fileStream.writable && !settled) {
+              fileStream.write(fileContent);
+              bytesWritten += fileContent.length;
+            }
             
             headersParsed = true;
           }
         }
-      } else if (fileStream) {
-        // Stream directly to file
+      } else if (fileStream && !fileStream.destroyed && fileStream.writable && !settled) {
+        // Stream directly to file - only if stream is still valid and not settled
         // Check if this chunk contains the boundary (end of file)
         const boundaryIndex = chunk.indexOf(boundaryBuffer);
         if (boundaryIndex !== -1) {
           // Write only up to the boundary
           const fileData = chunk.slice(0, boundaryIndex);
-          fileStream.write(fileData);
-          bytesWritten += fileData.length;
-          
-          // Close the stream
-          fileStream.end();
-          console.log(`[DIRECT_UPLOAD] File saved: ${filePath} (${bytesWritten} bytes)`);
-          resolve(filePath);
+          if (!fileStream.destroyed && fileStream.writable && !settled) {
+            fileStream.write(fileData);
+            bytesWritten += fileData.length;
+            
+            // Close the stream and wait for finish
+            fileStream.end(() => {
+              console.log(`[DIRECT_UPLOAD] File saved: ${filePath} (${bytesWritten} bytes)`);
+              guardedResolve(filePath);
+            });
+          }
         } else {
-          // Write entire chunk
-          fileStream.write(chunk);
-          bytesWritten += chunk.length;
-          
-          // Log progress every 10MB
-          if (bytesWritten % (10 * 1024 * 1024) < chunk.length) {
-            console.log(`[DIRECT_UPLOAD] Progress: ${Math.round(bytesWritten / 1024 / 1024)}MB written`);
+          // Write entire chunk - only if stream is still valid
+          if (!fileStream.destroyed && fileStream.writable && !settled) {
+            fileStream.write(chunk);
+            bytesWritten += chunk.length;
+            
+            // Log progress every 10MB
+            if (bytesWritten % (10 * 1024 * 1024) < chunk.length) {
+              console.log(`[DIRECT_UPLOAD] Progress: ${Math.round(bytesWritten / 1024 / 1024)}MB written`);
+            }
           }
         }
       }
     });
     
     req.on('end', () => {
-      if (fileStream && !fileStream.destroyed) {
-        fileStream.end();
-        console.log(`[DIRECT_UPLOAD] Upload complete: ${filePath} (${bytesWritten} bytes)`);
-        resolve(filePath);
+      if (settled) return;
+      
+      if (fileStream && !fileStream.destroyed && !fileStream.writableEnded) {
+        fileStream.end(() => {
+          console.log(`[DIRECT_UPLOAD] Upload complete: ${filePath} (${bytesWritten} bytes)`);
+          guardedResolve(filePath);
+        });
       } else if (!headersParsed) {
-        reject(new Error('No file data received or headers not parsed'));
+        guardedReject(new Error('No file data received or headers not parsed'));
       }
     });
     
+    // Handle client disconnect/abort
+    req.on('aborted', () => {
+      console.log('[DIRECT_UPLOAD] Request aborted by client');
+      guardedReject(new Error('Upload aborted by client'));
+    });
+
     req.on('error', (error: Error) => {
       console.error('[DIRECT_UPLOAD] Upload error:', error);
-      if (fileStream) {
-        fileStream.destroy();
-      }
-      if (filePath && fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
-      reject(error);
+      guardedReject(error);
     });
   });
 }
