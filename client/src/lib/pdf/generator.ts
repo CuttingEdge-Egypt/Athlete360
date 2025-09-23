@@ -285,11 +285,11 @@ const generateBioPDF = (pdf: jsPDF, data: any, athleteName?: string): number => 
   if (athleteInfo.name) {
     currentY = addText(pdf, `Name: ${athleteInfo.name}`, currentY, { weight: 'bold', indent: 10 });
   }
-  if (athleteInfo.country) {
-    currentY = addText(pdf, `Country: ${athleteInfo.country}`, currentY, { indent: 10 });
-  }
   if (athleteInfo.sport) {
     currentY = addText(pdf, `Sport: ${athleteInfo.sport}`, currentY, { indent: 10 });
+  }
+  if (athleteInfo.country) {
+    currentY = addText(pdf, `Country: ${athleteInfo.country}`, currentY, { indent: 10 });
   }
   
   currentY += pdfTheme.spacing.sectionGap;
@@ -312,6 +312,7 @@ const generateBioPDF = (pdf: jsPDF, data: any, athleteName?: string): number => 
     currentY = addText(pdf, `Current Rank: ${athleteInfo.rank}`, currentY, { indent: 10 });
   }
   
+  currentY += pdfTheme.spacing.sectionGap;
   
   if (bioSections.overallStory) {
     currentY = addSectionHeader(pdf, 'Career Overview', currentY);
@@ -532,11 +533,11 @@ const generateStrengthsPDF = (pdf: jsPDF, data: any, athleteName?: string): numb
   if (athleteInfo.name) {
     currentY = addText(pdf, `Name: ${athleteInfo.name}`, currentY, { weight: 'bold', indent: 10 });
   }
-  if (athleteInfo.country) {
-    currentY = addText(pdf, `Country: ${athleteInfo.country}`, currentY, { indent: 10 });
-  }
   if (athleteInfo.sport) {
     currentY = addText(pdf, `Sport: ${athleteInfo.sport}`, currentY, { indent: 10 });
+  }
+  if (athleteInfo.country) {
+    currentY = addText(pdf, `Country: ${athleteInfo.country}`, currentY, { indent: 10 });
   }
   
   currentY += pdfTheme.spacing.sectionGap;
