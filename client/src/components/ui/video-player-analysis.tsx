@@ -314,10 +314,11 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
             const playerName = player.name?.toLowerCase() || '';
             const totalKicks = player.kicks[0].total_kick_number;
             
-            // Determine player color based on name or other identifiers
-            if (playerName.includes('blue') || playerName.includes('player 1')) {
+            // Determine player color based on name - use same logic as other components
+            const isBlue = player.name === 'Player 1' || player.name?.includes('YANG');
+            if (isBlue) {
               blueKicks = totalKicks;
-            } else if (playerName.includes('red') || playerName.includes('player 2')) {
+            } else {
               redKicks = totalKicks;
             }
           }
