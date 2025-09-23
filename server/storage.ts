@@ -41,7 +41,7 @@ import {
   type InsertJob,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, asc, sql, ilike, ne, notInArray } from "drizzle-orm";
+import { eq, desc, and, asc, sql, ilike, ne, notInArray, not } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -724,15 +724,69 @@ export class DatabaseStorage implements IStorage {
     const results = [];
     
     for (const serviceType of serviceTypes) {
-      const [latestLog] = await db
-        .select()
-        .from(analysisLogs)
-        .where(eq(analysisLogs.serviceType, serviceType))
-        .orderBy(desc(analysisLogs.createdAt))
-        .limit(1);
-      
-      if (latestLog) {
-        results.push(latestLog);
+      if (serviceType === 'video') {
+        // For video analysis, get a successful result (not error results)
+        const [latestLog] = await db
+          .select()
+          .from(analysisLogs)
+          .where(
+            and(
+              eq(analysisLogs.serviceType, serviceType),
+              not(sql`${analysisLogs.resultData}::text LIKE '%error%'`)
+            )
+          )
+          .orderBy(desc(analysisLogs.createdAt))
+          .limit(1);
+        
+        if (latestLog) {
+          results.push(latestLog);
+        }
+      } else if (serviceType === 'weaknesses') {
+        // For weaknesses, get a result with substantial content (length > 500)
+        const [latestLog] = await db
+          .select()
+          .from(analysisLogs)
+          .where(
+            and(
+              eq(analysisLogs.serviceType, serviceType),
+              sql`LENGTH(${analysisLogs.resultData}::text) > 500`
+            )
+          )
+          .orderBy(desc(analysisLogs.createdAt))
+          .limit(1);
+        
+        if (latestLog) {
+          results.push(latestLog);
+        }
+      } else if (serviceType === 'bio') {
+        // For bio, get a result with substantial content (length > 2000)
+        const [latestLog] = await db
+          .select()
+          .from(analysisLogs)
+          .where(
+            and(
+              eq(analysisLogs.serviceType, serviceType),
+              sql`LENGTH(${analysisLogs.resultData}::text) > 2000`
+            )
+          )
+          .orderBy(desc(analysisLogs.createdAt))
+          .limit(1);
+        
+        if (latestLog) {
+          results.push(latestLog);
+        }
+      } else {
+        // For other types, get the latest
+        const [latestLog] = await db
+          .select()
+          .from(analysisLogs)
+          .where(eq(analysisLogs.serviceType, serviceType))
+          .orderBy(desc(analysisLogs.createdAt))
+          .limit(1);
+        
+        if (latestLog) {
+          results.push(latestLog);
+        }
       }
     }
     

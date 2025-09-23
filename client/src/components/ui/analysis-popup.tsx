@@ -46,7 +46,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { generateProfessionalPdf } from "@/lib/pdf/generator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-// Remove unused import
+import { VideoAnalysisResults } from "@/components/ui/video-analysis-results";
+import { DevelopmentPlanDisplay } from "@/components/ui/development-plan-display";
 import {
   Select,
   SelectContent,
@@ -1628,6 +1629,127 @@ export function AnalysisPopup({
     }
   };
 
+  // Video analysis renderer
+  const renderVideoAnalysis = (data: any) => {
+    if (!data) {
+      return <div className="text-gray-400 text-center py-8">Video analysis data not available</div>;
+    }
+
+    // Check if it's an error result
+    if (data.error) {
+      return (
+        <div className="text-center py-8">
+          <div className="text-red-400 mb-4">Video Analysis Error</div>
+          <p className="text-gray-400">{data.errorMessage || "Unable to analyze video"}</p>
+        </div>
+      );
+    }
+
+    return <VideoAnalysisResults analysisData={data} />;
+  };
+
+  // Comparison analysis renderer
+  const renderComparisonAnalysis = (data: any) => {
+    if (!data) {
+      return <div className="text-gray-400 text-center py-8">Comparison analysis data not available</div>;
+    }
+
+    const parsedData = parseAnalysisData(data);
+    
+    if (parsedData.tabs) {
+      return (
+        <div className="space-y-6">
+          {/* Overview Tab */}
+          {parsedData.tabs.overview && (
+            <Card className="bg-athlete-gray-800 border-gray-700">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center">
+                  <User className="mr-3" size={24} />
+                  Athlete Comparison Overview
+                </h3>
+                <div className="prose prose-invert max-w-none">
+                  <pre className="whitespace-pre-wrap text-gray-300 leading-relaxed">
+                    {parsedData.tabs.overview}
+                  </pre>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Strengths Comparison */}
+          {parsedData.tabs.strengths && (
+            <Card className="bg-athlete-gray-800 border-gray-700">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-green-400 mb-4 flex items-center">
+                  <Star className="mr-3" size={24} />
+                  Strengths Comparison
+                </h3>
+                <div className="prose prose-invert max-w-none">
+                  <pre className="whitespace-pre-wrap text-gray-300 leading-relaxed">
+                    {parsedData.tabs.strengths}
+                  </pre>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Weaknesses Comparison */}
+          {parsedData.tabs.weaknesses && (
+            <Card className="bg-athlete-gray-800 border-gray-700">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-red-400 mb-4 flex items-center">
+                  <AlertTriangle className="mr-3" size={24} />
+                  Weaknesses Comparison
+                </h3>
+                <div className="prose prose-invert max-w-none">
+                  <pre className="whitespace-pre-wrap text-gray-300 leading-relaxed">
+                    {parsedData.tabs.weaknesses}
+                  </pre>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Head-to-Head */}
+          {parsedData.tabs.headToHead && (
+            <Card className="bg-athlete-gray-800 border-gray-700">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-purple-400 mb-4 flex items-center">
+                  <Target className="mr-3" size={24} />
+                  Head-to-Head Analysis
+                </h3>
+                <div className="prose prose-invert max-w-none">
+                  <pre className="whitespace-pre-wrap text-gray-300 leading-relaxed">
+                    {parsedData.tabs.headToHead}
+                  </pre>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      );
+    }
+
+    // Fallback for other comparison formats
+    return (
+      <div className="space-y-6">
+        <Card className="bg-athlete-gray-800 border-gray-700">
+          <CardContent className="p-6">
+            <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center">
+              <User className="mr-3" size={24} />
+              Athlete Comparison Analysis
+            </h3>
+            <div className="prose prose-invert max-w-none">
+              <pre className="whitespace-pre-wrap text-gray-300 leading-relaxed">
+                {typeof parsedData === 'string' ? parsedData : JSON.stringify(parsedData, null, 2)}
+              </pre>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
+
   const renderAnalysisContent = () => {
     if (!data) {
       return <div className="text-gray-400 text-center py-8">Analysis data not available</div>;
@@ -1660,7 +1782,17 @@ export function AnalysisPopup({
 
     // Special handling for development plan
     if (type === "development" || type === "development-plan") {
-      return renderDevelopmentPlan(data);
+      return <DevelopmentPlanDisplay plan={data} language="en" />;
+    }
+
+    // Special handling for video analysis
+    if (type === "video" || type === "video-analysis") {
+      return renderVideoAnalysis(data);
+    }
+
+    // Special handling for comparison analysis
+    if (type === "comparison") {
+      return renderComparisonAnalysis(data);
     }
 
     // Special handling for rank analysis
