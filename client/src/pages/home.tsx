@@ -863,9 +863,16 @@ export default function Home() {
     if (!selectedAthlete) return;
     
     try {
+      // Get current language from localStorage
+      const language = localStorage.getItem('i18nextLng') || 'en';
+      
       const response = await fetch(`/api/analysis/${selectedAthlete.id}/bio`, {
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ language })
       });
       
       if (response.ok) {

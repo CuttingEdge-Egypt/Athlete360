@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { useLanguage } from "@/lib/LanguageProvider";
 import { AnalysisPopup } from "./analysis-popup";
 import { 
   User, Trophy, Star, AlertTriangle, Calendar, Apple, 
@@ -41,6 +42,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth() as { user: UserType | null };
+  const { language } = useLanguage();
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
   const [analysisData, setAnalysisData] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -123,7 +125,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         setProgressPhase("AI processing...");
         setProgressPercent(60);
         
-        const response = await apiRequest("POST", url, undefined, { signal: controller.signal });
+        const response = await apiRequest("POST", url, { language }, { signal: controller.signal });
         
         setProgressPhase("Finalizing results...");
         setProgressPercent(90);
