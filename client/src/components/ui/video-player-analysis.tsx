@@ -32,14 +32,20 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
   const [volume, setVolume] = useState(1);
   const [videoUrl, setVideoUrl] = useState<string>("");
 
-  // Translation function for data box titles
-  const getDataBoxTitle = (key: string): string => {
+  // Translation function for all UI titles
+  const getTitle = (key: string): string => {
     if (language === 'arabic') {
       const arabicTitles: Record<string, string> = {
+        // Data box titles
         'BLUE SCORE': 'النقاط الزرقاء',
         'RED SCORE': 'النقاط الحمراء', 
         'TOTAL KICKS': 'إجمالي الركلات',
-        'WARNINGS': 'إنذارات'
+        'WARNINGS': 'إنذارات',
+        // Section titles
+        'Complete Match Analysis': 'تحليل المباراة الكامل',
+        'Advice for Each Player': 'نصائح لكل لاعب',
+        'General Observations': 'ملاحظات عامة',
+        'TACTICAL': 'تكتيكي'
       };
       return arabicTitles[key] || key;
     }
@@ -494,7 +500,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           {/* Blue Score */}
           <Card className="bg-blue-900/20 border-blue-500/30" data-testid="blue-score-card">
             <CardContent className="p-4 text-center">
-              <div className="text-blue-400 font-semibold text-sm mb-2">{getDataBoxTitle('BLUE SCORE')}</div>
+              <div className="text-blue-400 font-semibold text-sm mb-2">{getTitle('BLUE SCORE')}</div>
               <div className="text-4xl font-bold text-blue-300" data-testid="blue-score">{currentStats.blueScore}</div>
             </CardContent>
           </Card>
@@ -502,7 +508,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           {/* Blue Kicks */}
           <Card className="bg-blue-900/20 border-blue-500/30" data-testid="blue-kicks-card">
             <CardContent className="p-4 text-center">
-              <div className="text-blue-400 font-semibold text-sm mb-2">{getDataBoxTitle('TOTAL KICKS')}</div>
+              <div className="text-blue-400 font-semibold text-sm mb-2">{getTitle('TOTAL KICKS')}</div>
               <div className="text-2xl font-bold text-blue-300" data-testid="blue-kicks">{blueKicks}</div>
             </CardContent>
           </Card>
@@ -510,7 +516,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           {/* Blue Yellow Cards */}
           <Card className="bg-blue-900/20 border-blue-500/30" data-testid="blue-cards-card">
             <CardContent className="p-4 text-center">
-              <div className="text-blue-400 font-semibold text-sm mb-2">{getDataBoxTitle('WARNINGS')}</div>
+              <div className="text-blue-400 font-semibold text-sm mb-2">{getTitle('WARNINGS')}</div>
               <div className="text-2xl font-bold text-yellow-400" data-testid="blue-cards">{currentStats.blueCards}</div>
             </CardContent>
           </Card>
@@ -633,7 +639,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           {/* Red Score */}
           <Card className="bg-red-900/20 border-red-500/30" data-testid="red-score-card">
             <CardContent className="p-4 text-center">
-              <div className="text-red-400 font-semibold text-sm mb-2">{getDataBoxTitle('RED SCORE')}</div>
+              <div className="text-red-400 font-semibold text-sm mb-2">{getTitle('RED SCORE')}</div>
               <div className="text-4xl font-bold text-red-300" data-testid="red-score">{currentStats.redScore}</div>
             </CardContent>
           </Card>
@@ -641,7 +647,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           {/* Red Kicks */}
           <Card className="bg-red-900/20 border-red-500/30" data-testid="red-kicks-card">
             <CardContent className="p-4 text-center">
-              <div className="text-red-400 font-semibold text-sm mb-2">{getDataBoxTitle('TOTAL KICKS')}</div>
+              <div className="text-red-400 font-semibold text-sm mb-2">{getTitle('TOTAL KICKS')}</div>
               <div className="text-2xl font-bold text-red-300" data-testid="red-kicks">{redKicks}</div>
             </CardContent>
           </Card>
@@ -649,7 +655,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           {/* Red Yellow Cards */}
           <Card className="bg-red-900/20 border-red-500/30" data-testid="red-cards-card">
             <CardContent className="p-4 text-center">
-              <div className="text-red-400 font-semibold text-sm mb-2">{getDataBoxTitle('WARNINGS')}</div>
+              <div className="text-red-400 font-semibold text-sm mb-2">{getTitle('WARNINGS')}</div>
               <div className="text-2xl font-bold text-yellow-400" data-testid="red-cards">{currentStats.redCards}</div>
             </CardContent>
           </Card>
@@ -661,7 +667,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
         <CardHeader>
           <CardTitle className="text-white flex items-center">
             <Trophy className="mr-2 text-yellow-400" size={20} />
-            Complete Match Analysis
+            {getTitle('Complete Match Analysis')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -682,6 +688,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
       {/* Player Advice Section - After Match Analysis */}
       <PlayerAdviceSection 
         adviceData={analysisData.advice_analysis}
+        language={language}
       />
     </div>
   );
@@ -690,6 +697,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
 // Player Advice Section Component
 interface PlayerAdviceSectionProps {
   adviceData: string | null;
+  language?: string;
 }
 
 interface PlayerAdvice {
@@ -714,15 +722,28 @@ interface AdviceData {
   general_observations: string;
 }
 
-function PlayerAdviceSection({ adviceData }: PlayerAdviceSectionProps) {
+function PlayerAdviceSection({ adviceData, language = 'english' }: PlayerAdviceSectionProps) {
   const [parsedAdviceData, setParsedAdviceData] = useState<AdviceData | null>(null);
   const [hasParsingError, setHasParsingError] = useState(false);
+
+  // Translation function for titles within PlayerAdviceSection
+  const getTitle = (key: string): string => {
+    if (language === 'arabic') {
+      const arabicTitles: Record<string, string> = {
+        'Advice for Each Player': 'نصائح لكل لاعب',
+        'General Observations': 'ملاحظات عامة',
+        'TACTICAL': 'تكتيكي'
+      };
+      return arabicTitles[key] || key;
+    }
+    return key;
+  };
 
   useEffect(() => {
     if (adviceData) {
       try {
         // Use the same robust parsing logic as other components
-        let parsed = adviceData;
+        let parsed: any = adviceData;
         
         if (typeof adviceData === 'string') {
           // Check if it's a markdown-wrapped JSON string
@@ -778,7 +799,7 @@ function PlayerAdviceSection({ adviceData }: PlayerAdviceSectionProps) {
       <CardHeader>
         <CardTitle className="text-white flex items-center">
           <Brain className="mr-2 text-purple-400" size={20} />
-          Advice for Each Player
+          {getTitle('Advice for Each Player')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -806,7 +827,7 @@ function PlayerAdviceSection({ adviceData }: PlayerAdviceSectionProps) {
                 <CardHeader>
                   <CardTitle className="text-white text-lg flex items-center">
                     <MessageSquare className="mr-2 text-blue-400" size={18} />
-                    General Observations
+                    {getTitle('General Observations')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -850,7 +871,7 @@ function PlayerAdviceSection({ adviceData }: PlayerAdviceSectionProps) {
                     <div className="space-y-2">
                       <h4 className="text-yellow-400 font-semibold text-sm flex items-center">
                         <Target className="mr-1" size={14} />
-                        TACTICAL
+                        {getTitle('TACTICAL')}
                       </h4>
                       {player.tactical_advice?.issues?.length > 0 && (
                         <div>
