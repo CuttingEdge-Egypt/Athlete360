@@ -532,6 +532,295 @@ Watch the entire round carefully and provide actionable, specific advice that co
   }
 }
 
+// Comprehensive analysis function that runs all analyses including advice in parallel
+export async function analyzeVideoComprehensive(
+  videoFilePath: string,
+  filename: string,
+  roundToAnalyze: number
+) {
+  console.log(`[ANALYZE_COMPREHENSIVE] Starting comprehensive video analysis for ${filename} at ${videoFilePath}`);
+  console.log(`[ANALYZE_COMPREHENSIVE] Round: ${roundToAnalyze}`);
+  
+  if (!fs.existsSync(videoFilePath)) {
+    throw new Error(`Video file not found: ${videoFilePath}`);
+  }
+  
+  const fileStats = fs.statSync(videoFilePath);
+  console.log(`[ANALYZE_COMPREHENSIVE] Video file size: ${fileStats.size} bytes`);
+  
+  let uploadedFile = null;
+  
+  try {
+    // Upload file to Gemini once and reuse for all analyses
+    console.log(`[ANALYZE_COMPREHENSIVE] Uploading video file to Gemini...`);
+    uploadedFile = await uploadFileToGemini(videoFilePath);
+    
+    const videoFile = {
+      fileData: {
+        mimeType: uploadedFile.mimeType,
+        fileUri: uploadedFile.uri
+      }
+    };
+    
+    console.log(`[ANALYZE_COMPREHENSIVE] Video ready for analysis: ${uploadedFile.uri}`);
+    console.log(`[ANALYZE_COMPREHENSIVE] Starting all analyses in parallel...`);
+
+    // Define all prompts (reusing existing prompts from processVideoGemini and generatePlayerAdvice)
+    const promptMatch = `Write me a match Analysis of what happened in round ${roundToAnalyze} in technical terms. Include the story of the round.
+
+IMPORTANT: Start directly with "**Match Analysis: Round ${roundToAnalyze}**" - DO NOT include any prefacing phrases like "Of course", "Here is", "Sure", or similar AI response patterns.
+
+Listen to any insights the commentator might have. Here is a template:
+
+Match Score:
+Give me the final score of the match.
+
+Kick Count & Types:
+This analysis is limited by the fast action and occasional obscured views, but here are some highlights. Precise numbers are hard to determine but I will use as many markers as possible.
+
+Player 1 (Blue): Describe their technique style.
+Count of spinning kicks: Estimate based on observation
+Number of front kicks: Estimate based on observation
+
+Player 2 (Red): Describe their technique style.  
+Count of Round housekicks: Estimate based on observation
+Number of Tipi-chaji: Estimate based on observation
+
+Punch Count:
+Mention if there were any punches in the match
+
+Match Brief & Technical Analysis:
+Provide detailed technical analysis of both players' approaches and strategies.
+
+Strategic Adaptation: How each player adapted during the round.
+
+Key Moments/Commentator Notes:
+Include any key insights from commentators.
+
+Summary:
+Explain who performed better and why.
+
+Take your time in processing to make sure the results are accurate.
+Make sure you're not scanning the yellow card as an actual score.`;
+
+    const promptScore = `Analyze round ${roundToAnalyze} of the competition and provide a detailed JSON scoring breakdown for each player.
+
+IMPORTANT: Return ONLY valid JSON in the following structure:
+{
+  "players": [
+    {
+      "name": "Player Name",
+      "color": "Blue/Red",
+      "kicks": [
+        {
+          "timestamp": "MM:SS format",
+          "score": 1, 2, 3, or 5 (points scored)
+        }
+      ],
+      "total_kicks": number,
+      "total_points": sum of all points
+    }
+  ],
+  "summary": {
+    "total_match_score_blue": total blue score,
+    "total_match_score_red": total red score
+  }
+}
+
+Focus on scoring kicks only. Include precise timestamps and point values.`;
+
+    const promptPunch = `Analyze round ${roundToAnalyze} and identify all punch attempts by each player.
+
+IMPORTANT: Return ONLY valid JSON in the following structure:
+{
+  "players": [
+    {
+      "name": "Player Name",
+      "Punch": [
+        {
+          "timestamp": "MM:SS format"
+        }
+      ],
+      "total_punches": number of punches
+    }
+  ]
+}
+
+Focus only on punch attempts, not kicks.`;
+
+    const promptKickNo = `Analyze round ${roundToAnalyze} and count the total number of kicks thrown by each player.
+
+IMPORTANT: Return ONLY valid JSON in the following structure:
+{
+  "players": [
+    {
+      "name": "Player 1/Player 2",
+      "kicks": [
+        {
+          "total_kick_number": total count of kicks thrown
+        }
+      ]
+    }
+  ]
+}`;
+
+    const promptYellowCards = `Analyze round ${roundToAnalyze} and identify all yellow card penalties.
+
+IMPORTANT: Return ONLY valid JSON in the following structure:
+{
+  "players": [
+    {
+      "name": "Player Name",
+      "color": "Blue/Red",
+      "Yellow_cards": [
+        {
+          "timestamp": "MM:SS format",
+          "Amount": 1 (always 1 per card)
+        }
+      ],
+      "total_yellows": total count
+    }
+  ]
+}`;
+
+    const promptAdvice = `Analyze round ${roundToAnalyze} of this combat sports match and provide detailed improvement advice for each player. Focus on tactical, technical, and mental aspects.
+
+IMPORTANT: Return ONLY a valid JSON response in the following structure:
+
+{
+  "players": [
+    {
+      "name": "Player 1",
+      "color": "Red/Blue",
+      "tactical_advice": {
+        "issues": ["List of tactical mistakes or weaknesses observed"],
+        "improvements": ["Specific tactical recommendations for improvement"]
+      },
+      "technical_advice": {
+        "issues": ["List of technical mistakes in technique, form, or execution"],
+        "improvements": ["Specific technical skills to work on"]
+      },
+      "mental_advice": {
+        "issues": ["Mental/psychological issues observed (hesitation, aggression, focus)"],
+        "improvements": ["Mental training and mindset recommendations"]
+      }
+    },
+    {
+      "name": "Player 2", 
+      "color": "Red/Blue",
+      "tactical_advice": {
+        "issues": ["List of tactical mistakes or weaknesses observed"],
+        "improvements": ["Specific tactical recommendations for improvement"]
+      },
+      "technical_advice": {
+        "issues": ["List of technical mistakes in technique, form, or execution"],
+        "improvements": ["Specific technical skills to work on"]
+      },
+      "mental_advice": {
+        "issues": ["Mental/psychological issues observed (hesitation, aggression, focus)"],
+        "improvements": ["Mental training and mindset recommendations"]
+      }
+    }
+  ],
+  "general_observations": "Overall observations about the match and areas both players could improve on"
+}
+
+FOCUS ON:
+- Tactical positioning, timing, distance management, strategy
+- Technical execution of kicks, blocks, movement, balance
+- Mental aspects like focus, confidence, aggression levels, composure
+- Provide specific, actionable advice for each area
+
+Be detailed and specific in your observations and recommendations.`;
+
+    // Run all analyses in parallel using Promise.allSettled for better error handling
+    const analysisPromises = [
+      model.generateContent([videoFile, promptMatch]),      // 0: Match Analysis
+      model.generateContent([videoFile, promptScore]),      // 1: Score Analysis  
+      model.generateContent([videoFile, promptPunch]),      // 2: Punch Analysis
+      model.generateContent([videoFile, promptKickNo]),     // 3: Kick Count
+      model.generateContent([videoFile, promptYellowCards]), // 4: Yellow Cards
+      model.generateContent([videoFile, promptAdvice])      // 5: Player Advice
+    ];
+
+    console.log(`[ANALYZE_COMPREHENSIVE] Making 6 parallel analysis calls...`);
+    const results = await Promise.allSettled(analysisPromises);
+    console.log(`[ANALYZE_COMPREHENSIVE] All 6 analysis calls completed`);
+
+    // Process results with error handling
+    const responses = results.map((result, index) => {
+      const analysisNames = ['Match', 'Score', 'Punch', 'Kick Count', 'Yellow Cards', 'Advice'];
+      if (result.status === 'fulfilled') {
+        const text = result.value.response.text();
+        console.log(`[ANALYZE_COMPREHENSIVE] Raw ${analysisNames[index]} Response:`, text.substring(0, 200) + (text.length > 200 ? '...' : ''));
+        return text;
+      } else {
+        console.error(`[ANALYZE_COMPREHENSIVE] ${analysisNames[index]} analysis failed:`, result.reason);
+        return null;
+      }
+    });
+
+    const [responseMatch, responseScore, responsePunch, responseKickNo, responseYellowCards, responseAdvice] = responses;
+
+    // Clean up the uploaded file
+    try {
+      const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error('GOOGLE_API_KEY or GEMINI_API_KEY environment variable is required');
+      }
+      const fileManager = new GoogleAIFileManager(apiKey);
+      await fileManager.deleteFile(uploadedFile.name);
+      console.log(`[ANALYZE_COMPREHENSIVE] Uploaded file cleaned up successfully`);
+    } catch (cleanupError) {
+      console.warn(`[ANALYZE_COMPREHENSIVE] Failed to cleanup uploaded file:`, cleanupError);
+    }
+
+    console.log(`[ANALYZE_COMPREHENSIVE] Processing complete, structuring results...`);
+
+    // Return comprehensive analysis results including advice
+    return {
+      match_analysis: responseMatch,
+      score_analysis: responseScore,
+      punch_analysis: responsePunch,  
+      kick_count_analysis: responseKickNo,
+      yellow_card_analysis: responseYellowCards,
+      advice_analysis: responseAdvice, // NEW: Include advice in main response
+      roundAnalyzed: roundToAnalyze,
+      processedAt: new Date().toISOString(),
+      errors: {
+        match: responseMatch ? null : 'Match analysis failed',
+        score: responseScore ? null : 'Score analysis failed', 
+        punch: responsePunch ? null : 'Punch analysis failed',
+        kickCount: responseKickNo ? null : 'Kick count analysis failed',
+        yellowCards: responseYellowCards ? null : 'Yellow card analysis failed',
+        advice: responseAdvice ? null : 'Player advice generation failed'
+      }
+    };
+
+  } catch (error) {
+    console.error(`[ANALYZE_COMPREHENSIVE] Error occurred: ${error}`);
+    console.error(`[ANALYZE_COMPREHENSIVE] Stack trace:`, error instanceof Error ? error.stack : 'No stack trace');
+    
+    // Clean up uploaded file on error
+    if (uploadedFile) {
+      try {
+        const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+        if (apiKey) {
+          const fileManager = new GoogleAIFileManager(apiKey);
+          await fileManager.deleteFile(uploadedFile.name);
+          console.log(`[ANALYZE_COMPREHENSIVE] Uploaded file cleaned up after error`);
+        }
+      } catch (cleanupError) {
+        console.warn(`[ANALYZE_COMPREHENSIVE] Failed to cleanup uploaded file after error:`, cleanupError);
+      }
+    }
+    
+    throw new Error(`Comprehensive video analysis failed: ${error instanceof Error ? error.message : String(error)}`);
+  } finally {
+    console.log(`[ANALYZE_COMPREHENSIVE] Comprehensive analysis complete`);
+  }
+}
+
 // Main function that matches the Python API pattern
 export async function analyzeVideoFile(
   videoFilePath: string,
