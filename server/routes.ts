@@ -53,6 +53,7 @@ import { paymobService } from "./paymobService";
 import { TestingService } from "./testingService";
 import OpenAI from "openai";
 import { Readable } from "stream";
+import multer from "multer";
 
 // HTML generation function for payment result pages
 interface PaymentResultData {
@@ -146,101 +147,14 @@ function generatePaymentResultHTML(data: PaymentResultData): string {
 // All LLM implementations now use GPT-5 with temperature 1.0 (default minimum)
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// Simple direct video upload handler that properly extracts form fields
-async function handleDirectVideoUpload(req: any): Promise<{ filePath: string, fields: Record<string, string> }> {
-  console.log('[DIRECT_UPLOAD] Starting video upload with form field extraction');
-  
-  const contentType = req.headers['content-type'] || '';
-  const boundary = contentType.split('boundary=')[1];
-  if (!boundary) {
-    throw new Error('No multipart boundary found');
-  }
-  
-  const uploadPath = path.join(process.cwd(), 'temp', 'uploads');
-  if (!fs.existsSync(uploadPath)) {
-    fs.mkdirSync(uploadPath, { recursive: true });
-  }
-  
-  return new Promise((resolve, reject) => {
-    let chunks: Buffer[] = [];
-    let totalSize = 0;
-    const MAX_UPLOAD_SIZE = 500 * 1024 * 1024; // 500MB limit
-    
-    // Collect all data first
-    
-    req.on('data', (chunk: Buffer) => {
-      totalSize += chunk.length;
-      
-      // Check upload size limit
-      if (totalSize > MAX_UPLOAD_SIZE) {
-        reject(new Error(`Upload size exceeds limit of ${MAX_UPLOAD_SIZE} bytes`));
-        return;
-      }
-      chunks.push(chunk);
-    });
-    
-    req.on('end', () => {
-      const fullData = Buffer.concat(chunks);
-      const dataString = fullData.toString('latin1');
-      
-      console.log('[DIRECT_UPLOAD] Processing multipart data...');
-      
-      // Extract form fields
-      const formFields: Record<string, string> = {};
-      
-      // Find roundToAnalyze field
-      const roundMatch = dataString.match(/name="roundToAnalyze"\r?\n\r?\n(\d+)/);
-      if (roundMatch) {
-        formFields.roundToAnalyze = roundMatch[1];
-        console.log(`[DIRECT_UPLOAD] Found roundToAnalyze: ${roundMatch[1]}`);
-      }
-      
-      // Extract video file
-      const fileNameMatch = dataString.match(/filename="([^"]+)"/);
-      if (!fileNameMatch) {
-        reject(new Error('No video file found in upload'));
-        return;
-      }
-      
-      const fileName = fileNameMatch[1];
-      const timestamp = Date.now();
-      const ext = path.extname(fileName);
-      const filePath = path.join(uploadPath, `video_${timestamp}${ext}`);
-      
-      // Find video data boundaries
-      const videoStartMarker = 'Content-Type: video';
-      const videoStartIdx = dataString.indexOf(videoStartMarker);
-      if (videoStartIdx === -1) {
-        reject(new Error('Could not find video content'));
-        return;
-      }
-      
-      // Video content starts after headers (double CRLF)
-      const contentStart = dataString.indexOf('\r\n\r\n', videoStartIdx) + 4;
-      // Video content ends before next boundary
-      const nextBoundary = `--${boundary}`;
-      const contentEndIdx = dataString.indexOf(nextBoundary, contentStart);
-      
-      if (contentEndIdx === -1) {
-        reject(new Error('Could not find end of video content'));
-        return;
-      }
-      
-      // Extract and save video
-      const videoBuffer = fullData.slice(contentStart, contentEndIdx - 2); // -2 for \r\n
-      fs.writeFileSync(filePath, videoBuffer);
-      console.log(`[DIRECT_UPLOAD] Video saved: ${filePath} (${videoBuffer.length} bytes)`);
-      console.log(`[DIRECT_UPLOAD] Form fields extracted:`, formFields);
-      
-      resolve({ filePath, fields: formFields });
-    });
-    
-    req.on('error', (error: Error) => {
-      console.error('[DIRECT_UPLOAD] Upload error:', error);
-      reject(error);
-    });
-  });
-}
+// Configure Multer for video uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 500 * 1024 * 1024, // 500MB limit
+  },
+});
+
 
 // Helper function to detect failed AI analyses
 function isAnalysisFailed(data: any): boolean {
@@ -3146,7 +3060,7 @@ Return only valid JSON with the missing fields.`;
 
   // Video Analysis endpoint - Direct upload like Sept 15 Python implementation
   // Video Analysis endpoint - Direct upload like Sept 15 Python implementation
-  app.post('/api/analysis/video', isAuthenticated, async (req: any, res) => {
+  app.post('/api/analysis/video', isAuthenticated, upload.single('video'), async (req: any, res) => {
     // Set a long timeout for video processing (10 minutes)
     req.setTimeout(600000); // 10 minutes
     res.setTimeout(600000); // 10 minutes
@@ -3156,28 +3070,36 @@ Return only valid JSON with the missing fields.`;
     
     console.log(`[VIDEO ROUTE ${requestId}] ===== VIDEO ANALYSIS REQUEST STARTED =====`);
     console.log(`[VIDEO ROUTE ${requestId}] Request received at ${new Date().toISOString()}`);
-    console.log(`[VIDEO ROUTE ${requestId}] Headers:`, req.headers);
     
     let videoFilePath: string | null = null;
     let fileName = '';
     
     try {
-      console.log(`[VIDEO ROUTE ${requestId}] Starting direct video upload (Sept 15 approach - no Multer)`);
       const userId = req.user.claims.sub;
       
-      // Handle direct file upload without Multer - like Python version
-      console.log(`[VIDEO ROUTE ${requestId}] Processing video upload directly...`);
-      const uploadResult = await handleDirectVideoUpload(req);
-      videoFilePath = uploadResult.filePath;
-      fileName = path.basename(videoFilePath);
+      // Handle Multer upload
+      if (!req.file) {
+        throw new Error('No video file uploaded');
+      }
       
-      console.log(`[VIDEO ROUTE ${requestId}] Direct upload complete: ${videoFilePath}`);
-      const fileStats = fs.statSync(videoFilePath);
-      console.log(`[VIDEO ROUTE ${requestId}] File size: ${fileStats.size} bytes`);
+      // Save uploaded file to temp directory
+      const uploadPath = path.join(process.cwd(), 'temp', 'uploads');
+      if (!fs.existsSync(uploadPath)) {
+        fs.mkdirSync(uploadPath, { recursive: true });
+      }
       
-      // Extract round number from form fields
-      const round = parseInt(uploadResult.fields?.roundToAnalyze) || 1;
-      console.log(`[VIDEO ROUTE ${requestId}] Round selected: ${round} (from form field: ${uploadResult.fields?.roundToAnalyze})`)
+      const timestamp = Date.now();
+      const ext = path.extname(req.file.originalname);
+      videoFilePath = path.join(uploadPath, `video_${timestamp}${ext}`);
+      fileName = `video_${timestamp}${ext}`;
+      
+      // Write buffer to file
+      fs.writeFileSync(videoFilePath, req.file.buffer);
+      console.log(`[VIDEO ROUTE ${requestId}] Video saved: ${videoFilePath} (${req.file.size} bytes)`);
+      
+      // Extract round number from form body - Multer handles this automatically!
+      const round = Number(req.body.roundToAnalyze) || 1;
+      console.log(`[VIDEO ROUTE ${requestId}] Round selected: ${round} (from req.body.roundToAnalyze: ${req.body.roundToAnalyze})`)
       
       console.log(`[ROUTE ${requestId}] User: ${userId}, File: ${fileName}, Round: ${round}`);
 
@@ -3212,7 +3134,7 @@ Return only valid JSON with the missing fields.`;
       console.log(`[ROUTE ${requestId}] Transaction record created`);
 
       console.log(`[ROUTE ${requestId}] Starting video analysis processing...`);
-      console.log(`[ROUTE ${requestId}] Video file details - Path: ${videoFilePath}, Size: ${fileStats.size} bytes`);
+      console.log(`[ROUTE ${requestId}] Video file details - Path: ${videoFilePath}, Size: ${req.file.size} bytes`);
       
       const analysisStartTime = Date.now();
       
