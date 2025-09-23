@@ -742,8 +742,8 @@ export class DatabaseStorage implements IStorage {
           results.push(latestLog);
         }
       } else if (serviceType === 'weaknesses') {
-        // For weaknesses, get a result with substantial content (length > 600)
-        const [latestLog] = await db
+        // For weaknesses, get a result with substantial content (length > 600) but skip the first one
+        const logs = await db
           .select()
           .from(analysisLogs)
           .where(
@@ -753,8 +753,10 @@ export class DatabaseStorage implements IStorage {
             )
           )
           .orderBy(desc(analysisLogs.createdAt))
-          .limit(1);
+          .limit(2);
         
+        // Use the second result if available, otherwise fall back to first
+        const latestLog = logs[1] || logs[0];
         if (latestLog) {
           results.push(latestLog);
         }

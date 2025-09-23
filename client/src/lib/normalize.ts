@@ -123,6 +123,10 @@ export function normalizeDevelopmentPlan(raw: any): GoalBasedPlan | null {
     const parsed = safeJsonParse(raw);
     const content = extractContent(parsed);
     
+    console.log('Development Plan normalization - raw:', typeof raw, raw);
+    console.log('Development Plan normalization - parsed:', parsed);
+    console.log('Development Plan normalization - content:', content);
+    
     if (!content) return null;
     
     // Extract title
@@ -317,6 +321,10 @@ export function normalizeComparison(raw: any): ComparisonViewModel | null {
   try {
     const parsed = safeJsonParse(raw);
     const content = extractContent(parsed);
+    
+    console.log('Comparison normalization - raw:', typeof raw, raw);
+    console.log('Comparison normalization - parsed:', parsed);
+    console.log('Comparison normalization - content:', content);
     
     if (!content) return null;
     
