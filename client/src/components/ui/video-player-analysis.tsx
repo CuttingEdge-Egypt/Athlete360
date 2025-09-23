@@ -1,10 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw, Volume2, Trophy, Brain, Target, MessageSquare, Loader2 } from "lucide-react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useMutation } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
+import { Play, Pause, RotateCcw, Volume2, Trophy, Brain, Target, MessageSquare } from "lucide-react";
 
 interface VideoPlayerAnalysisProps {
   videoFile: File;
@@ -38,8 +35,49 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
   const parseAnalysisEvents = () => {
     const parseAnalysisData = (jsonString: string) => {
       try {
-        return typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
+        // If it's already parsed, return as-is
+        if (typeof jsonString !== 'string') {
+          return jsonString;
+        }
+        
+        // Check if it's a markdown-wrapped JSON string
+        if (jsonString.includes('```json') || jsonString.includes('```')) {
+          // Extract JSON from markdown code blocks
+          let content = jsonString;
+          if (content.startsWith('```json') && content.endsWith('```')) {
+            content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+          } else if (content.startsWith('```') && content.endsWith('```')) {
+            content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
+          }
+          // Try to parse the extracted content as JSON
+          return JSON.parse(content.trim());
+        }
+        
+        // First try to parse as direct JSON
+        try {
+          return JSON.parse(jsonString);
+        } catch (directParseError) {
+          // If direct parse fails, check if it's wrapped in a content field object
+          try {
+            const contentWrapper = JSON.parse(jsonString);
+            if (contentWrapper.content) {
+              // Extract JSON from markdown code blocks in content
+              let content = contentWrapper.content;
+              if (content.startsWith('```json') && content.endsWith('```')) {
+                content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+              } else if (content.startsWith('```') && content.endsWith('```')) {
+                content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
+              }
+              return JSON.parse(content.trim());
+            }
+            return contentWrapper;
+          } catch (wrapperParseError) {
+            // If all parsing fails, return the original string wrapped in content
+            return { content: jsonString };
+          }
+        }
       } catch (error) {
+        // Silently handle parse errors - data will be treated as plain text
         return { content: jsonString };
       }
     };
@@ -51,7 +89,8 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
     // Debug logging only in development
     if (process.env.NODE_ENV === 'development') {
       console.log("=== VIDEO ANALYSIS DEBUG ===");
-      console.log("Score Analysis:", scoreAnalysis);
+      console.log("Score Analysis Before Parsing:", analysisData.score_analysis);
+      console.log("Score Analysis After Parsing:", scoreAnalysis);
       console.log("Yellow Card Analysis:", yellowCardAnalysis);
       console.log("Kick Analysis:", kickAnalysis);
       console.log("Raw analysisData:", analysisData);
@@ -275,10 +314,11 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
             const playerName = player.name?.toLowerCase() || '';
             const totalKicks = player.kicks[0].total_kick_number;
             
-            // Determine player color based on name or other identifiers
-            if (playerName.includes('blue') || playerName.includes('player 1')) {
+            // Determine player color based on name - use same logic as other components
+            const isBlue = player.name === 'Player 1' || player.name?.includes('YANG');
+            if (isBlue) {
               blueKicks = totalKicks;
-            } else if (playerName.includes('red') || playerName.includes('player 2')) {
+            } else {
               redKicks = totalKicks;
             }
           }
@@ -626,8 +666,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
 
       {/* Player Advice Section - After Match Analysis */}
       <PlayerAdviceSection 
-        videoFile={videoFile}
-        roundToAnalyze={analysisData.roundAnalyzed || 1}
+        adviceData={analysisData.advice_analysis}
       />
     </div>
   );
@@ -635,8 +674,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData }: VideoPlayerAnal
 
 // Player Advice Section Component
 interface PlayerAdviceSectionProps {
-  videoFile: File;
-  roundToAnalyze: number;
+  adviceData: string | null;
 }
 
 interface PlayerAdvice {
@@ -661,113 +699,94 @@ interface AdviceData {
   general_observations: string;
 }
 
-function PlayerAdviceSection({ videoFile, roundToAnalyze }: PlayerAdviceSectionProps) {
-  const [adviceData, setAdviceData] = useState<AdviceData | null>(null);
-  const { toast } = useToast();
+function PlayerAdviceSection({ adviceData }: PlayerAdviceSectionProps) {
+  const [parsedAdviceData, setParsedAdviceData] = useState<AdviceData | null>(null);
+  const [hasParsingError, setHasParsingError] = useState(false);
 
-  const generateAdviceMutation = useMutation({
-    mutationFn: async () => {
-      const formData = new FormData();
-      formData.append('video', videoFile);
-      formData.append('round', roundToAnalyze.toString());
-
-      const response = await fetch('/api/analysis/video/advice', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to generate advice');
-      }
-
-      return response.json();
-    },
-    onSuccess: (data) => {
-      console.log("Advice generation completed:", data);
-      
+  useEffect(() => {
+    if (adviceData) {
       try {
-        const parsedAdvice = typeof data.advice_analysis === 'string' 
-          ? JSON.parse(data.advice_analysis) 
-          : data.advice_analysis;
+        // Use the same robust parsing logic as other components
+        let parsed = adviceData;
         
-        setAdviceData(parsedAdvice);
-        toast({
-          title: "Advice Generated",
-          description: "Player improvement advice has been generated successfully!"
-        });
+        if (typeof adviceData === 'string') {
+          // Check if it's a markdown-wrapped JSON string
+          if (adviceData.includes('```json') || adviceData.includes('```')) {
+            // Extract JSON from markdown code blocks
+            let content = adviceData;
+            if (content.startsWith('```json') && content.endsWith('```')) {
+              content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+            } else if (content.startsWith('```') && content.endsWith('```')) {
+              content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
+            }
+            // Try to parse the extracted content as JSON
+            parsed = JSON.parse(content.trim());
+          } else {
+            // Try to parse as direct JSON
+            try {
+              parsed = JSON.parse(adviceData);
+            } catch (directParseError) {
+              // If direct parse fails, check if it's wrapped in a content field object
+              try {
+                const contentWrapper = JSON.parse(adviceData);
+                if (contentWrapper.content) {
+                  // Extract JSON from markdown code blocks in content
+                  let content = contentWrapper.content;
+                  if (content.startsWith('```json') && content.endsWith('```')) {
+                    content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+                  } else if (content.startsWith('```') && content.endsWith('```')) {
+                    content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
+                  }
+                  parsed = JSON.parse(content.trim());
+                } else {
+                  parsed = contentWrapper;
+                }
+              } catch (wrapperParseError) {
+                // If all parsing fails, use the original string
+                throw new Error('Could not parse advice data');
+              }
+            }
+          }
+        }
+        
+        setParsedAdviceData(parsed);
+        setHasParsingError(false);
       } catch (error) {
         console.error("Error parsing advice data:", error);
-        toast({
-          title: "Parsing Error",
-          description: "Generated advice could not be parsed properly."
-        });
+        setHasParsingError(true);
       }
-    },
-    onError: (error: any) => {
-      console.error("Error generating advice:", error);
-      toast({
-        title: "Generation Failed",
-        description: error.message || "Failed to generate player advice. Please try again."
-      });
     }
-  });
-
-  const handleGenerateAdvice = () => {
-    generateAdviceMutation.mutate();
-  };
+  }, [adviceData]);
 
   return (
     <Card className="bg-athlete-gray-800 border-gray-700">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-white flex items-center">
-            <Brain className="mr-2 text-purple-400" size={20} />
-            Advice for Each Player
-          </CardTitle>
-          {!adviceData && (
-            <Button
-              onClick={handleGenerateAdvice}
-              disabled={generateAdviceMutation.isPending}
-              className="bg-purple-600 hover:bg-purple-700 text-white"
-              data-testid="generate-advice-button"
-            >
-              {generateAdviceMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Brain className="mr-2 h-4 w-4" />
-                  Generate Player Advice
-                </>
-              )}
-            </Button>
-          )}
-        </div>
+        <CardTitle className="text-white flex items-center">
+          <Brain className="mr-2 text-purple-400" size={20} />
+          Advice for Each Player
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        {!adviceData && !generateAdviceMutation.isPending && (
+        {!adviceData && (
           <div className="text-gray-400 text-center py-8" data-testid="advice-empty-state">
             <Brain className="mx-auto mb-4 text-purple-400" size={48} />
-            <p className="text-lg mb-2">Generate AI-Powered Improvement Advice</p>
-            <p className="text-sm">Get tactical, technical, and mental improvement suggestions for each player</p>
+            <p className="text-lg mb-2">No Player Advice Available</p>
+            <p className="text-sm">Advice will appear automatically after video analysis</p>
           </div>
         )}
 
-        {generateAdviceMutation.isPending && (
-          <div className="text-center py-8" data-testid="advice-loading">
-            <Loader2 className="mx-auto mb-4 text-purple-400 animate-spin" size={48} />
-            <p className="text-gray-300 text-lg mb-2">Analyzing player performance...</p>
-            <p className="text-gray-400 text-sm">This may take a few moments</p>
+        {hasParsingError && (
+          <div className="text-gray-400 text-center py-8" data-testid="advice-error">
+            <MessageSquare className="mx-auto mb-4 text-red-400" size={48} />
+            <p className="text-lg mb-2">Unable to Display Advice</p>
+            <p className="text-sm">There was an issue processing the player advice data</p>
           </div>
         )}
 
-        {adviceData && (
+        {parsedAdviceData && !hasParsingError && (
           <div className="space-y-6" data-testid="advice-results">
             {/* General Observations */}
-            {adviceData.general_observations && (
+            {parsedAdviceData.general_observations && (
               <Card className="bg-gray-900/50 border-gray-600">
                 <CardHeader>
                   <CardTitle className="text-white text-lg flex items-center">
@@ -777,7 +796,7 @@ function PlayerAdviceSection({ videoFile, roundToAnalyze }: PlayerAdviceSectionP
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-300 leading-relaxed" data-testid="general-observations">
-                    {adviceData.general_observations}
+                    {parsedAdviceData.general_observations}
                   </p>
                 </CardContent>
               </Card>
@@ -785,7 +804,7 @@ function PlayerAdviceSection({ videoFile, roundToAnalyze }: PlayerAdviceSectionP
 
             {/* Player Advice Cards */}
             <div className="grid md:grid-cols-2 gap-6">
-              {adviceData.players?.map((player, index) => (
+              {parsedAdviceData.players?.map((player, index) => (
                 <Card 
                   key={index}
                   className={`border-2 ${
