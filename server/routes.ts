@@ -3363,6 +3363,205 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
+  // Video Analysis Advice endpoint - Generate improvement advice for each player
+  app.post('/api/analysis/video/advice', isAuthenticated, async (req: any, res) => {
+    // Set a long timeout for video processing (10 minutes)
+    req.setTimeout(600000); // 10 minutes
+    res.setTimeout(600000); // 10 minutes
+    
+    const tokenCost = 150; // Advice generation costs fewer tokens than full analysis
+    const requestId = `advice_req_${Date.now()}`;
+    
+    console.log(`[ADVICE ROUTE ${requestId}] ===== PLAYER ADVICE REQUEST STARTED =====`);
+    console.log(`[ADVICE ROUTE ${requestId}] Request received at ${new Date().toISOString()}`);
+    
+    let videoFilePath: string | null = null;
+    let fileName = '';
+    
+    try {
+      console.log(`[ADVICE ROUTE ${requestId}] Starting direct video upload for advice generation`);
+      const userId = req.user.claims.sub;
+      
+      // Handle direct file upload without Multer - same as main video analysis
+      console.log(`[ADVICE ROUTE ${requestId}] Processing video upload directly...`);
+      
+      // Create temp directory if it doesn't exist
+      const tempDir = path.join(process.cwd(), 'temp', 'uploads');
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+      
+      // Generate unique filename
+      const timestamp = Date.now();
+      fileName = `advice_video_${timestamp}.mp4`;
+      videoFilePath = path.join(tempDir, fileName);
+      
+      console.log(`[DIRECT_UPLOAD] Starting video upload - streaming to disk`);
+      console.log(`[DIRECT_UPLOAD] Starting stream to: ${videoFilePath}`);
+      
+      // Stream the request body directly to file
+      const writeStream = fs.createWriteStream(videoFilePath);
+      let totalBytes = 0;
+      
+      req.on('data', (chunk: Buffer) => {
+        writeStream.write(chunk);
+        totalBytes += chunk.length;
+        
+        // Log progress every 10MB
+        if (totalBytes % (10 * 1024 * 1024) === 0) {
+          console.log(`[DIRECT_UPLOAD] Progress: ${Math.round(totalBytes / (1024 * 1024))}MB written`);
+        }
+      });
+      
+      req.on('end', () => {
+        writeStream.end();
+        console.log(`[DIRECT_UPLOAD] File saved: ${videoFilePath} (${totalBytes} bytes)`);
+      });
+      
+      req.on('error', (error: Error) => {
+        console.error(`[DIRECT_UPLOAD] Upload error:`, error);
+        writeStream.destroy();
+        throw error;
+      });
+      
+      // Wait for upload to complete
+      await new Promise<void>((resolve, reject) => {
+        writeStream.on('finish', resolve);
+        writeStream.on('error', reject);
+      });
+      
+      console.log(`[ADVICE ROUTE ${requestId}] Direct upload complete: ${videoFilePath}`);
+      console.log(`[ADVICE ROUTE ${requestId}] File size: ${totalBytes} bytes`);
+      
+      // Parse form data from the uploaded file to extract round number
+      const boundary = req.headers['content-type']?.split('boundary=')[1];
+      if (!boundary) {
+        throw new Error('Missing multipart boundary');
+      }
+      
+      const fileContent = fs.readFileSync(videoFilePath);
+      const fileString = fileContent.toString('latin1');
+      
+      // Extract round number from form data
+      const roundMatch = fileString.match(/name="round"\r?\n\r?\n(\d+)/);
+      const roundToAnalyze = roundMatch ? parseInt(roundMatch[1]) : 1;
+      
+      console.log(`[ADVICE ROUTE ${requestId}] Round to analyze: ${roundToAnalyze}`);
+      
+      // Extract the actual video file content (remove form data headers)
+      const videoStartMarker = '\r\n\r\n';
+      const videoEndMarker = `\r\n--${boundary}`;
+      
+      const videoStartIndex = fileString.indexOf(videoStartMarker) + videoStartMarker.length;
+      const videoEndIndex = fileString.lastIndexOf(videoEndMarker);
+      
+      if (videoStartIndex === -1 || videoEndIndex === -1) {
+        throw new Error('Could not extract video content from multipart data');
+      }
+      
+      // Write clean video file
+      const videoBuffer = fileContent.slice(videoStartIndex, videoEndIndex);
+      fs.writeFileSync(videoFilePath, videoBuffer);
+      
+      console.log(`[ADVICE ROUTE ${requestId}] Clean video file written: ${videoBuffer.length} bytes`);
+      
+      console.log(`[ROUTE ${requestId}] User: ${userId}, File: ${fileName}, Round: ${roundToAnalyze}`);
+      
+      // Check user tokens before processing
+      console.log(`[ROUTE ${requestId}] Checking user tokens...`);
+      const user = await storage.getUser(userId);
+      if (!user || user.tokens < tokenCost) {
+        console.log(`[ROUTE ${requestId}] Insufficient tokens: ${user?.tokens || 0} < ${tokenCost}`);
+        return res.status(402).json({
+          message: "Insufficient tokens for video advice analysis",
+          required: tokenCost,
+          available: user?.tokens || 0
+        });
+      }
+      
+      console.log(`[ROUTE ${requestId}] Token check passed: User has ${user.tokens} tokens`);
+      
+      // Deduct tokens
+      console.log(`[ROUTE ${requestId}] Deducting ${tokenCost} tokens...`);
+      console.log(`DEDUCTING ${tokenCost} tokens from user ${userId}: ${user.tokens} → ${user.tokens - tokenCost}`);
+      
+      await storage.updateUserTokens(userId, user.tokens - tokenCost);
+      console.log(`DEDUCTION RESULT: User now has ${user.tokens - tokenCost}/5000 tokens`);
+      console.log(`[ROUTE ${requestId}] Tokens deducted successfully`);
+      
+      // Create transaction record
+      console.log(`[ROUTE ${requestId}] Creating transaction record...`);
+      await storage.createTransaction({
+        userId: userId,
+        action: 'video-advice',
+        tokensDeducted: tokenCost,
+        serviceType: 'video-advice',
+        athleteId: null
+      });
+      console.log(`[ROUTE ${requestId}] Transaction record created`);
+      
+      // Generate player advice using the new service
+      console.log(`[ROUTE ${requestId}] Starting advice generation processing...`);
+      console.log(`[ROUTE ${requestId}] Video file details - Path: ${videoFilePath}, Size: ${videoBuffer.length} bytes`);
+      
+      const { generatePlayerAdvice } = await import('./videoAnalysisService.js');
+      const adviceResult = await generatePlayerAdvice(videoFilePath, roundToAnalyze);
+      
+      console.log(`[ROUTE ${requestId}] Advice generation completed successfully`);
+      
+      // Return the advice results
+      res.json({
+        message: "Player advice generated successfully",
+        ...adviceResult
+      });
+      
+    } catch (error) {
+      console.error(`[ADVICE ROUTE ${requestId}] Error during advice generation:`, error);
+      console.error(`[ADVICE ROUTE ${requestId}] Error stack:`, error instanceof Error ? error.stack : 'No stack trace');
+      console.error(`[ADVICE ROUTE ${requestId}] Error type:`, typeof error);
+      
+      // Save error to analysis logs for debugging
+      try {
+        console.log(`[ROUTE ${requestId}] Saving error log to database...`);
+        await storage.createAnalysisLog({
+          userId: req.user.claims.sub,
+          athleteId: null,
+          analysisType: 'video-advice',
+          status: 'failed',
+          tokensUsed: 0, // No tokens charged for failed analysis
+          errorMessage: error instanceof Error ? error.message : String(error),
+          requestData: JSON.stringify({ 
+            fileName,
+            timestamp: new Date().toISOString(),
+            error: error instanceof Error ? error.message : String(error)
+          }),
+          responseData: null
+        });
+        console.log(`[ROUTE ${requestId}] Error log saved to database`);
+      } catch (dbError) {
+        console.error(`[ROUTE ${requestId}] Failed to save error to database:`, dbError);
+      }
+      
+      res.status(500).json({
+        message: "Failed to generate player advice",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    } finally {
+      // Clean up temporary files
+      if (videoFilePath && fs.existsSync(videoFilePath)) {
+        try {
+          console.log(`[ROUTE ${requestId}] Cleaning up temporary files...`);
+          fs.unlinkSync(videoFilePath);
+          console.log(`[ROUTE ${requestId}] Deleted temporary file: ${videoFilePath}`);
+        } catch (cleanupError) {
+          console.error(`[ROUTE ${requestId}] Failed to delete temporary file:`, cleanupError);
+        }
+      }
+      
+      console.log(`[ROUTE ${requestId}] ===== PLAYER ADVICE REQUEST COMPLETED =====`);
+    }
+  });
+
   // Dev Admin Middleware
   const isDevAdmin = (req: Request, res: Response, next: Function) => {
     // Reject in production unless explicitly allowed
