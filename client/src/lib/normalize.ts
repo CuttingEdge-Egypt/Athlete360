@@ -170,6 +170,49 @@ function formatHeadToHead(athlete1: any, athlete2: any): string {
   return sections.join('\n');
 }
 
+// Helper to format strengths data from comparison analysis
+function formatStrengthsData(strengthsData: any, detailedAnalysis?: any): string {
+  if (!strengthsData) return 'Strengths analysis not available';
+  
+  let formatted = '';
+  
+  // Get athlete names from detailedAnalysis if available
+  const name1 = detailedAnalysis?.athlete1?.name || 'Athlete 1';
+  const name2 = detailedAnalysis?.athlete2?.name || 'Athlete 2';
+  
+  if (strengthsData.athlete1 && Array.isArray(strengthsData.athlete1)) {
+    formatted += `**${name1} Strengths:**\n\n`;
+    
+    strengthsData.athlete1.forEach((strength: any, index: number) => {
+      formatted += `${index + 1}. **${strength.title || 'Strength'}** ${strength.rating ? `(${strength.rating}/100)` : ''}\n`;
+      if (strength.description) {
+        formatted += `   ${strength.description}\n`;
+      }
+      if (strength.evidence) {
+        formatted += `   *Evidence:* ${strength.evidence}\n`;
+      }
+      formatted += '\n';
+    });
+  }
+  
+  if (strengthsData.athlete2 && Array.isArray(strengthsData.athlete2)) {
+    formatted += `**${name2} Strengths:**\n\n`;
+    
+    strengthsData.athlete2.forEach((strength: any, index: number) => {
+      formatted += `${index + 1}. **${strength.title || 'Strength'}** ${strength.rating ? `(${strength.rating}/100)` : ''}\n`;
+      if (strength.description) {
+        formatted += `   ${strength.description}\n`;
+      }
+      if (strength.evidence) {
+        formatted += `   *Evidence:* ${strength.evidence}\n`;
+      }
+      formatted += '\n';
+    });
+  }
+  
+  return formatted.trim();
+}
+
 /**
  * Normalize development plan data to GoalBasedPlan format
  */
@@ -382,41 +425,60 @@ export function normalizeComparison(raw: any): ComparisonViewModel | null {
     
     // Handle existing tabs structure
     if (content.tabs && typeof content.tabs === 'object') {
-      // Check if tabs contain rawResponse data
       const tabKeys = Object.keys(content.tabs);
-      let hasRawResponse = false;
+      let detailedAnalysis: any = null;
+      let overallAnalysis: any = null;
+      let strengthsData: any = null;
       
+      // Process each tab individually
       for (const key of tabKeys) {
         const tab = content.tabs[key];
-        if (tab && tab.rawResponse && typeof tab.rawResponse === 'string') {
-          hasRawResponse = true;
+        if (tab) {
           try {
-            const parsedResponse = JSON.parse(tab.rawResponse);
+            let parsedResponse: any;
             
-            // Extract meaningful data from parsed response
+            // Handle string rawResponse or direct object
+            if (tab.rawResponse && typeof tab.rawResponse === 'string') {
+              parsedResponse = JSON.parse(tab.rawResponse);
+            } else if (tab.rawResponse && typeof tab.rawResponse === 'object') {
+              parsedResponse = tab.rawResponse;
+            } else {
+              // Skip empty or invalid tabs
+              continue;
+            }
+            
+            // Extract data based on tab content
             if (parsedResponse.detailedAnalysis) {
-              const analysis = parsedResponse.detailedAnalysis;
-              tabs = {
-                overview: parsedResponse.overallAnalysis || 
-                         parsedResponse.summary || 
-                         `Comparison between ${analysis.athlete1?.name || 'Athlete 1'} and ${analysis.athlete2?.name || 'Athlete 2'}`,
-                strengths: formatAthleteAnalysis(analysis.athlete1, analysis.athlete2, 'strengths'),
-                weaknesses: formatAthleteAnalysis(analysis.athlete1, analysis.athlete2, 'weaknesses'), 
-                headToHead: parsedResponse.headToHeadComparison || 
-                           parsedResponse.directComparison ||
-                           formatHeadToHead(analysis.athlete1, analysis.athlete2)
-              };
+              detailedAnalysis = parsedResponse.detailedAnalysis;
+            }
+            if (parsedResponse.overallAnalysis || parsedResponse.athlete1) {
+              overallAnalysis = parsedResponse;
+            }
+            if (parsedResponse.strengths) {
+              strengthsData = parsedResponse.strengths;
             }
           } catch (e) {
-            console.error('Failed to parse rawResponse:', e);
-            tabs[key] = tab.rawResponse.substring(0, 1000) + '...';
+            console.error(`Failed to parse rawResponse for ${key}:`, e, tab.rawResponse);
           }
-          break;
         }
       }
       
-      if (!hasRawResponse) {
-        // Use tabs directly
+      // Build tabs from extracted data
+      if (detailedAnalysis || overallAnalysis || strengthsData) {
+        tabs = {
+          overview: overallAnalysis?.overallAnalysis?.summary || 
+                   (detailedAnalysis ? `Comparison between ${detailedAnalysis.athlete1?.name || 'Athlete 1'} and ${detailedAnalysis.athlete2?.name || 'Athlete 2'}` : 
+                    'Athlete comparison analysis'),
+          strengths: strengthsData ? formatStrengthsData(strengthsData, detailedAnalysis) : 
+                     (detailedAnalysis ? formatAthleteAnalysis(detailedAnalysis.athlete1, detailedAnalysis.athlete2, 'strengths') : 
+                      'Strength analysis not available'),
+          weaknesses: detailedAnalysis ? formatAthleteAnalysis(detailedAnalysis.athlete1, detailedAnalysis.athlete2, 'weaknesses') : 
+                      'Weakness analysis not available',
+          headToHead: detailedAnalysis ? formatHeadToHead(detailedAnalysis.athlete1, detailedAnalysis.athlete2) :
+                      (overallAnalysis?.headToHeadComparison || 'Head-to-head analysis not available')
+        };
+      } else {
+        // Use tabs directly as fallback
         tabs = content.tabs;
       }
     } else {
