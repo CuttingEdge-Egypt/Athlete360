@@ -3484,23 +3484,42 @@ Return only valid JSON with the missing fields.`;
   // Public endpoint for analysis previews - no authentication required
   app.get('/api/preview/latest-by-type', async (req, res) => {
     try {
-      const serviceTypes = [
+      // Get the most recent analyses from the database (use actual service types from DB)
+      const dbServiceTypes = [
         'bio',
         'strengths', 
         'weaknesses',
-        'beat-strategies',
+        'beat',           // maps to beat-strategies in frontend
         'comparison',
-        'nutrition-plan',
-        'development-plan',
-        'video'
+        'nutrition',      // maps to nutrition-plan in frontend  
+        'nutrition-plan', // also check for this
+        'development',    // maps to development-plan in frontend
+        'development-plan', // also check for this
+        'video',
+        'rank'
       ];
       
-      // Get the latest analysis for each type
-      const latestAnalyses = await storage.getLatestAnalysisByType(serviceTypes);
+      // Get the latest analysis for each type from actual database
+      const latestAnalyses = await storage.getLatestAnalysisByType(dbServiceTypes);
       
-      // Filter out sensitive data and format for preview
+      // Map database service types to frontend expected types
+      const serviceTypeMapping: { [key: string]: string } = {
+        'bio': 'bio',
+        'strengths': 'strengths',
+        'weaknesses': 'weaknesses', 
+        'beat': 'beat-strategies',
+        'comparison': 'comparison',
+        'nutrition': 'nutrition-plan',
+        'nutrition-plan': 'nutrition-plan',
+        'development': 'development-plan',
+        'development-plan': 'development-plan',
+        'video': 'video',
+        'rank': 'rank'
+      };
+      
+      // Format and map service types for frontend
       const previewData = latestAnalyses.map(log => ({
-        serviceType: log.serviceType,
+        serviceType: serviceTypeMapping[log.serviceType] || log.serviceType,
         resultData: log.resultData,
         createdAt: log.createdAt
       }));

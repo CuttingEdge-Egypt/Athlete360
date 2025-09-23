@@ -24,9 +24,9 @@ export default function Landing() {
   const [, setLocation] = useLocation();
   const [previewModal, setPreviewModal] = useState<{ open: boolean; serviceType: string | null }>({ open: false, serviceType: null });
 
-  // Fetch preview data for the selected service type
+  // Fetch all preview data (not filtered by service type)
   const { data: previewData, isLoading: previewLoading } = useQuery<PreviewApiResponse>({
-    queryKey: ['/api/preview/latest-by-type', previewModal.serviceType],
+    queryKey: ['/api/preview/latest-by-type'],
     enabled: previewModal.open && !!previewModal.serviceType,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
