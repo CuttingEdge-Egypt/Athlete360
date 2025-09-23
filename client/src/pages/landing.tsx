@@ -3,7 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus, Gift, UserPlus, TrendingDown, Target, Calendar, Video, Users, Twitter, Instagram, Linkedin, Mail, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import AnalysisPreview from "@/components/AnalysisPreview";
 
 export default function Landing() {
   const [referralCode, setReferralCode] = useState<string | null>(null);
@@ -277,9 +276,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
-      {/* AI Analysis Showcase */}
-      <AnalysisPreview />
 
       {/* Footer */}
       <footer className="bg-athlete-primary border-t border-gray-800 py-12">
