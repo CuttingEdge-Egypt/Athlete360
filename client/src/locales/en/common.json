@@ -162,6 +162,30 @@
     "tryAgainLater": "Please try again later or contact support if the issue persists.",
     "nutrition": {
       "plan": "Personalized Nutrition Plan"
+    },
+    "comparison": {
+      "title": "Athlete Comparison",
+      "sport": "Sport",
+      "language": "Language",
+      "countryAthlete1": "Country (Athlete 1)",
+      "athlete1": "Athlete 1",
+      "countryAthlete2": "Country (Athlete 2)",
+      "athlete2": "Athlete 2",
+      "selectSport": "Select sport...",
+      "selectLanguage": "Select language...",
+      "english": "English",
+      "arabic": "Arabic",
+      "selectFirstAthlete": "Select first athlete...",
+      "selectSecondAthlete": "Select second athlete...",
+      "compareAthletes": "Compare Athletes",
+      "selectionRequired": "Selection Required",
+      "selectTwoAthletes": "Please select two athletes to compare",
+      "invalidSelection": "Invalid Selection",
+      "selectDifferentAthletes": "Please select two different athletes",
+      "comparisonComplete": "Comparison Complete",
+      "comparisonSuccess": "AI-powered athlete comparison generated successfully!",
+      "comparisonFailed": "Comparison Failed",
+      "comparisonError": "Failed to generate comparison"
     }
   }
 }

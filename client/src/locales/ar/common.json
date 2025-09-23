@@ -162,6 +162,30 @@
     "tryAgainLater": "يرجى المحاولة مرة أخرى لاحقاً أو الاتصال بالدعم إذا استمرت المشكلة.",
     "nutrition": {
       "plan": "خطة تغذية شخصية"
+    },
+    "comparison": {
+      "title": "مقارنة الرياضيين",
+      "sport": "الرياضة",
+      "language": "اللغة",
+      "countryAthlete1": "الدولة (رياضي 1)",
+      "athlete1": "رياضي 1",
+      "countryAthlete2": "الدولة (رياضي 2)",
+      "athlete2": "رياضي 2",
+      "selectSport": "اختر الرياضة...",
+      "selectLanguage": "اختر اللغة...",
+      "english": "English",
+      "arabic": "عربي",
+      "selectFirstAthlete": "اختر الرياضي الأول...",
+      "selectSecondAthlete": "اختر الرياضي الثاني...",
+      "compareAthletes": "قارن بين الرياضيين",
+      "selectionRequired": "يتطلب الاختيار",
+      "selectTwoAthletes": "يرجى اختيار رياضيين للمقارنة",
+      "invalidSelection": "اختيار غير صحيح",
+      "selectDifferentAthletes": "يرجى اختيار رياضيين مختلفين",
+      "comparisonComplete": "اكتملت المقارنة",
+      "comparisonSuccess": "تم إنشاء مقارنة الرياضيين بنجاح باستخدام الذكاء الاصطناعي!",
+      "comparisonFailed": "فشلت المقارنة",
+      "comparisonError": "فشل في إنشاء المقارنة"
     }
   }
 }

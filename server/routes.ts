@@ -2826,7 +2826,7 @@ Return only valid JSON with the missing fields.`;
     let queueId: string | undefined; // Define queueId for queue management
     try {
       const userId = (req.user as any)?.claims?.sub;
-      const { athlete1Id, athlete2Id } = req.body;
+      const { athlete1Id, athlete2Id, language = 'english' } = req.body;
       
       // Generate queue ID for tracking
       queueId = `comp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -2906,12 +2906,12 @@ Return only valid JSON with the missing fields.`;
         headToHeadResult,
         detailsResult
       ] = await Promise.all([
-        generateOverviewComparison(athlete1ForComparison, athlete2ForComparison, sportName),
-        generateStrengthsComparison(athlete1ForComparison, athlete2ForComparison, sportName),
-        generateWeaknessesComparison(athlete1ForComparison, athlete2ForComparison, sportName),
-        generateCompetitionHistoryComparison(athlete1ForComparison, athlete2ForComparison, sportName),
-        generateHeadToHeadComparison(athlete1ForComparison, athlete2ForComparison, sportName),
-        generateDetailsComparison(athlete1ForComparison, athlete2ForComparison, sportName)
+        generateOverviewComparison(athlete1ForComparison, athlete2ForComparison, sportName, language),
+        generateStrengthsComparison(athlete1ForComparison, athlete2ForComparison, sportName, language),
+        generateWeaknessesComparison(athlete1ForComparison, athlete2ForComparison, sportName, language),
+        generateCompetitionHistoryComparison(athlete1ForComparison, athlete2ForComparison, sportName, language),
+        generateHeadToHeadComparison(athlete1ForComparison, athlete2ForComparison, sportName, language),
+        generateDetailsComparison(athlete1ForComparison, athlete2ForComparison, sportName, language)
       ]);
 
       console.log('✅ All 6 tab analyses completed successfully');

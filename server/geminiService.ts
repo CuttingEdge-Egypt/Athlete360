@@ -941,10 +941,15 @@ CRITICAL ERROR HANDLING:
 export async function generateOverviewComparison(
   athlete1: { name: string; country: string; profileImageUrl?: string },
   athlete2: { name: string; country: string; profileImageUrl?: string },
-  sport: string
+  sport: string,
+  language: string = 'english'
 ): Promise<any> {
   try {
+    const languageInstruction = language === 'arabic' ? 'IMPORTANT: Generate all text content, field values, and analysis in Arabic language only. Do not use English except for athlete names and JSON keys.' : 'Generate all text content in English.';
+    
     const prompt = `You are an expert ${sport} analyst with Google search capabilities. Find current ranking and basic information for these two athletes.
+
+${languageInstruction}
 
 ATHLETES TO ANALYZE:
 Athlete 1: ${athlete1.name} from ${athlete1.country} (${sport})
@@ -1002,10 +1007,15 @@ Return ONLY pure JSON (no markdown blocks):
 export async function generateStrengthsComparison(
   athlete1: { name: string; country: string; profileImageUrl?: string },
   athlete2: { name: string; country: string; profileImageUrl?: string },
-  sport: string
+  sport: string,
+  language: string = 'english'
 ): Promise<any> {
   try {
+    const languageInstruction = language === 'arabic' ? 'IMPORTANT: Generate all text content, field values, and analysis in Arabic language only. Do not use English except for athlete names and JSON keys.' : 'Generate all text content in English.';
+    
     const prompt = `You are an expert ${sport} analyst. Analyze the specific strengths of these two athletes using Google search.
+
+${languageInstruction}
 
 ATHLETES: ${athlete1.name} (${athlete1.country}) vs ${athlete2.name} (${athlete2.country}) in ${sport}
 
@@ -1062,10 +1072,15 @@ Return ONLY pure JSON:
 export async function generateWeaknessesComparison(
   athlete1: { name: string; country: string; profileImageUrl?: string },
   athlete2: { name: string; country: string; profileImageUrl?: string },
-  sport: string
+  sport: string,
+  language: string = 'english'
 ): Promise<any> {
   try {
+    const languageInstruction = language === 'arabic' ? 'IMPORTANT: Generate all text content, field values, and analysis in Arabic language only. Do not use English except for athlete names and JSON keys.' : 'Generate all text content in English.';
+    
     const prompt = `You are an expert ${sport} analyst. Analyze areas for improvement and weaknesses for these athletes using Google search.
+
+${languageInstruction}
 
 ATHLETES: ${athlete1.name} (${athlete1.country}) vs ${athlete2.name} (${athlete2.country}) in ${sport}
 
@@ -1122,10 +1137,15 @@ Return ONLY pure JSON:
 export async function generateCompetitionHistoryComparison(
   athlete1: { name: string; country: string; profileImageUrl?: string },
   athlete2: { name: string; country: string; profileImageUrl?: string },
-  sport: string
+  sport: string,
+  language: string = 'english'
 ): Promise<any> {
   try {
+    const languageInstruction = language === 'arabic' ? 'IMPORTANT: Generate all text content, field values, and analysis in Arabic language only. Do not use English except for athlete names and JSON keys.' : 'Generate all text content in English.';
+    
     const prompt = `You are an expert ${sport} analyst. Research the competition history and achievements of these athletes using Google search.
+
+${languageInstruction}
 
 ATHLETES: ${athlete1.name} (${athlete1.country}) vs ${athlete2.name} (${athlete2.country}) in ${sport}
 
@@ -1169,10 +1189,15 @@ Return ONLY pure JSON:
 export async function generateHeadToHeadComparison(
   athlete1: { name: string; country: string; profileImageUrl?: string },
   athlete2: { name: string; country: string; profileImageUrl?: string },
-  sport: string
+  sport: string,
+  language: string = 'english'
 ): Promise<any> {
   try {
+    const languageInstruction = language === 'arabic' ? 'IMPORTANT: Generate all text content, field values, and analysis in Arabic language only. Do not use English except for athlete names and JSON keys.' : 'Generate all text content in English.';
+    
     const prompt = `You are an expert ${sport} analyst. Provide head-to-head prediction analysis for these athletes using Google search.
+
+${languageInstruction}
 
 ATHLETES: ${athlete1.name} (${athlete1.country}) vs ${athlete2.name} (${athlete2.country}) in ${sport}
 
@@ -1227,10 +1252,15 @@ Return ONLY pure JSON:
 export async function generateDetailsComparison(
   athlete1: { name: string; country: string; profileImageUrl?: string },
   athlete2: { name: string; country: string; profileImageUrl?: string },
-  sport: string
+  sport: string,
+  language: string = 'english'
 ): Promise<any> {
   try {
+    const languageInstruction = language === 'arabic' ? 'IMPORTANT: Generate all text content, field values, and analysis in Arabic language only. Do not use English except for athlete names and JSON keys.' : 'Generate all text content in English.';
+    
     const prompt = `You are an expert ${sport} analyst. Provide detailed technical analysis of these athletes using Google search.
+
+${languageInstruction}
 
 ATHLETES: ${athlete1.name} (${athlete1.country}) vs ${athlete2.name} (${athlete2.country}) in ${sport}
 
