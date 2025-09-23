@@ -137,7 +137,7 @@ export interface IStorage {
   createAnalysisLog(log: Partial<AnalysisLog>): Promise<AnalysisLog>;
   getUserAnalysisLogs(userId: string): Promise<AnalysisLog[]>;
   getAnalysisLogById(id: string): Promise<AnalysisLog | undefined>;
-  getRecentAnalysisLogsForPreview(limit?: number): Promise<AnalysisLog[]>;
+  getLatestAnalysisByType(serviceTypes: string[]): Promise<AnalysisLog[]>;
 
   // Payment receipts
   createPaymentReceipt(receipt: InsertPaymentReceipt): Promise<PaymentReceipt>;
@@ -720,12 +720,23 @@ export class DatabaseStorage implements IStorage {
     return log;
   }
 
-  async getRecentAnalysisLogsForPreview(limit: number = 20): Promise<AnalysisLog[]> {
-    return db
-      .select()
-      .from(analysisLogs)
-      .orderBy(desc(analysisLogs.createdAt))
-      .limit(limit);
+  async getLatestAnalysisByType(serviceTypes: string[]): Promise<AnalysisLog[]> {
+    const results = [];
+    
+    for (const serviceType of serviceTypes) {
+      const [latestLog] = await db
+        .select()
+        .from(analysisLogs)
+        .where(eq(analysisLogs.serviceType, serviceType))
+        .orderBy(desc(analysisLogs.createdAt))
+        .limit(1);
+      
+      if (latestLog) {
+        results.push(latestLog);
+      }
+    }
+    
+    return results;
   }
 
   async getUserHistory(userId: string): Promise<any[]> {

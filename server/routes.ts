@@ -3481,45 +3481,6 @@ Return only valid JSON with the missing fields.`;
     res.json(TestingService.getTestScenarios());
   });
 
-  // Public endpoint for landing page preview - no authentication required
-  app.get('/api/preview/recent-generations', async (req, res) => {
-    try {
-      const limit = Math.min(parseInt(req.query.limit as string) || 10, 50); // Default 10, max 50
-      
-      // Get recent analysis logs from the database
-      const recentLogs = await storage.getRecentAnalysisLogsForPreview(limit * 3); // Get more to filter and randomize
-      
-      // Filter out sensitive data and only include interesting service types
-      const interestingServiceTypes = ['bio', 'rank', 'strengths', 'weaknesses', 'nutrition-plan', 'beat-strategies', 'comparison', 'video'];
-      
-      const filteredLogs = recentLogs
-        .filter(log => interestingServiceTypes.includes(log.serviceType))
-        .map(log => ({
-          id: log.id,
-          serviceType: log.serviceType,
-          resultData: log.resultData,
-          createdAt: log.createdAt
-        }));
-      
-      // Randomize and take the requested limit
-      const shuffled = filteredLogs.sort(() => Math.random() - 0.5);
-      const finalResults = shuffled.slice(0, limit);
-      
-      res.json({
-        success: true,
-        data: finalResults,
-        count: finalResults.length
-      });
-    } catch (error) {
-      console.error('Error fetching preview data:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch preview data',
-        data: [],
-        count: 0
-      });
-    }
-  });
 
   const httpServer = createServer(app);
   return httpServer;
