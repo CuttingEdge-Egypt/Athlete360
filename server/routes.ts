@@ -982,15 +982,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         try {
           let gptBioAnalysis;
+          // Get language parameter from request body or query, default to 'en'
+          const language = req.body?.language || req.query?.language || 'en';
+          
           if (forceUpdate) {
             try {
-              gptBioAnalysis = await generateAthleteBiography(athlete.name, sportName);
+              gptBioAnalysis = await generateAthleteBiography(athlete.name, sportName, athlete.country || undefined, language);
             } catch (refreshError) {
               console.log(`Refresh failed for ${athlete.name}, falling back to regular bio generation:`, refreshError);
-              gptBioAnalysis = await generateAthleteBiography(athlete.name, sportName);
+              gptBioAnalysis = await generateAthleteBiography(athlete.name, sportName, athlete.country || undefined, language);
             }
           } else {
-            gptBioAnalysis = await generateAthleteBiography(athlete.name, sportName);
+            gptBioAnalysis = await generateAthleteBiography(athlete.name, sportName, athlete.country || undefined, language);
           }
           
           // Update athlete bio in database with GPT-5 AI content
@@ -1127,8 +1130,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} rank analysis for ${athlete.name}`);
         
         try {
+          // Get language parameter from request body or query, default to 'en'
+          const language = req.body?.language || req.query?.language || 'en';
+          
           // Use Gemini 2.5 Pro with URL context for enhanced ranking analysis
-          rankData = await generateRankHistoryWithGemini(athlete.name, sportName, athlete.country || undefined);
+          rankData = await generateRankHistoryWithGemini(athlete.name, sportName, athlete.country || undefined, language);
           
           // Ensure we have valid data structure (updated for new career phases format)
           if (!rankData || !rankData.athlete_name) {
