@@ -185,7 +185,7 @@ const addText = (pdf: jsPDF, text: string, currentY: number, options: any = {}):
 };
 
 // Data extraction functions
-const extractAthleteInfo = (data: any) => {
+const extractAthleteInfo = (data: any, athleteName?: string) => {
   let athleteInfo = {
     name: '',
     country: '',
@@ -205,6 +205,11 @@ const extractAthleteInfo = (data: any) => {
     athleteInfo.name = data.athlete_name || '';
     athleteInfo.country = data.nationality || '';
     athleteInfo.sport = data.sport || '';
+  }
+
+  // Use the athleteName parameter as fallback if name is still empty
+  if (!athleteInfo.name && athleteName) {
+    athleteInfo.name = athleteName;
   }
 
   return athleteInfo;
@@ -267,10 +272,10 @@ const parseBioSections = (bioText: string) => {
 };
 
 // Specific PDF generators
-const generateBioPDF = (pdf: jsPDF, data: any): number => {
+const generateBioPDF = (pdf: jsPDF, data: any, athleteName?: string): number => {
   let currentY = 60;
   
-  const athleteInfo = extractAthleteInfo(data);
+  const athleteInfo = extractAthleteInfo(data, athleteName);
   const bio = data.data?.bio || data.bio || '';
   const bioSections = parseBioSections(bio);
   
@@ -307,12 +312,6 @@ const generateBioPDF = (pdf: jsPDF, data: any): number => {
     currentY = addText(pdf, `Current Rank: ${athleteInfo.rank}`, currentY, { indent: 10 });
   }
   
-  if (bioSections.introduction) {
-    currentY = addText(pdf, bioSections.introduction, currentY, { 
-      indent: 10,
-      extraSpacing: pdfTheme.spacing.paragraphGap 
-    });
-  }
   
   if (bioSections.overallStory) {
     currentY = addSectionHeader(pdf, 'Career Overview', currentY);
@@ -336,11 +335,11 @@ const generateBioPDF = (pdf: jsPDF, data: any): number => {
   return currentY;
 };
 
-const generateRankPDF = (pdf: jsPDF, data: any): number => {
+const generateRankPDF = (pdf: jsPDF, data: any, athleteName?: string): number => {
   let currentY = 60;
   
   try {
-    const athleteInfo = extractAthleteInfo(data);
+    const athleteInfo = extractAthleteInfo(data, athleteName);
     
     // Athlete Information
     currentY = addSectionHeader(pdf, 'Athlete Information', currentY);
@@ -522,10 +521,10 @@ const generateRankPDF = (pdf: jsPDF, data: any): number => {
   return currentY;
 };
 
-const generateStrengthsPDF = (pdf: jsPDF, data: any): number => {
+const generateStrengthsPDF = (pdf: jsPDF, data: any, athleteName?: string): number => {
   let currentY = 60;
   
-  const athleteInfo = extractAthleteInfo(data);
+  const athleteInfo = extractAthleteInfo(data, athleteName);
   
   // Athlete Information
   currentY = addSectionHeader(pdf, 'Athlete Information', currentY);
@@ -587,10 +586,10 @@ const generateStrengthsPDF = (pdf: jsPDF, data: any): number => {
   return currentY;
 };
 
-const generateWeaknessesPDF = (pdf: jsPDF, data: any): number => {
+const generateWeaknessesPDF = (pdf: jsPDF, data: any, athleteName?: string): number => {
   let currentY = 60;
   
-  const athleteInfo = extractAthleteInfo(data);
+  const athleteInfo = extractAthleteInfo(data, athleteName);
   
   // Athlete Information
   currentY = addSectionHeader(pdf, 'Athlete Information', currentY);
@@ -682,16 +681,16 @@ export const generateProfessionalPdf = async ({
   let finalY: number;
   switch (type) {
     case 'bio':
-      finalY = generateBioPDF(pdf, data);
+      finalY = generateBioPDF(pdf, data, athleteName);
       break;
     case 'rank':
-      finalY = generateRankPDF(pdf, data);
+      finalY = generateRankPDF(pdf, data, athleteName);
       break;
     case 'strengths':
-      finalY = generateStrengthsPDF(pdf, data);
+      finalY = generateStrengthsPDF(pdf, data, athleteName);
       break;
     case 'weaknesses':
-      finalY = generateWeaknessesPDF(pdf, data);
+      finalY = generateWeaknessesPDF(pdf, data, athleteName);
       break;
     default:
       finalY = addText(pdf, 'Analysis type not supported for PDF export.', 60);
