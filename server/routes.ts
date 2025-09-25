@@ -450,7 +450,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Use GPT-5 to get athlete personal info only (no bio)
       console.log(`Creating athlete ${name} for sport ${sport.name} using GPT-5 personal info generation...`);
-      const personalInfo = await getAthletePersonalInfo(name, sport.name, req.body.nationality);
+      let personalInfo = null;
+      try {
+        personalInfo = await getAthletePersonalInfo(name, sport.name, req.body.nationality);
+      } catch (error) {
+        if (error instanceof Error && error.message === 'PERSONAL_INFO_NOT_FOUND') {
+          console.log(`⚠️ No personal info found for ${name}, creating athlete with basic information only`);
+          personalInfo = null;
+        } else {
+          // Re-throw other errors
+          throw error;
+        }
+      }
 
       // Use provided nationality or default to Unknown
       const athleteCountry = req.body.nationality || req.body.country || "Unknown";
