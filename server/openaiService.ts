@@ -12,25 +12,44 @@ export interface AthleteStatistics {
     sport: string;
     position?: string;
   };
-  season?: {
-    year: string;
+  recent_season: {
+    period: string;
     league?: string;
     team?: string;
-  };
-  statistics: {
-    common: {
-      games_played: number;
-      minutes_played: number;
-      wins: number;
-      losses: number;
+    statistics: {
+      common: {
+        games_played: number;
+        minutes_played: number;
+        wins: number;
+        losses: number;
+      };
+      sport_specific: {
+        category: string;
+        metrics: Array<{
+          name: string;
+          value: number | string;
+          unit?: string | null;
+        }>;
+      };
     };
-    sport_specific: {
-      category: string;
-      metrics: Array<{
-        name: string;
-        value: number | string;
-        unit?: string | null;
-      }>;
+  };
+  all_time: {
+    career_span: string;
+    statistics: {
+      common: {
+        total_games: number;
+        total_minutes: number;
+        total_wins: number;
+        total_losses: number;
+      };
+      sport_specific: {
+        category: string;
+        metrics: Array<{
+          name: string;
+          value: number | string;
+          unit?: string | null;
+        }>;
+      };
     };
   };
   highlights?: Array<{
@@ -2223,7 +2242,7 @@ export async function generateAthleteStatistics(
   try {
     console.log(`🔢 Generating statistics for ${athleteName} in ${sportName}...`);
 
-    const prompt = `You are a statistics generator for athletes across all sports. You MUST search the internet extensively to find current, authentic statistical data about this athlete.
+    const prompt = `You are an advanced sports statistics generator specializing in comprehensive, deep statistical analysis. You MUST search the internet extensively to find detailed, authentic statistical data about this athlete.
 
 ATHLETE TO ANALYZE:
 Name: ${athleteName}
@@ -2231,18 +2250,24 @@ Sport: ${sportName}
 Country: ${athleteCountry || 'Unknown'}
 
 CRITICAL INSTRUCTIONS:
-1. MANDATORY: Use your web search tool to find current statistical data from official sources
-2. MANDATORY: Search federation websites, competition databases, news sources, and statistical platforms
+1. MANDATORY: Use your web search tool to find comprehensive statistical data from official sources
+2. MANDATORY: Search federation websites, competition databases, news sources, statistical platforms, and analytical sites
 3. MANDATORY: Return only valid JSON with no extra text or explanations
 4. CRITICAL: DO NOT include any source URLs, links, citations, or references in the response
 5. CRITICAL: Use the EXACT JSON structure specified below
+6. CRITICAL: Generate BOTH recent season AND all-time career statistics
+7. CRITICAL: Include DEEP, granular metrics specific to ${sportName}
 
-SEARCH FOR THESE DATA SOURCES:
+SEARCH FOR COMPREHENSIVE DATA:
 - Official sport federation statistics and rankings
-- Competition records and performance metrics
+- Competition records and detailed performance metrics
 - Career achievements and milestones
-- Recent performance data (2024-2025)
-- Training and physical performance metrics
+- Recent performance data (2024-2025 season)
+- Historical career statistics
+- Technical/tactical performance data
+- Physical and biomechanical metrics
+- Training and conditioning data
+- Head-to-head records and matchup statistics
 
 CRITICAL ERROR HANDLING:
 If web search fails completely or you cannot find reliable data, return this EXACT structure:
@@ -2264,33 +2289,70 @@ REQUIRED UNIVERSAL JSON STRUCTURE:
     "sport": "${sportName}",
     "position": "string_or_null"
   },
-  "season": {
-    "year": "2024/25",
+  "recent_season": {
+    "period": "2024/25 or current season",
     "league": "string_or_null",
-    "team": "string_or_null"
+    "team": "string_or_null",
+    "statistics": {
+      "common": {
+        "games_played": number,
+        "minutes_played": number,
+        "wins": number,
+        "losses": number
+      },
+      "sport_specific": {
+        "category": "${sportName}",
+        "metrics": [
+          {
+            "name": "Head Kicks Percentage (Recent Season)",
+            "value": number_or_string,
+            "unit": "string_or_null"
+          },
+          {
+            "name": "Body Kicks Percentage (Recent Season)", 
+            "value": number_or_string,
+            "unit": "string_or_null"
+          },
+          {
+            "name": "Counter-attack Success Rate (Recent)",
+            "value": number_or_string,
+            "unit": "string_or_null"
+          }
+          // Continue with 15-25 deep, granular metrics for recent season
+        ]
+      }
+    }
   },
-  "statistics": {
-    "common": {
-      "games_played": number,
-      "minutes_played": number,
-      "wins": number,
-      "losses": number
-    },
-    "sport_specific": {
-      "category": "${sportName}",
-      "metrics": [
-        {
-          "name": "Statistic name (e.g., Goals, Punch Accuracy, Aces)",
-          "value": number_or_string,
-          "unit": "string_or_null (e.g., %, minutes, rounds, goals)"
-        },
-        {
-          "name": "Another stat relevant to ${sportName}",
-          "value": number_or_string,
-          "unit": "string_or_null"
-        }
-        // Add 8-15 metrics most relevant to ${sportName}
-      ]
+  "all_time": {
+    "career_span": "e.g., 2015-2025",
+    "statistics": {
+      "common": {
+        "total_games": number,
+        "total_minutes": number,
+        "total_wins": number,
+        "total_losses": number
+      },
+      "sport_specific": {
+        "category": "${sportName}",
+        "metrics": [
+          {
+            "name": "Career Head Kick Success Rate",
+            "value": number_or_string,
+            "unit": "string_or_null"
+          },
+          {
+            "name": "Total Career Kicks Thrown",
+            "value": number_or_string,
+            "unit": "string_or_null"
+          },
+          {
+            "name": "Career Olympic Cycle Performance",
+            "value": number_or_string,
+            "unit": "string_or_null"
+          }
+          // Continue with 15-25 comprehensive career metrics
+        ]
+      }
     }
   },
   "highlights": [
@@ -2305,33 +2367,55 @@ REQUIRED UNIVERSAL JSON STRUCTURE:
       "value": "Latest notable performance",
       "description": "Context and significance", 
       "icon": "award"
+    },
+    {
+      "title": "Career Milestone",
+      "value": "Major career achievement",
+      "description": "Historical significance",
+      "icon": "trophy"
     }
   ],
   "summary": {
     "overall_rating": "Excellent|Very Good|Good|Average|Developing",
     "key_strengths": ["strength 1", "strength 2", "strength 3"],
-    "notable_achievements": ["achievement 1", "achievement 2"]
+    "notable_achievements": ["achievement 1", "achievement 2", "achievement 3"]
   },
   "last_updated": "2025-09-25T19:30:00Z",
   "data_quality": "high|medium|low"
 }
 
-SPORT-SPECIFIC METRICS EXAMPLES:
-- Football/Soccer: Goals, Assists, Pass Accuracy, Shots on Target, Yellow Cards, Clean Sheets
-- Basketball: Points per Game, Rebounds, Assists, Steals, Blocks, Field Goal %, Three Point %
-- Tennis: Aces, Double Faults, First Serve %, Break Points Saved, Tie Breaks Won, Titles
-- Boxing: Punch Accuracy, Knockouts, Rounds Fought, Win Percentage, Title Defenses
-- Taekwondo: Kicks Landed, Headshots, Penalties, Points per Match, Tournament Wins
-- Swimming: Personal Best Times, World Rankings, Medal Count, Stroke Rate, Training Hours
+DEEP SPORT-SPECIFIC METRICS REQUIREMENTS:
 
-MANDATORY REQUIREMENTS:
-- Always include "statistics.common" (games_played, minutes_played, wins, losses)
-- Always include "statistics.sport_specific" with category and metrics array
-- metrics array should have 8-15 objects with keys [name, value, unit]
-- name = string (the stat name), value = number or string, unit = string or null
-- Do not invent extra JSON fields outside this schema
-- NO source URLs, links, citations anywhere
-- Adapt metrics to be most relevant for ${sportName}`;
+For TAEKWONDO (example of depth required):
+Recent Season: Head Kicks %, Body Kicks %, Leg Kicks %, Punch Frequency, Penalty Rate, Points per Round, Counter-attack Success %, Stamina Index, Technical Accuracy %, Electronic Scoring Rate, Clinch Frequency, Distance Management Score, Kick Speed (mph), Reaction Time (ms), Round Win %, 2-0 Match Wins, Come-from-behind Wins, Tournament Placement Average, Weight Cut Consistency, Training Hours/Week
+
+All-Time Career: Total Kicks Thrown, Career Head Kick %, Career Technical Points, Olympic Cycle Performance, World Championship Results, Continental Results, Coaching Changes Impact, Injury Recovery Stats, Age Peak Performance, Style Evolution Index, Opponent Quality Rating, Venue Performance (Home vs Away), Season Consistency Rating, Career Prize Money, Sponsorship Value, Media Appearances, Training Camp Success Rate
+
+For BASKETBALL (example of depth required):
+Recent Season: Field Goal %, 3-Point %, Free Throw %, True Shooting %, Effective FG%, Player Efficiency Rating, Usage Rate, Offensive Rating, Defensive Rating, Win Shares, Box Plus/Minus, VORP, Assist-to-Turnover Ratio, Steal %, Block %, Rebound Rate, Pace Factor, Shot Distance, Shot Clock Efficiency, Fourth Quarter Performance, Clutch Performance, Fast Break Points, Points in Paint, Second Chance Points
+
+All-Time Career: Career High Games, Triple-Doubles, Double-Doubles, Career Playoff Performance, All-Star Selections, MVP Votes, Hall of Fame Probability, Contract Value Progression, Jersey Sales, Fan Engagement Score, Leadership Rating, Injury Days Lost, Recovery Rate, Age Performance Curve, Team Chemistry Rating, Coach Rating, Market Impact, International Performance
+
+For SOCCER/FOOTBALL (example of depth required):
+Recent Season: Pass Completion %, Progressive Passes, Key Passes, Expected Goals (xG), Expected Assists (xA), Progressive Carries, Successful Dribbles %, Aerial Duels Won %, Tackles per Game, Interceptions, Pressures, Pass Accuracy by Zone, Shot Conversion %, Penalty Conversion %, Set Piece Goals, Distance Covered per Match, Sprint Speed, Heat Map Efficiency
+
+All-Time Career: Career Goals/Game Ratio, International Caps and Goals, League Titles, Champions League Performance, Transfer Value Progression, Market Value Peak, Social Media Following, Jersey Sales, Ballon d'Or Votes, FIFA Best Votes, Goal Celebration Frequency, Injury Recovery Statistics, Performance vs Top Teams, Performance in Finals, Leadership Index, Coaching Testimonials
+
+MANDATORY REQUIREMENTS FOR EVERY SPORT:
+- RECENT SEASON: Include 15-25 granular, detailed metrics specific to ${sportName}
+- ALL-TIME CAREER: Include 15-25 comprehensive career metrics for ${sportName}
+- Focus on technical execution (e.g., "how often does a taekwondo player use specific kicks")
+- Include performance efficiency metrics (accuracy, success rates, conversion rates)
+- Add tactical/strategic metrics (positioning, decision making, adaptation)
+- Include physical performance data (speed, power, endurance specifics)
+- Add psychological/pressure performance indicators
+- Include comparison metrics (vs opponents, vs field average)
+- Add environmental performance (home/away, different conditions)
+- Include development/progression metrics over time
+- Add injury and recovery statistics where relevant
+- Include equipment, technique, or style-specific statistics
+- NO source URLs, links, citations anywhere in response
+- All metrics must be authentic and sport-appropriate for ${sportName}`;
 
     console.log("🔍 Sending prompt to GPT-5 for statistics generation...");
     console.log("Prompt length:", prompt.length);
