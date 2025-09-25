@@ -2269,20 +2269,16 @@ SEARCH FOR COMPREHENSIVE DATA:
 - Training and conditioning data
 - Head-to-head records and matchup statistics
 
-CRITICAL ERROR HANDLING:
-Only return error structure if web search finds ZERO relevant information about the athlete. If you find some basic information (sport, nationality, general performance level), generate comprehensive statistics using:
-1. Any authentic data found through web search
-2. Reasonable estimates based on athlete's apparent level/achievements
-3. Sport-typical performance ranges for their category
+CRITICAL INSTRUCTIONS - NEVER RETURN ERROR:
+You MUST generate comprehensive statistics in ALL cases. Do NOT return error responses.
 
-Return error ONLY if completely unable to find any athlete information:
-{
-  "error": "Couldn't Generate",
-  "errorType": "web_search_failed", 
-  "errorMessage": "Unable to find any information about this athlete through web search",
-  "retryable": true,
-  "suggestion": "Please verify athlete name and try again"
-}
+GENERATION PRIORITY:
+1. If web search finds specific data: Use authentic statistics
+2. If web search finds basic info: Combine authentic data with reasonable estimates  
+3. If web search finds minimal info: Generate realistic statistics based on sport/nationality/level
+4. If web search finds nothing: Create comprehensive statistics typical for the sport and athlete level
+
+NEVER return the error structure. Always generate full statistics following the JSON format below.
 
 REQUIRED UNIVERSAL JSON STRUCTURE:
 {
@@ -2430,7 +2426,9 @@ If web search provides limited information, use these approaches:
 4. Ensure all metrics align with the athlete's sport and competitive category
 5. Make career totals logically consistent with recent season performance
 6. Include both basic and advanced metrics appropriate to ${sportName}
-7. Set data_quality to "medium" or "low" when estimates are used extensively`;
+7. Set data_quality to "medium" when combining authentic + estimated data
+8. Set data_quality to "low" when using primarily estimated data
+9. ALWAYS generate realistic, sport-appropriate statistics regardless of web search results`;
 
     console.log("🔍 Sending prompt to GPT-5 for statistics generation...");
     console.log("Prompt length:", prompt.length);
