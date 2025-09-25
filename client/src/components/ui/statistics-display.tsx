@@ -14,7 +14,12 @@ import {
   User,
   Medal,
   Calendar,
-  Award
+  Award,
+  Zap,
+  Shield,
+  Heart,
+  Timer,
+  Flame
 } from "lucide-react";
 
 export interface AthleteStatistics {
@@ -27,15 +32,15 @@ export interface AthleteStatistics {
     [categoryName: string]: {
       title: string;
       description: string;
+      icon?: string;
       stats: Array<{
         name: string;
         value: string | number;
         unit?: string;
-        type: "number" | "percentage" | "rank" | "ratio" | "text" | "score";
+        type: "number" | "percentage" | "rank" | "ratio" | "text" | "score" | "rating";
         trend?: "up" | "down" | "stable" | "unknown";
         context: string;
         timeframe?: string;
-        source?: string;
       }>;
     };
   };
@@ -44,10 +49,15 @@ export interface AthleteStatistics {
     value: string;
     description: string;
     category: string;
+    icon?: string;
   }>;
+  summary?: {
+    overall_rating: string;
+    key_strengths: string[];
+    notable_achievements: string[];
+  };
   lastUpdated: string;
   dataQuality: "high" | "medium" | "low";
-  notes?: string[];
 }
 
 interface StatisticsDisplayProps {
@@ -55,7 +65,22 @@ interface StatisticsDisplayProps {
   language?: string;
 }
 
-const categoryIcons: { [key: string]: any } = {
+const iconMap: { [key: string]: any } = {
+  chart: BarChart3,
+  target: Target,
+  trophy: Trophy,
+  user: User,
+  zap: Zap,
+  activity: Activity,
+  star: Star,
+  award: Award,
+  medal: Medal,
+  shield: Shield,
+  heart: Heart,
+  timer: Timer,
+  flame: Flame,
+  'trending-up': TrendingUp,
+  // Legacy mappings for backwards compatibility
   performance: BarChart3,
   technical: Target,
   physical: Activity,
@@ -64,6 +89,16 @@ const categoryIcons: { [key: string]: any } = {
   career: Award,
   competition: Star,
   default: User
+};
+
+const getIconComponent = (iconName?: string, categoryKey?: string) => {
+  if (iconName && iconMap[iconName.toLowerCase()]) {
+    return iconMap[iconName.toLowerCase()];
+  }
+  if (categoryKey && iconMap[categoryKey.toLowerCase()]) {
+    return iconMap[categoryKey.toLowerCase()];
+  }
+  return iconMap.default;
 };
 
 const getTrendIcon = (trend?: string) => {
@@ -168,6 +203,54 @@ export function StatisticsDisplay({ statistics, language = "en" }: StatisticsDis
         </div>
       </div>
 
+      {/* Summary Section */}
+      {statistics.summary && (
+        <Card className="bg-athlete-gray-800 border-athlete-gray-700" data-testid="card-summary">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center">
+              <Trophy className="mr-2 h-5 w-5 text-yellow-500" />
+              Performance Summary
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-center">
+              <Badge 
+                className="bg-athlete-accent text-white text-lg px-4 py-2"
+                data-testid="badge-overall-rating"
+              >
+                Overall Rating: {statistics.summary.overall_rating}
+              </Badge>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h4 className="font-semibold text-athlete-accent mb-2">Key Strengths</h4>
+                <ul className="space-y-1">
+                  {statistics.summary.key_strengths.map((strength, index) => (
+                    <li key={index} className="text-athlete-gray-300 text-sm flex items-start">
+                      <Star className="h-3 w-3 text-green-500 mr-2 mt-1 flex-shrink-0" />
+                      {strength}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-athlete-accent mb-2">Notable Achievements</h4>
+                <ul className="space-y-1">
+                  {statistics.summary.notable_achievements.map((achievement, index) => (
+                    <li key={index} className="text-athlete-gray-300 text-sm flex items-start">
+                      <Medal className="h-3 w-3 text-yellow-500 mr-2 mt-1 flex-shrink-0" />
+                      {achievement}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Highlights Section */}
       {statistics.highlights && statistics.highlights.length > 0 && (
         <Card className="bg-athlete-gray-800 border-athlete-gray-700" data-testid="card-highlights">
@@ -179,23 +262,29 @@ export function StatisticsDisplay({ statistics, language = "en" }: StatisticsDis
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {statistics.highlights.map((highlight, index) => (
-                <div 
-                  key={index} 
-                  className="bg-athlete-gray-700 p-4 rounded-lg"
-                  data-testid={`highlight-${index}`}
-                >
-                  <h4 className="font-semibold text-athlete-accent text-sm mb-1">
-                    {highlight.title}
-                  </h4>
-                  <p className="text-2xl font-bold text-white mb-2">
-                    {highlight.value}
-                  </p>
-                  <p className="text-athlete-gray-400 text-sm">
-                    {highlight.description}
-                  </p>
-                </div>
-              ))}
+              {statistics.highlights.map((highlight, index) => {
+                const HighlightIcon = getIconComponent(highlight.icon);
+                return (
+                  <div 
+                    key={index} 
+                    className="bg-athlete-gray-700 p-4 rounded-lg"
+                    data-testid={`highlight-${index}`}
+                  >
+                    <div className="flex items-center mb-2">
+                      <HighlightIcon className="h-4 w-4 text-athlete-accent mr-2" />
+                      <h4 className="font-semibold text-athlete-accent text-sm">
+                        {highlight.title}
+                      </h4>
+                    </div>
+                    <p className="text-2xl font-bold text-white mb-2">
+                      {highlight.value}
+                    </p>
+                    <p className="text-athlete-gray-400 text-sm">
+                      {highlight.description}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
@@ -204,7 +293,7 @@ export function StatisticsDisplay({ statistics, language = "en" }: StatisticsDis
       {/* Statistics Categories */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {categoryEntries.map(([categoryKey, category]) => {
-          const IconComponent = categoryIcons[categoryKey.toLowerCase()] || categoryIcons.default;
+          const IconComponent = getIconComponent(category.icon, categoryKey);
           
           return (
             <Card 
@@ -236,11 +325,6 @@ export function StatisticsDisplay({ statistics, language = "en" }: StatisticsDis
                             </span>
                           )}
                         </div>
-                        {stat.source && (
-                          <Badge variant="outline" className="text-xs">
-                            {stat.source}
-                          </Badge>
-                        )}
                       </div>
                       
                       {renderStatValue(stat)}
@@ -261,31 +345,6 @@ export function StatisticsDisplay({ statistics, language = "en" }: StatisticsDis
         })}
       </div>
 
-      {/* Notes Section */}
-      {statistics.notes && statistics.notes.length > 0 && (
-        <Card className="bg-athlete-gray-800 border-athlete-gray-700" data-testid="card-notes">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center">
-              <Calendar className="mr-2 h-5 w-5 text-athlete-accent" />
-              Additional Notes
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
-              {statistics.notes.map((note, index) => (
-                <li 
-                  key={index} 
-                  className="text-athlete-gray-400 text-sm flex items-start"
-                  data-testid={`note-${index}`}
-                >
-                  <span className="text-athlete-accent mr-2">•</span>
-                  {note}
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

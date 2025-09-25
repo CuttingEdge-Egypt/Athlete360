@@ -13,15 +13,15 @@ export interface AthleteStatistics {
     [categoryName: string]: {
       title: string;
       description: string;
+      icon?: string;
       stats: Array<{
         name: string;
         value: string | number;
         unit?: string;
-        type: "number" | "percentage" | "rank" | "ratio" | "text" | "score";
+        type: "number" | "percentage" | "rank" | "ratio" | "text" | "score" | "rating";
         trend?: "up" | "down" | "stable" | "unknown";
         context: string;
         timeframe?: string;
-        source?: string;
       }>;
     };
   };
@@ -30,10 +30,15 @@ export interface AthleteStatistics {
     value: string;
     description: string;
     category: string;
+    icon?: string;
   }>;
+  summary?: {
+    overall_rating: string;
+    key_strengths: string[];
+    notable_achievements: string[];
+  };
   lastUpdated: string;
   dataQuality: "high" | "medium" | "low";
-  notes?: string[];
 }
 
 // Helper function to search for athlete profile picture from taekwondodata.com
@@ -2222,7 +2227,9 @@ CRITICAL INSTRUCTIONS:
 1. MANDATORY: Use your web search tool to find current statistical data from official sources
 2. MANDATORY: Search federation websites, competition databases, news sources, and statistical platforms
 3. MANDATORY: Return only valid JSON with no extra text or explanations
-4. MANDATORY: Create sport-specific categories and statistics based on what's relevant for ${sportName}
+4. MANDATORY: Create 3-6 sport-specific categories based on what's most relevant for ${sportName}
+5. CRITICAL: DO NOT include any source URLs, links, citations, or references in the response
+6. CRITICAL: Remove all "source" fields - provide clean data only
 
 SEARCH FOR THESE DATA SOURCES:
 - Official sport federation statistics and rankings
@@ -2232,21 +2239,12 @@ SEARCH FOR THESE DATA SOURCES:
 - Training and physical performance metrics
 - Technical skill assessments and ratings
 
-ADAPTIVE CATEGORIES TO INCLUDE (customize based on sport):
-For Combat Sports (Boxing, Taekwondo, MMA, etc.):
-- Performance: Win rate, KO rate, decision wins, ranking position
-- Technical: Strike accuracy, defense rate, takedown success
-- Physical: Reach, height, weight, conditioning metrics
-
-For Team Sports (Football, Basketball, etc.):
-- Performance: Goals/Points per game, assists, success rate
-- Technical: Pass accuracy, shot conversion, defensive actions
-- Physical: Speed, stamina, strength metrics
-
-For Individual Sports (Tennis, Swimming, etc.):
-- Performance: Win rate, best times/scores, ranking
-- Technical: Technique ratings, consistency metrics
-- Physical: Endurance, power, flexibility
+SPORT-SPECIFIC CATEGORY EXAMPLES (create 3-6 most relevant):
+Combat Sports (Boxing, Taekwondo, MMA): "performance", "striking", "defense", "physical"
+Team Sports (Football, Basketball): "scoring", "playmaking", "defense", "physical"
+Tennis/Individual: "serving", "groundstrokes", "movement", "mental"
+Swimming/Track: "technique", "speed", "endurance", "consistency"
+Gymnastics: "difficulty", "execution", "consistency", "apparatus"
 
 CRITICAL ERROR HANDLING:
 If web search fails completely or you cannot find reliable data, return this EXACT structure:
@@ -2258,7 +2256,7 @@ If web search fails completely or you cannot find reliable data, return this EXA
   "suggestion": "Please verify athlete name and try again"
 }
 
-REQUIRED JSON STRUCTURE (customize categories for the sport):
+REQUIRED FLEXIBLE JSON STRUCTURE (adapt categories to ${sportName}):
 {
   "athlete": {
     "name": "${athleteName}",
@@ -2266,121 +2264,64 @@ REQUIRED JSON STRUCTURE (customize categories for the sport):
     "country": "${athleteCountry || 'Unknown'}"
   },
   "categories": {
-    "performance": {
-      "title": "Performance Metrics",
-      "description": "Competition and career performance statistics",
+    "category_key_1": {
+      "title": "Category Title (e.g., Performance, Scoring, Technique)",
+      "description": "What this category measures for ${sportName}",
+      "icon": "chart|target|trophy|user|zap|activity",
       "stats": [
         {
-          "name": "Current World Ranking",
-          "value": "Search for exact ranking",
-          "type": "rank",
+          "name": "Statistic name",
+          "value": "Real data (no sources/URLs)",
+          "unit": "unit if needed",
+          "type": "number|percentage|rank|text|rating",
           "trend": "up|down|stable|unknown",
-          "context": "Explanation of ranking system and position",
-          "timeframe": "Current/2024",
-          "source": "Official federation"
-        },
-        {
-          "name": "Career Win Rate",
-          "value": "Percentage from web search",
-          "unit": "%",
-          "type": "percentage", 
-          "trend": "up|down|stable|unknown",
-          "context": "Overall career success rate with context",
-          "timeframe": "Career",
-          "source": "Competition records"
+          "context": "Brief explanation (no sources)",
+          "timeframe": "When this applies"
         }
       ]
     },
-    "technical": {
-      "title": "Technical Skills",
-      "description": "Sport-specific technical performance metrics",
+    "category_key_2": {
+      "title": "Another relevant category for ${sportName}",
+      "description": "Description",
+      "icon": "chart|target|trophy|user|zap|activity",
       "stats": [
-        {
-          "name": "Primary Technique Success Rate",
-          "value": "Sport-specific technical stat",
-          "unit": "%",
-          "type": "percentage",
-          "trend": "up|down|stable|unknown", 
-          "context": "Analysis of technical proficiency",
-          "timeframe": "Recent competitions",
-          "source": "Technical analysis"
-        }
-      ]
-    },
-    "physical": {
-      "title": "Physical Attributes",
-      "description": "Physical characteristics and fitness metrics",
-      "stats": [
-        {
-          "name": "Height",
-          "value": "Height from search",
-          "unit": "cm",
-          "type": "number",
-          "context": "Physical measurement",
-          "source": "Official records"
-        },
-        {
-          "name": "Weight Category/Weight",
-          "value": "Weight/category from search",
-          "unit": "kg",
-          "type": "text",
-          "context": "Competition weight or category",
-          "source": "Official records"
-        }
-      ]
-    },
-    "achievements": {
-      "title": "Career Achievements",
-      "description": "Major titles, medals, and milestones",
-      "stats": [
-        {
-          "name": "Major Titles",
-          "value": "Number of major titles",
-          "type": "number",
-          "context": "List of significant championships and titles",
-          "timeframe": "Career",
-          "source": "Competition records"
-        },
-        {
-          "name": "Best Career Result",
-          "value": "Highest achievement",
-          "type": "text",
-          "context": "Most significant career accomplishment",
-          "timeframe": "Career",
-          "source": "Competition records"
-        }
+        // 2-5 relevant stats for this category
       ]
     }
+    // Add 3-6 total categories most relevant to ${sportName}
   },
   "highlights": [
     {
       "title": "Top Statistical Highlight",
-      "value": "Most impressive statistic",
-      "description": "Why this statistic stands out",
-      "category": "performance"
+      "value": "Most impressive stat (no sources)",
+      "description": "Why this stands out",
+      "category": "category_key",
+      "icon": "star|award|trending-up"
     },
     {
       "title": "Recent Achievement",
       "value": "Latest notable performance",
       "description": "Context and significance",
-      "category": "achievements"
+      "category": "category_key",
+      "icon": "star|award|trending-up"
     }
   ],
-  "lastUpdated": "2024-12-19",
-  "dataQuality": "high|medium|low",
-  "notes": [
-    "Any important context or limitations of the data",
-    "Sources used and reliability notes"
-  ]
+  "summary": {
+    "overall_rating": "Excellent|Very Good|Good|Average|Developing",
+    "key_strengths": ["strength 1", "strength 2", "strength 3"],
+    "notable_achievements": ["achievement 1", "achievement 2"]
+  },
+  "lastUpdated": "2025-09-25",
+  "dataQuality": "high|medium|low"
 }
 
-SPORT-SPECIFIC ADAPTATIONS:
-- For ${sportName}, prioritize statistics most relevant to that sport
-- Include sport-specific categories (e.g., "striking" for combat sports, "shooting" for basketball)
-- Use appropriate units and terminology for the sport
-- Focus on metrics that matter most for performance evaluation in ${sportName}
-
-MANDATORY: Search extensively for authentic data and adapt the structure to showcase the most relevant statistics for ${sportName}. If certain categories don't apply to the sport, replace them with more relevant ones.`;
+MANDATORY REQUIREMENTS:
+- NO source URLs, links, citations, or references anywhere
+- Create categories specific to ${sportName} (not generic)
+- Use meaningful icons from: chart, target, trophy, user, zap, activity, star, award, trending-up
+- Each category should have 2-5 relevant statistics
+- All data must be clean without source attributions
+- Adapt structure completely to showcase ${sportName} performance analysis`;
 
     console.log("🔍 Sending prompt to GPT-5 for statistics generation...");
     console.log("Prompt length:", prompt.length);
