@@ -805,6 +805,9 @@ export function AnalysisPopup({
     // Extract data with safe fallbacks - handle nested data structure
     const actualData = bioData.data || bioData; // Handle case where data is nested under 'data' key
     
+    // Debug logging to see the data structure
+    console.log('Bio analysis data structure:', { bioData, actualData, personalInfo: actualData.personalInfo });
+    
     const name = actualData.name || bioData.name || "Athlete Profile";
     const bio = actualData.bio || bioData.bio || "";
     const playersStory = actualData.playersStory || bioData.playersStory || actualData.playerStory || bioData.playerStory || "";
