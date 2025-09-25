@@ -23,7 +23,7 @@ import { NutritionPlanDisplay } from "@/components/ui/nutrition-plan-display";
 import { DevelopmentPlanDisplay } from "@/components/ui/development-plan-display";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X } from "lucide-react";
+import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X, RefreshCw } from "lucide-react";
 import type { Sport, Athlete } from "@shared/schema";
 import GenerationQueue from "@/components/ui/generation-queue";
 import { CountrySelect } from "@/components/ui/country-select";
@@ -1884,15 +1884,14 @@ export default function Home() {
                     <div className="flex justify-between items-center">
                       <h2 className="text-2xl font-bold text-white">{t('developmentPlan.yourPlan')}</h2>
                       <Button
-                        variant="outline"
                         onClick={() => {
                           setShowDevelopmentForm(true);
                           setDevelopmentPlanData(null);
                         }}
-                        className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white"
+                        className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold shadow-lg"
                         data-testid="button-new-development-plan"
                       >
-                        <X className="mr-2 h-4 w-4" />
+                        <RefreshCw className="mr-2 h-4 w-4" />
                         {t('developmentPlan.generateNew')}
                       </Button>
                     </div>
