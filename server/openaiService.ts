@@ -2486,8 +2486,30 @@ If web search provides limited information, use these approaches:
     }
 
     // Validate the response structure
-    if (!statisticsResponse.player || !statisticsResponse.statistics || !statisticsResponse.statistics.sport_specific) {
-      throw new Error("Invalid statistics data structure");
+    if (!statisticsResponse.player || !statisticsResponse.recent_season || !statisticsResponse.all_time) {
+      throw new Error("Invalid statistics data structure - missing required sections");
+    }
+
+    if (!statisticsResponse.recent_season.statistics || !statisticsResponse.all_time.statistics) {
+      throw new Error("Invalid statistics data structure - missing statistics sections");
+    }
+
+    // Normalize numeric values to strings for display consistency
+    const normalizeMetrics = (metrics: any[]) => {
+      return metrics.map(metric => ({
+        ...metric,
+        value: String(metric.value)
+      }));
+    };
+
+    if (statisticsResponse.recent_season.statistics.sport_specific?.metrics) {
+      statisticsResponse.recent_season.statistics.sport_specific.metrics = 
+        normalizeMetrics(statisticsResponse.recent_season.statistics.sport_specific.metrics);
+    }
+
+    if (statisticsResponse.all_time.statistics.sport_specific?.metrics) {
+      statisticsResponse.all_time.statistics.sport_specific.metrics = 
+        normalizeMetrics(statisticsResponse.all_time.statistics.sport_specific.metrics);
     }
 
     const statisticsData: AthleteStatistics = statisticsResponse;
