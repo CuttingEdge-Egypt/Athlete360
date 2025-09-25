@@ -227,16 +227,9 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
       sessionStorage.setItem('videoAnalysisData', JSON.stringify(item.result));
       setLocation('/video-analysis');
     } else if (item.serviceType === 'statistics') {
-      // Navigate to home with statistics tab and data
-      sessionStorage.setItem('statisticsData', JSON.stringify(item.result));
-      const url = "/?tab=statistics&data=fromStorage";
-      console.log('Navigating to statistics:', url);
-      
-      setLocation(url);
-      setTimeout(() => {
-        window.history.pushState({}, '', url);
-        window.dispatchEvent(new PopStateEvent('popstate'));
-      }, 100);
+      // Show analysis popup for statistics
+      setSelectedResult(item);
+      setShowAnalysisPopup(true);
     } else {
       // Show analysis popup for other types
       setSelectedResult(item);

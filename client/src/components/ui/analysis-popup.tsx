@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RankChart } from "./rank-chart";
 import { NutritionPlanDisplay } from "./nutrition-plan-display";
 import { StrategicCombatDisplay } from "./strategic-combat-display";
+import { StatisticsDisplay } from "./statistics-display";
 import {
   Download,
   Share2,
@@ -1891,6 +1892,11 @@ export function AnalysisPopup({
     // Special handling for rank analysis
     if (type === "rank") {
       return renderRankAnalysis(data);
+    }
+
+    // Special handling for statistics analysis
+    if (type === "statistics") {
+      return <StatisticsDisplay statistics={data} language="en" />;
     }
 
     // Parse the data to handle JSON strings consistently

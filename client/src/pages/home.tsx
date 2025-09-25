@@ -838,6 +838,7 @@ export default function Home() {
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [showBioPopup, setShowBioPopup] = useState(false);
   const [bioData, setBioData] = useState(null);
+  const [showStatisticsPopup, setShowStatisticsPopup] = useState(false);
 
   const { data: sports = [] } = useQuery<Sport[]>({
     queryKey: ["/api/sports"],
@@ -1087,7 +1088,7 @@ export default function Home() {
 
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-6xl mx-auto">
-            <TabsList className="grid w-full grid-cols-5 bg-athlete-gray-800 mb-8">
+            <TabsList className="grid w-full grid-cols-4 bg-athlete-gray-800 mb-8">
               <TabsTrigger 
                 value="analysis" 
                 data-testid="tab-analysis"
@@ -1119,14 +1120,6 @@ export default function Home() {
               >
                 <CalendarDays size={16} />
                 {t('interface.developmentPlan')}
-              </TabsTrigger>
-              <TabsTrigger 
-                value="statistics" 
-                data-testid="tab-statistics"
-                className="data-[state=active]:bg-athlete-accent flex items-center gap-2"
-              >
-                <TrendingUp size={16} />
-                {t('interface.statistics', 'Statistics')}
               </TabsTrigger>
             </TabsList>
 
@@ -1976,24 +1969,6 @@ export default function Home() {
               )}
             </TabsContent>
 
-            <TabsContent value="statistics" className="space-y-8">
-              {statisticsData ? (
-                <StatisticsDisplay 
-                  statistics={statisticsData}
-                  language={i18n.language}
-                />
-              ) : (
-                <Card className="bg-athlete-gray-800 border-gray-700">
-                  <CardContent className="p-8 text-center">
-                    <TrendingUp className="w-12 h-12 mx-auto mb-4 text-athlete-accent" />
-                    <h3 className="text-xl font-semibold text-white mb-2">No Statistics Available</h3>
-                    <p className="text-athlete-gray-400">
-                      Generate statistics from the Athlete Analysis tab first.
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
 
           </Tabs>
 
@@ -2008,6 +1983,18 @@ export default function Home() {
               onOpenChange={setShowBioPopup}
               type="bio"
               data={bioData}
+              athleteName={selectedAthlete.name}
+              athleteId={selectedAthlete.id}
+              createdAt={new Date().toISOString()}
+            />
+          )}
+
+          {showStatisticsPopup && statisticsData && selectedAthlete && (
+            <AnalysisPopup
+              open={showStatisticsPopup}
+              onOpenChange={setShowStatisticsPopup}
+              type="statistics"
+              data={statisticsData}
               athleteName={selectedAthlete.name}
               athleteId={selectedAthlete.id}
               createdAt={new Date().toISOString()}
