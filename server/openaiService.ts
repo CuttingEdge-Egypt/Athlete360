@@ -2456,7 +2456,16 @@ If web search provides limited information, use these approaches:
       if (!response.text) {
         throw new Error("Empty response from Gemini");
       }
-      statisticsResponse = JSON.parse(response.text);
+      
+      // Clean markdown formatting from Gemini response
+      let cleanedResponse = response.text.trim();
+      if (cleanedResponse.startsWith('```json')) {
+        cleanedResponse = cleanedResponse.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (cleanedResponse.startsWith('```')) {
+        cleanedResponse = cleanedResponse.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+      
+      statisticsResponse = JSON.parse(cleanedResponse);
     } catch (parseError) {
       console.error("Failed to parse statistics JSON:", parseError);
       throw new Error("AI_RESPONSE_PARSE_ERROR");
