@@ -3,6 +3,39 @@ import OpenAI from "openai";
 // GPT-5 is now available and is the latest OpenAI model with default temperature 1.0 (cannot go under)
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+export interface AthleteStatistics {
+  athlete: {
+    name: string;
+    sport: string;
+    country: string;
+  };
+  categories: {
+    [categoryName: string]: {
+      title: string;
+      description: string;
+      stats: Array<{
+        name: string;
+        value: string | number;
+        unit?: string;
+        type: "number" | "percentage" | "rank" | "ratio" | "text" | "score";
+        trend?: "up" | "down" | "stable" | "unknown";
+        context: string;
+        timeframe?: string;
+        source?: string;
+      }>;
+    };
+  };
+  highlights: Array<{
+    title: string;
+    value: string;
+    description: string;
+    category: string;
+  }>;
+  lastUpdated: string;
+  dataQuality: "high" | "medium" | "low";
+  notes?: string[];
+}
+
 // Helper function to search for athlete profile picture from taekwondodata.com
 async function searchTaekwondoDataProfilePicture(athleteName: string, nationality?: string): Promise<string | null> {
   try {
@@ -2166,5 +2199,226 @@ MANDATORY: Use ONLY current web search results. Do not use generic descriptions 
       retryable: true,
       suggestion: "Please try again or select different athletes"
     };
+  }
+}
+
+// Generate comprehensive athlete statistics with adaptive structure
+export async function generateAthleteStatistics(
+  athleteName: string,
+  sportName: string,
+  athleteCountry?: string
+): Promise<AthleteStatistics> {
+  try {
+    console.log(`🔢 Generating statistics for ${athleteName} in ${sportName}...`);
+
+    const prompt = `You are an expert sports statistician and analyst with advanced web search capabilities. You MUST search the internet extensively to find current, authentic statistical data about this athlete.
+
+ATHLETE TO ANALYZE:
+Name: ${athleteName}
+Sport: ${sportName}
+Country: ${athleteCountry || 'Unknown'}
+
+CRITICAL INSTRUCTIONS:
+1. MANDATORY: Use your web search tool to find current statistical data from official sources
+2. MANDATORY: Search federation websites, competition databases, news sources, and statistical platforms
+3. MANDATORY: Return only valid JSON with no extra text or explanations
+4. MANDATORY: Create sport-specific categories and statistics based on what's relevant for ${sportName}
+
+SEARCH FOR THESE DATA SOURCES:
+- Official sport federation statistics and rankings
+- Competition records and performance metrics
+- Career achievements and milestones
+- Recent performance data (2024-2025)
+- Training and physical performance metrics
+- Technical skill assessments and ratings
+
+ADAPTIVE CATEGORIES TO INCLUDE (customize based on sport):
+For Combat Sports (Boxing, Taekwondo, MMA, etc.):
+- Performance: Win rate, KO rate, decision wins, ranking position
+- Technical: Strike accuracy, defense rate, takedown success
+- Physical: Reach, height, weight, conditioning metrics
+
+For Team Sports (Football, Basketball, etc.):
+- Performance: Goals/Points per game, assists, success rate
+- Technical: Pass accuracy, shot conversion, defensive actions
+- Physical: Speed, stamina, strength metrics
+
+For Individual Sports (Tennis, Swimming, etc.):
+- Performance: Win rate, best times/scores, ranking
+- Technical: Technique ratings, consistency metrics
+- Physical: Endurance, power, flexibility
+
+CRITICAL ERROR HANDLING:
+If web search fails completely or you cannot find reliable data, return this EXACT structure:
+{
+  "error": "Couldn't Generate",
+  "errorType": "web_search_failed", 
+  "errorMessage": "Unable to find authentic statistical data through web search",
+  "retryable": true,
+  "suggestion": "Please verify athlete name and try again"
+}
+
+REQUIRED JSON STRUCTURE (customize categories for the sport):
+{
+  "athlete": {
+    "name": "${athleteName}",
+    "sport": "${sportName}",
+    "country": "${athleteCountry || 'Unknown'}"
+  },
+  "categories": {
+    "performance": {
+      "title": "Performance Metrics",
+      "description": "Competition and career performance statistics",
+      "stats": [
+        {
+          "name": "Current World Ranking",
+          "value": "Search for exact ranking",
+          "type": "rank",
+          "trend": "up|down|stable|unknown",
+          "context": "Explanation of ranking system and position",
+          "timeframe": "Current/2024",
+          "source": "Official federation"
+        },
+        {
+          "name": "Career Win Rate",
+          "value": "Percentage from web search",
+          "unit": "%",
+          "type": "percentage", 
+          "trend": "up|down|stable|unknown",
+          "context": "Overall career success rate with context",
+          "timeframe": "Career",
+          "source": "Competition records"
+        }
+      ]
+    },
+    "technical": {
+      "title": "Technical Skills",
+      "description": "Sport-specific technical performance metrics",
+      "stats": [
+        {
+          "name": "Primary Technique Success Rate",
+          "value": "Sport-specific technical stat",
+          "unit": "%",
+          "type": "percentage",
+          "trend": "up|down|stable|unknown", 
+          "context": "Analysis of technical proficiency",
+          "timeframe": "Recent competitions",
+          "source": "Technical analysis"
+        }
+      ]
+    },
+    "physical": {
+      "title": "Physical Attributes",
+      "description": "Physical characteristics and fitness metrics",
+      "stats": [
+        {
+          "name": "Height",
+          "value": "Height from search",
+          "unit": "cm",
+          "type": "number",
+          "context": "Physical measurement",
+          "source": "Official records"
+        },
+        {
+          "name": "Weight Category/Weight",
+          "value": "Weight/category from search",
+          "unit": "kg",
+          "type": "text",
+          "context": "Competition weight or category",
+          "source": "Official records"
+        }
+      ]
+    },
+    "achievements": {
+      "title": "Career Achievements",
+      "description": "Major titles, medals, and milestones",
+      "stats": [
+        {
+          "name": "Major Titles",
+          "value": "Number of major titles",
+          "type": "number",
+          "context": "List of significant championships and titles",
+          "timeframe": "Career",
+          "source": "Competition records"
+        },
+        {
+          "name": "Best Career Result",
+          "value": "Highest achievement",
+          "type": "text",
+          "context": "Most significant career accomplishment",
+          "timeframe": "Career",
+          "source": "Competition records"
+        }
+      ]
+    }
+  },
+  "highlights": [
+    {
+      "title": "Top Statistical Highlight",
+      "value": "Most impressive statistic",
+      "description": "Why this statistic stands out",
+      "category": "performance"
+    },
+    {
+      "title": "Recent Achievement",
+      "value": "Latest notable performance",
+      "description": "Context and significance",
+      "category": "achievements"
+    }
+  ],
+  "lastUpdated": "2024-12-19",
+  "dataQuality": "high|medium|low",
+  "notes": [
+    "Any important context or limitations of the data",
+    "Sources used and reliability notes"
+  ]
+}
+
+SPORT-SPECIFIC ADAPTATIONS:
+- For ${sportName}, prioritize statistics most relevant to that sport
+- Include sport-specific categories (e.g., "striking" for combat sports, "shooting" for basketball)
+- Use appropriate units and terminology for the sport
+- Focus on metrics that matter most for performance evaluation in ${sportName}
+
+MANDATORY: Search extensively for authentic data and adapt the structure to showcase the most relevant statistics for ${sportName}. If certain categories don't apply to the sport, replace them with more relevant ones.`;
+
+    const response = await openai.responses.create({
+      model: "gpt-5",
+      input: prompt,
+      tools: [{ type: "web_search_preview" }],
+      max_output_tokens: 8000
+    });
+
+    console.log("GPT-5 Statistics Response:", response.output_text);
+
+    let statisticsData: AthleteStatistics;
+    try {
+      statisticsData = JSON.parse(response.output_text);
+    } catch (parseError) {
+      console.error("Failed to parse statistics JSON:", parseError);
+      throw new Error("AI_RESPONSE_PARSE_ERROR");
+    }
+
+    // Validate the response structure
+    if (statisticsData.error) {
+      console.log("Statistics generation failed:", statisticsData.error);
+      throw new Error(`AI_WEB_SEARCH_FAILED: ${statisticsData.errorMessage}`);
+    }
+
+    if (!statisticsData.athlete || !statisticsData.categories) {
+      throw new Error("Invalid statistics data structure");
+    }
+
+    console.log(`✅ Successfully generated statistics for ${athleteName}`);
+    return statisticsData;
+
+  } catch (error) {
+    console.error(`❌ Error generating statistics for ${athleteName}:`, error);
+    
+    if (error instanceof Error && error.message.includes('AI_WEB_SEARCH_FAILED')) {
+      throw error;
+    }
+    
+    throw new Error(`Statistics generation failed: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
