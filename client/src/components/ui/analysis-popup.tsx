@@ -805,9 +805,6 @@ export function AnalysisPopup({
     // Extract data with safe fallbacks - handle nested data structure
     const actualData = bioData.data || bioData; // Handle case where data is nested under 'data' key
     
-    // Debug logging to see the data structure
-    console.log('Bio analysis data structure:', { bioData, actualData, personalInfo: actualData.personalInfo });
-    
     const name = actualData.name || bioData.name || "Athlete Profile";
     const bio = actualData.bio || bioData.bio || "";
     const playersStory = actualData.playersStory || bioData.playersStory || actualData.playerStory || bioData.playerStory || "";
@@ -947,45 +944,51 @@ export function AnalysisPopup({
           <h2 className="text-4xl font-bold text-athlete-accent mb-3" data-testid="text-athlete-name">{name}</h2>
           
           {/* Personal Information - Display directly beneath name like in Statistics */}
-          {actualData?.personalInfo && (
+          {(actualData?.personalInfo || bioData?.personalInfo) && (
             <div className="space-y-2 mb-4">
               <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-300">
-                {actualData.personalInfo.age && actualData.personalInfo.age !== "N/A" && (
+                {((actualData?.personalInfo?.age && actualData.personalInfo.age !== "N/A") || 
+                  (bioData?.personalInfo?.age && bioData.personalInfo.age !== "N/A")) && (
                   <div className="flex items-center gap-1">
                     <span className="text-athlete-accent font-semibold">Age:</span>
-                    <span>{actualData.personalInfo.age}</span>
+                    <span>{actualData?.personalInfo?.age || bioData?.personalInfo?.age}</span>
                   </div>
                 )}
-                {actualData.personalInfo.dateOfBirth && actualData.personalInfo.dateOfBirth !== "N/A" && (
+                {((actualData?.personalInfo?.dateOfBirth && actualData.personalInfo.dateOfBirth !== "N/A") || 
+                  (bioData?.personalInfo?.dateOfBirth && bioData.personalInfo.dateOfBirth !== "N/A")) && (
                   <div className="flex items-center gap-1">
                     <span className="text-athlete-accent font-semibold">Born:</span>
-                    <span>{actualData.personalInfo.dateOfBirth}</span>
+                    <span>{actualData?.personalInfo?.dateOfBirth || bioData?.personalInfo?.dateOfBirth}</span>
                   </div>
                 )}
-                {actualData.personalInfo.height && actualData.personalInfo.height !== "N/A" && (
+                {((actualData?.personalInfo?.height && actualData.personalInfo.height !== "N/A") || 
+                  (bioData?.personalInfo?.height && bioData.personalInfo.height !== "N/A")) && (
                   <div className="flex items-center gap-1">
                     <span className="text-athlete-accent font-semibold">Height:</span>
-                    <span>{actualData.personalInfo.height}</span>
+                    <span>{actualData?.personalInfo?.height || bioData?.personalInfo?.height}</span>
                   </div>
                 )}
-                {actualData.personalInfo.weight && actualData.personalInfo.weight !== "N/A" && (
+                {((actualData?.personalInfo?.weight && actualData.personalInfo.weight !== "N/A") || 
+                  (bioData?.personalInfo?.weight && bioData.personalInfo.weight !== "N/A")) && (
                   <div className="flex items-center gap-1">
                     <span className="text-athlete-accent font-semibold">Weight:</span>
-                    <span>{actualData.personalInfo.weight}</span>
+                    <span>{actualData?.personalInfo?.weight || bioData?.personalInfo?.weight}</span>
                   </div>
                 )}
-                {actualData.personalInfo.position && actualData.personalInfo.position !== "N/A" && (
+                {((actualData?.personalInfo?.position && actualData.personalInfo.position !== "N/A") || 
+                  (bioData?.personalInfo?.position && bioData.personalInfo.position !== "N/A")) && (
                   <div className="flex items-center gap-1">
                     <span className="text-athlete-accent font-semibold">Position:</span>
-                    <span>{actualData.personalInfo.position}</span>
+                    <span>{actualData?.personalInfo?.position || bioData?.personalInfo?.position}</span>
                   </div>
                 )}
               </div>
-              {actualData.personalInfo.educationalBackground && actualData.personalInfo.educationalBackground !== "N/A" && (
+              {((actualData?.personalInfo?.educationalBackground && actualData.personalInfo.educationalBackground !== "N/A") || 
+                (bioData?.personalInfo?.educationalBackground && bioData.personalInfo.educationalBackground !== "N/A")) && (
                 <div className="text-center">
                   <div className="text-sm text-gray-300">
                     <span className="text-athlete-accent font-semibold">Education: </span>
-                    <span>{actualData.personalInfo.educationalBackground}</span>
+                    <span>{actualData?.personalInfo?.educationalBackground || bioData?.personalInfo?.educationalBackground}</span>
                   </div>
                 </div>
               )}
