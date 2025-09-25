@@ -10,7 +10,7 @@ import { useLanguage } from "@/lib/LanguageProvider";
 import { AnalysisPopup } from "./analysis-popup";
 import { 
   User, Trophy, Star, AlertTriangle, Calendar, Apple, 
-  Swords, Video, Loader2, Coins 
+  Swords, Video, Loader2, Coins, BarChart3 
 } from "lucide-react";
 import type { Athlete, User as UserType } from "@shared/schema";
 
@@ -36,6 +36,7 @@ const iconMap = {
   "apple-alt": Apple,
   "chess": Swords,
   "video": Video,
+  "bar-chart": BarChart3,
 };
 
 export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceCardProps) {

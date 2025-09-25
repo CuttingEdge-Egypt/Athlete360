@@ -21,9 +21,10 @@ import { AthleteComparison } from "@/components/ui/athlete-comparison";
 import { VideoAnalysisResults } from "@/components/ui/video-analysis-results";
 import { NutritionPlanDisplay } from "@/components/ui/nutrition-plan-display";
 import { DevelopmentPlanDisplay } from "@/components/ui/development-plan-display";
+import { StatisticsDisplay } from "@/components/ui/statistics-display";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X, RefreshCw } from "lucide-react";
+import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X, RefreshCw, TrendingUp } from "lucide-react";
 import type { Sport, Athlete } from "@shared/schema";
 import GenerationQueue from "@/components/ui/generation-queue";
 import { CountrySelect } from "@/components/ui/country-select";
@@ -44,6 +45,7 @@ export default function Home() {
   const [showNutritionForm, setShowNutritionForm] = useState<boolean>(true);
   const [developmentPlanData, setDevelopmentPlanData] = useState<any>(null);
   const [showDevelopmentForm, setShowDevelopmentForm] = useState<boolean>(true);
+  const [statisticsData, setStatisticsData] = useState<any>(null);
   const [developmentJobId, setDevelopmentJobId] = useState<string | null>(null);
   const [developmentProgress, setDevelopmentProgress] = useState<number>(0);
   const [developmentProgressMessage, setDevelopmentProgressMessage] = useState<string>("");
@@ -602,6 +604,32 @@ export default function Home() {
         } catch (error) {
           console.error('Failed to parse development plan data from URL:', error);
         }
+      } else if (tab === 'statistics' && data) {
+        try {
+          let parsedData;
+          if (data === 'fromStorage') {
+            // Get data from sessionStorage
+            const storedData = sessionStorage.getItem('statisticsData');
+            if (storedData) {
+              parsedData = JSON.parse(storedData);
+              // Clean up sessionStorage after use
+              sessionStorage.removeItem('statisticsData');
+            } else {
+              throw new Error('No statistics data found in sessionStorage');
+            }
+          } else {
+            // Legacy URL-based approach
+            parsedData = JSON.parse(decodeURIComponent(data));
+          }
+          
+          console.log('Parsed statistics data:', parsedData);
+          setStatisticsData(parsedData);
+          setActiveTab("statistics");
+          // Clean up URL after loading data
+          window.history.replaceState({}, '', window.location.pathname);
+        } catch (error) {
+          console.error('Failed to parse statistics data from URL:', error);
+        }
       }
     };
 
@@ -690,6 +718,32 @@ export default function Home() {
         window.history.replaceState({}, '', window.location.pathname);
       } catch (error) {
         console.error('Failed to parse development plan data from URL:', error);
+      }
+    } else if (tab === 'statistics' && data) {
+      try {
+        let parsedData;
+        if (data === 'fromStorage') {
+          // Get data from sessionStorage
+          const storedData = sessionStorage.getItem('statisticsData');
+          if (storedData) {
+            parsedData = JSON.parse(storedData);
+            // Clean up sessionStorage after use
+            sessionStorage.removeItem('statisticsData');
+          } else {
+            throw new Error('No statistics data found in sessionStorage');
+          }
+        } else {
+          // Legacy URL-based approach
+          parsedData = JSON.parse(decodeURIComponent(data));
+        }
+        
+        console.log('Location change - Parsed statistics data:', parsedData);
+        setStatisticsData(parsedData);
+        setActiveTab("statistics");
+        // Clean up URL after loading data
+        window.history.replaceState({}, '', window.location.pathname);
+      } catch (error) {
+        console.error('Failed to parse statistics data from URL:', error);
       }
     }
   }, [location]);
@@ -951,6 +1005,14 @@ export default function Home() {
       cost: 100,
       icon: "chess",
       color: "text-red-400"
+    },
+    {
+      id: "statistics",
+      title: t('services.statistics.title', 'Statistics'),
+      description: t('services.statistics.description', 'Comprehensive performance statistics and metrics analysis'),
+      cost: 60,
+      icon: "bar-chart",
+      color: "text-blue-400"
     }
   ];
 
@@ -1025,7 +1087,7 @@ export default function Home() {
 
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-6xl mx-auto">
-            <TabsList className="grid w-full grid-cols-4 bg-athlete-gray-800 mb-8">
+            <TabsList className="grid w-full grid-cols-5 bg-athlete-gray-800 mb-8">
               <TabsTrigger 
                 value="analysis" 
                 data-testid="tab-analysis"
@@ -1057,6 +1119,14 @@ export default function Home() {
               >
                 <CalendarDays size={16} />
                 {t('interface.developmentPlan')}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="statistics" 
+                data-testid="tab-statistics"
+                className="data-[state=active]:bg-athlete-accent flex items-center gap-2"
+              >
+                <TrendingUp size={16} />
+                {t('interface.statistics', 'Statistics')}
               </TabsTrigger>
             </TabsList>
 
@@ -1903,6 +1973,25 @@ export default function Home() {
                     />
                   </div>
                 )
+              )}
+            </TabsContent>
+
+            <TabsContent value="statistics" className="space-y-8">
+              {statisticsData ? (
+                <StatisticsDisplay 
+                  statistics={statisticsData}
+                  language={i18n.language}
+                />
+              ) : (
+                <Card className="bg-athlete-gray-800 border-gray-700">
+                  <CardContent className="p-8 text-center">
+                    <TrendingUp className="w-12 h-12 mx-auto mb-4 text-athlete-accent" />
+                    <h3 className="text-xl font-semibold text-white mb-2">No Statistics Available</h3>
+                    <p className="text-athlete-gray-400">
+                      Generate statistics from the Athlete Analysis tab first.
+                    </p>
+                  </CardContent>
+                </Card>
               )}
             </TabsContent>
 
