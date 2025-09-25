@@ -2459,11 +2459,19 @@ If web search provides limited information, use these approaches:
       
       // Clean markdown formatting from Gemini response
       let cleanedResponse = response.text.trim();
-      if (cleanedResponse.startsWith('```json')) {
-        cleanedResponse = cleanedResponse.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-      } else if (cleanedResponse.startsWith('```')) {
-        cleanedResponse = cleanedResponse.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      
+      // Remove markdown code blocks
+      if (cleanedResponse.startsWith('```')) {
+        // Find the first newline after opening ```
+        const firstNewline = cleanedResponse.indexOf('\n');
+        if (firstNewline !== -1) {
+          cleanedResponse = cleanedResponse.substring(firstNewline + 1);
+        }
+        // Remove closing ```
+        cleanedResponse = cleanedResponse.replace(/```\s*$/, '');
       }
+      
+      console.log("🧹 Cleaned response for parsing:", cleanedResponse.substring(0, 200) + "...");
       
       statisticsResponse = JSON.parse(cleanedResponse);
     } catch (parseError) {
