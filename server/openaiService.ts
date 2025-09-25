@@ -2382,6 +2382,9 @@ SPORT-SPECIFIC ADAPTATIONS:
 
 MANDATORY: Search extensively for authentic data and adapt the structure to showcase the most relevant statistics for ${sportName}. If certain categories don't apply to the sport, replace them with more relevant ones.`;
 
+    console.log("🔍 Sending prompt to GPT-5 for statistics generation...");
+    console.log("Prompt length:", prompt.length);
+    
     const response = await openai.responses.create({
       model: "gpt-5",
       input: prompt,
@@ -2389,7 +2392,9 @@ MANDATORY: Search extensively for authentic data and adapt the structure to show
       max_output_tokens: 8000
     });
 
-    console.log("GPT-5 Statistics Response:", response.output_text);
+    console.log("📊 GPT-5 Raw Response Object:", JSON.stringify(response, null, 2));
+    console.log("📊 GPT-5 Statistics Response Text:", response.output_text);
+    console.log("📊 Response length:", response.output_text?.length || 0);
 
     let statisticsResponse: any;
     try {
