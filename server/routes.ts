@@ -530,6 +530,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(newAthlete);
     } catch (error) {
       console.error("Error creating athlete with AI:", error);
+      
+      // Check for player not found error
+      if (error instanceof Error && error.message === 'PLAYER_NOT_FOUND') {
+        return res.status(404).json({ message: "Player Not Found" });
+      }
+      
       res.status(500).json({ message: "Failed to create athlete with AI" });
     }
   });

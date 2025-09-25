@@ -2023,15 +2023,13 @@ export async function generateAthleteBiography(name: string, sport: string, nati
     try {
       const athleteData = JSON.parse(cleanedText);
       
-      // Check for error responses and create fallback profile
+      // Check for error responses
       if (athleteData.error && (athleteData.error === 'no_data_found' || athleteData.error === 'search_failed' || athleteData.error === 'not_found')) {
-        console.log(`⚠️  No web data found for ${name}, creating fallback profile...`);
-        return createFallbackAthleteProfile(name, sport, country);
+        throw new Error('PLAYER_NOT_FOUND');
       }
       
       if (athleteData.success === false) {
-        console.log(`⚠️  No authentic athlete data found for ${name}, creating fallback profile...`);
-        return createFallbackAthleteProfile(name, sport, country);
+        throw new Error('PLAYER_NOT_FOUND');
       }
       
       // Validate required fields
@@ -2098,11 +2096,11 @@ export async function generateAthleteBiography(name: string, sport: string, nati
         
         // Check for error responses
         if (athleteData.error && (athleteData.error === 'no_data_found' || athleteData.error === 'search_failed' || athleteData.error === 'not_found')) {
-          throw new Error(`AI_WEB_SEARCH_FAILED: ${athleteData.error}`);
+          throw new Error('PLAYER_NOT_FOUND');
         }
         
         if (athleteData.success === false) {
-          throw new Error('AI_WEB_SEARCH_FAILED: No authentic athlete data found through Google search');
+          throw new Error('PLAYER_NOT_FOUND');
         }
         
         // Validate required fields
