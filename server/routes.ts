@@ -45,7 +45,7 @@ const developmentPlanSchema = z.object({
 
 type DevelopmentPlanRequest = z.infer<typeof developmentPlanSchema>;
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, compareAthletes, generateRankHistory } from "./openaiService";
+import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, compareAthletes, generateRankHistory, generateAthleteStatistics, AthleteStatistics } from "./openaiService";
 import { generateNutritionPlan, generateEnhancedNutritionPlan, generateRankHistoryWithGemini, generateAthleteBiography, generateDevelopmentPlan, type NutritionPlanFormData, type DevelopmentPlanFormData } from "./geminiService";
 import { analyzeVideoFile, analyzeVideoComprehensive } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
@@ -2154,6 +2154,99 @@ Return only valid JSON with the missing fields.`;
       res.status(500).json({ 
         message: "Unable to generate authentic beat strategies at this time. Please try again later. Your tokens have been refunded."
       });
+    }
+  });
+
+  // Statistics generation endpoint using GPT-5 
+  app.post('/api/analysis/:athleteId/statistics', isAuthenticated, async (req: any, res) => {
+    const tokenCost = 60;
+    const userId = req.user.claims.sub;
+    const athleteId = req.params.athleteId;
+    const language = req.body.language || 'en';
+    
+    try {
+      // Check tokens and deduct
+      const user = await storage.getUser(userId);
+      if (!user || (user.tokens || 0) < tokenCost) {
+        return res.status(402).json({ message: "Insufficient tokens" });
+      }
+
+      await storage.deductTokens(userId, tokenCost);
+      await storage.createTransaction({
+        userId,
+        action: "Statistics Analysis",
+        tokensDeducted: tokenCost,
+        athleteId,
+        serviceType: "statistics"
+      });
+
+      // Get athlete data
+      const athlete = await storage.getAthleteById(athleteId);
+      if (!athlete) {
+        return res.status(404).json({ message: "Athlete not found" });
+      }
+
+      const sport = await storage.getSportById(athlete.sportId);
+      const sportName = sport?.name || "Unknown Sport";
+      
+      const forceUpdate = req.query.forceUpdate === 'true';
+      
+      // Check for existing statistics in analysis logs (skip if force update)
+      let statisticsData;
+      if (!forceUpdate) {
+        const existingStatistics = await storage.getLatestAnalysisByType(athleteId, "statistics");
+        if (existingStatistics) {
+          console.log(`Using cached statistics for ${athlete.name}`);
+          statisticsData = existingStatistics.resultData;
+        }
+      }
+      
+      if (!statisticsData || forceUpdate) {
+        // Generate fresh statistics using GPT-5
+        console.log(`${forceUpdate ? 'Force updating' : 'Generating new'} statistics for ${athlete.name}`);
+        
+        try {
+          statisticsData = await generateAthleteStatistics(
+            athlete.name,
+            sportName,
+            athlete.country || undefined
+          );
+        } catch (aiError) {
+          console.error(`Error generating statistics for ${athlete.name}:`, aiError);
+          
+          // Check if this is a web search failure that should refund tokens
+          if (aiError instanceof Error && aiError.message.includes('AI_WEB_SEARCH_FAILED')) {
+            await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "statistics", "Statistics Analysis");
+            return res.status(404).json({ 
+              message: "AI web search could not find reliable statistical data for this athlete. Please try again later. Your tokens have been refunded.",
+              error: "web_search_failed",
+              shouldRetry: true
+            });
+          }
+          
+          // For other errors, also refund tokens
+          await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "statistics", "Statistics Analysis");
+          return res.status(500).json({ 
+            message: "Failed to generate statistics analysis. Your tokens have been refunded.",
+            error: aiError instanceof Error ? aiError.message : String(aiError)
+          });
+        }
+      }
+
+      await storage.createAnalysisLog({
+        userId,
+        athleteId,
+        serviceType: "statistics",
+        language,
+        resultData: statisticsData
+      });
+
+      res.json(statisticsData);
+    } catch (error) {
+      console.error("Error generating statistics analysis:", error);
+      // Refund tokens for unexpected errors
+      await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "statistics", "Statistics Analysis");
+      res.status(500).json({ message: "Failed to generate statistics analysis. Your tokens have been refunded." });
     }
   });
 

@@ -2391,23 +2391,26 @@ MANDATORY: Search extensively for authentic data and adapt the structure to show
 
     console.log("GPT-5 Statistics Response:", response.output_text);
 
-    let statisticsData: AthleteStatistics;
+    let statisticsResponse: any;
     try {
-      statisticsData = JSON.parse(response.output_text);
+      statisticsResponse = JSON.parse(response.output_text);
     } catch (parseError) {
       console.error("Failed to parse statistics JSON:", parseError);
       throw new Error("AI_RESPONSE_PARSE_ERROR");
     }
 
-    // Validate the response structure
-    if (statisticsData.error) {
-      console.log("Statistics generation failed:", statisticsData.error);
-      throw new Error(`AI_WEB_SEARCH_FAILED: ${statisticsData.errorMessage}`);
+    // Check if the response contains an error
+    if (statisticsResponse.error) {
+      console.log("Statistics generation failed:", statisticsResponse.error);
+      throw new Error(`AI_WEB_SEARCH_FAILED: ${statisticsResponse.errorMessage}`);
     }
 
-    if (!statisticsData.athlete || !statisticsData.categories) {
+    // Validate the response structure
+    if (!statisticsResponse.athlete || !statisticsResponse.categories) {
       throw new Error("Invalid statistics data structure");
     }
+
+    const statisticsData: AthleteStatistics = statisticsResponse;
 
     console.log(`✅ Successfully generated statistics for ${athleteName}`);
     return statisticsData;
