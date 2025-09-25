@@ -2023,13 +2023,15 @@ export async function generateAthleteBiography(name: string, sport: string, nati
     try {
       const athleteData = JSON.parse(cleanedText);
       
-      // Check for error responses
+      // Check for error responses and create fallback profile
       if (athleteData.error && (athleteData.error === 'no_data_found' || athleteData.error === 'search_failed' || athleteData.error === 'not_found')) {
-        throw new Error(`AI_WEB_SEARCH_FAILED: ${athleteData.error}`);
+        console.log(`⚠️  No web data found for ${name}, creating fallback profile...`);
+        return createFallbackAthleteProfile(name, sport, country);
       }
       
       if (athleteData.success === false) {
-        throw new Error('AI_WEB_SEARCH_FAILED: No authentic athlete data found through Google search');
+        console.log(`⚠️  No authentic athlete data found for ${name}, creating fallback profile...`);
+        return createFallbackAthleteProfile(name, sport, country);
       }
       
       // Validate required fields
