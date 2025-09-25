@@ -921,7 +921,8 @@ export default function Home() {
       // Get current language from localStorage
       const language = localStorage.getItem('i18nextLng') || 'en';
       
-      const response = await fetch(`/api/analysis/${selectedAthlete.id}/bio`, {
+      // Add forceUpdate parameter to ensure fresh comprehensive bio analysis
+      const response = await fetch(`/api/analysis/${selectedAthlete.id}/bio?forceUpdate=true`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -946,7 +947,7 @@ export default function Home() {
         
         toast({
           title: "Analysis Complete",
-          description: "Biography analysis generated successfully!",
+          description: "Comprehensive biography analysis generated successfully!",
         });
       } else {
         toast({
