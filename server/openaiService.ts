@@ -1,7 +1,11 @@
 import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
 
 // GPT-5 is now available and is the latest OpenAI model with default temperature 1.0 (cannot go under)
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// Initialize Gemini API client for statistics generation
+const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 export interface AthleteStatistics {
   player: {
@@ -2430,23 +2434,29 @@ If web search provides limited information, use these approaches:
 8. Set data_quality to "low" when using primarily estimated data
 9. ALWAYS generate realistic, sport-appropriate statistics regardless of web search results`;
 
-    console.log("🔍 Sending prompt to GPT-5 for statistics generation...");
+    console.log("🔍 Sending prompt to Gemini-2.5-pro for statistics generation...");
     console.log("Prompt length:", prompt.length);
     
-    const response = await openai.responses.create({
-      model: "gpt-5",
-      input: prompt,
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 16000 // Increased to allow for extensive reasoning + final JSON response
+    const response = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      contents: prompt,
+      config: {
+        temperature: 0.1,
+        maxOutputTokens: 16000,
+        tools: [{ googleSearch: {} }]
+      }
     });
 
-    console.log("📊 GPT-5 Raw Response Object:", JSON.stringify(response, null, 2));
-    console.log("📊 GPT-5 Statistics Response Text:", response.output_text);
-    console.log("📊 Response length:", response.output_text?.length || 0);
+    console.log("📊 Gemini-2.5-pro Raw Response Object:", JSON.stringify(response, null, 2));
+    console.log("📊 Gemini-2.5-pro Statistics Response Text:", response.text);
+    console.log("📊 Response length:", response.text?.length || 0);
 
     let statisticsResponse: any;
     try {
-      statisticsResponse = JSON.parse(response.output_text);
+      if (!response.text) {
+        throw new Error("Empty response from Gemini");
+      }
+      statisticsResponse = JSON.parse(response.text);
     } catch (parseError) {
       console.error("Failed to parse statistics JSON:", parseError);
       throw new Error("AI_RESPONSE_PARSE_ERROR");
