@@ -80,6 +80,17 @@ export interface AthleteData {
   profileImageUrl?: string | null;
   worldRank?: string;
   currentRecord?: string;
+  personalInfo?: {
+    age?: number | string;
+    dateOfBirth?: string;
+    weight?: string;
+    height?: string;
+    position?: string;
+    educationalBackground?: string;
+    previousSports?: string[];
+    yearsInCurrentSport?: string;
+    [key: string]: any; // Allow additional fields
+  };
 }
 
 // Enhanced nutrition plan function that accepts comprehensive form data

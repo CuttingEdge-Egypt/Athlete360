@@ -869,7 +869,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               "Competition history verified through real-time data",
               "Technical analysis from OpenAI's latest model"
             ],
-            personalInfo: {
+            personalInfo: gptBioAnalysis.personalInfo ? {
+              ...gptBioAnalysis.personalInfo, // Include all AI-generated personal info fields
+              sport: sportName,
+              status: "Active Professional", 
+              analysisDate: new Date().toLocaleDateString(),
+              lastUpdated: forceUpdate ? "Force updated with GPT-5 web search analysis" : "Fresh GPT-5 analysis with web search"
+            } : {
               sport: sportName,
               status: "Active Professional", 
               analysisDate: new Date().toLocaleDateString(),
