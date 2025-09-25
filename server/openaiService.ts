@@ -2386,7 +2386,14 @@ REQUIRED UNIVERSAL JSON STRUCTURE:
     "notable_achievements": ["achievement 1", "achievement 2", "achievement 3"]
   },
   "last_updated": "2025-09-25T19:30:00Z",
-  "data_quality": "high|medium|low"
+  "data_quality": "high|medium|low",
+  "references": [
+    {
+      "source": "Brief description of data source",
+      "data_points": ["Specific stats or facts used from this source"],
+      "reliability": "high|medium|low"
+    }
+  ]
 }
 
 DEEP SPORT-SPECIFIC METRICS REQUIREMENTS:
@@ -2419,8 +2426,8 @@ MANDATORY REQUIREMENTS FOR EVERY SPORT:
 - Include development/progression metrics over time
 - Add injury and recovery statistics where relevant
 - Include equipment, technique, or style-specific statistics
-- NO source URLs, links, citations anywhere in response
 - All metrics must be authentic and sport-appropriate for ${sportName}
+- INCLUDE REFERENCES: Add a "references" array listing the specific web sources and data points you used from your web search. For each reference, include the source description, specific data points used, and reliability assessment. This is for validation purposes only.
 
 GUIDANCE FOR LIMITED WEB SEARCH DATA:
 If web search provides limited information, use these approaches:
@@ -2510,6 +2517,13 @@ If web search provides limited information, use these approaches:
     if (statisticsResponse.all_time.statistics.sport_specific?.metrics) {
       statisticsResponse.all_time.statistics.sport_specific.metrics = 
         normalizeMetrics(statisticsResponse.all_time.statistics.sport_specific.metrics);
+    }
+
+    // TEMPORARY: Remove references field before returning (for validation testing only)
+    // TODO: Remove this entire references system after testing is complete
+    if (statisticsResponse.references) {
+      console.log("📚 References from Gemini (for validation):", JSON.stringify(statisticsResponse.references, null, 2));
+      delete statisticsResponse.references;
     }
 
     const statisticsData: AthleteStatistics = statisticsResponse;
