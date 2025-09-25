@@ -70,6 +70,16 @@ export const athletes = pgTable("athletes", {
   rank: integer("rank"),
   profileImageUrl: varchar("profile_image_url"),
   achievements: jsonb("achievements").$type<string[]>(),
+  personalInfo: jsonb("personal_info").$type<{
+    age?: string;
+    dateOfBirth?: string;
+    height?: string;
+    weight?: string;
+    educationalBackground?: string;
+    position?: string;
+    yearsInCurrentSport?: string;
+    previousSports?: string[];
+  }>(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

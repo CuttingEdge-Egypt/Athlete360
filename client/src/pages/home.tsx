@@ -1284,10 +1284,48 @@ export default function Home() {
                             )}
                           </h3>
                           <p className="text-gray-400 capitalize">{selectedAthlete.country || "Unknown Country"}</p>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <Star className="text-athlete-warning" size={16} />
-                            <span className="text-sm text-gray-300">Rank #{selectedAthlete.rank || "TBD"}</span>
-                          </div>
+                          {/* Personal Information Badges */}
+                          {selectedAthlete.personalInfo && (
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {selectedAthlete.personalInfo.age && (
+                                <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-blue-400/60 transition-all duration-200">
+                                  <div className="flex items-center justify-center w-4 h-4 bg-blue-500/20 rounded-full">
+                                    <span className="text-[10px] text-blue-400">📅</span>
+                                  </div>
+                                  <span className="text-xs text-slate-400 font-medium">Age</span>
+                                  <span className="text-xs font-bold text-white">{selectedAthlete.personalInfo.age}</span>
+                                </div>
+                              )}
+                              
+                              {selectedAthlete.personalInfo.height && (
+                                <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-yellow-400/60 transition-all duration-200">
+                                  <div className="flex items-center justify-center w-4 h-4 bg-yellow-500/20 rounded-full">
+                                    <span className="text-[10px] text-yellow-400">📏</span>
+                                  </div>
+                                  <span className="text-xs text-slate-400 font-medium">Height</span>
+                                  <span className="text-xs font-bold text-white">{selectedAthlete.personalInfo.height}</span>
+                                </div>
+                              )}
+                              
+                              {selectedAthlete.personalInfo.position && selectedAthlete.personalInfo.position !== "N/A" && (
+                                <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-purple-400/60 transition-all duration-200">
+                                  <div className="flex items-center justify-center w-4 h-4 bg-purple-500/20 rounded-full">
+                                    <span className="text-[10px] text-purple-400">🏆</span>
+                                  </div>
+                                  <span className="text-xs text-slate-400 font-medium">Position</span>
+                                  <span className="text-xs font-bold text-white">{selectedAthlete.personalInfo.position}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* Fallback rank display if no personal info */}
+                          {!selectedAthlete.personalInfo && selectedAthlete.rank && (
+                            <div className="flex items-center space-x-2 mt-1">
+                              <Star className="text-athlete-warning" size={16} />
+                              <span className="text-sm text-gray-300">Rank #{selectedAthlete.rank}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="text-athlete-accent">

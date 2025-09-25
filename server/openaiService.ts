@@ -625,6 +625,127 @@ export interface AnalysisData {
   rankHistory: Array<{ rank: number; date: string; tournament?: string }>;
 }
 
+// Personal Info generation interface
+export interface PersonalInfo {
+  age?: string;
+  dateOfBirth?: string;
+  height?: string;
+  weight?: string;
+  educationalBackground?: string;
+  position?: string;
+  yearsInCurrentSport?: string;
+  previousSports?: string[];
+}
+
+// GPT-Image-1 implementation of athlete image generation
+export async function generateAthleteImage(name: string, sport: string, nationality?: string, personalInfo?: PersonalInfo): Promise<string | null> {
+  try {
+    // Create detailed prompt based on available information
+    const nationalityDesc = nationality ? ` from ${nationality}` : '';
+    const physicalDesc = personalInfo?.height || personalInfo?.weight ? 
+      ` Physical characteristics: ${personalInfo.height || 'athletic height'}, ${personalInfo.weight || 'athletic build'}` : '';
+    const ageDesc = personalInfo?.age ? ` Age: ${personalInfo.age}` : '';
+    
+    const prompt = `Professional sports portrait of ${name}, a ${sport} athlete${nationalityDesc}.${ageDesc}${physicalDesc} 
+    High-quality professional headshot, athletic appearance, confident expression, 
+    sports photography style, clean background, well-lit, professional sports portrait.
+    Focus on realistic human features, athletic build appropriate for ${sport}.`;
+
+    console.log(`🎨 Generating image for ${name} using GPT-Image-1...`);
+    
+    const response = await openai.images.generate({
+      model: "gpt-image-1",
+      prompt: prompt,
+      n: 1,
+      size: "1024x1024",
+      response_format: "url"
+    });
+
+    if (response.data && response.data.length > 0 && response.data[0].url) {
+      console.log(`✅ Successfully generated image for ${name}`);
+      return response.data[0].url;
+    }
+    
+    throw new Error('No image URL returned from GPT-Image-1');
+    
+  } catch (error) {
+    console.error(`❌ Image generation failed for ${name}:`, error);
+    return null; // Return null to trigger fallback to default profile icon
+  }
+}
+
+// GPT-5 implementation of athlete personal info generation (for AI search)
+export async function getAthletePersonalInfo(name: string, sport: string, nationality?: string): Promise<PersonalInfo> {
+  const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const nationalityContext = nationality ? ` from ${nationality}` : '';
+  
+  const prompt = `Today's date is ${currentDate}.
+    Search the web for factual, up-to-date personal information about the athlete "${name}"${nationalityContext}, who competes in ${sport}.
+    
+    Extract ONLY the following personal information if available:
+    - Age (current age)
+    - Date of birth
+    - Height
+    - Weight  
+    - Position (if applicable to the sport)
+    - Educational background (school, university, club affiliations)
+    - Years competing in current sport
+    - Previous sports (if any)
+
+    CRITICAL REQUIREMENTS:
+    - Only provide factual, verifiable personal information
+    - Use "N/A" for any information not found
+    - Do not generate or estimate any data
+    - If you cannot find reliable personal information, respond with: {"error": "no_personal_info_found"}
+
+    Format the response as a JSON object with these exact fields:
+    {
+      "age": "string or N/A",
+      "dateOfBirth": "string or N/A", 
+      "height": "string or N/A",
+      "weight": "string or N/A",
+      "position": "string or N/A",
+      "educationalBackground": "string or N/A",
+      "yearsInCurrentSport": "string or N/A",
+      "previousSports": ["array of sports or empty array"]
+    }`;
+
+  try {
+    const response = await openai.responses.create({
+      model: "gpt-5",
+      input: prompt,
+      tools: [{ type: "web_search_preview" }],
+      max_output_tokens: 2000,
+    });
+
+    const result = JSON.parse(response.output_text);
+    
+    // Check for error responses
+    if (result.error === 'no_personal_info_found') {
+      throw new Error('PERSONAL_INFO_NOT_FOUND');
+    }
+    
+    return {
+      age: result.age === "N/A" ? undefined : result.age,
+      dateOfBirth: result.dateOfBirth === "N/A" ? undefined : result.dateOfBirth,
+      height: result.height === "N/A" ? undefined : result.height,
+      weight: result.weight === "N/A" ? undefined : result.weight,
+      position: result.position === "N/A" ? undefined : result.position,
+      educationalBackground: result.educationalBackground === "N/A" ? undefined : result.educationalBackground,
+      yearsInCurrentSport: result.yearsInCurrentSport === "N/A" ? undefined : result.yearsInCurrentSport,
+      previousSports: Array.isArray(result.previousSports) ? result.previousSports : []
+    };
+  } catch (error) {
+    console.error(`Error getting personal info for ${name}:`, error);
+    
+    if (error instanceof Error && error.message.includes('PERSONAL_INFO_NOT_FOUND')) {
+      throw error;
+    }
+    
+    throw new Error(`Failed to generate personal info for ${name}: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
 // GPT-5 implementation of athlete profile generation
 export async function getAthleteProfile(name: string, sport: string, nationality?: string): Promise<AthleteData> {
   const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });

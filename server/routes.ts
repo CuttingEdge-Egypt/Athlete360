@@ -45,7 +45,7 @@ const developmentPlanSchema = z.object({
 
 type DevelopmentPlanRequest = z.infer<typeof developmentPlanSchema>;
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, compareAthletes, generateRankHistory, generateAthleteStatistics, AthleteStatistics } from "./openaiService";
+import { getAthleteProfile, getAthletePersonalInfo, generateAthleteImage, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, compareAthletes, generateRankHistory, generateAthleteStatistics, AthleteStatistics } from "./openaiService";
 import { generateNutritionPlan, generateEnhancedNutritionPlan, generateRankHistoryWithGemini, generateAthleteBiography, generateDevelopmentPlan, type NutritionPlanFormData, type DevelopmentPlanFormData } from "./geminiService";
 import { analyzeVideoFile, analyzeVideoComprehensive } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
@@ -448,80 +448,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Sport not found" });
       }
 
-      // Use Gemini 2.5 Pro to get athlete profile
-      console.log(`Creating athlete ${name} for sport ${sport.name} using Gemini 2.5 Pro...`);
-      const aiProfile = await generateAthleteBiography(name, sport.name, req.body.nationality);
+      // Use GPT-5 to get athlete personal info only (no bio)
+      console.log(`Creating athlete ${name} for sport ${sport.name} using GPT-5 personal info generation...`);
+      const personalInfo = await getAthletePersonalInfo(name, sport.name, req.body.nationality);
 
-      // Extract nationality from bio data first
-      const extractNationality = (bio: string): string | undefined => {
-        const text = bio.toLowerCase();
-        
-        // Country mapping for common nationalities found in bios
-        const nationalityMap: { [key: string]: string } = {
-          'american': 'United States',
-          'spanish': 'Spain',
-          'egyptian': 'Egypt',
-          'korean': 'South Korea',
-          'south korean': 'South Korea',
-          'uzbek': 'Uzbekistan',
-          'brazilian': 'Brazil',
-          'argentinian': 'Argentina',
-          'portuguese': 'Portugal',
-          'palestinian': 'Palestine',
-          'british': 'United Kingdom',
-          'english': 'United Kingdom',
-          'canadian': 'Canada',
-          'french': 'France',
-          'german': 'Germany',
-          'italian': 'Italy',
-          'japanese': 'Japan',
-          'chinese': 'China',
-          'australian': 'Australia',
-          'mexican': 'Mexico',
-          'turkish': 'Turkey',
-          'serbian': 'Serbia',
-          'croatian': 'Croatia',
-          'polish': 'Poland',
-          'russian': 'Russia',
-          'ukrainian': 'Ukraine',
-          'thai': 'Thailand',
-          'iranian': 'Iran',
-          'iraqi': 'Iraq',
-        };
-        
-        // Check for nationality keywords
-        for (const [adjective, country] of Object.entries(nationalityMap)) {
-          if (text.includes(adjective)) {
-            return country;
-          }
-        }
-        
-        return undefined;
-      };
+      // Use provided nationality or default to Unknown
+      const athleteCountry = req.body.nationality || req.body.country || "Unknown";
 
-      const extractedCountry = extractNationality(aiProfile.bio);
+      // Generate athlete image using GPT-Image-1 with personal info
+      console.log(`🎨 Generating athlete image for ${name}...`);
+      let profileImageUrl = await generateAthleteImage(name, sport.name, athleteCountry, personalInfo);
 
-      // Search for athlete profile image using enhanced AI-powered search
-      console.log(`🔍 Searching for profile image for ${name} in ${sport.name}...`);
-      let profileImageUrl = await searchAthleteImage(name, sport.name, req.body.nationality || extractedCountry);
-
-      // Create athlete in database
-      // Handle rank - convert to number if possible, otherwise store as undefined
-      let rankValue = undefined;
-      if (typeof aiProfile.rank === 'number') {
-        rankValue = aiProfile.rank;
-      } else if (typeof aiProfile.rank === 'string' && !isNaN(Number(aiProfile.rank)) && aiProfile.rank !== 'N/A') {
-        rankValue = Number(aiProfile.rank);
+      // If image generation fails, use default profile icon (null will trigger fallback in frontend)
+      if (!profileImageUrl) {
+        console.log(`⚠️ Image generation failed for ${name}, will use default profile icon`);
       }
 
       const athleteData = {
         name: name.trim(),
         sportId,
-        bio: aiProfile.bio || `Professional ${sport.name} athlete`,
-        rank: rankValue,
-        country: extractedCountry,
+        bio: `Professional ${sport.name} athlete`, // Minimal bio placeholder
+        rank: undefined, // No rank during creation - will be populated by personal info display
+        country: athleteCountry,
         profileImageUrl: profileImageUrl || undefined,
-        achievements: aiProfile.achievements || []
+        achievements: [], // No achievements during initial creation
+        personalInfo: personalInfo // Store personal info for display
       };
 
       const newAthlete = await storage.createAthlete(athleteData);
@@ -2206,7 +2157,7 @@ Return only valid JSON with the missing fields.`;
       // Check for existing statistics in analysis logs (skip if force update)
       let statisticsData;
       if (!forceUpdate) {
-        const existingAnalyses = await storage.getLatestAnalysisByType("statistics");
+        const existingAnalyses = await storage.getLatestAnalysisByType(["statistics"]);
         const existingStatistics = existingAnalyses.find(analysis => analysis.athleteId === athleteId);
         if (existingStatistics) {
           console.log(`Using cached statistics for ${athlete.name}`);
