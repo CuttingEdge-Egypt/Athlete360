@@ -839,7 +839,6 @@ export default function Home() {
   const [showBioPopup, setShowBioPopup] = useState(false);
   const [bioData, setBioData] = useState(null);
   const [showStatisticsPopup, setShowStatisticsPopup] = useState(false);
-  const [isBioLoading, setIsBioLoading] = useState(false);
 
   const { data: sports = [] } = useQuery<Sport[]>({
     queryKey: ["/api/sports"],
@@ -916,15 +915,13 @@ export default function Home() {
   };
 
   const handleAthleteCardClick = async () => {
-    if (!selectedAthlete || isBioLoading) return;
+    if (!selectedAthlete) return;
     
-    setIsBioLoading(true);
     try {
       // Get current language from localStorage
       const language = localStorage.getItem('i18nextLng') || 'en';
       
-      // Add forceUpdate parameter to ensure fresh comprehensive bio analysis
-      const response = await fetch(`/api/analysis/${selectedAthlete.id}/bio?forceUpdate=true`, {
+      const response = await fetch(`/api/analysis/${selectedAthlete.id}/bio`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -949,7 +946,7 @@ export default function Home() {
         
         toast({
           title: "Analysis Complete",
-          description: "Comprehensive biography analysis generated successfully!",
+          description: "Biography analysis generated successfully!",
         });
       } else {
         toast({
@@ -964,8 +961,6 @@ export default function Home() {
         description: "Failed to load athlete biography",
         variant: "destructive",
       });
-    } finally {
-      setIsBioLoading(false);
     }
   };
 
@@ -1253,12 +1248,8 @@ export default function Home() {
               {/* Current Athlete Display */}
               {selectedAthlete && (
                 <Card 
-                  className={`bg-athlete-gray-700 border-gray-600 transition-colors duration-300 ${
-                    isBioLoading 
-                      ? 'cursor-not-allowed opacity-75' 
-                      : 'cursor-pointer hover:border-athlete-accent'
-                  }`}
-                  onClick={isBioLoading ? undefined : handleAthleteCardClick}
+                  className="bg-athlete-gray-700 border-gray-600 cursor-pointer hover:border-athlete-accent transition-colors duration-300"
+                  onClick={handleAthleteCardClick}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -1300,14 +1291,7 @@ export default function Home() {
                         </div>
                       </div>
                       <div className="text-athlete-accent">
-                        {isBioLoading ? (
-                          <div className="flex items-center space-x-2">
-                            <Loader2 className="animate-spin" size={16} />
-                            <span className="text-sm">Generating Biography...</span>
-                          </div>
-                        ) : (
-                          <span className="text-sm">Click for Biography →</span>
-                        )}
+                        <span className="text-sm">Click for Biography →</span>
                       </div>
                     </div>
                   </CardContent>

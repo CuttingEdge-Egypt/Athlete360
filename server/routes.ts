@@ -839,17 +839,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           if (forceUpdate) {
             try {
-              gptBioAnalysis = await getAthleteProfile(athlete.name, sportName, athlete.country || undefined);
+              gptBioAnalysis = await generateAthleteBiography(athlete.name, sportName, athlete.country || undefined, language);
             } catch (refreshError) {
               console.log(`Refresh failed for ${athlete.name}, falling back to regular bio generation:`, refreshError);
-              gptBioAnalysis = await getAthleteProfile(athlete.name, sportName, athlete.country || undefined);
+              gptBioAnalysis = await generateAthleteBiography(athlete.name, sportName, athlete.country || undefined, language);
             }
           } else {
-            gptBioAnalysis = await getAthleteProfile(athlete.name, sportName, athlete.country || undefined);
+            gptBioAnalysis = await generateAthleteBiography(athlete.name, sportName, athlete.country || undefined, language);
           }
           
           // Update athlete bio in database with GPT-5 AI content
-          const rankValue = gptBioAnalysis.rank;
+          const rankValue = gptBioAnalysis.currentRank || gptBioAnalysis.rank;
           await storage.updateAthlete(athleteId, { 
             bio: gptBioAnalysis.bio,
             rank: typeof rankValue === 'number' ? rankValue : 
@@ -861,15 +861,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           bioAnalysis = {
             name: gptBioAnalysis.name,
             bio: gptBioAnalysis.bio,
-            playersStory: "", // Note: getAthleteProfile doesn't return playersStory, but bio is comprehensive
-            rank: gptBioAnalysis.rank,
+            playersStory: gptBioAnalysis.playersStory || "",
+            rank: gptBioAnalysis.currentRank || gptBioAnalysis.rank,
             profileImageUrl: athlete.profileImageUrl,
             achievements: gptBioAnalysis.achievements && Array.isArray(gptBioAnalysis.achievements) && gptBioAnalysis.achievements.length > 0 ? gptBioAnalysis.achievements.slice(0, 4) : [
               "Career achievements from GPT-5 analysis with web search",
               "Competition history verified through real-time data",
               "Technical analysis from OpenAI's latest model"
             ],
-            personalInfo: {
+            personalInfo: gptBioAnalysis.personalInfo ? {
+              ...gptBioAnalysis.personalInfo, // Include all AI-generated personal info fields
+              sport: sportName,
+              status: "Active Professional", 
+              analysisDate: new Date().toLocaleDateString(),
+              lastUpdated: forceUpdate ? "Force updated with GPT-5 web search analysis" : "Fresh GPT-5 analysis with web search"
+            } : {
               sport: sportName,
               status: "Active Professional", 
               analysisDate: new Date().toLocaleDateString(),
