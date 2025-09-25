@@ -651,13 +651,14 @@ export async function generateAthleteImage(name: string, sport: string, national
     sports photography style, clean background, well-lit, professional sports portrait.
     Focus on realistic human features, athletic build appropriate for ${sport}.`;
 
-    console.log(`🎨 Generating image for ${name} using GPT-Image-1...`);
+    console.log(`🎨 Generating image for ${name} using DALL-E-3...`);
     
     const response = await openai.images.generate({
-      model: "gpt-image-1",
+      model: "dall-e-3",
       prompt: prompt,
       n: 1,
       size: "1024x1024",
+      quality: "standard",
       response_format: "url"
     });
 
@@ -711,14 +712,28 @@ export async function getAthletePersonalInfo(name: string, sport: string, nation
     }`;
 
   try {
-    const response = await openai.responses.create({
-      model: "gpt-5",
-      input: prompt,
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 2000,
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are a sports research assistant. Provide only factual, verifiable personal information about athletes in valid JSON format."
+        },
+        {
+          role: "user", 
+          content: prompt
+        }
+      ],
+      max_tokens: 1000,
+      temperature: 0.1,
     });
 
-    const result = JSON.parse(response.output_text);
+    const responseText = response.choices[0]?.message?.content?.trim();
+    if (!responseText) {
+      throw new Error('Empty response from OpenAI');
+    }
+
+    const result = JSON.parse(responseText);
     
     // Check for error responses
     if (result.error === 'no_personal_info_found') {
