@@ -4,32 +4,39 @@ import OpenAI from "openai";
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export interface AthleteStatistics {
-  athlete: {
+  player: {
     name: string;
+    age?: number;
+    nationality: string;
+    team?: string;
     sport: string;
-    country: string;
+    position?: string;
   };
-  categories: {
-    [categoryName: string]: {
-      title: string;
-      description: string;
-      icon?: string;
-      stats: Array<{
+  season?: {
+    year: string;
+    league?: string;
+    team?: string;
+  };
+  statistics: {
+    common: {
+      games_played: number;
+      minutes_played: number;
+      wins: number;
+      losses: number;
+    };
+    sport_specific: {
+      category: string;
+      metrics: Array<{
         name: string;
-        value: string | number;
-        unit?: string;
-        type: "number" | "percentage" | "rank" | "ratio" | "text" | "score" | "rating";
-        trend?: "up" | "down" | "stable" | "unknown";
-        context: string;
-        timeframe?: string;
+        value: number | string;
+        unit?: string | null;
       }>;
     };
   };
-  highlights: Array<{
+  highlights?: Array<{
     title: string;
     value: string;
     description: string;
-    category: string;
     icon?: string;
   }>;
   summary?: {
@@ -37,8 +44,8 @@ export interface AthleteStatistics {
     key_strengths: string[];
     notable_achievements: string[];
   };
-  lastUpdated: string;
-  dataQuality: "high" | "medium" | "low";
+  last_updated: string;
+  data_quality: "high" | "medium" | "low";
 }
 
 // Helper function to search for athlete profile picture from taekwondodata.com
@@ -2216,7 +2223,7 @@ export async function generateAthleteStatistics(
   try {
     console.log(`🔢 Generating statistics for ${athleteName} in ${sportName}...`);
 
-    const prompt = `You are an expert sports statistician and analyst with advanced web search capabilities. You MUST search the internet extensively to find current, authentic statistical data about this athlete.
+    const prompt = `You are a statistics generator for athletes across all sports. You MUST search the internet extensively to find current, authentic statistical data about this athlete.
 
 ATHLETE TO ANALYZE:
 Name: ${athleteName}
@@ -2227,9 +2234,8 @@ CRITICAL INSTRUCTIONS:
 1. MANDATORY: Use your web search tool to find current statistical data from official sources
 2. MANDATORY: Search federation websites, competition databases, news sources, and statistical platforms
 3. MANDATORY: Return only valid JSON with no extra text or explanations
-4. MANDATORY: Create 3-6 sport-specific categories based on what's most relevant for ${sportName}
-5. CRITICAL: DO NOT include any source URLs, links, citations, or references in the response
-6. CRITICAL: Remove all "source" fields - provide clean data only
+4. CRITICAL: DO NOT include any source URLs, links, citations, or references in the response
+5. CRITICAL: Use the EXACT JSON structure specified below
 
 SEARCH FOR THESE DATA SOURCES:
 - Official sport federation statistics and rankings
@@ -2237,14 +2243,6 @@ SEARCH FOR THESE DATA SOURCES:
 - Career achievements and milestones
 - Recent performance data (2024-2025)
 - Training and physical performance metrics
-- Technical skill assessments and ratings
-
-SPORT-SPECIFIC CATEGORY EXAMPLES (create 3-6 most relevant):
-Combat Sports (Boxing, Taekwondo, MMA): "performance", "striking", "defense", "physical"
-Team Sports (Football, Basketball): "scoring", "playmaking", "defense", "physical"
-Tennis/Individual: "serving", "groundstrokes", "movement", "mental"
-Swimming/Track: "technique", "speed", "endurance", "consistency"
-Gymnastics: "difficulty", "execution", "consistency", "apparatus"
 
 CRITICAL ERROR HANDLING:
 If web search fails completely or you cannot find reliable data, return this EXACT structure:
@@ -2256,54 +2254,57 @@ If web search fails completely or you cannot find reliable data, return this EXA
   "suggestion": "Please verify athlete name and try again"
 }
 
-REQUIRED FLEXIBLE JSON STRUCTURE (adapt categories to ${sportName}):
+REQUIRED UNIVERSAL JSON STRUCTURE:
 {
-  "athlete": {
+  "player": {
     "name": "${athleteName}",
+    "age": number_or_null,
+    "nationality": "${athleteCountry || 'Unknown'}",
+    "team": "string_or_null",
     "sport": "${sportName}",
-    "country": "${athleteCountry || 'Unknown'}"
+    "position": "string_or_null"
   },
-  "categories": {
-    "category_key_1": {
-      "title": "Category Title (e.g., Performance, Scoring, Technique)",
-      "description": "What this category measures for ${sportName}",
-      "icon": "chart|target|trophy|user|zap|activity",
-      "stats": [
-        {
-          "name": "Statistic name",
-          "value": "Real data (no sources/URLs)",
-          "unit": "unit if needed",
-          "type": "number|percentage|rank|text|rating",
-          "trend": "up|down|stable|unknown",
-          "context": "Brief explanation (no sources)",
-          "timeframe": "When this applies"
-        }
-      ]
+  "season": {
+    "year": "2024/25",
+    "league": "string_or_null",
+    "team": "string_or_null"
+  },
+  "statistics": {
+    "common": {
+      "games_played": number,
+      "minutes_played": number,
+      "wins": number,
+      "losses": number
     },
-    "category_key_2": {
-      "title": "Another relevant category for ${sportName}",
-      "description": "Description",
-      "icon": "chart|target|trophy|user|zap|activity",
-      "stats": [
-        // 2-5 relevant stats for this category
+    "sport_specific": {
+      "category": "${sportName}",
+      "metrics": [
+        {
+          "name": "Statistic name (e.g., Goals, Punch Accuracy, Aces)",
+          "value": number_or_string,
+          "unit": "string_or_null (e.g., %, minutes, rounds, goals)"
+        },
+        {
+          "name": "Another stat relevant to ${sportName}",
+          "value": number_or_string,
+          "unit": "string_or_null"
+        }
+        // Add 8-15 metrics most relevant to ${sportName}
       ]
     }
-    // Add 3-6 total categories most relevant to ${sportName}
   },
   "highlights": [
     {
       "title": "Top Statistical Highlight",
-      "value": "Most impressive stat (no sources)",
+      "value": "Most impressive stat",
       "description": "Why this stands out",
-      "category": "category_key",
-      "icon": "star|award|trending-up"
+      "icon": "star"
     },
     {
       "title": "Recent Achievement",
       "value": "Latest notable performance",
-      "description": "Context and significance",
-      "category": "category_key",
-      "icon": "star|award|trending-up"
+      "description": "Context and significance", 
+      "icon": "award"
     }
   ],
   "summary": {
@@ -2311,17 +2312,26 @@ REQUIRED FLEXIBLE JSON STRUCTURE (adapt categories to ${sportName}):
     "key_strengths": ["strength 1", "strength 2", "strength 3"],
     "notable_achievements": ["achievement 1", "achievement 2"]
   },
-  "lastUpdated": "2025-09-25",
-  "dataQuality": "high|medium|low"
+  "last_updated": "2025-09-25T19:30:00Z",
+  "data_quality": "high|medium|low"
 }
 
+SPORT-SPECIFIC METRICS EXAMPLES:
+- Football/Soccer: Goals, Assists, Pass Accuracy, Shots on Target, Yellow Cards, Clean Sheets
+- Basketball: Points per Game, Rebounds, Assists, Steals, Blocks, Field Goal %, Three Point %
+- Tennis: Aces, Double Faults, First Serve %, Break Points Saved, Tie Breaks Won, Titles
+- Boxing: Punch Accuracy, Knockouts, Rounds Fought, Win Percentage, Title Defenses
+- Taekwondo: Kicks Landed, Headshots, Penalties, Points per Match, Tournament Wins
+- Swimming: Personal Best Times, World Rankings, Medal Count, Stroke Rate, Training Hours
+
 MANDATORY REQUIREMENTS:
-- NO source URLs, links, citations, or references anywhere
-- Create categories specific to ${sportName} (not generic)
-- Use meaningful icons from: chart, target, trophy, user, zap, activity, star, award, trending-up
-- Each category should have 2-5 relevant statistics
-- All data must be clean without source attributions
-- Adapt structure completely to showcase ${sportName} performance analysis`;
+- Always include "statistics.common" (games_played, minutes_played, wins, losses)
+- Always include "statistics.sport_specific" with category and metrics array
+- metrics array should have 8-15 objects with keys [name, value, unit]
+- name = string (the stat name), value = number or string, unit = string or null
+- Do not invent extra JSON fields outside this schema
+- NO source URLs, links, citations anywhere
+- Adapt metrics to be most relevant for ${sportName}`;
 
     console.log("🔍 Sending prompt to GPT-5 for statistics generation...");
     console.log("Prompt length:", prompt.length);
@@ -2352,7 +2362,7 @@ MANDATORY REQUIREMENTS:
     }
 
     // Validate the response structure
-    if (!statisticsResponse.athlete || !statisticsResponse.categories) {
+    if (!statisticsResponse.player || !statisticsResponse.statistics || !statisticsResponse.statistics.sport_specific) {
       throw new Error("Invalid statistics data structure");
     }
 
