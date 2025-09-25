@@ -2270,11 +2270,16 @@ SEARCH FOR COMPREHENSIVE DATA:
 - Head-to-head records and matchup statistics
 
 CRITICAL ERROR HANDLING:
-If web search fails completely or you cannot find reliable data, return this EXACT structure:
+Only return error structure if web search finds ZERO relevant information about the athlete. If you find some basic information (sport, nationality, general performance level), generate comprehensive statistics using:
+1. Any authentic data found through web search
+2. Reasonable estimates based on athlete's apparent level/achievements
+3. Sport-typical performance ranges for their category
+
+Return error ONLY if completely unable to find any athlete information:
 {
   "error": "Couldn't Generate",
   "errorType": "web_search_failed", 
-  "errorMessage": "Unable to find authentic statistical data through web search",
+  "errorMessage": "Unable to find any information about this athlete through web search",
   "retryable": true,
   "suggestion": "Please verify athlete name and try again"
 }
@@ -2415,7 +2420,17 @@ MANDATORY REQUIREMENTS FOR EVERY SPORT:
 - Add injury and recovery statistics where relevant
 - Include equipment, technique, or style-specific statistics
 - NO source URLs, links, citations anywhere in response
-- All metrics must be authentic and sport-appropriate for ${sportName}`;
+- All metrics must be authentic and sport-appropriate for ${sportName}
+
+GUIDANCE FOR LIMITED WEB SEARCH DATA:
+If web search provides limited information, use these approaches:
+1. Generate statistics consistent with athlete's apparent competitive level
+2. Use sport-typical ranges for amateur/semi-professional/professional athletes
+3. Create realistic progression patterns for recent vs career stats
+4. Ensure all metrics align with the athlete's sport and competitive category
+5. Make career totals logically consistent with recent season performance
+6. Include both basic and advanced metrics appropriate to ${sportName}
+7. Set data_quality to "medium" or "low" when estimates are used extensively`;
 
     console.log("🔍 Sending prompt to GPT-5 for statistics generation...");
     console.log("Prompt length:", prompt.length);
