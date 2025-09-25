@@ -943,55 +943,98 @@ export function AnalysisPopup({
           </div>
           <h2 className="text-4xl font-bold text-athlete-accent mb-3" data-testid="text-athlete-name">{name}</h2>
           
-          {/* Personal Information - Display directly beneath name like in Statistics */}
+          {/* Personal Information - Beautiful Card Display */}
           {(actualData?.personalInfo || bioData?.personalInfo) && (
-            <div className="space-y-2 mb-4">
-              <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-300">
-                {((actualData?.personalInfo?.age && actualData.personalInfo.age !== "N/A") || 
-                  (bioData?.personalInfo?.age && bioData.personalInfo.age !== "N/A")) && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-athlete-accent font-semibold">Age:</span>
-                    <span>{actualData?.personalInfo?.age || bioData?.personalInfo?.age}</span>
+            <div className="mb-6">
+              <Card className="bg-gradient-to-r from-blue-900/40 to-purple-900/40 border border-blue-500/30 shadow-2xl">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-xl text-blue-300 flex items-center gap-2 justify-center">
+                    <User className="w-5 h-5" />
+                    Personal Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {((actualData?.personalInfo?.age && actualData.personalInfo.age !== "N/A") || 
+                      (bioData?.personalInfo?.age && bioData.personalInfo.age !== "N/A")) && (
+                      <div className="flex items-center gap-3 p-3 bg-gray-800/60 rounded-lg border border-gray-600/50 hover:border-blue-400/50 transition-colors">
+                        <div className="flex items-center justify-center w-8 h-8 bg-blue-500/20 rounded-full">
+                          <Calendar className="w-4 h-4 text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-400 font-medium">Age</p>
+                          <p className="text-sm font-bold text-white" data-testid="text-age">{actualData?.personalInfo?.age || bioData?.personalInfo?.age}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {((actualData?.personalInfo?.dateOfBirth && actualData.personalInfo.dateOfBirth !== "N/A") || 
+                      (bioData?.personalInfo?.dateOfBirth && bioData.personalInfo.dateOfBirth !== "N/A")) && (
+                      <div className="flex items-center gap-3 p-3 bg-gray-800/60 rounded-lg border border-gray-600/50 hover:border-green-400/50 transition-colors">
+                        <div className="flex items-center justify-center w-8 h-8 bg-green-500/20 rounded-full">
+                          <Calendar className="w-4 h-4 text-green-400" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-400 font-medium">Born</p>
+                          <p className="text-sm font-bold text-white" data-testid="text-dateofbirth">{actualData?.personalInfo?.dateOfBirth || bioData?.personalInfo?.dateOfBirth}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {((actualData?.personalInfo?.height && actualData.personalInfo.height !== "N/A") || 
+                      (bioData?.personalInfo?.height && bioData.personalInfo.height !== "N/A")) && (
+                      <div className="flex items-center gap-3 p-3 bg-gray-800/60 rounded-lg border border-gray-600/50 hover:border-yellow-400/50 transition-colors">
+                        <div className="flex items-center justify-center w-8 h-8 bg-yellow-500/20 rounded-full">
+                          <User className="w-4 h-4 text-yellow-400" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-400 font-medium">Height</p>
+                          <p className="text-sm font-bold text-white" data-testid="text-height">{actualData?.personalInfo?.height || bioData?.personalInfo?.height}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {((actualData?.personalInfo?.weight && actualData.personalInfo.weight !== "N/A") || 
+                      (bioData?.personalInfo?.weight && bioData.personalInfo.weight !== "N/A")) && (
+                      <div className="flex items-center gap-3 p-3 bg-gray-800/60 rounded-lg border border-gray-600/50 hover:border-orange-400/50 transition-colors">
+                        <div className="flex items-center justify-center w-8 h-8 bg-orange-500/20 rounded-full">
+                          <BarChart className="w-4 h-4 text-orange-400" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-400 font-medium">Weight</p>
+                          <p className="text-sm font-bold text-white" data-testid="text-weight">{actualData?.personalInfo?.weight || bioData?.personalInfo?.weight}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {((actualData?.personalInfo?.position && actualData.personalInfo.position !== "N/A") || 
+                      (bioData?.personalInfo?.position && bioData.personalInfo.position !== "N/A")) && (
+                      <div className="flex items-center gap-3 p-3 bg-gray-800/60 rounded-lg border border-gray-600/50 hover:border-purple-400/50 transition-colors">
+                        <div className="flex items-center justify-center w-8 h-8 bg-purple-500/20 rounded-full">
+                          <Trophy className="w-4 h-4 text-purple-400" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-400 font-medium">Position</p>
+                          <p className="text-sm font-bold text-white" data-testid="text-position">{actualData?.personalInfo?.position || bioData?.personalInfo?.position}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {((actualData?.personalInfo?.educationalBackground && actualData.personalInfo.educationalBackground !== "N/A") || 
+                      (bioData?.personalInfo?.educationalBackground && bioData.personalInfo.educationalBackground !== "N/A")) && (
+                      <div className="flex items-center gap-3 p-3 bg-gray-800/60 rounded-lg border border-gray-600/50 hover:border-emerald-400/50 transition-colors sm:col-span-2 lg:col-span-3">
+                        <div className="flex items-center justify-center w-8 h-8 bg-emerald-500/20 rounded-full">
+                          <Award className="w-4 h-4 text-emerald-400" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-400 font-medium">Education</p>
+                          <p className="text-sm font-bold text-white" data-testid="text-education">{actualData?.personalInfo?.educationalBackground || bioData?.personalInfo?.educationalBackground}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-                {((actualData?.personalInfo?.dateOfBirth && actualData.personalInfo.dateOfBirth !== "N/A") || 
-                  (bioData?.personalInfo?.dateOfBirth && bioData.personalInfo.dateOfBirth !== "N/A")) && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-athlete-accent font-semibold">Born:</span>
-                    <span>{actualData?.personalInfo?.dateOfBirth || bioData?.personalInfo?.dateOfBirth}</span>
-                  </div>
-                )}
-                {((actualData?.personalInfo?.height && actualData.personalInfo.height !== "N/A") || 
-                  (bioData?.personalInfo?.height && bioData.personalInfo.height !== "N/A")) && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-athlete-accent font-semibold">Height:</span>
-                    <span>{actualData?.personalInfo?.height || bioData?.personalInfo?.height}</span>
-                  </div>
-                )}
-                {((actualData?.personalInfo?.weight && actualData.personalInfo.weight !== "N/A") || 
-                  (bioData?.personalInfo?.weight && bioData.personalInfo.weight !== "N/A")) && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-athlete-accent font-semibold">Weight:</span>
-                    <span>{actualData?.personalInfo?.weight || bioData?.personalInfo?.weight}</span>
-                  </div>
-                )}
-                {((actualData?.personalInfo?.position && actualData.personalInfo.position !== "N/A") || 
-                  (bioData?.personalInfo?.position && bioData.personalInfo.position !== "N/A")) && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-athlete-accent font-semibold">Position:</span>
-                    <span>{actualData?.personalInfo?.position || bioData?.personalInfo?.position}</span>
-                  </div>
-                )}
-              </div>
-              {((actualData?.personalInfo?.educationalBackground && actualData.personalInfo.educationalBackground !== "N/A") || 
-                (bioData?.personalInfo?.educationalBackground && bioData.personalInfo.educationalBackground !== "N/A")) && (
-                <div className="text-center">
-                  <div className="text-sm text-gray-300">
-                    <span className="text-athlete-accent font-semibold">Education: </span>
-                    <span>{actualData?.personalInfo?.educationalBackground || bioData?.personalInfo?.educationalBackground}</span>
-                  </div>
-                </div>
-              )}
+                </CardContent>
+              </Card>
             </div>
           )}
 
