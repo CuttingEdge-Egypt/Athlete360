@@ -2793,9 +2793,9 @@ export async function generateDevelopmentPlan(
 export async function getAthletePersonalInfoGemini(name: string, sport: string, nationality?: string): Promise<PersonalInfo> {
   const nationalityContext = nationality ? ` from ${nationality}` : '';
   
-  const prompt = `Search the web for factual personal information about the athlete "${name}"${nationalityContext} who competes in ${sport}.
+  const prompt = `Based on your knowledge, provide factual personal information about the athlete "${name}"${nationalityContext} who competes in ${sport}.
 
-    Extract ONLY the following personal information if available:
+    Extract ONLY the following personal information if you have reliable knowledge:
     - Age (current age)
     - Date of birth  
     - Height
@@ -2806,11 +2806,11 @@ export async function getAthletePersonalInfoGemini(name: string, sport: string, 
     - Previous sports (if any)
 
     CRITICAL REQUIREMENTS:
-    - Only provide factual, verifiable personal information found through web search
-    - Use "N/A" for any information not found
+    - Only provide factual, verifiable personal information from your training data
+    - Use "N/A" for any information you don't have reliable knowledge about
     - Do not generate or estimate any data
-    - If you cannot find reliable personal information, respond with: {"error": "no_personal_info_found"}
-    - Search multiple sources to verify information accuracy
+    - If you cannot find reliable personal information in your knowledge, respond with: {"error": "no_personal_info_found"}
+    - Be conservative - only include information you're confident about
     
     Athlete details:
     - Name: ${name}
@@ -2830,11 +2830,11 @@ export async function getAthletePersonalInfoGemini(name: string, sport: string, 
     }`;
 
   try {
-    console.log(`🔍 Searching for personal info for ${name} using Gemini-2.5-pro with web search...`);
+    console.log(`🔍 Getting personal info for ${name} using Gemini-2.5-pro built-in knowledge...`);
     
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
-      tools: [{ googleSearchRetrieval: {} }], // Enable web search
+      // Note: Web search not available, using Gemini's built-in knowledge
     });
 
     const responseText = result.response.text();
