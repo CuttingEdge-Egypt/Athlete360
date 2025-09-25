@@ -123,6 +123,10 @@
     "developmentPlan": {
       "title": "Development Plan",
       "description": "Personalized training roadmap with specific goals and timelines"
+    },
+    "statistics": {
+      "title": "Statistics", 
+      "description": "Comprehensive performance statistics and metrics analysis"
     }
   },
   "interface": {
@@ -134,6 +138,7 @@
     "compareAthletes": "Compare Athletes",
     "nutritionPlan": "Nutrition Plan",
     "developmentPlan": "Development Plan",
+    "statistics": "Statistics",
     "selectSportAthlete": "Select Sport & Athlete",
     "sport": "Sport",
     "country": "Country",

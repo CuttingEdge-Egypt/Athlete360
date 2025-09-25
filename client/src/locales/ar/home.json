@@ -123,6 +123,10 @@
     "developmentPlan": {
       "title": "خطة التطوير",
       "description": "خارطة طريق تدريبية شخصية مع أهداف وجدول زمني محدد"
+    },
+    "statistics": {
+      "title": "الإحصائيات",
+      "description": "تحليل شامل لإحصائيات الأداء والمقاييس"
     }
   },
   "interface": {
@@ -134,6 +138,7 @@
     "compareAthletes": "مقارنة الرياضيين",
     "nutritionPlan": "خطة التغذية",
     "developmentPlan": "خطة التطوير",
+    "statistics": "الإحصائيات",
     "selectSportAthlete": "اختر الرياضة والرياضي",
     "sport": "الرياضة",
     "country": "البلد",
