@@ -8,6 +8,16 @@ import { cleanJsonResponse } from './jsonUtils.js';
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 const googleGenAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
+// Initialize Gemini 2.5 Pro model with web search capabilities
+const model = googleGenAI.getGenerativeModel({ 
+  model: "gemini-2.5-pro",
+  generationConfig: {
+    temperature: 0.1,
+    maxOutputTokens: 2000,
+    responseMimeType: "application/json",
+  },
+});
+
 export interface NutritionPlanData {
   plan: string;
 }
@@ -2777,4 +2787,99 @@ export async function generateDevelopmentPlan(
     console.error("Error generating goal-based development plan:", error);
     throw new Error(`Failed to generate goal-based development plan: ${error instanceof Error ? error.message : String(error)}`);
   }
+}
+
+// Personal info extraction using Gemini 2.5 Pro with web search
+export async function getAthletePersonalInfoGemini(name: string, sport: string, nationality?: string): Promise<PersonalInfo> {
+  const nationalityContext = nationality ? ` from ${nationality}` : '';
+  
+  const prompt = `Search the web for factual personal information about the athlete "${name}"${nationalityContext} who competes in ${sport}.
+
+    Extract ONLY the following personal information if available:
+    - Age (current age)
+    - Date of birth  
+    - Height
+    - Weight
+    - Position (if applicable to the sport)
+    - Educational background (school, university, club affiliations)
+    - Years competing in current sport
+    - Previous sports (if any)
+
+    CRITICAL REQUIREMENTS:
+    - Only provide factual, verifiable personal information found through web search
+    - Use "N/A" for any information not found
+    - Do not generate or estimate any data
+    - If you cannot find reliable personal information, respond with: {"error": "no_personal_info_found"}
+    - Search multiple sources to verify information accuracy
+    
+    Athlete details:
+    - Name: ${name}
+    - Sport: ${sport}
+    - Nationality: ${nationality || "Unknown"}
+
+    Format the response as a JSON object with these exact fields:
+    {
+      "age": "string or N/A",
+      "dateOfBirth": "string or N/A", 
+      "height": "string or N/A",
+      "weight": "string or N/A",
+      "position": "string or N/A",
+      "educationalBackground": "string or N/A",
+      "yearsInCurrentSport": "string or N/A",
+      "previousSports": ["array of sports or empty array"]
+    }`;
+
+  try {
+    console.log(`🔍 Searching for personal info for ${name} using Gemini-2.5-pro with web search...`);
+    
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      tools: [{ googleSearchRetrieval: {} }], // Enable web search
+    });
+
+    const responseText = result.response.text();
+    if (!responseText) {
+      throw new Error('Empty response from Gemini');
+    }
+
+    console.log(`📋 Gemini response for ${name}:`, responseText.substring(0, 200) + '...');
+
+    const parsedResult = JSON.parse(responseText);
+    
+    // Check for error responses
+    if (parsedResult.error === 'no_personal_info_found') {
+      throw new Error('PERSONAL_INFO_NOT_FOUND');
+    }
+    
+    return {
+      age: parsedResult.age === "N/A" ? undefined : parsedResult.age,
+      dateOfBirth: parsedResult.dateOfBirth === "N/A" ? undefined : parsedResult.dateOfBirth,
+      height: parsedResult.height === "N/A" ? undefined : parsedResult.height,
+      weight: parsedResult.weight === "N/A" ? undefined : parsedResult.weight,
+      position: parsedResult.position === "N/A" ? undefined : parsedResult.position,
+      educationalBackground: parsedResult.educationalBackground === "N/A" ? undefined : parsedResult.educationalBackground,
+      yearsInCurrentSport: parsedResult.yearsInCurrentSport === "N/A" ? undefined : parsedResult.yearsInCurrentSport,
+      previousSports: Array.isArray(parsedResult.previousSports) ? parsedResult.previousSports : []
+    };
+  } catch (error) {
+    console.error(`❌ Error getting personal info for ${name} with Gemini:`, error);
+    
+    if (error instanceof Error && error.message.includes('PERSONAL_INFO_NOT_FOUND')) {
+      throw error;
+    }
+    
+    throw new Error(`Failed to generate personal info for ${name}: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+// PersonalInfo interface to match the expected type
+interface PersonalInfo {
+  age?: string;
+  dateOfBirth?: string;
+  height?: string;
+  weight?: string;
+  position?: string;
+  educationalBackground?: string;
+  yearsInCurrentSport?: string;
+  previousSports?: string[];
 }

@@ -45,7 +45,8 @@ const developmentPlanSchema = z.object({
 
 type DevelopmentPlanRequest = z.infer<typeof developmentPlanSchema>;
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, getAthletePersonalInfo, generateAthleteImage, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, compareAthletes, generateRankHistory, generateAthleteStatistics, AthleteStatistics } from "./openaiService";
+import { getAthleteProfile, generateAthleteImage, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, compareAthletes, generateRankHistory, generateAthleteStatistics, AthleteStatistics } from "./openaiService";
+import { getAthletePersonalInfoGemini } from "./geminiService";
 import { generateNutritionPlan, generateEnhancedNutritionPlan, generateRankHistoryWithGemini, generateAthleteBiography, generateDevelopmentPlan, type NutritionPlanFormData, type DevelopmentPlanFormData } from "./geminiService";
 import { analyzeVideoFile, analyzeVideoComprehensive } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
@@ -448,11 +449,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Sport not found" });
       }
 
-      // Use GPT-5 to get athlete personal info only (no bio)
-      console.log(`Creating athlete ${name} for sport ${sport.name} using GPT-5 personal info generation...`);
+      // Use Gemini-2.5-pro to get athlete personal info only (no bio)
+      console.log(`Creating athlete ${name} for sport ${sport.name} using Gemini-2.5-pro personal info generation...`);
       let personalInfo = null;
       try {
-        personalInfo = await getAthletePersonalInfo(name, sport.name, req.body.nationality);
+        personalInfo = await getAthletePersonalInfoGemini(name, sport.name, req.body.nationality);
       } catch (error) {
         if (error instanceof Error && error.message === 'PERSONAL_INFO_NOT_FOUND') {
           console.log(`⚠️ No personal info found for ${name}, creating athlete with basic information only`);
@@ -466,9 +467,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use provided nationality or default to Unknown
       const athleteCountry = req.body.nationality || req.body.country || "Unknown";
 
-      // Generate athlete image using GPT-Image-1 with personal info
+      // Generate athlete image using DALL-E-3 with personal info
       console.log(`🎨 Generating athlete image for ${name}...`);
-      let profileImageUrl = await generateAthleteImage(name, sport.name, athleteCountry, personalInfo);
+      let profileImageUrl = await generateAthleteImage(name, sport.name, athleteCountry, personalInfo || undefined);
 
       // If image generation fails, use default profile icon (null will trigger fallback in frontend)
       if (!profileImageUrl) {
@@ -483,7 +484,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         country: athleteCountry,
         profileImageUrl: profileImageUrl || undefined,
         achievements: [], // No achievements during initial creation
-        personalInfo: personalInfo // Store personal info for display
+        personalInfo: personalInfo || undefined // Store personal info for display
       };
 
       const newAthlete = await storage.createAthlete(athleteData);
