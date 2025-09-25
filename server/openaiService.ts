@@ -2389,7 +2389,7 @@ MANDATORY: Search extensively for authentic data and adapt the structure to show
       model: "gpt-5",
       input: prompt,
       tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 8000
+      max_output_tokens: 16000 // Increased to allow for extensive reasoning + final JSON response
     });
 
     console.log("📊 GPT-5 Raw Response Object:", JSON.stringify(response, null, 2));
