@@ -860,6 +860,14 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
     const recentNews = bioData.personalInfo?.recentNews || bioData.recentNews || [];
     const profileImageUrl = bioData.profileImageUrl;
     
+    // Extract personal information for beautiful display
+    const personalInfo = bioData.personalInfo || {};
+    const age = personalInfo.age;
+    const dateOfBirth = personalInfo.dateOfBirth;
+    const height = personalInfo.height;
+    const position = personalInfo.position;
+    const educationalBackground = personalInfo.educationalBackground;
+    
     
     // Parse bio content to extract different sections
     const bioSections = parseBioSectionsForDisplay(bio);
@@ -889,6 +897,81 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl }: Anal
             </div>
           )}
         </div>
+
+        {/* Personal Information Section */}
+        {(age || dateOfBirth || height || position || educationalBackground) && (
+          <Card className="bg-gradient-to-r from-blue-900/40 to-purple-900/40 border border-blue-500/30 shadow-2xl">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-2xl text-blue-300 flex items-center gap-3">
+                <User className="w-6 h-6" />
+                Personal Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {age && (
+                  <div className="flex items-center gap-3 p-4 bg-gray-800/60 rounded-lg border border-gray-600/50 hover:border-blue-400/50 transition-colors">
+                    <div className="flex items-center justify-center w-10 h-10 bg-blue-500/20 rounded-full">
+                      <Calendar className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400 font-medium">Age</p>
+                      <p className="text-lg font-bold text-white" data-testid="text-age">{age}</p>
+                    </div>
+                  </div>
+                )}
+                
+                {dateOfBirth && (
+                  <div className="flex items-center gap-3 p-4 bg-gray-800/60 rounded-lg border border-gray-600/50 hover:border-green-400/50 transition-colors">
+                    <div className="flex items-center justify-center w-10 h-10 bg-green-500/20 rounded-full">
+                      <Calendar className="w-5 h-5 text-green-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400 font-medium">Born</p>
+                      <p className="text-lg font-bold text-white" data-testid="text-dateofbirth">{dateOfBirth}</p>
+                    </div>
+                  </div>
+                )}
+                
+                {height && (
+                  <div className="flex items-center gap-3 p-4 bg-gray-800/60 rounded-lg border border-gray-600/50 hover:border-yellow-400/50 transition-colors">
+                    <div className="flex items-center justify-center w-10 h-10 bg-yellow-500/20 rounded-full">
+                      <User className="w-5 h-5 text-yellow-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400 font-medium">Height</p>
+                      <p className="text-lg font-bold text-white" data-testid="text-height">{height}</p>
+                    </div>
+                  </div>
+                )}
+                
+                {position && (
+                  <div className="flex items-center gap-3 p-4 bg-gray-800/60 rounded-lg border border-gray-600/50 hover:border-purple-400/50 transition-colors">
+                    <div className="flex items-center justify-center w-10 h-10 bg-purple-500/20 rounded-full">
+                      <Trophy className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400 font-medium">Position</p>
+                      <p className="text-lg font-bold text-white" data-testid="text-position">{position}</p>
+                    </div>
+                  </div>
+                )}
+                
+                {educationalBackground && (
+                  <div className="flex items-center gap-3 p-4 bg-gray-800/60 rounded-lg border border-gray-600/50 hover:border-emerald-400/50 transition-colors">
+                    <div className="flex items-center justify-center w-10 h-10 bg-emerald-500/20 rounded-full">
+                      <Award className="w-5 h-5 text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400 font-medium">Education</p>
+                      <p className="text-lg font-bold text-white" data-testid="text-education">{educationalBackground}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Introduction Section */}
         {bioSections.introduction && (
