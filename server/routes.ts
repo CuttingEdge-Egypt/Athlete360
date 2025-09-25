@@ -2200,7 +2200,8 @@ Return only valid JSON with the missing fields.`;
       // Check for existing statistics in analysis logs (skip if force update)
       let statisticsData;
       if (!forceUpdate) {
-        const existingStatistics = await storage.getLatestAnalysisByType(athleteId, "statistics");
+        const existingAnalyses = await storage.getLatestAnalysisByType("statistics");
+        const existingStatistics = existingAnalyses.find(analysis => analysis.athleteId === athleteId);
         if (existingStatistics) {
           console.log(`Using cached statistics for ${athlete.name}`);
           statisticsData = existingStatistics.resultData;

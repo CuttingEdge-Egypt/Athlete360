@@ -942,63 +942,57 @@ export function AnalysisPopup({
             )}
           </div>
           <h2 className="text-4xl font-bold text-athlete-accent mb-3" data-testid="text-athlete-name">{name}</h2>
+          
+          {/* Personal Information - Display directly beneath name like in Statistics */}
+          {actualData?.personalInfo && (
+            <div className="space-y-2 mb-4">
+              <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-300">
+                {actualData.personalInfo.age && actualData.personalInfo.age !== "N/A" && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-athlete-accent font-semibold">Age:</span>
+                    <span>{actualData.personalInfo.age}</span>
+                  </div>
+                )}
+                {actualData.personalInfo.dateOfBirth && actualData.personalInfo.dateOfBirth !== "N/A" && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-athlete-accent font-semibold">Born:</span>
+                    <span>{actualData.personalInfo.dateOfBirth}</span>
+                  </div>
+                )}
+                {actualData.personalInfo.height && actualData.personalInfo.height !== "N/A" && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-athlete-accent font-semibold">Height:</span>
+                    <span>{actualData.personalInfo.height}</span>
+                  </div>
+                )}
+                {actualData.personalInfo.weight && actualData.personalInfo.weight !== "N/A" && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-athlete-accent font-semibold">Weight:</span>
+                    <span>{actualData.personalInfo.weight}</span>
+                  </div>
+                )}
+                {actualData.personalInfo.position && actualData.personalInfo.position !== "N/A" && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-athlete-accent font-semibold">Position:</span>
+                    <span>{actualData.personalInfo.position}</span>
+                  </div>
+                )}
+              </div>
+              {actualData.personalInfo.educationalBackground && actualData.personalInfo.educationalBackground !== "N/A" && (
+                <div className="text-center">
+                  <div className="text-sm text-gray-300">
+                    <span className="text-athlete-accent font-semibold">Education: </span>
+                    <span>{actualData.personalInfo.educationalBackground}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {rank !== "N/A" && (
             <div className="inline-block px-6 py-2 bg-athlete-warning text-black font-bold text-lg rounded-full">
               Career Rank #{rank}
             </div>
-          )}
-
-          {/* Personal Information Section */}
-          {(actualData.personalInfo || bioData.personalInfo) && (
-            <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-gray-600 shadow-xl mt-6">
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
-                  {/* Age and Date of Birth */}
-                  {((actualData.personalInfo?.age && actualData.personalInfo.age !== "N/A") || 
-                    (actualData.personalInfo?.dateOfBirth && actualData.personalInfo.dateOfBirth !== "N/A")) && (
-                    <div className="space-y-1" data-testid="info-age-birth">
-                      <div className="text-sm text-gray-400 font-semibold">Age & Birth</div>
-                      {actualData.personalInfo?.age && actualData.personalInfo.age !== "N/A" && (
-                        <div className="text-white font-medium">{actualData.personalInfo.age} years old</div>
-                      )}
-                      {actualData.personalInfo?.dateOfBirth && actualData.personalInfo.dateOfBirth !== "N/A" && (
-                        <div className="text-gray-300 text-sm">{actualData.personalInfo.dateOfBirth}</div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Height and Weight */}
-                  {((actualData.personalInfo?.height && actualData.personalInfo.height !== "N/A") || 
-                    (actualData.personalInfo?.weight && actualData.personalInfo.weight !== "N/A")) && (
-                    <div className="space-y-1" data-testid="info-physical">
-                      <div className="text-sm text-gray-400 font-semibold">Physical</div>
-                      {actualData.personalInfo?.height && actualData.personalInfo.height !== "N/A" && (
-                        <div className="text-white font-medium">{actualData.personalInfo.height}</div>
-                      )}
-                      {actualData.personalInfo?.weight && actualData.personalInfo.weight !== "N/A" && (
-                        <div className="text-gray-300 text-sm">{actualData.personalInfo.weight}</div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Position (for team sports) */}
-                  {actualData.personalInfo?.position && actualData.personalInfo.position !== "N/A" && (
-                    <div className="space-y-1" data-testid="info-position">
-                      <div className="text-sm text-gray-400 font-semibold">Position</div>
-                      <div className="text-white font-medium">{actualData.personalInfo.position}</div>
-                    </div>
-                  )}
-
-                  {/* Educational Background */}
-                  {actualData.personalInfo?.educationalBackground && actualData.personalInfo.educationalBackground !== "N/A" && (
-                    <div className="space-y-1" data-testid="info-education">
-                      <div className="text-sm text-gray-400 font-semibold">Education</div>
-                      <div className="text-white font-medium text-sm">{actualData.personalInfo.educationalBackground}</div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
           )}
         </div>
 
