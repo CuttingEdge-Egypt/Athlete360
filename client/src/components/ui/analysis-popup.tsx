@@ -941,11 +941,64 @@ export function AnalysisPopup({
               </div>
             )}
           </div>
-          <h2 className="text-4xl font-bold text-athlete-accent mb-3">{name}</h2>
+          <h2 className="text-4xl font-bold text-athlete-accent mb-3" data-testid="text-athlete-name">{name}</h2>
           {rank !== "N/A" && (
             <div className="inline-block px-6 py-2 bg-athlete-warning text-black font-bold text-lg rounded-full">
               Career Rank #{rank}
             </div>
+          )}
+
+          {/* Personal Information Section */}
+          {(actualData.personalInfo || bioData.personalInfo) && (
+            <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-gray-600 shadow-xl mt-6">
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
+                  {/* Age and Date of Birth */}
+                  {((actualData.personalInfo?.age && actualData.personalInfo.age !== "N/A") || 
+                    (actualData.personalInfo?.dateOfBirth && actualData.personalInfo.dateOfBirth !== "N/A")) && (
+                    <div className="space-y-1" data-testid="info-age-birth">
+                      <div className="text-sm text-gray-400 font-semibold">Age & Birth</div>
+                      {actualData.personalInfo?.age && actualData.personalInfo.age !== "N/A" && (
+                        <div className="text-white font-medium">{actualData.personalInfo.age} years old</div>
+                      )}
+                      {actualData.personalInfo?.dateOfBirth && actualData.personalInfo.dateOfBirth !== "N/A" && (
+                        <div className="text-gray-300 text-sm">{actualData.personalInfo.dateOfBirth}</div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Height and Weight */}
+                  {((actualData.personalInfo?.height && actualData.personalInfo.height !== "N/A") || 
+                    (actualData.personalInfo?.weight && actualData.personalInfo.weight !== "N/A")) && (
+                    <div className="space-y-1" data-testid="info-physical">
+                      <div className="text-sm text-gray-400 font-semibold">Physical</div>
+                      {actualData.personalInfo?.height && actualData.personalInfo.height !== "N/A" && (
+                        <div className="text-white font-medium">{actualData.personalInfo.height}</div>
+                      )}
+                      {actualData.personalInfo?.weight && actualData.personalInfo.weight !== "N/A" && (
+                        <div className="text-gray-300 text-sm">{actualData.personalInfo.weight}</div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Position (for team sports) */}
+                  {actualData.personalInfo?.position && actualData.personalInfo.position !== "N/A" && (
+                    <div className="space-y-1" data-testid="info-position">
+                      <div className="text-sm text-gray-400 font-semibold">Position</div>
+                      <div className="text-white font-medium">{actualData.personalInfo.position}</div>
+                    </div>
+                  )}
+
+                  {/* Educational Background */}
+                  {actualData.personalInfo?.educationalBackground && actualData.personalInfo.educationalBackground !== "N/A" && (
+                    <div className="space-y-1" data-testid="info-education">
+                      <div className="text-sm text-gray-400 font-semibold">Education</div>
+                      <div className="text-white font-medium text-sm">{actualData.personalInfo.educationalBackground}</div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
 
@@ -959,6 +1012,24 @@ export function AnalysisPopup({
               </h3>
               <div className="prose prose-invert max-w-none">
                 <p className="text-gray-200 leading-relaxed text-lg">{bioSections.introduction}</p>
+                
+                {/* Previous Sports and Years in Current Sport Info */}
+                {actualData.personalInfo && (
+                  <div className="mt-6 pt-4 border-t border-gray-600">
+                    {actualData.personalInfo.previousSports && actualData.personalInfo.previousSports.length > 0 && (
+                      <div className="mb-3">
+                        <span className="text-emerald-400 font-semibold">Previous Sports: </span>
+                        <span className="text-gray-300">{actualData.personalInfo.previousSports.join(', ')}</span>
+                      </div>
+                    )}
+                    {actualData.personalInfo.yearsInCurrentSport && actualData.personalInfo.yearsInCurrentSport !== "N/A" && (
+                      <div>
+                        <span className="text-emerald-400 font-semibold">Years in {actualData.sport || 'current sport'}: </span>
+                        <span className="text-gray-300">{actualData.personalInfo.yearsInCurrentSport}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

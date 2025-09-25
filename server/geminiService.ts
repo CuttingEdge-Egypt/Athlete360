@@ -1934,13 +1934,13 @@ export async function generateAthleteBiography(name: string, sport: string, nati
     ? `IMPORTANT LANGUAGE REQUIREMENT: You MUST respond in Arabic language. All text content in the JSON response including bio, playersStory, achievement descriptions, and recent news should be written in Arabic. Write naturally in Arabic with proper grammar and structure.
 
     Structure the biography with these Arabic headings:
-    - فقرة تعريفية
+    - فقرة تعريفية (must include information about any previous sports they played and how long they have been competing in ${sport})
     - قصة اللاعب الشاملة وما يُعرف به في ${sport}
     - عنوان "المنافسات الأخيرة:"
     - عنوان "السجل المهني والتصنيفات:"
     - عنوان "الإنجازات البارزة:"`
     : `Create a detailed biography structured with the following headings:
-    - An introductory paragraph
+    - An introductory paragraph (must include information about any previous sports they played and how long they have been competing in ${sport})
     - Players' overall story and what they're known for in ${sport}
     - A heading "Recent Competitions:"
     - A heading "Career Record and Rankings:"
@@ -1969,6 +1969,15 @@ export async function generateAthleteBiography(name: string, sport: string, nati
     - currentRank: current world ranking if available (as number or "N/A")
     - achievements: array of achievement objects with achievement description and medal type
     - recentNews: array of recent news or competition results
+    - personalInfo: object containing detailed personal information:
+      * age: current age (as number or "N/A")
+      * dateOfBirth: date of birth (as string like "June 6, 2004" or "N/A")
+      * weight: weight in kg (as string like "75 kg" or "N/A")
+      * height: height in cm (as string like "180 cm" or "N/A")
+      * position: playing position for team sports (as string or "N/A" for individual sports)
+      * educationalBackground: education details (university, school, or "N/A")
+      * previousSports: sports played before current sport (array of strings or empty array)
+      * yearsInCurrentSport: how many years playing current sport (as string like "8 years" or "N/A")
     
     CRITICAL ERROR HANDLING:
     - If you cannot find any reliable data through Google search, respond with exactly: {"error": "no_data_found", "success": false}
@@ -1987,7 +1996,17 @@ export async function generateAthleteBiography(name: string, sport: string, nati
           "medal": ${medalTypes}
         }
       ],
-      "recentNews": ["array of recent news or competition results"]
+      "recentNews": ["array of recent news or competition results"],
+      "personalInfo": {
+        "age": "current age as number or N/A",
+        "dateOfBirth": "date of birth as string or N/A",
+        "weight": "weight in kg as string or N/A",
+        "height": "height in cm as string or N/A", 
+        "position": "playing position for team sports or N/A",
+        "educationalBackground": "education details or N/A",
+        "previousSports": ["array of previous sports or empty array"],
+        "yearsInCurrentSport": "years in current sport as string or N/A"
+      }
     }`;
 
   try {
