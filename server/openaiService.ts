@@ -733,7 +733,14 @@ export async function getAthletePersonalInfo(name: string, sport: string, nation
       throw new Error('Empty response from OpenAI');
     }
 
-    const result = JSON.parse(responseText);
+    // Extract JSON from markdown code blocks if present
+    let jsonText = responseText;
+    const codeBlockMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (codeBlockMatch) {
+      jsonText = codeBlockMatch[1].trim();
+    }
+
+    const result = JSON.parse(jsonText);
     
     // Check for error responses
     if (result.error === 'no_personal_info_found') {
