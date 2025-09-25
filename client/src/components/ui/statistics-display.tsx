@@ -23,32 +23,39 @@ import {
 } from "lucide-react";
 
 export interface AthleteStatistics {
-  athlete: {
+  player: {
     name: string;
+    age?: number;
+    nationality: string;
+    team?: string;
     sport: string;
-    country: string;
+    position?: string;
   };
-  categories: {
-    [categoryName: string]: {
-      title: string;
-      description: string;
-      icon?: string;
-      stats: Array<{
+  season?: {
+    year: string;
+    league?: string;
+    team?: string;
+  };
+  statistics: {
+    common: {
+      games_played: number;
+      minutes_played: number;
+      wins: number;
+      losses: number;
+    };
+    sport_specific: {
+      category: string;
+      metrics: Array<{
         name: string;
-        value: string | number;
-        unit?: string;
-        type: "number" | "percentage" | "rank" | "ratio" | "text" | "score" | "rating";
-        trend?: "up" | "down" | "stable" | "unknown";
-        context: string;
-        timeframe?: string;
+        value: number | string;
+        unit?: string | null;
       }>;
     };
   };
-  highlights: Array<{
+  highlights?: Array<{
     title: string;
     value: string;
     description: string;
-    category: string;
     icon?: string;
   }>;
   summary?: {
@@ -56,8 +63,8 @@ export interface AthleteStatistics {
     key_strengths: string[];
     notable_achievements: string[];
   };
-  lastUpdated: string;
-  dataQuality: "high" | "medium" | "low";
+  last_updated: string;
+  data_quality: "high" | "medium" | "low";
 }
 
 interface StatisticsDisplayProps {
@@ -128,77 +135,74 @@ const getDataQualityColor = (quality: string) => {
   }
 };
 
-const formatStatValue = (stat: AthleteStatistics['categories'][string]['stats'][0]) => {
-  let formattedValue = String(stat.value);
+const formatMetricValue = (metric: AthleteStatistics['statistics']['sport_specific']['metrics'][0]) => {
+  let formattedValue = String(metric.value);
   
-  if (stat.unit) {
-    formattedValue += ` ${stat.unit}`;
+  if (metric.unit) {
+    formattedValue += ` ${metric.unit}`;
   }
   
   return formattedValue;
 };
 
-const renderStatValue = (stat: AthleteStatistics['categories'][string]['stats'][0]) => {
-  const formattedValue = formatStatValue(stat);
+const renderMetricValue = (metric: AthleteStatistics['statistics']['sport_specific']['metrics'][0]) => {
+  const formattedValue = formatMetricValue(metric);
   
   // Special handling for percentage values to show progress bar
-  if (stat.type === "percentage" && typeof stat.value === 'number') {
+  if (metric.unit === "%" && typeof metric.value === 'number') {
     return (
       <div className="space-y-2">
         <div className="flex justify-between items-center">
           <span className="text-2xl font-bold text-white">{formattedValue}</span>
-          {getTrendIcon(stat.trend)}
         </div>
         <Progress 
-          value={stat.value} 
+          value={metric.value} 
           className="h-2" 
-          data-testid={`progress-${stat.name.toLowerCase().replace(/\s+/g, '-')}`}
+          data-testid={`progress-${metric.name.toLowerCase().replace(/\s+/g, '-')}`}
         />
       </div>
     );
   }
   
-  // Special formatting for rank values
-  if (stat.type === "rank") {
-    return (
-      <div className="flex items-center space-x-2">
-        <span className="text-2xl font-bold text-athlete-accent">{formattedValue}</span>
-        {getTrendIcon(stat.trend)}
-      </div>
-    );
-  }
-  
-  // Default formatting for other types
+  // Default formatting for all values
   return (
     <div className="flex items-center space-x-2">
       <span className="text-2xl font-bold text-white">{formattedValue}</span>
-      {getTrendIcon(stat.trend)}
     </div>
   );
 };
 
 export function StatisticsDisplay({ statistics, language = "en" }: StatisticsDisplayProps) {
-  const categoryEntries = Object.entries(statistics.categories);
-  
   return (
     <div className="space-y-6" data-testid="statistics-display">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-3xl font-bold text-white" data-testid="text-athlete-name">
-          {statistics.athlete.name} Statistics
+        <h2 className="text-3xl font-bold text-white" data-testid="text-player-name">
+          {statistics.player.name} Statistics
         </h2>
-        <p className="text-athlete-gray-400" data-testid="text-sport-country">
-          {statistics.athlete.sport} • {statistics.athlete.country}
-        </p>
+        <div className="text-athlete-gray-400 space-y-1" data-testid="text-player-info">
+          <p>{statistics.player.sport} • {statistics.player.nationality}</p>
+          {statistics.player.team && <p>Team: {statistics.player.team}</p>}
+          {statistics.player.position && <p>Position: {statistics.player.position}</p>}
+          {statistics.player.age && <p>Age: {statistics.player.age}</p>}
+        </div>
+        
+        {statistics.season && (
+          <div className="text-athlete-gray-400 text-sm" data-testid="text-season-info">
+            Season: {statistics.season.year}
+            {statistics.season.league && ` • ${statistics.season.league}`}
+          </div>
+        )}
+        
         <div className="flex justify-center items-center space-x-4">
           <Badge 
-            className={getDataQualityColor(statistics.dataQuality)}
-            data-testid={`badge-data-quality-${statistics.dataQuality}`}
+            className={getDataQualityColor(statistics.data_quality)}
+            data-testid={`badge-data-quality-${statistics.data_quality}`}
           >
-            Data Quality: {statistics.dataQuality.charAt(0).toUpperCase() + statistics.dataQuality.slice(1)}
+            Data Quality: {statistics.data_quality.charAt(0).toUpperCase() + statistics.data_quality.slice(1)}
           </Badge>
           <span className="text-sm text-athlete-gray-400" data-testid="text-last-updated">
-            Updated: {new Date(statistics.lastUpdated).toLocaleDateString()}
+            Updated: {new Date(statistics.last_updated).toLocaleDateString()}
           </span>
         </div>
       </div>
@@ -290,60 +294,67 @@ export function StatisticsDisplay({ statistics, language = "en" }: StatisticsDis
         </Card>
       )}
 
-      {/* Statistics Categories */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {categoryEntries.map(([categoryKey, category]) => {
-          const IconComponent = getIconComponent(category.icon, categoryKey);
-          
-          return (
-            <Card 
-              key={categoryKey} 
-              className="bg-athlete-gray-800 border-athlete-gray-700"
-              data-testid={`card-category-${categoryKey}`}
-            >
-              <CardHeader>
-                <CardTitle className="text-white flex items-center">
-                  <IconComponent className="mr-2 h-5 w-5 text-athlete-accent" />
-                  {category.title}
-                </CardTitle>
-                <p className="text-athlete-gray-400 text-sm">
-                  {category.description}
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {category.stats.map((stat, statIndex) => (
-                  <div key={statIndex} data-testid={`stat-${categoryKey}-${statIndex}`}>
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h4 className="font-medium text-white text-sm">
-                            {stat.name}
-                          </h4>
-                          {stat.timeframe && (
-                            <span className="text-xs text-athlete-gray-400">
-                              {stat.timeframe}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {renderStatValue(stat)}
-                      
-                      <p className="text-athlete-gray-400 text-sm mt-2">
-                        {stat.context}
-                      </p>
-                    </div>
-                    
-                    {statIndex < category.stats.length - 1 && (
-                      <Separator className="bg-athlete-gray-700 mt-4" />
-                    )}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+      {/* Common Statistics */}
+      <Card className="bg-athlete-gray-800 border-athlete-gray-700" data-testid="card-common-stats">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center">
+            <BarChart3 className="mr-2 h-5 w-5 text-athlete-accent" />
+            Common Statistics
+          </CardTitle>
+          <p className="text-athlete-gray-400 text-sm">
+            Universal performance metrics across all sports
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">{statistics.statistics.common.games_played}</div>
+              <div className="text-sm text-athlete-gray-400">Games Played</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">{statistics.statistics.common.minutes_played}</div>
+              <div className="text-sm text-athlete-gray-400">Minutes Played</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-500">{statistics.statistics.common.wins}</div>
+              <div className="text-sm text-athlete-gray-400">Wins</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-red-500">{statistics.statistics.common.losses}</div>
+              <div className="text-sm text-athlete-gray-400">Losses</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Sport-Specific Metrics */}
+      <Card className="bg-athlete-gray-800 border-athlete-gray-700" data-testid="card-sport-specific">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center">
+            <Target className="mr-2 h-5 w-5 text-athlete-accent" />
+            {statistics.statistics.sport_specific.category} Metrics
+          </CardTitle>
+          <p className="text-athlete-gray-400 text-sm">
+            Specialized performance metrics for {statistics.statistics.sport_specific.category}
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {statistics.statistics.sport_specific.metrics.map((metric, index) => (
+              <div 
+                key={index} 
+                className="bg-athlete-gray-700 p-4 rounded-lg"
+                data-testid={`metric-${index}`}
+              >
+                <h4 className="font-medium text-white text-sm mb-2">
+                  {metric.name}
+                </h4>
+                {renderMetricValue(metric)}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
     </div>
   );
