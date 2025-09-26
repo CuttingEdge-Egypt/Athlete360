@@ -1,4 +1,5 @@
-import { chromium, firefox, webkit } from 'playwright';
+import { Builder, WebDriver, By, until } from 'selenium-webdriver';
+import chrome from 'selenium-webdriver/chrome';
 import OpenAI from 'openai';
 
 // Initialize OpenAI client
@@ -21,7 +22,7 @@ interface AthleteContext {
   personalInfo?: any;
 }
 
-// Main function: Complete Playwright + GPT-5 pipeline
+// Main function: Complete Selenium + GPT-5 pipeline
 export async function searchAthleteImageWithScraping(
   athleteName: string, 
   sport?: string,
@@ -29,7 +30,7 @@ export async function searchAthleteImageWithScraping(
   personalInfo?: any
 ): Promise<string | null> {
   try {
-    console.log(`🔍 Starting Playwright + GPT-5 image search for ${athleteName}...`);
+    console.log(`🔍 Starting Selenium + GPT-5 image search for ${athleteName}...`);
     
     const athleteContext: AthleteContext = {
       name: athleteName,
@@ -69,7 +70,7 @@ export async function searchAthleteImageWithScraping(
     }
 
   } catch (error) {
-    console.error(`❌ Error in Playwright + GPT-5 image search for ${athleteName}:`, error);
+    console.error(`❌ Error in Selenium + GPT-5 image search for ${athleteName}:`, error);
     return null;
   }
 }
@@ -104,58 +105,57 @@ async function scrapeTaekwondoFederation(athleteContext: AthleteContext): Promis
   try {
     console.log(`🥋 Scraping World Taekwondo federation for ${athleteContext.name}...`);
     
-    const browser = await chromium.launch({ 
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-    });
+    // Set up Chrome options for headless browsing
+    const chromeOptions = new chrome.Options();
+    chromeOptions.addArguments('--headless');
+    chromeOptions.addArguments('--no-sandbox');
+    chromeOptions.addArguments('--disable-setuid-sandbox');
+    chromeOptions.addArguments('--disable-dev-shm-usage');
+    chromeOptions.addArguments('--disable-gpu');
+    chromeOptions.addArguments('--disable-features=VizDisplayCompositor');
+    chromeOptions.addArguments('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+
+    const driver = await new Builder()
+      .forBrowser('chrome')
+      .setChromeOptions(chromeOptions)
+      .build();
     
-    const page = await browser.newPage();
-    
-    // Set user agent to avoid detection
-    await page.setExtraHTTPHeaders({
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    });
-    
-    // Search World Taekwondo website
-    const searchQuery = `${athleteContext.name} ${athleteContext.country || ''}`.trim();
-    const searchUrl = `https://www.worldtaekwondo.org/?s=${encodeURIComponent(searchQuery)}`;
-    
-    console.log(`🌐 Searching: ${searchUrl}`);
-    
-    await page.goto(searchUrl, { waitUntil: 'networkidle', timeout: 30000 });
-    
-    // Extract images from search results
-    const foundImages = await page.evaluate((athleteName) => {
-      const images: any[] = [];
-      const imgElements = document.querySelectorAll('img[src*="jpg"], img[src*="jpeg"], img[src*="png"], img[src*="webp"]');
+    try {
+      // Search World Taekwondo website
+      const searchQuery = `${athleteContext.name} ${athleteContext.country || ''}`.trim();
+      const searchUrl = `https://www.worldtaekwondo.org/?s=${encodeURIComponent(searchQuery)}`;
       
-      imgElements.forEach(img => {
-        const src = img.getAttribute('src');
-        const alt = img.getAttribute('alt') || '';
-        
-        if (src && src.startsWith('http') && alt.toLowerCase().includes(athleteName.toLowerCase().split(' ')[0])) {
-          images.push({
-            url: src,
-            altText: alt,
-            context: 'World Taekwondo Federation'
-          });
+      console.log(`🌐 Searching: ${searchUrl}`);
+      
+      await driver.get(searchUrl);
+      await driver.wait(until.elementLocated(By.tagName('body')), 30000);
+      
+      // Extract images from search results
+      const imgElements = await driver.findElements(By.css('img[src*="jpg"], img[src*="jpeg"], img[src*="png"], img[src*="webp"]'));
+      
+      for (const imgElement of imgElements) {
+        try {
+          const src = await imgElement.getAttribute('src');
+          const alt = await imgElement.getAttribute('alt') || '';
+          
+          if (src && src.startsWith('http') && alt.toLowerCase().includes(athleteContext.name.toLowerCase().split(' ')[0])) {
+            images.push({
+              url: src,
+              source: 'worldtaekwondo.org',
+              altText: alt,
+              context: 'World Taekwondo Federation',
+              confidence: 0.8 // High confidence for official federation
+            });
+          }
+        } catch (elementError) {
+          console.log(`⚠️ Error processing image element:`, elementError);
+          continue;
         }
-      });
+      }
       
-      return images;
-    }, athleteContext.name);
-    
-    foundImages.forEach(img => {
-      images.push({
-        url: img.url,
-        source: 'worldtaekwondo.org',
-        altText: img.altText,
-        context: img.context,
-        confidence: 0.8 // High confidence for official federation
-      });
-    });
-    
-    await browser.close();
+    } finally {
+      await driver.quit();
+    }
     
     console.log(`🥋 Found ${images.length} images from Taekwondo federation`);
     
@@ -173,61 +173,63 @@ async function scrapeSportsNews(athleteContext: AthleteContext): Promise<Scraped
   try {
     console.log(`📰 Scraping sports news sites for ${athleteContext.name}...`);
     
-    const browser = await chromium.launch({ 
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-    });
-    
-    const page = await browser.newPage();
-    await page.setExtraHTTPHeaders({
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    });
-    
-    // Search ESPN for athlete images
-    const searchQuery = `${athleteContext.name} ${athleteContext.sport || ''} ${athleteContext.country || ''}`.trim();
-    const espnSearchUrl = `https://www.espn.com/search/_/q/${encodeURIComponent(searchQuery)}`;
+    // Set up Chrome options for headless browsing
+    const chromeOptions = new chrome.Options();
+    chromeOptions.addArguments('--headless');
+    chromeOptions.addArguments('--no-sandbox');
+    chromeOptions.addArguments('--disable-setuid-sandbox');
+    chromeOptions.addArguments('--disable-dev-shm-usage');
+    chromeOptions.addArguments('--disable-gpu');
+    chromeOptions.addArguments('--disable-features=VizDisplayCompositor');
+    chromeOptions.addArguments('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+
+    const driver = await new Builder()
+      .forBrowser('chrome')
+      .setChromeOptions(chromeOptions)
+      .build();
     
     try {
-      await page.goto(espnSearchUrl, { waitUntil: 'networkidle', timeout: 15000 });
+      // Search ESPN for athlete images
+      const searchQuery = `${athleteContext.name} ${athleteContext.sport || ''} ${athleteContext.country || ''}`.trim();
+      const espnSearchUrl = `https://www.espn.com/search/_/q/${encodeURIComponent(searchQuery)}`;
       
-      const espnImages = await page.evaluate((athleteName) => {
-        const images: any[] = [];
-        const imgElements = document.querySelectorAll('img[src*="jpg"], img[src*="jpeg"], img[src*="png"], img[src*="webp"]');
+      await driver.get(espnSearchUrl);
+      await driver.wait(until.elementLocated(By.tagName('body')), 15000);
+      
+      const imgElements = await driver.findElements(By.css('img[src*="jpg"], img[src*="jpeg"], img[src*="png"], img[src*="webp"]'));
+      
+      let foundCount = 0;
+      for (const imgElement of imgElements) {
+        if (foundCount >= 3) break; // Limit to top 3
         
-        imgElements.forEach(img => {
-          const src = img.getAttribute('src');
-          const alt = img.getAttribute('alt') || '';
+        try {
+          const src = await imgElement.getAttribute('src');
+          const alt = await imgElement.getAttribute('alt') || '';
           
           if (src && src.startsWith('http') && (
-            alt.toLowerCase().includes(athleteName.toLowerCase().split(' ')[0]) ||
-            src.toLowerCase().includes(athleteName.toLowerCase().replace(' ', ''))
+            alt.toLowerCase().includes(athleteContext.name.toLowerCase().split(' ')[0]) ||
+            src.toLowerCase().includes(athleteContext.name.toLowerCase().replace(' ', ''))
           )) {
             images.push({
               url: src,
+              source: 'espn.com',
               altText: alt,
-              context: 'ESPN Sports News'
+              context: 'ESPN Sports News',
+              confidence: 0.7 // Good confidence for major news
             });
+            foundCount++;
           }
-        });
-        
-        return images.slice(0, 3); // Limit to top 3
-      }, athleteContext.name);
-      
-      espnImages.forEach(img => {
-        images.push({
-          url: img.url,
-          source: 'espn.com',
-          altText: img.altText,
-          context: img.context,
-          confidence: 0.7 // Good confidence for major news
-        });
-      });
+        } catch (elementError) {
+          console.log(`⚠️ Error processing ESPN image element:`, elementError);
+          continue;
+        }
+      }
       
     } catch (espnError) {
       console.log(`⚠️ ESPN search failed: ${espnError}`);
+    } finally {
+      await driver.quit();
     }
-    
-    await browser.close();
     
     console.log(`📰 Found ${images.length} images from sports news sites`);
     
@@ -245,63 +247,65 @@ async function scrapeGoogleImages(athleteContext: AthleteContext): Promise<Scrap
   try {
     console.log(`🔍 Scraping Google Images for ${athleteContext.name} (with throttling)...`);
     
-    const browser = await chromium.launch({ 
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-    });
+    // Set up Chrome options for headless browsing
+    const chromeOptions = new chrome.Options();
+    chromeOptions.addArguments('--headless');
+    chromeOptions.addArguments('--no-sandbox');
+    chromeOptions.addArguments('--disable-setuid-sandbox');
+    chromeOptions.addArguments('--disable-dev-shm-usage');
+    chromeOptions.addArguments('--disable-gpu');
+    chromeOptions.addArguments('--disable-features=VizDisplayCompositor');
+    chromeOptions.addArguments('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+
+    const driver = await new Builder()
+      .forBrowser('chrome')
+      .setChromeOptions(chromeOptions)
+      .build();
     
-    const page = await browser.newPage();
-    await page.setExtraHTTPHeaders({
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    });
-    
-    // Build comprehensive search query
-    const searchTerms = [athleteContext.name];
-    if (athleteContext.sport) searchTerms.push(athleteContext.sport);
-    if (athleteContext.country) searchTerms.push(athleteContext.country);
-    
-    const searchQuery = searchTerms.join(' ');
-    const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}&tbm=isch`;
-    
-    await page.goto(googleUrl, { waitUntil: 'networkidle', timeout: 30000 });
-    
-    // Wait for images to load
-    await page.waitForSelector('img[src]', { timeout: 10000 });
-    
-    // Extract image URLs
-    const googleImages = await page.evaluate(() => {
-      const images: any[] = [];
-      const imgElements = document.querySelectorAll('img[src*="http"]');
+    try {
+      // Build comprehensive search query
+      const searchTerms = [athleteContext.name];
+      if (athleteContext.sport) searchTerms.push(athleteContext.sport);
+      if (athleteContext.country) searchTerms.push(athleteContext.country);
       
-      imgElements.forEach((img, index) => {
-        if (index > 10) return; // Limit to prevent excessive scraping
+      const searchQuery = searchTerms.join(' ');
+      const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}&tbm=isch`;
+      
+      await driver.get(googleUrl);
+      await driver.wait(until.elementLocated(By.css('img[src]')), 10000);
+      
+      // Extract image URLs
+      const imgElements = await driver.findElements(By.css('img[src*="http"]'));
+      
+      let foundCount = 0;
+      for (const imgElement of imgElements) {
+        if (foundCount >= 10) break; // Limit to prevent excessive scraping
         
-        const src = img.getAttribute('src');
-        const alt = img.getAttribute('alt') || '';
-        
-        if (src && src.includes('http') && !src.includes('google') && !src.includes('gstatic')) {
-          images.push({
-            url: src,
-            altText: alt,
-            context: 'Google Images'
-          });
+        try {
+          const src = await imgElement.getAttribute('src');
+          const alt = await imgElement.getAttribute('alt') || '';
+          
+          if (src && src.includes('http') && !src.includes('google') && !src.includes('gstatic')) {
+            images.push({
+              url: src,
+              source: 'google.com',
+              altText: alt,
+              context: 'Google Images',
+              confidence: 0.5 // Lower confidence for Google Images
+            });
+            foundCount++;
+            
+            if (foundCount >= 5) break; // Max 5 images from Google
+          }
+        } catch (elementError) {
+          console.log(`⚠️ Error processing Google image element:`, elementError);
+          continue;
         }
-      });
+      }
       
-      return images.slice(0, 5); // Max 5 images from Google
-    });
-    
-    googleImages.forEach(img => {
-      images.push({
-        url: img.url,
-        source: 'google.com',
-        altText: img.altText,
-        context: img.context,
-        confidence: 0.5 // Lower confidence for Google Images
-      });
-    });
-    
-    await browser.close();
+    } finally {
+      await driver.quit();
+    }
     
     console.log(`🔍 Found ${images.length} images from Google Images`);
     
