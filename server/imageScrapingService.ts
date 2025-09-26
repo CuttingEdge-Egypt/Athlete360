@@ -88,10 +88,15 @@ async function generateOptimalSearchQuery(
     if (country) contextInfo.push(country);
     
     const prompt = `The user wants to see images of the athlete: ${athleteName}.
-Return ONLY the best Google Images search query for this athlete.
-Example: "Habiba Wael Emerah Taekwondo site:gettyimages.com OR site:fiba.basketball"
-Example: "Serena Williams Tennis site:espn.com OR site:usopen.org"
-For ${athleteName}: ${contextInfo.join(' ')}`;
+Return ONLY the best Google Images search query for this specific athlete.
+IMPORTANT: Always include the athlete's full name in the search query.
+
+Examples:
+"Habiba Wael Emerah Taekwondo site:gettyimages.com OR site:fiba.basketball"
+"Serena Williams Tennis site:espn.com OR site:usopen.org"  
+"Rafael Nadal Tennis site:gettyimages.com OR site:atptour.com"
+
+Create a similar search query for: ${athleteName} (${contextInfo.join(' ')})`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
