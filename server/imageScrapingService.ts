@@ -118,30 +118,21 @@ async function getDirectImageUrlsFromGPT5(athlete: AthleteProfile): Promise<stri
       if (athlete.personalInfo.position) athleteDetails.push(`Position: ${athlete.personalInfo.position}`);
     }
 
-    const prompt = `You are an expert image finder. I need direct image URLs for this athlete.
+    const prompt = `Fetch downloadable image url's for the player ${athlete.name} who is ${athlete.country} and plays ${athlete.sport}, they are also ${athleteDetails.join(', ')}.
+Return urls in a JSON:
+{
+  "images": [
+    "https://example1.com",
+    "https://example2.com", 
+    "https://example3.com"
+  ]
+}`;
 
-COMPLETE ATHLETE DATA:
-${athleteDetails.join('\n')}
-
-TASK: Find actual, working image URLs for this athlete. Provide 3-5 direct image URLs that show this specific athlete.
-
-Focus on these sources (in priority order):
-- Sport-specific databases (TaekwondoData.com for Taekwondo, etc.)
-- Official sports federation websites  
-- Olympic/competition databases
-- Major sports news outlets (ESPN, BBC Sport, etc.)
-- Professional athlete databases
-
-Requirements:
-- URLs must end in .jpg, .jpeg, .png, or .webp
-- URLs must be direct links to images, not webpage links
-- Prioritize official, high-quality athlete photos
-- Include variety: profile shots, action shots, official photos
-
-Respond with ONLY a JSON array of image URLs:
-["https://example.com/athlete1.jpg", "https://example.com/athlete2.png", "https://example.com/athlete3.webp"]
-
-Find the actual image URLs for ${athlete.name}.`;
+    // Debug: Log the exact prompt being sent
+    console.log(`🔍 EXACT PROMPT SENT TO GPT-5 for ${athlete.name}:`);
+    console.log('---START PROMPT---');
+    console.log(prompt);
+    console.log('---END PROMPT---');
 
     const response = await openai.chat.completions.create({
       model: "gpt-5", // Using GPT-5 with web search functionality
@@ -163,20 +154,25 @@ Find the actual image URLs for ${athlete.name}.`;
     console.log('---END GPT-5 RESPONSE---');
 
     try {
-      // Try to parse as JSON array
-      const imageUrls = JSON.parse(content);
-      if (Array.isArray(imageUrls)) {
-        console.log(`🎯 GPT-5 provided ${imageUrls.length} direct image URLs for ${athlete.name}`);
-        imageUrls.forEach((url: string, index: number) => {
-          console.log(`📋 Image ${index + 1}: ${url}`);
+      // Try to parse as JSON object with images array
+      const response = JSON.parse(content);
+      if (response.images && Array.isArray(response.images)) {
+        console.log(`🎯 GPT-5 provided ${response.images.length} image page URLs for ${athlete.name}`);
+        response.images.forEach((url: string, index: number) => {
+          console.log(`📋 Image page ${index + 1}: ${url}`);
         });
-        return imageUrls.filter(url => typeof url === 'string' && url.match(/\.(jpg|jpeg|png|webp)(\?.*)?$/i));
+        return response.images.filter(url => typeof url === 'string' && url.startsWith('http'));
+      }
+      // Fallback: try parsing as direct array (old format)
+      if (Array.isArray(response)) {
+        console.log(`🎯 GPT-5 provided ${response.length} URLs for ${athlete.name} (array format)`);
+        return response.filter(url => typeof url === 'string' && url.startsWith('http'));
       }
     } catch (parseError) {
       // If JSON parsing fails, try to extract URLs from text
-      const urlMatches = content.match(/https?:\/\/[^\s"'<>]+\.(jpg|jpeg|png|webp)(\?[^\s"'<>]*)?/gi);
+      const urlMatches = content.match(/https?:\/\/[^\s"'<>]+/gi);
       if (urlMatches) {
-        console.log(`🎯 GPT-5 provided ${urlMatches.length} image URLs for ${athlete.name} (extracted from text)`);
+        console.log(`🎯 GPT-5 provided ${urlMatches.length} URLs for ${athlete.name} (extracted from text)`);
         return urlMatches;
       }
     }
