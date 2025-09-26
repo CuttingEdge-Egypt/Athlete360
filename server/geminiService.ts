@@ -14,7 +14,7 @@ const model = googleGenAI.getGenerativeModel({
   generationConfig: {
     temperature: 0.1,
     maxOutputTokens: 2000,
-    responseMimeType: "application/json",
+    // Note: responseMimeType removed when using tools
   },
 });
 
@@ -2832,18 +2832,25 @@ export async function getAthletePersonalInfoGemini(name: string, sport: string, 
   try {
     console.log(`🔍 Searching for personal info for ${name} using Gemini-2.5-pro with web search...`);
     
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      tools: [{ googleSearch: {} }] // Enable web search - matching our existing pattern
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      contents: prompt,
+      config: {
+        temperature: 0.1,
+        maxOutputTokens: 2000,
+        tools: [{ googleSearch: {} }] // Enable web search - matching our existing pattern
+      }
     });
 
-    const responseText = result.response.text();
+    let responseText = result.text || "";
     if (!responseText) {
       throw new Error('Empty response from Gemini');
     }
 
     console.log(`📋 Gemini response for ${name}:`, responseText.substring(0, 200) + '...');
 
+    // Clean and parse JSON response (since we can't use responseMimeType with tools)
+    responseText = cleanJsonResponse(responseText);
     const parsedResult = JSON.parse(responseText);
     
     // Check for error responses
