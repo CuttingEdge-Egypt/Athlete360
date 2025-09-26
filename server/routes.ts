@@ -3703,14 +3703,14 @@ Return only valid JSON with the missing fields.`;
         console.log(`🧪 [TEST] No athlete found in database, proceeding with provided data`);
       }
 
-      // Trigger async image search using the comprehensive Playwright + GPT-5 pipeline
-      console.log(`🚀 [TEST] Starting Playwright + GPT-5 image search for ${athleteName}`);
+      // Trigger async image search using the enhanced HTTP-based pipeline
+      console.log(`🚀 [TEST] Starting HTTP-based image search for ${athleteName}`);
       searchAthleteImageAsync(
-        athleteName, 
-        sport || athleteData?.sport_id || 'Taekwondo',
-        country || athleteData?.country || 'Unknown', 
-        athleteData?.personal_info || {},
-        athleteData?.id
+        athleteData?.id || 'temp-id-for-test',
+        athleteName,
+        sport || athleteData?.sport_id || 'Unknown',
+        country || athleteData?.country || 'Unknown',
+        athleteData?.personal_info || {}
       );
 
       res.json({ 

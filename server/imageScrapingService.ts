@@ -112,8 +112,7 @@ Return the best image URL you find, prioritizing official and credible sources.`
       model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
       max_tokens: 500,
-      temperature: 0.3,
-      tools: [{ type: "web_search" }]
+      temperature: 0.3
     });
     
     const content = response.choices[0]?.message?.content;
@@ -601,8 +600,7 @@ async function validateImageUrl(url: string): Promise<boolean> {
       method: 'HEAD',
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      },
-      timeout: 10000
+      }
     });
     
     if (!response.ok) {

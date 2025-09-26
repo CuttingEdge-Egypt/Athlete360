@@ -1966,7 +1966,7 @@ export async function searchAthleteImage(athleteName: string, sport?: string, na
   try {
     console.log(`🔍 Starting comprehensive image search for ${athleteName} (${sport || 'Unknown Sport'})`);
     
-    // Strategy 1: Selenium + GPT-5 pipeline (primary method)
+    // Strategy 1: Enhanced HTTP-based pipeline (primary method)
     const { searchAthleteImageWithScraping } = await import('./imageScrapingService.js');
     const scrapedImageUrl = await searchAthleteImageWithScraping(athleteName, sport, nationality, personalInfo);
     if (scrapedImageUrl) {
