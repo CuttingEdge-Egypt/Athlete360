@@ -103,30 +103,34 @@ export async function searchAthleteImageWithScraping(
 // STEP 1: Ask GPT-5 to find direct image URLs using web search
 async function getDirectImageUrlsFromGPT5(athlete: AthleteProfile): Promise<string[]> {
   try {
+    // Use the exact format that worked for the user
     const athleteDetails = [];
-    athleteDetails.push(`Name: ${athlete.name}`);
-    if (athlete.sport) athleteDetails.push(`Sport: ${athlete.sport}`);
-    if (athlete.country) athleteDetails.push(`Country: ${athlete.country}`);
     
-    // Include ALL personal data for better search accuracy
+    // Convert country to nationality format
+    let nationality = athlete.country;
+    if (athlete.country === "United States") nationality = "American";
+    else if (athlete.country === "Canada") nationality = "Canadian";
+    else if (athlete.country === "United Kingdom") nationality = "British";
+    
+    // Add only key details in natural format
     if (athlete.personalInfo) {
-      if (athlete.personalInfo.age) athleteDetails.push(`Age: ${athlete.personalInfo.age}`);
-      if (athlete.personalInfo.dateOfBirth) athleteDetails.push(`Date of Birth: ${athlete.personalInfo.dateOfBirth}`);
-      if (athlete.personalInfo.height) athleteDetails.push(`Height: ${athlete.personalInfo.height}`);
-      if (athlete.personalInfo.weight) athleteDetails.push(`Weight: ${athlete.personalInfo.weight}`);
-      if (athlete.personalInfo.achievements) athleteDetails.push(`Achievements: ${athlete.personalInfo.achievements}`);
-      if (athlete.personalInfo.position) athleteDetails.push(`Position: ${athlete.personalInfo.position}`);
+      if (athlete.personalInfo.height) athleteDetails.push(athlete.personalInfo.height);
+      if (athlete.personalInfo.achievements) {
+        const achievements = athlete.personalInfo.achievements.toLowerCase();
+        if (achievements.includes('gold')) {
+          athleteDetails.push(`won gold medals in ${athlete.sport.toLowerCase()}`);
+        } else if (achievements.includes('medal')) {
+          athleteDetails.push(`won medals in ${athlete.sport.toLowerCase()}`);
+        }
+      }
+    }
+    
+    // Ensure we have at least some details to avoid incomplete prompt
+    if (athleteDetails.length === 0) {
+      athleteDetails.push(`competes in ${athlete.sport.toLowerCase()}`);
     }
 
-    const prompt = `Fetch downloadable image url's for the player ${athlete.name} who is ${athlete.country} and plays ${athlete.sport}, they are also ${athleteDetails.join(', ')}.
-Return urls in a JSON:
-{
-  "images": [
-    "https://example1.com",
-    "https://example2.com", 
-    "https://example3.com"
-  ]
-}`;
+    const prompt = `Fetch downloadable image url's for the player ${athlete.name} who is ${nationality} and plays ${athlete.sport}, they are also ${athleteDetails.join(', ')}. Return urls in a JSON:`;
 
     // Debug: Log the exact prompt being sent
     console.log(`🔍 EXACT PROMPT SENT TO GPT-5 for ${athlete.name}:`);
@@ -138,7 +142,7 @@ Return urls in a JSON:
       model: "gpt-5", // Using GPT-5 with web search functionality
       messages: [{ role: "user", content: prompt }],
       // GPT-5 only supports default temperature (1.0)
-      max_completion_tokens: 800
+      max_completion_tokens: 2000
     });
 
     const content = response.choices[0]?.message?.content;
@@ -158,7 +162,7 @@ Return urls in a JSON:
       const response = JSON.parse(content);
       if (response.images && Array.isArray(response.images)) {
         console.log(`🎯 GPT-5 provided ${response.images.length} image page URLs for ${athlete.name}`);
-        response.images.forEach((url: string, index: number) => {
+        (response.images as string[]).forEach((url: string, index: number) => {
           console.log(`📋 Image page ${index + 1}: ${url}`);
         });
         return response.images.filter(url => typeof url === 'string' && url.startsWith('http'));
@@ -237,9 +241,8 @@ Provide 3-5 specific HTTP instructions that we can execute to find this athlete'
     const response = await openai.chat.completions.create({
       model: "gpt-5",
       messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" },
       // GPT-5 only supports default temperature (1.0)
-      max_completion_tokens: 1000
+      max_completion_tokens: 2000
     });
 
     const content = response.choices[0]?.message?.content;

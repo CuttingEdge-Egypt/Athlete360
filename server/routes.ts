@@ -3680,6 +3680,48 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
+  // Minimal OpenAI test endpoint 
+  app.post('/api/test-openai-minimal', async (req: Request, res: Response) => {
+    try {
+      console.log('🧪 [MINIMAL TEST] Testing OpenAI directly...');
+      
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      
+      const prompt = "Fetch downloadable image url's for the player CJ Nickolas who is American and plays Taekwondo, they are also 6 ft 2, and he won gold medals in taekwondo. Return urls in a JSON:";
+      
+      console.log('🔍 [MINIMAL TEST] Sending exact user prompt to GPT-5...');
+      console.log('PROMPT:', prompt);
+      
+      const completion = await openai.chat.completions.create({
+        model: "gpt-5",
+        messages: [
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        max_completion_tokens: 2000
+      });
+      
+      const response = completion.choices[0].message.content;
+      console.log('✅ [MINIMAL TEST] GPT-5 Response:', response);
+      
+      res.json({
+        success: true,
+        prompt,
+        response,
+        rawCompletion: completion
+      });
+      
+    } catch (error) {
+      console.error('❌ [MINIMAL TEST] Error:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message
+      });
+    }
+  });
+
   // Temporary test route for image search (no auth for testing)
   app.post('/api/test-image-search-direct', async (req: Request, res: Response) => {
     try {
