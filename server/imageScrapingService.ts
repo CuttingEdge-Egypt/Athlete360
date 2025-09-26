@@ -19,6 +19,12 @@ interface AthleteProfile {
   personalInfo?: any;
 }
 
+interface ImageInstruction {
+  url: string;
+  source: string;
+  reasoning: string;
+}
+
 // Main function: HTTP-based image search with sport-specific adapters
 export async function searchAthleteImageWithScraping(
   athleteName: string, 
@@ -27,7 +33,7 @@ export async function searchAthleteImageWithScraping(
   personalInfo?: any
 ): Promise<string | null> {
   try {
-    console.log(`🔍 Starting enhanced HTTP-based image search for ${athleteName}...`);
+    console.log(`🔍 Starting streamlined 3-step image search for ${athleteName}...`);
     
     const athleteProfile: AthleteProfile = {
       name: athleteName,
@@ -36,71 +42,250 @@ export async function searchAthleteImageWithScraping(
       personalInfo
     };
 
-    // Try multiple HTTP-based sources in priority order
-    const imageCandidates: ImageResult[] = [];
+    // STEP 1: Ask GPT-5 for specific image sources and instructions
+    console.log(`🤖 Step 1: Getting GPT-5 guidance for ${athleteName}...`);
+    const imageInstructions = await getImageSourcesFromGPT5(athleteProfile);
     
-    // Priority 1: GPT-5 with built-in web search (highest quality)
-    const gptResult = await searchWithGPT5WebSearch(athleteProfile);
-    if (gptResult) imageCandidates.push(gptResult);
-    
-    // Priority 2: Sport-specific federation APIs and scrapers
-    const sportResults = await searchSportSpecificSources(athleteProfile);
-    imageCandidates.push(...sportResults);
-    
-    // Priority 3: General sports databases
-    const generalResults = await searchGeneralSportsAPIs(athleteProfile);
-    imageCandidates.push(...generalResults);
-    
-    // Priority 4: Google Custom Search API (controlled fallback)
-    if (imageCandidates.length < 3) {
-      const googleResults = await searchGoogleCustomSearch(athleteProfile);
-      imageCandidates.push(...googleResults);
-    }
-    
-    // Priority 5: Bing Images Search (enhanced image discovery)
-    if (imageCandidates.length < 5) {
-      const bingResults = await searchBingImages(athleteProfile);
-      imageCandidates.push(...bingResults);
-    }
-    
-    if (imageCandidates.length === 0) {
-      console.log(`❌ No images found from any HTTP source for ${athleteName}`);
+    if (!imageInstructions || imageInstructions.length === 0) {
+      console.log(`❌ GPT-5 could not provide image sources for ${athleteName}`);
       return null;
     }
     
-    console.log(`📸 Found ${imageCandidates.length} candidate images from HTTP sources`);
+    // STEP 2: Fetch images based on GPT-5 instructions
+    console.log(`📸 Step 2: Fetching ${imageInstructions.length} images guided by GPT-5...`);
+    const validImages: string[] = [];
     
-    // Use GPT-5 to intelligently rank and select the best image
-    const bestImage = await selectBestImageWithGPT5(imageCandidates, athleteProfile);
+    for (const instruction of imageInstructions) {
+      try {
+        const imageUrl = await fetchImageFromInstruction(instruction);
+        if (imageUrl && await validateImageUrl(imageUrl)) {
+          validImages.push(imageUrl);
+          console.log(`✅ Successfully fetched: ${imageUrl}`);
+          
+          // Stop after finding first valid image to speed up the process
+          if (validImages.length >= 1) break;
+        }
+      } catch (error) {
+        console.log(`⚠️ Failed to fetch image from instruction: ${error}`);
+      }
+    }
     
-    if (!bestImage) {
-      console.log(`❌ GPT-5 could not select suitable image for ${athleteName}`);
+    if (validImages.length === 0) {
+      console.log(`❌ No valid images fetched for ${athleteName}`);
       return null;
     }
     
-    // Validate the final image URL accessibility
-    const validatedUrl = await validateImageUrl(bestImage.url);
-    
-    if (!validatedUrl) {
-      console.log(`❌ Image URL validation failed for ${athleteName}`);
-      return null;
+    // STEP 3: Use GPT-5 Vision to verify this is actually the correct athlete
+    console.log(`🔍 Step 3: GPT-5 identity verification for ${athleteName}...`);
+    for (const imageUrl of validImages) {
+      const verification = await verifyAthleteIdentityWithGPT5Vision(imageUrl, athleteProfile);
+      
+      if (verification.verified) {
+        console.log(`✅ GPT-5 confirmed athlete identity: ${verification.reasoning}`);
+        return imageUrl;
+      } else {
+        console.log(`❌ GPT-5 rejected image: ${verification.reasoning}`);
+      }
     }
     
-    // NEW: Use GPT-5 Vision to verify the image actually shows the correct athlete/sport
-    const visualVerification = await verifyImageWithGPT5Vision(bestImage.url, athleteProfile);
-    
-    if (!visualVerification.verified) {
-      console.log(`❌ GPT-5 rejected athlete identity for ${athleteName}: ${visualVerification.reasoning}`);
-      return null;
-    }
-    
-    console.log(`✅ Found and identity-verified image for ${athleteName} from ${bestImage.source}`);
-    console.log(`✅ Identity verification: ${visualVerification.reasoning}`);
-    return bestImage.url;
+    console.log(`❌ No images passed GPT-5 identity verification for ${athleteName}`);
+    return null;
     
   } catch (error) {
-    console.error(`❌ Error in HTTP-based image search for ${athleteName}:`, error);
+    console.error('Error in streamlined athlete image search:', error);
     return null;
+  }
+}
+
+// STEP 1: Get specific image sources from GPT-5 with complete athlete data
+async function getImageSourcesFromGPT5(athlete: AthleteProfile): Promise<ImageInstruction[]> {
+  try {
+    const athleteDetails = [];
+    athleteDetails.push(`Name: ${athlete.name}`);
+    if (athlete.sport) athleteDetails.push(`Sport: ${athlete.sport}`);
+    if (athlete.country) athleteDetails.push(`Country: ${athlete.country}`);
+    
+    // Include personal data for better search accuracy
+    if (athlete.personalInfo) {
+      if (athlete.personalInfo.age) athleteDetails.push(`Age: ${athlete.personalInfo.age}`);
+      if (athlete.personalInfo.dateOfBirth) athleteDetails.push(`Date of Birth: ${athlete.personalInfo.dateOfBirth}`);
+      if (athlete.personalInfo.height) athleteDetails.push(`Height: ${athlete.personalInfo.height}`);
+      if (athlete.personalInfo.weight) athleteDetails.push(`Weight: ${athlete.personalInfo.weight}`);
+      if (athlete.personalInfo.achievements) athleteDetails.push(`Achievements: ${athlete.personalInfo.achievements}`);
+    }
+
+    const prompt = `Find the best image sources for this athlete. Use all the provided data to find accurate, high-quality photos.
+
+ATHLETE DETAILS:
+${athleteDetails.join('\n')}
+
+Your task: Find 3-5 specific image URLs for this athlete. Use your web search capability to find:
+
+1. Official sports federation photos (highest priority)
+2. Olympic or international competition photos 
+3. Major news outlet photos (ESPN, BBC Sport, Reuters, AP)
+4. Official tournament or league photos
+5. Sports database photos (TheSportsDB, etc.)
+
+For each image URL you find, provide:
+- The direct image URL (must end in .jpg, .jpeg, .png, or .webp)
+- The source website/database
+- Brief reasoning why this source is credible
+
+Respond in JSON format:
+{
+  "images": [
+    {
+      "url": "https://example.com/athlete.jpg",
+      "source": "Official Olympic Committee",
+      "reasoning": "Official Olympic athlete profile photo from IOC database"
+    }
+  ]
+}
+
+Focus on finding the most credible, official sources that are likely to have the correct athlete photo.`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
+      temperature: 0.2,
+      max_tokens: 1000
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) return [];
+
+    const result = JSON.parse(content);
+    if (!result.images || !Array.isArray(result.images)) return [];
+
+    console.log(`🎯 GPT-5 found ${result.images.length} image sources for ${athlete.name}`);
+    return result.images;
+
+  } catch (error) {
+    console.error('Error getting image sources from GPT-5:', error);
+    return [];
+  }
+}
+
+// STEP 2: Fetch image from GPT-5 instruction
+async function fetchImageFromInstruction(instruction: ImageInstruction): Promise<string | null> {
+  try {
+    console.log(`📸 Fetching from ${instruction.source}: ${instruction.url}`);
+    
+    // Validate the URL is actually an image
+    if (!instruction.url.match(/\.(jpg|jpeg|png|webp)(\?.*)?$/i)) {
+      console.log(`⚠️ URL doesn't appear to be a direct image: ${instruction.url}`);
+      return null;
+    }
+
+    // Test if the URL is accessible
+    const response = await fetch(instruction.url, { 
+      method: 'HEAD',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    });
+
+    if (!response.ok) {
+      console.log(`⚠️ Image URL not accessible (${response.status}): ${instruction.url}`);
+      return null;
+    }
+
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.startsWith('image/')) {
+      console.log(`⚠️ URL is not an image (${contentType}): ${instruction.url}`);
+      return null;
+    }
+
+    return instruction.url;
+
+  } catch (error) {
+    console.log(`⚠️ Failed to fetch image: ${error}`);
+    return null;
+  }
+}
+
+// STEP 3: Enhanced athlete identity verification with GPT-5 Vision
+async function verifyAthleteIdentityWithGPT5Vision(
+  imageUrl: string, 
+  athlete: AthleteProfile
+): Promise<{ verified: boolean; reasoning: string }> {
+  try {
+    const contextInfo = [];
+    contextInfo.push(`Name: ${athlete.name}`);
+    if (athlete.sport) contextInfo.push(`Sport: ${athlete.sport}`);
+    if (athlete.country) contextInfo.push(`Nationality: ${athlete.country}`);
+    
+    // Include detailed personal information for better verification
+    if (athlete.personalInfo) {
+      if (athlete.personalInfo.age) contextInfo.push(`Age: ${athlete.personalInfo.age}`);
+      if (athlete.personalInfo.dateOfBirth) contextInfo.push(`Date of Birth: ${athlete.personalInfo.dateOfBirth}`);
+      if (athlete.personalInfo.height) contextInfo.push(`Height: ${athlete.personalInfo.height}`);
+      if (athlete.personalInfo.weight) contextInfo.push(`Weight: ${athlete.personalInfo.weight}`);
+      if (athlete.personalInfo.achievements) contextInfo.push(`Key Achievements: ${athlete.personalInfo.achievements}`);
+    }
+
+    const prompt = `CRITICAL TASK: Verify if this image shows the specific athlete "${athlete.name}".
+
+ATHLETE PROFILE:
+${contextInfo.join('\n')}
+
+VERIFICATION REQUIREMENTS:
+1. IDENTITY CHECK: Does this image show ${athlete.name} specifically? Use all provided data to verify.
+2. PERSON MATCH: Compare visible characteristics (face, build, age) with the athlete data.
+3. AUTHENTICITY: Is this a real sports photo (not AI-generated or fake)?
+4. CONTEXT VERIFICATION: Does this appear to be a professional athlete photo?
+
+CRITICAL RULES:
+- Focus on WHO is in the image, not WHAT sport they're playing
+- Use the provided personal data (age, nationality, achievements) to help identify
+- If you're confident this is ${athlete.name}, verify = true
+- If you're unsure or this appears to be a different person, verify = false
+- It's better to reject uncertain matches than approve wrong athletes
+
+Analyze the image carefully and respond in JSON format:
+{
+  "verified": <boolean>,
+  "reasoning": "<detailed explanation of why this is or isn't ${athlete.name}, mentioning specific identifying factors>"
+}`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: prompt },
+            {
+              type: "image_url",
+              image_url: {
+                url: imageUrl,
+                detail: "high"
+              }
+            }
+          ]
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.1,
+      max_tokens: 500
+    });
+
+    const gptResponse = response.choices[0]?.message?.content;
+    if (!gptResponse) {
+      return { verified: false, reasoning: 'No response from GPT-5 Vision' };
+    }
+
+    const result = JSON.parse(gptResponse);
+    return {
+      verified: result.verified || false,
+      reasoning: result.reasoning || 'No reasoning provided'
+    };
+
+  } catch (error) {
+    console.error(`❌ Error in GPT-5 Vision verification:`, error);
+    return { verified: false, reasoning: `Vision analysis failed: ${error}` };
   }
 }
 
