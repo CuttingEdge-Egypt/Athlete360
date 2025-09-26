@@ -1316,6 +1316,36 @@ export default function Home() {
                                   <span className="text-xs font-bold text-white">{selectedAthlete.personalInfo.position}</span>
                                 </div>
                               )}
+                              
+                              {selectedAthlete.personalInfo.weight && selectedAthlete.personalInfo.weight !== "N/A" && (
+                                <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-orange-400/60 transition-all duration-200">
+                                  <div className="flex items-center justify-center w-4 h-4 bg-orange-500/20 rounded-full">
+                                    <span className="text-[10px] text-orange-400">⚖️</span>
+                                  </div>
+                                  <span className="text-xs text-slate-400 font-medium">Weight</span>
+                                  <span className="text-xs font-bold text-white">{selectedAthlete.personalInfo.weight}</span>
+                                </div>
+                              )}
+                              
+                              {selectedAthlete.personalInfo.dateOfBirth && selectedAthlete.personalInfo.dateOfBirth !== "N/A" && (
+                                <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-pink-400/60 transition-all duration-200">
+                                  <div className="flex items-center justify-center w-4 h-4 bg-pink-500/20 rounded-full">
+                                    <span className="text-[10px] text-pink-400">🎂</span>
+                                  </div>
+                                  <span className="text-xs text-slate-400 font-medium">Birth</span>
+                                  <span className="text-xs font-bold text-white">{selectedAthlete.personalInfo.dateOfBirth}</span>
+                                </div>
+                              )}
+                              
+                              {selectedAthlete.personalInfo.educationalBackground && selectedAthlete.personalInfo.educationalBackground !== "N/A" && (
+                                <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-indigo-400/60 transition-all duration-200">
+                                  <div className="flex items-center justify-center w-4 h-4 bg-indigo-500/20 rounded-full">
+                                    <span className="text-[10px] text-indigo-400">🎓</span>
+                                  </div>
+                                  <span className="text-xs text-slate-400 font-medium">Education</span>
+                                  <span className="text-xs font-bold text-white">{selectedAthlete.personalInfo.educationalBackground}</span>
+                                </div>
+                              )}
                             </div>
                           )}
                           
