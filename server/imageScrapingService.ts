@@ -1,6 +1,11 @@
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-import { openai } from './openaiService.js';
+import OpenAI from 'openai';
+
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || process.env.GOOGLE_API_KEY
+});
 
 // Add stealth plugin to avoid detection
 puppeteer.use(StealthPlugin());
