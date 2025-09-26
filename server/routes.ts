@@ -45,7 +45,7 @@ const developmentPlanSchema = z.object({
 
 type DevelopmentPlanRequest = z.infer<typeof developmentPlanSchema>;
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, generateAthleteImage, generateSpecificAnalysis, searchAthleteImage, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, compareAthletes, generateRankHistory, generateAthleteStatistics, AthleteStatistics } from "./openaiService";
+import { getAthleteProfile, generateAthleteImage, generateSpecificAnalysis, searchAthleteImage, searchAthleteImageAsync, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, compareAthletes, generateRankHistory, generateAthleteStatistics, AthleteStatistics } from "./openaiService";
 import { getAthletePersonalInfoGemini } from "./geminiService";
 import { generateNutritionPlan, generateEnhancedNutritionPlan, generateRankHistoryWithGemini, generateAthleteBiography, generateDevelopmentPlan, type NutritionPlanFormData, type DevelopmentPlanFormData } from "./geminiService";
 import { analyzeVideoFile, analyzeVideoComprehensive } from "./videoAnalysisService";
