@@ -57,6 +57,12 @@ export async function searchAthleteImageWithScraping(
       imageCandidates.push(...googleResults);
     }
     
+    // Priority 5: Bing Images Search (enhanced image discovery)
+    if (imageCandidates.length < 5) {
+      const bingResults = await searchBingImages(athleteProfile);
+      imageCandidates.push(...bingResults);
+    }
+    
     if (imageCandidates.length === 0) {
       console.log(`❌ No images found from any HTTP source for ${athleteName}`);
       return null;
@@ -512,6 +518,85 @@ async function searchGoogleCustomSearch(athlete: AthleteProfile): Promise<ImageR
     
   } catch (error) {
     console.log(`⚠️ Google Custom Search failed: ${error}`);
+  }
+  
+  return results;
+}
+
+// Priority 5: Bing Images Search via SearchAPI.io (enhanced image discovery)
+async function searchBingImages(athlete: AthleteProfile): Promise<ImageResult[]> {
+  const results: ImageResult[] = [];
+  
+  try {
+    // Only use if we have SearchAPI.io API key configured
+    const searchApiKey = process.env.SEARCHAPI_KEY;
+    
+    if (!searchApiKey) {
+      console.log(`⚠️ SearchAPI.io key not configured, skipping Bing Images`);
+      return results;
+    }
+    
+    console.log(`🔎 Using Bing Images search for ${athlete.name}...`);
+    
+    // Build comprehensive athlete search query with all available data
+    const queryParts = [athlete.name];
+    if (athlete.sport) queryParts.push(athlete.sport);
+    if (athlete.country) queryParts.push(athlete.country);
+    queryParts.push('athlete', 'professional', 'photo');
+    
+    const query = queryParts.join(' ');
+    
+    const searchUrl = 'https://www.searchapi.io/api/v1/search';
+    const params = new URLSearchParams({
+      engine: 'bing_images',
+      q: query,
+      image_type: 'photo',           // Critical for athlete photos
+      size: 'large',                 // High-quality results
+      usage_rights: 'free_to_share_and_use', // Legal compliance
+      safe_search: 'moderate',       // Content filtering
+      market_code: 'en-US',          // Localization
+      count: '10',                   // Results per request
+      api_key: searchApiKey
+    });
+    
+    const response = await fetch(`${searchUrl}?${params}`, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      
+      if (data.images_results && data.images_results.length > 0) {
+        console.log(`🎯 Bing Images found ${data.images_results.length} results for ${athlete.name}`);
+        
+        // Process Bing image results
+        for (const image of data.images_results.slice(0, 5)) { // Take top 5 results
+          if (image.thumbnail && image.original) {
+            
+            // Prioritize original full-size images over thumbnails
+            const imageUrl = image.original || image.thumbnail;
+            
+            if (imageUrl && typeof imageUrl === 'string') {
+              results.push({
+                url: imageUrl,
+                source: 'bing-images',
+                confidence: 0.8, // Higher confidence for Bing's quality
+                context: `Bing Images: ${image.title || 'Professional athlete photo'}`
+              });
+            }
+          }
+        }
+      } else {
+        console.log(`⚠️ No Bing Images results found for ${athlete.name}`);
+      }
+    } else {
+      console.log(`⚠️ Bing Images API error: ${response.status}`);
+    }
+    
+  } catch (error) {
+    console.log(`⚠️ Bing Images search failed: ${error}`);
   }
   
   return results;
