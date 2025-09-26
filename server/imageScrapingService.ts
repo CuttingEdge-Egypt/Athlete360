@@ -144,10 +144,10 @@ Respond with ONLY a JSON array of image URLs:
 Find the actual image URLs for ${athlete.name}.`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5", // Using GPT-5 with web search functionality
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.2,
-      max_tokens: 800
+      // GPT-5 only supports default temperature (1.0)
+      max_completion_tokens: 800
     });
 
     const content = response.choices[0]?.message?.content;
@@ -230,11 +230,11 @@ Respond in JSON format:
 Provide 3-5 specific HTTP instructions that we can execute to find this athlete's image.`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
-      temperature: 0.2,
-      max_tokens: 1000
+      // GPT-5 only supports default temperature (1.0)
+      max_completion_tokens: 1000
     });
 
     const content = response.choices[0]?.message?.content;
@@ -366,7 +366,7 @@ Analyze the image thoroughly and respond in JSON format:
 }`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       messages: [
         {
           role: "user",
@@ -383,8 +383,8 @@ Analyze the image thoroughly and respond in JSON format:
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.1,
-      max_tokens: 500
+      // temperature removed - GPT-5 only supports default temperature 0.1,
+      max_completion_tokens: 500
     });
 
     const gptResponse = response.choices[0]?.message?.content;
@@ -437,10 +437,10 @@ Consider:
 Provide strategic guidance for image search optimization.`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.3,
-      max_tokens: 500
+      // temperature removed - GPT-5 only supports default temperature 0.3,
+      max_completion_tokens: 500
     });
 
     const content = response.choices[0]?.message?.content;
@@ -538,7 +538,7 @@ Analyze the image carefully and respond in JSON format:
 }`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       messages: [
         {
           role: "user",
@@ -555,8 +555,8 @@ Analyze the image carefully and respond in JSON format:
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.1,
-      max_tokens: 500
+      // temperature removed - GPT-5 only supports default temperature 0.1,
+      max_completion_tokens: 500
     });
 
     const gptResponse = response.choices[0]?.message?.content;
@@ -596,10 +596,10 @@ Find an official, professional photo that shows their face clearly. Look for ima
 Return the best image URL you find, prioritizing official and credible sources.`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       messages: [{ role: "user", content: prompt }],
-      max_tokens: 500,
-      temperature: 0.3
+      max_completion_tokens: 500,
+      // temperature removed - GPT-5 only supports default temperature 0.3
     });
     
     const content = response.choices[0]?.message?.content;
@@ -1138,10 +1138,10 @@ Respond in JSON format:
 }`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
-      temperature: 0.3
+      // temperature removed - GPT-5 only supports default temperature 0.3
     });
     
     const gptResponse = response.choices[0]?.message?.content;
@@ -1215,7 +1215,7 @@ Analyze the image and respond in JSON format:
 }`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       messages: [
         {
           role: "user",
@@ -1232,8 +1232,8 @@ Analyze the image and respond in JSON format:
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.1,
-      max_tokens: 500
+      // temperature removed - GPT-5 only supports default temperature 0.1,
+      max_completion_tokens: 500
     });
 
     const gptResponse = response.choices[0]?.message?.content;
