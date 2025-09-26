@@ -42,41 +42,41 @@ export async function searchAthleteImageWithScraping(
       personalInfo
     };
 
-    // STEP 1: Pass all athlete data to GPT-5
-    console.log(`🤖 Step 1: Sending athlete data to GPT-5 for image source instructions...`);
-    const imageInstructions = await getImageInstructionsFromGPT5(athleteProfile);
+    // STEP 1: Ask GPT-5 to find direct image URLs (using web search)
+    console.log(`🤖 Step 1: Asking GPT-5 to find direct image URLs for ${athleteName}...`);
+    const directImageUrls = await getDirectImageUrlsFromGPT5(athleteProfile);
     
-    if (!imageInstructions || imageInstructions.length === 0) {
-      console.log(`❌ GPT-5 could not provide image instructions for ${athleteName}`);
+    if (!directImageUrls || directImageUrls.length === 0) {
+      console.log(`❌ GPT-5 could not find direct image URLs for ${athleteName}`);
       return null;
     }
     
-    // STEP 2: GPT-5 returns links and HTTP instructions  
-    console.log(`📸 Step 2: Following GPT-5 instructions to fetch images...`);
+    // STEP 2: Download images directly from GPT-5's URLs
+    console.log(`📸 Step 2: Downloading images directly from GPT-5's URLs...`);
     const fetchedImages: string[] = [];
     
-    for (const instruction of imageInstructions) {
+    for (const imageUrl of directImageUrls) {
       try {
-        const imageUrl = await executeImageInstruction(instruction);
-        if (imageUrl) {
+        const isValid = await validateImageUrl(imageUrl);
+        if (isValid) {
           fetchedImages.push(imageUrl);
-          console.log(`✅ Successfully fetched: ${imageUrl}`);
+          console.log(`✅ Successfully validated: ${imageUrl}`);
           
           // Get first working image for verification
           if (fetchedImages.length >= 1) break;
         }
       } catch (error) {
-        console.log(`⚠️ Failed to execute instruction: ${error}`);
+        console.log(`⚠️ Failed to validate image: ${error}`);
       }
     }
     
     if (fetchedImages.length === 0) {
-      console.log(`❌ No images could be fetched for ${athleteName}`);
+      console.log(`❌ No valid images found for ${athleteName}`);
       return null;
     }
     
-    // STEP 3: We get the image (already done above)
-    console.log(`✅ Step 3: Image retrieved successfully`);
+    // STEP 3: Image downloaded successfully
+    console.log(`✅ Step 3: Image downloaded successfully`);
     
     // STEP 4: Send image and ALL athlete info to GPT-5 for verification
     console.log(`🔍 Step 4: Sending image and athlete data to GPT-5 for verification...`);
@@ -100,7 +100,88 @@ export async function searchAthleteImageWithScraping(
   }
 }
 
-// STEP 1: Pass athlete data to GPT-5 for specific HTTP instructions  
+// STEP 1: Ask GPT-5 to find direct image URLs using web search
+async function getDirectImageUrlsFromGPT5(athlete: AthleteProfile): Promise<string[]> {
+  try {
+    const athleteDetails = [];
+    athleteDetails.push(`Name: ${athlete.name}`);
+    if (athlete.sport) athleteDetails.push(`Sport: ${athlete.sport}`);
+    if (athlete.country) athleteDetails.push(`Country: ${athlete.country}`);
+    
+    // Include ALL personal data for better search accuracy
+    if (athlete.personalInfo) {
+      if (athlete.personalInfo.age) athleteDetails.push(`Age: ${athlete.personalInfo.age}`);
+      if (athlete.personalInfo.dateOfBirth) athleteDetails.push(`Date of Birth: ${athlete.personalInfo.dateOfBirth}`);
+      if (athlete.personalInfo.height) athleteDetails.push(`Height: ${athlete.personalInfo.height}`);
+      if (athlete.personalInfo.weight) athleteDetails.push(`Weight: ${athlete.personalInfo.weight}`);
+      if (athlete.personalInfo.achievements) athleteDetails.push(`Achievements: ${athlete.personalInfo.achievements}`);
+      if (athlete.personalInfo.position) athleteDetails.push(`Position: ${athlete.personalInfo.position}`);
+    }
+
+    const prompt = `You are an expert image finder. I need direct image URLs for this athlete.
+
+COMPLETE ATHLETE DATA:
+${athleteDetails.join('\n')}
+
+TASK: Find actual, working image URLs for this athlete. Provide 3-5 direct image URLs that show this specific athlete.
+
+Focus on these sources (in priority order):
+- Sport-specific databases (TaekwondoData.com for Taekwondo, etc.)
+- Official sports federation websites  
+- Olympic/competition databases
+- Major sports news outlets (ESPN, BBC Sport, etc.)
+- Professional athlete databases
+
+Requirements:
+- URLs must end in .jpg, .jpeg, .png, or .webp
+- URLs must be direct links to images, not webpage links
+- Prioritize official, high-quality athlete photos
+- Include variety: profile shots, action shots, official photos
+
+Respond with ONLY a JSON array of image URLs:
+["https://example.com/athlete1.jpg", "https://example.com/athlete2.png", "https://example.com/athlete3.webp"]
+
+Find the actual image URLs for ${athlete.name}.`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.2,
+      max_tokens: 800
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) return [];
+
+    try {
+      // Try to parse as JSON array
+      const imageUrls = JSON.parse(content);
+      if (Array.isArray(imageUrls)) {
+        console.log(`🎯 GPT-5 provided ${imageUrls.length} direct image URLs for ${athlete.name}`);
+        imageUrls.forEach((url: string, index: number) => {
+          console.log(`📋 Image ${index + 1}: ${url}`);
+        });
+        return imageUrls.filter(url => typeof url === 'string' && url.match(/\.(jpg|jpeg|png|webp)(\?.*)?$/i));
+      }
+    } catch (parseError) {
+      // If JSON parsing fails, try to extract URLs from text
+      const urlMatches = content.match(/https?:\/\/[^\s"'<>]+\.(jpg|jpeg|png|webp)(\?[^\s"'<>]*)?/gi);
+      if (urlMatches) {
+        console.log(`🎯 GPT-5 provided ${urlMatches.length} image URLs for ${athlete.name} (extracted from text)`);
+        return urlMatches;
+      }
+    }
+
+    console.log(`❌ Could not parse image URLs from GPT-5 response for ${athlete.name}`);
+    return [];
+
+  } catch (error) {
+    console.error('Error getting direct image URLs from GPT-5:', error);
+    return [];
+  }
+}
+
+// Legacy: STEP 1 instructions-based approach
 async function getImageInstructionsFromGPT5(athlete: AthleteProfile): Promise<ImageInstruction[]> {
   try {
     const athleteDetails = [];
@@ -166,7 +247,7 @@ Provide 3-5 specific HTTP instructions that we can execute to find this athlete'
     
     // Log each instruction separately to avoid log truncation
     console.log(`📋 === GPT-5's COMPLETE INSTRUCTIONS FOR ${athlete.name.toUpperCase()} ===`);
-    result.instructions.forEach((instruction, index) => {
+    result.instructions.forEach((instruction: any, index: number) => {
       console.log(`📋 Instruction ${index + 1}:`);
       console.log(`📋   Source: ${instruction.source}`);
       console.log(`📋   URL: ${instruction.url}`);
