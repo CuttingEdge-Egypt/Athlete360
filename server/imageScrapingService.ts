@@ -163,6 +163,18 @@ Provide 3-5 specific HTTP instructions that we can execute to find this athlete'
     if (!result.instructions || !Array.isArray(result.instructions)) return [];
 
     console.log(`🎯 GPT-5 provided ${result.instructions.length} HTTP instructions for ${athlete.name}`);
+    
+    // Log each instruction separately to avoid log truncation
+    console.log(`📋 === GPT-5's COMPLETE INSTRUCTIONS FOR ${athlete.name.toUpperCase()} ===`);
+    result.instructions.forEach((instruction, index) => {
+      console.log(`📋 Instruction ${index + 1}:`);
+      console.log(`📋   Source: ${instruction.source}`);
+      console.log(`📋   URL: ${instruction.url}`);
+      console.log(`📋   Reasoning: ${instruction.reasoning}`);
+      console.log(`📋 ---`);
+    });
+    console.log(`📋 === END GPT-5 INSTRUCTIONS ===`);
+    
     return result.instructions;
 
   } catch (error) {
