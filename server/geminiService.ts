@@ -2858,8 +2858,15 @@ export async function getAthletePersonalInfoGemini(name: string, sport: string, 
       throw new Error('PERSONAL_INFO_NOT_FOUND');
     }
     
+    // Clean up age format - remove date references
+    let cleanAge = parsedResult.age;
+    if (cleanAge && cleanAge !== "N/A") {
+      cleanAge = cleanAge.replace(/\s*\(as of.*?\)/gi, '').trim();
+      cleanAge = cleanAge.replace(/\s*as of.*$/gi, '').trim();
+    }
+    
     return {
-      age: parsedResult.age === "N/A" ? undefined : parsedResult.age,
+      age: cleanAge === "N/A" ? undefined : cleanAge,
       dateOfBirth: parsedResult.dateOfBirth === "N/A" ? undefined : parsedResult.dateOfBirth,
       height: parsedResult.height === "N/A" ? undefined : parsedResult.height,
       weight: parsedResult.weight === "N/A" ? undefined : parsedResult.weight,

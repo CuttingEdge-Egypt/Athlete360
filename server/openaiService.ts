@@ -2036,8 +2036,22 @@ If you find a suitable image, provide ONLY the direct image URL. If no suitable 
             } else if (item && typeof item === 'object') {
               console.log(`🔍 GPT-5 output item ${index}:`, Object.keys(item));
               
-              // Check for image objects (base64 or URL)
-              if ('image' in item || 'base64' in item || 'data' in item || 'image_url' in item) {
+              // Handle web search call results - this is the key fix!
+              if (item.type === 'web_search_call' && item.status === 'completed') {
+                console.log(`🔍 Found web search call:`, JSON.stringify(item, null, 2));
+                
+                // Look for results in the web search call
+                if (item.results && Array.isArray(item.results)) {
+                  item.results.forEach((result: any) => {
+                    if (result.url && result.url.match(/\.(jpg|jpeg|png|webp)$/i)) {
+                      console.log(`📸 Found image URL in search results: ${result.url}`);
+                      textParts.push(result.url);
+                    }
+                  });
+                }
+              }
+              // Check for direct image objects (base64 or URL)
+              else if ('image' in item || 'base64' in item || 'data' in item || 'image_url' in item) {
                 console.log(`🖼️ Found image object at index ${index}:`, JSON.stringify(item, null, 2));
                 foundImageObjects.push(item);
                 
@@ -2045,8 +2059,16 @@ If you find a suitable image, provide ONLY the direct image URL. If no suitable 
                 if (item.image_url) textParts.push(item.image_url);
                 if (item.url) textParts.push(item.url);
                 if (item.link) textParts.push(item.link);
-              } else {
-                // Check for text content
+              }
+              // Check for reasoning with potential URLs
+              else if (item.type === 'reasoning' && item.summary) {
+                const summaryText = Array.isArray(item.summary) ? item.summary.join(' ') : String(item.summary);
+                if (summaryText.includes('http')) {
+                  textParts.push(summaryText);
+                }
+              }
+              // Check for text content  
+              else {
                 if ('text' in item) textParts.push((item as any).text);
                 else if ('content' in item) textParts.push((item as any).content);
                 else if ('url' in item) textParts.push((item as any).url);
