@@ -1935,11 +1935,12 @@ export async function searchAthleteImage(athleteName: string, sport?: string, na
   try {
     console.log(`🔍 Starting comprehensive image search for ${athleteName} (${sport || 'Unknown Sport'})`);
     
-    // Strategy 1: AI-powered web search with GPT-5 (primary method)
-    const aiImageUrl = await searchAthleteImageWithAI(athleteName, sport, nationality, personalInfo);
-    if (aiImageUrl) {
-      console.log(`✅ Found image via AI web search: ${aiImageUrl}`);
-      return aiImageUrl;
+    // Strategy 1: Selenium + GPT-5 pipeline (primary method)
+    const { searchAthleteImageWithScraping } = await import('./imageScrapingService.js');
+    const scrapedImageUrl = await searchAthleteImageWithScraping(athleteName, sport, nationality, personalInfo);
+    if (scrapedImageUrl) {
+      console.log(`✅ Found image via Selenium + GPT-5: ${scrapedImageUrl}`);
+      return scrapedImageUrl;
     }
     
     // Strategy 2: Sport-specific database search (secondary method)
