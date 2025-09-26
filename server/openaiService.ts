@@ -1931,6 +1931,37 @@ export async function generateThreadedBiography(athleteName: string, sport: stri
 }
 
 // Enhanced AI-powered athlete image search with multiple sources and better sport context
+// Asynchronous image search that updates athlete profile when image is found
+export async function searchAthleteImageAsync(
+  athleteId: string,
+  athleteName: string, 
+  sport?: string, 
+  nationality?: string, 
+  personalInfo?: any
+): Promise<void> {
+  try {
+    console.log(`🔍 [ASYNC] Starting background image search for ${athleteName}...`);
+    
+    // Run the full Selenium + GPT-5 pipeline
+    const imageUrl = await searchAthleteImage(athleteName, sport, nationality, personalInfo);
+    
+    if (imageUrl) {
+      console.log(`✅ [ASYNC] Found image for ${athleteName}, updating profile...`);
+      
+      // Update athlete's profile image in database
+      const { storage } = await import('./storage.js');
+      await storage.updateAthlete(athleteId, { profileImageUrl: imageUrl });
+      
+      console.log(`✅ [ASYNC] Successfully updated ${athleteName}'s profile image: ${imageUrl}`);
+    } else {
+      console.log(`❌ [ASYNC] No image found for ${athleteName}, profile will use default icon`);
+    }
+    
+  } catch (error) {
+    console.error(`❌ [ASYNC] Error in background image search for ${athleteName}:`, error);
+  }
+}
+
 export async function searchAthleteImage(athleteName: string, sport?: string, nationality?: string, personalInfo?: any): Promise<string | null> {
   try {
     console.log(`🔍 Starting comprehensive image search for ${athleteName} (${sport || 'Unknown Sport'})`);

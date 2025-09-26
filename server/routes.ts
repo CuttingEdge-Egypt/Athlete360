@@ -467,29 +467,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use provided nationality or default to Unknown
       const athleteCountry = req.body.nationality || req.body.country || "Unknown";
 
-      // Search for athlete image using GPT-5 web search (not generation)
-      console.log(`🔍 Searching for athlete image for ${name} using GPT-5 web search...`);
-      let profileImageUrl = await searchAthleteImage(name, sport.name, athleteCountry, personalInfo);
-
-      // If image search fails, use default profile icon (null will trigger fallback in frontend)
-      if (!profileImageUrl) {
-        console.log(`⚠️ Image search failed for ${name}, will use default profile icon`);
-      }
-
+      // Create athlete profile immediately (without waiting for image)
       const athleteData = {
         name: name.trim(),
         sportId,
         bio: `Professional ${sport.name} athlete`, // Minimal bio placeholder
         rank: undefined, // No rank during creation - will be populated by personal info display
         country: athleteCountry,
-        profileImageUrl: profileImageUrl || undefined,
+        profileImageUrl: undefined, // Image will be added asynchronously
         achievements: [], // No achievements during initial creation
         personalInfo: personalInfo || undefined // Store personal info for display
       };
 
       const newAthlete = await storage.createAthlete(athleteData);
-      
       console.log(`Successfully created athlete: ${newAthlete.name}`);
+      
+      // Start image search asynchronously (non-blocking)
+      console.log(`🔍 Starting async image search for ${name}...`);
+      searchAthleteImageAsync(newAthlete.id, name, sport.name, athleteCountry, personalInfo)
+        .catch(error => {
+          console.error(`❌ Async image search failed for ${name}:`, error);
+        });
+
+      // Return athlete profile immediately
       res.json(newAthlete);
     } catch (error) {
       console.error("Error creating athlete with AI:", error);
