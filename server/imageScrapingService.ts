@@ -605,6 +605,105 @@ Respond in JSON format:
   }
 }
 
+// GPT-5 Vision: Visual verification that image matches athlete and sport
+async function verifyImageWithGPT5Vision(
+  imageUrl: string, 
+  athlete: AthleteProfile
+): Promise<{ verified: boolean; reasoning: string }> {
+  try {
+    console.log(`👁️ Using GPT-5 Vision to verify image for ${athlete.name}...`);
+    
+    const contextInfo = [];
+    if (athlete.sport) contextInfo.push(`Sport: ${athlete.sport}`);
+    if (athlete.country) contextInfo.push(`Country: ${athlete.country}`);
+    if (athlete.personalInfo?.age) contextInfo.push(`Age: ${athlete.personalInfo.age}`);
+    if (athlete.personalInfo?.dateOfBirth) contextInfo.push(`Born: ${athlete.personalInfo.dateOfBirth}`);
+
+    const prompt = `You are analyzing an athlete photo to verify it matches the expected athlete and sport.
+
+ATHLETE TO VERIFY:
+Name: ${athlete.name}
+${contextInfo.join('\n')}
+
+VERIFICATION REQUIREMENTS:
+1. SPORT ACCURACY: Does this image show an athlete from "${athlete.sport || 'the specified sport'}"?
+   - For Taekwondo: Look for martial arts uniform (dobok), protective gear, kicking/fighting poses, competition setting
+   - For Tennis: Look for tennis racket, tennis court, tennis attire, playing poses
+   - For Football: Look for football/soccer ball, football field, football uniform, playing action
+   - For Basketball: Look for basketball, court, uniform, playing action
+   - REJECT if showing wrong sport (e.g., football player when expecting Taekwondo)
+
+2. ATHLETE CONSISTENCY: Does this appear to be a legitimate athlete photo?
+   - Professional sports photo quality
+   - Competition or training environment
+   - Athletic context and setting
+   - Not a random person or celebrity
+
+3. QUALITY CHECK: Is this a suitable profile image?
+   - Clear, well-lit photo
+   - Shows the athlete prominently
+   - Professional or official sports context
+
+CRITICAL RULES:
+- If the image shows the WRONG sport, immediately reject (verified: false)
+- If unsure about sport accuracy, reject to be safe
+- Only verify (verified: true) if confident the image shows correct sport and athlete context
+
+Analyze the image and respond in JSON format:
+{
+  "verified": <boolean>,
+  "reasoning": "<detailed explanation of sport verification, athlete context, and decision>"
+}`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: prompt },
+            {
+              type: "image_url",
+              image_url: {
+                url: imageUrl,
+                detail: "high"
+              }
+            }
+          ]
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.1,
+      max_tokens: 500
+    });
+
+    const gptResponse = response.choices[0]?.message?.content;
+    if (!gptResponse) {
+      console.log(`❌ No response from GPT-5 Vision for ${athlete.name}`);
+      return { verified: false, reasoning: "No response from vision analysis" };
+    }
+
+    try {
+      const verification = JSON.parse(gptResponse);
+      console.log(`👁️ GPT-5 Vision result for ${athlete.name}: ${verification.verified ? '✅ VERIFIED' : '❌ REJECTED'}`);
+      console.log(`👁️ Reasoning: ${verification.reasoning}`);
+      
+      return {
+        verified: verification.verified || false,
+        reasoning: verification.reasoning || "No reasoning provided"
+      };
+      
+    } catch (parseError) {
+      console.error(`❌ Error parsing GPT-5 Vision response:`, parseError);
+      return { verified: false, reasoning: "Failed to parse vision analysis response" };
+    }
+    
+  } catch (error) {
+    console.error(`❌ Error in GPT-5 Vision verification:`, error);
+    return { verified: false, reasoning: `Vision analysis failed: ${error}` };
+  }
+}
+
 // Validate image URL accessibility and format
 async function validateImageUrl(url: string): Promise<boolean> {
   try {
