@@ -1985,6 +1985,8 @@ async function searchAthleteImageWithAI(athleteName: string, sport?: string, nat
 
     const fullContext = personalContext ? `${nationalityContext}. Personal details: ${personalContext}` : nationalityContext;
     
+    console.log(`🔧 GPT-5 web search context: "${athleteName}${fullContext}"`);
+    
     const response = await openai.responses.create({
       model: "gpt-5",
       input: `Search the web for a high-quality profile photo of the${sportContext} athlete "${athleteName}"${fullContext}.
@@ -2076,7 +2078,10 @@ If you find a suitable image, provide ONLY the direct image URL. If no suitable 
     
     return null;
   } catch (error) {
-    console.error(`Error in AI web search for ${athleteName}:`, error);
+    console.error(`❌ GPT-5 web search failed for ${athleteName}:`, error);
+    console.error(`❌ Error type:`, typeof error);
+    console.error(`❌ Error message:`, error instanceof Error ? error.message : String(error));
+    console.error(`❌ Full error details:`, JSON.stringify(error, null, 2));
     return null;
   }
 }
