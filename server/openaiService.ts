@@ -1931,12 +1931,12 @@ export async function generateThreadedBiography(athleteName: string, sport: stri
 }
 
 // Enhanced AI-powered athlete image search with multiple sources and better sport context
-export async function searchAthleteImage(athleteName: string, sport?: string, nationality?: string): Promise<string | null> {
+export async function searchAthleteImage(athleteName: string, sport?: string, nationality?: string, personalInfo?: any): Promise<string | null> {
   try {
     console.log(`🔍 Starting comprehensive image search for ${athleteName} (${sport || 'Unknown Sport'})`);
     
     // Strategy 1: AI-powered web search with GPT-5 (primary method)
-    const aiImageUrl = await searchAthleteImageWithAI(athleteName, sport, nationality);
+    const aiImageUrl = await searchAthleteImageWithAI(athleteName, sport, nationality, personalInfo);
     if (aiImageUrl) {
       console.log(`✅ Found image via AI web search: ${aiImageUrl}`);
       return aiImageUrl;
@@ -1966,16 +1966,28 @@ export async function searchAthleteImage(athleteName: string, sport?: string, na
 }
 
 // AI-powered web search for athlete images using GPT-5
-async function searchAthleteImageWithAI(athleteName: string, sport?: string, nationality?: string): Promise<string | null> {
+async function searchAthleteImageWithAI(athleteName: string, sport?: string, nationality?: string, personalInfo?: any): Promise<string | null> {
   try {
     console.log(`🤖 Using AI web search for ${athleteName}...`);
     
     const sportContext = sport ? ` ${sport}` : '';
     const nationalityContext = nationality ? ` from ${nationality}` : '';
     
+    // Build additional context from personal info
+    const personalContext = personalInfo ? [
+      personalInfo.age ? `Age: ${personalInfo.age}` : '',
+      personalInfo.height ? `Height: ${personalInfo.height}` : '',
+      personalInfo.weight ? `Weight: ${personalInfo.weight}` : '',
+      personalInfo.position ? `Position: ${personalInfo.position}` : '',
+      personalInfo.dateOfBirth ? `Born: ${personalInfo.dateOfBirth}` : '',
+      personalInfo.educationalBackground ? `Education: ${personalInfo.educationalBackground}` : ''
+    ].filter(Boolean).join(', ') : '';
+
+    const fullContext = personalContext ? `${nationalityContext}. Personal details: ${personalContext}` : nationalityContext;
+    
     const response = await openai.responses.create({
       model: "gpt-5",
-      input: `Search the web for a high-quality profile photo of the${sportContext} athlete "${athleteName}"${nationalityContext}.
+      input: `Search the web for a high-quality profile photo of the${sportContext} athlete "${athleteName}"${fullContext}.
 
 Find ONLY official, professional photos from credible sources such as:
 - Official sport federation websites

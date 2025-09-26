@@ -467,13 +467,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use provided nationality or default to Unknown
       const athleteCountry = req.body.nationality || req.body.country || "Unknown";
 
-      // Generate athlete image using DALL-E-3 with personal info
-      console.log(`🎨 Generating athlete image for ${name}...`);
-      let profileImageUrl = await generateAthleteImage(name, sport.name, athleteCountry, personalInfo || undefined);
+      // Search for athlete image using GPT-5 web search (not generation)
+      console.log(`🔍 Searching for athlete image for ${name} using GPT-5 web search...`);
+      let profileImageUrl = await searchAthleteImage(name, sport.name, athleteCountry, personalInfo);
 
-      // If image generation fails, use default profile icon (null will trigger fallback in frontend)
+      // If image search fails, use default profile icon (null will trigger fallback in frontend)
       if (!profileImageUrl) {
-        console.log(`⚠️ Image generation failed for ${name}, will use default profile icon`);
+        console.log(`⚠️ Image search failed for ${name}, will use default profile icon`);
       }
 
       const athleteData = {
