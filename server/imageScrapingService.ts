@@ -1,14 +1,10 @@
-import puppeteer from 'puppeteer-extra';
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import { chromium, firefox, webkit } from 'playwright';
 import OpenAI from 'openai';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || process.env.GOOGLE_API_KEY
 });
-
-// Add stealth plugin to avoid detection
-puppeteer.use(StealthPlugin());
 
 interface ScrapedImage {
   url: string;
@@ -25,7 +21,7 @@ interface AthleteContext {
   personalInfo?: any;
 }
 
-// Main function: Complete Selenium + GPT-5 pipeline
+// Main function: Complete Playwright + GPT-5 pipeline
 export async function searchAthleteImageWithScraping(
   athleteName: string, 
   sport?: string,
@@ -33,7 +29,7 @@ export async function searchAthleteImageWithScraping(
   personalInfo?: any
 ): Promise<string | null> {
   try {
-    console.log(`🔍 Starting Selenium + GPT-5 image search for ${athleteName}...`);
+    console.log(`🔍 Starting Playwright + GPT-5 image search for ${athleteName}...`);
     
     const athleteContext: AthleteContext = {
       name: athleteName,
@@ -73,7 +69,7 @@ export async function searchAthleteImageWithScraping(
     }
 
   } catch (error) {
-    console.error(`❌ Error in Selenium + GPT-5 image search for ${athleteName}:`, error);
+    console.error(`❌ Error in Playwright + GPT-5 image search for ${athleteName}:`, error);
     return null;
   }
 }
@@ -108,7 +104,7 @@ async function scrapeTaekwondoFederation(athleteContext: AthleteContext): Promis
   try {
     console.log(`🥋 Scraping World Taekwondo federation for ${athleteContext.name}...`);
     
-    const browser = await puppeteer.launch({ 
+    const browser = await chromium.launch({ 
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
     });
@@ -116,7 +112,9 @@ async function scrapeTaekwondoFederation(athleteContext: AthleteContext): Promis
     const page = await browser.newPage();
     
     // Set user agent to avoid detection
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    await page.setExtraHTTPHeaders({
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    });
     
     // Search World Taekwondo website
     const searchQuery = `${athleteContext.name} ${athleteContext.country || ''}`.trim();
@@ -124,7 +122,7 @@ async function scrapeTaekwondoFederation(athleteContext: AthleteContext): Promis
     
     console.log(`🌐 Searching: ${searchUrl}`);
     
-    await page.goto(searchUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+    await page.goto(searchUrl, { waitUntil: 'networkidle', timeout: 30000 });
     
     // Extract images from search results
     const foundImages = await page.evaluate((athleteName) => {
@@ -175,20 +173,22 @@ async function scrapeSportsNews(athleteContext: AthleteContext): Promise<Scraped
   try {
     console.log(`📰 Scraping sports news sites for ${athleteContext.name}...`);
     
-    const browser = await puppeteer.launch({ 
+    const browser = await chromium.launch({ 
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
     });
     
     const page = await browser.newPage();
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    await page.setExtraHTTPHeaders({
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    });
     
     // Search ESPN for athlete images
     const searchQuery = `${athleteContext.name} ${athleteContext.sport || ''} ${athleteContext.country || ''}`.trim();
     const espnSearchUrl = `https://www.espn.com/search/_/q/${encodeURIComponent(searchQuery)}`;
     
     try {
-      await page.goto(espnSearchUrl, { waitUntil: 'networkidle2', timeout: 15000 });
+      await page.goto(espnSearchUrl, { waitUntil: 'networkidle', timeout: 15000 });
       
       const espnImages = await page.evaluate((athleteName) => {
         const images: any[] = [];
@@ -245,13 +245,15 @@ async function scrapeGoogleImages(athleteContext: AthleteContext): Promise<Scrap
   try {
     console.log(`🔍 Scraping Google Images for ${athleteContext.name} (with throttling)...`);
     
-    const browser = await puppeteer.launch({ 
+    const browser = await chromium.launch({ 
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
     });
     
     const page = await browser.newPage();
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    await page.setExtraHTTPHeaders({
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    });
     
     // Build comprehensive search query
     const searchTerms = [athleteContext.name];
@@ -261,7 +263,7 @@ async function scrapeGoogleImages(athleteContext: AthleteContext): Promise<Scrap
     const searchQuery = searchTerms.join(' ');
     const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}&tbm=isch`;
     
-    await page.goto(googleUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+    await page.goto(googleUrl, { waitUntil: 'networkidle', timeout: 30000 });
     
     // Wait for images to load
     await page.waitForSelector('img[src]', { timeout: 10000 });
