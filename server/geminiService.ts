@@ -2806,11 +2806,11 @@ export async function getAthletePersonalInfoGemini(name: string, sport: string, 
     - Previous sports (if any)
 
     CRITICAL REQUIREMENTS:
-    - Only provide factual, verifiable personal information found through web search
-    - Use "N/A" for any information not found
-    - Do not generate or estimate any data
-    - If you cannot find reliable personal information, respond with: {"error": "no_personal_info_found"}
-    - Search multiple sources to verify information accuracy
+    - Search thoroughly across multiple sources for factual personal information
+    - Use "N/A" only for information that genuinely cannot be found after extensive search
+    - Prioritize finding any available personal details over strict verification
+    - Only respond with {"error": "no_personal_info_found"} if absolutely no personal information exists
+    - Include partial information when available (e.g., approximate age, weight category, etc.)
     
     Athlete details:
     - Name: ${name}
@@ -2830,15 +2830,15 @@ export async function getAthletePersonalInfoGemini(name: string, sport: string, 
     }`;
 
   try {
-    console.log(`🔍 Searching for personal info for ${name} using Gemini-2.5-pro with web search...`);
+    console.log(`🔍 Searching for personal info for ${name} using Gemini-2.5-flash with web search...`);
     
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash", // Use same model as biography (better for web search)
       contents: prompt,
       config: {
-        temperature: 0.1,
-        maxOutputTokens: 2000,
-        tools: [{ googleSearch: {} }] // Enable web search - matching our existing pattern
+        temperature: 0.7, // Less restrictive than 0.1, but more factual than 1.0
+        maxOutputTokens: 4000, // More tokens for comprehensive search
+        tools: [{ googleSearch: {} }] // Enable web search
       }
     });
 
