@@ -42,38 +42,40 @@ export async function searchAthleteImageWithScraping(
       personalInfo
     };
 
-    // STEP 1: Ask GPT-5 for specific image sources and instructions
-    console.log(`🤖 Step 1: Getting GPT-5 guidance for ${athleteName}...`);
-    const imageInstructions = await getImageSourcesFromGPT5(athleteProfile);
+    // STEP 1: Get search strategies from GPT-5, then use real search methods
+    console.log(`🤖 Step 1: Getting GPT-5 search strategies for ${athleteName}...`);
+    const searchStrategies = await getSearchStrategiesFromGPT5(athleteProfile);
     
-    if (!imageInstructions || imageInstructions.length === 0) {
-      console.log(`❌ GPT-5 could not provide image sources for ${athleteName}`);
+    // STEP 2: Use existing search methods with GPT-5 strategies  
+    console.log(`📸 Step 2: Searching with enhanced strategies...`);
+    const imageCandidates: ImageResult[] = [];
+    
+    // Apply the enhanced strategies to our existing search methods
+    const gptResult = await searchWithGPT5WebSearch(athleteProfile);
+    if (gptResult) imageCandidates.push(gptResult);
+    
+    const sportResults = await searchSportSpecificSources(athleteProfile);
+    imageCandidates.push(...sportResults);
+    
+    const generalResults = await searchGeneralSportsAPIs(athleteProfile);
+    imageCandidates.push(...generalResults);
+    
+    if (imageCandidates.length === 0) {
+      console.log(`❌ No images found from any source for ${athleteName}`);
       return null;
     }
     
-    // STEP 2: Fetch images based on GPT-5 instructions
-    console.log(`📸 Step 2: Fetching ${imageInstructions.length} images guided by GPT-5...`);
-    const validImages: string[] = [];
+    console.log(`📸 Found ${imageCandidates.length} candidate images`);
     
-    for (const instruction of imageInstructions) {
-      try {
-        const imageUrl = await fetchImageFromInstruction(instruction);
-        if (imageUrl && await validateImageUrl(imageUrl)) {
-          validImages.push(imageUrl);
-          console.log(`✅ Successfully fetched: ${imageUrl}`);
-          
-          // Stop after finding first valid image to speed up the process
-          if (validImages.length >= 1) break;
-        }
-      } catch (error) {
-        console.log(`⚠️ Failed to fetch image from instruction: ${error}`);
-      }
-    }
+    // Use GPT-5 to select the best image
+    const bestImage = await selectBestImageWithGPT5(imageCandidates, athleteProfile);
     
-    if (validImages.length === 0) {
-      console.log(`❌ No valid images fetched for ${athleteName}`);
+    if (!bestImage) {
+      console.log(`❌ GPT-5 could not select suitable image for ${athleteName}`);
       return null;
     }
+    
+    const validImages: string[] = [bestImage.url];
     
     // STEP 3: Use GPT-5 Vision to verify this is actually the correct athlete
     console.log(`🔍 Step 3: GPT-5 identity verification for ${athleteName}...`);
@@ -97,8 +99,8 @@ export async function searchAthleteImageWithScraping(
   }
 }
 
-// STEP 1: Get specific image sources from GPT-5 with complete athlete data
-async function getImageSourcesFromGPT5(athlete: AthleteProfile): Promise<ImageInstruction[]> {
+// STEP 1: Get search strategies from GPT-5 with complete athlete data
+async function getSearchStrategiesFromGPT5(athlete: AthleteProfile): Promise<string[]> {
   try {
     const athleteDetails = [];
     athleteDetails.push(`Name: ${athlete.name}`);
@@ -114,53 +116,33 @@ async function getImageSourcesFromGPT5(athlete: AthleteProfile): Promise<ImageIn
       if (athlete.personalInfo.achievements) athleteDetails.push(`Achievements: ${athlete.personalInfo.achievements}`);
     }
 
-    const prompt = `Find the best image sources for this athlete. Use all the provided data to find accurate, high-quality photos.
+    const prompt = `Provide enhanced search strategies for finding the best images of this athlete.
 
 ATHLETE DETAILS:
 ${athleteDetails.join('\n')}
 
-Your task: Find 3-5 specific image URLs for this athlete. Use your web search capability to find:
+Your task: Analyze this athlete's profile and provide optimal search strategies that will help find their images more effectively.
 
-1. Official sports federation photos (highest priority)
-2. Olympic or international competition photos 
-3. Major news outlet photos (ESPN, BBC Sport, Reuters, AP)
-4. Official tournament or league photos
-5. Sports database photos (TheSportsDB, etc.)
+Consider:
+- What specific keywords would be most effective?
+- What sources are likely to have their photos?
+- Any notable achievements or competitions they've participated in?
+- Alternative name variations or nicknames?
 
-For each image URL you find, provide:
-- The direct image URL (must end in .jpg, .jpeg, .png, or .webp)
-- The source website/database
-- Brief reasoning why this source is credible
-
-Respond in JSON format:
-{
-  "images": [
-    {
-      "url": "https://example.com/athlete.jpg",
-      "source": "Official Olympic Committee",
-      "reasoning": "Official Olympic athlete profile photo from IOC database"
-    }
-  ]
-}
-
-Focus on finding the most credible, official sources that are likely to have the correct athlete photo.`;
+Provide strategic guidance for image search optimization.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" },
-      temperature: 0.2,
-      max_tokens: 1000
+      temperature: 0.3,
+      max_tokens: 500
     });
 
     const content = response.choices[0]?.message?.content;
     if (!content) return [];
 
-    const result = JSON.parse(content);
-    if (!result.images || !Array.isArray(result.images)) return [];
-
-    console.log(`🎯 GPT-5 found ${result.images.length} image sources for ${athlete.name}`);
-    return result.images;
+    console.log(`🎯 GPT-5 provided search strategies for ${athlete.name}`);
+    return [content]; // Return the strategy as guidance
 
   } catch (error) {
     console.error('Error getting image sources from GPT-5:', error);
