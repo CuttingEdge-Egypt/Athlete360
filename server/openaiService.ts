@@ -2019,6 +2019,7 @@ If you find a suitable image, provide ONLY the direct image URL. If no suitable 
 
     // Handle GPT-5 response parsing - response.output can be various types
     let aiResponse: string = '';
+    let foundImageObjects: any[] = [];
     
     try {
       if (response.output) {
@@ -2027,36 +2028,56 @@ If you find a suitable image, provide ONLY the direct image URL. If no suitable 
           aiResponse = response.output.trim();
         } else if (Array.isArray(response.output)) {
           // If it's an array, extract text from each item and handle potential image objects
-          aiResponse = response.output
-            .map(item => {
-              if (typeof item === 'string') return item;
-              if (item && typeof item === 'object') {
-                // Check for image objects (base64 or URL)
-                if ('image' in item || 'base64' in item || 'data' in item) {
-                  console.log(`🖼️ Found potential image object:`, Object.keys(item));
-                  return ''; // Skip image objects for URL extraction
-                }
+          const textParts: string[] = [];
+          
+          response.output.forEach((item, index) => {
+            if (typeof item === 'string') {
+              textParts.push(item);
+            } else if (item && typeof item === 'object') {
+              console.log(`🔍 GPT-5 output item ${index}:`, Object.keys(item));
+              
+              // Check for image objects (base64 or URL)
+              if ('image' in item || 'base64' in item || 'data' in item || 'image_url' in item) {
+                console.log(`🖼️ Found image object at index ${index}:`, JSON.stringify(item, null, 2));
+                foundImageObjects.push(item);
+                
+                // Try to extract URL from image object
+                if (item.image_url) textParts.push(item.image_url);
+                if (item.url) textParts.push(item.url);
+                if (item.link) textParts.push(item.link);
+              } else {
                 // Check for text content
-                if ('text' in item) return (item as any).text;
-                if ('content' in item) return (item as any).content;
-                if ('url' in item) return (item as any).url; // Direct URL
-                if ('link' in item) return (item as any).link; // Direct link
+                if ('text' in item) textParts.push((item as any).text);
+                else if ('content' in item) textParts.push((item as any).content);
+                else if ('url' in item) textParts.push((item as any).url);
+                else if ('link' in item) textParts.push((item as any).link);
+                else {
+                  console.log(`🤔 Unknown object structure:`, item);
+                  textParts.push(String(item));
+                }
               }
-              return String(item);
-            })
-            .join(' ')
-            .trim();
+            } else {
+              textParts.push(String(item));
+            }
+          });
+          
+          aiResponse = textParts.filter(Boolean).join(' ').trim();
         } else if (typeof response.output === 'object') {
           // Try to extract text from object
           const outputObj = response.output as any;
+          console.log(`🔍 GPT-5 single object keys:`, Object.keys(outputObj));
           aiResponse = outputObj.text || outputObj.content || outputObj.message || JSON.stringify(response.output);
         } else {
           aiResponse = String(response.output).trim();
         }
       }
     } catch (parseError) {
-      console.error(`Error parsing GPT-5 response:`, parseError);
+      console.error(`❌ Error parsing GPT-5 response:`, parseError);
       aiResponse = '';
+    }
+    
+    if (foundImageObjects.length > 0) {
+      console.log(`🖼️ Total image objects found: ${foundImageObjects.length}`);
     }
     
     console.log(`🤖 AI search response type:`, typeof response.output);
