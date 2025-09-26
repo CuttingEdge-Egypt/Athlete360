@@ -2015,7 +2015,38 @@ If you find a suitable image, provide ONLY the direct image URL. If no suitable 
       max_output_tokens: 1000
     });
 
-    const aiResponse = response.output?.toString()?.trim();
+    // Handle GPT-5 response parsing - response.output can be various types
+    let aiResponse: string = '';
+    
+    try {
+      if (response.output) {
+        // If it's already a string, use it directly
+        if (typeof response.output === 'string') {
+          aiResponse = response.output.trim();
+        } else if (Array.isArray(response.output)) {
+          // If it's an array, extract text from each item
+          aiResponse = response.output
+            .map(item => {
+              if (typeof item === 'string') return item;
+              if (item && typeof item === 'object' && 'text' in item) return (item as any).text;
+              if (item && typeof item === 'object' && 'content' in item) return (item as any).content;
+              return String(item);
+            })
+            .join(' ')
+            .trim();
+        } else if (typeof response.output === 'object') {
+          // Try to extract text from object
+          const outputObj = response.output as any;
+          aiResponse = outputObj.text || outputObj.content || outputObj.message || JSON.stringify(response.output);
+        } else {
+          aiResponse = String(response.output).trim();
+        }
+      }
+    } catch (parseError) {
+      console.error(`Error parsing GPT-5 response:`, parseError);
+      aiResponse = '';
+    }
+    
     console.log(`🤖 AI search response: ${aiResponse}`);
     
     if (aiResponse && aiResponse !== "NO_IMAGE_FOUND" && aiResponse.includes('http')) {
