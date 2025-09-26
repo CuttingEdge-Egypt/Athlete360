@@ -528,7 +528,7 @@ async function selectBestImageWithGPT5(
     if (athlete.sport) contextInfo.push(`Sport: ${athlete.sport}`);
     if (athlete.country) contextInfo.push(`Country: ${athlete.country}`);
     
-    const prompt = `You are selecting the best athlete photo URL for "${athlete.name}". Choose based on SOURCE CREDIBILITY and URL PATTERNS.
+    const prompt = `You are selecting the best athlete photo URL for "${athlete.name}". CRITICAL: The image MUST show an athlete from the correct sport.
 
 ATHLETE INFO:
 Name: ${athlete.name}
@@ -542,24 +542,33 @@ ${candidateDescriptions.map(img =>
      Context: ${img.context}`
 ).join('\n\n')}
 
-SELECTION PRIORITY (choose the HIGHEST priority available):
-1. OFFICIAL SPORTS SITES: thesportsdb.com, olympics.com, sports federations
-2. MAJOR NEWS: espn.com, bbc.com, cnn.com, reuters.com
-3. TOURNAMENT SITES: World championships, official competitions
-4. VERIFIED SPORTS: taekwondodata.com, official league websites
+SELECTION CRITERIA (in priority order):
+1. SPORT VERIFICATION: The image MUST show an athlete from "${athlete.sport || 'the specified sport'}"
+   - For Taekwondo: Look for martial arts uniform (dobok), protective gear, kicking poses
+   - For Tennis: Look for tennis racket, tennis court, tennis attire
+   - For Football: Look for football/soccer ball, football field, football uniform
+   - REJECT any image showing wrong sport (e.g., football player for Taekwondo athlete)
 
-URL QUALITY INDICATORS:
-- "cutout" or "render" = preferred (isolated athlete image)
-- "thumb" or "profile" = good (portrait style)
-- "action" or "competition" = acceptable
-- Higher resolution indicators = better
+2. SOURCE CREDIBILITY (after sport verification):
+   - OFFICIAL SPORTS SITES: thesportsdb.com, olympics.com, sports federations
+   - MAJOR NEWS: espn.com, bbc.com, cnn.com, reuters.com
+   - TOURNAMENT SITES: World championships, official competitions
+   - VERIFIED SPORTS: taekwondodata.com, official league websites
 
-ALWAYS SELECT the best available option. Only use selectedIndex: 0 if ALL sources are clearly unreliable (social media, fan sites, etc.).
+3. URL QUALITY INDICATORS:
+   - "cutout" or "render" = preferred (isolated athlete image)
+   - "thumb" or "profile" = good (portrait style)
+   - "action" or "competition" = acceptable
+
+CRITICAL RULES:
+- If no image shows the correct sport, use selectedIndex: 0 (reject all)
+- Never select an image of a different sport athlete
+- Sport accuracy is MORE important than source credibility
 
 Respond in JSON format:
 {
   "selectedIndex": <number 1-${candidates.length}>,
-  "reasoning": "<brief explanation focusing on source credibility and URL type>"
+  "reasoning": "<explanation focusing on sport verification first, then source credibility>"
 }`;
 
     const response = await openai.chat.completions.create({

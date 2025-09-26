@@ -3680,6 +3680,69 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
+  // Temporary test route for image search (no auth for testing)
+  app.post('/api/test-image-search-direct', async (req: Request, res: Response) => {
+    try {
+      const { athleteName, sport, country } = req.body;
+      
+      if (!athleteName) {
+        return res.status(400).json({ error: 'Athlete name is required' });
+      }
+
+      console.log(`🧪 [TEST] Triggering image search for ${athleteName}...`);
+      
+      // Get athlete details from database for context
+      let athleteData = null;
+      let sportName = sport || 'Unknown';
+      try {
+        const athletes = await storage.searchAthletesByName(athleteName, sport || "", country || "");
+        if (athletes.length > 0) {
+          athleteData = athletes[0];
+          console.log(`🧪 [TEST] Found athlete in database: ${athleteData.name}`);
+          
+          // Resolve sport name from sportId if available
+          if (athleteData.sportId && !sport) {
+            try {
+              const sportRecord = await storage.getSportById(athleteData.sportId);
+              if (sportRecord) {
+                sportName = sportRecord.name;
+                console.log(`🧪 [TEST] Resolved sport: ${sportName}`);
+              }
+            } catch (sportError) {
+              console.log(`🧪 [TEST] Could not resolve sport name, using Unknown`);
+            }
+          }
+        }
+      } catch (dbError) {
+        console.log(`🧪 [TEST] No athlete found in database, proceeding with provided data`);
+      }
+
+      // Trigger async image search using the enhanced HTTP-based pipeline with all available data
+      console.log(`🚀 [TEST] Starting HTTP-based image search for ${athleteName} (${sportName}, ${country || athleteData?.country || 'Unknown'})`);
+      searchAthleteImageAsync(
+        athleteData?.id || 'temp-id-for-test',
+        athleteName,
+        sportName,
+        country || athleteData?.country || 'Unknown',
+        athleteData?.personalInfo || {}
+      );
+
+      res.json({ 
+        success: true, 
+        message: `Started background image search for ${athleteName}. Check server logs for progress.`,
+        athlete: athleteData ? {
+          name: athleteData.name,
+          country: athleteData.country,
+          sport: athleteData.sportId
+        } : { name: athleteName, sport, country }
+      });
+
+    } catch (error) {
+      console.error('🧪 [TEST] Error in test image search:', error);
+      res.status(500).json({ error: 'Failed to start image search test' });
+    }
+  });
+
   // Temporary test route for image search
   app.post('/api/test-image-search', isAuthenticatedUniversal, async (req: Request, res: Response) => {
     try {
