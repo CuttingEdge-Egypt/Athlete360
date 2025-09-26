@@ -3693,24 +3693,38 @@ Return only valid JSON with the missing fields.`;
       
       // Get athlete details from database for context
       let athleteData = null;
+      let sportName = sport || 'Unknown';
       try {
         const athletes = await storage.searchAthletesByName(athleteName, sport || "", country || "");
         if (athletes.length > 0) {
           athleteData = athletes[0];
           console.log(`🧪 [TEST] Found athlete in database: ${athleteData.name}`);
+          
+          // Resolve sport name from sportId if available
+          if (athleteData.sportId && !sport) {
+            try {
+              const sportRecord = await storage.getSportById(athleteData.sportId);
+              if (sportRecord) {
+                sportName = sportRecord.name;
+                console.log(`🧪 [TEST] Resolved sport: ${sportName}`);
+              }
+            } catch (sportError) {
+              console.log(`🧪 [TEST] Could not resolve sport name, using Unknown`);
+            }
+          }
         }
       } catch (dbError) {
         console.log(`🧪 [TEST] No athlete found in database, proceeding with provided data`);
       }
 
-      // Trigger async image search using the enhanced HTTP-based pipeline
-      console.log(`🚀 [TEST] Starting HTTP-based image search for ${athleteName}`);
+      // Trigger async image search using the enhanced HTTP-based pipeline with all available data
+      console.log(`🚀 [TEST] Starting HTTP-based image search for ${athleteName} (${sportName}, ${country || athleteData?.country || 'Unknown'})`);
       searchAthleteImageAsync(
         athleteData?.id || 'temp-id-for-test',
         athleteName,
-        sport || athleteData?.sport_id || 'Unknown',
+        sportName,
         country || athleteData?.country || 'Unknown',
-        athleteData?.personal_info || {}
+        athleteData?.personalInfo || {}
       );
 
       res.json({ 
@@ -3719,7 +3733,7 @@ Return only valid JSON with the missing fields.`;
         athlete: athleteData ? {
           name: athleteData.name,
           country: athleteData.country,
-          sport: athleteData.sport_id
+          sport: athleteData.sportId
         } : { name: athleteName, sport, country }
       });
 
