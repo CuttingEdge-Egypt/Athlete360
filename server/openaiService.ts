@@ -1966,29 +1966,16 @@ export async function searchAthleteImage(athleteName: string, sport?: string, na
   try {
     console.log(`🔍 Starting comprehensive image search for ${athleteName} (${sport || 'Unknown Sport'})`);
     
-    // Strategy 1: Enhanced HTTP-based pipeline (primary method)
+    // FIXED: All searches now go through the enhanced verification pipeline
     const { searchAthleteImageWithScraping } = await import('./imageScrapingService.js');
-    const scrapedImageUrl = await searchAthleteImageWithScraping(athleteName, sport, nationality, personalInfo);
-    if (scrapedImageUrl) {
-      console.log(`✅ Found image via Selenium + GPT-5: ${scrapedImageUrl}`);
-      return scrapedImageUrl;
+    const verifiedImageUrl = await searchAthleteImageWithScraping(athleteName, sport, nationality, personalInfo);
+    
+    if (verifiedImageUrl) {
+      console.log(`✅ Found and identity-verified image: ${verifiedImageUrl}`);
+      return verifiedImageUrl;
     }
     
-    // Strategy 2: Sport-specific database search (secondary method)
-    const sportSpecificUrl = await searchSportSpecificDatabase(athleteName, sport, nationality);
-    if (sportSpecificUrl) {
-      console.log(`✅ Found image via sport-specific database: ${sportSpecificUrl}`);
-      return sportSpecificUrl;
-    }
-    
-    // Strategy 3: TheSportsDB fallback (tertiary method)
-    const theSportsDBUrl = await searchTheSportsDB(athleteName, sport);
-    if (theSportsDBUrl) {
-      console.log(`✅ Found image via TheSportsDB: ${theSportsDBUrl}`);
-      return theSportsDBUrl;
-    }
-    
-    console.log(`❌ No profile image found for ${athleteName} across all sources`);
+    console.log(`❌ No verified image found for ${athleteName} - all candidates failed identity verification`);
     return null;
     
   } catch (error) {
