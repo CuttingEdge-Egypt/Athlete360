@@ -84,12 +84,12 @@ export async function searchAthleteImageWithScraping(
     const visualVerification = await verifyImageWithGPT5Vision(bestImage.url, athleteProfile);
     
     if (!visualVerification.verified) {
-      console.log(`❌ GPT-5 Vision rejected image for ${athleteName}: ${visualVerification.reasoning}`);
+      console.log(`❌ GPT-5 rejected athlete identity for ${athleteName}: ${visualVerification.reasoning}`);
       return null;
     }
     
-    console.log(`✅ Found and visually verified image for ${athleteName} from ${bestImage.source}`);
-    console.log(`✅ Visual verification: ${visualVerification.reasoning}`);
+    console.log(`✅ Found and identity-verified image for ${athleteName} from ${bestImage.source}`);
+    console.log(`✅ Identity verification: ${visualVerification.reasoning}`);
     return bestImage.url;
     
   } catch (error) {
@@ -614,54 +614,47 @@ Respond in JSON format:
   }
 }
 
-// GPT-5 Vision: Visual verification that image matches athlete and sport
+// GPT-5: Athlete identity verification - confirms the person in image is the correct athlete
 async function verifyImageWithGPT5Vision(
   imageUrl: string, 
   athlete: AthleteProfile
 ): Promise<{ verified: boolean; reasoning: string }> {
   try {
-    console.log(`👁️ Using GPT-5 Vision to verify image for ${athlete.name}...`);
+    console.log(`🔍 Using GPT-5 to verify athlete identity for ${athlete.name}...`);
     
     const contextInfo = [];
     if (athlete.sport) contextInfo.push(`Sport: ${athlete.sport}`);
-    if (athlete.country) contextInfo.push(`Country: ${athlete.country}`);
+    if (athlete.country) contextInfo.push(`Nationality: ${athlete.country}`);
     if (athlete.personalInfo?.age) contextInfo.push(`Age: ${athlete.personalInfo.age}`);
-    if (athlete.personalInfo?.dateOfBirth) contextInfo.push(`Born: ${athlete.personalInfo.dateOfBirth}`);
+    if (athlete.personalInfo?.dateOfBirth) contextInfo.push(`Date of Birth: ${athlete.personalInfo.dateOfBirth}`);
+    if (athlete.personalInfo?.height) contextInfo.push(`Height: ${athlete.personalInfo.height}`);
+    if (athlete.personalInfo?.weight) contextInfo.push(`Weight: ${athlete.personalInfo.weight}`);
 
-    const prompt = `You are analyzing an athlete photo to verify it matches the expected athlete and sport.
+    const prompt = `You are verifying if this image shows the correct athlete. Focus on ATHLETE IDENTITY, not sport verification.
 
-ATHLETE TO VERIFY:
+TARGET ATHLETE:
 Name: ${athlete.name}
 ${contextInfo.join('\n')}
 
-VERIFICATION REQUIREMENTS:
-1. SPORT ACCURACY: Does this image show an athlete from "${athlete.sport || 'the specified sport'}"?
-   - For Taekwondo: Look for martial arts uniform (dobok), protective gear, kicking/fighting poses, competition setting
-   - For Tennis: Look for tennis racket, tennis court, tennis attire, playing poses
-   - For Football: Look for football/soccer ball, football field, football uniform, playing action
-   - For Basketball: Look for basketball, court, uniform, playing action
-   - REJECT if showing wrong sport (e.g., football player when expecting Taekwondo)
+IDENTITY VERIFICATION TASK:
+Does this image show ${athlete.name}? Use the provided context to help identify if this is the correct person.
 
-2. ATHLETE CONSISTENCY: Does this appear to be a legitimate athlete photo?
-   - Professional sports photo quality
-   - Competition or training environment
-   - Athletic context and setting
-   - Not a random person or celebrity
+Consider:
+1. FACIAL FEATURES: Does this person match what you know about ${athlete.name}?
+2. ATHLETE CONTEXT: Is this a professional athlete photo (not a random person)?
+3. CONSISTENCY: Do visible characteristics (age, appearance) match the provided data?
+4. AUTHENTICITY: Is this a legitimate sports photo (not AI-generated or fake)?
 
-3. QUALITY CHECK: Is this a suitable profile image?
-   - Clear, well-lit photo
-   - Shows the athlete prominently
-   - Professional or official sports context
-
-CRITICAL RULES:
-- If the image shows the WRONG sport, immediately reject (verified: false)
-- If unsure about sport accuracy, reject to be safe
-- Only verify (verified: true) if confident the image shows correct sport and athlete context
+IMPORTANT RULES:
+- Focus on WHO is in the image, not WHAT sport they're playing
+- If you're confident this is ${athlete.name}, verify = true
+- If you're unsure or this appears to be a different person, verify = false
+- It's better to reject uncertain matches than approve wrong athletes
 
 Analyze the image and respond in JSON format:
 {
   "verified": <boolean>,
-  "reasoning": "<detailed explanation of sport verification, athlete context, and decision>"
+  "reasoning": "<explanation focusing on athlete identity verification>"
 }`;
 
     const response = await openai.chat.completions.create({
