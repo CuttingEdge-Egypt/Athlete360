@@ -72,16 +72,25 @@ export async function searchAthleteImageWithScraping(
       return null;
     }
     
-    // Validate the final image URL
+    // Validate the final image URL accessibility
     const validatedUrl = await validateImageUrl(bestImage.url);
     
-    if (validatedUrl) {
-      console.log(`✅ Found verified image for ${athleteName} from ${bestImage.source}`);
-      return bestImage.url;
-    } else {
-      console.log(`❌ Image validation failed for ${athleteName}`);
+    if (!validatedUrl) {
+      console.log(`❌ Image URL validation failed for ${athleteName}`);
       return null;
     }
+    
+    // NEW: Use GPT-5 Vision to verify the image actually shows the correct athlete/sport
+    const visualVerification = await verifyImageWithGPT5Vision(bestImage.url, athleteProfile);
+    
+    if (!visualVerification.verified) {
+      console.log(`❌ GPT-5 Vision rejected image for ${athleteName}: ${visualVerification.reasoning}`);
+      return null;
+    }
+    
+    console.log(`✅ Found and visually verified image for ${athleteName} from ${bestImage.source}`);
+    console.log(`✅ Visual verification: ${visualVerification.reasoning}`);
+    return bestImage.url;
     
   } catch (error) {
     console.error(`❌ Error in HTTP-based image search for ${athleteName}:`, error);
