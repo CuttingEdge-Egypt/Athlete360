@@ -528,7 +528,7 @@ async function selectBestImageWithGPT5(
     if (athlete.sport) contextInfo.push(`Sport: ${athlete.sport}`);
     if (athlete.country) contextInfo.push(`Country: ${athlete.country}`);
     
-    const prompt = `You are an expert at selecting the best athlete photos. I need you to choose the BEST image for "${athlete.name}".
+    const prompt = `You are selecting the best athlete photo URL for "${athlete.name}". Choose based on SOURCE CREDIBILITY and URL PATTERNS.
 
 ATHLETE INFO:
 Name: ${athlete.name}
@@ -542,20 +542,25 @@ ${candidateDescriptions.map(img =>
      Context: ${img.context}`
 ).join('\n\n')}
 
-SELECTION CRITERIA:
-- Must show the athlete's face clearly
-- Professional quality photo preferred
-- Official sources have higher credibility
-- Avoid group photos or team shots
-- Consider image resolution and clarity
+SELECTION PRIORITY (choose the HIGHEST priority available):
+1. OFFICIAL SPORTS SITES: thesportsdb.com, olympics.com, sports federations
+2. MAJOR NEWS: espn.com, bbc.com, cnn.com, reuters.com
+3. TOURNAMENT SITES: World championships, official competitions
+4. VERIFIED SPORTS: taekwondodata.com, official league websites
+
+URL QUALITY INDICATORS:
+- "cutout" or "render" = preferred (isolated athlete image)
+- "thumb" or "profile" = good (portrait style)
+- "action" or "competition" = acceptable
+- Higher resolution indicators = better
+
+ALWAYS SELECT the best available option. Only use selectedIndex: 0 if ALL sources are clearly unreliable (social media, fan sites, etc.).
 
 Respond in JSON format:
 {
   "selectedIndex": <number 1-${candidates.length}>,
-  "reasoning": "<explanation of selection>"
-}
-
-If none are suitable, use selectedIndex: 0.`;
+  "reasoning": "<brief explanation focusing on source credibility and URL type>"
+}`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
