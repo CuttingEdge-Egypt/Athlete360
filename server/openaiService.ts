@@ -2024,12 +2024,22 @@ If you find a suitable image, provide ONLY the direct image URL. If no suitable 
         if (typeof response.output === 'string') {
           aiResponse = response.output.trim();
         } else if (Array.isArray(response.output)) {
-          // If it's an array, extract text from each item
+          // If it's an array, extract text from each item and handle potential image objects
           aiResponse = response.output
             .map(item => {
               if (typeof item === 'string') return item;
-              if (item && typeof item === 'object' && 'text' in item) return (item as any).text;
-              if (item && typeof item === 'object' && 'content' in item) return (item as any).content;
+              if (item && typeof item === 'object') {
+                // Check for image objects (base64 or URL)
+                if ('image' in item || 'base64' in item || 'data' in item) {
+                  console.log(`🖼️ Found potential image object:`, Object.keys(item));
+                  return ''; // Skip image objects for URL extraction
+                }
+                // Check for text content
+                if ('text' in item) return (item as any).text;
+                if ('content' in item) return (item as any).content;
+                if ('url' in item) return (item as any).url; // Direct URL
+                if ('link' in item) return (item as any).link; // Direct link
+              }
               return String(item);
             })
             .join(' ')
@@ -2047,6 +2057,8 @@ If you find a suitable image, provide ONLY the direct image URL. If no suitable 
       aiResponse = '';
     }
     
+    console.log(`🤖 AI search response type:`, typeof response.output);
+    console.log(`🤖 AI search response structure:`, JSON.stringify(response.output, null, 2));
     console.log(`🤖 AI search response: ${aiResponse}`);
     
     if (aiResponse && aiResponse !== "NO_IMAGE_FOUND" && aiResponse.includes('http')) {
