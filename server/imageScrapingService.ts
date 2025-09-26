@@ -103,34 +103,22 @@ export async function searchAthleteImageWithScraping(
 // STEP 1: Ask GPT-5 to find direct image URLs using web search
 async function getDirectImageUrlsFromGPT5(athlete: AthleteProfile): Promise<string[]> {
   try {
-    // Use the exact format that worked for the user
-    const athleteDetails = [];
+    // Simple approach - include athlete data directly
+    const athleteInfo = [];
+    athleteInfo.push(`Name: ${athlete.name}`);
+    athleteInfo.push(`Country: ${athlete.country}`);
+    athleteInfo.push(`Sport: ${athlete.sport}`);
     
-    // Convert country to nationality format
-    let nationality = athlete.country;
-    if (athlete.country === "United States") nationality = "American";
-    else if (athlete.country === "Canada") nationality = "Canadian";
-    else if (athlete.country === "United Kingdom") nationality = "British";
-    
-    // Add only key details in natural format
     if (athlete.personalInfo) {
-      if (athlete.personalInfo.height) athleteDetails.push(athlete.personalInfo.height);
-      if (athlete.personalInfo.achievements) {
-        const achievements = athlete.personalInfo.achievements.toLowerCase();
-        if (achievements.includes('gold')) {
-          athleteDetails.push(`won gold medals in ${athlete.sport.toLowerCase()}`);
-        } else if (achievements.includes('medal')) {
-          athleteDetails.push(`won medals in ${athlete.sport.toLowerCase()}`);
-        }
-      }
-    }
-    
-    // Ensure we have at least some details to avoid incomplete prompt
-    if (athleteDetails.length === 0) {
-      athleteDetails.push(`competes in ${athlete.sport.toLowerCase()}`);
+      if (athlete.personalInfo.height) athleteInfo.push(`Height: ${athlete.personalInfo.height}`);
+      if (athlete.personalInfo.age) athleteInfo.push(`Age: ${athlete.personalInfo.age}`);
+      if (athlete.personalInfo.achievements) athleteInfo.push(`Achievements: ${athlete.personalInfo.achievements}`);
     }
 
-    const prompt = `Fetch downloadable image url's for the player ${athlete.name} who is ${nationality} and plays ${athlete.sport}, they are also ${athleteDetails.join(', ')}. Return urls in a JSON:`;
+    const prompt = `Fetch 3-5 downloadable image urls for the athlete with the following details:
+${athleteInfo.join(', ')}
+
+Find any publicly available images from official sources, sports websites, or news articles. Return the image urls in JSON format with an "images" array.`;
 
     // Debug: Log the exact prompt being sent
     console.log(`🔍 EXACT PROMPT SENT TO GPT-5 for ${athlete.name}:`);
