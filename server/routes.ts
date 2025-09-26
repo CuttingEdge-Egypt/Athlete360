@@ -3700,6 +3700,7 @@ Return only valid JSON with the missing fields.`;
             content: prompt
           }
         ],
+        // Note: GPT-5 doesn't have direct web search tools in API
         max_completion_tokens: 2000
       });
       

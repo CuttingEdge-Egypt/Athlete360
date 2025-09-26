@@ -126,30 +126,40 @@ Find any publicly available images from official sources, sports websites, or ne
     console.log(prompt);
     console.log('---END PROMPT---');
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-5", // Using GPT-5 with web search functionality
-      messages: [{ role: "user", content: prompt }],
-      // GPT-5 only supports default temperature (1.0)
-      max_completion_tokens: 2000
+    // Use Gemini 2.5 Pro with web search like other parts of the app
+    const { GoogleGenerativeAI } = await import('@google/generative-ai');
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || "");
+    
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-2.5-pro",
+      tools: [{ googleSearch: {} }] // Enable web search like other functions
+    });
+    
+    const response = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.3,
+        maxOutputTokens: 2000
+      }
     });
 
-    const content = response.choices[0]?.message?.content;
+    const content = response.response?.text();
     if (!content) {
-      console.log(`❌ GPT-5 returned empty response for ${athlete.name}`);
+      console.log(`❌ Gemini returned empty response for ${athlete.name}`);
       return [];
     }
 
-    // Log the raw GPT-5 response for debugging
-    console.log(`🤖 GPT-5 RAW RESPONSE for ${athlete.name}:`);
-    console.log('---START GPT-5 RESPONSE---');
+    // Log the raw Gemini response for debugging
+    console.log(`🤖 GEMINI RAW RESPONSE for ${athlete.name}:`);
+    console.log('---START GEMINI RESPONSE---');
     console.log(content);
-    console.log('---END GPT-5 RESPONSE---');
+    console.log('---END GEMINI RESPONSE---');
 
     try {
       // Try to parse as JSON object with images array
       const response = JSON.parse(content);
       if (response.images && Array.isArray(response.images)) {
-        console.log(`🎯 GPT-5 provided ${response.images.length} image page URLs for ${athlete.name}`);
+        console.log(`🎯 Gemini provided ${response.images.length} image page URLs for ${athlete.name}`);
         (response.images as string[]).forEach((url: string, index: number) => {
           console.log(`📋 Image page ${index + 1}: ${url}`);
         });
@@ -157,14 +167,14 @@ Find any publicly available images from official sources, sports websites, or ne
       }
       // Fallback: try parsing as direct array (old format)
       if (Array.isArray(response)) {
-        console.log(`🎯 GPT-5 provided ${response.length} URLs for ${athlete.name} (array format)`);
+        console.log(`🎯 Gemini provided ${response.length} URLs for ${athlete.name} (array format)`);
         return response.filter(url => typeof url === 'string' && url.startsWith('http'));
       }
     } catch (parseError) {
       // If JSON parsing fails, try to extract URLs from text
       const urlMatches = content.match(/https?:\/\/[^\s"'<>]+/gi);
       if (urlMatches) {
-        console.log(`🎯 GPT-5 provided ${urlMatches.length} URLs for ${athlete.name} (extracted from text)`);
+        console.log(`🎯 Gemini provided ${urlMatches.length} URLs for ${athlete.name} (extracted from text)`);
         return urlMatches;
       }
     }
