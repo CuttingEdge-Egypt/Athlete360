@@ -151,7 +151,16 @@ Find the actual image URLs for ${athlete.name}.`;
     });
 
     const content = response.choices[0]?.message?.content;
-    if (!content) return [];
+    if (!content) {
+      console.log(`❌ GPT-5 returned empty response for ${athlete.name}`);
+      return [];
+    }
+
+    // Log the raw GPT-5 response for debugging
+    console.log(`🤖 GPT-5 RAW RESPONSE for ${athlete.name}:`);
+    console.log('---START GPT-5 RESPONSE---');
+    console.log(content);
+    console.log('---END GPT-5 RESPONSE---');
 
     try {
       // Try to parse as JSON array
