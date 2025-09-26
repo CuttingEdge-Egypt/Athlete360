@@ -1965,31 +1965,112 @@ export async function searchAthleteImage(athleteName: string, sport?: string, na
   }
 }
 
-// AI-powered web search for athlete images using GPT-5
+// Google Custom Search API for athlete images  
 async function searchAthleteImageWithAI(athleteName: string, sport?: string, nationality?: string, personalInfo?: any): Promise<string | null> {
   try {
-    console.log(`🤖 Using AI web search for ${athleteName}...`);
+    console.log(`🔍 Using Google Custom Search API for ${athleteName}...`);
     
-    const sportContext = sport ? ` ${sport}` : '';
-    const nationalityContext = nationality ? ` from ${nationality}` : '';
+    // Build comprehensive search query with all context
+    const searchTerms = [athleteName];
+    if (sport) searchTerms.push(sport);
+    if (nationality) searchTerms.push(nationality);
     
-    // Build additional context from personal info
-    const personalContext = personalInfo ? [
-      personalInfo.age ? `Age: ${personalInfo.age}` : '',
-      personalInfo.height ? `Height: ${personalInfo.height}` : '',
-      personalInfo.weight ? `Weight: ${personalInfo.weight}` : '',
-      personalInfo.position ? `Position: ${personalInfo.position}` : '',
-      personalInfo.dateOfBirth ? `Born: ${personalInfo.dateOfBirth}` : '',
-      personalInfo.educationalBackground ? `Education: ${personalInfo.educationalBackground}` : ''
-    ].filter(Boolean).join(', ') : '';
+    // Add personal context for better identification
+    if (personalInfo) {
+      if (personalInfo.age) searchTerms.push(`age ${personalInfo.age}`);
+      if (personalInfo.position) searchTerms.push(personalInfo.position);
+      if (personalInfo.weight && !personalInfo.weight.includes('N/A')) {
+        // Extract weight category for combat sports
+        const weightMatch = personalInfo.weight.match(/(-?\d+(?:\.\d+)?)\s*kg/);
+        if (weightMatch) searchTerms.push(`${weightMatch[1]}kg`);
+      }
+    }
+    
+    const searchQuery = searchTerms.join(' ');
+    console.log(`🔍 Google search query: "${searchQuery}"`);
+    
+    return await searchGoogleImages(searchQuery, athleteName, sport, nationality, personalInfo);
+    
+  } catch (error) {
+    console.error(`❌ Error in Google image search for ${athleteName}:`, error);
+    return null;
+  }
+}
 
-    const fullContext = personalContext ? `${nationalityContext}. Personal details: ${personalContext}` : nationalityContext;
+// Google Custom Search API implementation
+async function searchGoogleImages(
+  searchQuery: string, 
+  athleteName: string, 
+  sport?: string, 
+  nationality?: string, 
+  personalInfo?: any
+): Promise<string | null> {
+  try {
+    // Check for Google Custom Search API key
+    const apiKey = process.env.GOOGLE_SEARCH_API_KEY;
+    const searchEngineId = process.env.GOOGLE_SEARCH_ENGINE_ID;
     
-    console.log(`🔧 GPT-5 web search context: "${athleteName}${fullContext}"`);
+    if (!apiKey || !searchEngineId) {
+      console.log(`⚠️ Google Custom Search API not configured, using original GPT-5 approach as fallback`);
+      return await searchWithGPT5WebSearch(athleteName, sport, `${athleteName} from ${nationality || 'unknown country'}`);
+    }
+    
+    const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${searchEngineId}&q=${encodeURIComponent(searchQuery)}&searchType=image&imgType=photo&imgSize=medium&num=10&safe=active`;
+    
+    console.log(`🌐 Calling Google Custom Search API...`);
+    
+    const response = await fetch(searchUrl);
+    const data = await response.json();
+    
+    if (!response.ok) {
+      console.error(`❌ Google API error:`, data);
+      return null;
+    }
+    
+    if (!data.items || data.items.length === 0) {
+      console.log(`❌ No images found for query: ${searchQuery}`);
+      return null;
+    }
+    
+    console.log(`📸 Found ${data.items.length} images from Google Custom Search`);
+    
+    // Filter and validate images
+    for (const item of data.items) {
+      const imageUrl = item.link;
+      
+      if (!imageUrl) continue;
+      
+      // Validate image URL format
+      if (!imageUrl.match(/\.(jpg|jpeg|png|webp)$/i)) {
+        console.log(`⚠️ Skipping non-image URL: ${imageUrl}`);
+        continue;
+      }
+      
+      // Check if URL is accessible
+      if (await validateImageUrl(imageUrl)) {
+        console.log(`✅ Found valid image: ${imageUrl}`);
+        console.log(`📋 Image context: ${item.title || 'No title'}`);
+        return imageUrl;
+      }
+    }
+    
+    console.log(`❌ No valid images found among ${data.items.length} results`);
+    return null;
+    
+  } catch (error) {
+    console.error(`❌ Google Custom Search API error:`, error);
+    return null;
+  }
+}
+
+// Fallback: Original GPT-5 approach (kept for compatibility)
+async function searchWithGPT5WebSearch(athleteName: string, sport?: string, context?: string): Promise<string | null> {
+  try {
+    console.log(`🤖 Fallback: Using GPT-5 web search for ${athleteName}...`);
     
     const response = await openai.responses.create({
       model: "gpt-5",
-      input: `Search the web for a high-quality profile photo of the${sportContext} athlete "${athleteName}"${fullContext}.
+      input: `Search the web for a high-quality profile photo of the${sport ? ` ${sport}` : ''} athlete "${athleteName}"${context ? ` ${context}` : ''}.
 
 Find ONLY official, professional photos from credible sources such as:
 - Official sport federation websites
