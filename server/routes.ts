@@ -3680,6 +3680,55 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
+  // Temporary test route for image search
+  app.post('/api/test-image-search', isAuthenticatedUniversal, async (req: Request, res: Response) => {
+    try {
+      const { athleteName, sport, country } = req.body;
+      
+      if (!athleteName) {
+        return res.status(400).json({ error: 'Athlete name is required' });
+      }
+
+      console.log(`🧪 [TEST] Triggering image search for ${athleteName}...`);
+      
+      // Get athlete details from database for context
+      let athleteData = null;
+      try {
+        const athletes = await storage.searchAthletesByName(athleteName, sport || "", country || "");
+        if (athletes.length > 0) {
+          athleteData = athletes[0];
+          console.log(`🧪 [TEST] Found athlete in database: ${athleteData.name}`);
+        }
+      } catch (dbError) {
+        console.log(`🧪 [TEST] No athlete found in database, proceeding with provided data`);
+      }
+
+      // Trigger async image search using the comprehensive Playwright + GPT-5 pipeline
+      console.log(`🚀 [TEST] Starting Playwright + GPT-5 image search for ${athleteName}`);
+      searchAthleteImageAsync(
+        athleteName, 
+        sport || athleteData?.sport_id || 'Taekwondo',
+        country || athleteData?.country || 'Unknown', 
+        athleteData?.personal_info || {},
+        athleteData?.id
+      );
+
+      res.json({ 
+        success: true, 
+        message: `Started background image search for ${athleteName}. Check server logs for progress.`,
+        athlete: athleteData ? {
+          name: athleteData.name,
+          country: athleteData.country,
+          sport: athleteData.sport_id
+        } : { name: athleteName, sport, country }
+      });
+
+    } catch (error) {
+      console.error('🧪 [TEST] Error in test image search:', error);
+      res.status(500).json({ error: 'Failed to start image search test' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
