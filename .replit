@@ -56,12 +56,12 @@ localPort = 40013
 externalPort = 3001
 
 [[ports]]
-localPort = 41713
-externalPort = 3000
+localPort = 41087
+externalPort = 5000
 
 [[ports]]
-localPort = 45213
-externalPort = 5000
+localPort = 41713
+externalPort = 3000
 
 [agent]
 integrations = ["javascript_log_in_with_replit:1.0.0"]

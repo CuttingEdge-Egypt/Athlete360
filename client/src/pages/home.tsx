@@ -1358,9 +1358,6 @@ export default function Home() {
                           )}
                         </div>
                       </div>
-                      <div className="text-athlete-accent">
-                        <span className="text-sm">Click for Biography →</span>
-                      </div>
                     </div>
                   </CardContent>
                 </Card>
