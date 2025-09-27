@@ -52,6 +52,10 @@ import { analyzeVideoFile, analyzeVideoComprehensive } from "./videoAnalysisServ
 import { paymobService } from "./paymobService";
 
 import { TestingService } from "./testingService";
+import OpenAI from "openai";
+import { Readable } from "stream";
+import multer from "multer";
+import { spawn } from "child_process";
 
 // New Python-based image search function
 async function searchAthleteImageWithPython(
@@ -545,7 +549,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let profileImageUrl: string | undefined;
       
       try {
-        profileImageUrl = await searchAthleteImage(name, sport.name, athleteCountry, personalInfo) || undefined;
+        profileImageUrl = await searchAthleteImageWithPython(name, sport.name, athleteCountry, personalInfo) || undefined;
         if (profileImageUrl) {
           console.log(`✅ Found image for ${name}: ${profileImageUrl}`);
         } else {
@@ -634,7 +638,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
     } catch (error) {
       console.error("Error in image search test:", error);
-      res.status(500).json({ message: "Image search test failed", error: error.message });
+      res.status(500).json({ 
+        message: "Image search test failed", 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
     }
   });
 

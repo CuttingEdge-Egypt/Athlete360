@@ -45,65 +45,64 @@ def search_athlete_images_with_gpt5(
         if details:
             athlete_info += f"\nDetails: {details}"
         
-        prompt = f"""Find 3-5 DIRECT downloadable image URLs for this athlete:
+        prompt = f"""You are an expert image researcher. Search the web to find 3-5 DIRECT downloadable image URLs for this athlete:
 
 {athlete_info}
 
-CRITICAL REQUIREMENTS:
-1. Find ONLY direct image URLs that end in .jpg, .png, .webp, .gif
-2. Focus on accessible, non-restrictive sources like:
-   - Wikipedia Commons images
-   - Official Olympic/sports federation sites with open access
-   - Major news outlets with accessible images
-   - Government sports websites
-   - TheSportsDB.com athlete photos
-   - Sports databases with public images
+SEARCH STRATEGY:
+1. Search for "{name} {sport} {country}" to find recent athlete photos
+2. Look for official sports federation websites and Olympic databases
+3. Check Wikipedia Commons and government sports websites
+4. Find news articles and sports reporting sites
 
-3. AVOID restrictive sources that commonly block downloads:
+CRITICAL REQUIREMENTS:
+1. Return ONLY direct image URLs that end in .jpg, .png, .webp, .gif
+2. Focus on accessible, non-restrictive sources like:
+   - Wikipedia Commons images (upload.wikimedia.org)
+   - Official Olympic/sports federation sites
+   - TheSportsDB.com athlete photos
+   - Major news outlets with public images
+   - Government and official sports websites
+
+3. AVOID restrictive sources:
    - Social media platforms (Instagram, Facebook, Twitter)
    - Stock photo sites requiring subscriptions
-   - News sites with heavy protection
-   - Private team websites
+   - Private or protected team websites
 
-4. Return WORKING image URLs that can be downloaded without authentication
+4. Use your web search capabilities to find current, accessible images
 
-Example format needed:
+Return your findings in this JSON format:
 {{
   "images": [
     "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Athlete_Name.jpg/256px-Athlete_Name.jpg",
-    "https://www.thesportsdb.com/images/media/player/thumb/athlete123.jpg",
-    "https://olympics.com/images/athlete/public/athlete456.jpg"
+    "https://www.thesportsdb.com/images/media/player/thumb/athlete123.jpg"
   ]
 }}
 
-Return only real, accessible image URLs in JSON format."""
+Search the web now and return only real, accessible image URLs that can be downloaded."""
 
         print(f"🤖 Sending request to GPT-5 with web search enabled...")
         
-        # Use GPT-5 with web search capabilities (similar to our working generations)
-        response = client.chat.completions.create(
+        # Use GPT-5 with web search via Responses API (correct approach!)
+        response = client.responses.create(
             model="gpt-5",
-            messages=[
-                {
-                    "role": "system", 
-                    "content": "You are an expert at finding publicly accessible athlete images. Use web search to find direct, downloadable image URLs that are not restricted or protected."
-                },
-                {
-                    "role": "user", 
-                    "content": prompt
-                }
-            ],
-            # Note: Web search tools syntax may vary - removing for now and relying on model's training
-            # tools=[{"type": "web_search"}],  # Enable web search for GPT-5
-            max_completion_tokens=2000
+            input=prompt,
+            tools=[{"type": "web_search"}]  # Enable web search for GPT-5
         )
         
-        content = response.choices[0].message.content
-        if content:
-            content = content.strip()
+        print(f"🔧 GPT-5 response received. Response type: {type(response.output)}")
+        print(f"🔧 Response content: {response.output}")
+        
+        # Handle response output - it might be a list or string
+        if isinstance(response.output, list):
+            # If it's a list, join the elements or take the first one
+            content = ' '.join(str(item) for item in response.output) if response.output else ""
+        elif isinstance(response.output, str):
+            content = response.output.strip()
         else:
-            content = ""
-        print(f"🔧 GPT-5 response received, parsing URLs...")
+            content = str(response.output)
+        
+        print(f"🔧 Processed content: {content[:200]}...")  # Show first 200 chars
         
         if not content:
             return {"success": False, "error": "Empty response from GPT-5", "downloaded_image": None}
