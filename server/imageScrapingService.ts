@@ -246,7 +246,8 @@ Return ONLY direct download URLs in JSON format with an "images" array.`;
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || "");
     
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-pro"
+      model: "gemini-2.5-flash",
+      tools: [{ googleSearchRetrieval: {} }]
     });
     
     const response = await model.generateContent({
