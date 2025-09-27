@@ -223,17 +223,24 @@ async function getDirectImageUrlsFromGPT5(athlete: AthleteProfile): Promise<stri
       if (athlete.personalInfo.achievements) athleteInfo.push(`Achievements: ${athlete.personalInfo.achievements}`);
     }
 
-    const prompt = `Find 3-5 DIRECT DOWNLOAD image links for the athlete with the following details:
-${athleteInfo.join(', ')}
+    const prompt = `Find 3-5 DIRECT DOWNLOAD image links for the athlete: ${athlete.name} (${athlete.sport}, ${athlete.country})
 
-Requirements:
-- Find images from official team websites, news sites, Wikipedia, or open sports databases
-- Provide DIRECT download URLs that end in .jpg, .png, .webp or similar image extensions
-- AVOID Getty Images, AP Photo, Reuters, or other copyrighted photo services
-- Look for images from official Olympic committees, national sports federations, or news articles
-- Ensure the URLs are direct links to image files, not webpage links
+I need actual image URLs that end in .jpg, .png, .webp etc. Focus on:
+- Wikipedia Commons images
+- Official Olympic/sports federation sites
+- News articles with direct image links
+- TheSportsDB.com athlete photos
+- Official team/national websites
 
-Return ONLY direct download URLs in JSON format with an "images" array.`;
+Example format I need:
+{
+  "images": [
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Athlete_Name.jpg/256px-Athlete_Name.jpg",
+    "https://www.thesportsdb.com/images/media/player/thumb/athlete123.jpg"
+  ]
+}
+
+Return only real, working image URLs in JSON format.`;
 
     // Debug: Log the exact prompt being sent
     console.log(`🔍 EXACT PROMPT SENT TO GPT-5 for ${athlete.name}:`);
@@ -246,8 +253,7 @@ Return ONLY direct download URLs in JSON format with an "images" array.`;
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || "");
     
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash",
-      tools: [{ googleSearchRetrieval: {} }]
+      model: "gemini-2.5-flash"
     });
     
     const response = await model.generateContent({
