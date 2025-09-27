@@ -400,7 +400,7 @@ async function executeImageInstruction(instruction: ImageInstruction): Promise<s
       return null;
     }
 
-    const data = await response.json();
+    const data = await response.json() as any;
     
     // Extract image URLs based on known API patterns
     let imageUrl: string | null = null;
@@ -1043,7 +1043,7 @@ async function searchGeneralSportsAPIs(athlete: AthleteProfile): Promise<ImageRe
     );
     
     if (response.ok) {
-      const data = await response.json();
+      const data = await response.json() as any;
       
       if (data.player && data.player.length > 0) {
         for (const player of data.player.slice(0, 2)) { // Take top 2 results
@@ -1092,7 +1092,7 @@ async function searchGoogleCustomSearch(athlete: AthleteProfile): Promise<ImageR
     const response = await fetch(searchUrl);
     
     if (response.ok) {
-      const data = await response.json();
+      const data = await response.json() as any;
       
       if (data.items) {
         for (const item of data.items) {
@@ -1158,7 +1158,7 @@ async function searchBingImages(athlete: AthleteProfile): Promise<ImageResult[]>
     });
     
     if (response.ok) {
-      const data = await response.json();
+      const data = await response.json() as any;
       
       if (data.images_results && data.images_results.length > 0) {
         console.log(`🎯 Bing Images found ${data.images_results.length} results for ${athlete.name}`);
