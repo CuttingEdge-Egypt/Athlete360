@@ -248,25 +248,42 @@ Return only real, working image URLs in JSON format.`;
     console.log(prompt);
     console.log('---END PROMPT---');
 
-    // Use EXACT same Gemini pattern that works for personal info generation
-    const { getAthletePersonalInfoGemini } = await import('./geminiService.js');
-    
-    // Use the EXACT same Gemini pattern that works for personal info - copy from geminiService.ts
+    // EXACT copy of working Gemini initialization from geminiService.ts
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || "");
     
-    // Use exact same syntax as working generateAthleteBiography
-    const result = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-      config: {
-        temperature: 0.1,
-        maxOutputTokens: 2048,
-        tools: [{ googleSearch: {} }]
-      }
-    });
+    console.log(`🔧 Testing genAI object:`, !!genAI);
+    console.log(`🔧 Testing genAI.models:`, !!genAI.models);
+    console.log(`🔧 Available methods:`, Object.keys(genAI));
     
-    let content = (result.text || "").trim();
+    // Fix: Use the correct API structure (not genAI.models)
+    console.log(`🔧 Trying correct Gemini API structure...`);
+    
+    try {
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      console.log(`🔧 Model created successfully:`, !!model);
+      
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.1,
+          maxOutputTokens: 2048
+        },
+        tools: [{ googleSearch: {} }] // Use exact same web search as working geminiService.ts
+      });
+      
+      console.log(`🔧 API call succeeded!`);
+    } catch (apiError) {
+      console.log(`❌ Gemini API call failed:`, apiError);
+      console.log(`🔧 API error details:`, apiError.message);
+      return [];
+    }
+    
+    let content = (result.response.text() || "").trim();
+    
+    console.log(`🔧 Gemini API call completed. Result keys:`, Object.keys(result));
+    console.log(`🔧 Response available:`, !!result.response);
+    console.log(`🔧 Response text:`, result.response.text() ? 'HAS CONTENT' : 'EMPTY');
 
     if (!content) {
       console.log(`❌ Gemini returned empty response for ${athlete.name}`);
