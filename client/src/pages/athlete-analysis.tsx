@@ -111,7 +111,32 @@ export default function AthleteAnalysis() {
                       <h1 className="text-3xl font-bold text-white mb-2">{athlete.name}</h1>
                       <p className="text-gray-400 mb-2">{athlete.bio}</p>
                       <div className="flex items-center space-x-4">
-                        <span className="text-sm text-athlete-warning">Rank #{athlete.rank || "TBD"}</span>
+                        {/* Multiple Rankings Display */}
+                        <div className="flex items-center space-x-2 text-sm">
+                          {athlete.rank && (
+                            <span className="text-athlete-warning bg-athlete-gray-700 px-2 py-1 rounded">
+                              World #{athlete.rank}
+                            </span>
+                          )}
+                          {athlete.olympicRank && (
+                            <span className="text-yellow-400 bg-athlete-gray-700 px-2 py-1 rounded">
+                              Olympic #{athlete.olympicRank}
+                            </span>
+                          )}
+                          {athlete.continentalRank && (
+                            <span className="text-green-400 bg-athlete-gray-700 px-2 py-1 rounded">
+                              Continental #{athlete.continentalRank}
+                            </span>
+                          )}
+                          {athlete.nationalRank && (
+                            <span className="text-blue-400 bg-athlete-gray-700 px-2 py-1 rounded">
+                              National #{athlete.nationalRank}
+                            </span>
+                          )}
+                          {!athlete.rank && !athlete.olympicRank && !athlete.continentalRank && !athlete.nationalRank && (
+                            <span className="text-gray-400">Rank TBD</span>
+                          )}
+                        </div>
                         <span className="text-sm text-gray-400">Updated: {new Date(athlete.updatedAt || '').toLocaleDateString()}</span>
                       </div>
                     </div>
