@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import fs from 'fs';
 import path from 'path';
+import fetch from 'node-fetch';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -92,7 +93,7 @@ export async function searchAthleteImageWithScraping(
   }
 }
 
-// NEW: Use direct URLs from Gemini instead of downloading
+// NEW: Smart image search with fallback - try direct URLs first, download if needed
 export async function searchAthleteImageWithDirectUrls(
   athleteName: string, 
   sport?: string,
@@ -100,7 +101,7 @@ export async function searchAthleteImageWithDirectUrls(
   personalInfo?: any
 ): Promise<string | null> {
   try {
-    console.log(`🔍 Starting direct URL search for ${athleteName}...`);
+    console.log(`🔍 Starting smart image search for ${athleteName}...`);
     
     const athleteProfile: AthleteProfile = {
       name: athleteName,
@@ -117,15 +118,94 @@ export async function searchAthleteImageWithDirectUrls(
       return null;
     }
     
-    // Return the first URL directly without downloading
-    const imageUrl = directImageUrls[0];
-    console.log(`✅ Using direct URL for ${athleteName}: ${imageUrl}`);
-    return imageUrl;
+    // Try to validate and use URLs directly first
+    for (const url of directImageUrls) {
+      console.log(`🔍 Checking URL: ${url}`);
+      
+      // Check if it's an image URL (ends with image extension or from trusted sources)
+      const isImageUrl = /\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i.test(url) || 
+                        url.includes('olympics.com/images') || 
+                        url.includes('cloudinary.com') ||
+                        url.includes('gettyimages.com') ||
+                        url.includes('teamusa.com');
+      
+      if (isImageUrl) {
+        console.log(`✅ Valid image URL found for ${athleteName}: ${url}`);
+        
+        // Try to verify the URL is accessible
+        try {
+          const response = await fetch(url, { method: 'HEAD' });
+          if (response.ok) {
+            console.log(`✅ URL is accessible, using direct URL for ${athleteName}`);
+            return url;
+          } else {
+            console.log(`⚠️ URL returned ${response.status}, trying next...`);
+          }
+        } catch (error) {
+          console.log(`⚠️ Could not verify URL, trying to download instead...`);
+        }
+      }
+    }
+    
+    // If direct URLs didn't work, try downloading the best one
+    console.log(`📥 Direct URLs not suitable, attempting download...`);
+    const downloadedImage = await downloadBestImage(directImageUrls, athleteName);
+    
+    if (downloadedImage) {
+      console.log(`✅ Successfully downloaded image for ${athleteName}: ${downloadedImage}`);
+      return downloadedImage;
+    }
+    
+    console.log(`❌ No suitable image found for ${athleteName}`);
+    return null;
     
   } catch (error) {
-    console.error('Error in direct URL image search:', error);
+    console.error('Error in smart image search:', error);
     return null;
   }
+}
+
+// Helper function to download the best available image
+async function downloadBestImage(urls: string[], athleteName: string): Promise<string | null> {
+  for (const url of urls) {
+    try {
+      console.log(`📥 Attempting to download from: ${url}`);
+      
+      const response = await fetch(url);
+      if (!response.ok) {
+        console.log(`⚠️ HTTP ${response.status} for ${url}`);
+        continue;
+      }
+      
+      const contentType = response.headers.get('content-type');
+      if (!contentType?.startsWith('image/')) {
+        console.log(`⚠️ Not an image: ${contentType}`);
+        continue;
+      }
+      
+      const buffer = await response.arrayBuffer();
+      const fileName = `${athleteName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${Date.now()}.jpg`;
+      const filePath = path.join('attached_assets', 'athlete_images', fileName);
+      
+      // Ensure directory exists
+      const dir = path.dirname(filePath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      
+      // Save the image
+      fs.writeFileSync(filePath, Buffer.from(buffer));
+      console.log(`✅ Downloaded image to: ${filePath}`);
+      
+      // Return the URL path that will work in the frontend
+      return `/attached_assets/athlete_images/${fileName}`;
+      
+    } catch (error) {
+      console.error(`❌ Failed to download from ${url}:`, error);
+    }
+  }
+  
+  return null;
 }
 
 // STEP 1: Ask GPT-5 to find direct image URLs using web search
