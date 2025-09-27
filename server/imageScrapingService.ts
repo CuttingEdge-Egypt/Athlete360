@@ -256,13 +256,12 @@ Return only real, working image URLs in JSON format.`;
       model: "gemini-2.5-pro"
     });
     
-    const response = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: {
+    const response = await model.generateContent(prompt, {
+      config: {
         temperature: 0.3,
-        maxOutputTokens: 2000
-      },
-      tools: [{ googleSearch: {} }] // Enable web search like Vito and CJ
+        maxOutputTokens: 2000,
+        tools: [{ googleSearch: {} }] // Enable web search like Vito and CJ
+      }
     });
 
     const content = response.response?.text();
@@ -1391,54 +1390,107 @@ Analyze the image and respond in JSON format:
   }
 }
 
-// Download image and save locally
+// Enhanced download image and save locally with better handling
 async function downloadImageLocally(url: string, athleteName: string): Promise<string | null> {
-  try {
-    console.log(`🔍 Downloading image: ${url}`);
-    
-    const fetch = (await import('node-fetch')).default;
-    const response = await fetch(url, { 
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+  const maxRetries = 3;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`🔍 Downloading image (attempt ${attempt}/${maxRetries}): ${url}`);
+      
+      const fetch = (await import('node-fetch')).default;
+      
+      // Enhanced headers to bypass common protections
+      const headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Sec-Fetch-Dest': 'image',
+        'Sec-Fetch-Mode': 'no-cors',
+        'Sec-Fetch-Site': 'cross-site',
+        'Referer': 'https://www.google.com/'
+      };
+
+      const response = await fetch(url, { 
+        headers,
+        follow: 5, // Follow up to 5 redirects
+        size: 10 * 1024 * 1024 // 10MB max size
+      });
+      
+      if (!response.ok) {
+        console.log(`❌ Image URL not accessible (attempt ${attempt}): ${response.status} ${response.statusText}`);
+        if (attempt === maxRetries) return null;
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Exponential backoff
+        continue;
       }
-    });
-    
-    if (!response.ok) {
-      console.log(`❌ Image URL not accessible: ${response.status}`);
-      return null;
+      
+      const contentType = response.headers.get('content-type');
+      console.log(`📋 Content-Type: ${contentType}`);
+      
+      // More flexible content type checking
+      if (!contentType) {
+        console.log(`⚠️ No content-type header, checking URL extension`);
+        if (!/\.(jpg|jpeg|png|webp|gif|bmp)(\?|$)/i.test(url)) {
+          console.log(`❌ URL doesn't appear to be an image: ${url}`);
+          if (attempt === maxRetries) return null;
+          continue;
+        }
+      } else if (!contentType.startsWith('image/') && !contentType.includes('octet-stream')) {
+        console.log(`❌ URL is not an image: ${contentType}`);
+        if (attempt === maxRetries) return null;
+        continue;
+      }
+
+      // Create directory if it doesn't exist
+      const imageDir = path.join(process.cwd(), 'attached_assets', 'athlete_images');
+      if (!fs.existsSync(imageDir)) {
+        fs.mkdirSync(imageDir, { recursive: true });
+      }
+      
+      // Generate filename from athlete name and timestamp
+      const sanitizedName = athleteName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+      const timestamp = Date.now();
+      
+      // Better extension detection
+      let extension = 'jpg';
+      if (contentType && contentType.startsWith('image/')) {
+        extension = contentType.split('/')[1].split(';')[0] || 'jpg';
+      } else {
+        // Try to get extension from URL
+        const urlMatch = url.match(/\.([a-z]+)(\?|$)/i);
+        if (urlMatch) extension = urlMatch[1];
+      }
+      
+      const filename = `${sanitizedName}_${timestamp}.${extension}`;
+      const filePath = path.join(imageDir, filename);
+      
+      // Download and save the image
+      const buffer = await response.buffer();
+      
+      // Validate it's actually an image by checking the buffer
+      if (buffer.length < 100) {
+        console.log(`❌ Downloaded file too small (${buffer.length} bytes), probably not an image`);
+        if (attempt === maxRetries) return null;
+        continue;
+      }
+      
+      fs.writeFileSync(filePath, buffer);
+      
+      const relativePath = `/attached_assets/athlete_images/${filename}`;
+      console.log(`✅ Image downloaded successfully: ${relativePath}`);
+      return relativePath;
+      
+    } catch (error) {
+      console.error(`❌ Error downloading image (attempt ${attempt}):`, error);
+      if (attempt === maxRetries) return null;
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Exponential backoff
     }
-    
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.startsWith('image/')) {
-      console.log(`❌ URL is not an image: ${contentType}`);
-      return null;
-    }
-    
-    // Create directory if it doesn't exist
-    const imageDir = path.join(process.cwd(), 'attached_assets', 'athlete_images');
-    if (!fs.existsSync(imageDir)) {
-      fs.mkdirSync(imageDir, { recursive: true });
-    }
-    
-    // Generate filename from athlete name and timestamp
-    const sanitizedName = athleteName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
-    const timestamp = Date.now();
-    const extension = contentType.split('/')[1] || 'jpg';
-    const filename = `${sanitizedName}_${timestamp}.${extension}`;
-    const filePath = path.join(imageDir, filename);
-    
-    // Download and save the image
-    const buffer = await response.buffer();
-    fs.writeFileSync(filePath, buffer);
-    
-    const relativePath = `/attached_assets/athlete_images/${filename}`;
-    console.log(`✅ Image downloaded successfully: ${relativePath}`);
-    return relativePath;
-    
-  } catch (error) {
-    console.error(`❌ Error downloading image:`, error);
-    return null;
   }
+  
+  return null;
 }
 
 // Validate image URL accessibility and format (legacy - kept for compatibility)
