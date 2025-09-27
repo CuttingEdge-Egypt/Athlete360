@@ -1966,9 +1966,9 @@ export async function searchAthleteImage(athleteName: string, sport?: string, na
   try {
     console.log(`🔍 Starting comprehensive image search for ${athleteName} (${sport || 'Unknown Sport'})`);
     
-    // FIXED: All searches now go through the enhanced verification pipeline
-    const { searchAthleteImageWithScraping } = await import('./imageScrapingService.js');
-    const verifiedImageUrl = await searchAthleteImageWithScraping(athleteName, sport, nationality, personalInfo);
+    // FIXED: Use direct URLs instead of downloading for better reliability
+    const { searchAthleteImageWithDirectUrls } = await import('./imageScrapingService.js');
+    const verifiedImageUrl = await searchAthleteImageWithDirectUrls(athleteName, sport, nationality, personalInfo);
     
     if (verifiedImageUrl) {
       console.log(`✅ Found and identity-verified image: ${verifiedImageUrl}`);

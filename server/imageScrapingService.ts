@@ -92,6 +92,42 @@ export async function searchAthleteImageWithScraping(
   }
 }
 
+// NEW: Use direct URLs from Gemini instead of downloading
+export async function searchAthleteImageWithDirectUrls(
+  athleteName: string, 
+  sport?: string,
+  country?: string, 
+  personalInfo?: any
+): Promise<string | null> {
+  try {
+    console.log(`🔍 Starting direct URL search for ${athleteName}...`);
+    
+    const athleteProfile: AthleteProfile = {
+      name: athleteName,
+      sport,
+      country,
+      personalInfo
+    };
+
+    // Get direct image URLs from Gemini
+    const directImageUrls = await getDirectImageUrlsFromGPT5(athleteProfile);
+    
+    if (!directImageUrls || directImageUrls.length === 0) {
+      console.log(`❌ No direct image URLs found for ${athleteName}`);
+      return null;
+    }
+    
+    // Return the first URL directly without downloading
+    const imageUrl = directImageUrls[0];
+    console.log(`✅ Using direct URL for ${athleteName}: ${imageUrl}`);
+    return imageUrl;
+    
+  } catch (error) {
+    console.error('Error in direct URL image search:', error);
+    return null;
+  }
+}
+
 // STEP 1: Ask GPT-5 to find direct image URLs using web search
 async function getDirectImageUrlsFromGPT5(athlete: AthleteProfile): Promise<string[]> {
   try {
