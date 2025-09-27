@@ -1260,12 +1260,7 @@ export default function Home() {
                               src={selectedAthlete.profileImageUrl}
                               alt="Athlete profile" 
                               className="w-16 h-16 rounded-full object-cover"
-                              onLoad={() => {
-                                console.log('✅ Image loaded successfully:', selectedAthlete.profileImageUrl);
-                              }}
                               onError={(e) => {
-                                console.error('❌ Image failed to load:', selectedAthlete.profileImageUrl);
-                                console.error('Error details:', e);
                                 const img = e.currentTarget;
                                 const fallback = img.parentElement?.querySelector('.profile-fallback') as HTMLElement;
                                 if (fallback) {
