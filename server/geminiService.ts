@@ -2897,3 +2897,155 @@ interface PersonalInfo {
   yearsInCurrentSport?: string;
   previousSports?: string[];
 }
+
+// Fast Gemini-based image search with web search capabilities
+export async function searchAthleteImagesWithGemini(
+  name: string,
+  sport: string,
+  country: string,
+  details?: string
+): Promise<string | null> {
+  try {
+    console.log(`🔍 Starting Gemini-2.5-pro image search for ${name} (${sport}, ${country})`);
+    
+    // Build comprehensive search prompt
+    const athleteInfo = `Name: ${name}\nCountry: ${country}\nSport: ${sport}`;
+    const detailsText = details ? `\nDetails: ${details}` : '';
+    
+    const prompt = `You are an expert image researcher. Use web search to find 3-5 DIRECT downloadable image URLs for this athlete:
+
+${athleteInfo}${detailsText}
+
+SEARCH STRATEGY:
+1. Search for "${name} ${sport} ${country}" to find recent athlete photos
+2. Look for official sports federation websites and Olympic databases  
+3. Check Wikipedia Commons and government sports websites
+4. Find news articles and sports reporting sites
+
+CRITICAL REQUIREMENTS:
+1. Return ONLY direct image URLs that end in .jpg, .png, .webp, .gif
+2. Focus on accessible, non-restrictive sources like:
+   - Wikipedia Commons images (upload.wikimedia.org)
+   - Official Olympic/sports federation sites
+   - TheSportsDB.com athlete photos
+   - Major news outlets with public images
+   - Government and official sports websites
+
+3. AVOID restrictive sources:
+   - Social media platforms (Instagram, Facebook, Twitter)
+   - Stock photo sites requiring subscriptions  
+   - Private or protected team websites
+
+4. Use web search to find current, accessible images
+
+Return ONLY a JSON array of image URLs in this exact format:
+["https://url1.jpg", "https://url2.png", "https://url3.webp"]`;
+
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      contents: prompt,
+      config: {
+        temperature: 0.1,
+        maxOutputTokens: 2000,
+        tools: [{ googleSearch: {} }]
+      }
+    });
+
+    let responseText = result.text || "";
+    if (!responseText) {
+      return null;
+    }
+
+    // Clean and parse JSON response
+    responseText = cleanJsonResponse(responseText);
+    
+    let imageUrls: string[] = [];
+    try {
+      imageUrls = JSON.parse(responseText);
+      if (!Array.isArray(imageUrls)) {
+        // Try to extract URLs from text if not array
+        const urlRegex = /https?:\/\/[^\s"'<>]+\.(?:jpg|jpeg|png|webp|gif)(?:\?[^\s"'<>]*)?/gi;
+        imageUrls = responseText.match(urlRegex) || [];
+      }
+    } catch (parseError) {
+      // Fallback: extract URLs from text
+      const urlRegex = /https?:\/\/[^\s"'<>]+\.(?:jpg|jpeg|png|webp|gif)(?:\?[^\s"'<>]*)?/gi;
+      imageUrls = responseText.match(urlRegex) || [];
+    }
+
+    if (imageUrls.length === 0) {
+      console.log(`❌ No image URLs found for ${name}`);
+      return null;
+    }
+
+    console.log(`🎯 Gemini found ${imageUrls.length} image URLs for ${name}`);
+    
+    // Try to download the first working image
+    const downloadedPath = await downloadImageFromUrl(imageUrls[0], name);
+    
+    if (downloadedPath) {
+      console.log(`✅ Successfully downloaded image for ${name}: ${downloadedPath}`);
+      return downloadedPath;
+    } else {
+      console.log(`❌ Failed to download image for ${name}`);
+      return null;
+    }
+
+  } catch (error) {
+    console.error(`❌ Gemini image search failed for ${name}:`, error);
+    return null;
+  }
+}
+
+// Helper function to download image from URL
+async function downloadImageFromUrl(url: string, athleteName: string): Promise<string | null> {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+      },
+      // timeout: 30000, // Note: timeout not supported in node-fetch RequestInit
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const contentType = response.headers.get('content-type') || '';
+    
+    // Determine file extension
+    let ext = 'jpg';
+    if (contentType.includes('png') || url.toLowerCase().endsWith('.png')) {
+      ext = 'png';
+    } else if (contentType.includes('webp') || url.toLowerCase().endsWith('.webp')) {
+      ext = 'webp';
+    } else if (contentType.includes('gif') || url.toLowerCase().endsWith('.gif')) {
+      ext = 'gif';
+    }
+
+    // Create filename
+    const cleanName = athleteName.toLowerCase().replace(/[^a-zA-Z0-9]/g, '_');
+    const timestamp = Date.now();
+    const filename = `${cleanName}_${timestamp}.${ext}`;
+    const filepath = `attached_assets/athlete_images/${filename}`;
+
+    // Ensure directory exists
+    const fs = await import('fs');
+    const path = await import('path');
+    const dir = path.dirname(filepath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
+    // Save image
+    const buffer = await response.buffer();
+    fs.writeFileSync(filepath, buffer);
+
+    return `/${filepath}`;
+    
+  } catch (error) {
+    console.error(`Failed to download image from ${url}:`, error);
+    return null;
+  }
+}

@@ -47,7 +47,7 @@ type DevelopmentPlanRequest = z.infer<typeof developmentPlanSchema>;
 import { seedDatabase } from "./seedData";
 import { getAthleteProfile, generateAthleteImage, generateSpecificAnalysis, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, compareAthletes, generateRankHistory, generateAthleteStatistics, AthleteStatistics } from "./openaiService";
 import { getAthletePersonalInfoGemini } from "./geminiService";
-import { generateNutritionPlan, generateEnhancedNutritionPlan, generateRankHistoryWithGemini, generateAthleteBiography, generateDevelopmentPlan, type NutritionPlanFormData, type DevelopmentPlanFormData } from "./geminiService";
+import { generateNutritionPlan, generateEnhancedNutritionPlan, generateRankHistoryWithGemini, generateAthleteBiography, generateDevelopmentPlan, searchAthleteImagesWithGemini, type NutritionPlanFormData, type DevelopmentPlanFormData } from "./geminiService";
 import { analyzeVideoFile, analyzeVideoComprehensive } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
 
@@ -549,16 +549,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let profileImageUrl: string | undefined;
       
       try {
-        // Set a reasonable timeout for image search (2 minutes)
-        const imageSearchTimeout = 120000; // 2 minutes
-        const imageSearchPromise = searchAthleteImageWithPython(name, sport.name, athleteCountry, personalInfo);
-        
-        profileImageUrl = await Promise.race([
-          imageSearchPromise,
-          new Promise<string | null>((_, reject) => 
-            setTimeout(() => reject(new Error('Image search timeout')), imageSearchTimeout)
-          )
-        ]) || undefined;
+        // Use fast Gemini-2.5-pro image search instead of slow GPT-5 Python script
+        profileImageUrl = await searchAthleteImagesWithGemini(name, sport.name, athleteCountry, personalInfo ? JSON.stringify(personalInfo) : undefined) || undefined;
         
         if (profileImageUrl) {
           console.log(`✅ Found image for ${name}: ${profileImageUrl}`);
@@ -566,11 +558,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`⚠️ No image found for ${name}, proceeding with default`);
         }
       } catch (error) {
-        if (error instanceof Error && error.message === 'Image search timeout') {
-          console.log(`⏰ Image search timed out for ${name}, proceeding without image`);
-        } else {
-          console.error(`❌ Image search failed for ${name}:`, error);
-        }
+        console.error(`❌ Image search failed for ${name}:`, error);
         profileImageUrl = undefined;
       }
 
