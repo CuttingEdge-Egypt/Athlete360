@@ -256,12 +256,13 @@ Return only real, working image URLs in JSON format.`;
       model: "gemini-2.5-pro"
     });
     
-    const response = await model.generateContent(prompt, {
-      config: {
+    const response = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
         temperature: 0.3,
-        maxOutputTokens: 2000,
-        tools: [{ googleSearch: {} }] // Enable web search like Vito and CJ
-      }
+        maxOutputTokens: 2000
+      },
+      tools: [{ googleSearch: {} }] // Enable web search like Vito and CJ
     });
 
     const content = response.response?.text();
