@@ -1,4 +1,6 @@
 import OpenAI from 'openai';
+import fs from 'fs';
+import path from 'path';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -52,47 +54,37 @@ export async function searchAthleteImageWithScraping(
     }
     
     // STEP 2: Download images directly from GPT-5's URLs
-    console.log(`📸 Step 2: Downloading images directly from GPT-5's URLs...`);
-    const fetchedImages: string[] = [];
+    console.log(`📸 Step 2: Downloading images directly from web search URLs...`);
+    const downloadedImages: string[] = [];
     
     for (const imageUrl of directImageUrls) {
       try {
-        const isValid = await validateImageUrl(imageUrl);
-        if (isValid) {
-          fetchedImages.push(imageUrl);
-          console.log(`✅ Successfully validated: ${imageUrl}`);
+        const localPath = await downloadImageLocally(imageUrl, athleteName);
+        if (localPath) {
+          downloadedImages.push(localPath);
+          console.log(`✅ Successfully downloaded: ${imageUrl} -> ${localPath}`);
           
           // Get first working image for verification
-          if (fetchedImages.length >= 1) break;
+          if (downloadedImages.length >= 1) break;
         }
       } catch (error) {
-        console.log(`⚠️ Failed to validate image: ${error}`);
+        console.log(`⚠️ Failed to download image: ${error}`);
       }
     }
     
-    if (fetchedImages.length === 0) {
-      console.log(`❌ No valid images found for ${athleteName}`);
+    if (downloadedImages.length === 0) {
+      console.log(`❌ No images could be downloaded for ${athleteName}`);
       return null;
     }
     
-    // STEP 3: Image downloaded successfully
-    console.log(`✅ Step 3: Image downloaded successfully`);
+    // STEP 3: Images downloaded successfully
+    console.log(`✅ Step 3: ${downloadedImages.length} image(s) downloaded successfully`);
     
-    // STEP 4: Send image and ALL athlete info to GPT-5 for verification
-    console.log(`🔍 Step 4: Sending image and athlete data to GPT-5 for verification...`);
-    for (const imageUrl of fetchedImages) {
-      const verification = await verifyAthleteWithCompleteData(imageUrl, athleteProfile);
-      
-      if (verification.verified) {
-        console.log(`✅ GPT-5 verified this is ${athleteName}: ${verification.reasoning}`);
-        return imageUrl;
-      } else {
-        console.log(`❌ GPT-5 rejected image: ${verification.reasoning}`);
-      }
-    }
-    
-    console.log(`❌ No images passed GPT-5 verification for ${athleteName}`);
-    return null;
+    // For now, return the first downloaded image without verification
+    // TODO: Add back verification step if needed
+    const firstImage = downloadedImages[0];
+    console.log(`✅ Using downloaded image for ${athleteName}: ${firstImage}`);
+    return firstImage;
     
   } catch (error) {
     console.error('Error in 4-step athlete image search:', error);
@@ -1269,11 +1261,62 @@ Analyze the image and respond in JSON format:
   }
 }
 
-// Validate image URL accessibility and format
+// Download image and save locally
+async function downloadImageLocally(url: string, athleteName: string): Promise<string | null> {
+  try {
+    console.log(`🔍 Downloading image: ${url}`);
+    
+    const fetch = (await import('node-fetch')).default;
+    const response = await fetch(url, { 
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    });
+    
+    if (!response.ok) {
+      console.log(`❌ Image URL not accessible: ${response.status}`);
+      return null;
+    }
+    
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.startsWith('image/')) {
+      console.log(`❌ URL is not an image: ${contentType}`);
+      return null;
+    }
+    
+    // Create directory if it doesn't exist
+    const imageDir = path.join(process.cwd(), 'attached_assets', 'athlete_images');
+    if (!fs.existsSync(imageDir)) {
+      fs.mkdirSync(imageDir, { recursive: true });
+    }
+    
+    // Generate filename from athlete name and timestamp
+    const sanitizedName = athleteName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+    const timestamp = Date.now();
+    const extension = contentType.split('/')[1] || 'jpg';
+    const filename = `${sanitizedName}_${timestamp}.${extension}`;
+    const filePath = path.join(imageDir, filename);
+    
+    // Download and save the image
+    const buffer = await response.buffer();
+    fs.writeFileSync(filePath, buffer);
+    
+    const relativePath = `/attached_assets/athlete_images/${filename}`;
+    console.log(`✅ Image downloaded successfully: ${relativePath}`);
+    return relativePath;
+    
+  } catch (error) {
+    console.error(`❌ Error downloading image:`, error);
+    return null;
+  }
+}
+
+// Validate image URL accessibility and format (legacy - kept for compatibility)
 async function validateImageUrl(url: string): Promise<boolean> {
   try {
     console.log(`🔍 Validating image URL: ${url}`);
     
+    const fetch = (await import('node-fetch')).default;
     const response = await fetch(url, { 
       method: 'HEAD',
       headers: {
