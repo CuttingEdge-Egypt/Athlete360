@@ -248,19 +248,19 @@ Return only real, working image URLs in JSON format.`;
     console.log(prompt);
     console.log('---END PROMPT---');
 
-    // Use Gemini like the rest of the app for consistency
+    // Use Gemini-2.5-pro with web search like Vito and CJ
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || "");
     
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash"
+      model: "gemini-2.5-pro"
     });
     
-    const response = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: {
+    const response = await model.generateContent(prompt, {
+      config: {
         temperature: 0.3,
-        maxOutputTokens: 2000
+        maxOutputTokens: 2000,
+        tools: [{ googleSearch: {} }] // Enable web search like Vito and CJ
       }
     });
 
