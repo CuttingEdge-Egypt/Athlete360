@@ -1252,9 +1252,9 @@ export default function Home() {
                   onClick={handleAthleteCardClick}
                 >
                   <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="relative w-16 h-16">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start space-x-4">
+                        <div className="relative w-16 h-16 flex-shrink-0">
                           {selectedAthlete.profileImageUrl ? (
                             <img 
                               src={selectedAthlete.profileImageUrl}
@@ -1276,7 +1276,7 @@ export default function Home() {
                             <User className="text-gray-400" size={24} />
                           </div>
                         </div>
-                        <div>
+                        <div className="flex-1 min-w-0">
                           <h3 className="text-xl font-bold text-white">
                             {selectedAthlete.name}
                             {selectedAthlete.nameArabic && (
@@ -1310,9 +1310,15 @@ export default function Home() {
                               {selectedAthlete.personalInfo.position && selectedAthlete.personalInfo.position !== "N/A" && (
                                 <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-purple-400/60 transition-all duration-200">
                                   <div className="flex items-center justify-center w-4 h-4 bg-purple-500/20 rounded-full">
-                                    <span className="text-[10px] text-purple-400">🏆</span>
+                                    <span className="text-[10px] text-purple-400">{selectedSport && ['taekwondo', 'boxing', 'athletics', 'tennis', 'golf', 'swimming'].some(sport => 
+                                      sports.find(s => s.id === selectedSport)?.name.toLowerCase().includes(sport)
+                                    ) ? '🥋' : '🏆'}</span>
                                   </div>
-                                  <span className="text-xs text-slate-400 font-medium">Position</span>
+                                  <span className="text-xs text-slate-400 font-medium">
+                                    {selectedSport && ['taekwondo', 'boxing', 'athletics', 'tennis', 'golf', 'swimming'].some(sport => 
+                                      sports.find(s => s.id === selectedSport)?.name.toLowerCase().includes(sport)
+                                    ) ? 'Weight Category' : 'Position'}
+                                  </span>
                                   <span className="text-xs font-bold text-white">{selectedAthlete.personalInfo.position}</span>
                                 </div>
                               )}
@@ -1338,12 +1344,16 @@ export default function Home() {
                               )}
                               
                               {selectedAthlete.personalInfo.educationalBackground && selectedAthlete.personalInfo.educationalBackground !== "N/A" && (
-                                <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-indigo-400/60 transition-all duration-200">
-                                  <div className="flex items-center justify-center w-4 h-4 bg-indigo-500/20 rounded-full">
+                                <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-indigo-400/60 transition-all duration-200 max-w-xs">
+                                  <div className="flex items-center justify-center w-4 h-4 bg-indigo-500/20 rounded-full flex-shrink-0">
                                     <span className="text-[10px] text-indigo-400">🎓</span>
                                   </div>
-                                  <span className="text-xs text-slate-400 font-medium">Education</span>
-                                  <span className="text-xs font-bold text-white">{selectedAthlete.personalInfo.educationalBackground}</span>
+                                  <span className="text-xs text-slate-400 font-medium flex-shrink-0">Education</span>
+                                  <span className="text-xs font-bold text-white truncate" title={selectedAthlete.personalInfo.educationalBackground}>
+                                    {selectedAthlete.personalInfo.educationalBackground.length > 50 
+                                      ? selectedAthlete.personalInfo.educationalBackground.substring(0, 50) + '...' 
+                                      : selectedAthlete.personalInfo.educationalBackground}
+                                  </span>
                                 </div>
                               )}
                             </div>
