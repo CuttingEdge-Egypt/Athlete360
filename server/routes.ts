@@ -549,14 +549,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let profileImageUrl: string | undefined;
       
       try {
-        profileImageUrl = await searchAthleteImageWithPython(name, sport.name, athleteCountry, personalInfo) || undefined;
+        // Set a reasonable timeout for image search (2 minutes)
+        const imageSearchTimeout = 120000; // 2 minutes
+        const imageSearchPromise = searchAthleteImageWithPython(name, sport.name, athleteCountry, personalInfo);
+        
+        profileImageUrl = await Promise.race([
+          imageSearchPromise,
+          new Promise<string | null>((_, reject) => 
+            setTimeout(() => reject(new Error('Image search timeout')), imageSearchTimeout)
+          )
+        ]) || undefined;
+        
         if (profileImageUrl) {
           console.log(`✅ Found image for ${name}: ${profileImageUrl}`);
         } else {
           console.log(`⚠️ No image found for ${name}, proceeding with default`);
         }
       } catch (error) {
-        console.error(`❌ Image search failed for ${name}:`, error);
+        if (error instanceof Error && error.message === 'Image search timeout') {
+          console.log(`⏰ Image search timed out for ${name}, proceeding without image`);
+        } else {
+          console.error(`❌ Image search failed for ${name}:`, error);
+        }
         profileImageUrl = undefined;
       }
 

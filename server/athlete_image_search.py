@@ -84,12 +84,24 @@ Search the web now and return only real, accessible image URLs that can be downl
 
         print(f"🤖 Sending request to GPT-5 with web search enabled...")
         
-        # Use GPT-5 with web search via Responses API (correct approach!)
-        response = client.responses.create(
-            model="gpt-5",
-            input=prompt,
-            tools=[{"type": "web_search"}]  # Enable web search for GPT-5
-        )
+        # Use GPT-5 with web search via Responses API with timeout handling
+        import signal
+        
+        def timeout_handler(signum, frame):
+            raise TimeoutError("GPT-5 web search timed out")
+        
+        # Set a 90-second timeout for GPT-5 web search
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(90)  # 90 seconds
+        
+        try:
+            response = client.responses.create(
+                model="gpt-5",
+                input=prompt,
+                tools=[{"type": "web_search"}]  # Enable web search for GPT-5
+            )
+        finally:
+            signal.alarm(0)  # Cancel the alarm
         
         if not json_output:
             print(f"🔧 GPT-5 response received. Response type: {type(response.output)}")
