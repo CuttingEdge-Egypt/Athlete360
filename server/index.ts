@@ -20,6 +20,9 @@ app.use((req, res, next) => {
 // Serve static files from attached_assets
 app.use('/attached_assets', express.static(path.join(process.cwd(), 'attached_assets')));
 
+// Serve static files from public directory (for images, etc.)
+app.use('/images', express.static(path.join(process.cwd(), 'public/images')));
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
