@@ -21,7 +21,8 @@ def search_athlete_images_with_gpt5(
     country: str,
     sport: str,
     details: str = "",
-    save_directory: str = "./attached_assets/athlete_images"
+    save_directory: str = "./attached_assets/athlete_images",
+    json_output: bool = False
 ) -> Dict[str, Any]:
     """
     Search for athlete images using GPT-5 with web search capabilities.
@@ -90,8 +91,9 @@ Search the web now and return only real, accessible image URLs that can be downl
             tools=[{"type": "web_search"}]  # Enable web search for GPT-5
         )
         
-        print(f"🔧 GPT-5 response received. Response type: {type(response.output)}")
-        print(f"🔧 Response content: {response.output}")
+        if not json_output:
+            print(f"🔧 GPT-5 response received. Response type: {type(response.output)}")
+            print(f"🔧 Response content: {response.output}")
         
         # Handle response output - it might be a list or string
         if isinstance(response.output, list):
@@ -102,7 +104,8 @@ Search the web now and return only real, accessible image URLs that can be downl
         else:
             content = str(response.output)
         
-        print(f"🔧 Processed content: {content[:200]}...")  # Show first 200 chars
+        if not json_output:
+            print(f"🔧 Processed content: {content[:200]}...")  # Show first 200 chars
         
         if not content:
             return {"success": False, "error": "Empty response from GPT-5", "downloaded_image": None}
@@ -125,12 +128,13 @@ Search the web now and return only real, accessible image URLs that can be downl
         if not image_urls:
             return {"success": False, "error": "No image URLs found in GPT-5 response", "downloaded_image": None}
         
-        print(f"🎯 GPT-5 found {len(image_urls)} image URLs for {name}")
-        for i, url in enumerate(image_urls, 1):
-            print(f"📋 Image URL {i}: {url}")
+        if not json_output:
+            print(f"🎯 GPT-5 found {len(image_urls)} image URLs for {name}")
+            for i, url in enumerate(image_urls, 1):
+                print(f"📋 Image URL {i}: {url}")
         
         # Try to download the first working image
-        downloaded_image = download_first_working_image(image_urls, name, save_directory)
+        downloaded_image = download_first_working_image(image_urls, name, save_directory, json_output)
         
         if downloaded_image:
             return {
@@ -149,13 +153,15 @@ Search the web now and return only real, accessible image URLs that can be downl
             }
             
     except Exception as e:
-        print(f"❌ Error in GPT-5 image search: {str(e)}")
+        if not json_output:
+            print(f"❌ Error in GPT-5 image search: {str(e)}")
         return {"success": False, "error": f"Search failed: {str(e)}", "downloaded_image": None}
 
 def download_first_working_image(
     image_urls: List[str], 
     athlete_name: str, 
     save_directory: str,
+    json_output: bool = False,
     max_retries: int = 3
 ) -> Optional[str]:
     """
@@ -176,7 +182,8 @@ def download_first_working_image(
     save_path.mkdir(parents=True, exist_ok=True)
     
     for i, url in enumerate(image_urls, 1):
-        print(f"📥 Attempting to download image {i}/{len(image_urls)}: {url}")
+        if not json_output:
+            print(f"📥 Attempting to download image {i}/{len(image_urls)}: {url}")
         
         for attempt in range(1, max_retries + 1):
             try:
@@ -295,7 +302,8 @@ def main():
         country=args.country,
         sport=args.sport,
         details=args.details,
-        save_directory=args.save_dir
+        save_directory=args.save_dir,
+        json_output=args.json_output
     )
     
     if args.json_output:
