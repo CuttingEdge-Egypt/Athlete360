@@ -7,10 +7,64 @@ import { AnalysisResult } from "@/components/ui/analysis-result";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, RefreshCw, Sparkles, User } from "lucide-react";
+import { ArrowLeft, RefreshCw, Sparkles, User, Trophy, Medal, Target, TrendingUp } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Athlete, Transaction, AnalysisLog } from "@shared/schema";
+
+// Helper function to determine if a sport is individual vs team
+const isIndividualSport = (sportName: string): boolean => {
+  // Normalize the sport name: lowercase, remove symbols, handle common variations
+  const normalizedSport = sportName
+    .toLowerCase()
+    .replace(/[&\-–—]/g, ' ')  // Replace various dash/ampersand symbols with spaces
+    .replace(/\s+/g, ' ')      // Normalize multiple spaces to single space
+    .trim()
+    .split('–')[0]             // Remove event suffixes like "– 400m"
+    .split('-')[0]             // Remove event suffixes like "- 400m"
+    .trim();
+
+  const individualSports = [
+    // Combat sports
+    'taekwondo', 'karate', 'judo', 'boxing', 'wrestling', 'fencing', 'martial arts',
+    // Racket sports
+    'tennis', 'badminton', 'table tennis', 'ping pong', 'squash', 'racquetball',
+    // Precision sports
+    'archery', 'shooting', 'darts', 'billiards', 'snooker',
+    // Individual ball sports
+    'golf', 'bowling',
+    // Aquatic sports
+    'swimming', 'diving', 'synchronized swimming', 'water polo', // Note: water polo can be individual events
+    // Track and field
+    'athletics', 'track and field', 'track & field', 'running', 'marathon', 'sprint',
+    'jumping', 'throwing', 'pole vault', 'high jump', 'long jump', 'javelin', 'discus',
+    // Gymnastics
+    'gymnastics', 'artistic gymnastics', 'rhythmic gymnastics', 'trampoline',
+    // Strength sports
+    'weightlifting', 'powerlifting', 'strongman',
+    // Endurance sports
+    'cycling', 'triathlon', 'duathlon', 'pentathlon', 'decathlon', 'heptathlon',
+    'marathon', 'cross country',
+    // Winter sports
+    'figure skating', 'speed skating', 'skiing', 'snowboarding', 'biathlon',
+    'bobsled', 'luge', 'skeleton', 'ski jumping', 'cross country skiing',
+    // Other individual sports
+    'equestrian', 'surfing', 'skateboarding', 'climbing', 'rock climbing',
+    'sailing', 'windsurfing', 'motocross', 'auto racing', 'chess'
+  ];
+  
+  // Check exact matches first
+  if (individualSports.includes(normalizedSport)) {
+    return true;
+  }
+  
+  // Check if any individual sport is contained in the normalized name
+  return individualSports.some(sport => {
+    const normalizedIndividualSport = sport.replace(/[&\-–—]/g, ' ').replace(/\s+/g, ' ').trim();
+    return normalizedSport.includes(normalizedIndividualSport) || 
+           normalizedIndividualSport.includes(normalizedSport);
+  });
+};
 
 export default function AthleteAnalysis() {
   const [, params] = useRoute("/athlete/:id");
@@ -176,6 +230,17 @@ export default function AthleteAnalysis() {
               >
                 Analysis Results
               </TabsTrigger>
+              {/* Rankings tab - only show for individual sports */}
+              {athlete?.sport && isIndividualSport(athlete.sport) && (
+                <TabsTrigger 
+                  value="rankings" 
+                  data-testid="tab-rankings"
+                  className="data-[state=active]:bg-athlete-accent"
+                >
+                  <Trophy className="mr-2 h-4 w-4" />
+                  Rankings
+                </TabsTrigger>
+              )}
               <TabsTrigger 
                 value="history" 
                 data-testid="tab-history"
@@ -218,6 +283,122 @@ export default function AthleteAnalysis() {
                 </Card>
               )}
             </TabsContent>
+
+            {/* Rankings Tab Content - only for individual sports */}
+            {athlete?.sport && isIndividualSport(athlete.sport) && (
+              <TabsContent value="rankings">
+                <Card className="bg-athlete-gray-800 border-gray-700">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-xl font-bold text-white flex items-center">
+                        <Trophy className="mr-2 h-5 w-5 text-athlete-warning" />
+                        Ranking Analysis
+                      </h3>
+                      <Button
+                        onClick={() => updateAthleteDataMutation.mutate()}
+                        disabled={updateAthleteDataMutation.isPending}
+                        data-testid="button-refresh-rankings"
+                        variant="outline"
+                        size="sm"
+                        className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                      >
+                        {updateAthleteDataMutation.isPending ? (
+                          <>
+                            <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                            Updating...
+                          </>
+                        ) : (
+                          <>
+                            <RefreshCw className="mr-2 h-4 w-4" />
+                            Refresh Rankings
+                          </>
+                        )}
+                      </Button>
+                    </div>
+
+                    {/* Multiple Rankings Display */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                      {/* World Ranking */}
+                      <div className="bg-athlete-gray-700 p-4 rounded-lg border border-gray-600">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="text-sm font-medium text-gray-300">World Ranking</h4>
+                          <Target className="h-4 w-4 text-athlete-warning" />
+                        </div>
+                        <div className="text-2xl font-bold text-white">
+                          {athlete.rank ? `#${athlete.rank}` : 'N/A'}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">International Federation</p>
+                      </div>
+
+                      {/* Olympic Ranking */}
+                      <div className="bg-athlete-gray-700 p-4 rounded-lg border border-gray-600">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="text-sm font-medium text-gray-300">Olympic Qualification</h4>
+                          <Medal className="h-4 w-4 text-yellow-400" />
+                        </div>
+                        <div className="text-2xl font-bold text-white">
+                          {athlete.olympicRank ? `#${athlete.olympicRank}` : 'N/A'}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">Olympic Qualification System</p>
+                      </div>
+
+                      {/* Continental Ranking */}
+                      <div className="bg-athlete-gray-700 p-4 rounded-lg border border-gray-600">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="text-sm font-medium text-gray-300">Continental Ranking</h4>
+                          <TrendingUp className="h-4 w-4 text-green-400" />
+                        </div>
+                        <div className="text-2xl font-bold text-white">
+                          {athlete.continentalRank ? `#${athlete.continentalRank}` : 'N/A'}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">Regional Federation</p>
+                      </div>
+
+                      {/* National Ranking */}
+                      <div className="bg-athlete-gray-700 p-4 rounded-lg border border-gray-600">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="text-sm font-medium text-gray-300">National Ranking</h4>
+                          <Trophy className="h-4 w-4 text-blue-400" />
+                        </div>
+                        <div className="text-2xl font-bold text-white">
+                          {athlete.nationalRank ? `#${athlete.nationalRank}` : 'N/A'}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">National Federation</p>
+                      </div>
+                    </div>
+
+                    {/* Ranking Analysis Results */}
+                    <div className="space-y-4">
+                      <h4 className="text-lg font-semibold text-white mb-4">Detailed Ranking Analysis</h4>
+                      {athleteAnalysisLogs.filter(log => log.serviceType === 'rank').length > 0 ? (
+                        <div className="space-y-4">
+                          {athleteAnalysisLogs
+                            .filter(log => log.serviceType === 'rank')
+                            .map((log) => (
+                              <AnalysisResult
+                                key={log.id}
+                                type={log.serviceType}
+                                data={log.resultData}
+                                createdAt={typeof log.createdAt === 'string' ? log.createdAt : (log.createdAt || new Date()).toISOString()}
+                                shared={log.shared || false}
+                                shareUrl={log.shareUrl || undefined}
+                              />
+                            ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <Trophy className="mx-auto h-12 w-12 text-gray-500 mb-4" />
+                          <p className="text-gray-400 mb-4">No ranking analysis available yet</p>
+                          <p className="text-sm text-gray-500">
+                            Generate a ranking analysis from the Analysis Results tab to see detailed ranking progression and history
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            )}
 
             <TabsContent value="history">
               <Card className="bg-athlete-gray-800 border-gray-700">
