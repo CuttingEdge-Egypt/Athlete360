@@ -248,54 +248,45 @@ Return only real, working image URLs in JSON format.`;
     console.log(prompt);
     console.log('---END PROMPT---');
 
-    // Use Gemini 2.5 Pro with web search like other parts of the app
-    const { GoogleGenerativeAI } = await import('@google/generative-ai');
-    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || "");
-    
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash"
-    });
-    
-    const response = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 0.3,
-        maxOutputTokens: 2000
-      }
+    // Use GPT-5 with web search like CJ and Vito images
+    const response = await openai.chat.completions.create({
+      model: "gpt-5",
+      messages: [{ role: "user", content: prompt }],
+      max_completion_tokens: 2000
     });
 
-    const content = response.response?.text();
+    const content = response.choices[0]?.message?.content;
     if (!content) {
-      console.log(`❌ Gemini returned empty response for ${athlete.name}`);
+      console.log(`❌ GPT-5 returned empty response for ${athlete.name}`);
       return [];
     }
 
-    // Log the raw Gemini response for debugging
-    console.log(`🤖 GEMINI RAW RESPONSE for ${athlete.name}:`);
-    console.log('---START GEMINI RESPONSE---');
+    // Log the raw GPT-5 response for debugging
+    console.log(`🤖 GPT-5 RAW RESPONSE for ${athlete.name}:`);
+    console.log('---START GPT-5 RESPONSE---');
     console.log(content);
-    console.log('---END GEMINI RESPONSE---');
+    console.log('---END GPT-5 RESPONSE---');
 
     try {
       // Try to parse as JSON object with images array
-      const response = JSON.parse(content);
-      if (response.images && Array.isArray(response.images)) {
-        console.log(`🎯 Gemini provided ${response.images.length} image page URLs for ${athlete.name}`);
-        (response.images as string[]).forEach((url: string, index: number) => {
-          console.log(`📋 Image page ${index + 1}: ${url}`);
+      const result = JSON.parse(content);
+      if (result.images && Array.isArray(result.images)) {
+        console.log(`🎯 GPT-5 provided ${result.images.length} image URLs for ${athlete.name}`);
+        (result.images as string[]).forEach((url: string, index: number) => {
+          console.log(`📋 Image URL ${index + 1}: ${url}`);
         });
-        return response.images.filter((url: any) => typeof url === 'string' && url.startsWith('http'));
+        return result.images.filter((url: any) => typeof url === 'string' && url.startsWith('http'));
       }
       // Fallback: try parsing as direct array (old format)
-      if (Array.isArray(response)) {
-        console.log(`🎯 Gemini provided ${response.length} URLs for ${athlete.name} (array format)`);
-        return response.filter((url: any) => typeof url === 'string' && url.startsWith('http'));
+      if (Array.isArray(result)) {
+        console.log(`🎯 GPT-5 provided ${result.length} URLs for ${athlete.name} (array format)`);
+        return result.filter((url: any) => typeof url === 'string' && url.startsWith('http'));
       }
     } catch (parseError) {
       // If JSON parsing fails, try to extract URLs from text
       const urlMatches = content.match(/https?:\/\/[^\s"'<>]+/gi);
       if (urlMatches) {
-        console.log(`🎯 Gemini provided ${urlMatches.length} URLs for ${athlete.name} (extracted from text)`);
+        console.log(`🎯 GPT-5 provided ${urlMatches.length} URLs for ${athlete.name} (extracted from text)`);
         return urlMatches;
       }
     }
