@@ -259,17 +259,17 @@ Return only real, working image URLs in JSON format.`;
     // Fix: Use the correct API structure (not genAI.models)
     console.log(`🔧 Trying correct Gemini API structure...`);
     
+    let result;
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
       console.log(`🔧 Model created successfully:`, !!model);
       
-      const result = await model.generateContent({
+      result = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.1,
           maxOutputTokens: 2048
-        },
-        tools: [{ googleSearch: {} }] // Use exact same web search as working geminiService.ts
+        }
       });
       
       console.log(`🔧 API call succeeded!`);
@@ -297,19 +297,19 @@ Return only real, working image URLs in JSON format.`;
     console.log('---END GEMINI RESPONSE---');
     
     // Additional debugging for Gemini response structure
-    console.log(`📊 Response object keys:`, Object.keys(response));
-    console.log(`📊 Response text available:`, !!response.text);
-    console.log(`📊 Response type:`, typeof response.text);
+    console.log(`📊 Response object keys:`, Object.keys(result.response));
+    console.log(`📊 Response text available:`, !!result.response.text);
+    console.log(`📊 Response type:`, typeof result.response.text);
 
     try {
       // Try to parse as JSON object with images array
-      const result = JSON.parse(content);
-      if (result.images && Array.isArray(result.images)) {
-        console.log(`🎯 Gemini provided ${result.images.length} image URLs for ${athlete.name}`);
-        (result.images as string[]).forEach((url: string, index: number) => {
+      const jsonResult = JSON.parse(content);
+      if (jsonResult.images && Array.isArray(jsonResult.images)) {
+        console.log(`🎯 Gemini provided ${jsonResult.images.length} image URLs for ${athlete.name}`);
+        (jsonResult.images as string[]).forEach((url: string, index: number) => {
           console.log(`📋 Image URL ${index + 1}: ${url}`);
         });
-        return result.images.filter((url: any) => typeof url === 'string' && url.startsWith('http'));
+        return jsonResult.images.filter((url: any) => typeof url === 'string' && url.startsWith('http'));
       }
       // Fallback: try parsing as direct array (old format)
       if (Array.isArray(result)) {
