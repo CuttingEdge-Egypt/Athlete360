@@ -467,29 +467,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use provided nationality or default to Unknown
       const athleteCountry = req.body.nationality || req.body.country || "Unknown";
 
-      // Create athlete profile immediately (without waiting for image)
+      // Search for athlete image first (now synchronous)
+      console.log(`🔍 Starting image search for ${name}...`);
+      let profileImageUrl: string | undefined;
+      
+      try {
+        profileImageUrl = await searchAthleteImage(name, sport.name, athleteCountry, personalInfo) || undefined;
+        if (profileImageUrl) {
+          console.log(`✅ Found image for ${name}: ${profileImageUrl}`);
+        } else {
+          console.log(`⚠️ No image found for ${name}, proceeding with default`);
+        }
+      } catch (error) {
+        console.error(`❌ Image search failed for ${name}:`, error);
+        profileImageUrl = undefined;
+      }
+
+      // Create athlete profile with image (if found)
       const athleteData = {
         name: name.trim(),
         sportId,
         bio: `Professional ${sport.name} athlete`, // Minimal bio placeholder
         rank: undefined, // No rank during creation - will be populated by personal info display
         country: athleteCountry,
-        profileImageUrl: undefined, // Image will be added asynchronously
+        profileImageUrl, // Image found during creation or undefined
         achievements: [], // No achievements during initial creation
         personalInfo: personalInfo || undefined // Store personal info for display
       };
 
       const newAthlete = await storage.createAthlete(athleteData);
-      console.log(`Successfully created athlete: ${newAthlete.name}`);
+      console.log(`Successfully created athlete with image: ${newAthlete.name}`);
       
-      // Start image search asynchronously (non-blocking)
-      console.log(`🔍 Starting async image search for ${name}...`);
-      searchAthleteImageAsync(newAthlete.id, name, sport.name, athleteCountry, personalInfo)
-        .catch(error => {
-          console.error(`❌ Async image search failed for ${name}:`, error);
-        });
-
-      // Return athlete profile immediately
+      // Return complete athlete profile
       res.json(newAthlete);
     } catch (error) {
       console.error("Error creating athlete with AI:", error);

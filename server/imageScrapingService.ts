@@ -130,8 +130,7 @@ Return ONLY direct download URLs in JSON format with an "images" array.`;
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || "");
     
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-pro",
-      tools: [{ googleSearch: {} }] // Enable web search like other functions
+      model: "gemini-2.5-pro"
     });
     
     const response = await model.generateContent({
@@ -162,12 +161,12 @@ Return ONLY direct download URLs in JSON format with an "images" array.`;
         (response.images as string[]).forEach((url: string, index: number) => {
           console.log(`📋 Image page ${index + 1}: ${url}`);
         });
-        return response.images.filter(url => typeof url === 'string' && url.startsWith('http'));
+        return response.images.filter((url: any) => typeof url === 'string' && url.startsWith('http'));
       }
       // Fallback: try parsing as direct array (old format)
       if (Array.isArray(response)) {
         console.log(`🎯 Gemini provided ${response.length} URLs for ${athlete.name} (array format)`);
-        return response.filter(url => typeof url === 'string' && url.startsWith('http'));
+        return response.filter((url: any) => typeof url === 'string' && url.startsWith('http'));
       }
     } catch (parseError) {
       // If JSON parsing fails, try to extract URLs from text
