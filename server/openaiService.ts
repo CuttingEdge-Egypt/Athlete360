@@ -1058,217 +1058,180 @@ IMPORTANT: Do not include any links, URLs, citations, or reference sources in yo
 }
 
 
-// GPT-5 implementation of enhanced rank history generation with competition-by-competition tracking
+// Gemini-2.5-pro implementation of enhanced rank history generation with multiple ranking types support
 export async function generateRankHistory(athleteName: string, sport: string, nationality?: string): Promise<any> {
   const currentDate = new Date().toISOString().split('T')[0];
   
-  // COMPLETELY REDESIGNED: Official Sport Federation Ranking Analysis
+  // Import genAI from geminiService
+  const { genAI, cleanJsonResponse } = await import('./geminiService');
+  
+  // REDESIGNED FOR MULTIPLE RANKING TYPES: Official Sport Federation Ranking Analysis
   const prompt = `Search the OFFICIAL SPORT FEDERATION WEBSITES for authentic ranking progression data for athlete "${athleteName}" from ${nationality || 'unknown nationality'} in ${sport}.
 
-🎯 PRIMARY OBJECTIVE: COMPETITION-BASED RANKING CHANGES
-Find specific competitions and years where this athlete's world ranking changed, using only official federation sources.
+🎯 PRIMARY OBJECTIVE: MULTIPLE RANKING TYPES ANALYSIS
+Find ALL types of rankings for this athlete (World, Olympic, Continental, National, etc.) and track their progression through competitions.
 
 🔍 COMPREHENSIVE SEARCH STRATEGY:
-Execute multiple targeted searches to find ANY competition or ranking data for this athlete:
+Execute multiple targeted searches to find ANY competition or ranking data:
 
-COMPREHENSIVE SEARCH SEQUENCE - Search extensively for ANY athletic information:
 1. "${athleteName} ${sport}" - General athletic background
 2. "${athleteName} ${sport} ranking" - Any ranking mentions
-3. "${athleteName} ${sport} competition results" - Competition participation
-4. "${athleteName} ${sport} tournament" - Specific tournaments
-5. "${athleteName} ${sport} championship" - Championship participation
-6. "${athleteName} olympics ${sport}" - Olympic qualification/participation
-7. "${athleteName} world ${sport}" - World-level competitions
-8. "${athleteName} national ${sport}" - National level competitions
-9. "${athleteName} Egyptian ${sport}" - National context (if Egyptian athlete)
-10. "${athleteName} taekwondo Egypt" - Country-specific search
-11. "${athleteName} martial arts" - Broader martial arts context
-12. "${athleteName} athlete" - General athletic verification
+3. "${athleteName} ${sport} world ranking" - World ranking data
+4. "${athleteName} ${sport} olympic ranking" - Olympic qualification rankings
+5. "${athleteName} ${sport} competition results" - Competition participation
+6. "${athleteName} ${sport} championship" - Championship participation
+7. "${athleteName} olympics ${sport}" - Olympic qualification/participation
+8. "${athleteName} world ${sport}" - World-level competitions
+9. "${athleteName} continental ${sport}" - Continental rankings
+10. "${athleteName} national ${sport}" - National level competitions
 
 ${sport.toLowerCase() === 'taekwondo' ? `
 ✅ TAEKWONDO-SPECIFIC SEARCHES:
-9. "${athleteName} taekwondo world ranking WT"
-10. "${athleteName} olympic taekwondo ranking qualification"
-11. "${athleteName} world taekwondo championship results"
-12. "${athleteName} WT Grand Prix ranking points"
-13. "${athleteName} taekwondo weight category"
-14. Check: https://www.worldtaekwondo.org/ranking/
-15. Check: https://www.taekwondodata.com/ranking_search.html
+- "${athleteName} WT world ranking" - World Taekwondo rankings
+- "${athleteName} olympic taekwondo qualification ranking" - Olympic qualification
+- "${athleteName} world taekwondo championship" - World Championship rankings
+- "${athleteName} asian taekwondo ranking" - Continental rankings
+- "${athleteName} taekwondo weight category ranking"
+- Check: https://www.worldtaekwondo.org/ranking/
+- Check: https://www.taekwondodata.com/ranking_search.html
 
-📊 SEARCH FOR ANY OF THESE:
-- Current WT world ranking in any weight category
-- Historical ranking positions after competitions
-- Olympic/World Championship results or attempts
-- Grand Prix, Open tournaments, or qualifying events
-- National championships or team selections
-- Youth/junior rankings or transitions
-- Regional championships or continental events
+📊 SEARCH FOR MULTIPLE RANKING TYPES:
+- WT World Ranking (overall world ranking)
+- Olympic Qualification Ranking (for Olympic Games)
+- Continental Ranking (Asian, European, etc.)
+- National Ranking (country-specific)
+- Weight Category Ranking (specific weight class)
+- Youth/Junior Rankings (age group)
 ` : sport.toLowerCase() === 'fencing' ? `
-✅ REQUIRED SOURCES:
-- FIE Athletes & Rankings: https://fie.org/athletes
-- European Fencing rankings: https://www.eurofencing.info/rankings/
-- World Cup and Grand Prix ranking effects
-- Olympic qualification ranking lists
+✅ FENCING-SPECIFIC SEARCHES:
+- "${athleteName} FIE world ranking" - FIE World Rankings
+- "${athleteName} olympic fencing ranking" - Olympic qualification
+- "${athleteName} european fencing ranking" - Continental rankings
+- "${athleteName} world cup fencing ranking" - World Cup standings
+- Check: https://fie.org/athletes
+- Check: https://www.eurofencing.info/rankings/
 
-📊 SEARCH FOR SPECIFIC DATA:
-- Current FIE world ranking by weapon (foil/épée/sabre)
-- World Cup results affecting rankings
-- World Championship ranking impacts
-- European Championship ranking changes
-` : sport.toLowerCase() === 'wrestling' ? `
-✅ REQUIRED SOURCES:
-- United World Wrestling rankings: https://uww.org/
-- FloWrestling rankings: https://www.flowrestling.org/rankings
-- World Championship and Olympic ranking lists
-- Continental championship rankings
-
-📊 SEARCH FOR SPECIFIC DATA:
-- Current UWW world ranking by weight class and style
-- World Championship ranking impacts
-- Continental championship effects
-- Olympic qualification ranking progression
-` : sport.toLowerCase() === 'squash' ? `
-✅ REQUIRED SOURCES:
-- PSA Squash Tour rankings: https://www.psasquashtour.com/
-- World Squash Federation: https://www.worldsquash.org/
-- SquashInfo rankings: https://www.squashinfo.com/rankings
-
-📊 SEARCH FOR SPECIFIC DATA:
-- Current PSA world ranking
-- Major tournament ranking impacts
-- World Championship effects on ranking
-- Monthly ranking progression
-` : sport.toLowerCase() === 'football' || sport.toLowerCase() === 'soccer' ? `
-✅ REQUIRED SOURCES:
-- FIFA World Rankings: https://inside.fifa.com/fifa-world-ranking/
-- UEFA Rankings: https://www.uefa.com/nationalassociations/uefarankings/
-- Football-ranking.com: https://football-ranking.com/
-- EloRatings.net: https://www.eloratings.net/
-
-📊 SEARCH FOR SPECIFIC DATA:
-- Current FIFA world ranking position
-- Major tournament ranking changes
-- World Cup/Continental Cup impacts
-- Annual ranking progression
-` : sport.toLowerCase() === 'basketball' ? `
-✅ REQUIRED SOURCES:
-- FIBA World Rankings: Official FIBA rankings pages
-- Eurobasket rankings: https://www.eurobasket.com/
-- National team and club rankings
-- Olympic qualification rankings
-
-📊 SEARCH FOR SPECIFIC DATA:
-- Current FIBA world ranking
-- World Cup/Olympics ranking impacts
-- Continental championship effects
-- Annual ranking progression
+📊 SEARCH FOR MULTIPLE RANKING TYPES:
+- FIE World Ranking (overall world ranking)
+- Olympic Qualification Ranking
+- European Ranking (continental)
+- World Cup Ranking (series standings)
+- National Ranking (country-specific)
+- Weapon-specific Ranking (foil/épée/sabre)
 ` : `
-✅ REQUIRED SOURCES:
-- Official ${sport} federation ranking pages
-- International governing body rankings
-- Major competition result impacts
-- Regional/continental ranking systems
+✅ SPORT-SPECIFIC SEARCHES:
+- "${athleteName} world ${sport} ranking" - World rankings
+- "${athleteName} olympic ${sport} qualification" - Olympic rankings
+- "${athleteName} continental ${sport} ranking" - Continental rankings
+- "${athleteName} national ${sport} ranking" - National rankings
 
-📊 SEARCH FOR SPECIFIC DATA:
-- Current official world ranking
-- Major tournament ranking changes
-- Championship impacts on ranking
-- Year-over-year ranking progression
+📊 SEARCH FOR MULTIPLE RANKING TYPES:
+- World Ranking (international federation)
+- Olympic Qualification Ranking
+- Continental Ranking (regional)
+- National Ranking (country-specific)
+- Category-specific Rankings (weight class, age group, etc.)
 `}
 
-🏆 FOCUS ON COMPETITION-YEAR PROGRESSION:
-Instead of generic career periods, find SPECIFIC:
-1. Competition name + year + ranking change
-2. World Championship results and ranking impacts
-3. Olympic/major tournament effects on world ranking
-4. Season-end rankings for different years
-5. Breakthrough competitions that elevated ranking
+🏆 FOCUS ON MULTIPLE RANKING PROGRESSION:
+Track progression across different ranking systems:
+1. World Federation Rankings
+2. Olympic Qualification Rankings  
+3. Continental/Regional Rankings
+4. National Rankings
+5. Age Group/Category Rankings
 
-⚠️ CRITICAL SEARCH STRATEGY:
-1. Start with broad searches: "${athleteName} ${sport} ranking" and "${athleteName} ${sport} competition results"
-2. Look for ANY mention of rankings, even if not current world ranking
-3. Search for specific competitions the athlete participated in
-4. Check for youth/junior rankings that led to senior rankings
-5. Look for national rankings that indicate competitive level
-6. If no official world ranking found, search for regional/continental rankings
-7. Include qualifying tournaments and development competitions
-
-IMPORTANT: Even developing athletes may have competition records - search thoroughly!
-
-📋 RETURN FORMAT - COMPETITION-BASED RANKING PROGRESSION:
+📋 RETURN FORMAT - MULTIPLE RANKING TYPES SUPPORT:
 {
   "athlete": {
     "name": "${athleteName}",
     "nationality": "${nationality || 'N/A'}",
     "sport": "${sport}",
-    "currentWorldRank": "Current official federation ranking (e.g., '#15' or 'Unranked')",
-    "peakWorldRank": "Best career ranking from official federation",
-    "peakRankDate": "Date achieved peak ranking YYYY-MM-DD",
-    "rankingTrend": "Current 6-month trend: 'Rising', 'Stable', 'Declining', 'New'",
-    "careerSpan": "Competition years (e.g., '2019-2025')",
     "lastUpdated": "${currentDate}",
-    "officialSource": "Federation website used for ranking data"
+    "careerSpan": "Competition years (e.g., '2019-2025')"
   },
-  "competitionRankingTimeline": [
+  "rankings": {
+    "world": {
+      "title": "World Ranking",
+      "current": "Current world ranking (e.g., '#15' or 'Unranked')",
+      "peak": "Best career world ranking",
+      "peakDate": "Date achieved peak ranking YYYY-MM-DD",
+      "trend": "Current trend: 'Rising', 'Stable', 'Declining', 'New'",
+      "source": "Official federation (e.g., 'WT', 'FIE', 'FIFA')"
+    },
+    "olympic": {
+      "title": "Olympic Qualification Ranking",
+      "current": "Current Olympic qualification ranking",
+      "peak": "Best Olympic qualification ranking",
+      "peakDate": "Date achieved peak Olympic ranking",
+      "qualified": "Olympic qualification status (true/false/pending)",
+      "source": "Olympic qualification system"
+    },
+    "continental": {
+      "title": "Continental Ranking",
+      "current": "Current continental ranking (e.g., 'Asian #3')",
+      "peak": "Best continental ranking",
+      "peakDate": "Date achieved peak continental ranking",
+      "region": "Continental region (e.g., 'Asian', 'European')",
+      "source": "Continental federation"
+    },
+    "national": {
+      "title": "National Ranking",
+      "current": "Current national ranking",
+      "peak": "Best national ranking",
+      "peakDate": "Date achieved peak national ranking",
+      "country": "Country name",
+      "source": "National federation"
+    }
+  },
+  "competitionTimeline": [
     {
-      "competition": "Specific competition name (e.g., '2024 World Championships')",
+      "competition": "Competition name",
       "year": "Competition year (YYYY)",
-      "date": "Competition date YYYY-MM-DD if available",
-      "rankingBefore": "World ranking before competition",
-      "rankingAfter": "World ranking after competition",
-      "rankingChange": "Change with direction (e.g., '#25 → #18 (+7)', 'Unranked → #45 (First ranking)')",
-      "competitionLevel": "World Championships/Olympics/Grand Prix/Continental/National",
-      "result": "Competition result (medal/placement/outcome)",
-      "rankingSource": "Official federation ranking list reference"
+      "date": "Competition date YYYY-MM-DD",
+      "rankingChanges": {
+        "world": "World ranking change (e.g., '#25 → #18 (+7)')",
+        "olympic": "Olympic ranking change",
+        "continental": "Continental ranking change",
+        "national": "National ranking change"
+      },
+      "competitionLevel": "World/Olympic/Continental/National",
+      "result": "Competition result"
     }
   ],
-  "rankingSummary": {
-    "firstOfficialRanking": "First federation ranking with date and competition",
-    "breakthroughCompetition": "Competition that achieved significant ranking jump",
-    "peakRankingPeriod": "Best ranking period with competition details",
-    "recentCompetitions": "Last 2-3 major competitions and ranking effects",
-    "nextMajorCompetition": "Upcoming competition affecting ranking"
+  "summary": {
+    "highestAchievement": "Best overall ranking achievement",
+    "recentProgress": "Recent ranking trends across all systems",
+    "nextMajorCompetition": "Upcoming important competition",
+    "strengths": "Strong ranking categories"
   }
 }
 
-📋 FLEXIBLE DATA REQUIREMENTS:
-- Provide ranking data if you find ANY authentic, verifiable athletic information from official sources
-- Include competition participation, tournament results, or any verified sporting activities
-- Use actual competition records, championship participation, medal results, or team selections
-- Create meaningful timelines from ANY authentic competitive data found
-
-ENHANCED SUCCESS CRITERIA:
-- Success = ANY authentic athletic information (rankings, competition results, achievements, participation records)
-- Include youth competitions, national championships, regional tournaments, or development programs if verified
-- Use phrases like "competing at [level]" or "active in [competitions]" only with specific evidence
-- Build progression from actual competition data, not generic development phases
-
-CRITICAL SUCCESS PRIORITY - Create authentic profiles from ANY available data:
-- Even if no world rankings exist, search for national championships, local tournaments, competition participation
-- Use phrases like "Active competitor in Egyptian national taekwondo" with evidence
-- Include training background, competitive categories, or athletic development programs  
-- Create meaningful profiles from verified sporting activities at ANY level
-- Success = finding the athlete exists in sporting context, even without official rankings
-- Only fail if the person cannot be verified as an athlete in the specified sport
-- Priority: authentic sporting profile > no profile at all
-
-RESPONSE FORMAT REQUIREMENTS:
-- Return ONLY valid JSON with no markdown links, URLs, or additional text
-- Do NOT include markdown links like [text](url) in JSON strings
-- Do NOT include parentheses with URLs in JSON values
-- Keep all text content clean and parseable
-- Use simple string values without complex nested formatting
-- Avoid special characters that break JSON parsing`;
+CRITICAL REQUIREMENTS:
+- Search for ALL ranking types, not just world rankings
+- Include rankings even if athlete is not highly ranked
+- Use "N/A" or "Unranked" for rankings not found
+- Provide authentic data only - no estimates or placeholders
+- Return clean JSON without markdown formatting
+- Include multiple ranking progressions when available`;
 
   try {
-    const response = await openai.responses.create({
-      model: "gpt-5",
-      input: prompt,
-      tools: [{ type: "web_search_preview" }],
-      max_output_tokens: 8000,
+    console.log(`🔍 Starting Gemini-2.5-pro rank analysis for ${athleteName}...`);
+    
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      contents: prompt,
+      config: {
+        temperature: 0.1,
+        maxOutputTokens: 8000,
+        tools: [{ googleSearch: {} }]
+      }
     });
 
-    let cleanedText = response.output_text.trim();
+    let cleanedText = result.text || "";
+    if (!cleanedText) {
+      throw new Error('Empty response from Gemini');
+    }
     console.log(`Raw GPT-5 rank response for ${athleteName}:`, cleanedText.substring(0, 800) + '...');
     
     // Handle GPT-5 error responses by creating fallback search
