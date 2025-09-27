@@ -3727,7 +3727,7 @@ Return only valid JSON with the missing fields.`;
       console.error('❌ [MINIMAL TEST] Error:', error);
       res.status(500).json({
         success: false,
-        error: error.message
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });
