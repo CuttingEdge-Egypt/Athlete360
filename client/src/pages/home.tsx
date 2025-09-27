@@ -914,55 +914,6 @@ export default function Home() {
     setSelectedAthlete(null);
   };
 
-  const handleAthleteCardClick = async () => {
-    if (!selectedAthlete) return;
-    
-    try {
-      // Get current language from localStorage
-      const language = localStorage.getItem('i18nextLng') || 'en';
-      
-      const response = await fetch(`/api/analysis/${selectedAthlete.id}/bio`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ language })
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setBioData(data);
-        setShowBioPopup(true);
-        
-        // Invalidate queries to refresh token balance immediately
-        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-        queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-        queryClient.invalidateQueries({ queryKey: ["/api/analysis-logs"] });
-        queryClient.invalidateQueries({ queryKey: ["/api/user-history"] });
-        
-        // Force refetch user data immediately
-        queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
-        
-        toast({
-          title: "Analysis Complete",
-          description: "Biography analysis generated successfully!",
-        });
-      } else {
-        toast({
-          title: "Analysis Error",
-          description: "Failed to generate athlete biography",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load athlete biography",
-        variant: "destructive",
-      });
-    }
-  };
 
 
 
@@ -1248,8 +1199,7 @@ export default function Home() {
               {/* Current Athlete Display */}
               {selectedAthlete && (
                 <Card 
-                  className="bg-athlete-gray-700 border-gray-600 cursor-pointer hover:border-athlete-accent transition-colors duration-300"
-                  onClick={handleAthleteCardClick}
+                  className="bg-athlete-gray-700 border-gray-600"
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between gap-4">
@@ -1344,15 +1294,13 @@ export default function Home() {
                               )}
                               
                               {selectedAthlete.personalInfo.educationalBackground && selectedAthlete.personalInfo.educationalBackground !== "N/A" && (
-                                <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-indigo-400/60 transition-all duration-200 max-w-xs">
+                                <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-indigo-400/60 transition-all duration-200 w-full">
                                   <div className="flex items-center justify-center w-4 h-4 bg-indigo-500/20 rounded-full flex-shrink-0">
                                     <span className="text-[10px] text-indigo-400">🎓</span>
                                   </div>
                                   <span className="text-xs text-slate-400 font-medium flex-shrink-0">Education</span>
-                                  <span className="text-xs font-bold text-white truncate" title={selectedAthlete.personalInfo.educationalBackground}>
-                                    {selectedAthlete.personalInfo.educationalBackground.length > 50 
-                                      ? selectedAthlete.personalInfo.educationalBackground.substring(0, 50) + '...' 
-                                      : selectedAthlete.personalInfo.educationalBackground}
+                                  <span className="text-xs font-bold text-white" title={selectedAthlete.personalInfo.educationalBackground}>
+                                    {selectedAthlete.personalInfo.educationalBackground}
                                   </span>
                                 </div>
                               )}
