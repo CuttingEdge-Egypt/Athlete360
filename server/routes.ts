@@ -525,6 +525,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test image search for specific athlete
+  app.post('/api/athletes/:id/test-image-search', isAuthenticated, async (req, res) => {
+    try {
+      const athleteId = req.params.id;
+      const athlete = await storage.getAthleteById(athleteId);
+      
+      if (!athlete) {
+        return res.status(404).json({ message: "Athlete not found" });
+      }
+
+      // Get sport information properly
+      const sport = await storage.getSportById(athlete.sportId);
+      const sportName = sport?.name || "Unknown Sport";
+      
+      console.log(`🧪 Testing enhanced image search for ${athlete.name} (${sportName})...`);
+      
+      const { searchAthleteImageWithScraping } = await import('./imageScrapingService.js');
+      const imageUrl = await searchAthleteImageWithScraping(
+        athlete.name, 
+        sportName, 
+        athlete.country,
+        athlete.personalInfo
+      );
+      
+      if (imageUrl) {
+        // Update athlete with found image
+        await storage.updateAthlete(athleteId, { profileImageUrl: imageUrl });
+        console.log(`✅ Image search successful for ${athlete.name}: ${imageUrl}`);
+        res.json({ success: true, imageUrl, message: `Image found and updated for ${athlete.name}` });
+      } else {
+        console.log(`❌ Image search failed for ${athlete.name}`);
+        res.json({ success: false, message: `No image found for ${athlete.name}` });
+      }
+      
+    } catch (error) {
+      console.error("Error in image search test:", error);
+      res.status(500).json({ message: "Image search test failed", error: error.message });
+    }
+  });
+
   // Update athlete data using OpenAI o3 - triggered when athlete is selected
   app.post('/api/athletes/:id/update-from-ai', isAuthenticated, async (req, res) => {
     try {

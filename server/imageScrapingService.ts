@@ -248,23 +248,26 @@ Return only real, working image URLs in JSON format.`;
     console.log(prompt);
     console.log('---END PROMPT---');
 
-    // Use Gemini-2.5-pro with web search like Vito and CJ
+    // Use EXACT same Gemini pattern that works for personal info generation
+    const { getAthletePersonalInfoGemini } = await import('./geminiService.js');
+    
+    // Use the EXACT same Gemini pattern that works for personal info - copy from geminiService.ts
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || "");
     
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-pro"
-    });
-    
-    const response = await model.generateContent(prompt, {
+    // Use exact same syntax as working generateAthleteBiography
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
       config: {
-        temperature: 0.3,
-        maxOutputTokens: 2000,
-        tools: [{ googleSearch: {} }] // Enable web search like Vito and CJ
+        temperature: 0.1,
+        maxOutputTokens: 2048,
+        tools: [{ googleSearch: {} }]
       }
     });
+    
+    let content = (result.text || "").trim();
 
-    const content = response.response?.text();
     if (!content) {
       console.log(`❌ Gemini returned empty response for ${athlete.name}`);
       return [];
@@ -275,6 +278,11 @@ Return only real, working image URLs in JSON format.`;
     console.log('---START GEMINI RESPONSE---');
     console.log(content);
     console.log('---END GEMINI RESPONSE---');
+    
+    // Additional debugging for Gemini response structure
+    console.log(`📊 Response object keys:`, Object.keys(response));
+    console.log(`📊 Response text available:`, !!response.text);
+    console.log(`📊 Response type:`, typeof response.text);
 
     try {
       // Try to parse as JSON object with images array
