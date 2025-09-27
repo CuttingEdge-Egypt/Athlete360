@@ -107,10 +107,17 @@ async function getDirectImageUrlsFromGPT5(athlete: AthleteProfile): Promise<stri
       if (athlete.personalInfo.achievements) athleteInfo.push(`Achievements: ${athlete.personalInfo.achievements}`);
     }
 
-    const prompt = `Fetch 3-5 downloadable image urls for the athlete with the following details:
+    const prompt = `Find 3-5 DIRECT DOWNLOAD image links for the athlete with the following details:
 ${athleteInfo.join(', ')}
 
-Find any publicly available images from official sources, sports websites, or news articles. Return the image urls in JSON format with an "images" array.`;
+Requirements:
+- Find images from official team websites, news sites, Wikipedia, or open sports databases
+- Provide DIRECT download URLs that end in .jpg, .png, .webp or similar image extensions
+- AVOID Getty Images, AP Photo, Reuters, or other copyrighted photo services
+- Look for images from official Olympic committees, national sports federations, or news articles
+- Ensure the URLs are direct links to image files, not webpage links
+
+Return ONLY direct download URLs in JSON format with an "images" array.`;
 
     // Debug: Log the exact prompt being sent
     console.log(`🔍 EXACT PROMPT SENT TO GPT-5 for ${athlete.name}:`);
