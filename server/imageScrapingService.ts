@@ -248,42 +248,36 @@ Return only real, working image URLs in JSON format.`;
     console.log(prompt);
     console.log('---END PROMPT---');
 
-    // EXACT copy of working Gemini initialization from geminiService.ts
-    const { GoogleGenerativeAI } = await import('@google/generative-ai');
-    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || "");
+    // Use the EXACT same working API structure from geminiService.ts
+    const { GoogleGenAI } = await import('@google/genai');
+    const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "" });
     
-    console.log(`🔧 Testing genAI object:`, !!genAI);
-    console.log(`🔧 Testing genAI.models:`, !!genAI.models);
-    console.log(`🔧 Available methods:`, Object.keys(genAI));
-    
-    // Fix: Use the correct API structure (not genAI.models)
-    console.log(`🔧 Trying correct Gemini API structure...`);
+    console.log(`🔧 Using working GoogleGenAI structure with web search...`);
     
     let result;
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
-      console.log(`🔧 Model created successfully:`, !!model);
-      
-      result = await model.generateContent({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: {
+      result = await genAI.models.generateContent({
+        model: "gemini-2.5-pro",
+        contents: prompt,
+        config: {
           temperature: 0.1,
-          maxOutputTokens: 2048
+          maxOutputTokens: 2048,
+          tools: [{ googleSearch: {} }]
         }
       });
       
-      console.log(`🔧 API call succeeded!`);
+      console.log(`🔧 API call succeeded with web search!`);
     } catch (apiError) {
       console.log(`❌ Gemini API call failed:`, apiError);
       console.log(`🔧 API error details:`, apiError.message);
       return [];
     }
     
-    let content = (result.response.text() || "").trim();
+    let content = (result.text || "").trim();
     
     console.log(`🔧 Gemini API call completed. Result keys:`, Object.keys(result));
-    console.log(`🔧 Response available:`, !!result.response);
-    console.log(`🔧 Response text:`, result.response.text() ? 'HAS CONTENT' : 'EMPTY');
+    console.log(`🔧 Response available:`, !!result.text);
+    console.log(`🔧 Response text:`, result.text ? 'HAS CONTENT' : 'EMPTY');
 
     if (!content) {
       console.log(`❌ Gemini returned empty response for ${athlete.name}`);
@@ -297,9 +291,9 @@ Return only real, working image URLs in JSON format.`;
     console.log('---END GEMINI RESPONSE---');
     
     // Additional debugging for Gemini response structure
-    console.log(`📊 Response object keys:`, Object.keys(result.response));
-    console.log(`📊 Response text available:`, !!result.response.text);
-    console.log(`📊 Response type:`, typeof result.response.text);
+    console.log(`📊 Response object keys:`, Object.keys(result));
+    console.log(`📊 Response text available:`, !!result.text);
+    console.log(`📊 Response type:`, typeof result.text);
 
     try {
       // Try to parse as JSON object with images array
