@@ -45,16 +45,89 @@ const developmentPlanSchema = z.object({
 
 type DevelopmentPlanRequest = z.infer<typeof developmentPlanSchema>;
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, generateAthleteImage, generateSpecificAnalysis, searchAthleteImage, searchAthleteImageAsync, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, compareAthletes, generateRankHistory, generateAthleteStatistics, AthleteStatistics } from "./openaiService";
+import { getAthleteProfile, generateAthleteImage, generateSpecificAnalysis, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, compareAthletes, generateRankHistory, generateAthleteStatistics, AthleteStatistics } from "./openaiService";
 import { getAthletePersonalInfoGemini } from "./geminiService";
 import { generateNutritionPlan, generateEnhancedNutritionPlan, generateRankHistoryWithGemini, generateAthleteBiography, generateDevelopmentPlan, type NutritionPlanFormData, type DevelopmentPlanFormData } from "./geminiService";
 import { analyzeVideoFile, analyzeVideoComprehensive } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
 
 import { TestingService } from "./testingService";
-import OpenAI from "openai";
-import { Readable } from "stream";
-import multer from "multer";
+
+// New Python-based image search function
+async function searchAthleteImageWithPython(
+  name: string,
+  sport: string,
+  country: string | null,
+  personalInfo?: any
+): Promise<string | null> {
+  return new Promise((resolve, reject) => {
+    console.log(`🐍 Starting Python-based image search for ${name} (${sport}, ${country})`);
+    
+    const pythonArgs = [
+      'server/athlete_image_search.py',
+      '--name', name,
+      '--sport', sport,
+      '--country', country || 'Unknown',
+      '--json-output'
+    ];
+    
+    // Add details if available
+    if (personalInfo) {
+      const details = JSON.stringify(personalInfo);
+      pythonArgs.push('--details', details);
+    }
+    
+    const pythonProcess = spawn('python3', pythonArgs, {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      env: { ...process.env }
+    });
+    
+    let stdout = '';
+    let stderr = '';
+    
+    pythonProcess.stdout.on('data', (data) => {
+      stdout += data.toString();
+    });
+    
+    pythonProcess.stderr.on('data', (data) => {
+      stderr += data.toString();
+      console.log(`🐍 Python stderr: ${data.toString()}`);
+    });
+    
+    pythonProcess.on('close', (code) => {
+      console.log(`🐍 Python process exited with code: ${code}`);
+      
+      if (code === 0) {
+        try {
+          // Parse the JSON output from Python script
+          const result = JSON.parse(stdout.trim());
+          console.log(`🐍 Python search result:`, result);
+          
+          if (result.success && result.downloaded_image) {
+            console.log(`✅ Python image search successful: ${result.downloaded_image}`);
+            resolve(result.downloaded_image);
+          } else {
+            console.log(`❌ Python image search failed: ${result.error || 'Unknown error'}`);
+            resolve(null);
+          }
+        } catch (parseError) {
+          console.error(`❌ Failed to parse Python output:`, parseError);
+          console.log(`🐍 Raw stdout:`, stdout);
+          resolve(null);
+        }
+      } else {
+        console.error(`❌ Python script failed with code ${code}`);
+        console.error(`🐍 stderr:`, stderr);
+        resolve(null);
+      }
+    });
+    
+    pythonProcess.on('error', (error) => {
+      console.error(`❌ Failed to start Python process:`, error);
+      resolve(null);
+    });
+  });
+}
 
 // HTML generation function for payment result pages
 interface PaymentResultData {
@@ -541,8 +614,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`🧪 Testing enhanced image search for ${athlete.name} (${sportName})...`);
       
-      const { searchAthleteImageWithScraping } = await import('./imageScrapingService.js');
-      const imageUrl = await searchAthleteImageWithScraping(
+      // Call new Python-based image search system
+      const imageUrl = await searchAthleteImageWithPython(
         athlete.name, 
         sportName, 
         athlete.country,
@@ -3811,13 +3884,19 @@ Return only valid JSON with the missing fields.`;
 
       // Trigger async image search using the enhanced HTTP-based pipeline with all available data
       console.log(`🚀 [TEST] Starting HTTP-based image search for ${athleteName} (${sportName}, ${country || athleteData?.country || 'Unknown'})`);
-      searchAthleteImageAsync(
-        athleteData?.id || 'temp-id-for-test',
+      // Use new Python-based image search
+      searchAthleteImageWithPython(
         athleteName,
         sportName,
         country || athleteData?.country || 'Unknown',
         athleteData?.personalInfo || {}
-      );
+      ).then(imageUrl => {
+        if (imageUrl && athleteData?.id) {
+          storage.updateAthlete(athleteData.id, { profileImageUrl: imageUrl }).catch(err => 
+            console.error(`❌ Failed to update athlete image: ${err}`)
+          );
+        }
+      }).catch(err => console.error(`❌ Python image search error: ${err}`));
 
       res.json({ 
         success: true, 
@@ -3874,13 +3953,19 @@ Return only valid JSON with the missing fields.`;
 
       // Trigger async image search using the enhanced HTTP-based pipeline with all available data
       console.log(`🚀 [TEST] Starting HTTP-based image search for ${athleteName} (${sportName}, ${country || athleteData?.country || 'Unknown'})`);
-      searchAthleteImageAsync(
-        athleteData?.id || 'temp-id-for-test',
+      // Use new Python-based image search
+      searchAthleteImageWithPython(
         athleteName,
         sportName,
         country || athleteData?.country || 'Unknown',
         athleteData?.personalInfo || {}
-      );
+      ).then(imageUrl => {
+        if (imageUrl && athleteData?.id) {
+          storage.updateAthlete(athleteData.id, { profileImageUrl: imageUrl }).catch(err => 
+            console.error(`❌ Failed to update athlete image: ${err}`)
+          );
+        }
+      }).catch(err => console.error(`❌ Python image search error: ${err}`));
 
       res.json({ 
         success: true, 
