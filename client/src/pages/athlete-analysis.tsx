@@ -316,54 +316,59 @@ export default function AthleteAnalysis() {
                       </Button>
                     </div>
 
-                    {/* Multiple Rankings Display */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                      {/* World Ranking */}
-                      <div className="bg-athlete-gray-700 p-4 rounded-lg border border-gray-600">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-sm font-medium text-gray-300">World Ranking</h4>
-                          <Target className="h-4 w-4 text-athlete-warning" />
+                    {/* Current Ranking Display */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                      {/* Current World Ranking */}
+                      <div className="bg-athlete-gray-700 p-6 rounded-lg border border-gray-600">
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className="text-lg font-medium text-gray-300">Current World Ranking</h4>
+                          <Target className="h-6 w-6 text-athlete-warning" />
                         </div>
-                        <div className="text-2xl font-bold text-white">
-                          {athlete.rank ? `#${athlete.rank}` : 'N/A'}
+                        <div className="text-4xl font-bold text-white mb-2">
+                          {athlete?.rank ? `#${athlete.rank}` : 'Unranked'}
                         </div>
-                        <p className="text-xs text-gray-400 mt-1">International Federation</p>
+                        <p className="text-sm text-gray-400">International Federation Ranking</p>
+                        {athlete?.rank && (
+                          <div className="mt-3 flex items-center text-sm text-green-400">
+                            <TrendingUp className="h-4 w-4 mr-1" />
+                            Official ranking in {athlete.sport}
+                          </div>
+                        )}
                       </div>
 
-                      {/* Olympic Ranking */}
-                      <div className="bg-athlete-gray-700 p-4 rounded-lg border border-gray-600">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-sm font-medium text-gray-300">Olympic Qualification</h4>
-                          <Medal className="h-4 w-4 text-yellow-400" />
+                      {/* Ranking Status */}
+                      <div className="bg-athlete-gray-700 p-6 rounded-lg border border-gray-600">
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className="text-lg font-medium text-gray-300">Ranking Status</h4>
+                          <Medal className="h-6 w-6 text-yellow-400" />
                         </div>
-                        <div className="text-2xl font-bold text-white">
-                          {athlete.olympicRank ? `#${athlete.olympicRank}` : 'N/A'}
+                        <div className="space-y-3">
+                          {athlete?.rank ? (
+                            <>
+                              <div className="flex items-center justify-between">
+                                <span className="text-gray-400">Qualification Status:</span>
+                                <span className="text-green-400 font-medium">
+                                  {athlete.rank <= 50 ? 'Elite Level' : 
+                                   athlete.rank <= 200 ? 'International Level' : 
+                                   athlete.rank <= 1000 ? 'National Level' : 'Competitive Level'}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-gray-400">Competition Tier:</span>
+                                <span className="text-blue-400 font-medium">
+                                  {athlete.rank <= 10 ? 'Olympic Contender' :
+                                   athlete.rank <= 100 ? 'World Championship Level' :
+                                   athlete.rank <= 500 ? 'International Events' : 'National/Regional Events'}
+                                </span>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="text-gray-400">
+                              <p>No official ranking available</p>
+                              <p className="text-sm mt-2">Generate a ranking analysis to discover current standings</p>
+                            </div>
+                          )}
                         </div>
-                        <p className="text-xs text-gray-400 mt-1">Olympic Qualification System</p>
-                      </div>
-
-                      {/* Continental Ranking */}
-                      <div className="bg-athlete-gray-700 p-4 rounded-lg border border-gray-600">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-sm font-medium text-gray-300">Continental Ranking</h4>
-                          <TrendingUp className="h-4 w-4 text-green-400" />
-                        </div>
-                        <div className="text-2xl font-bold text-white">
-                          {athlete.continentalRank ? `#${athlete.continentalRank}` : 'N/A'}
-                        </div>
-                        <p className="text-xs text-gray-400 mt-1">Regional Federation</p>
-                      </div>
-
-                      {/* National Ranking */}
-                      <div className="bg-athlete-gray-700 p-4 rounded-lg border border-gray-600">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-sm font-medium text-gray-300">National Ranking</h4>
-                          <Trophy className="h-4 w-4 text-blue-400" />
-                        </div>
-                        <div className="text-2xl font-bold text-white">
-                          {athlete.nationalRank ? `#${athlete.nationalRank}` : 'N/A'}
-                        </div>
-                        <p className="text-xs text-gray-400 mt-1">National Federation</p>
                       </div>
                     </div>
 
