@@ -1,0 +1,92 @@
+import os
+import requests
+from openai import OpenAI
+
+# Initialize the client (assuming OpenAI’s Python SDK supports GPT-5)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+def fetch_and_download_athlete_image(name: str,
+                                    country: str,
+                                    sport: str,
+                                    details: str,
+                                    save_path: str = "athlete.jpg") -> str:
+    """
+    Ask GPT-5 (with temperature = 1) to provide downloadable image URLs for the athlete,
+    then download the (first) image and return local path.
+
+    Args:
+        name: Athlete’s name
+        country: Athlete’s country
+        sport: Athlete’s sport
+        details: Additional personal / biographical details
+        save_path: Path (filename) to save the downloaded image
+
+    Returns:
+        The local path to the downloaded image file
+    """
+
+    # Prepare the prompt (you can tweak the style/format as needed)
+    prompt = (
+        f"Provide a JSON array (list) of direct downloadable image URLs (jpg/png) for the athlete "
+        f"with the following details:\n"
+        f"Name: {name}\n"
+        f"Country: {country}\n"
+        f"Sport: {sport}\n"
+        f"Personal Details: {details}\n\n"
+        "The URLs should link directly to image files (no HTML pages)."
+    )
+
+    # Build the API request
+    response = client.chat.completions.create(
+        model="gpt-5",
+        messages=[
+            {"role": "system", "content": "You are an assistant that returns direct image URLs."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=1.0,
+        # If GPT-5 supports “tools” or web search, you might include a tools argument:
+        # tools = ["web_search"], or something similar depending on the SDK/version.
+    )
+
+    # Parse the output
+    content = response.choices[0].message.content.strip()
+
+    # Try to interpret it as a JSON list (or fallback)
+    try:
+        # Use safe parsing if possible
+        import json
+        urls = json.loads(content)
+    except Exception:
+        # Fallback: if it’s Python-list-like
+        try:
+            urls = eval(content)
+        except Exception as e:
+            raise ValueError(f"Could not parse GPT-5 response as list of URLs: {content!r}") from e
+
+    if not urls or not isinstance(urls, (list, tuple)):
+        raise ValueError(f"No valid image URLs found in response: {urls}")
+
+    # Pick the first (most suitable) URL
+    image_url = urls[0]
+
+    # Download the image
+    resp = requests.get(image_url)
+    if resp.status_code != 200:
+        raise IOError(f"Failed to download image from {image_url}, status {resp.status_code}")
+
+    with open(save_path, "wb") as f:
+        f.write(resp.content)
+
+    return save_path
+
+
+# Example usage:
+if __name__ == "__main__":
+    local_path = fetch_and_download_athlete_image(
+        name="Michael Phelps",
+        country="USA",
+        sport="Swimming",
+        details="28-time Olympic medalist, world record holder in several freestyle events",
+        save_path="phelps.jpg"
+    )
+    print("Downloaded image to:", local_path)
