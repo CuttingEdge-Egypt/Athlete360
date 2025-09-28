@@ -21,6 +21,296 @@ const model = genai.getGenerativeModel({
   generationConfig,
 });
 
+// Sport-specific configurations
+interface SportConfig {
+  name: string;
+  primaryActions: string[];
+  scoringEvents: string[];
+  violationsEvents: string[];
+  hasRounds: boolean;
+  timeFormat: string;
+  analysisTerms: {
+    action: string; // kicks, shots, strikes, etc.
+    violation: string; // yellow cards, fouls, penalties, etc.
+    scoring: string; // points, goals, scores, etc.
+  };
+}
+
+const SPORT_CONFIGS: Record<string, SportConfig> = {
+  'taekwondo': {
+    name: 'Taekwondo',
+    primaryActions: ['kicks', 'punches', 'head kicks', 'body kicks', 'spinning kicks'],
+    scoringEvents: ['1-point kick', '2-point kick', '3-point kick', '5-point head kick'],
+    violationsEvents: ['yellow card', 'warning', 'gam-jeom'],
+    hasRounds: true,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'kicks',
+      violation: 'yellow cards',
+      scoring: 'points'
+    }
+  },
+  'boxing': {
+    name: 'Boxing',
+    primaryActions: ['jabs', 'hooks', 'uppercuts', 'crosses', 'combinations'],
+    scoringEvents: ['clean punch', 'power punch', 'combination'],
+    violationsEvents: ['warning', 'point deduction', 'low blow', 'holding'],
+    hasRounds: true,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'punches',
+      violation: 'warnings',
+      scoring: 'scoring punches'
+    }
+  },
+  'soccer': {
+    name: 'Soccer/Football',
+    primaryActions: ['shots', 'passes', 'crosses', 'tackles', 'headers'],
+    scoringEvents: ['goals', 'assists', 'key passes'],
+    violationsEvents: ['yellow card', 'red card', 'foul'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'shots',
+      violation: 'cards',
+      scoring: 'goals'
+    }
+  },
+  'basketball': {
+    name: 'Basketball',
+    primaryActions: ['shots', 'passes', 'rebounds', 'steals', 'blocks'],
+    scoringEvents: ['2-point shot', '3-point shot', 'free throw'],
+    violationsEvents: ['personal foul', 'technical foul', 'flagrant foul'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'shots',
+      violation: 'fouls',
+      scoring: 'points'
+    }
+  },
+  'tennis': {
+    name: 'Tennis',
+    primaryActions: ['serves', 'forehands', 'backhands', 'volleys', 'smashes'],
+    scoringEvents: ['aces', 'winners', 'service winners'],
+    violationsEvents: ['time violation', 'code violation', 'unsportsmanlike conduct'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'shots',
+      violation: 'violations',
+      scoring: 'points'
+    }
+  },
+  'martial_arts': {
+    name: 'Martial Arts',
+    primaryActions: ['strikes', 'kicks', 'punches', 'blocks', 'counters'],
+    scoringEvents: ['clean strike', 'power strike', 'combination'],
+    violationsEvents: ['warning', 'penalty', 'disqualification'],
+    hasRounds: true,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'strikes',
+      violation: 'penalties',
+      scoring: 'points'
+    }
+  }
+};
+
+// Get sport configuration or default to taekwondo
+function getSportConfig(sport: string): SportConfig {
+  const normalizedSport = sport.toLowerCase().replace(/[^a-z]/g, '_');
+  return SPORT_CONFIGS[normalizedSport] || SPORT_CONFIGS['taekwondo'];
+}
+
+// Generate sport-specific prompts
+function generateSportSpecificPrompts(sport: string, roundToAnalyze: number | 'no-rounds', language: string) {
+  const sportConfig = getSportConfig(sport);
+  const languageInstruction = language === 'arabic' 
+    ? `Write your response in Arabic (العربية). Use proper Arabic terminology for ${sportConfig.name.toLowerCase()} techniques and match analysis.`
+    : `Write your response in English.`;
+
+  const roundText = roundToAnalyze === 'no-rounds' 
+    ? 'the entire match/game' 
+    : `round ${roundToAnalyze}`;
+
+  const analysisTitle = roundToAnalyze === 'no-rounds'
+    ? `**Match Analysis: Full Game**`
+    : `**Match Analysis: Round ${roundToAnalyze}**`;
+
+  const promptMatch = `Write me a match analysis of what happened in ${roundText} in technical terms. Include the story of the ${roundToAnalyze === 'no-rounds' ? 'match' : 'round'}.
+
+${languageInstruction}
+
+IMPORTANT: Start directly with "${analysisTitle}" - DO NOT include any prefacing phrases like "Of course", "Here is", "Sure", or similar AI response patterns.
+
+Listen to any insights the commentator might have. Here is a template:
+
+Match Score:
+Give me the final score of the ${roundToAnalyze === 'no-rounds' ? 'match' : 'round'}.
+
+${sportConfig.analysisTerms.action.charAt(0).toUpperCase() + sportConfig.analysisTerms.action.slice(1)} Count & Types:
+This analysis is limited by the fast action and occasional obscured views, but here are some highlights. Precise numbers are hard to determine but I will use as many markers as possible.
+
+Player 1 (Blue): Describe their technique style.
+Count of ${sportConfig.primaryActions[0]}: Estimate based on observation
+Number of ${sportConfig.primaryActions[1]}: Estimate based on observation
+
+Player 2 (Red): Describe their technique style.  
+Count of ${sportConfig.primaryActions[2] || sportConfig.primaryActions[0]}: Estimate based on observation
+Number of ${sportConfig.primaryActions[3] || sportConfig.primaryActions[1]}: Estimate based on observation
+
+${sportConfig.analysisTerms.action === 'kicks' ? 'Punch Count:' : 'Other Actions:'}
+${sportConfig.analysisTerms.action === 'kicks' ? 'Mention if there were any punches in the match' : `Mention any secondary actions like ${sportConfig.primaryActions.slice(-2).join(', ')}`}
+
+Match Brief & Technical Analysis:
+Provide detailed technical analysis of both players' approaches and strategies.
+
+Strategic Adaptation: How each player adapted during the ${roundToAnalyze === 'no-rounds' ? 'match' : 'round'}.
+
+Key Moments/Commentator Notes:
+Include any key insights from commentators.
+
+Summary:
+Explain who performed better and why.
+
+Take your time in processing to make sure the results are accurate.
+Make sure you're not scanning ${sportConfig.violationsEvents[0]} as an actual score.`;
+
+  const promptScore = `Watch ${roundText} only. Identify when a player scored using the scoreboard. Focus on the scoreboard change for better accuracy. Listen to commentators they will help you reference which player scored how many ${sportConfig.analysisTerms.scoring}. Include final match score (from scoreboard) in the summary.
+
+IMPORTANT: Calculate total_${sportConfig.analysisTerms.scoring} by adding up all individual ${sportConfig.analysisTerms.action} scores. For example: if ${sportConfig.analysisTerms.action} are [1, 1, 2], then total_${sportConfig.analysisTerms.scoring} = 1+1+2 = 4.
+
+Return JSON format:
+{
+  "players": [
+    {
+      "name": "Player 1",
+      "color": "Red/Blue",
+      "${sportConfig.analysisTerms.action}": [
+        {
+          "timestamp": "${sportConfig.timeFormat}",
+          "score": 0
+        }
+      ],
+      "total_${sportConfig.analysisTerms.action}": 0,
+      "total_${sportConfig.analysisTerms.scoring}": 0
+    },
+    {
+      "name": "Player 2 (Red)", 
+      "${sportConfig.analysisTerms.action}": [
+        {
+          "timestamp": "${sportConfig.timeFormat}",
+          "score": 0
+        }
+      ],
+      "total_${sportConfig.analysisTerms.action}": 0,
+      "total_${sportConfig.analysisTerms.scoring}": 0
+    }
+  ],
+  "summary": {
+    "total_match_score_blue": 0,
+    "total_match_score_red": 0
+  }
+}`;
+
+  const promptActions = `Watch ${roundText} only. Watch this ${sportConfig.name.toLowerCase()} match and tell me when a player performed a ${sportConfig.analysisTerms.action === 'kicks' ? 'punch' : sportConfig.primaryActions[1]}, ${sportConfig.analysisTerms.action === 'kicks' ? 'a punch is when a player clenches their fist and tries to hit another player' : `a ${sportConfig.primaryActions[1]} is when a player attempts to ${sportConfig.primaryActions[1]}`}. If there are no ${sportConfig.analysisTerms.action === 'kicks' ? 'punches' : sportConfig.primaryActions[1]} found let the JSON be NONE.
+
+Return JSON format:
+{
+  "players": [
+    {
+      "name": "Player 1",
+      "${sportConfig.analysisTerms.action === 'kicks' ? 'Punch' : sportConfig.primaryActions[1]}": [
+        {
+          "timestamp": "${sportConfig.timeFormat}",
+          "score": 0
+        }
+      ],
+      "total_${sportConfig.analysisTerms.action === 'kicks' ? 'punches' : sportConfig.primaryActions[1]}": 0
+    },
+    {
+      "name": "Player 2",
+      "${sportConfig.analysisTerms.action === 'kicks' ? 'Punch' : sportConfig.primaryActions[1]}": [
+        {
+          "timestamp": "${sportConfig.timeFormat}", 
+          "score": 0
+        }
+      ],
+      "total_${sportConfig.analysisTerms.action === 'kicks' ? 'punches' : sportConfig.primaryActions[1]}": 0
+    }
+  ]
+}
+
+Return Time in ${sportConfig.timeFormat === 'MM:SS' ? 'Minutes and Seconds: MM:SS' : sportConfig.timeFormat};`;
+
+  const promptActionCount = `Watch ${roundText} only. Watch the ${sportConfig.name.toLowerCase()} match and count the total number of ${sportConfig.analysisTerms.action} both players executed. Even if ${sportConfig.analysisTerms.action} doesn't hit the opponent or if they blocked it; count every time there is an attempt.
+
+IMPORTANT: This total_${sportConfig.analysisTerms.action}_number should match the total_${sportConfig.analysisTerms.action} count from the scoring analysis.
+
+Return JSON format:
+{
+  "players": [
+    {
+      "name": "Player 1",
+      "${sportConfig.analysisTerms.action}": [
+        {
+          "total_${sportConfig.analysisTerms.action}_number": 0
+        }
+      ]
+    },
+    {
+      "name": "Player 2",
+      "${sportConfig.analysisTerms.action}": [
+        {
+          "total_${sportConfig.analysisTerms.action}_number": 0
+        }
+      ]
+    }
+  ]
+}`;
+
+  const promptViolations = `Watch ${roundText} only. This is a ${sportConfig.name.toLowerCase()} match, following ${sportConfig.name.toLowerCase()} rules. By looking at the scoreboard and watching when the referee gives a ${sportConfig.violationsEvents[0]} to a player, list all ${sportConfig.analysisTerms.violation} with their exact timestamps.
+
+IMPORTANT: Calculate total_${sportConfig.analysisTerms.violation.replace(' ', '_')} by adding up all individual ${sportConfig.violationsEvents[0]} amounts. For example: if ${sportConfig.violationsEvents[0]}s are [1, 1, 1], then total_${sportConfig.analysisTerms.violation.replace(' ', '_')} = 1+1+1 = 3.
+
+Return JSON format:
+{
+  "players": [
+    {
+      "name": "Player 1",
+      "color": "Red/Blue",
+      "${sportConfig.analysisTerms.violation.replace(' ', '_')}": [
+        {
+          "timestamp": "${sportConfig.timeFormat}",
+          "Amount": 1
+        }
+      ],
+      "total_${sportConfig.analysisTerms.violation.replace(' ', '_')}": 0
+    },
+    {
+      "name": "Player 2 (Red)",
+      "${sportConfig.analysisTerms.violation.replace(' ', '_')}": [
+        {
+          "timestamp": "${sportConfig.timeFormat}",
+          "Amount": 1
+        }
+      ],
+      "total_${sportConfig.analysisTerms.violation.replace(' ', '_')}": 0
+    }
+  ]
+}
+Return Time in ${sportConfig.timeFormat === 'MM:SS' ? 'Minutes and Seconds: MM:SS' : sportConfig.timeFormat};`;
+
+  return {
+    promptMatch,
+    promptScore,
+    promptActions,
+    promptActionCount,
+    promptViolations
+  };
+}
+
 // Function to clean markdown formatting from match analysis text
 function cleanMarkdownFormatting(text: string): string {
   if (!text) return '';
@@ -536,11 +826,12 @@ Watch the entire round carefully and provide actionable, specific advice that co
 export async function analyzeVideoComprehensive(
   videoFilePath: string,
   filename: string,
-  roundToAnalyze: number,
-  language: string = 'english'
+  roundToAnalyze: number | 'no-rounds',
+  language: string = 'english',
+  sport: string = 'taekwondo'
 ) {
   console.log(`[ANALYZE_COMPREHENSIVE] Starting comprehensive video analysis for ${filename} at ${videoFilePath}`);
-  console.log(`[ANALYZE_COMPREHENSIVE] Round: ${roundToAnalyze}`);
+  console.log(`[ANALYZE_COMPREHENSIVE] Round: ${roundToAnalyze}, Sport: ${sport}`);
   
   if (!fs.existsSync(videoFilePath)) {
     throw new Error(`Video file not found: ${videoFilePath}`);
@@ -566,22 +857,75 @@ export async function analyzeVideoComprehensive(
     console.log(`[ANALYZE_COMPREHENSIVE] Video ready for analysis: ${uploadedFile.uri}`);
     console.log(`[ANALYZE_COMPREHENSIVE] Starting all analyses in parallel...`);
 
-    // Language instruction for match analysis and advice
+    // Generate sport-specific prompts based on the sport
+    const sportPrompts = generateSportSpecificPrompts(sport, roundToAnalyze, language);
+
+    // Use sport-specific prompts
+    const promptMatch = sportPrompts.promptMatch;
+    const promptScore = sportPrompts.promptScore;
+    const promptPunch = sportPrompts.promptActions;
+    const promptKickNo = sportPrompts.promptActionCount;
+    const promptYellowCards = sportPrompts.promptViolations;
+
+    // Create sport-specific advice prompt
+    const sportConfig = getSportConfig(sport);
     const languageInstruction = language === 'arabic' 
-      ? `Write your response in Arabic (العربية). Use proper Arabic terminology for taekwondo techniques and match analysis.`
+      ? `Write your response in Arabic (العربية). Use proper Arabic terminology for ${sportConfig.name.toLowerCase()} techniques and match analysis.`
       : `Write your response in English.`;
-      
-    // Define all prompts (reusing existing prompts from processVideoGemini and generatePlayerAdvice)
-    const promptMatch = `Write me a match Analysis of what happened in round ${roundToAnalyze} in technical terms. Include the story of the round.
+
+    const roundText = roundToAnalyze === 'no-rounds' ? 'the entire match/game' : `round ${roundToAnalyze}`;
+    
+    const promptAdvice = `Analyze ${roundText} of this ${sportConfig.name.toLowerCase()} match and provide detailed improvement advice for each player. Focus on tactical, technical, and mental aspects.
 
 ${languageInstruction}
 
-IMPORTANT: Start directly with "**Match Analysis: Round ${roundToAnalyze}**" - DO NOT include any prefacing phrases like "Of course", "Here is", "Sure", or similar AI response patterns.
+IMPORTANT: Return ONLY a valid JSON response in the following structure:
 
-Listen to any insights the commentator might have. Here is a template:
+{
+  "players": [
+    {
+      "name": "Player 1",
+      "color": "Red/Blue",
+      "tactical_advice": {
+        "issues": ["List of tactical mistakes or weaknesses observed"],
+        "improvements": ["Specific tactical recommendations for improvement"]
+      },
+      "technical_advice": {
+        "issues": ["List of technical mistakes in technique, form, or execution"],
+        "improvements": ["Specific technical skills to work on"]
+      },
+      "mental_advice": {
+        "issues": ["Mental/psychological issues observed (hesitation, aggression, focus)"],
+        "improvements": ["Mental training and mindset recommendations"]
+      }
+    },
+    {
+      "name": "Player 2", 
+      "color": "Red/Blue",
+      "tactical_advice": {
+        "issues": ["List of tactical mistakes or weaknesses observed"],
+        "improvements": ["Specific tactical recommendations for improvement"]
+      },
+      "technical_advice": {
+        "issues": ["List of technical mistakes in technique, form, or execution"],
+        "improvements": ["Specific technical skills to work on"]
+      },
+      "mental_advice": {
+        "issues": ["Mental/psychological issues observed (hesitation, aggression, focus)"],
+        "improvements": ["Mental training and mindset recommendations"]
+      }
+    }
+  ],
+  "general_observations": "Overall observations about the match and areas both players could improve on"
+}
 
-Match Score:
-Give me the final score of the match.
+FOCUS ON:
+- Tactical positioning, timing, distance management, strategy
+- Technical execution of ${sportConfig.analysisTerms.action}, blocks, movement, balance
+- Mental aspects like focus, confidence, aggression levels, composure
+- Provide specific, actionable advice for each area
+
+Be detailed and specific in your observations and recommendations.`;
 
 Kick Count & Types:
 This analysis is limited by the fast action and occasional obscured views, but here are some highlights. Precise numbers are hard to determine but I will use as many markers as possible.
