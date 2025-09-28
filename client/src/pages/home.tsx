@@ -4,6 +4,7 @@ import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,7 +25,7 @@ import { DevelopmentPlanDisplay } from "@/components/ui/development-plan-display
 import { StatisticsDisplay } from "@/components/ui/statistics-display";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X, RefreshCw, TrendingUp } from "lucide-react";
+import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X, RefreshCw, TrendingUp, Check, ChevronsUpDown } from "lucide-react";
 import type { Sport, Athlete } from "@shared/schema";
 import GenerationQueue from "@/components/ui/generation-queue";
 import { CountrySelect } from "@/components/ui/country-select";
@@ -53,6 +54,12 @@ export default function Home() {
   const [nutritionProgress, setNutritionProgress] = useState<number>(0);
   const [nutritionJobProgressMessage, setNutritionJobProgressMessage] = useState<string>("");
   const [location] = useLocation();
+  
+  // Sports dropdown search states
+  const [sportDropdownOpen, setSportDropdownOpen] = useState(false);
+  const [sportSearchTerm, setSportSearchTerm] = useState("");
+  const [nutritionSportDropdownOpen, setNutritionSportDropdownOpen] = useState(false);
+  const [nutritionSportSearchTerm, setNutritionSportSearchTerm] = useState("");
 
   // Helper for required number validation that shows proper required messages
   const requiredNumber = (requiredMsg: string, invalidMsg: string, min: number, max: number) => 
@@ -843,6 +850,15 @@ export default function Home() {
   const { data: sports = [] } = useQuery<Sport[]>({
     queryKey: ["/api/sports"],
   });
+  
+  // Filter sports based on search terms
+  const filteredSports = sports.filter(sport => 
+    sport.name.toLowerCase().includes(sportSearchTerm.toLowerCase())
+  );
+  
+  const filteredNutritionSports = sports.filter(sport => 
+    sport.name.toLowerCase().includes(nutritionSportSearchTerm.toLowerCase())
+  );
 
   // Handle creating athlete with AI
   const handleCreateAthleteWithAI = async (athleteName: string) => {
@@ -1084,21 +1100,59 @@ export default function Home() {
                 <div>
                   <label className="block text-sm font-medium mb-2 text-gray-300">{t('interface.sport')}</label>
                   <div className="flex gap-2">
-                    <Select value={selectedSport} onValueChange={handleSportChange}>
-                      <SelectTrigger 
-                        data-testid="select-sport"
-                        className="bg-athlete-gray-700 border-gray-600 text-white flex-1"
-                      >
-                        <SelectValue placeholder={t('interface.chooseASport')} />
-                      </SelectTrigger>
-                      <SelectContent className="bg-athlete-gray-700 border-gray-600">
-                        {sports.map((sport) => (
-                          <SelectItem key={sport.id} value={sport.id}>
-                            {sport.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Popover open={sportDropdownOpen} onOpenChange={setSportDropdownOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={sportDropdownOpen}
+                          className="bg-athlete-gray-700 border-gray-600 text-white flex-1 justify-between hover:bg-athlete-gray-600"
+                          data-testid="select-sport"
+                        >
+                          {selectedSport
+                            ? sports.find(s => s.id === selectedSport)?.name
+                            : t('interface.chooseASport')}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[300px] p-0 bg-athlete-gray-700 border-gray-600" align="start">
+                        <div className="p-3 border-b border-gray-600">
+                          <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                            <Input
+                              placeholder="Search sports..."
+                              value={sportSearchTerm}
+                              onChange={(e) => setSportSearchTerm(e.target.value)}
+                              className="pl-9 bg-athlete-gray-600 border-gray-500 text-white placeholder-gray-400"
+                              data-testid="input-sport-search"
+                            />
+                          </div>
+                        </div>
+                        <div className="max-h-60 overflow-auto">
+                          {filteredSports.length === 0 ? (
+                            <div className="p-3 text-center text-gray-400">
+                              No sports found.
+                            </div>
+                          ) : (
+                            filteredSports.map((sportItem) => (
+                              <div
+                                key={sportItem.id}
+                                className="flex items-center px-3 py-2 cursor-pointer hover:bg-athlete-gray-600 text-white"
+                                onClick={() => {
+                                  handleSportChange(sportItem.id);
+                                  setSportDropdownOpen(false);
+                                  setSportSearchTerm("");
+                                }}
+                                data-testid={`option-sport-${sportItem.name.toLowerCase().replace(/\s+/g, '-')}`}
+                              >
+                                <Check className={`mr-2 h-4 w-4 ${selectedSport === sportItem.id ? "opacity-100" : "opacity-0"}`} />
+                                {sportItem.name}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                     {selectedSport && (
                       <Button
                         type="button"
@@ -1396,29 +1450,65 @@ export default function Home() {
                               <FormLabel className="text-gray-300">{t('nutritionPlan.sport')}</FormLabel>
                               <FormControl>
                                 <div className="flex gap-2">
-                                  <Select value={selectedSport || field.value || ""} onValueChange={(value) => { 
-                                    field.onChange(value);
-                                    setSelectedSport(value);
-                                    // Clear athlete selection when sport changes in form
-                                    if (value !== selectedSport) {
-                                      setSelectedAthlete(null);
-                                      setSearchName("");
-                                    }
-                                  }}>
-                                    <SelectTrigger 
-                                      data-testid="select-nutrition-sport"
-                                      className="bg-athlete-gray-700 border-gray-600 text-white flex-1"
-                                    >
-                                      <SelectValue placeholder={t('interface.chooseASport')} />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-athlete-gray-700 border-gray-600">
-                                      {sports.map((sport) => (
-                                        <SelectItem key={sport.id} value={sport.id}>
-                                          {sport.name}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
+                                  <Popover open={nutritionSportDropdownOpen} onOpenChange={setNutritionSportDropdownOpen}>
+                                    <PopoverTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        role="combobox"
+                                        aria-expanded={nutritionSportDropdownOpen}
+                                        className="bg-athlete-gray-700 border-gray-600 text-white flex-1 justify-between hover:bg-athlete-gray-600"
+                                        data-testid="select-nutrition-sport"
+                                      >
+                                        {(selectedSport || field.value)
+                                          ? sports.find(s => s.id === (selectedSport || field.value))?.name
+                                          : t('interface.chooseASport')}
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                      </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[300px] p-0 bg-athlete-gray-700 border-gray-600" align="start">
+                                      <div className="p-3 border-b border-gray-600">
+                                        <div className="relative">
+                                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                          <Input
+                                            placeholder="Search sports..."
+                                            value={nutritionSportSearchTerm}
+                                            onChange={(e) => setNutritionSportSearchTerm(e.target.value)}
+                                            className="pl-9 bg-athlete-gray-600 border-gray-500 text-white placeholder-gray-400"
+                                            data-testid="input-nutrition-sport-search"
+                                          />
+                                        </div>
+                                      </div>
+                                      <div className="max-h-60 overflow-auto">
+                                        {filteredNutritionSports.length === 0 ? (
+                                          <div className="p-3 text-center text-gray-400">
+                                            No sports found.
+                                          </div>
+                                        ) : (
+                                          filteredNutritionSports.map((sportItem) => (
+                                            <div
+                                              key={sportItem.id}
+                                              className="flex items-center px-3 py-2 cursor-pointer hover:bg-athlete-gray-600 text-white"
+                                              onClick={() => {
+                                                field.onChange(sportItem.id);
+                                                setSelectedSport(sportItem.id);
+                                                // Clear athlete selection when sport changes in form
+                                                if (sportItem.id !== selectedSport) {
+                                                  setSelectedAthlete(null);
+                                                  setSearchName("");
+                                                }
+                                                setNutritionSportDropdownOpen(false);
+                                                setNutritionSportSearchTerm("");
+                                              }}
+                                              data-testid={`option-nutrition-sport-${sportItem.name.toLowerCase().replace(/\s+/g, '-')}`}
+                                            >
+                                              <Check className={`mr-2 h-4 w-4 ${(selectedSport || field.value) === sportItem.id ? "opacity-100" : "opacity-0"}`} />
+                                              {sportItem.name}
+                                            </div>
+                                          ))
+                                        )}
+                                      </div>
+                                    </PopoverContent>
+                                  </Popover>
                                   {field.value && (
                                     <Button
                                       type="button"
