@@ -345,17 +345,12 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
                 </Button>
               </PopoverTrigger>
               <PopoverContent 
-                className="w-[300px] p-0 bg-athlete-gray-700 border-gray-600" 
+                className="w-[300px] h-[280px] p-0 bg-athlete-gray-700 border-gray-600" 
                 side="bottom" 
                 sideOffset={4} 
                 align="start"
-                onOpenAutoFocus={(e) => {
-                  e.preventDefault();
-                  const searchInput = e.currentTarget.querySelector('input');
-                  if (searchInput) {
-                    searchInput.focus();
-                  }
-                }}
+                avoidCollisions={false}
+                collisionPadding={0}
               >
                 <div className="p-3 border-b border-gray-600">
                   <div className="relative">
@@ -369,7 +364,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
                     />
                   </div>
                 </div>
-                <div className="max-h-60 overflow-auto">
+                <div className="h-[200px] overflow-auto">
                   {filteredSports.length === 0 ? (
                     <div className="p-3 text-center text-gray-400">
                       No sports found.
