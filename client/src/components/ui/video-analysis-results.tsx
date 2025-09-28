@@ -9,7 +9,48 @@ import { PlayerAdviceSection } from "@/components/ui/video-player-analysis";
 
 interface VideoAnalysisResultsProps {
   analysisData: any;
+  sport?: string;
 }
+
+// Sport configuration mapping for results display
+const SPORT_DISPLAY_CONFIGS = {
+  'taekwondo': { 
+    action: 'Kicks', 
+    violation: 'Yellow Cards', 
+    primaryAction: 'kicks',
+    secondaryAction: 'punches'
+  },
+  'boxing': { 
+    action: 'Punches', 
+    violation: 'Warnings', 
+    primaryAction: 'punches',
+    secondaryAction: 'combinations'
+  },
+  'soccer': { 
+    action: 'Shots', 
+    violation: 'Cards', 
+    primaryAction: 'shots',
+    secondaryAction: 'passes'
+  },
+  'basketball': { 
+    action: 'Shots', 
+    violation: 'Fouls', 
+    primaryAction: 'shots',
+    secondaryAction: 'rebounds'
+  },
+  'tennis': { 
+    action: 'Shots', 
+    violation: 'Violations', 
+    primaryAction: 'shots',
+    secondaryAction: 'serves'
+  },
+  'martial_arts': { 
+    action: 'Strikes', 
+    violation: 'Penalties', 
+    primaryAction: 'strikes',
+    secondaryAction: 'blocks'
+  }
+} as const;
 
 interface ScoreEvent {
   timestamp: number;
@@ -26,8 +67,11 @@ interface YellowCardEvent {
   player: 'blue' | 'red';
 }
 
-export function VideoAnalysisResults({ analysisData }: VideoAnalysisResultsProps) {
+export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: VideoAnalysisResultsProps) {
   const [selectedTimestamp, setSelectedTimestamp] = useState<number | null>(null);
+  
+  // Get sport-specific display configuration
+  const sportConfig = SPORT_DISPLAY_CONFIGS[sport as keyof typeof SPORT_DISPLAY_CONFIGS] || SPORT_DISPLAY_CONFIGS.taekwondo;
 
   // Function to render markdown-style formatted text
   const renderFormattedText = (text: string) => {

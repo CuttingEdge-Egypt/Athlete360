@@ -14,15 +14,29 @@ interface VideoAnalysisUploadProps {
   onClose?: () => void;
 }
 
+// Sport configuration mapping
+const SPORT_CONFIGS = {
+  'taekwondo': { name: 'Taekwondo', hasRounds: true },
+  'boxing': { name: 'Boxing', hasRounds: true },
+  'soccer': { name: 'Soccer/Football', hasRounds: false },
+  'basketball': { name: 'Basketball', hasRounds: false },
+  'tennis': { name: 'Tennis', hasRounds: false },
+  'martial_arts': { name: 'Martial Arts', hasRounds: true }
+} as const;
+
 export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [roundToAnalyze, setRoundToAnalyze] = useState(1);
+  const [roundToAnalyze, setRoundToAnalyze] = useState<number | 'no-rounds'>(1);
   const [language, setLanguage] = useState<string>("english");
+  const [sport, setSport] = useState<string>("taekwondo");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Analyzing Video...');
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [dragOver, setDragOver] = useState(false);
   const { toast } = useToast();
+
+  // Get current sport configuration
+  const currentSportConfig = SPORT_CONFIGS[sport as keyof typeof SPORT_CONFIGS] || SPORT_CONFIGS.taekwondo;
 
   const handleFileSelect = (file: File) => {
     // Validate file type
@@ -102,8 +116,9 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
     
     const formData = new FormData();
     formData.append('video', uploadedFile);
-    formData.append('roundToAnalyze', roundToAnalyze.toString());
+    formData.append('round', roundToAnalyze.toString());
     formData.append('language', language);
+    formData.append('sport', sport);
 
     // Create an AbortController for manual timeout control
     let controller: AbortController | null = null;
@@ -216,6 +231,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
           videoFile={uploadedFile}
           analysisData={analysisResult}
           language={language}
+          sport={sport}
         />
       </div>
     );
@@ -230,7 +246,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
             <div>
               <CardTitle className="text-white">Video Analysis</CardTitle>
               <p className="text-gray-400 text-sm mt-1">
-                Upload a taekwondo match video for AI-powered analysis (200 tokens)
+                Upload a sports match video for AI-powered analysis (200 tokens)
               </p>
             </div>
           </div>
@@ -290,27 +306,68 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
 
 
 
+          {/* Sport Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="sport-select" className="text-white font-medium">Sport</Label>
+            <Select value={sport} onValueChange={(value) => {
+              setSport(value);
+              // Reset round selection when sport changes
+              const newSportConfig = SPORT_CONFIGS[value as keyof typeof SPORT_CONFIGS];
+              if (!newSportConfig?.hasRounds) {
+                setRoundToAnalyze('no-rounds');
+              } else {
+                setRoundToAnalyze(1);
+              }
+            }}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select sport" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(SPORT_CONFIGS).map(([key, config]) => (
+                  <SelectItem key={key} value={key}>{config.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Round Selection */}
           <div className="space-y-2">
             <Label htmlFor="round" className="text-white font-medium">
-              Round to Analyze
+              {currentSportConfig.hasRounds ? 'Round to Analyze' : 'Analysis Type'}
             </Label>
             <div className="flex space-x-2">
-              {[1, 2, 3].map((round) => (
+              {currentSportConfig.hasRounds ? (
+                // Show round buttons for round-based sports
+                [1, 2, 3].map((round) => (
+                  <Button
+                    key={round}
+                    onClick={() => setRoundToAnalyze(round)}
+                    variant={roundToAnalyze === round ? "default" : "outline"}
+                    size="sm"
+                    data-testid={`button-round-${round}`}
+                    className={roundToAnalyze === round 
+                      ? "bg-indigo-600 hover:bg-indigo-700" 
+                      : "border-gray-600 text-gray-300"
+                    }
+                  >
+                    Round {round}
+                  </Button>
+                ))
+              ) : (
+                // Show "Full Match/Game" button for non-round sports
                 <Button
-                  key={round}
-                  onClick={() => setRoundToAnalyze(round)}
-                  variant={roundToAnalyze === round ? "default" : "outline"}
+                  onClick={() => setRoundToAnalyze('no-rounds')}
+                  variant={roundToAnalyze === 'no-rounds' ? "default" : "outline"}
                   size="sm"
-                  data-testid={`button-round-${round}`}
-                  className={roundToAnalyze === round 
-                    ? "bg-indigo-600 hover:bg-indigo-700" 
+                  data-testid="button-no-rounds"
+                  className={roundToAnalyze === 'no-rounds'
+                    ? "bg-indigo-600 hover:bg-indigo-700"
                     : "border-gray-600 text-gray-300"
                   }
                 >
-                  Round {round}
+                  Full Match/Game
                 </Button>
-              ))}
+              )}
             </div>
           </div>
 

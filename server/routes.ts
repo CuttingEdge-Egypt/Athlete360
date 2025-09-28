@@ -3297,8 +3297,9 @@ Return only valid JSON with the missing fields.`;
       fs.writeFileSync(videoFilePath, req.file.buffer);
       console.log(`[VIDEO ROUTE ${requestId}] Video saved: ${videoFilePath} (${req.file.size} bytes)`);
       
-      // Extract round number from form body - Multer handles this automatically!
-      const round = Number(req.body.roundToAnalyze) || 1;
+      // Extract round parameter from form body - preserving 'no-rounds' for sport-agnostic analysis
+      const roundRaw = req.body.roundToAnalyze || req.body.round || '1';
+      const round = roundRaw === 'no-rounds' ? 'no-rounds' : Number(roundRaw) || 1;
       const language = req.body.language || 'english';
       console.log(`[VIDEO ROUTE ${requestId}] Round selected: ${round} (from req.body.roundToAnalyze: ${req.body.roundToAnalyze})`);
       console.log(`[VIDEO ROUTE ${requestId}] Language selected: ${language}`);
@@ -3337,6 +3338,8 @@ Return only valid JSON with the missing fields.`;
 
       console.log(`[ROUTE ${requestId}] Starting video analysis processing...`);
       console.log(`[ROUTE ${requestId}] Video file details - Path: ${videoFilePath}, Size: ${req.file.size} bytes`);
+      const sport = req.body.sport || 'taekwondo'; // Default to taekwondo for backward compatibility
+      console.log(`[ROUTE ${requestId}] Analysis params - Round: ${round}, Language: ${language}, Sport: ${sport}`);
       
       const analysisStartTime = Date.now();
       
@@ -3349,7 +3352,8 @@ Return only valid JSON with the missing fields.`;
         videoFilePath, // Direct file path like Python version
         fileName,
         round,
-        language
+        language,
+        sport
       );
 
       const analysisTime = Date.now() - analysisStartTime;

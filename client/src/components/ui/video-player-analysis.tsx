@@ -7,6 +7,7 @@ interface VideoPlayerAnalysisProps {
   videoFile: File;
   analysisData: any;
   language?: string;
+  sport?: string;
 }
 
 interface ScoreEvent {
@@ -24,7 +25,7 @@ interface YellowCardEvent {
   player: 'blue' | 'red';
 }
 
-export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'english' }: VideoPlayerAnalysisProps) {
+export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'english', sport = 'taekwondo' }: VideoPlayerAnalysisProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
