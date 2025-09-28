@@ -33,15 +33,58 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
   const [volume, setVolume] = useState(1);
   const [videoUrl, setVideoUrl] = useState<string>("");
 
-  // Translation function for all UI titles
+  // Sport-specific display configurations
+  const SPORT_DISPLAY_CONFIGS = {
+    'taekwondo': { 
+      action: 'TOTAL KICKS', 
+      violation: 'WARNINGS',
+      actionArabic: 'إجمالي الركلات',
+      violationArabic: 'إنذارات'
+    },
+    'boxing': { 
+      action: 'TOTAL PUNCHES', 
+      violation: 'WARNINGS',
+      actionArabic: 'إجمالي اللكمات',
+      violationArabic: 'إنذارات'
+    },
+    'soccer': { 
+      action: 'TOTAL SHOTS', 
+      violation: 'CARDS',
+      actionArabic: 'إجمالي التسديدات',
+      violationArabic: 'البطاقات'
+    },
+    'basketball': { 
+      action: 'TOTAL SHOTS', 
+      violation: 'FOULS',
+      actionArabic: 'إجمالي التسديدات', 
+      violationArabic: 'الأخطاء'
+    },
+    'tennis': { 
+      action: 'TOTAL SHOTS', 
+      violation: 'VIOLATIONS',
+      actionArabic: 'إجمالي الضربات',
+      violationArabic: 'المخالفات'
+    },
+    'martial_arts': { 
+      action: 'TOTAL STRIKES', 
+      violation: 'PENALTIES',
+      actionArabic: 'إجمالي الضربات',
+      violationArabic: 'العقوبات'
+    }
+  } as const;
+
+  // Get sport-specific config
+  const sportConfig = SPORT_DISPLAY_CONFIGS[sport as keyof typeof SPORT_DISPLAY_CONFIGS] || SPORT_DISPLAY_CONFIGS.taekwondo;
+
+  // Translation function for all UI titles  
   const getTitle = (key: string): string => {
     if (language === 'arabic') {
       const arabicTitles: Record<string, string> = {
         // Data box titles
         'BLUE SCORE': 'النقاط الزرقاء',
         'RED SCORE': 'النقاط الحمراء', 
-        'TOTAL KICKS': 'إجمالي الركلات',
-        'WARNINGS': 'إنذارات',
+        [sportConfig.action]: sportConfig.actionArabic,
+        [sportConfig.violation]: sportConfig.violationArabic,
         // Section titles
         'Complete Match Analysis': 'تحليل المباراة الكامل',
         'Advice for Each Player': 'نصائح لكل لاعب',
@@ -105,16 +148,39 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
     };
 
     const scoreAnalysis = analysisData.score_analysis ? parseAnalysisData(analysisData.score_analysis) : null;
-    const yellowCardAnalysis = analysisData.yellow_card_analysis ? parseAnalysisData(analysisData.yellow_card_analysis) : null;
-    const kickAnalysis = analysisData.kick_count_analysis ? parseAnalysisData(analysisData.kick_count_analysis) : null;
+    
+    // Dynamic field name mapping based on sport
+    const getAnalysisFieldName = (type: 'violation' | 'action_count') => {
+      const sportFieldMappings: Record<string, Record<string, string>> = {
+        'taekwondo': { violation: 'yellow_card_analysis', action_count: 'kick_count_analysis' },
+        'boxing': { violation: 'warning_analysis', action_count: 'punch_count_analysis' },
+        'soccer': { violation: 'card_analysis', action_count: 'shot_count_analysis' },
+        'basketball': { violation: 'foul_analysis', action_count: 'shot_count_analysis' },
+        'tennis': { violation: 'violation_analysis', action_count: 'shot_count_analysis' },
+        'martial_arts': { violation: 'penalty_analysis', action_count: 'strike_count_analysis' }
+      };
+      
+      const mapping = sportFieldMappings[sport] || sportFieldMappings['taekwondo'];
+      return mapping[type];
+    };
+    
+    // Get sport-specific field names
+    const violationFieldName = getAnalysisFieldName('violation');
+    const actionCountFieldName = getAnalysisFieldName('action_count');
+    
+    // Parse with dynamic field names - with fallback to default taekwondo field names
+    const violationAnalysis = (analysisData[violationFieldName] || analysisData.yellow_card_analysis) ? 
+      parseAnalysisData(analysisData[violationFieldName] || analysisData.yellow_card_analysis) : null;
+    const actionAnalysis = (analysisData[actionCountFieldName] || analysisData.kick_count_analysis) ? 
+      parseAnalysisData(analysisData[actionCountFieldName] || analysisData.kick_count_analysis) : null;
 
     // Debug logging only in development
     if (process.env.NODE_ENV === 'development') {
       console.log("=== VIDEO ANALYSIS DEBUG ===");
       console.log("Score Analysis Before Parsing:", analysisData.score_analysis);
       console.log("Score Analysis After Parsing:", scoreAnalysis);
-      console.log("Yellow Card Analysis:", yellowCardAnalysis);
-      console.log("Kick Analysis:", kickAnalysis);
+      console.log(`${sportConfig.violation} Analysis:`, violationAnalysis);
+      console.log(`${sportConfig.action.split(' ')[1]} Analysis:`, actionAnalysis);
       console.log("Raw analysisData:", analysisData);
     }
 
@@ -238,15 +304,15 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
       }
     }
 
-    // Parse yellow card events with cumulative tracking
-    if (yellowCardAnalysis) {
+    // Parse violation events (cards/warnings/fouls) with cumulative tracking
+    if (violationAnalysis) {
       let blueCards = 0;
       let redCards = 0;
 
       // Handle both old format (string content) and new JSON format with color field
-      if (typeof yellowCardAnalysis === 'string') {
+      if (typeof violationAnalysis === 'string') {
         // Old format - parse text content
-        const lines = yellowCardAnalysis.split('\n');
+        const lines = violationAnalysis.split('\n');
         lines.forEach(line => {
           const timestamps = line.match(timestampRegex);
           if (timestamps) {
@@ -277,12 +343,12 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
             });
           }
         });
-      } else if (yellowCardAnalysis && Array.isArray(yellowCardAnalysis.players)) {
+      } else if (violationAnalysis && Array.isArray(violationAnalysis.players)) {
         // New JSON format - use players array with color field
-        // First, collect all yellow cards from both players and sort by timestamp
+        // First, collect all violation events from both players and sort by timestamp
         const allCards: Array<{timestamp: number, color: string}> = [];
         
-        yellowCardAnalysis.players.forEach((player: any) => {
+        violationAnalysis.players.forEach((player: any) => {
           if (player.color && Array.isArray(player.Yellow_cards)) {
             const playerColor = player.color.toLowerCase();
             
@@ -327,10 +393,10 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
     // Extract total kick counts
     let blueKicks = 0;
     let redKicks = 0;
-    if (kickAnalysis) {
+    if (actionAnalysis) {
       // First try new JSON format with players array
-      if (Array.isArray(kickAnalysis.players)) {
-        kickAnalysis.players.forEach((player: any) => {
+      if (Array.isArray(actionAnalysis.players)) {
+        actionAnalysis.players.forEach((player: any) => {
           // Handle the actual kick count JSON structure
           if (player.kicks && Array.isArray(player.kicks) && player.kicks[0]?.total_kick_number !== undefined) {
             const playerName = player.name?.toLowerCase() || '';
@@ -356,7 +422,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
         });
       } else {
         // Fallback to old text parsing method
-        const content = typeof kickAnalysis === 'string' ? kickAnalysis : JSON.stringify(kickAnalysis);
+        const content = typeof actionAnalysis === 'string' ? actionAnalysis : JSON.stringify(actionAnalysis);
         const blueKickMatch = content.match(/player\s*1.*?(\d+).*?kick/i) || content.match(/blue.*?(\d+).*?kick/i);
         const redKickMatch = content.match(/player\s*2.*?(\d+).*?kick/i) || content.match(/red.*?(\d+).*?kick/i);
         
@@ -509,7 +575,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           {/* Blue Kicks */}
           <Card className="bg-blue-900/20 border-blue-500/30" data-testid="blue-kicks-card">
             <CardContent className="p-4 text-center">
-              <div className="text-blue-400 font-semibold text-sm mb-2">{getTitle('TOTAL KICKS')}</div>
+              <div className="text-blue-400 font-semibold text-sm mb-2">{getTitle(sportConfig.action)}</div>
               <div className="text-2xl font-bold text-blue-300" data-testid="blue-kicks">{blueKicks}</div>
             </CardContent>
           </Card>
@@ -517,7 +583,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           {/* Blue Yellow Cards */}
           <Card className="bg-blue-900/20 border-blue-500/30" data-testid="blue-cards-card">
             <CardContent className="p-4 text-center">
-              <div className="text-blue-400 font-semibold text-sm mb-2">{getTitle('WARNINGS')}</div>
+              <div className="text-blue-400 font-semibold text-sm mb-2">{getTitle(sportConfig.violation)}</div>
               <div className="text-2xl font-bold text-yellow-400" data-testid="blue-cards">{currentStats.blueCards}</div>
             </CardContent>
           </Card>
@@ -648,7 +714,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           {/* Red Kicks */}
           <Card className="bg-red-900/20 border-red-500/30" data-testid="red-kicks-card">
             <CardContent className="p-4 text-center">
-              <div className="text-red-400 font-semibold text-sm mb-2">{getTitle('TOTAL KICKS')}</div>
+              <div className="text-red-400 font-semibold text-sm mb-2">{getTitle(sportConfig.action)}</div>
               <div className="text-2xl font-bold text-red-300" data-testid="red-kicks">{redKicks}</div>
             </CardContent>
           </Card>
@@ -656,7 +722,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           {/* Red Yellow Cards */}
           <Card className="bg-red-900/20 border-red-500/30" data-testid="red-cards-card">
             <CardContent className="p-4 text-center">
-              <div className="text-red-400 font-semibold text-sm mb-2">{getTitle('WARNINGS')}</div>
+              <div className="text-red-400 font-semibold text-sm mb-2">{getTitle(sportConfig.violation)}</div>
               <div className="text-2xl font-bold text-yellow-400" data-testid="red-cards">{currentStats.redCards}</div>
             </CardContent>
           </Card>
