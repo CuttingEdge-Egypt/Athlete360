@@ -9,34 +9,46 @@ import { Video, Upload, Loader2, Play, FileVideo } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AnalysisResult } from "./analysis-result";
 import { VideoPlayerAnalysis } from "./video-player-analysis";
+import { useQuery } from "@tanstack/react-query";
 
 interface VideoAnalysisUploadProps {
   onClose?: () => void;
 }
 
-// Sport configuration mapping
-const SPORT_CONFIGS = {
-  'taekwondo': { name: 'Taekwondo', hasRounds: true },
-  'boxing': { name: 'Boxing', hasRounds: true },
-  'soccer': { name: 'Soccer/Football', hasRounds: false },
-  'basketball': { name: 'Basketball', hasRounds: false },
-  'tennis': { name: 'Tennis', hasRounds: false },
-  'martial_arts': { name: 'Martial Arts', hasRounds: true }
-} as const;
+// Helper function to determine if a sport has rounds based on its name
+const hasRounds = (sportName: string): boolean => {
+  const roundBasedSports = ['taekwondo', 'boxing', 'martial arts', 'mma', 'kickboxing'];
+  return roundBasedSports.some(sport => 
+    sportName.toLowerCase().includes(sport)
+  );
+};
 
 export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [roundToAnalyze, setRoundToAnalyze] = useState<number | 'no-rounds'>(1);
   const [language, setLanguage] = useState<string>("english");
-  const [sport, setSport] = useState<string>("taekwondo");
+  const [sport, setSport] = useState<string>("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Analyzing Video...');
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [dragOver, setDragOver] = useState(false);
   const { toast } = useToast();
 
-  // Get current sport configuration
-  const currentSportConfig = SPORT_CONFIGS[sport as keyof typeof SPORT_CONFIGS] || SPORT_CONFIGS.taekwondo;
+  // Load sports from API
+  const { data: sports = [] } = useQuery<Array<{id: string, name: string}>>({
+    queryKey: ["/api/sports"]
+  });
+
+  // Find current sport and determine if it has rounds
+  const currentSport = sports.find(s => s.id === sport);
+  const currentSportHasRounds = currentSport ? hasRounds(currentSport.name) : false;
+
+  // Set default sport when sports load
+  if (sports.length > 0 && !sport) {
+    const defaultSport = sports.find(s => s.name.toLowerCase().includes('taekwondo')) || sports[0];
+    setSport(defaultSport.id);
+    setRoundToAnalyze(hasRounds(defaultSport.name) ? 1 : 'no-rounds');
+  }
 
   const handleFileSelect = (file: File) => {
     // Validate file type
@@ -312,19 +324,19 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
             <Select value={sport} onValueChange={(value) => {
               setSport(value);
               // Reset round selection when sport changes
-              const newSportConfig = SPORT_CONFIGS[value as keyof typeof SPORT_CONFIGS];
-              if (!newSportConfig?.hasRounds) {
+              const selectedSport = sports.find(s => s.id === value);
+              if (selectedSport && !hasRounds(selectedSport.name)) {
                 setRoundToAnalyze('no-rounds');
               } else {
                 setRoundToAnalyze(1);
               }
             }}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full max-w-xs">
                 <SelectValue placeholder="Select sport" />
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(SPORT_CONFIGS).map(([key, config]) => (
-                  <SelectItem key={key} value={key}>{config.name}</SelectItem>
+                {sports.map((sport) => (
+                  <SelectItem key={sport.id} value={sport.id}>{sport.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -333,10 +345,10 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
           {/* Round Selection */}
           <div className="space-y-2">
             <Label htmlFor="round" className="text-white font-medium">
-              {currentSportConfig.hasRounds ? 'Round to Analyze' : 'Analysis Type'}
+              {currentSportHasRounds ? 'Round to Analyze' : 'Analysis Type'}
             </Label>
             <div className="flex space-x-2">
-              {currentSportConfig.hasRounds ? (
+              {currentSportHasRounds ? (
                 // Show round buttons for round-based sports
                 [1, 2, 3].map((round) => (
                   <Button
@@ -381,7 +393,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
               onValueChange={setLanguage}
               data-testid="select-language"
             >
-              <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white">
+              <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white w-full max-w-xs">
                 <SelectValue placeholder="Select language" />
               </SelectTrigger>
               <SelectContent className="bg-athlete-gray-700 border-gray-600">
