@@ -26,7 +26,7 @@ const hasRounds = (sportName: string): boolean => {
 
 export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [roundToAnalyze, setRoundToAnalyze] = useState<number | 'no-rounds'>(1);
+  const [roundToAnalyze, setRoundToAnalyze] = useState<number | null>(1);
   const [language, setLanguage] = useState<string>("english");
   const [sport, setSport] = useState<string>("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -55,7 +55,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
   if (sports.length > 0 && !sport) {
     const defaultSport = sports.find(s => s.name.toLowerCase().includes('taekwondo')) || sports[0];
     setSport(defaultSport.id);
-    setRoundToAnalyze(hasRounds(defaultSport.name) ? 1 : 'no-rounds');
+    setRoundToAnalyze(hasRounds(defaultSport.name) ? 1 : null);
   }
 
   const handleFileSelect = (file: File) => {
@@ -136,7 +136,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
     
     const formData = new FormData();
     formData.append('video', uploadedFile);
-    formData.append('round', roundToAnalyze.toString());
+    formData.append('round', roundToAnalyze ? roundToAnalyze.toString() : '');
     formData.append('language', language);
     formData.append('sport', sport);
 
@@ -380,7 +380,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
                           setSportSearchTerm("");
                           // Reset round selection when sport changes
                           if (!hasRounds(sportItem.name)) {
-                            setRoundToAnalyze('no-rounds');
+                            setRoundToAnalyze(null);
                           } else {
                             setRoundToAnalyze(1);
                           }
@@ -397,46 +397,31 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
             </Popover>
           </div>
 
-          {/* Round Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="round" className="text-white font-medium">
-              {currentSportHasRounds ? 'Round to Analyze' : 'Analysis Type'}
-            </Label>
-            <div className="flex space-x-2">
-              {currentSportHasRounds ? (
-                // Show round buttons for round-based sports
-                [1, 2, 3].map((round) => (
-                  <Button
-                    key={round}
-                    onClick={() => setRoundToAnalyze(round)}
-                    variant={roundToAnalyze === round ? "default" : "outline"}
-                    size="sm"
-                    data-testid={`button-round-${round}`}
-                    className={roundToAnalyze === round 
-                      ? "bg-indigo-600 hover:bg-indigo-700" 
-                      : "border-gray-600 text-gray-300"
+          {/* Round Selection - Only show for sports that have rounds */}
+          {currentSportHasRounds && (
+            <div className="space-y-2">
+              <Label htmlFor="round" className="text-white font-medium">
+                Round to Analyze
+              </Label>
+              <div className="flex items-center space-x-3">
+                <Input
+                  type="number"
+                  min="1"
+                  max="50"
+                  value={roundToAnalyze || 1}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    if (value >= 1 && value <= 50) {
+                      setRoundToAnalyze(value);
                     }
-                  >
-                    Round {round}
-                  </Button>
-                ))
-              ) : (
-                // Show "Full Match/Game" button for non-round sports
-                <Button
-                  onClick={() => setRoundToAnalyze('no-rounds')}
-                  variant={roundToAnalyze === 'no-rounds' ? "default" : "outline"}
-                  size="sm"
-                  data-testid="button-no-rounds"
-                  className={roundToAnalyze === 'no-rounds'
-                    ? "bg-indigo-600 hover:bg-indigo-700"
-                    : "border-gray-600 text-gray-300"
-                  }
-                >
-                  Full Match/Game
-                </Button>
-              )}
+                  }}
+                  className="w-20 bg-athlete-gray-700 border-gray-600 text-white text-center"
+                  data-testid="input-round-number"
+                />
+                <span className="text-gray-400 text-sm">Enter round number (1-50)</span>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Language Selection */}
           <div className="space-y-2">
