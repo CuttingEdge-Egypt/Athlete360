@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Video, Upload, Loader2, Play, FileVideo } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Video, Upload, Loader2, Play, FileVideo, Search, Check, ChevronsUpDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AnalysisResult } from "./analysis-result";
 import { VideoPlayerAnalysis } from "./video-player-analysis";
@@ -32,6 +33,8 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
   const [loadingMessage, setLoadingMessage] = useState('Analyzing Video...');
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [sportDropdownOpen, setSportDropdownOpen] = useState(false);
+  const [sportSearchTerm, setSportSearchTerm] = useState("");
   const { toast } = useToast();
 
   // Load sports from API
@@ -42,6 +45,11 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
   // Find current sport and determine if it has rounds
   const currentSport = sports.find(s => s.id === sport);
   const currentSportHasRounds = currentSport ? hasRounds(currentSport.name) : false;
+  
+  // Filter sports based on search term
+  const filteredSports = sports.filter(sport => 
+    sport.name.toLowerCase().includes(sportSearchTerm.toLowerCase())
+  );
 
   // Set default sport when sports load
   if (sports.length > 0 && !sport) {
@@ -318,28 +326,68 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
 
 
 
-          {/* Sport Selection */}
+          {/* Sport Selection with Search */}
           <div className="space-y-2">
             <Label htmlFor="sport-select" className="text-white font-medium">Sport</Label>
-            <Select value={sport} onValueChange={(value) => {
-              setSport(value);
-              // Reset round selection when sport changes
-              const selectedSport = sports.find(s => s.id === value);
-              if (selectedSport && !hasRounds(selectedSport.name)) {
-                setRoundToAnalyze('no-rounds');
-              } else {
-                setRoundToAnalyze(1);
-              }
-            }}>
-              <SelectTrigger className="w-full max-w-xs">
-                <SelectValue placeholder="Select sport" />
-              </SelectTrigger>
-              <SelectContent>
-                {sports.map((sport) => (
-                  <SelectItem key={sport.id} value={sport.id}>{sport.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={sportDropdownOpen} onOpenChange={setSportDropdownOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={sportDropdownOpen}
+                  className="w-full max-w-xs justify-between bg-athlete-gray-700 border-gray-600 text-white hover:bg-athlete-gray-600"
+                  data-testid="button-sport-select"
+                >
+                  {sport
+                    ? sports.find(s => s.id === sport)?.name
+                    : "Select sport..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[300px] p-0 bg-athlete-gray-700 border-gray-600">
+                <div className="p-3 border-b border-gray-600">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Search sports..."
+                      value={sportSearchTerm}
+                      onChange={(e) => setSportSearchTerm(e.target.value)}
+                      className="pl-9 bg-athlete-gray-600 border-gray-500 text-white placeholder-gray-400"
+                      data-testid="input-sport-search"
+                    />
+                  </div>
+                </div>
+                <div className="max-h-60 overflow-auto">
+                  {filteredSports.length === 0 ? (
+                    <div className="p-3 text-center text-gray-400">
+                      No sports found.
+                    </div>
+                  ) : (
+                    filteredSports.map((sportItem) => (
+                      <div
+                        key={sportItem.id}
+                        className="flex items-center px-3 py-2 cursor-pointer hover:bg-athlete-gray-600 text-white"
+                        onClick={() => {
+                          setSport(sportItem.id);
+                          setSportDropdownOpen(false);
+                          setSportSearchTerm("");
+                          // Reset round selection when sport changes
+                          if (!hasRounds(sportItem.name)) {
+                            setRoundToAnalyze('no-rounds');
+                          } else {
+                            setRoundToAnalyze(1);
+                          }
+                        }}
+                        data-testid={`option-sport-${sportItem.name.toLowerCase().replace(/\s+/g, '-')}`}
+                      >
+                        <Check className={`mr-2 h-4 w-4 ${sport === sportItem.id ? "opacity-100" : "opacity-0"}`} />
+                        {sportItem.name}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
 
           {/* Round Selection */}
