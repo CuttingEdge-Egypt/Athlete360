@@ -359,7 +359,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
                       placeholder="Search sports..."
                       value={sportSearchTerm}
                       onChange={(e) => setSportSearchTerm(e.target.value)}
-                      className="pl-9 bg-athlete-gray-600 border-gray-500 text-white placeholder-gray-400"
+                      className="pl-9 bg-athlete-gray-800 border-athlete-gray-600 text-white placeholder-gray-500 focus:bg-athlete-gray-700 focus:border-gray-500"
                       data-testid="input-sport-search"
                     />
                   </div>
