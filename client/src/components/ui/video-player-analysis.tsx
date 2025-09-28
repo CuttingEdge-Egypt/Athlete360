@@ -149,30 +149,39 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
 
     const scoreAnalysis = analysisData.score_analysis ? parseAnalysisData(analysisData.score_analysis) : null;
     
-    // Dynamic field name mapping based on sport
-    const getAnalysisFieldName = (type: 'violation' | 'action_count') => {
-      const sportFieldMappings: Record<string, Record<string, string>> = {
-        'taekwondo': { violation: 'yellow_card_analysis', action_count: 'kick_count_analysis' },
-        'boxing': { violation: 'warning_analysis', action_count: 'punch_count_analysis' },
-        'soccer': { violation: 'card_analysis', action_count: 'shot_count_analysis' },
-        'basketball': { violation: 'foul_analysis', action_count: 'shot_count_analysis' },
-        'tennis': { violation: 'violation_analysis', action_count: 'shot_count_analysis' },
-        'martial_arts': { violation: 'penalty_analysis', action_count: 'strike_count_analysis' }
-      };
+    // Smart analysis field detection - let AI response structure determine the field names
+    const findAnalysisFields = () => {
+      const fields: { 
+        violationField: string | null, 
+        actionField: string | null, 
+        violationAnalysis: any | null, 
+        actionAnalysis: any | null 
+      } = { violationField: null, actionField: null, violationAnalysis: null, actionAnalysis: null };
       
-      const mapping = sportFieldMappings[sport] || sportFieldMappings['taekwondo'];
-      return mapping[type];
+      // Look for violation-related fields (cards, warnings, fouls, penalties, violations)
+      const violationPatterns = ['yellow_card_analysis', 'card_analysis', 'warning_analysis', 'foul_analysis', 'penalty_analysis', 'violation_analysis'];
+      for (const pattern of violationPatterns) {
+        if (analysisData[pattern]) {
+          fields.violationField = pattern;
+          fields.violationAnalysis = parseAnalysisData(analysisData[pattern]);
+          break;
+        }
+      }
+      
+      // Look for action-related fields (kicks, punches, shots, strikes)
+      const actionPatterns = ['kick_count_analysis', 'punch_count_analysis', 'shot_count_analysis', 'strike_count_analysis'];
+      for (const pattern of actionPatterns) {
+        if (analysisData[pattern]) {
+          fields.actionField = pattern;
+          fields.actionAnalysis = parseAnalysisData(analysisData[pattern]);
+          break;
+        }
+      }
+      
+      return fields;
     };
     
-    // Get sport-specific field names
-    const violationFieldName = getAnalysisFieldName('violation');
-    const actionCountFieldName = getAnalysisFieldName('action_count');
-    
-    // Parse with dynamic field names - with fallback to default taekwondo field names
-    const violationAnalysis = (analysisData[violationFieldName] || analysisData.yellow_card_analysis) ? 
-      parseAnalysisData(analysisData[violationFieldName] || analysisData.yellow_card_analysis) : null;
-    const actionAnalysis = (analysisData[actionCountFieldName] || analysisData.kick_count_analysis) ? 
-      parseAnalysisData(analysisData[actionCountFieldName] || analysisData.kick_count_analysis) : null;
+    const { violationField, actionField, violationAnalysis, actionAnalysis } = findAnalysisFields();
 
     // Debug logging only in development
     if (process.env.NODE_ENV === 'development') {
@@ -558,6 +567,56 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
 
   const matchAnalysis = parseMatchAnalysis();
 
+  // Dynamic label extraction from AI response
+  const extractLabelsFromAI = () => {
+    const labels = { actionLabel: 'Actions', violationLabel: 'Violations' };
+    
+    // Extract action label from field name or data structure
+    if (actionField) {
+      if (actionField.includes('kick')) labels.actionLabel = 'Total Kicks';
+      else if (actionField.includes('punch')) labels.actionLabel = 'Total Punches';  
+      else if (actionField.includes('shot')) labels.actionLabel = 'Total Shots';
+      else if (actionField.includes('strike')) labels.actionLabel = 'Total Strikes';
+    }
+    
+    // Check if AI data has specific action type info
+    if (actionAnalysis && actionAnalysis.players) {
+      const player = actionAnalysis.players[0];
+      if (player) {
+        if (player.kicks) labels.actionLabel = 'Total Kicks';
+        else if (player.punches) labels.actionLabel = 'Total Punches';
+        else if (player.shots) labels.actionLabel = 'Total Shots';
+        else if (player.strikes) labels.actionLabel = 'Total Strikes';
+      }
+    }
+    
+    // Extract violation label from field name
+    if (violationField) {
+      if (violationField.includes('yellow_card')) labels.violationLabel = 'Warnings';
+      else if (violationField.includes('card')) labels.violationLabel = 'Cards';
+      else if (violationField.includes('warning')) labels.violationLabel = 'Warnings';
+      else if (violationField.includes('foul')) labels.violationLabel = 'Fouls';
+      else if (violationField.includes('penalty')) labels.violationLabel = 'Penalties';
+      else if (violationField.includes('violation')) labels.violationLabel = 'Violations';
+    }
+    
+    // Check if AI data has specific violation type info
+    if (violationAnalysis && violationAnalysis.players) {
+      const player = violationAnalysis.players[0];
+      if (player) {
+        if (player.Yellow_cards) labels.violationLabel = 'Warnings';
+        else if (player.cards) labels.violationLabel = 'Cards';
+        else if (player.fouls) labels.violationLabel = 'Fouls';
+        else if (player.penalties) labels.violationLabel = 'Penalties';
+        else if (player.violations) labels.violationLabel = 'Violations';
+      }
+    }
+    
+    return labels;
+  };
+
+  const dynamicLabels = extractLabelsFromAI();
+
   return (
     <div className="space-y-6">
       {/* Main Video Layout with Side Stats */}
@@ -575,7 +634,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           {/* Blue Kicks */}
           <Card className="bg-blue-900/20 border-blue-500/30" data-testid="blue-kicks-card">
             <CardContent className="p-4 text-center">
-              <div className="text-blue-400 font-semibold text-sm mb-2">{getTitle(sportConfig.action)}</div>
+              <div className="text-blue-400 font-semibold text-sm mb-2">{getTitle(dynamicLabels.actionLabel)}</div>
               <div className="text-2xl font-bold text-blue-300" data-testid="blue-kicks">{blueKicks}</div>
             </CardContent>
           </Card>
@@ -583,7 +642,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           {/* Blue Yellow Cards */}
           <Card className="bg-blue-900/20 border-blue-500/30" data-testid="blue-cards-card">
             <CardContent className="p-4 text-center">
-              <div className="text-blue-400 font-semibold text-sm mb-2">{getTitle(sportConfig.violation)}</div>
+              <div className="text-blue-400 font-semibold text-sm mb-2">{getTitle(dynamicLabels.violationLabel)}</div>
               <div className="text-2xl font-bold text-yellow-400" data-testid="blue-cards">{currentStats.blueCards}</div>
             </CardContent>
           </Card>
@@ -714,7 +773,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           {/* Red Kicks */}
           <Card className="bg-red-900/20 border-red-500/30" data-testid="red-kicks-card">
             <CardContent className="p-4 text-center">
-              <div className="text-red-400 font-semibold text-sm mb-2">{getTitle(sportConfig.action)}</div>
+              <div className="text-red-400 font-semibold text-sm mb-2">{getTitle(dynamicLabels.actionLabel)}</div>
               <div className="text-2xl font-bold text-red-300" data-testid="red-kicks">{redKicks}</div>
             </CardContent>
           </Card>
@@ -722,7 +781,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           {/* Red Yellow Cards */}
           <Card className="bg-red-900/20 border-red-500/30" data-testid="red-cards-card">
             <CardContent className="p-4 text-center">
-              <div className="text-red-400 font-semibold text-sm mb-2">{getTitle(sportConfig.violation)}</div>
+              <div className="text-red-400 font-semibold text-sm mb-2">{getTitle(dynamicLabels.violationLabel)}</div>
               <div className="text-2xl font-bold text-yellow-400" data-testid="red-cards">{currentStats.redCards}</div>
             </CardContent>
           </Card>
