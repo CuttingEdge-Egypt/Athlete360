@@ -327,8 +327,8 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
 
 
           {/* Sport Selection with Search */}
-          <div className="space-y-2">
-            <Label htmlFor="sport-select" className="text-white font-medium">Sport</Label>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="sport-select" className="text-white font-medium block">Sport</Label>
             <Popover open={sportDropdownOpen} onOpenChange={setSportDropdownOpen}>
               <PopoverTrigger asChild>
                 <Button
