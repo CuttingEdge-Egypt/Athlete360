@@ -344,7 +344,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[300px] p-0 bg-athlete-gray-700 border-gray-600">
+              <PopoverContent className="w-[300px] p-0 bg-athlete-gray-700 border-gray-600" align="start">
                 <div className="p-3 border-b border-gray-600">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
