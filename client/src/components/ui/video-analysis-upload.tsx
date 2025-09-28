@@ -329,65 +329,56 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
           {/* Sport Selection with Search */}
           <div className="space-y-2">
             <Label htmlFor="sport-select" className="text-white font-medium">Sport</Label>
-            <Popover open={sportDropdownOpen} onOpenChange={setSportDropdownOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={sportDropdownOpen}
-                  className="w-full max-w-xs justify-between bg-athlete-gray-700 border-gray-600 text-white hover:bg-athlete-gray-600"
-                  data-testid="button-sport-select"
-                >
-                  {sport
-                    ? sports.find(s => s.id === sport)?.name
-                    : "Select sport..."}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[300px] p-0 bg-athlete-gray-700 border-gray-600" side="bottom" avoidCollisions={false}>
-                <div className="p-3 border-b border-gray-600">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <Input
-                      placeholder="Search sports..."
-                      value={sportSearchTerm}
-                      onChange={(e) => setSportSearchTerm(e.target.value)}
-                      className="pl-9 bg-athlete-gray-600 border-gray-500 text-white placeholder-gray-400"
-                      data-testid="input-sport-search"
-                    />
-                  </div>
-                </div>
-                <div className="max-h-60 overflow-auto">
+            <div className="relative">
+              {/* Search Input */}
+              <div className="relative mb-2">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 z-10" />
+                <Input
+                  placeholder="Search sports..."
+                  value={sportSearchTerm}
+                  onChange={(e) => setSportSearchTerm(e.target.value)}
+                  className="pl-9 bg-athlete-gray-700 border-gray-600 text-white placeholder-gray-400 w-full max-w-xs"
+                  data-testid="input-sport-search"
+                />
+              </div>
+              {/* Dropdown */}
+              <Select 
+                value={sport} 
+                onValueChange={(value) => {
+                  setSport(value);
+                  // Reset round selection when sport changes
+                  const selectedSportObj = sports.find(s => s.id === value);
+                  if (selectedSportObj && !hasRounds(selectedSportObj.name)) {
+                    setRoundToAnalyze('no-rounds');
+                  } else {
+                    setRoundToAnalyze(1);
+                  }
+                }}
+                data-testid="select-sport"
+              >
+                <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white w-full max-w-xs">
+                  <SelectValue placeholder="Select sport..." />
+                </SelectTrigger>
+                <SelectContent className="bg-athlete-gray-700 border-gray-600 max-h-60">
                   {filteredSports.length === 0 ? (
                     <div className="p-3 text-center text-gray-400">
                       No sports found.
                     </div>
                   ) : (
                     filteredSports.map((sportItem) => (
-                      <div
-                        key={sportItem.id}
-                        className="flex items-center px-3 py-2 cursor-pointer hover:bg-athlete-gray-600 text-white"
-                        onClick={() => {
-                          setSport(sportItem.id);
-                          setSportDropdownOpen(false);
-                          setSportSearchTerm("");
-                          // Reset round selection when sport changes
-                          if (!hasRounds(sportItem.name)) {
-                            setRoundToAnalyze('no-rounds');
-                          } else {
-                            setRoundToAnalyze(1);
-                          }
-                        }}
+                      <SelectItem 
+                        key={sportItem.id} 
+                        value={sportItem.id}
+                        className="text-white hover:bg-athlete-gray-600"
                         data-testid={`option-sport-${sportItem.name.toLowerCase().replace(/\s+/g, '-')}`}
                       >
-                        <Check className={`mr-2 h-4 w-4 ${sport === sportItem.id ? "opacity-100" : "opacity-0"}`} />
                         {sportItem.name}
-                      </div>
+                      </SelectItem>
                     ))
                   )}
-                </div>
-              </PopoverContent>
-            </Popover>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Round Selection */}
