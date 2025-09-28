@@ -3260,7 +3260,22 @@ Return only valid JSON with the missing fields.`;
 
   // Video Analysis endpoint - Direct upload like Sept 15 Python implementation
   // Video Analysis endpoint - Direct upload like Sept 15 Python implementation
-  app.post('/api/analysis/video', isAuthenticated, upload.single('video'), async (req: any, res) => {
+  app.post('/api/analysis/video', isAuthenticated, (req: any, res, next) => {
+    console.log('[VIDEO UPLOAD] Video upload endpoint hit, starting multer processing...');
+    upload.single('video')(req, res, (err) => {
+      console.log('[VIDEO UPLOAD] Multer processing completed');
+      if (err) {
+        console.error('[VIDEO UPLOAD] Multer error:', err);
+        return res.status(400).json({ 
+          message: "Video upload failed", 
+          error: err.message,
+          type: err.code || 'UPLOAD_ERROR'
+        });
+      }
+      console.log('[VIDEO UPLOAD] Multer successful, proceeding to video analysis handler');
+      next();
+    });
+  }, async (req: any, res) => {
     // Set a long timeout for video processing (10 minutes)
     req.setTimeout(600000); // 10 minutes
     res.setTimeout(600000); // 10 minutes
