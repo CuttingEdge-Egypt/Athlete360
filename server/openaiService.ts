@@ -2878,20 +2878,21 @@ export async function getAthleteImage(
 ): Promise<AthleteImageResult> {
   console.log(`🖼️ Starting GPT-5 image search for ${name} (${sport}, ${country})`);
 
-  const prompt = `I need to find a photo of this athlete for their sports profile:
+  const prompt = `I need a working image URL for displaying this athlete's photo in a web browser:
 
 Athlete: ${name}
 Sport: ${sport}
 Country: ${country}
 Additional info: ${details}
 
-Please provide a direct image URL that I can use to display their photo. I'm looking for:
-- Official sports photos
-- Professional headshots or action shots
-- Images from tournaments or competitions
-- Team or federation photos
+IMPORTANT: I need a direct image URL that works when opened in a browser tab - NOT WikiMedia Special:FilePath URLs or redirect URLs.
 
-Please respond with just the image URL if you find one, or "NO_IMAGE_FOUND" if you cannot locate a suitable image.`;
+I'm looking for:
+- Direct image URLs ending in .jpg, .png, .jpeg, or .webp
+- URLs that can be used directly in an <img> src attribute
+- Professional sports photos, headshots, or action shots
+
+Please respond with ONLY a working direct image URL, or "NO_IMAGE_FOUND" if you cannot find one that works in browsers.`;
 
   try {
     // Send prompt to GPT-5
@@ -2919,25 +2920,13 @@ Please respond with just the image URL if you find one, or "NO_IMAGE_FOUND" if y
     const url = rawResponse;
     console.log(`📸 GPT-5 found image URL: ${url}`);
 
-    // Convert WikiMedia Commons URLs to direct image URLs
+    // For WikiMedia URLs, keep them as-is since Special:FilePath should work in browsers
+    // The issue is not URL conversion but that Special:FilePath URLs don't always work reliably
     let processedUrl = url;
+    
     if (url.includes('commons.wikimedia.org/wiki/Special:FilePath/')) {
-      // Convert WikiMedia special path to direct image URL
-      const encodedFileName = url.split('/').pop() || '';
-      const fileName = decodeURIComponent(encodedFileName);
-      if (fileName) {
-        // For WikiMedia, use the original encoded filename to avoid space issues
-        processedUrl = `https://upload.wikimedia.org/wikipedia/commons/${encodedFileName}`;
-        console.log(`🔄 Converted WikiMedia URL to direct image: ${processedUrl}`);
-      }
-    } else if (url.includes('commons.wikimedia.org') && url.includes('File:')) {
-      // Handle other WikiMedia formats  
-      const match = url.match(/File:(.+?)(?:\?|$)/);
-      if (match) {
-        const encodedFileName = match[1];
-        processedUrl = `https://upload.wikimedia.org/wikipedia/commons/${encodedFileName}`;
-        console.log(`🔄 Converted WikiMedia File URL to direct image: ${processedUrl}`);
-      }
+      console.log(`📝 Using WikiMedia Special:FilePath URL as-is: ${url}`);
+      processedUrl = url; // Use the Special:FilePath URL directly
     }
 
     const downloadableExts = [".jpg", ".jpeg", ".png", ".webp"];
