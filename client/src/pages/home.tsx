@@ -1282,40 +1282,31 @@ export default function Home() {
                         disabled={!selectedSport || isSearching}
                       >
                         {isSearching ? (
-                          <div className="flex flex-col items-center space-y-2">
-                            <div className="flex items-center space-x-3">
-                              {/* Progress Circle */}
-                              <div className="relative w-6 h-6">
-                                <svg className="w-6 h-6 transform -rotate-90" viewBox="0 0 36 36">
-                                  {/* Background circle */}
-                                  <path
-                                    className="text-gray-600"
-                                    stroke="currentColor"
-                                    strokeWidth="3"
-                                    fill="none"
-                                    d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831 15.9155 15.9155 0 0 1 0 -31.831"
-                                  />
-                                  {/* Progress circle */}
-                                  <path
-                                    className="text-athlete-accent"
-                                    stroke="currentColor"
-                                    strokeWidth="3"
-                                    fill="none"
-                                    strokeLinecap="round"
-                                    strokeDasharray={`${searchProgress}, 100`}
-                                    d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831 15.9155 15.9155 0 0 1 0 -31.831"
-                                  />
-                                </svg>
-                                {/* Progress percentage */}
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                  <span className="text-xs font-semibold text-white">{Math.round(searchProgress)}%</span>
-                                </div>
-                              </div>
-                              <div className="text-left">
-                                <div className="text-sm font-medium">Searching with AI...</div>
-                                <div className="text-xs text-gray-300">{searchProgressMessage}</div>
-                              </div>
+                          <div className="flex items-center space-x-3">
+                            {/* Animated Progress Circle */}
+                            <div className="relative w-5 h-5">
+                              <svg className="w-5 h-5 transform -rotate-90 animate-spin" viewBox="0 0 36 36">
+                                {/* Background circle */}
+                                <path
+                                  className="text-gray-600"
+                                  stroke="currentColor"
+                                  strokeWidth="3"
+                                  fill="none"
+                                  d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831 15.9155 15.9155 0 0 1 0 -31.831"
+                                />
+                                {/* Progress circle - animated */}
+                                <path
+                                  className="text-athlete-accent"
+                                  stroke="currentColor"
+                                  strokeWidth="3"
+                                  fill="none"
+                                  strokeLinecap="round"
+                                  strokeDasharray="25, 100"
+                                  d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831 15.9155 15.9155 0 0 1 0 -31.831"
+                                />
+                              </svg>
                             </div>
+                            <span className="text-sm font-medium">Searching with AI...</span>
                           </div>
                         ) : (
                           <>
