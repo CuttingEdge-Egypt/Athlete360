@@ -2923,18 +2923,19 @@ Please respond with just the image URL if you find one, or "NO_IMAGE_FOUND" if y
     let processedUrl = url;
     if (url.includes('commons.wikimedia.org/wiki/Special:FilePath/')) {
       // Convert WikiMedia special path to direct image URL
-      const fileName = decodeURIComponent(url.split('/').pop() || '');
+      const encodedFileName = url.split('/').pop() || '';
+      const fileName = decodeURIComponent(encodedFileName);
       if (fileName) {
-        // For WikiMedia, we'll try the commons direct URL without the thumb path first
-        processedUrl = `https://upload.wikimedia.org/wikipedia/commons/${fileName}`;
+        // For WikiMedia, use the original encoded filename to avoid space issues
+        processedUrl = `https://upload.wikimedia.org/wikipedia/commons/${encodedFileName}`;
         console.log(`🔄 Converted WikiMedia URL to direct image: ${processedUrl}`);
       }
     } else if (url.includes('commons.wikimedia.org') && url.includes('File:')) {
       // Handle other WikiMedia formats  
       const match = url.match(/File:(.+?)(?:\?|$)/);
       if (match) {
-        const fileName = decodeURIComponent(match[1]);
-        processedUrl = `https://upload.wikimedia.org/wikipedia/commons/${fileName}`;
+        const encodedFileName = match[1];
+        processedUrl = `https://upload.wikimedia.org/wikipedia/commons/${encodedFileName}`;
         console.log(`🔄 Converted WikiMedia File URL to direct image: ${processedUrl}`);
       }
     }
