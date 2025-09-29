@@ -2878,19 +2878,11 @@ export async function getAthleteImage(
 ): Promise<AthleteImageResult> {
   console.log(`🖼️ Starting GPT-5 image search for ${name} (${sport}, ${country})`);
 
-  const prompt = `Search the web for a professional profile photo of the athlete:
+  const prompt = `Find a picture of the athlete:
 - Name: ${name}
 - Sport: ${sport}
 - Country: ${country}
 ${details ? `- Additional info: ${details}` : ''}
-
-Find a high-quality profile image from:
-- Official sport federation websites
-- Olympic committee pages
-- Major sports news outlets
-- Competition organizer websites
-- Professional team pages
-- Sports databases
 
 Return a JSON object with this structure:
 {
