@@ -25,7 +25,7 @@ import { DevelopmentPlanDisplay } from "@/components/ui/development-plan-display
 import { StatisticsDisplay } from "@/components/ui/statistics-display";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X, RefreshCw, TrendingUp, Check, ChevronsUpDown, BadgeCheck } from "lucide-react";
+import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X, RefreshCw, TrendingUp, Check, ChevronsUpDown, Shield, Ruler } from "lucide-react";
 import type { Sport, Athlete } from "@shared/schema";
 import GenerationQueue from "@/components/ui/generation-queue";
 import { CountrySelect } from "@/components/ui/country-select";
@@ -1590,7 +1590,7 @@ export default function Home() {
                               {selectedAthlete.personalInfo.height && (
                                 <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-yellow-400/60 transition-all duration-200">
                                   <div className="flex items-center justify-center w-4 h-4 bg-yellow-500/20 rounded-full">
-                                    <span className="text-[10px] text-yellow-400">📏</span>
+                                    <Ruler className="text-yellow-400" size={10} />
                                   </div>
                                   <span className="text-xs text-slate-400 font-medium">Height</span>
                                   <span className="text-xs font-bold text-white">{selectedAthlete.personalInfo.height}</span>
@@ -1616,7 +1616,7 @@ export default function Home() {
                               {selectedAthlete.personalInfo.club && selectedAthlete.personalInfo.club !== "N/A" && (
                                 <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-green-400/60 transition-all duration-200">
                                   <div className="flex items-center justify-center w-4 h-4 bg-green-500/20 rounded-full">
-                                    <BadgeCheck className="text-green-400" size={10} />
+                                    <Shield className="text-green-400" size={10} />
                                   </div>
                                   <span className="text-xs text-slate-400 font-medium">Club</span>
                                   <span className="text-xs font-bold text-white">{selectedAthlete.personalInfo.club}</span>
