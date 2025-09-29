@@ -997,18 +997,29 @@ export default function Home() {
         const result = await response.json();
         
         if (result.success) {
+          console.log(`✅ Image search successful:`, result);
+          
           // Refresh athlete data to show the new image
           const updatedAthleteResponse = await fetch(`/api/athletes/${athleteId}`);
           if (updatedAthleteResponse.ok) {
             const updatedAthlete = await updatedAthleteResponse.json();
+            console.log(`🔄 Updated athlete data:`, updatedAthlete);
             setSelectedAthlete(updatedAthlete);
+            
+            toast({
+              title: "Image Found!",
+              description: `Profile image has been updated successfully. Found ${result.type || 'image'} URL.`,
+            });
+          } else {
+            console.error(`❌ Failed to refresh athlete data`);
+            toast({
+              title: "Image Found but Update Failed",
+              description: "Found an image but couldn't refresh the profile data.",
+              variant: "destructive",
+            });
           }
-          
-          toast({
-            title: "Image Found!",
-            description: result.message || "Profile image has been updated successfully.",
-          });
         } else {
+          console.log(`❌ Image search failed:`, result);
           toast({
             title: "No Image Found",
             description: result.message || "Could not find a suitable profile image.",

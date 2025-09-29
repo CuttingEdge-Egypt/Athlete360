@@ -2916,17 +2916,37 @@ Respond with a single URL or NULL, nothing else.`;
 
     console.log(`📸 GPT-5 found image URL: ${url}`);
 
+    // Convert WikiMedia Commons URLs to direct image URLs
+    let processedUrl = url;
+    if (url.includes('commons.wikimedia.org/wiki/Special:FilePath/')) {
+      // Convert WikiMedia special path to direct image URL
+      const fileName = decodeURIComponent(url.split('/').pop() || '');
+      if (fileName) {
+        // For WikiMedia, we'll try the commons direct URL without the thumb path first
+        processedUrl = `https://upload.wikimedia.org/wikipedia/commons/${fileName}`;
+        console.log(`🔄 Converted WikiMedia URL to direct image: ${processedUrl}`);
+      }
+    } else if (url.includes('commons.wikimedia.org') && url.includes('File:')) {
+      // Handle other WikiMedia formats  
+      const match = url.match(/File:(.+?)(?:\?|$)/);
+      if (match) {
+        const fileName = decodeURIComponent(match[1]);
+        processedUrl = `https://upload.wikimedia.org/wikipedia/commons/${fileName}`;
+        console.log(`🔄 Converted WikiMedia File URL to direct image: ${processedUrl}`);
+      }
+    }
+
     const downloadableExts = [".jpg", ".jpeg", ".png", ".webp"];
     const isDownloadable = downloadableExts.some(ext => 
-      url.toLowerCase().endsWith(ext)
-    );
+      processedUrl.toLowerCase().endsWith(ext)
+    ) || processedUrl.includes('upload.wikimedia.org');
 
     if (isDownloadable) {
       // For downloadable images, we'll return the download URL
       // The frontend can handle downloading/displaying as needed
-      console.log(`✅ Found downloadable image: ${url}`);
+      console.log(`✅ Found downloadable image: ${processedUrl}`);
       return {
-        downloadUrl: url,
+        downloadUrl: processedUrl,
         embedUrl: null,
         localFile: null,
         success: true
