@@ -2878,19 +2878,20 @@ export async function getAthleteImage(
 ): Promise<AthleteImageResult> {
   console.log(`🖼️ Starting GPT-5 image search for ${name} (${sport}, ${country})`);
 
-  const prompt = `You are an AI that provides athlete photos.
-The request is for an athlete:
-- Name: ${name}
-- Sport: ${sport}
-- Country: ${country}
-- Details: ${details}
+  const prompt = `I need to find a photo of this athlete for their sports profile:
 
-Return ONE of the following:
-1. A direct downloadable image link (ending in .jpg, .png, etc.)
-2. Or an embeddable link (usable directly inside an <img> HTML tag).
+Athlete: ${name}
+Sport: ${sport}
+Country: ${country}
+Additional info: ${details}
 
-If no real image is found, return only the word NULL.
-Respond with a single URL or NULL, nothing else.`;
+Please provide a direct image URL that I can use to display their photo. I'm looking for:
+- Official sports photos
+- Professional headshots or action shots
+- Images from tournaments or competitions
+- Team or federation photos
+
+Please respond with just the image URL if you find one, or "NO_IMAGE_FOUND" if you cannot locate a suitable image.`;
 
   try {
     // Send prompt to GPT-5
@@ -2900,10 +2901,11 @@ Respond with a single URL or NULL, nothing else.`;
       temperature: 1
     });
 
-    const url = response.choices[0]?.message?.content?.trim();
+    const rawResponse = response.choices[0]?.message?.content?.trim();
+    console.log(`🔍 Raw GPT-5 response for ${name}:`, JSON.stringify(rawResponse));
 
     // Handle case where GPT-5 returns no image
-    if (!url || url.toUpperCase() === "NULL") {
+    if (!rawResponse || rawResponse.toUpperCase() === "NULL" || rawResponse.toUpperCase() === "NO_IMAGE_FOUND") {
       console.log(`❌ GPT-5 found no image for ${name}`);
       return { 
         downloadUrl: null, 
@@ -2914,6 +2916,7 @@ Respond with a single URL or NULL, nothing else.`;
       };
     }
 
+    const url = rawResponse;
     console.log(`📸 GPT-5 found image URL: ${url}`);
 
     // Convert WikiMedia Commons URLs to direct image URLs
