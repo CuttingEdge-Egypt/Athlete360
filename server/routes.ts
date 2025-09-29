@@ -549,13 +549,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let profileImageUrl: string | undefined;
       
       try {
-        // Use fast Gemini-2.5-pro image search instead of slow GPT-5 Python script
-        profileImageUrl = await searchAthleteImagesWithGemini(name, sport.name, athleteCountry, personalInfo ? JSON.stringify(personalInfo) : undefined) || undefined;
+        // Use GPT-5 web search for athlete images
+        const imageResult = await getAthleteImage(name, sport.name, athleteCountry, personalInfo ? JSON.stringify(personalInfo) : undefined);
         
-        if (profileImageUrl) {
+        if (imageResult.success) {
+          profileImageUrl = imageResult.downloadUrl || imageResult.embedUrl || undefined;
           console.log(`✅ Found image for ${name}: ${profileImageUrl}`);
         } else {
           console.log(`⚠️ No image found for ${name}, proceeding with default`);
+          profileImageUrl = undefined;
         }
       } catch (error) {
         console.error(`❌ Image search failed for ${name}:`, error);
