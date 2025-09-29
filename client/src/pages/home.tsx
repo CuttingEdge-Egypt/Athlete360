@@ -1481,6 +1481,8 @@ export default function Home() {
                   )}
                 </div>
               </div>
+                </CardContent>
+              </Card>
 
               {/* Current Athlete Display */}
               {selectedAthlete && (
@@ -1658,7 +1660,6 @@ export default function Home() {
                           )}
                         </div>
                       </div>
-                    </div>
                   </CardContent>
                 </Card>
               )}
