@@ -1417,29 +1417,27 @@ export default function Home() {
                           </div>
                         </div>
                         
-                        {/* Image Search Button */}
-                        {!selectedAthlete.profileImageUrl && (
-                          <Button
-                            data-testid="button-search-image"
-                            onClick={() => handleSearchAthleteImage(selectedAthlete.id)}
-                            size="sm"
-                            variant="outline"
-                            className="bg-athlete-gray-600 border-gray-500 text-gray-300 hover:bg-athlete-gray-500 hover:text-white text-xs px-2 py-1 h-6"
-                            disabled={isSearchingImage}
-                          >
-                            {isSearchingImage ? (
-                              <div className="flex items-center space-x-1">
-                                <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
-                                <span>Searching...</span>
-                              </div>
-                            ) : (
-                              <>
-                                <Search className="mr-1 h-3 w-3" />
-                                Find Image
-                              </>
-                            )}
-                          </Button>
-                        )}
+                        {/* Image Search Button - Always show to allow replacing broken images */}
+                        <Button
+                          data-testid="button-search-image"
+                          onClick={() => handleSearchAthleteImage(selectedAthlete.id)}
+                          size="sm"
+                          variant="outline"
+                          className="bg-athlete-gray-600 border-gray-500 text-gray-300 hover:bg-athlete-gray-500 hover:text-white text-xs px-2 py-1 h-6"
+                          disabled={isSearchingImage}
+                        >
+                          {isSearchingImage ? (
+                            <div className="flex items-center space-x-1">
+                              <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
+                              <span>Searching...</span>
+                            </div>
+                          ) : (
+                            <>
+                              <Search className="mr-1 h-3 w-3" />
+                              {selectedAthlete.profileImageUrl ? "Update Image" : "Find Image"}
+                            </>
+                          )}
+                        </Button>
                         <div className="flex-1 min-w-0">
                           <h3 className="text-xl font-bold text-white">
                             {selectedAthlete.name}
