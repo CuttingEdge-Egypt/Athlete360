@@ -39,6 +39,8 @@ export default function Home() {
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [searchName, setSearchName] = useState<string>("");
   const [isSearching, setIsSearching] = useState(false);
+  const [searchProgress, setSearchProgress] = useState(0);
+  const [searchProgressMessage, setSearchProgressMessage] = useState("");
   const [activeTab, setActiveTab] = useState<string>("analysis");
   const [comparisonData, setComparisonData] = useState<any>(null);
   const [videoAnalysisData, setVideoAnalysisData] = useState<any>(null);
@@ -865,7 +867,43 @@ export default function Home() {
     if (!selectedSport || !athleteName.trim()) return;
     
     setIsSearching(true);
+    setSearchProgress(0);
+    setSearchProgressMessage("");
+    
+    // Progress simulation based on typical AI search stages
+    const updateProgress = (progress: number, message: string) => {
+      setSearchProgress(progress);
+      setSearchProgressMessage(message);
+    };
+
     try {
+      // Stage 1: Initializing search
+      updateProgress(10, "Initializing athlete search...");
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Stage 2: Validating sport information
+      updateProgress(20, "Validating sport information...");
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      // Start the actual API request
+      const startTime = Date.now();
+      
+      // Stage 3: AI personal info extraction (this takes the longest)
+      updateProgress(35, "AI extracting athlete details...");
+      
+      const progressInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        if (elapsed < 8000) { // First 8 seconds - personal info extraction
+          const progress = 35 + (elapsed / 8000) * 30; // From 35% to 65%
+          updateProgress(Math.min(progress, 65), "Analyzing athlete background and achievements...");
+        } else if (elapsed < 12000) { // Next 4 seconds - image search
+          const progress = 65 + ((elapsed - 8000) / 4000) * 20; // From 65% to 85%
+          updateProgress(Math.min(progress, 85), "Searching for athlete profile image...");
+        } else { // Final stage - database creation
+          updateProgress(90, "Creating athlete profile...");
+        }
+      }, 300);
+
       const response = await fetch('/api/athletes/create-with-ai', {
         method: 'POST',
         headers: {
@@ -877,9 +915,16 @@ export default function Home() {
           nationality: selectedCountry // Pass selected nationality to improve AI search accuracy
         }),
       });
-      
+
+      clearInterval(progressInterval);
+
       if (response.ok) {
+        updateProgress(95, "Finalizing athlete data...");
         const newAthlete = await response.json();
+        
+        updateProgress(100, "Search completed successfully!");
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         setSelectedAthlete(newAthlete);
         setSearchName(newAthlete.name);
         toast({
@@ -887,6 +932,7 @@ export default function Home() {
           description: `${newAthlete.name} has been added to our database with AI-powered insights.`,
         });
       } else {
+        clearInterval(progressInterval);
         const error = await response.json();
         toast({
           title: "Creation Failed",
@@ -903,6 +949,8 @@ export default function Home() {
       });
     } finally {
       setIsSearching(false);
+      setSearchProgress(0);
+      setSearchProgressMessage("");
     }
   };
 
@@ -1234,10 +1282,41 @@ export default function Home() {
                         disabled={!selectedSport || isSearching}
                       >
                         {isSearching ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Searching with AI...
-                          </>
+                          <div className="flex flex-col items-center space-y-2">
+                            <div className="flex items-center space-x-3">
+                              {/* Progress Circle */}
+                              <div className="relative w-6 h-6">
+                                <svg className="w-6 h-6 transform -rotate-90" viewBox="0 0 36 36">
+                                  {/* Background circle */}
+                                  <path
+                                    className="text-gray-600"
+                                    stroke="currentColor"
+                                    strokeWidth="3"
+                                    fill="none"
+                                    d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831 15.9155 15.9155 0 0 1 0 -31.831"
+                                  />
+                                  {/* Progress circle */}
+                                  <path
+                                    className="text-athlete-accent"
+                                    stroke="currentColor"
+                                    strokeWidth="3"
+                                    fill="none"
+                                    strokeLinecap="round"
+                                    strokeDasharray={`${searchProgress}, 100`}
+                                    d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831 15.9155 15.9155 0 0 1 0 -31.831"
+                                  />
+                                </svg>
+                                {/* Progress percentage */}
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <span className="text-xs font-semibold text-white">{Math.round(searchProgress)}%</span>
+                                </div>
+                              </div>
+                              <div className="text-left">
+                                <div className="text-sm font-medium">Searching with AI...</div>
+                                <div className="text-xs text-gray-300">{searchProgressMessage}</div>
+                              </div>
+                            </div>
+                          </div>
                         ) : (
                           <>
                             <Search className="mr-2 h-4 w-4" />
