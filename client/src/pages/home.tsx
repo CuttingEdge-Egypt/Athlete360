@@ -1545,11 +1545,11 @@ export default function Home() {
                           
                           {/* Image Update Tip Popup */}
                           {showImageUpdateTip && (
-                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50 w-max max-w-[280px]">
-                              <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-4 py-2 rounded-lg shadow-xl border border-blue-400 relative animate-in slide-in-from-bottom-2 duration-300">
-                                {/* Arrow pointing down to button */}
-                                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
-                                  <div className="w-0 h-0 border-l-4 border-r-4 border-t-8 border-l-transparent border-r-transparent border-t-blue-600"></div>
+                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 z-50 w-max max-w-[280px]">
+                              <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-4 py-2 rounded-lg shadow-xl border border-blue-400 relative animate-in slide-in-from-top-2 duration-300">
+                                {/* Arrow pointing up to button */}
+                                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full">
+                                  <div className="w-0 h-0 border-l-4 border-r-4 border-b-8 border-l-transparent border-r-transparent border-b-blue-600"></div>
                                 </div>
                                 
                                 <div className="text-sm font-medium">
