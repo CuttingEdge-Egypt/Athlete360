@@ -879,29 +879,29 @@ export default function Home() {
 
     try {
       // Stage 1: Initializing search
-      updateProgress(10, "Initializing athlete search...");
+      updateProgress(10, "Starting AI search...");
       await new Promise(resolve => setTimeout(resolve, 500));
 
       // Stage 2: Validating sport information
-      updateProgress(20, "Validating sport information...");
+      updateProgress(20, "Preparing search parameters...");
       await new Promise(resolve => setTimeout(resolve, 800));
 
       // Start the actual API request
       const startTime = Date.now();
       
       // Stage 3: AI personal info extraction (this takes the longest)
-      updateProgress(35, "AI extracting athlete details...");
+      updateProgress(35, "Finding athlete information...");
       
       const progressInterval = setInterval(() => {
         const elapsed = Date.now() - startTime;
         if (elapsed < 8000) { // First 8 seconds - personal info extraction
           const progress = 35 + (elapsed / 8000) * 30; // From 35% to 65%
-          updateProgress(Math.min(progress, 65), "Analyzing athlete background and achievements...");
+          updateProgress(Math.min(progress, 65), "Extracting athlete details and achievements...");
         } else if (elapsed < 12000) { // Next 4 seconds - image search
           const progress = 65 + ((elapsed - 8000) / 4000) * 20; // From 65% to 85%
-          updateProgress(Math.min(progress, 85), "Searching for athlete profile image...");
+          updateProgress(Math.min(progress, 85), "Finding profile image...");
         } else { // Final stage - database creation
-          updateProgress(90, "Creating athlete profile...");
+          updateProgress(90, "Saving athlete profile...");
         }
       }, 300);
 
@@ -920,10 +920,10 @@ export default function Home() {
       clearInterval(progressInterval);
 
       if (response.ok) {
-        updateProgress(95, "Finalizing athlete data...");
+        updateProgress(95, "Building athlete profile...");
         const newAthlete = await response.json();
         
-        updateProgress(100, "Search completed successfully!");
+        updateProgress(100, "Athlete created successfully!");
         await new Promise(resolve => setTimeout(resolve, 500));
         
         setSelectedAthlete(newAthlete);
@@ -1349,9 +1349,9 @@ export default function Home() {
                       >
                         {isSearching ? (
                           <div className="flex items-center space-x-3">
-                            {/* Animated Progress Circle */}
+                            {/* iOS-style Progress Circle */}
                             <div className="relative w-5 h-5">
-                              <svg className="w-5 h-5 transform -rotate-90 animate-spin" viewBox="0 0 36 36">
+                              <svg className="w-5 h-5 transform -rotate-90" viewBox="0 0 36 36">
                                 {/* Background circle */}
                                 <path
                                   className="text-gray-600"
@@ -1360,19 +1360,31 @@ export default function Home() {
                                   fill="none"
                                   d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831 15.9155 15.9155 0 0 1 0 -31.831"
                                 />
-                                {/* Progress circle - animated */}
+                                {/* Smooth progress circle */}
                                 <path
-                                  className="text-athlete-accent"
+                                  className="text-athlete-accent transition-all duration-300 ease-out"
                                   stroke="currentColor"
                                   strokeWidth="3"
                                   fill="none"
                                   strokeLinecap="round"
-                                  strokeDasharray="25, 100"
+                                  strokeDasharray={`${(searchProgress || 0) * 100 / 100}, 100`}
                                   d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831 15.9155 15.9155 0 0 1 0 -31.831"
+                                  style={{
+                                    transform: 'rotate(0deg)',
+                                    transformOrigin: '50% 50%'
+                                  }}
                                 />
                               </svg>
+                              {/* Optional: Small rotating indicator for active progress */}
+                              {searchProgress < 100 && (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <div className="w-1 h-1 bg-athlete-accent rounded-full animate-pulse" />
+                                </div>
+                              )}
                             </div>
-                            <span className="text-sm font-medium">Searching with AI...</span>
+                            <span className="text-sm font-medium">
+                              {searchProgressMessage || "Starting search..."}
+                            </span>
                           </div>
                         ) : (
                           <>
