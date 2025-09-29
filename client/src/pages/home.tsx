@@ -1448,7 +1448,7 @@ export default function Home() {
                           </div>
                           
                           {/* Title */}
-                          <h3 className="text-xl font-semibold text-white mb-2">
+                          <h3 className="text-lg font-semibold text-white mb-2">
                             Athlete Not Found
                           </h3>
                           
@@ -1471,11 +1471,6 @@ export default function Home() {
                               <span>Search with AI</span>
                             </div>
                           </Button>
-                          
-                          {/* Subtle hint */}
-                          <p className="text-xs text-gray-400 mt-3">
-                            🤖 Powered by advanced AI search
-                          </p>
                         </div>
                       )}
                     </div>
