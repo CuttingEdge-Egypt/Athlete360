@@ -1272,7 +1272,8 @@ export default function Home() {
                     </div>
                   )}
                   
-                  {searchName.trim() && !isSearchLoading && availableAthletes.length === 0 && !selectedAthlete && (
+                  {searchName.trim() && !isSearchLoading && availableAthletes.length === 0 && 
+                   (!selectedAthlete || searchName.trim().toLowerCase() !== selectedAthlete.name.toLowerCase()) && (
                     <div className="mt-2 bg-athlete-gray-700 border border-gray-600 rounded-md p-4 text-center">
                       <p className="text-gray-300 mb-2">Athlete not found</p>
                       <Button
