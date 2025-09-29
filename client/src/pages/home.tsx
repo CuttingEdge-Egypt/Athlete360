@@ -1613,6 +1613,16 @@ export default function Home() {
                                 </div>
                               )}
                               
+                              {selectedAthlete.personalInfo.club && selectedAthlete.personalInfo.club !== "N/A" && (
+                                <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-green-400/60 transition-all duration-200">
+                                  <div className="flex items-center justify-center w-4 h-4 bg-green-500/20 rounded-full">
+                                    <span className="text-[10px] text-green-400">⚽</span>
+                                  </div>
+                                  <span className="text-xs text-slate-400 font-medium">Club</span>
+                                  <span className="text-xs font-bold text-white">{selectedAthlete.personalInfo.club}</span>
+                                </div>
+                              )}
+                              
                               {selectedAthlete.personalInfo.weight && selectedAthlete.personalInfo.weight !== "N/A" && (
                                 <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-orange-400/60 transition-all duration-200">
                                   <div className="flex items-center justify-center w-4 h-4 bg-orange-500/20 rounded-full">
