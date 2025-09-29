@@ -1339,60 +1339,120 @@ export default function Home() {
                   
                   {searchName.trim() && !isSearchLoading && availableAthletes.length === 0 && 
                    (!selectedAthlete || searchName.trim().toLowerCase() !== selectedAthlete.name.toLowerCase()) && (
-                    <div className="mt-2 bg-athlete-gray-700 border border-gray-600 rounded-md p-4 text-center">
-                      <p className="text-gray-300 mb-2">Athlete not found</p>
-                      <Button
-                        data-testid="create-athlete-ai"
-                        onClick={() => handleCreateAthleteWithAI(searchName.trim())}
-                        className="bg-athlete-accent hover:bg-athlete-accent/80 text-white"
-                        disabled={!selectedSport || isSearching}
-                      >
-                        {isSearching ? (
-                          <div className="flex items-center space-x-3">
-                            {/* iOS-style Progress Circle */}
-                            <div className="relative w-5 h-5">
-                              <svg className="w-5 h-5 transform -rotate-90" viewBox="0 0 36 36">
-                                {/* Background circle */}
-                                <path
-                                  className="text-gray-600"
-                                  stroke="currentColor"
-                                  strokeWidth="3"
-                                  fill="none"
-                                  d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831 15.9155 15.9155 0 0 1 0 -31.831"
-                                />
-                                {/* Smooth progress circle */}
-                                <path
-                                  className="text-athlete-accent transition-all duration-300 ease-out"
-                                  stroke="currentColor"
-                                  strokeWidth="3"
-                                  fill="none"
-                                  strokeLinecap="round"
-                                  strokeDasharray={`${(searchProgress || 0) * 100 / 100}, 100`}
-                                  d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831 15.9155 15.9155 0 0 1 0 -31.831"
-                                  style={{
-                                    transform: 'rotate(0deg)',
-                                    transformOrigin: '50% 50%'
-                                  }}
-                                />
-                              </svg>
-                              {/* Optional: Small rotating indicator for active progress */}
-                              {searchProgress < 100 && (
+                    <div className="mt-4">
+                      {isSearching ? (
+                        /* Premium AI Search Loading State */
+                        <div className="bg-gradient-to-br from-athlete-gray-700/90 to-athlete-gray-800/90 border border-athlete-accent/20 rounded-xl p-8 text-center backdrop-blur-sm shadow-2xl">
+                          {/* Enhanced Progress Circle */}
+                          <div className="flex flex-col items-center space-y-6">
+                            <div className="relative">
+                              {/* Outer glow ring */}
+                              <div className="absolute inset-0 bg-athlete-accent/20 rounded-full blur-md animate-pulse" style={{ width: '80px', height: '80px' }} />
+                              
+                              {/* Main progress circle */}
+                              <div className="relative w-20 h-20 flex items-center justify-center">
+                                <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 36 36">
+                                  {/* Background circle with gradient */}
+                                  <defs>
+                                    <linearGradient id="progress-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                                      <stop offset="0%" stopColor="rgb(75, 85, 99)" stopOpacity="0.3" />
+                                      <stop offset="100%" stopColor="rgb(55, 65, 81)" stopOpacity="0.6" />
+                                    </linearGradient>
+                                    <linearGradient id="progress-fill" x1="0%" y1="0%" x2="100%" y2="100%">
+                                      <stop offset="0%" stopColor="rgb(34, 197, 94)" />
+                                      <stop offset="50%" stopColor="rgb(16, 185, 129)" />
+                                      <stop offset="100%" stopColor="rgb(6, 182, 212)" />
+                                    </linearGradient>
+                                  </defs>
+                                  <path
+                                    stroke="url(#progress-bg)"
+                                    strokeWidth="2.5"
+                                    fill="none"
+                                    d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831 15.9155 15.9155 0 0 1 0 -31.831"
+                                  />
+                                  {/* Animated progress path */}
+                                  <path
+                                    stroke="url(#progress-fill)"
+                                    strokeWidth="2.5"
+                                    fill="none"
+                                    strokeLinecap="round"
+                                    strokeDasharray={`${(searchProgress || 0) * 100 / 100}, 100`}
+                                    d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831 15.9155 15.9155 0 0 1 0 -31.831"
+                                    className="transition-all duration-500 ease-out"
+                                    style={{
+                                      filter: 'drop-shadow(0 0 3px rgba(34, 197, 94, 0.4))'
+                                    }}
+                                  />
+                                </svg>
+                                
+                                {/* Progress percentage */}
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                  <div className="w-1 h-1 bg-athlete-accent rounded-full animate-pulse" />
+                                  <span className="text-lg font-bold text-white bg-athlete-gray-800/80 rounded-full w-12 h-12 flex items-center justify-center text-xs backdrop-blur-sm">
+                                    {Math.round(searchProgress || 0)}%
+                                  </span>
                                 </div>
-                              )}
+                              </div>
                             </div>
-                            <span className="text-sm font-medium">
-                              {searchProgressMessage || "Starting search..."}
-                            </span>
+                            
+                            {/* Status message with icon */}
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-center space-x-2">
+                                <div className="w-2 h-2 bg-athlete-accent rounded-full animate-ping" />
+                                <span className="text-lg font-semibold text-white">
+                                  AI Search in Progress
+                                </span>
+                              </div>
+                              <p className="text-athlete-accent font-medium text-sm max-w-sm mx-auto leading-relaxed">
+                                {searchProgressMessage || "Initializing intelligent search..."}
+                              </p>
+                            </div>
+                            
+                            {/* Subtle animated background elements */}
+                            <div className="absolute top-4 right-4 w-16 h-16 bg-athlete-accent/5 rounded-full animate-pulse" />
+                            <div className="absolute bottom-4 left-4 w-12 h-12 bg-blue-400/5 rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
                           </div>
-                        ) : (
-                          <>
-                            <Search className="mr-2 h-4 w-4" />
-                            Search with AI
-                          </>
-                        )}
-                      </Button>
+                        </div>
+                      ) : (
+                        /* Enhanced Not Found State */
+                        <div className="bg-gradient-to-br from-athlete-gray-700 to-athlete-gray-800 border border-gray-500/30 rounded-xl p-6 text-center shadow-xl hover:shadow-2xl transition-all duration-300">
+                          {/* Icon */}
+                          <div className="flex justify-center mb-4">
+                            <div className="w-16 h-16 bg-athlete-gray-600/50 rounded-full flex items-center justify-center border border-gray-500/20">
+                              <Search className="w-8 h-8 text-gray-400" />
+                            </div>
+                          </div>
+                          
+                          {/* Title */}
+                          <h3 className="text-xl font-semibold text-white mb-2">
+                            Athlete Not Found
+                          </h3>
+                          
+                          {/* Description */}
+                          <p className="text-gray-300 mb-6 text-sm leading-relaxed max-w-sm mx-auto">
+                            We couldn't find <span className="font-medium text-white">"{ searchName.trim()}"</span> in our database. Let our AI search the web and create their profile.
+                          </p>
+                          
+                          {/* Enhanced CTA Button */}
+                          <Button
+                            data-testid="create-athlete-ai"
+                            onClick={() => handleCreateAthleteWithAI(searchName.trim())}
+                            className="bg-gradient-to-r from-athlete-accent to-green-500 hover:from-athlete-accent/90 hover:to-green-500/90 text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                            disabled={!selectedSport || isSearching}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <div className="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center">
+                                <Search className="w-3 h-3" />
+                              </div>
+                              <span>Search with AI</span>
+                            </div>
+                          </Button>
+                          
+                          {/* Subtle hint */}
+                          <p className="text-xs text-gray-400 mt-3">
+                            🤖 Powered by advanced AI search
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
