@@ -914,21 +914,32 @@ export default function Home() {
       // Start the actual API request
       const startTime = Date.now();
       
-      // Stage 3: AI personal info extraction (this takes the longest)
+      // Stage 3: AI search with improved progress management
       updateProgress(35, "Finding athlete information...");
       
       const progressInterval = setInterval(() => {
         const elapsed = Date.now() - startTime;
-        if (elapsed < 8000) { // First 8 seconds - personal info extraction
-          const progress = 35 + (elapsed / 8000) * 30; // From 35% to 65%
-          updateProgress(Math.min(progress, 65), "Extracting athlete details and achievements...");
-        } else if (elapsed < 12000) { // Next 4 seconds - image search
-          const progress = 65 + ((elapsed - 8000) / 4000) * 20; // From 65% to 85%
+        
+        // Asymptotic progression that slows down but keeps moving
+        // This ensures smooth progress even for long-running operations
+        if (elapsed < 10000) { // First 10 seconds - personal info extraction
+          const progress = 35 + (elapsed / 10000) * 25; // From 35% to 60%
+          updateProgress(Math.min(progress, 60), "Searching athlete database...");
+        } else if (elapsed < 20000) { // Next 10 seconds - detailed extraction
+          const progress = 60 + ((elapsed - 10000) / 10000) * 15; // From 60% to 75%
+          updateProgress(Math.min(progress, 75), "Extracting athlete details...");
+        } else if (elapsed < 35000) { // Next 15 seconds - image search
+          const progress = 75 + ((elapsed - 20000) / 15000) * 10; // From 75% to 85%
           updateProgress(Math.min(progress, 85), "Finding profile image...");
-        } else { // Final stage - database creation
-          updateProgress(90, "Saving athlete profile...");
+        } else if (elapsed < 55000) { // Next 20 seconds - final processing
+          const progress = 85 + ((elapsed - 35000) / 20000) * 7; // From 85% to 92%
+          updateProgress(Math.min(progress, 92), "Finalizing athlete data...");
+        } else { // Beyond 55 seconds - very slow asymptotic approach to 95%
+          const extraTime = elapsed - 55000;
+          const progress = 92 + (3 * (1 - Math.exp(-extraTime / 30000))); // Asymptotically approaches 95%
+          updateProgress(Math.min(progress, 94.5), "Saving athlete profile...");
         }
-      }, 300);
+      }, 400);
 
       const response = await fetch('/api/athletes/create-with-ai', {
         method: 'POST',
