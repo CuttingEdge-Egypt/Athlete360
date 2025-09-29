@@ -2910,7 +2910,7 @@ IMPORTANT:
       model: "gpt-5",
       input: prompt,
       tools: [{ type: "web_search_preview" }], // Enable web search
-      max_output_tokens: 2000,
+      max_output_tokens: 8000, // Increased from 2000 to allow longer responses
     });
 
     console.log(`🔍 Raw GPT-5 response for ${name}:`, response.output_text);
