@@ -541,6 +541,29 @@ export default function Home() {
     }
   }, [toast]);
 
+  // Show image update tip when athlete is selected
+  useEffect(() => {
+    if (selectedAthlete) {
+      // Show tip after a short delay when athlete loads
+      const timer = setTimeout(() => {
+        setShowImageUpdateTip(true);
+      }, 1500);
+
+      // Auto-hide after 8 seconds
+      const hideTimer = setTimeout(() => {
+        setShowImageUpdateTip(false);
+      }, 9500);
+
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(hideTimer);
+      };
+    } else {
+      // Hide tip when no athlete is selected
+      setShowImageUpdateTip(false);
+    }
+  }, [selectedAthlete]);
+
   // Check for URL parameters to load comparison data
   useEffect(() => {
     const checkUrlParams = () => {
@@ -849,6 +872,7 @@ export default function Home() {
   const [showBioPopup, setShowBioPopup] = useState(false);
   const [bioData, setBioData] = useState(null);
   const [showStatisticsPopup, setShowStatisticsPopup] = useState(false);
+  const [showImageUpdateTip, setShowImageUpdateTip] = useState(false);
 
   const { data: sports = [] } = useQuery<Sport[]>({
     queryKey: ["/api/sports"],
@@ -1465,7 +1489,8 @@ export default function Home() {
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-start space-x-4">
+                      <div className="flex flex-col items-start space-y-3">
+                        {/* Profile Image */}
                         <div className="relative w-16 h-16 flex-shrink-0">
                           {selectedAthlete.profileImageUrl ? (
                             <img 
@@ -1489,28 +1514,61 @@ export default function Home() {
                           </div>
                         </div>
                         
-                        {/* Image Search Button - Always show to allow replacing broken images */}
-                        <Button
-                          data-testid="button-search-image"
-                          onClick={() => handleSearchAthleteImage(selectedAthlete.id)}
-                          size="sm"
-                          variant="outline"
-                          className="bg-athlete-gray-600 border-gray-500 text-gray-300 hover:bg-athlete-gray-500 hover:text-white text-xs px-2 py-1 h-6"
-                          disabled={isSearchingImage}
-                        >
-                          {isSearchingImage ? (
-                            <div className="flex items-center space-x-1">
-                              <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
-                              <span>Searching...</span>
+                        {/* Image Search Button - Below the image */}
+                        <div className="relative">
+                          <Button
+                            data-testid="button-search-image"
+                            onClick={() => {
+                              handleSearchAthleteImage(selectedAthlete.id);
+                              setShowImageUpdateTip(false);
+                            }}
+                            size="sm"
+                            variant="outline"
+                            className="bg-athlete-gray-600 border-gray-500 text-gray-300 hover:bg-athlete-gray-500 hover:text-white text-xs px-2 py-1 h-6 relative"
+                            disabled={isSearchingImage}
+                          >
+                            {isSearchingImage ? (
+                              <div className="flex items-center space-x-1">
+                                <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
+                                <span>Searching...</span>
+                              </div>
+                            ) : (
+                              <>
+                                <Search className="mr-1 h-3 w-3" />
+                                {selectedAthlete.profileImageUrl ? "Update Image" : "Find Image"}
+                              </>
+                            )}
+                          </Button>
+                          
+                          {/* Image Update Tip Popup */}
+                          {showImageUpdateTip && (
+                            <div className="absolute top-0 left-full ml-2 z-50">
+                              <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-4 py-2 rounded-lg shadow-xl border border-blue-400 relative animate-in slide-in-from-left-2 duration-300">
+                                {/* Arrow pointing to button */}
+                                <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-full">
+                                  <div className="w-0 h-0 border-t-4 border-b-4 border-r-8 border-t-transparent border-b-transparent border-r-blue-600"></div>
+                                </div>
+                                
+                                <div className="text-sm font-medium max-w-xs">
+                                  <p className="mb-1">Not a picture that suits <span className="font-bold">{selectedAthlete.name}</span>?</p>
+                                  <p className="text-blue-100">Help us update the picture.</p>
+                                  <p className="text-xs text-blue-200 mt-1 font-semibold">(No tokens will be deducted)</p>
+                                </div>
+                                
+                                {/* Close button */}
+                                <button
+                                  onClick={() => setShowImageUpdateTip(false)}
+                                  className="absolute -top-1 -right-1 w-5 h-5 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-xs transition-colors"
+                                >
+                                  ×
+                                </button>
+                              </div>
                             </div>
-                          ) : (
-                            <>
-                              <Search className="mr-1 h-3 w-3" />
-                              {selectedAthlete.profileImageUrl ? "Update Image" : "Find Image"}
-                            </>
                           )}
-                        </Button>
-                        <div className="flex-1 min-w-0">
+                        </div>
+                      </div>
+                      
+                      <div className="flex-1 min-w-0 ml-4">
                           <h3 className="text-xl font-bold text-white">
                             {selectedAthlete.name}
                             {selectedAthlete.nameArabic && (
@@ -1604,8 +1662,6 @@ export default function Home() {
                   </CardContent>
                 </Card>
               )}
-                </CardContent>
-              </Card>
 
               {/* Service Boxes Grid */}
               {selectedAthlete && (
