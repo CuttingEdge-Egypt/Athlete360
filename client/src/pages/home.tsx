@@ -541,28 +541,6 @@ export default function Home() {
     }
   }, [toast]);
 
-  // Show image update tip when athlete is selected
-  useEffect(() => {
-    if (selectedAthlete) {
-      // Show tip after a short delay when athlete loads
-      const timer = setTimeout(() => {
-        setShowImageUpdateTip(true);
-      }, 1500);
-
-      // Auto-hide after 8 seconds
-      const hideTimer = setTimeout(() => {
-        setShowImageUpdateTip(false);
-      }, 9500);
-
-      return () => {
-        clearTimeout(timer);
-        clearTimeout(hideTimer);
-      };
-    } else {
-      // Hide tip when no athlete is selected
-      setShowImageUpdateTip(false);
-    }
-  }, [selectedAthlete]);
 
   // Check for URL parameters to load comparison data
   useEffect(() => {
@@ -873,6 +851,29 @@ export default function Home() {
   const [bioData, setBioData] = useState(null);
   const [showStatisticsPopup, setShowStatisticsPopup] = useState(false);
   const [showImageUpdateTip, setShowImageUpdateTip] = useState(false);
+
+  // Show image update tip when athlete is selected
+  useEffect(() => {
+    if (selectedAthlete) {
+      // Show tip after a short delay when athlete loads
+      const timer = setTimeout(() => {
+        setShowImageUpdateTip(true);
+      }, 1500);
+
+      // Auto-hide after 8 seconds
+      const hideTimer = setTimeout(() => {
+        setShowImageUpdateTip(false);
+      }, 9500);
+
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(hideTimer);
+      };
+    } else {
+      // Hide tip when no athlete is selected
+      setShowImageUpdateTip(false);
+    }
+  }, [selectedAthlete]);
 
   const { data: sports = [] } = useQuery<Sport[]>({
     queryKey: ["/api/sports"],
