@@ -2850,3 +2850,106 @@ If web search provides limited information, use these approaches:
     throw new Error(`Statistics generation failed: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
+
+// Interface for image search results
+export interface AthleteImageResult {
+  downloadUrl?: string | null;
+  embedUrl?: string | null;
+  localFile?: string | null;
+  success: boolean;
+  error?: string;
+}
+
+/**
+ * Asks GPT-5 for an athlete photo link (downloadable or embeddable).
+ * Based on Python implementation but adapted for TypeScript/Node.js.
+ * 
+ * @param name - Athlete's full name
+ * @param sport - Sport played
+ * @param country - Nationality / Country
+ * @param details - Personal details (height, medals, etc.)
+ * @returns Promise<AthleteImageResult> - Image URLs and metadata
+ */
+export async function getAthleteImage(
+  name: string, 
+  sport: string, 
+  country: string, 
+  details: string = ""
+): Promise<AthleteImageResult> {
+  console.log(`🖼️ Starting GPT-5 image search for ${name} (${sport}, ${country})`);
+
+  const prompt = `You are an AI that provides athlete photos.
+The request is for an athlete:
+- Name: ${name}
+- Sport: ${sport}
+- Country: ${country}
+- Details: ${details}
+
+Return ONE of the following:
+1. A direct downloadable image link (ending in .jpg, .png, etc.)
+2. Or an embeddable link (usable directly inside an <img> HTML tag).
+
+If no real image is found, return only the word NULL.
+Respond with a single URL or NULL, nothing else.`;
+
+  try {
+    // Send prompt to GPT-5
+    const response = await openai.chat.completions.create({
+      model: "gpt-5", 
+      messages: [{ role: "user", content: prompt }],
+      temperature: 1
+    });
+
+    const url = response.choices[0]?.message?.content?.trim();
+
+    // Handle case where GPT-5 returns no image
+    if (!url || url.toUpperCase() === "NULL") {
+      console.log(`❌ GPT-5 found no image for ${name}`);
+      return { 
+        downloadUrl: null, 
+        embedUrl: null, 
+        localFile: null, 
+        success: false,
+        error: "No image found"
+      };
+    }
+
+    console.log(`📸 GPT-5 found image URL: ${url}`);
+
+    const downloadableExts = [".jpg", ".jpeg", ".png", ".webp"];
+    const isDownloadable = downloadableExts.some(ext => 
+      url.toLowerCase().endsWith(ext)
+    );
+
+    if (isDownloadable) {
+      // For downloadable images, we'll return the download URL
+      // The frontend can handle downloading/displaying as needed
+      console.log(`✅ Found downloadable image: ${url}`);
+      return {
+        downloadUrl: url,
+        embedUrl: null,
+        localFile: null,
+        success: true
+      };
+    } else {
+      // Assume embeddable link
+      console.log(`✅ Found embeddable image: ${url}`);
+      return {
+        downloadUrl: null,
+        embedUrl: url,
+        localFile: null,
+        success: true
+      };
+    }
+
+  } catch (error) {
+    console.error(`❌ GPT-5 image search error for ${name}:`, error);
+    return {
+      downloadUrl: null,
+      embedUrl: null,
+      localFile: null,
+      success: false,
+      error: `GPT-5 API error: ${error instanceof Error ? error.message : String(error)}`
+    };
+  }
+}

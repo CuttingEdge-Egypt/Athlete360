@@ -41,6 +41,7 @@ export default function Home() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchProgress, setSearchProgress] = useState(0);
   const [searchProgressMessage, setSearchProgressMessage] = useState("");
+  const [isSearchingImage, setIsSearchingImage] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("analysis");
   const [comparisonData, setComparisonData] = useState<any>(null);
   const [videoAnalysisData, setVideoAnalysisData] = useState<any>(null);
@@ -978,8 +979,61 @@ export default function Home() {
     setSelectedAthlete(null);
   };
 
+  // Handle searching for athlete image
+  const handleSearchAthleteImage = async (athleteId: string) => {
+    setIsSearchingImage(true);
+    
+    try {
+      console.log(`🖼️ Starting image search for athlete ${athleteId}...`);
+      
+      const response = await fetch(`/api/athletes/${athleteId}/search-image`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-
+      if (response.ok) {
+        const result = await response.json();
+        
+        if (result.success) {
+          // Refresh athlete data to show the new image
+          const updatedAthleteResponse = await fetch(`/api/athletes/${athleteId}`);
+          if (updatedAthleteResponse.ok) {
+            const updatedAthlete = await updatedAthleteResponse.json();
+            setSelectedAthlete(updatedAthlete);
+          }
+          
+          toast({
+            title: "Image Found!",
+            description: result.message || "Profile image has been updated successfully.",
+          });
+        } else {
+          toast({
+            title: "No Image Found",
+            description: result.message || "Could not find a suitable profile image.",
+            variant: "destructive",
+          });
+        }
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Search Failed",
+          description: error.message || "Failed to search for profile image",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error searching for athlete image:', error);
+      toast({
+        title: "Error",
+        description: "Something went wrong while searching for the image",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSearchingImage(false);
+    }
+  };
 
   const services = [
     {
@@ -1351,6 +1405,30 @@ export default function Home() {
                             <User className="text-gray-400" size={24} />
                           </div>
                         </div>
+                        
+                        {/* Image Search Button */}
+                        {!selectedAthlete.profileImageUrl && (
+                          <Button
+                            data-testid="button-search-image"
+                            onClick={() => handleSearchAthleteImage(selectedAthlete.id)}
+                            size="sm"
+                            variant="outline"
+                            className="bg-athlete-gray-600 border-gray-500 text-gray-300 hover:bg-athlete-gray-500 hover:text-white text-xs px-2 py-1 h-6"
+                            disabled={isSearchingImage}
+                          >
+                            {isSearchingImage ? (
+                              <div className="flex items-center space-x-1">
+                                <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
+                                <span>Searching...</span>
+                              </div>
+                            ) : (
+                              <>
+                                <Search className="mr-1 h-3 w-3" />
+                                Find Image
+                              </>
+                            )}
+                          </Button>
+                        )}
                         <div className="flex-1 min-w-0">
                           <h3 className="text-xl font-bold text-white">
                             {selectedAthlete.name}

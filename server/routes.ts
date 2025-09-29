@@ -45,7 +45,7 @@ const developmentPlanSchema = z.object({
 
 type DevelopmentPlanRequest = z.infer<typeof developmentPlanSchema>;
 import { seedDatabase } from "./seedData";
-import { getAthleteProfile, generateAthleteImage, generateSpecificAnalysis, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, compareAthletes, generateRankHistory, generateAthleteStatistics, AthleteStatistics } from "./openaiService";
+import { getAthleteProfile, generateAthleteImage, generateSpecificAnalysis, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, compareAthletes, generateRankHistory, generateAthleteStatistics, AthleteStatistics, getAthleteImage } from "./openaiService";
 import { getAthletePersonalInfoGemini } from "./geminiService";
 import { generateNutritionPlan, generateEnhancedNutritionPlan, generateRankHistoryWithGemini, generateAthleteBiography, generateDevelopmentPlan, searchAthleteImagesWithGemini, type NutritionPlanFormData, type DevelopmentPlanFormData } from "./geminiService";
 import { analyzeVideoFile, analyzeVideoComprehensive } from "./videoAnalysisService";
@@ -642,6 +642,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error in image search test:", error);
       res.status(500).json({ 
         message: "Image search test failed", 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
+  // GPT-5 Image search for athlete
+  app.post('/api/athletes/:id/search-image', isAuthenticated, async (req, res) => {
+    try {
+      const athleteId = req.params.id;
+      const athlete = await storage.getAthleteById(athleteId);
+      
+      if (!athlete) {
+        return res.status(404).json({ message: "Athlete not found" });
+      }
+
+      // Get sport information
+      const sport = await storage.getSportById(athlete.sportId);
+      const sportName = sport?.name || "Unknown Sport";
+      
+      // Prepare details string from personal info
+      let details = "";
+      if (athlete.personalInfo) {
+        details = JSON.stringify(athlete.personalInfo);
+      }
+      
+      console.log(`🖼️ Starting GPT-5 image search for ${athlete.name} (${sportName})...`);
+      
+      // Call GPT-5 image search function
+      const imageResult = await getAthleteImage(
+        athlete.name, 
+        sportName, 
+        athlete.country || "Unknown",
+        details
+      );
+      
+      if (imageResult.success) {
+        // Determine which URL to use
+        const imageUrl = imageResult.downloadUrl || imageResult.embedUrl;
+        
+        if (imageUrl) {
+          // Update athlete with found image
+          await storage.updateAthlete(athleteId, { profileImageUrl: imageUrl });
+          console.log(`✅ GPT-5 image search successful for ${athlete.name}: ${imageUrl}`);
+          
+          res.json({ 
+            success: true, 
+            imageUrl,
+            type: imageResult.downloadUrl ? 'downloadable' : 'embeddable',
+            message: `Image found and updated for ${athlete.name}` 
+          });
+        } else {
+          res.json({ 
+            success: false, 
+            message: `Image search returned success but no URL for ${athlete.name}` 
+          });
+        }
+      } else {
+        console.log(`❌ GPT-5 image search failed for ${athlete.name}: ${imageResult.error}`);
+        res.json({ 
+          success: false, 
+          message: imageResult.error || `No image found for ${athlete.name}` 
+        });
+      }
+      
+    } catch (error) {
+      console.error("Error in GPT-5 image search:", error);
+      res.status(500).json({ 
+        message: "Image search failed", 
         error: error instanceof Error ? error.message : 'Unknown error' 
       });
     }
