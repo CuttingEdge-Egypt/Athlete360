@@ -688,7 +688,8 @@ export async function getAthletePersonalInfo(name: string, sport: string, nation
     - Date of birth
     - Height
     - Weight  
-    - Position (if applicable to the sport)
+    - Position (only for team sports like football, basketball, volleyball, etc.)
+    - Club (only for team sports - the team/club the athlete plays for)
     - Educational background (school, university, club affiliations)
     - Years competing in current sport
     - Previous sports (if any)
@@ -697,6 +698,7 @@ export async function getAthletePersonalInfo(name: string, sport: string, nation
     - Only provide factual, verifiable personal information
     - Use "N/A" for any information not found
     - Do not generate or estimate any data
+    - Position and Club fields are ONLY for team sports - use "N/A" for individual sports
     - If you cannot find reliable personal information, respond with: {"error": "no_personal_info_found"}
 
     Format the response as a JSON object with these exact fields:
@@ -706,6 +708,7 @@ export async function getAthletePersonalInfo(name: string, sport: string, nation
       "height": "string or N/A",
       "weight": "string or N/A",
       "position": "string or N/A",
+      "club": "string or N/A",
       "educationalBackground": "string or N/A",
       "yearsInCurrentSport": "string or N/A",
       "previousSports": ["array of sports or empty array"]
