@@ -2800,8 +2800,9 @@ export async function getAthletePersonalInfoGemini(name: string, sport: string, 
     - Date of birth  
     - Height
     - Weight
-    - Position (if applicable to the sport)
-    - Educational background (school, university, club affiliations)
+    - Position (only for team sports like football, basketball, volleyball, handball, etc.)
+    - Club (only for team sports - the team/club the athlete currently plays for)
+    - Educational background (school, university - NOT including club/team names)
     - Years competing in current sport
     - Previous sports (if any)
 
@@ -2811,6 +2812,8 @@ export async function getAthletePersonalInfoGemini(name: string, sport: string, 
     - Prioritize finding any available personal details over strict verification
     - Only respond with {"error": "no_personal_info_found"} if absolutely no personal information exists
     - Include partial information when available (e.g., approximate age, weight category, etc.)
+    - Position and Club fields are ONLY for team sports - use "N/A" for individual sports
+    - Keep educational background separate from club information
     
     Athlete details:
     - Name: ${name}
@@ -2824,6 +2827,7 @@ export async function getAthletePersonalInfoGemini(name: string, sport: string, 
       "height": "string or N/A",
       "weight": "string or N/A",
       "position": "string or N/A",
+      "club": "string or N/A",
       "educationalBackground": "string or N/A",
       "yearsInCurrentSport": "string or N/A",
       "previousSports": ["array of sports or empty array"]
@@ -2871,6 +2875,7 @@ export async function getAthletePersonalInfoGemini(name: string, sport: string, 
       height: parsedResult.height === "N/A" ? undefined : parsedResult.height,
       weight: parsedResult.weight === "N/A" ? undefined : parsedResult.weight,
       position: parsedResult.position === "N/A" ? undefined : parsedResult.position,
+      club: parsedResult.club === "N/A" ? undefined : parsedResult.club,
       educationalBackground: parsedResult.educationalBackground === "N/A" ? undefined : parsedResult.educationalBackground,
       yearsInCurrentSport: parsedResult.yearsInCurrentSport === "N/A" ? undefined : parsedResult.yearsInCurrentSport,
       previousSports: Array.isArray(parsedResult.previousSports) ? parsedResult.previousSports : []
@@ -2893,6 +2898,7 @@ interface PersonalInfo {
   height?: string;
   weight?: string;
   position?: string;
+  club?: string;
   educationalBackground?: string;
   yearsInCurrentSport?: string;
   previousSports?: string[];
