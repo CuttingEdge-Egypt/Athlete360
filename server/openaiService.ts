@@ -2884,6 +2884,8 @@ export async function getAthleteImage(
 - Country: ${country}
 ${details ? `- Additional info: ${details}` : ''}
 
+Pick a clear picture that suits a profile picture.
+
 Return a JSON object with this structure:
 {
   "imageUrl": "direct image URL here" or null if not found,
