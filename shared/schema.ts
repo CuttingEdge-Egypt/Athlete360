@@ -77,6 +77,7 @@ export const athletes = pgTable("athletes", {
     weight?: string;
     educationalBackground?: string;
     position?: string;
+    club?: string;
     yearsInCurrentSport?: string;
     previousSports?: string[];
   }>(),
