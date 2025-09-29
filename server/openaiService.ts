@@ -2878,35 +2878,69 @@ export async function getAthleteImage(
 ): Promise<AthleteImageResult> {
   console.log(`🖼️ Starting GPT-5 image search for ${name} (${sport}, ${country})`);
 
-  const prompt = `I need a working image URL for displaying this athlete's photo in a web browser:
+  const prompt = `Search the web for a professional profile photo of the athlete:
+- Name: ${name}
+- Sport: ${sport}
+- Country: ${country}
+${details ? `- Additional info: ${details}` : ''}
 
-Athlete: ${name}
-Sport: ${sport}
-Country: ${country}
-Additional info: ${details}
+Find a high-quality profile image from:
+- Official sport federation websites
+- Olympic committee pages
+- Major sports news outlets
+- Competition organizer websites
+- Professional team pages
+- Sports databases
 
-IMPORTANT: I need a direct image URL that works when opened in a browser tab - NOT WikiMedia Special:FilePath URLs or redirect URLs.
+Return a JSON object with this structure:
+{
+  "imageUrl": "direct image URL here" or null if not found,
+  "source": "where the image is from"
+}
 
-I'm looking for:
-- Direct image URLs ending in .jpg, .png, .jpeg, or .webp
-- URLs that can be used directly in an <img> src attribute
-- Professional sports photos, headshots, or action shots
-
-Please respond with ONLY a working direct image URL, or "NO_IMAGE_FOUND" if you cannot find one that works in browsers.`;
+IMPORTANT: 
+- Provide actual direct image URLs that work in browsers
+- Avoid WikiMedia Special:FilePath URLs if possible
+- Look for .jpg, .png, .jpeg, or .webp files
+- If no suitable image is found, set imageUrl to null`;
 
   try {
-    // Send prompt to GPT-5
-    const response = await openai.chat.completions.create({
-      model: "gpt-5", 
-      messages: [{ role: "user", content: prompt }],
-      temperature: 1
+    // Use the correct GPT-5 web search API
+    const response = await openai.responses.create({
+      model: "gpt-5",
+      input: prompt,
+      tools: [{ type: "web_search_preview" }], // Enable web search
+      max_output_tokens: 2000,
     });
 
-    const rawResponse = response.choices[0]?.message?.content?.trim();
-    console.log(`🔍 Raw GPT-5 response for ${name}:`, JSON.stringify(rawResponse));
+    console.log(`🔍 Raw GPT-5 response for ${name}:`, response.output_text);
 
-    // Handle case where GPT-5 returns no image
-    if (!rawResponse || rawResponse.toUpperCase() === "NULL" || rawResponse.toUpperCase() === "NO_IMAGE_FOUND") {
+    // Parse the JSON response
+    let result;
+    try {
+      // Clean the response text
+      let cleanedText = response.output_text.trim();
+      
+      // Remove markdown code blocks if present
+      if (cleanedText.startsWith('```')) {
+        cleanedText = cleanedText.replace(/```json?\n?/g, '').replace(/```/g, '');
+      }
+      
+      result = JSON.parse(cleanedText);
+    } catch (parseError) {
+      console.error(`Failed to parse GPT-5 image search response:`, parseError);
+      console.log(`Raw response was:`, response.output_text);
+      return {
+        downloadUrl: null,
+        embedUrl: null,
+        localFile: null,
+        success: false,
+        error: "Failed to parse image search response"
+      };
+    }
+
+    // Handle the parsed result
+    if (!result.imageUrl) {
       console.log(`❌ GPT-5 found no image for ${name}`);
       return { 
         downloadUrl: null, 
@@ -2917,26 +2951,28 @@ Please respond with ONLY a working direct image URL, or "NO_IMAGE_FOUND" if you 
       };
     }
 
-    const url = rawResponse;
-    console.log(`📸 GPT-5 found image URL: ${url}`);
+    const url = result.imageUrl;
+    console.log(`📸 GPT-5 found image URL: ${url} from ${result.source || 'unknown source'}`);
 
-    // For WikiMedia URLs, keep them as-is since Special:FilePath should work in browsers
-    // The issue is not URL conversion but that Special:FilePath URLs don't always work reliably
+    // Process WikiMedia URLs if needed
     let processedUrl = url;
-    
     if (url.includes('commons.wikimedia.org/wiki/Special:FilePath/')) {
-      console.log(`📝 Using WikiMedia Special:FilePath URL as-is: ${url}`);
-      processedUrl = url; // Use the Special:FilePath URL directly
+      // Convert to direct WikiMedia URL
+      const fileName = url.split('/').pop();
+      if (fileName) {
+        // Use encoded filename to handle spaces properly
+        processedUrl = `https://upload.wikimedia.org/wikipedia/commons/${fileName}`;
+        console.log(`🔄 Converted WikiMedia URL to: ${processedUrl}`);
+      }
     }
 
+    // Determine if it's downloadable
     const downloadableExts = [".jpg", ".jpeg", ".png", ".webp"];
     const isDownloadable = downloadableExts.some(ext => 
       processedUrl.toLowerCase().endsWith(ext)
     ) || processedUrl.includes('upload.wikimedia.org');
 
     if (isDownloadable) {
-      // For downloadable images, we'll return the download URL
-      // The frontend can handle downloading/displaying as needed
       console.log(`✅ Found downloadable image: ${processedUrl}`);
       return {
         downloadUrl: processedUrl,
@@ -2945,11 +2981,10 @@ Please respond with ONLY a working direct image URL, or "NO_IMAGE_FOUND" if you 
         success: true
       };
     } else {
-      // Assume embeddable link
-      console.log(`✅ Found embeddable image: ${url}`);
+      console.log(`✅ Found embeddable image: ${processedUrl}`);
       return {
         downloadUrl: null,
-        embedUrl: url,
+        embedUrl: processedUrl,
         localFile: null,
         success: true
       };
