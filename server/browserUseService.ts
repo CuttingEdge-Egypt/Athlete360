@@ -137,6 +137,7 @@ If the player is not found or not ranked, return:
 `;
 
     // Call BrowserUse API
+    console.log(`📤 Sending BrowserUse request for ${athleteName}...`);
     const response = await fetch('https://cloud.browser-use.com/api/v1/tasks', {
       method: 'POST',
       headers: {
@@ -150,14 +151,16 @@ If the player is not found or not ranked, return:
       })
     });
 
+    console.log(`📥 BrowserUse response status for ${athleteName}: ${response.status}`);
+    
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`❌ BrowserUse API error: ${response.status} - ${errorText}`);
+      console.error(`❌ BrowserUse API error for ${athleteName}: ${response.status} - ${errorText}`);
       return null;
     }
 
     const result = await response.json() as any;
-    console.log('🔍 BrowserUse response:', JSON.stringify(result, null, 2));
+    console.log(`🔍 BrowserUse raw response for ${athleteName}:`, JSON.stringify(result, null, 2));
 
     // Extract the JSON from the result
     let rankingData;
@@ -178,13 +181,15 @@ If the player is not found or not ranked, return:
         }
       }
     } catch (parseError) {
-      console.error('❌ Failed to parse BrowserUse response as JSON:', parseError);
-      console.log('Raw result:', result.result);
+      console.error(`❌ Failed to parse BrowserUse response as JSON for ${athleteName}:`, parseError);
+      console.log(`Raw result for ${athleteName}:`, result.result);
       return null;
     }
 
+    console.log(`📊 Parsed ranking data for ${athleteName}:`, rankingData);
+    
     if (!rankingData || !rankingData.success) {
-      console.log(`⚠️ No rankings found for ${athleteName}`);
+      console.log(`⚠️ No rankings found for ${athleteName}. Ranking data:`, rankingData);
       return null;
     }
 
