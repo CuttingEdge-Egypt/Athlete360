@@ -221,7 +221,7 @@ If the player is not found or not ranked, return:
         const statusData = await statusResponse.json() as any;
         console.log(`📊 Task status (attempt ${attempts}):`, statusData.status);
 
-        if (statusData.status === 'completed') {
+        if (statusData.status === 'finished' || statusData.status === 'completed') {
           taskResult = statusData;
           console.log(`✅ Task completed for ${athleteName}:`, JSON.stringify(taskResult, null, 2));
           break;
