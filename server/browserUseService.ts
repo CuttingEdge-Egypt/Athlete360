@@ -136,9 +136,34 @@ If the player is not found or not ranked, return:
 }
 `;
 
+    // Define the structured output JSON schema
+    const structuredOutputSchema = {
+      "type": "object",
+      "properties": {
+        "success": { "type": "boolean" },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "category": { "type": "string" },
+              "rank": { "type": "string" },
+              "totalAthletes": { "type": "string" },
+              "points": { "type": "string" },
+              "lastUpdated": { "type": "string" }
+            },
+            "required": ["category", "rank"]
+          }
+        },
+        "source": { "type": "string" },
+        "error": { "type": ["string", "null"] }
+      },
+      "required": ["success"]
+    };
+
     // Call BrowserUse API
     console.log(`📤 Sending BrowserUse request for ${athleteName}...`);
-    const response = await fetch('https://cloud.browser-use.com/api/v1/tasks', {
+    const response = await fetch('https://api.browser-use.com/api/v1/run-task', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
@@ -146,8 +171,7 @@ If the player is not found or not ranked, return:
       },
       body: JSON.stringify({
         task: taskPrompt,
-        maxDurationMs: 60000, // 1 minute timeout
-        returnScreenshot: false
+        structured_output_json: JSON.stringify(structuredOutputSchema)
       })
     });
 
@@ -165,24 +189,30 @@ If the player is not found or not ranked, return:
     // Extract the JSON from the result
     let rankingData;
     try {
-      // BrowserUse returns the result in the 'result' field
-      if (result.result) {
-        // Try to parse the result as JSON
+      // BrowserUse may return the result directly or in a 'result' field
+      if (result.result !== undefined) {
+        // Result is in the 'result' field
         if (typeof result.result === 'string') {
-          // Extract JSON from the string if it contains other text
+          // Try to parse as JSON
           const jsonMatch = result.result.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
             rankingData = JSON.parse(jsonMatch[0]);
           } else {
             rankingData = JSON.parse(result.result);
           }
-        } else {
+        } else if (typeof result.result === 'object') {
           rankingData = result.result;
         }
+      } else if (result.success !== undefined) {
+        // Result is returned directly (structured output)
+        rankingData = result;
+      } else {
+        console.error(`❌ Unexpected BrowserUse response format for ${athleteName}`);
+        return null;
       }
     } catch (parseError) {
       console.error(`❌ Failed to parse BrowserUse response as JSON for ${athleteName}:`, parseError);
-      console.log(`Raw result for ${athleteName}:`, result.result);
+      console.log(`Raw result for ${athleteName}:`, result);
       return null;
     }
 
