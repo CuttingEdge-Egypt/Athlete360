@@ -50,6 +50,7 @@ import { getAthletePersonalInfoGemini } from "./geminiService";
 import { generateNutritionPlan, generateEnhancedNutritionPlan, generateRankHistoryWithGemini, generateAthleteBiography, generateDevelopmentPlan, searchAthleteImagesWithGemini, type NutritionPlanFormData, type DevelopmentPlanFormData } from "./geminiService";
 import { analyzeVideoFile, analyzeVideoComprehensive } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
+import { fetchAthleteRankings, isIndividualSport } from "./browserUseService";
 
 import { TestingService } from "./testingService";
 import OpenAI from "openai";
@@ -564,7 +565,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         profileImageUrl = undefined;
       }
 
-      // Create athlete profile with image (if found)
+      // Fetch rankings for individual sports
+      let rankings = null;
+      if (isIndividualSport(sport.name)) {
+        console.log(`🏆 Fetching rankings for ${name} (individual sport: ${sport.name})...`);
+        try {
+          rankings = await fetchAthleteRankings(name, athleteCountry, sport.name);
+          if (rankings) {
+            console.log(`✅ Found rankings for ${name}:`, rankings);
+          } else {
+            console.log(`⚠️ No rankings found for ${name}`);
+          }
+        } catch (error) {
+          console.error(`❌ Failed to fetch rankings for ${name}:`, error);
+        }
+      } else {
+        console.log(`⏭️ Skipping rankings for ${name} (team sport: ${sport.name})`);
+      }
+
+      // Create athlete profile with image (if found) and rankings (for individual sports)
       const athleteData = {
         name: name.trim(),
         sportId,
@@ -573,7 +592,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         country: athleteCountry,
         profileImageUrl, // Image found during creation or undefined
         achievements: [], // No achievements during initial creation
-        personalInfo: personalInfo || undefined // Store personal info for display
+        personalInfo: personalInfo || undefined, // Store personal info for display
+        rankings: rankings || undefined // Store rankings for individual sports
       };
 
       const newAthlete = await storage.createAthlete(athleteData);

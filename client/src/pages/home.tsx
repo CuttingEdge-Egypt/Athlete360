@@ -25,7 +25,7 @@ import { DevelopmentPlanDisplay } from "@/components/ui/development-plan-display
 import { StatisticsDisplay } from "@/components/ui/statistics-display";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X, RefreshCw, TrendingUp, Check, ChevronsUpDown, Shield, Ruler } from "lucide-react";
+import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X, RefreshCw, TrendingUp, Check, ChevronsUpDown, Shield, Ruler, Trophy } from "lucide-react";
 import type { Sport, Athlete } from "@shared/schema";
 import GenerationQueue from "@/components/ui/generation-queue";
 import { CountrySelect } from "@/components/ui/country-select";
@@ -920,24 +920,38 @@ export default function Home() {
       const progressInterval = setInterval(() => {
         const elapsed = Date.now() - startTime;
         
+        // Determine if this is an individual sport for ranking search
+        const isIndividualSport = selectedSport && ![
+          'Football', 'Soccer', 'Basketball', 'Volleyball', 'Handball', 
+          'Rugby', 'Cricket', 'Baseball', 'Softball', 'Hockey', 
+          'Field Hockey', 'Ice Hockey', 'Water Polo', 'American Football',
+          'Lacrosse', 'Netball', 'Australian Football', 'Gaelic Football'
+        ].some(teamSport => 
+          sports.find(s => s.id === selectedSport)?.name.toLowerCase().includes(teamSport.toLowerCase())
+        );
+        
         // Asymptotic progression that slows down but keeps moving
         // This ensures smooth progress even for long-running operations
         if (elapsed < 10000) { // First 10 seconds - personal info extraction
-          const progress = 35 + (elapsed / 10000) * 25; // From 35% to 60%
-          updateProgress(Math.min(progress, 60), "Searching athlete database...");
+          const progress = 35 + (elapsed / 10000) * 20; // From 35% to 55%
+          updateProgress(Math.min(progress, 55), "Searching athlete database...");
         } else if (elapsed < 20000) { // Next 10 seconds - detailed extraction
-          const progress = 60 + ((elapsed - 10000) / 10000) * 15; // From 60% to 75%
-          updateProgress(Math.min(progress, 75), "Extracting athlete details...");
-        } else if (elapsed < 35000) { // Next 15 seconds - image search
-          const progress = 75 + ((elapsed - 20000) / 15000) * 10; // From 75% to 85%
-          updateProgress(Math.min(progress, 85), "Finding profile image...");
-        } else if (elapsed < 55000) { // Next 20 seconds - final processing
-          const progress = 85 + ((elapsed - 35000) / 20000) * 7; // From 85% to 92%
-          updateProgress(Math.min(progress, 92), "Finalizing athlete data...");
-        } else { // Beyond 55 seconds - very slow asymptotic approach to 95%
-          const extraTime = elapsed - 55000;
-          const progress = 92 + (3 * (1 - Math.exp(-extraTime / 30000))); // Asymptotically approaches 95%
-          updateProgress(Math.min(progress, 94.5), "Saving athlete profile...");
+          const progress = 55 + ((elapsed - 10000) / 10000) * 15; // From 55% to 70%
+          updateProgress(Math.min(progress, 70), "Extracting athlete details...");
+        } else if (elapsed < 30000) { // Next 10 seconds - ranking search for individual sports
+          const progress = 70 + ((elapsed - 20000) / 10000) * 10; // From 70% to 80%
+          const message = isIndividualSport ? "Searching official rankings..." : "Verifying team information...";
+          updateProgress(Math.min(progress, 80), message);
+        } else if (elapsed < 45000) { // Next 15 seconds - image search
+          const progress = 80 + ((elapsed - 30000) / 15000) * 10; // From 80% to 90%
+          updateProgress(Math.min(progress, 90), "Finding profile image...");
+        } else if (elapsed < 65000) { // Next 20 seconds - final processing
+          const progress = 90 + ((elapsed - 45000) / 20000) * 5; // From 90% to 95%
+          updateProgress(Math.min(progress, 95), "Finalizing athlete data...");
+        } else { // Beyond 65 seconds - very slow asymptotic approach to 97%
+          const extraTime = elapsed - 65000;
+          const progress = 95 + (2 * (1 - Math.exp(-extraTime / 30000))); // Asymptotically approaches 97%
+          updateProgress(Math.min(progress, 96.5), "Saving athlete profile...");
         }
       }, 400);
 
@@ -1664,6 +1678,31 @@ export default function Home() {
                                     {selectedAthlete.personalInfo.educationalBackground}
                                   </span>
                                 </div>
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* Rankings for Individual Sports */}
+                          {selectedAthlete && selectedAthlete.rankings && selectedAthlete.rankings.categories && selectedAthlete.rankings.categories.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mt-2">
+                              {selectedAthlete.rankings.categories.map((category: any, index: number) => (
+                                <div key={index} className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-amber-400/60 transition-all duration-200">
+                                  <div className="flex items-center justify-center w-4 h-4 bg-amber-500/20 rounded-full">
+                                    <Trophy className="text-amber-400" size={10} />
+                                  </div>
+                                  <span className="text-xs text-slate-400 font-medium">
+                                    {category.category !== "Overall" ? category.category : "Rank"}
+                                  </span>
+                                  <span className="text-xs font-bold text-white">
+                                    #{category.rank}
+                                    {category.totalAthletes ? ` / ${category.totalAthletes}` : ""}
+                                  </span>
+                                </div>
+                              ))}
+                              {selectedAthlete.rankings.source && (
+                                <span className="text-xs text-slate-500 ml-1" title={`Last updated: ${selectedAthlete.rankings.fetchedAt || 'Recently'}`}>
+                                  ({selectedAthlete.rankings.source})
+                                </span>
                               )}
                             </div>
                           )}

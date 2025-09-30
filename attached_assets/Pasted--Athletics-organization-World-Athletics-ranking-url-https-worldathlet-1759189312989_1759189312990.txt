@@ -1,0 +1,67 @@
+{
+  "Athletics": {
+    "organization": "World Athletics",
+    "ranking_url": "https://worldathletics.org/world-rankings/introduction",
+    "note": "World Athletics publishes “World Rankings” for events. :contentReference[oaicite:0]{index=0}"
+  },
+  "Taekwondo": {
+    "organization": "World Taekwondo",
+    "ranking_url": "https://www.worldtaekwondo.org/ranking/ranking.html",
+    "note": "Olympic kyorugi weight-category rankings."
+  },
+  "Wrestling": {
+    "organization": "United World Wrestling (UWW)",
+    "ranking_url": "https://uww.org/athletes-results",
+    "note": "UWW site includes athlete results and ranking by style / weight class."
+  },
+  "Judo": {
+    "organization": "International Judo Federation (IJF)",
+    "ranking_url": "https://www.ijf.org/wrl",
+    "note": "IJF World Ranking List page."
+  },
+  "Fencing": {
+    "organization": "FIE (Fédération Internationale d’Escrime)",
+    "ranking_url": "https://fie.org/athletes",
+    "note": "FIE athlete pages often show ranking by weapon."
+  },
+  "Karate": {
+    "organization": "World Karate Federation (WKF)",
+    "ranking_url": "https://www.wkf.net/ranking",
+    "note": "WKF maintains kumite / kata rankings."
+  },
+  "Badminton": {
+    "organization": "BWF (Badminton World Federation)",
+    "ranking_url": "https://bwfworldtour.bwfbadminton.com/rankings/",
+    "note": "Official BWF world rankings page."
+  },
+  "Tennis": {
+    "organization": "ATP / WTA",
+    "ranking_url": "https://www.atptour.com/en/rankings/singles",
+    "note": "ATP ranking for men; WTA for women (similar structure)."
+  },
+  "Table Tennis": {
+    "organization": "ITTF",
+    "ranking_url": "https://www.ittf.com/rankings",
+    "note": "ITTF publishes world rankings for players."
+  },
+  "Squash": {
+    "organization": "PSA (Professional Squash Association)",
+    "ranking_url": "https://psaworldtour.com/rankings",
+    "note": "PSA world ranking list."
+  },
+  "Archery": {
+    "organization": "World Archery Federation",
+    "ranking_url": "https://worldarchery.sport/world-archery-rankings",
+    "note": "World Archery’s ranking pages for recurve / compound etc."
+  },
+  "Boxing": {
+    "organization": "IBA (International Boxing Association)",
+    "ranking_url": "https://www.iba.sport/rankings",
+    "note": "IBA maintains rankings by weight division."
+  },
+  "Swimming": {
+    "organization": "World Aquatics",
+    "ranking_url": "https://www.worldaquatics.com/rankings",
+    "note": "World Aquatics publishes performance rankings by event."
+  }
+}

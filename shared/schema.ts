@@ -81,6 +81,17 @@ export const athletes = pgTable("athletes", {
     yearsInCurrentSport?: string;
     previousSports?: string[];
   }>(),
+  rankings: jsonb("rankings").$type<{
+    categories?: Array<{
+      category: string;
+      rank: string;
+      totalAthletes?: string;
+      points?: string;
+      lastUpdated?: string;
+    }>;
+    source?: string;
+    fetchedAt?: string;
+  }>(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
