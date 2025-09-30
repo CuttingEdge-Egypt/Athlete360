@@ -183,36 +183,85 @@ If the player is not found or not ranked, return:
       return null;
     }
 
-    const result = await response.json() as any;
-    console.log(`🔍 BrowserUse raw response for ${athleteName}:`, JSON.stringify(result, null, 2));
+    const taskResponse = await response.json() as any;
+    console.log(`🔍 BrowserUse task created for ${athleteName}:`, JSON.stringify(taskResponse, null, 2));
 
-    // Extract the JSON from the result
+    // BrowserUse returns a task ID - we need to poll for the result
+    const taskId = taskResponse.id;
+    if (!taskId) {
+      console.error(`❌ No task ID returned from BrowserUse for ${athleteName}`);
+      return null;
+    }
+
+    console.log(`⏳ Polling for task result: ${taskId}...`);
+
+    // Poll for task completion (max 60 seconds)
+    const maxAttempts = 30; // 30 attempts * 2 seconds = 60 seconds max
+    let attempts = 0;
+    let taskResult = null;
+
+    while (attempts < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds between polls
+      attempts++;
+
+      try {
+        const statusResponse = await fetch(`https://api.browser-use.com/api/v1/task/${taskId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!statusResponse.ok) {
+          console.error(`❌ Failed to get task status for ${athleteName}: ${statusResponse.status}`);
+          continue;
+        }
+
+        const statusData = await statusResponse.json() as any;
+        console.log(`📊 Task status (attempt ${attempts}):`, statusData.status);
+
+        if (statusData.status === 'finished') {
+          taskResult = statusData;
+          console.log(`✅ Task completed for ${athleteName}:`, JSON.stringify(taskResult, null, 2));
+          break;
+        } else if (statusData.status === 'failed' || statusData.status === 'stopped') {
+          console.error(`❌ Task ${statusData.status} for ${athleteName}`);
+          return null;
+        }
+      } catch (pollError) {
+        console.error(`❌ Error polling task status for ${athleteName}:`, pollError);
+      }
+    }
+
+    if (!taskResult) {
+      console.error(`❌ Task timed out for ${athleteName} after ${maxAttempts} attempts`);
+      return null;
+    }
+
+    // Extract the ranking data from the task result
     let rankingData;
     try {
-      // BrowserUse may return the result directly or in a 'result' field
-      if (result.result !== undefined) {
-        // Result is in the 'result' field
-        if (typeof result.result === 'string') {
-          // Try to parse as JSON
-          const jsonMatch = result.result.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            rankingData = JSON.parse(jsonMatch[0]);
-          } else {
-            rankingData = JSON.parse(result.result);
-          }
-        } else if (typeof result.result === 'object') {
-          rankingData = result.result;
+      // The result should be in the output or result field
+      const output = taskResult.output || taskResult.result;
+      
+      if (typeof output === 'string') {
+        // Try to parse as JSON
+        const jsonMatch = output.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          rankingData = JSON.parse(jsonMatch[0]);
+        } else {
+          rankingData = JSON.parse(output);
         }
-      } else if (result.success !== undefined) {
-        // Result is returned directly (structured output)
-        rankingData = result;
+      } else if (typeof output === 'object') {
+        rankingData = output;
       } else {
-        console.error(`❌ Unexpected BrowserUse response format for ${athleteName}`);
+        console.error(`❌ Unexpected output format for ${athleteName}:`, output);
         return null;
       }
     } catch (parseError) {
-      console.error(`❌ Failed to parse BrowserUse response as JSON for ${athleteName}:`, parseError);
-      console.log(`Raw result for ${athleteName}:`, result);
+      console.error(`❌ Failed to parse task result for ${athleteName}:`, parseError);
+      console.log(`Raw task result:`, taskResult);
       return null;
     }
 
