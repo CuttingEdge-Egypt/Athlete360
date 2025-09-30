@@ -221,13 +221,15 @@ If the player is not found or not ranked, return:
         const statusData = await statusResponse.json() as any;
         console.log(`📊 Task status (attempt ${attempts}):`, statusData.status);
 
-        if (statusData.status === 'finished') {
+        if (statusData.status === 'completed') {
           taskResult = statusData;
           console.log(`✅ Task completed for ${athleteName}:`, JSON.stringify(taskResult, null, 2));
           break;
         } else if (statusData.status === 'failed' || statusData.status === 'stopped') {
           console.error(`❌ Task ${statusData.status} for ${athleteName}`);
           return null;
+        } else {
+          console.log(`⏳ Task still running (attempt ${attempts}/${maxAttempts})...`);
         }
       } catch (pollError) {
         console.error(`❌ Error polling task status for ${athleteName}:`, pollError);
