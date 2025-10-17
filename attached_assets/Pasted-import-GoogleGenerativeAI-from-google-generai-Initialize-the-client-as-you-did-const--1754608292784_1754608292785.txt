@@ -1,0 +1,128 @@
+import { GoogleGenerativeAI } from "@google/generai";
+
+// Initialize the client as you did
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || "");
+
+// Your existing interfaces
+export interface AthleteData {
+  name: string;
+  sport: string;
+  bio: string; // This will contain the formatted bio with citations
+  rank: number | string;
+  country?: string;
+  achievements: string[];
+  recentNews: string;
+  profileImageDescription: string;
+  // This will be populated from the model's grounding response
+  referenceLinks?: Array<{ title: string; uri: string }>;
+  stats?: any;
+}
+
+// ... (Your other interfaces like AnalysisData remain the same)
+
+export async function getAthleteProfile(name: string, sport: string, nationality?: string): Promise<AthleteData> {
+  const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const nationalityContext = nationality ? ` from ${nationality}` : '';
+
+  const isEgyptianTaekwondo = sport.toLowerCase() === 'taekwondo' && (
+    nationality?.toLowerCase().includes('egypt') ||
+    /\b(ahmed|mohamed|habiba|wael)\b/i.test(name)
+  );
+  
+  const sportSpecificGuidance = isEgyptianTaekwondo 
+    ? 'For Egyptian taekwondo athletes, heavily reference https://www.taekwondodata.com/ for accurate competition records, rankings, and athlete profiles.'
+    : '';
+
+  // --- MODIFICATION 1: Updated Prompt ---
+  // The prompt is updated to request the specific biography format with inline citations.
+  const prompt = `
+    Today's date is ${currentDate}.
+    Using Google Search, find factual, up-to-date information about the athlete "${name}"${nationalityContext}, who competes in ${sport}.
+    
+    Then, format the response as a JSON object matching the provided schema.
+
+    Inside the "bio" field of the JSON, you MUST create a detailed biography structured with the following headings:
+    - An introductory paragraph.
+    - A heading "Recent Competitions:".
+    - A heading "Career Record and Rankings:".
+    - A heading "Notable Achievements:".
+
+    Crucially, for every sentence in the "bio" that uses information from a search result, you MUST end it with a citation marker like [1], [2], etc. If multiple sources support a sentence, use comma-separated indices like [1, 3].
+    
+    Populate all other JSON fields like "rank", "achievements", and "recentNews" with the information you find.
+    ${sportSpecificGuidance}
+  `;
+
+  try {
+    // --- MODIFICATION 2: Model Definition with Grounding Tool ---
+    // Get the generative model instance
+    const model = genAI.getGenerativeModel({
+      // Use the correct, latest model name
+      model: "gemini-1.5-pro-latest",
+      // Enable the Google Search tool for grounding
+      tools: [{
+        googleSearch: {}
+      }],
+    });
+
+    // The generateContent call now implicitly uses the tool
+    const result = await model.generateContent({
+      contents: [{ 
+        role: "user", 
+        parts: [{ text: prompt }]
+      }],
+      // Your existing JSON configuration remains the same
+      generationConfig: {
+        responseMimeType: "application/json",
+        // The schema is simplified here for clarity, use your full schema
+        responseSchema: {
+          type: "object",
+          properties: {
+            name: { type: "string" },
+            sport: { type: "string" },
+            bio: { type: "string" }, // This will contain the formatted bio
+            rank: { type: "string" },
+            country: { type: "string" },
+            achievements: { type: "array", items: { type: "string" } },
+            recentNews: { type: "string" },
+            profileImageDescription: { type: "string" },
+          },
+          required: ["name", "sport", "bio", "rank", "country", "achievements", "recentNews", "profileImageDescription"]
+        }
+      }
+    });
+
+    const response = result.response;
+    const data = JSON.parse(response.text() || "{}");
+    
+    // --- MODIFICATION 3: Extracting Grounding Citations ---
+    // The API response includes grounding attributions that link the [1], [2] markers to actual sources.
+    const groundingAttribution = response.candidates?.[0]?.groundingAttributions;
+    const references = groundingAttribution?.map(attr => ({
+        title: attr.web?.title || "Untitled",
+        uri: attr.web?.uri || "#"
+    })) || [];
+
+    let parsedRank = data.rank;
+    if (typeof data.rank === 'string' && !isNaN(Number(data.rank))) {
+      parsedRank = Number(data.rank);
+    }
+    
+    // Return the parsed data along with the extracted reference links
+    return {
+      name: data.name || name,
+      sport: data.sport || sport,
+      bio: data.bio || `Professional ${sport} athlete with competitive experience.`,
+      rank: parsedRank || 'N/A',
+      achievements: data.achievements || [],
+      recentNews: data.recentNews === 'N/A' ? 'N/A' : (data.recentNews || "N/A"),
+      profileImageDescription: data.profileImageDescription || `${sport} athlete`,
+      referenceLinks: references, // Add the sourced links here
+      country: data.country || nationality || 'Unknown'
+    };
+
+  } catch (error) {
+    console.error(`❌ Error generating profile for ${name}:`, error);
+    throw new Error(`Failed to generate profile for ${name}: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}

@@ -1,0 +1,106 @@
+Of course. Here is a generic prompt and a corresponding JSON structure designed for a large language model like Gemini 2.5 Pro to generate a detailed rank history analysis for any athlete in any sport.Prompt for Gemini 2.5 Pro code Codedownloadcontent_copyexpand_less    As an expert sports analyst, your task is to generate a comprehensive rank history analysis for the athlete detailed in the provided JSON data.
+
+**Instructions:**
+
+1.  **Analyze, Don't Just List:** Do not simply list the athlete's achievements from the JSON. Your primary goal is to create a narrative that explains the **impact** of these achievements on the athlete's ranking and standing within their sport.
+2.  **Explain the "Why":** Use the `ranking_system_overview` provided in the JSON to explain *why* certain results led to significant changes in rank. For example, explain how winning a "Major" or "G4" event provides a substantial point boost compared to a lower-tier event.
+3.  **Infer the Trajectory:** Based on the results, infer the athlete's likely ranking trajectory. Use phrases like "this likely propelled them into the top 50," "this would have solidified their position among the elite," or "this performance established their initial senior ranking."
+4.  **Follow the Chronology:** Structure your analysis chronologically using the `career_phases` provided in the JSON. Dedicate a section to each phase, explaining the progression during that period.
+5.  **Maintain a Professional Tone:** Write the analysis in a clear, professional, and insightful manner, as would be expected from a sports journalist or analyst.
+6.  **Use Only Provided Data:** Base your entire analysis strictly on the information contained within the JSON object.
+
+Begin the analysis now for the athlete specified in the JSON below.
+  Generic JSON StructureThis JSON structure is designed to be adaptable to any sport, whether it's an individual sport with a points-based system (like Taekwondo or Tennis) or a team sport where player rankings are more subjective.Below is the structure populated with Ahmed Nassar's information as a working example. You can replace the values to analyze any athlete. code JSONdownloadcontent_copyexpand_lessIGNORE_WHEN_COPYING_STARTIGNORE_WHEN_COPYING_END    {
+  "athlete_name": "Ahmed Nassar",
+  "sport": "Taekwondo",
+  "nationality": "Egypt",
+  "active_period": {
+    "start_year": 2017,
+    "end_year": "current"
+  },
+  "ranking_system_overview": "World Taekwondo (WT) utilizes a points-based system where athletes accumulate ranking points from sanctioned international events. The significance of an event is denoted by its 'Grade' (G-rating). Continental Championships (G4), for example, award significantly more points than G1 or G2 Opens, making them crucial for major jumps in the world rankings. The Grand Prix series is reserved for the top-ranked athletes, so participation itself indicates an elite ranking.",
+  "career_phases": [
+    {
+      "phase_name": "Early Career and Senior Transition",
+      "period": "2017-2019",
+      "key_achievements": [
+        {
+          "year": 2018,
+          "event_name": "El Hassan Open",
+          "event_tier": "G1 Tournament",
+          "result": "Bronze Medal",
+          "notes": "One of his first significant medals at the senior international level."
+        },
+        {
+          "year": 2019,
+          "event_name": "World Championships",
+          "event_tier": "Major (G12)",
+          "result": "Participation",
+          "notes": "Gaining initial ranking points and experience at the highest level of the sport."
+        },
+        {
+          "year": 2019,
+          "event_name": "African Games",
+          "event_tier": "Continental Games (G4)",
+          "result": "Participation",
+          "notes": "Competing against top continental rivals."
+        }
+      ]
+    },
+    {
+      "phase_name": "Continental Breakthrough and Ranking Ascent",
+      "period": "2021-2022",
+      "key_achievements": [
+        {
+          "year": 2021,
+          "event_name": "African Championships",
+          "event_tier": "Continental Championship (G4)",
+          "result": "Silver Medal",
+          "notes": "First major continental medal, would have caused a significant jump in his world ranking."
+        },
+        {
+          "year": 2022,
+          "event_name": "African Championships",
+          "event_tier": "Continental Championship (G4)",
+          "result": "Silver Medal",
+          "notes": "Back-to-back silver medals solidified his status as a top contender in Africa."
+        },
+        {
+          "year": 2022,
+          "event_name": "Rome Grand Prix",
+          "event_tier": "Premier Event (G6)",
+          "result": "Participation",
+          "notes": "Qualification for this elite series confirms his ranking was among the world's top 32."
+        }
+      ]
+    },
+    {
+      "phase_name": "Solidifying Elite Status and Olympic Qualification",
+      "period": "2023-2024",
+      "key_achievements": [
+        {
+          "year": 2023,
+          "event_name": "African Championships",
+          "event_tier": "Continental Championship (G4)",
+          "result": "Gold Medal",
+          "notes": "Winning the continental title would have propelled him to his career-high ranking."
+        },
+        {
+          "year": 2024,
+          "event_name": "African Games",
+          "event_tier": "Continental Games (G4)",
+          "result": "Bronze Medal",
+          "notes": "Maintained a high ranking with another podium finish at a major continental event."
+        },
+        {
+          "year": 2024,
+          "event_name": "African Olympic Qualification Tournament",
+          "event_tier": "Olympic Qualifier",
+          "result": "Gold Medal",
+          "notes": "Secured a spot at the Paris 2024 Olympics, demonstrating peak performance."
+        }
+      ]
+    }
+  ]
+}
+  

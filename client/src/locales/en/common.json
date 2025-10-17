@@ -1,0 +1,196 @@
+{
+  "buttons": {
+    "signUp": "Sign Up",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "clear": "Clear",
+    "retry": "Retry",
+    "close": "Close",
+    "next": "Next",
+    "back": "Back",
+    "view": "View",
+    "upload": "Upload",
+    "analyze": "Analyze",
+    "compare": "Compare",
+    "buyTokens": "Buy Tokens",
+    "startFreeTrial": "Start Free Trial",
+    "startFreeTrialTokens": "Start Free Trial - 1000 Tokens",
+    "signInToContinue": "Sign In to Continue"
+  },
+  "labels": {
+    "athleteName": "Athlete Name",
+    "sport": "Sport",
+    "country": "Country",
+    "email": "Email Address",
+    "password": "Password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "cardNumber": "Card Number",
+    "expiryDate": "Expiry Date",
+    "cvv": "CVV",
+    "cardholderName": "Cardholder Name"
+  },
+  "placeholders": {
+    "searchAthlete": "Search athlete by name...",
+    "enterEmail": "Enter your email",
+    "enterPassword": "Enter your password",
+    "selectSport": "Select a sport",
+    "selectCountry": "Select a country"
+  },
+  "messages": {
+    "welcome": "Welcome back!",
+    "loginFailed": "Login failed",
+    "signupSuccessful": "Signup successful",
+    "profileUpdated": "Profile updated",
+    "paymentSuccessful": "Payment successful!",
+    "paymentFailed": "Payment failed",
+    "analysisComplete": "Analysis complete",
+    "generationCancelled": "Generation cancelled",
+    "referralLinkCopied": "Referral link copied!",
+    "athleteNotFound": "Athlete not found",
+    "searchWithAI": "Search with AI",
+    "searchingWithAI": "Searching with AI...",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "unknownCountry": "Unknown Country",
+    "sampleAthlete": "Sample Athlete"
+  },
+  "tabs": {
+    "overview": "Overview",
+    "detailed": "Detailed",
+    "strengths": "Strengths",
+    "weaknesses": "Weaknesses",
+    "competitionHistory": "Competition History",
+    "headToHead": "Head-to-Head",
+    "details": "Details",
+    "analysisResults": "Analysis Results",
+    "history": "History",
+    "comparison": "Comparison"
+  },
+  "units": {
+    "tokens": "tokens",
+    "month": "month",
+    "egp": "EGP"
+  },
+  "languages": {
+    "english": "English",
+    "arabic": "العربية"
+  },
+  "analysis": {
+    "bio": {
+      "title": "Complete Athlete Biography",
+      "header": "Biography Analysis",
+      "introduction": "Introduction",
+      "playersStory": "Player's Story"
+    },
+    "achievements": {
+      "title": "Notable Achievements"
+    },
+    "recentNews": {
+      "title": "Recent News"
+    },
+    "rankingSystem": {
+      "title": "Ranking System Overview"
+    },
+    "careerPhases": {
+      "title": "Career Phases",
+      "subtitle": "Professional career progression through different phases",
+      "internationalCompetitions": "International Competitions",
+      "careerSpan": "Career Span",
+      "present": "Present",
+      "participated": "Participated"
+    },
+    "strengths": {
+      "title": "Competitive Strengths Profile"
+    },
+    "weaknesses": {
+      "title": "Areas for Improvement",
+      "unableToGenerate": "Unable to generate authentic weaknesses analysis at this time."
+    },
+    "combat": {
+      "title": "Strategic Combat Analysis",
+      "noData": "Strategic combat analysis data is not available",
+      "strategiesTitle": "Combat Strategies",
+      "tacticalAnalysis": "Advanced tactical analysis with {count} strategic approaches",
+      "risk": "Risk",
+      "strategicOverview": "Strategic Overview",
+      "executionPlan": "Execution Plan",
+      "successProbability": "Success Probability",
+      "analysisComplete": "Strategic Analysis Complete",
+      "tacticalApproaches": "{count} tactical approaches identified for optimal performance advantage"
+    },
+    "evidence": "Evidence",
+    "analysisFor": "Analysis for",
+    "generatedOn": "Generated on",
+    "exportPdf": "Export PDF",
+    "exporting": "Exporting...",
+    "share": "Share",
+    "exportFailed": "Export Failed",
+    "exportError": "There was an error generating the PDF. Please try again.",
+    "strengths": {
+      "athleteStrengths": "Athlete Strengths",
+      "strengthLevel": "Strength Level",
+      "impact": "impact",
+      "noData": "No strengths analysis data available",
+      "generateNew": "Generate a new analysis to see detailed insights.",
+      "noPdfData": "No strengths data available for PDF export.",
+      "unableToGenerate": "Unable to generate authentic strengths analysis at this time."
+    },
+    "development": {
+      "program": "Development Program",
+      "plan": "Development Plan",
+      "goalBased": "Goal-based plan",
+      "trainingExercises": "Training Exercises",
+      "videoAvailable": "Video Available",
+      "keyObjectives": "Key Objectives",
+      "current": "Current",
+      "noData": "No development plan data available",
+      "generateNew": "Generate a new analysis to see your personalized development program.",
+      "unableToGenerate": "Unable to generate authentic development plan at this time.",
+      "analysisTitle": "Development Plan Analysis",
+      "phases": "{count} Phase",
+      "phases_other": "{count} Phases"
+    },
+    "rank": {
+      "progression": "Ranking Progression",
+      "unavailable": "⚠ Rank Analysis Unavailable",
+      "unableToGenerate": "Unable to generate authentic rank history at this time."
+    },
+    "unavailable": "⚠ Analysis Unavailable",
+    "tryAgainLater": "Please try again later or contact support if the issue persists.",
+    "nutrition": {
+      "plan": "Personalized Nutrition Plan"
+    },
+    "comparison": {
+      "title": "Athlete Comparison",
+      "sport": "Sport",
+      "language": "Language",
+      "countryAthlete1": "Country (Athlete 1)",
+      "athlete1": "Athlete 1",
+      "countryAthlete2": "Country (Athlete 2)",
+      "athlete2": "Athlete 2",
+      "selectSport": "Select sport...",
+      "selectLanguage": "Select language...",
+      "english": "English",
+      "arabic": "Arabic",
+      "selectFirstAthlete": "Select first athlete...",
+      "selectSecondAthlete": "Select second athlete...",
+      "compareAthletes": "Compare Athletes",
+      "selectionRequired": "Selection Required",
+      "selectTwoAthletes": "Please select two athletes to compare",
+      "invalidSelection": "Invalid Selection",
+      "selectDifferentAthletes": "Please select two different athletes",
+      "comparisonComplete": "Comparison Complete",
+      "comparisonSuccess": "AI-powered athlete comparison generated successfully!",
+      "comparisonFailed": "Comparison Failed",
+      "comparisonError": "Failed to generate comparison"
+    }
+  }
+}

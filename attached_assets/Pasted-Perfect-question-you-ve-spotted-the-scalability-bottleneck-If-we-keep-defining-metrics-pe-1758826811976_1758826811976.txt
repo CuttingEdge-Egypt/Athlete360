@@ -1,0 +1,132 @@
+Perfect question 👌 — you’ve spotted the **scalability bottleneck**.
+If we keep defining metrics per sport manually, we’ll never keep up (especially with combat sports like taekwondo, karate, wrestling, boxing, etc. where stats vary wildly).
+
+The trick: **make the `metrics` section universal in shape** but **flexible in content**.
+That way GPT-5 can generate *whatever it wants*, and your frontend can *always* read it in the same way.
+
+---
+
+## 🔑 Key Idea
+
+Instead of a raw key-value object (which changes per sport), structure `metrics` as a **list of objects with `name`, `value`, and optional `unit/category`**.
+
+This gives GPT-5 freedom while keeping your UI consistent.
+
+---
+
+## 📐 JSON Structure
+
+```json
+{
+  "statistics": {
+    "common": {
+      "games_played": 20,
+      "minutes_played": 1200,
+      "wins": 15,
+      "losses": 5
+    },
+    "sport_specific": {
+      "category": "boxing",
+      "metrics": [
+        {
+          "name": "Punch Accuracy",
+          "value": 72,
+          "unit": "%"
+        },
+        {
+          "name": "Knockouts",
+          "value": 8,
+          "unit": null
+        },
+        {
+          "name": "Rounds Fought",
+          "value": 60,
+          "unit": "rounds"
+        },
+        {
+          "name": "Takedown Defense",
+          "value": 65,
+          "unit": "%"
+        }
+      ]
+    }
+  }
+}
+```
+
+---
+
+## ⚡ Why This Works
+
+* **Consistent JSON shape**:
+
+  * Always `metrics: [ { name, value, unit } ]`.
+* **Adaptive to any sport**:
+
+  * Boxing, taekwondo, wrestling, football, basketball → all work.
+* **Frontend rendering is trivial**:
+
+  ```js
+  data.statistics.sport_specific.metrics.map(m => (
+    <div key={m.name}>
+      <strong>{m.name}:</strong> {m.value}{m.unit ? " " + m.unit : ""}
+    </div>
+  ))
+  ```
+* **GPT freedom**:
+
+  * GPT can output anything under `metrics`, no hard-coded fields.
+* **Future-proof**:
+
+  * New sports (e.g., esports, squash, cricket) won’t break the format.
+
+---
+
+## 🥋 Example for Taekwondo
+
+```json
+{
+  "statistics": {
+    "common": {
+      "games_played": 12,
+      "minutes_played": 480,
+      "wins": 10,
+      "losses": 2
+    },
+    "sport_specific": {
+      "category": "taekwondo",
+      "metrics": [
+        { "name": "Kicks Landed", "value": 135, "unit": "kicks" },
+        { "name": "Headshots", "value": 28, "unit": null },
+        { "name": "Penalties", "value": 4, "unit": null },
+        { "name": "Match Duration Average", "value": 3, "unit": "minutes" }
+      ]
+    }
+  }
+}
+```
+
+---
+
+## 🎯 Prompt Instruction for GPT-5
+
+When calling GPT-5, set rules like this in the **system message**:
+
+```
+You are a statistics generator for players across all sports.  
+Return JSON only.  
+- Always include "statistics.common" (games_played, minutes_played, wins, losses).  
+- Always include "statistics.sport_specific" with:
+  - category: the sport name
+  - metrics: an array of objects with keys [name, value, unit]  
+    - name = string (the stat name, e.g., "Goals", "Punch Accuracy")  
+    - value = number or string  
+    - unit = string or null (e.g., "%", "minutes", "rounds")  
+- Do not invent extra JSON fields outside this schema.  
+```
+
+---
+
+✅ This way, both GPT and your frontend “speak the same language” without you hardcoding each sport.
+
+Do you want me to also show you how the **frontend can auto-format these metrics into grouped tables** (like offensive/defensive in football, strikes/defense in MMA), or should we keep it flat for now?

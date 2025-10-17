@@ -1,0 +1,97 @@
+Prompt for Replit Vibe Coding Tool
+
+⸻
+
+“Create a complete, fully functional, and visually stunning web-based subscription model solution named ‘Athlete360’. The system must be creative, innovative, catchy, and designed with out-of-the-box ideas. It must include all CRUD operations for every entity, with sample data provided for each. Ensure the UI is modern, engaging, and highly interactive. Provide a landing page showcasing the product’s value, then a subscription and payment system, followed by a feature-rich dashboard for the AI-powered athlete services.”
+
+⸻
+
+Core Requirements
+	1.	Solution Overview
+	•	Name: Athlete360
+	•	Type: Web-based (responsive for desktop & mobile)
+	•	Business Model: Subscription-based + token usage system.
+	•	Payment Model: $25 subscription = 1000 tokens; “Pay-as-you-go” thereafter.
+	•	Every action costs a predefined number of tokens.
+	•	When tokens are insufficient, show a creative popup encouraging recharge.
+	2.	Landing Page
+	•	Display all valuable features in an animated, interactive way.
+	•	Include subscription pricing & “Start Now” button.
+	•	Include “About Athlete360 AI” section explaining its unique value.
+	3.	Authentication
+	•	Sign-up/Login (with email + password).
+	•	Token balance tracking in user profile.
+	4.	Subscription & Token Management
+	•	Buy subscription (Stripe or dummy payment gateway).
+	•	Deduct tokens per action automatically.
+	•	Show transaction history & token usage logs.
+
+⸻
+
+Main Athlete Services Dashboard
+
+Subscriber Flow:
+
+Step 1: Select a sport (dropdown with all sports, CRUD enabled, sample sports like “Football”, “Taekwondo”, “Tennis”).
+
+Step 2: Enter an athlete’s name (sample data: Cristiano Ronaldo, Malek Mohamed Abdelrazik, Serena Williams).
+
+Step 3: System displays clickable service boxes (each showing token cost). Each box leads to a dedicated CRUD-enabled feature:
+	1.	Bio Box (cost: 50 tokens)
+	•	Generate innovative biography with athlete’s latest photo, personal contacts, career history, championships, ranks.
+	•	CRUD: Edit bio, update image, add achievements.
+	•	Sample data for famous athletes.
+	2.	Rank Box (cost: 70 tokens)
+	•	Show athlete’s rank history with interactive charts & recommended actions to improve.
+	•	CRUD: Add/Edit ranks & recommendations.
+	3.	Strengths Box (cost: 50 tokens)
+	•	List strengths in bold points with detailed supporting info.
+	•	CRUD: Add/Edit/Delete strengths.
+	4.	Weaknesses Box (cost: 50 tokens)
+	•	List weaknesses in bold points with supporting info.
+	•	CRUD: Add/Edit/Delete weaknesses.
+	5.	Development Plan Box (cost: 80 tokens)
+	•	Auto-generate 4-week plan to improve weaknesses.
+	•	CRUD: Update plan, change timelines.
+	6.	Nutrition Plan Box (cost: 90 tokens)
+	•	Upload athlete’s in-body scan & set target weight.
+	•	Generate a comprehensive meal plan.
+	•	CRUD: Add/Edit/Delete meals.
+	7.	How Can I Beat Box (cost: 100 tokens)
+	•	List tactical techniques to beat the athlete.
+	•	CRUD: Add/Edit/Delete strategies.
+	8.	Dynamic Analysis Box (cost: 120 tokens)
+	•	Upload video or YouTube link for AI analysis.
+	•	Output strengths, weaknesses, and tactical suggestions.
+	•	CRUD: Upload/Delete analysis videos.
+
+⸻
+
+Extra Functionalities
+	•	Each feature must have:
+	•	Extract button → export to PDF.
+	•	Share button → share via link/email.
+	•	Historical Log: All generated data stored for future retrieval.
+	•	User can repeat all actions for multiple athletes until tokens run out.
+
+⸻
+
+CRUD Entities & Sample Data
+	•	Users: (ID, Name, Email, Tokens, Subscription Status) → Sample: John Doe, john@example.com, 1000 tokens.
+	•	Sports: (ID, Name) → Sample: Football, Taekwondo, Tennis.
+	•	Athletes: (ID, SportID, Name, Bio, Rank, Strengths[], Weaknesses[], DevelopmentPlan[], NutritionPlan[], HowToBeat[], DynamicAnalysis[]) with dummy famous athlete profiles.
+	•	Transactions: (ID, UserID, Action, TokensDeducted, DateTime).
+	•	Logs: Store all historical extractions & shares.
+
+⸻
+
+Technical Requirements
+	•	Stack: HTML5, CSS3, JavaScript (React or Vue preferred), Node.js backend, MongoDB database.
+	•	AI-powered sections: Use dummy AI responses with placeholders.
+	•	Charts: Use Chart.js or D3.js for rank history.
+	•	Responsive design with animations and icon-based boxes.
+
+⸻
+
+Final Note for AI Generation:
+“Make this solution extremely creative, visually appealing, and user-friendly. Use catchy UI elements, hover animations, interactive cards, and a premium feel. Ensure all CRUD operations are implemented, with sample data filled in for every section. Provide a complete end-to-end working cycle from subscription to data retrieval.”

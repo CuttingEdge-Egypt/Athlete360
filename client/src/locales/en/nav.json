@@ -1,0 +1,39 @@
+{
+  "brand": "Athlete360",
+  "menu": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "analysis": "Analysis",
+    "comparison": "Comparison",
+    "profile": "Profile",
+    "settings": "Settings",
+    "help": "Help",
+    "logout": "Logout",
+    "buyTokens": "Buy Tokens",
+    "videoAnalysis": "Video Analysis",
+    "history": "History"
+  },
+  "footer": {
+    "tagline": "AI-powered athlete analytics for the next generation of sports analysis.",
+    "features": "Features",
+    "featuresList": {
+      "athleteProfiles": "Athlete Profiles",
+      "performanceAnalytics": "Performance Analytics",
+      "trainingPlans": "Training Plans",
+      "videoAnalysis": "Video Analysis"
+    },
+    "support": "Support",
+    "supportList": {
+      "helpCenter": "Help Center",
+      "apiDocumentation": "API Documentation",
+      "contactUs": "Contact Us",
+      "community": "Community"
+    },
+    "connect": "Connect",
+    "contact": {
+      "email": "support@athlete360.ai",
+      "liveChat": "Live Chat Support"
+    },
+    "copyright": "© 2024 Athlete360. All rights reserved."
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "athlete1": {
+    "name": "Ahmed Nassar",
+    "country": "Egypt",
+    "rank": "Unranked",
+    "profileImageUrl": ""
+  },
+  "athlete2": {
+    "name": "Nicholas Cj",
+    "country": "United States",
+    "rank": "2",
+    "profileImageUrl": ""
+  },
+  "strengths": {
+    "athlete1": [
+      {
+        "title": "Disciplined, low-risk scoring in qualifiers",
+        "description": "Advanced through the 2024 African Olympic Qualification Tournament in Dakar with controlled 2–0, 2–0 wins that indicate patient distance management and clean body shots.",
+        "rating": 78,
+        "evidence": "Defeated Getnet Atnafu 2–0 and Nicalas Fernandes 2–0 en route to Olympic qualification; took bronze at the 2024 African Games with several narrow wins."
+      },
+      {
+        "title": "Continental pedigree at -68 kg",
+        "description": "Captured the 2023 African Championships title at -68 kg and podiumed at multiple Africa-based events, demonstrating effectiveness against regional opposition.",
+        "rating": 80,
+        "evidence": "Gold at 2023 African Championships (Abidjan); bronze at 2024 African Games (Accra)."
+      }
+    ],
+    "athlete2": [
+      {
+        "title": "Explosive head-kick threat and late-round clutch scoring",
+        "description": "Regularly lands decisive head kicks under pressure and flips rounds in the closing seconds; excels at high-difficulty head techniques off long reach and dynamic entries.",
+        "rating": 96,
+        "evidence": "Paris 2024 R16 comeback: erased a 7–4 deficit with a body kick sequence and a last-14-second head kick to win the round; sealed the match with another late head kick in R2."
+      },
+      {
+        "title": "World-class form versus elite fields",
+        "description": "Sustained medal-level performance at majors and GP events, including a world silver and 2025 Grand Prix Challenge title at -80 kg.",
+        "rating": 94,
+        "evidence": "2023 World Championships silver (welterweight), multiple 2022–2023 Grand Prix medals, 2023 Pan American title(s); won the Charlotte 2025 World Taekwondo Grand Prix Challenge final over Geon-woo Seo by point gap (PTF)."
+      },
+      {
+        "title": "Length, timing, and variety",
+        "description": "At 6'2\" in -80 kg, leverages range for front-leg cuts to set up head kicks and 4-point turning kicks to the body; blends capoeira-influenced movement with modern cut-cancel exchanges.",
+        "rating": 93,
+        "evidence": "Documented height and style features; Paris 2024 quarterfinal vs Faysal Sawadogo included head-kick scores and a 4-point turning body kick in the final 20 seconds."
+      }
+    ],
+    "advantage": "athlete2"
+  },
+  "weaknesses": {
+    "athlete1": [
+      {
+        "title": "Limited output against top-tier opposition",
+        "description": "Struggled to score versus elite European opponents; early Olympic exit with straight-round loss indicates difficulty breaking high-pressure front-leg screens and counter lines.",
+        "impact": "high",
+        "exploitation": "Maintain center pressure with active front-leg probing to force low-percentage entries; draw out single shots and counter with head-kick checks."
+      },
+      {
+        "title": "Closing stretch execution",
+        "description": "Losses in semifinal/final stages at continental events suggest lapses in late-round adjustment and risk management when trailing.",
+        "impact": "medium",
+        "exploitation": "Accelerate tempo in final 30–40 seconds, feint to body to set up head-kick windows, and force gam-jeoms via clinch entries after score."
+      }
+    ],
+    "athlete2": [
+      {
+        "title": "Conversion at the very top",
+        "description": "Despite deep runs, has dropped key matches to world champions in medal bouts, indicating a remaining gap in specific matchup problem-solving.",
+        "impact": "medium",
+        "exploitation": "Opponents like Simone Alessio/Firas Katoussi can slow exchanges, deny rhythm resets, and punish risk-on phase shifts with counters to the head."
+      },
+      {
+        "title": "Risk tolerance and momentum swings",
+        "description": "Open, expressive style can invite momentum reversals if early reads fail; occasionally over-extends on spinning or capoeira-inspired entries.",
+        "impact": "medium",
+        "exploitation": "Bait spins with cut-checks, step off-line to draw whiffs, and reply with jammed body turns for 2–4 points plus gam-jeom pressure."
+      }
+    ],
+    "advantage": "athlete2"
+  },
+  "ranking": {
+    "comparison": "CJ Nickolas entered Paris 2024 as the world No. 2 in men’s -80 kg and remained a top-10 fixture through 2025, adding a 2025 Grand Prix Challenge title. Ahmed Nassar’s Olympic entry came via the African Qualification Tournament at -68 kg; no current official month-by-month rank number was publicly accessible for him, and he does not appear among headline leaders.",
+    "athlete1Trajectory": "Qualified for Paris 2024 via Africa, finished tied-11th in -68 kg; 2024 continental bronze; limited 2025 data found and no verified current WT rank number surfaced in public lists.",
+    "athlete2Trajectory": "World silver in 2023, multiple Grand Prix medals in 2022–2023, No. 2 entering Paris 2024, semifinal and bronze-bout appearance at the Games, and a 2025 WT Grand Prix Challenge victory—consistent elite trajectory.",
+    "competitiveEdge": "athlete2"
+  },

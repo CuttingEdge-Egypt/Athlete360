@@ -1,0 +1,399 @@
+```python
+"""
+Reference implementation (Python) — teach Replit how to:
+ - Use an LLM with web + vision (called "o3" here) to drive Selenium
+ - Extract Taekwondo rankings for any athlete from the World Taekwondo / SimplyCompete ranking page.
+
+Notes / assumptions:
+ - Replace OPENAI_API_KEY and endpoint code with your actual SDK calls. The examples below use the common
+   `openai`-style placeholder functions. The real "o3" vision+web interface may have slightly different call
+   signatures — adapt accordingly.
+ - This example uses Selenium + webdriver-manager. On Replit you may need to use their headless Chrome setup or
+   a compatible browser driver. For production, run in an environment with Chrome/Chromedriver available.
+ - The LLM is used in two ways:
+    1) Text/web capabilities: ask the model to search for the athlete's weight categories and confirm which
+       ranking category is applicable.
+    2) Vision capabilities: send screenshots (page or element) so the model can "see" UI or results and return
+       structured instructions (JSON) telling Selenium what to click/type/select next.
+ - The model is expected to reply with strict JSON for programmatic use (example schemas shown below).
+ - The page uses Angular/UI-Select elements; the script uses strategies (click input area, send keys, Enter)
+   and falls back to locating visible dropdown options.
+
+WARNING: This is a reference / pattern. Tune selectors and timeouts for robustness.
+"""
+
+import os
+import time
+import json
+import base64
+import logging
+from io import BytesIO
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    ElementNotInteractableException,
+    StaleElementReferenceException,
+)
+from webdriver_manager.chrome import ChromeDriverManager
+from PIL import Image
+
+# === Placeholder imports for the LLM (o3). Replace with your provider/SDK ===
+import requests
+
+# ========== CONFIG ==========
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "<REPLACE_WITH_KEY>")
+O3_API_BASE = "https://api.openai.example/v1"   # <-- replace with real endpoint if different
+O3_MODEL = "o3"  # user-supplied name for the model with web+vision capabilities
+
+RANKINGS_URL = (
+    "https://worldtkd.simplycompete.com/playerRankingV2"
+    "?limit=25&pageNo=1&month=0&year=2025&rankingCategoryId=11ef3b4e-697f-68de-aca4-064aef8133e9"
+    "&subCategory1=11ef3b4e-3058-36ed-aca4-064aef8133e9&rankingTypeId=11ef3b4e-05ce-797c-aca4-064aef8133e9"
+)
+
+# === Logging ===
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# ========== Selenium helper functions ==========
+
+def start_browser(headless=True):
+    chrome_options = Options()
+    if headless:
+        chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--window-size=1600,1000")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    # Add other options needed for Replit environment
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+    driver.implicitly_wait(6)
+    return driver
+
+def take_screenshot_bytes(driver, element=None):
+    """
+    Return PNG bytes of either full page (if element is None) or of the element.
+    """
+    if element is None:
+        png = driver.get_screenshot_as_png()
+        return png
+    else:
+        # element screenshot (Selenium 4 supports element.screenshot_as_png)
+        try:
+            png = element.screenshot_as_png
+            return png
+        except Exception:
+            # fallback: full-page then crop
+            full = Image.open(BytesIO(driver.get_screenshot_as_png()))
+            loc = element.location_once_scrolled_into_view
+            size = element.size
+            left = int(loc["x"]); top = int(loc["y"])
+            right = left + int(size["width"]); bottom = top + int(size["height"])
+            cropped = full.crop((left, top, right, bottom))
+            buf = BytesIO()
+            cropped.save(buf, format="PNG")
+            return buf.getvalue()
+
+def element_exists(driver, by, selector):
+    try:
+        driver.find_element(by, selector)
+        return True
+    except NoSuchElementException:
+        return False
+
+def safe_click(driver, element):
+    try:
+        element.click()
+    except (ElementNotInteractableException, StaleElementReferenceException):
+        driver.execute_script("arguments[0].click();", element)
+
+def wait_short():
+    time.sleep(0.7)
+
+def wait_long():
+    time.sleep(2.0)
+
+# ========== o3 interaction helpers ==========
+# NOTE: adapt these to actual SDK for o3. The pattern is:
+#  - send text + (optionally) images
+#  - expect strict JSON back with defined fields
+
+def call_o3_text(prompt, system="You are o3, a web+vision-enabled assistant."):
+    """
+    Sample HTTP POST to an LLM text endpoint. Replace with real SDK call.
+    """
+    headers = {"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"}
+    payload = {
+        "model": O3_MODEL,
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": prompt},
+        ],
+        "temperature": 0.0,
+        # any other params...
+    }
+    resp = requests.post(f"{O3_API_BASE}/chat/completions", headers=headers, json=payload, timeout=30)
+    resp.raise_for_status()
+    return resp.json()["choices"][0]["message"]["content"]
+
+def call_o3_with_image(prompt, image_bytes, instruction_schema=None):
+    """
+    Example: send screenshot + prompt. Expect a strict JSON object in response.
+
+    Many LLM APIs accept multipart form (files + messages). This is a placeholder.
+    """
+    headers = {"Authorization": f"Bearer {OPENAI_API_KEY}"}
+    # convert image to base64 for a simple POST (some APIs accept binary files instead)
+    img_b64 = base64.b64encode(image_bytes).decode("utf-8")
+    payload = {
+        "model": O3_MODEL,
+        "messages": [
+            {"role": "system", "content": "You are o3, a web+vision assistant that returns strict JSON responses."},
+            {"role": "user", "content": prompt},
+        ],
+        "image_base64": img_b64,
+        "instruction_schema": instruction_schema or {},
+        "temperature": 0.0,
+    }
+    resp = requests.post(f"{O3_API_BASE}/vision/completions", headers=headers, json=payload, timeout=30)
+    resp.raise_for_status()
+    return resp.json()["choices"][0]["message"]["content"]
+
+# ========== LLM JSON schemas (expected) ==========
+# Example: when asking the model to "choose a ranking category & weight", the model should output:
+# {
+#   "action": "choose_ranking_and_weight",
+#   "ranking_category": "World Kyorugi Rankings",
+#   "weight_category": "M-74 kg"
+# }
+#
+# When sending a screenshot of results and asking to "find athlete rows", expect:
+# {
+#   "action":"extract_table",
+#   "rows":[
+#       {"name":"LIM Tae-hee","member_id":"12345","rank":"5","points":"1204", "detail_link":"https://..."},
+#       ...
+#   ]
+# }
+
+# ========== Domain-specific helpers for the SimplyCompete page ==========
+def click_ui_select_by_visible_text(driver, target_visible_text):
+    """
+    Generic helper to open a ui-select (selectize-input) and type the option text, then press Enter.
+    This corresponds to the Angular UI select pattern you shared.
+    """
+    # Find all selectize inputs on the page and try to open them and set value by typing.
+    selects = driver.find_elements(By.CSS_SELECTOR, "div.selectize-input")
+    for s in selects:
+        try:
+            safe_click(driver, s)
+            wait_short()
+            # Try to find the internal input (ui-select-search)
+            try:
+                inp = s.find_element(By.CSS_SELECTOR, "input.ui-select-search")
+            except NoSuchElementException:
+                # fallback - try to locate global ui-select search
+                inp = driver.find_element(By.CSS_SELECTOR, "input.ui-select-search")
+            # clear and type
+            inp.clear()
+            inp.send_keys(target_visible_text)
+            wait_short()
+            inp.send_keys(Keys.ENTER)
+            wait_short()
+            return True
+        except Exception:
+            continue
+    return False
+
+def set_ranking_category(driver, category_text):
+    """
+    Attempts to set the ranking category dropdown to category_text.
+    """
+    # On the provided page, the ranking category label appears as "World Kyorugi Rankings" when selected.
+    # We'll try to use the input search approach:
+    return click_ui_select_by_visible_text(driver, category_text)
+
+def set_weight_category(driver, weight_text):
+    return click_ui_select_by_visible_text(driver, weight_text)
+
+def search_athlete_name(driver, name_text):
+    """
+    Use the athlete name search input and submit.
+    """
+    try:
+        inp = driver.find_element(By.CSS_SELECTOR, "input[ng-model='playerRankingV2.formData.searchQuery'], input[placeholder*='Search by name']")
+    except NoSuchElementException:
+        # fallback: generic search input
+        inp = driver.find_element(By.CSS_SELECTOR, "input.form-control")
+    inp.clear()
+    inp.send_keys(name_text)
+    inp.send_keys(Keys.ENTER)
+    wait_long()
+
+# ========== High-level flow ==========
+def extract_rankings_for_athlete(athlete_name, country, sport="taekwondo", headless=True):
+    """
+    Master flow:
+     1) Ask o3 (text/web) to find which weight categories the athlete competes in (by name + country).
+     2) Open the ranking page in Selenium.
+     3) For each weight category (or the one chosen by o3), have o3 (via vision) inspect the page and instruct Selenium to
+        select proper ranking category + weight category + type athlete name.
+     4) If results appear, have o3 parse the results screenshot and return structured ranking rows.
+    """
+    driver = start_browser(headless=headless)
+    try:
+        # 1) Ask the model to find weight categories the athlete competes in.
+        prompt_find_weights = (
+            f"You're o3 with web access. Find all weight categories that the taekwondo athlete "
+            f"'{athlete_name}' from '{country}' has competed in at the international level. "
+            "Return a JSON array of weight strings only, e.g. [\"M-74 kg\",\"M-80 kg\"] and nothing else."
+        )
+        logger.info("Asking o3 for weight categories (text/web)...")
+        try:
+            weights_json_text = call_o3_text(prompt_find_weights)
+            weights = json.loads(weights_json_text)
+        except Exception:
+            # If the model cannot find anything, default to common categories:
+            logger.warning("o3 failed to return weights JSON — defaulting to common categories.")
+            weights = ["M-68 kg", "M-74 kg", "M-80 kg", "M-87 kg"]
+
+        logger.info(f"Found candidate weights: {weights}")
+
+        # 2) Open the ranking page
+        logger.info("Opening ranking page...")
+        driver.get(RANKINGS_URL)
+        wait_long()
+
+        # 3) Ask o3 (vision) to inspect the page and pick the correct ranking category to use.
+        #    We'll send a screenshot so the model can "see" the selects and tell us which to pick.
+        page_png = take_screenshot_bytes(driver)
+        prompt_find_ranking_and_ui = (
+            "You are o3 with vision. Inspect the attached screenshot of the World Taekwondo ranking page.\n"
+            "Return JSON with the field 'ranking_category' that matches the correct ranking for 'taekwondo' and the "
+            "field 'ui_hints' which contains concise instructions for Selenium for how to select category and weight.\n"
+            "Example return:\n"
+            '{'
+            '"ranking_category":"World Kyorugi Rankings",'
+            '"ui_hints":["click_selectize_then_type:World Kyorugi Rankings", "click_selectize_then_type:M-74 kg"]'
+            '}'
+        )
+        logger.info("Sending page screenshot to o3 for ranking category selection...")
+        try:
+            json_text = call_o3_with_image(prompt_find_ranking_and_ui, page_png)
+            ranking_choice = json.loads(json_text)
+        except Exception:
+            logger.warning("o3 vision call failed or returned invalid JSON; falling back to defaults.")
+            ranking_choice = {"ranking_category": "World Kyorugi Rankings", "ui_hints": []}
+
+        chosen_ranking = ranking_choice.get("ranking_category", "World Kyorugi Rankings")
+        logger.info(f"o3 recommends ranking category: {chosen_ranking}")
+
+        # 4) Iterate candidate weights (or let o3 pick one). We'll try each weight until results found.
+        all_rows = []
+        for weight in weights:
+            logger.info(f"Trying weight category: {weight}")
+
+            # set ranking category
+            ok = set_ranking_category(driver, chosen_ranking)
+            wait_short()
+
+            # set weight category
+            ok2 = set_weight_category(driver, weight)
+            wait_short()
+
+            # search name
+            search_athlete_name(driver, athlete_name)
+            wait_long()
+
+            # take a screenshot of results area and ask o3 to parse it
+            results_png = take_screenshot_bytes(driver)
+            prompt_parse_results = (
+                f"You are o3 with vision. The attached image shows the results after searching for '{athlete_name}' "
+                f"in weight category '{weight}'. Return strict JSON:\n"
+                '{ "action":"extract_table", "rows":[ { "name":string, "member_id":string|null, "rank":string|null,'
+                ' "points":string|null, "detail_link":string|null } ] }\n'
+                "If no rows are present, return {\"action\":\"no_results\", \"rows\":[] }"
+            )
+            try:
+                parsed_text = call_o3_with_image(prompt_parse_results, results_png)
+                parsed = json.loads(parsed_text)
+            except Exception:
+                logger.exception("o3 failed to parse results; attempting local DOM parse fallback.")
+                parsed = {"action": "unknown", "rows": []}
+
+            if parsed.get("action") == "extract_table" and parsed.get("rows"):
+                logger.info(f"Found rows for weight {weight}: {len(parsed['rows'])}")
+                # attach weight context
+                for r in parsed["rows"]:
+                    r["weight_category"] = weight
+                    r["ranking_category"] = chosen_ranking
+                all_rows.extend(parsed["rows"])
+                # Optionally break after first successful weight or continue to get all weights.
+                # break
+            else:
+                logger.info(f"No results detected by o3 for {weight}.")
+
+            # small pause between tries
+            wait_short()
+
+        # 5) If we have rows, optionally click the athlete detail link and ask o3 to extract historical rankings.
+        for row in all_rows:
+            if row.get("detail_link"):
+                driver.get(row["detail_link"])
+                wait_long()
+                detail_png = take_screenshot_bytes(driver)
+                prompt_extract_history = (
+                    f"You are o3 with vision. The attached page is the athlete detail page for {row.get('name')}. "
+                    "Return JSON: { 'history': [ { 'year': '2024', 'rank': '6', 'points': '123' }, ... ] }"
+                )
+                try:
+                    hist_text = call_o3_with_image(prompt_extract_history, detail_png)
+                    hist_json = json.loads(hist_text)
+                    row["history"] = hist_json.get("history", [])
+                except Exception:
+                    row["history"] = []
+
+        return {"athlete": athlete_name, "country": country, "sport": sport, "results": all_rows}
+
+    finally:
+        driver.quit()
+
+
+# ========== Example usage (main) ==========
+if __name__ == "__main__":
+    athlete = "LIM Tae-hee"
+    country = "KOR"
+    sport = "taekwondo"
+
+    # Run flow (headless for servers like Replit)
+    output = extract_rankings_for_athlete(athlete, country, sport=sport, headless=True)
+    print(json.dumps(output, indent=2, ensure_ascii=False))
+```
+
+### Quick explanation (how the pieces fit)
+
+* The script demonstrates a *pattern* rather than a drop-in turnkey product. Key ideas:
+
+  1. **Hybrid control** — the model (o3) handles discovery and visual reasoning (what to click, which weight categories apply, and parsing screenshots) while Selenium executes deterministic actions (click/type/navigate).
+  2. **Vision loop** — screenshots are sent to o3; o3 returns structured JSON telling Selenium what to do next or returning parsed data (ranking rows). This makes the approach robust to Angular UI widgets where DOM inspection alone can be brittle.
+  3. **Angular/ui-select handling** — we show a practical approach: click the visible `div.selectize-input`, then send text to the contained `.ui-select-search` input and press Enter. If selectors differ in the wild, tweak CSS/XPath.
+  4. **Fallbacks** — code falls back to DOM parsing / defaults if o3 can't respond.
+
+### What you must adapt in Replit
+
+1. **Browser executable** — Replit may require a specific headless Chrome binary or use of a chromium package. Ensure `webdriver` can talk to Chrome in that environment (use Replit's browser service or run in a container with Chrome installed).
+2. **o3 API calls** — replace `call_o3_text` and `call_o3_with_image` with your actual SDK calls. Guarantee the model returns strict JSON (validate with `json.loads()`), and fail safe if it doesn't.
+3. **Timeouts & retries** — increase waits and add robust retry loops for flaky network or dynamic Angular loading.
+4. **Security** — keep the API key in environment variables and never print it.
+
+---
+
+If you'd like, I can:
+
+* Convert this to an async Node.js / Puppeteer example for Replit (many people prefer Puppeteer on Replit).
+* Provide a stricter JSON schema for the model responses and a small test harness that validates model output before acting.
+  Which one would you like next?

@@ -1,0 +1,369 @@
+{
+  "hero": {
+    "title": "Athlete360",
+    "subtitle": "AI-Powered Athlete Analytics & Performance Optimization Platform",
+    "description": "Analyze any athlete's performance, get tactical insights, create development plans, and unlock the secrets to athletic excellence with our revolutionary AI system."
+  },
+  "features": {
+    "athleteProfiles": {
+      "title": "Athlete Profiles",
+      "description": "Comprehensive bios with latest stats"
+    },
+    "performanceAnalytics": {
+      "title": "Performance Analytics", 
+      "description": "Dynamic analysis and rankings"
+    },
+    "trainingPlans": {
+      "title": "Training Plans",
+      "description": "Personalized development strategies"
+    }
+  },
+  "pricing": {
+    "title": "Start Your Journey",
+    "price": "$25",
+    "period": "/month",
+    "description": "Get 1,000 tokens to analyze any athlete"
+  },
+  "about": {
+    "title": "About Athlete360 AI",
+    "description": "Revolutionary sports analytics platform that combines artificial intelligence with deep athletic insights to provide unprecedented analysis of any athlete's performance, strengths, and development opportunities."
+  },
+  "landing": {
+    "navigation": {
+      "brand": "Athlete360",
+      "signUp": "Sign Up",
+      "signIn": "Sign In"
+    },
+    "hero": {
+      "title": "Athlete360",
+      "subtitle": "AI-Powered Athlete Analytics & Performance Optimization Platform",
+      "description": "Analyze any athlete's performance, get tactical insights, create development plans, and unlock the secrets to athletic excellence with our revolutionary AI system.",
+      "ctaStart": "Start Free Trial - 1000 Tokens",
+      "ctaSignIn": "Sign In to Continue"
+    },
+    "referralBanner": {
+      "title": "You're using a referral link!",
+      "description": "Your friend will get 100 bonus tokens when you sign up!\nYou'll start with 1000 free tokens."
+    },
+    "howToBeat": {
+      "title": "How to Beat",
+      "description": "Strategic insights on how to defeat specific opponents or improve matchups"
+    },
+    "developmentPlan": {
+      "title": "Development Plan",
+      "description": "Personalized training roadmap with specific goals and timelines"
+    },
+    "pricing": {
+      "title": "Ready to Transform Your Athletic Analysis?",
+      "journeyTitle": "Start Your Journey",
+      "subtitle": "Get 1000 tokens to start your journey",
+      "tokenDescription": "Get 1,000 tokens to analyze any athlete",
+      "price": "$25",
+      "period": "/month",
+      "features": {
+        "unlimited": "Unlimited athlete analysis",
+        "allServices": "Access to all 9 analysis services", 
+        "comparison": "Advanced athlete comparison",
+        "videoAnalysis": "Professional video analysis",
+        "support": "Priority customer support"
+      },
+      "getStarted": "Get Started Now"
+    },
+    "footer": {
+      "description": "The world's most advanced AI-powered athlete analysis platform. Unlock performance insights, strategic advantages, and development opportunities for any athlete.",
+      "quickLinks": "Quick Links",
+      "services": "Services",
+      "support": "Support", 
+      "contact": "Contact",
+      "followUs": "Follow Us",
+      "copyright": "© 2024 Athlete360. All rights reserved."
+    }
+  },
+  "services": {
+    "generate": "Generate",
+    "aiProcessing": "AI Processing...",
+    "analyzingData": "Analyzing data...",
+    "gatheringInsights": "Gathering insights...",
+    "buildingAnalysis": "Building analysis...",
+    "almostDone": "Almost done...",
+    "queue": {
+      "title": "Generation Queue",
+      "requestSent": "Request sent, our AI is processing...",
+      "takingTime": "This might take 2-3 minutes...",
+      "analyzingData": "Analyzing data...",
+      "gatheringInsights": "Gathering insights...",
+      "buildingAnalysis": "Building analysis...",
+      "almostThere": "Almost there, finalizing analysis...",
+      "waiting": "Waiting for available slot...",
+      "view": "View result",
+      "retry": "Retry generation",
+      "cancel": "Cancel Generation",
+      "remove": "Remove",
+      "cancelDialog": {
+        "title": "Cancel Generation",
+        "description": "Are you sure you want to cancel this generation? This action cannot be undone.",
+        "keepRunning": "No, Keep Running",
+        "confirmCancel": "Yes, Cancel Generation"
+      }
+    },
+    "bioAnalysis": {
+      "title": "Bio Analysis",
+      "description": "Complete athlete biography with career highlights and achievements"
+    },
+    "rankHistory": {
+      "title": "Competitive History", 
+      "description": "Interactive charts showing ranking progression and improvement recommendations"
+    },
+    "strengths": {
+      "title": "Strengths",
+      "description": "Detailed analysis of key strengths and competitive advantages"
+    },
+    "weaknesses": {
+      "title": "Weaknesses",
+      "description": "In-depth analysis of areas needing improvement and targeted solutions"
+    },
+    "tacticRecommendations": {
+      "title": "Tactic Recommendations",
+      "description": "AI-powered strategic insights and competition preparation plans"
+    },
+    "trainingPlans": {
+      "title": "Training Plans",
+      "description": "Customized workout regimens and development programs"
+    },
+    "videoAnalysis": {
+      "title": "Video Analysis",
+      "description": "Advanced performance analysis from competition footage"
+    },
+    "athleteComparison": {
+      "title": "Athlete Comparison",
+      "description": "Head-to-head analysis and competitive insights"
+    },
+    "nutritionPlan": {
+      "title": "Nutrition Plan",
+      "description": "Personalized nutrition planning and meal guidance"
+    },
+    "howToBeat": {
+      "title": "How to Beat",
+      "description": "Strategic insights on how to defeat specific opponents or improve matchups"
+    },
+    "developmentPlan": {
+      "title": "Development Plan",
+      "description": "Personalized training roadmap with specific goals and timelines"
+    },
+    "statistics": {
+      "title": "Statistics", 
+      "description": "Comprehensive performance statistics and metrics analysis"
+    }
+  },
+  "competitiveHistory": {
+    "title": "Competitive History Analysis",
+    "subtitle": "Professional analysis of career progression and achievements",
+    "careerOverview": "Career Overview",
+    "peakPerformance": "Peak Performance Periods",
+    "keyResults": "Key Results:",
+    "competitionAnalysis": "Competition Analysis",
+    "grandPrix": "Grand Prix",
+    "worldChampionships": "World Championships",
+    "olympicGames": "Olympic Games",
+    "continentalEvents": "Continental Events",
+    "progressionPatterns": "Progression Patterns",
+    "notableAchievements": "Notable Achievements",
+    "recentForm": "Recent Form",
+    "keyInsights": "Key Insights"
+  },
+  "interface": {
+    "selectSport": "Select Sport",
+    "selectCountry": "Select Country",
+    "welcome": "Welcome to Athlete360",
+    "tagline": "Analyze any athlete's performance with AI-powered insights",
+    "athleteAnalysis": "Athlete Analysis",
+    "compareAthletes": "Compare Athletes",
+    "nutritionPlan": "Nutrition Plan",
+    "developmentPlan": "Development Plan",
+    "statistics": "Statistics",
+    "selectSportAthlete": "Select Sport & Athlete",
+    "sport": "Sport",
+    "country": "Country",
+    "athleteName": "Athlete Name",
+    "chooseASport": "Choose a sport...",
+    "clearSport": "Clear sport selection",
+    "allCountries": "All countries",
+    "searchAthlete": "Search athlete by name...",
+    "readyToAnalyze": {
+      "title": "Ready to Analyze?",
+      "description": "Select a sport and enter an athlete's name to begin your comprehensive analysis journey."
+    },
+    "analysisServices": "Analysis Services",
+    "clickForBiography": "Click for Biography →",
+    "rank": "Rank"
+  },
+  "nutritionPlan": {
+    "title": "Create Your Nutrition Plan",
+    "sport": "Sport",
+    "goal": "Goal",
+    "age": "Age",
+    "height": "Height (cm)",
+    "currentWeight": "Current Weight (kg)",
+    "targetWeight": "Target Weight (kg)",
+    "country": "Country (For meal preferences)",
+    "period": "Period (Weeks)",
+    "inbodyReport": "InBody Report (Optional)",
+    "language": "Plan Language",
+    "generate": "Generate Nutrition Plan",
+    "goalPlaceholder": "Be specific! Describe your fitness goals in detail - what do you want to achieve, by when, and why? The more details you provide, the better your personalized nutrition plan will be.",
+    "countryHint": "This affects meal types and local food preferences",
+    "weekNavigation": {
+      "week": "Week",
+      "previous": "Previous Week",
+      "next": "Next Week",
+      "selectWeek": "Select Week",
+      "selectDay": "Select Day in Week",
+      "dailyFocus": "Daily Focus",
+      "personalizedInstructions": "Personalized Instructions"
+    }
+  },
+  "developmentPlan": {
+    "title": "Create Your Development Plan",
+    "goal": "Training Goal",
+    "age": "Age",
+    "height": "Height (cm)",
+    "weight": "Weight (kg)", 
+    "gender": "Gender",
+    "sport": "Sport",
+    "language": "Plan Language",
+    "generate": "Generate Development Plan",
+    "generating": "Generating Plan...",
+    "goalPlaceholder": "Be specific! What do you want to improve? (e.g., 'Improve kicking power and speed', 'Build endurance for competition', 'Develop better technique')",
+    "agePlaceholder": "Enter your age in years",
+    "heightPlaceholder": "Enter your height in centimeters",
+    "weightPlaceholder": "Enter your weight in kilograms",
+    "genderPlaceholder": "Select your gender",
+    "sportPlaceholder": "Enter your sport (e.g., Taekwondo, Football, Basketball)",
+    "selectLanguage": "Select plan language",
+    "male": "Male",
+    "female": "Female",
+    "yourPlan": "Your Development Plan",
+    "generateNew": "Generate New Plan",
+    "exerciseVideo": "Exercise Demo Video",
+    "exerciseVideos": "Exercise Videos",
+    "video": "Video"
+  },
+  "referral": {
+    "title": "You're using a referral link!",
+    "description": "Your friend will get 100 bonus tokens when you sign up!\nYou'll start with 1000 free tokens."
+  },
+  "actions": {
+    "clear": "Clear",
+    "cancel": "Cancel", 
+    "clearHistory": "Clear History",
+    "clearing": "Clearing...",
+    "signUp": "Sign Up",
+    "signIn": "Sign In",
+    "startFreeTrial": "Start Free Trial - 1000 Tokens",
+    "signInToContinue": "Sign In to Continue",
+    "preview": "Preview"
+  },
+  "dialogs": {
+    "clearHistory": {
+      "title": "Clear All History?",
+      "description": "This will permanently delete all your analysis history, including:",
+      "items": {
+        "analyses": "All athlete analysis records",
+        "transactions": "Token transaction history",
+        "usage": "Service usage logs"
+      },
+      "warning": "This action cannot be undone."
+    }
+  },
+  "toasts": {
+    "historyCleared": {
+      "title": "History Cleared",
+      "description": "All your analysis history has been permanently deleted"
+    },
+    "error": {
+      "title": "Error"
+    },
+    "clearHistoryError": {
+      "description": "Failed to clear history. Please try again."
+    }
+  },
+  "states": {
+    "loading": "Loading history...",
+    "emptyHistory": "No analysis history yet",
+    "unknownAthlete": "Unknown Athlete"
+  },
+  "athleteSearch": {
+    "notFound": {
+      "title": "Athlete Not Found",
+      "description": "We couldn't find \"{name}\" in our database. Let our AI search the web and create their profile.",
+      "button": "Search with AI"
+    },
+    "aiSearching": {
+      "title": "AI Search in Progress",
+      "initializing": "Initializing intelligent search..."
+    },
+    "progress": {
+      "starting": "Starting AI search...",
+      "preparing": "Preparing search parameters...",
+      "finding": "Finding athlete information...",
+      "searchingDatabase": "Searching athlete database...",
+      "extractingDetails": "Extracting athlete details...",
+      "searchingRankings": "Searching official rankings...",
+      "verifyingTeam": "Verifying team information...",
+      "findingImage": "Finding profile image...",
+      "finalizing": "Finalizing athlete data...",
+      "saving": "Saving athlete profile...",
+      "building": "Building athlete profile...",
+      "success": "Athlete created successfully!"
+    },
+    "imageUpdate": {
+      "updateButton": "Update Image",
+      "findButton": "Find Image",
+      "searching": "Searching...",
+      "popup": {
+        "question": "Not a picture that suits {name}?",
+        "help": "Help us update the picture.",
+        "noTokens": "(No tokens will be deducted)"
+      }
+    },
+    "rankingUpdate": {
+      "updateButton": "Update Info",
+      "updating": "Updating...",
+      "tooltip": {
+        "help": "Help us update our data on {name} so we get their most recent data",
+        "noTokens": "(No token deduction)"
+      }
+    }
+  },
+  "validation": {
+    "goalRequired": "Please describe your fitness goals in detail",
+    "goalTooLong": "Goal description is too long. Please keep it under 1000 characters",
+    "sportRequired": "Please select a sport",
+    "ageRequired": "Age is required",
+    "ageInvalid": "Please enter a valid age between 13 and 99",
+    "heightRequired": "Height is required",
+    "heightInvalid": "Please enter a valid height between 120 and 250 cm",
+    "weightRequired": "Weight is required",
+    "weightInvalid": "Please enter a valid weight between 30 and 300 kg",
+    "currentWeightRequired": "Current weight is required",
+    "currentWeightInvalid": "Please enter a valid weight between 30 and 300 kg",
+    "targetWeightRequired": "Target weight is required",
+    "targetWeightInvalid": "Please enter a valid target weight between 30 and 300 kg",
+    "genderRequired": "Please select your gender",
+    "countryRequired": "Please select a country for meal preferences"
+  },
+  "errors": {
+    "error": "Error",
+    "networkError": "Network Error",
+    "authError": "Authentication Error",
+    "insufficientTokens": "Insufficient Tokens",
+    "unexpectedError": "An unexpected error occurred. Please try again",
+    "serviceUnavailable": "Service temporarily unavailable. Please try again later",
+    "analysisFailed": "Analysis failed. Please try again",
+    "athleteNotFound": "Athlete not found. Please check the name and try again",
+    "aiServiceError": "AI analysis is currently unavailable. Please try again later",
+    "tokenDeductionFailed": "Failed to process tokens. Please try again",
+    "networkIssue": "Network error. Please check your connection and try again",
+    "sessionExpired": "Your session has expired. Please log in again"
+  }
+}

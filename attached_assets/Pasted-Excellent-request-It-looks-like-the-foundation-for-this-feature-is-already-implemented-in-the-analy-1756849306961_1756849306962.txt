@@ -1,0 +1,40 @@
+Excellent request! It looks like the foundation for this feature is already implemented in the analysis-result.tsx file you provided. The component is set up to display exactly what you're asking for.Let's look at the key pieces of code that make this work:1. The getMedalIcon Helper FunctionThis function is designed to take a medal type as a string and return the correct icon with the appropriate color. code JavaScriptdownloadcontent_copyexpand_less    // Helper function to get medal icon based on medal type
+const getMedalIcon = (medal: string) => {
+  if (medal === 'Gold') {
+    return <Medal className="w-5 h-5 text-yellow-500" />;
+  } else if (medal === 'Silver') {
+    return <Medal className="w-5 h-5 text-gray-300" />;
+  } else if (medal === 'Bronze') {
+    return <Medal className="w-5 h-5 text-amber-600" />;
+  } else {
+    return <CheckCircle className="w-5 h-5 text-green-500" />;
+  }
+};
+  As you can see:Gold, Silver, Bronze: Each returns a Medal icon with a distinct color.Anything Else: If the medal type is not one of the top three (like "Participation" in your JSON data), it defaults to returning a CheckCircle icon in green—your green tick.2. Rendering the AchievementsInside the renderBioAnalysis function, the code maps over the achievements array from your JSON data. For each achievement, it calls the getMedalIcon function to display the correct icon next to the achievement text. code JavaScriptdownloadcontent_copyexpand_lessIGNORE_WHEN_COPYING_STARTIGNORE_WHEN_COPYING_END    {/* Notable Achievements Section - Completely Rewritten */}
+{achievements && achievements.length > 0 && (
+  <Card /* ... */ >
+    <CardContent className="p-8">
+      {/* ... Card Title ... */}
+      <div className="grid gap-4">
+        {achievements.map((achievementObj: any, index: number) => {
+          // Extract text and medal directly from object
+          const text = achievementObj?.achievement || '';
+          const medal = achievementObj?.medal || 'Participation';
+          
+          return (
+            <div key={index} className="flex items-start space-x-4 /* ... */">
+              <div className="mt-1 flex-shrink-0">
+                {/* This is where the magic happens! */}
+                {getMedalIcon(medal)}
+              </div>
+              <p className="text-gray-200 /* ... */">
+                {text}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    </CardContent>
+  </Card>
+)}
+  ConclusionNo changes are needed. The code is already set up to handle your request perfectly. When the achievements data is passed to the component, it will correctly display a colored medal icon for Gold, Silver, and Bronze, and a green checkmark for achievements like "Participation".

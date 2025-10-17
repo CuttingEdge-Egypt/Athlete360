@@ -1,0 +1,140 @@
+Let’s map out the full Paymob card payment flow with 3DS for your case:
+
+🔄 Full Payment Flow with Paymob (Integration ID: 4233746)
+1. Authentication (Get API Token)
+
+Your backend calls Paymob to get an auth token using your PAYMOB_API_KEY.
+
+POST https://accept.paymob.com/api/auth/tokens
+{
+  "api_key": "YOUR_PAYMOB_API_KEY"
+}
+
+
+Response → { "token": "AUTH_TOKEN" }
+
+2. Create an Order
+
+Create an order for the payment (amount in cents).
+
+POST https://accept.paymob.com/api/ecommerce/orders
+{
+  "auth_token": "AUTH_TOKEN",
+  "delivery_needed": "false",
+  "amount_cents": "1500",
+  "currency": "EGP",
+  "merchant_order_id": "order_12345",
+  "items": []
+}
+
+
+Response → { "id": 374538333, ... } → This is your order_id.
+
+3. Generate a Payment Key
+
+Request a payment key for this order using your integration ID (4233746).
+
+This step attaches billing data and defines the payment method.
+
+POST https://accept.paymob.com/api/acceptance/payment_keys
+{
+  "auth_token": "AUTH_TOKEN",
+  "amount_cents": "1500",
+  "expiration": 3600,
+  "order_id": "374538333",
+  "billing_data": {
+    "apartment": "NA",
+    "email": "customer@email.com",
+    "floor": "NA",
+    "first_name": "John",
+    "last_name": "Doe",
+    "street": "NA",
+    "building": "NA",
+    "phone_number": "+201000000000",
+    "shipping_method": "NA",
+    "postal_code": "NA",
+    "city": "Cairo",
+    "country": "EG",
+    "state": "NA"
+  },
+  "currency": "EGP",
+  "integration_id": 4233746
+}
+
+
+Response → { "token": "PAYMENT_KEY" }
+
+4. Load Iframe / Redirect to Paymob Checkout
+
+Embed Paymob’s iframe in your frontend or redirect the user.
+
+<iframe 
+  src="https://accept.paymob.com/api/acceptance/iframes/YOUR_IFRAME_ID?payment_token=PAYMENT_KEY" 
+  width="100%" height="600" frameborder="0">
+</iframe>
+
+
+⚠️ If the card requires 3D Secure, Paymob will automatically redirect the user to the redirection_url (the OTP/bank authentication page).
+
+5. Customer Completes 3DS
+
+The customer enters OTP/password at their bank page.
+
+Paymob waits for the bank’s response.
+
+6. Paymob Sends Callbacks
+
+After the 3DS step, Paymob POSTs the result to your configured callback(s):
+
+Processed callback:
+https://accept.paymobsolutions.com/api/acceptance/post_pay
+
+Response callback:
+https://accept.paymobsolutions.com/api/acceptance/post_pay
+
+You’ll get JSON like this:
+
+{
+  "id": 333874374,
+  "amount_cents": 1500,
+  "success": "true",
+  "order": 374538333,
+  "currency": "EGP",
+  "source_data": {
+    "pan": "4889",
+    "sub_type": "MasterCard"
+  },
+  "created_at": "2025-08-23T16:47:06.702693",
+  "hmac": "53a7c8..."
+}
+
+
+If success:true → payment is successful
+
+If success:false → payment failed (wrong OTP, declined, etc.)
+
+7. Verify Payment (Optional but Recommended)
+
+On your backend, verify the payment using transaction ID to be safe.
+
+GET https://accept.paymob.com/api/acceptance/transactions/333874374?token=AUTH_TOKEN
+
+8. Deliver Service (e.g., Add Tokens, Create Receipt)
+
+Only after you confirm success:true →
+
+Add tokens to user account
+
+Save receipt in DB
+
+Send confirmation to user
+
+⚡ Info I May Still Need from You:
+
+Your Iframe ID (you get this when you create an iframe integration in Paymob dashboard).
+
+Example: 326484
+
+Needed in Step 4.
+
+Your API Key (already should be in your .env).

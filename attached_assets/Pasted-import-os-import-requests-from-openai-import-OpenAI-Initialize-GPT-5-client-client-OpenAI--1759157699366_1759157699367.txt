@@ -1,0 +1,95 @@
+import os
+import requests
+from openai import OpenAI
+
+# Initialize GPT-5 client
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+def get_athlete_image(name: str, sport: str, country: str, details: str, save_dir: str = "downloads"):
+    """
+    Asks GPT-5 for an athlete photo link (downloadable or embeddable).
+    If it's downloadable, auto-downloads the image.
+    
+    Args:
+        name (str): Athlete's full name
+        sport (str): Sport played
+        country (str): Nationality / Country
+        details (str): Personal details (height, medals, etc.)
+        save_dir (str): Folder to save downloaded images
+
+    Returns:
+        dict: { "download_url": str or None, "embed_url": str or None, "local_file": str or None }
+    """
+
+    prompt = f"""
+    You are an AI that provides athlete photos.
+    The request is for an athlete:
+    - Name: {name}
+    - Sport: {sport}
+    - Country: {country}
+    - Details: {details}
+
+    Return ONE of the following:
+    1. A direct downloadable image link (ending in .jpg, .png, etc.)
+    2. Or an embeddable link (usable directly inside an <img> HTML tag).
+    
+    If no real image is found, return only the word NULL.
+    Respond with a single URL or NULL, nothing else.
+    """
+
+    try:
+        # Send prompt to GPT-5
+        response = client.chat.completions.create(
+            model="gpt-5",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=1
+        )
+        url = response.choices[0].message.content.strip()
+
+        # Handle case where GPT-5 returns no image
+        if url.upper() == "NULL":
+            return {"download_url": None, "embed_url": None, "local_file": None}
+
+        downloadable_exts = (".jpg", ".jpeg", ".png", ".webp")
+        local_file = None
+
+        if url.lower().endswith(downloadable_exts):
+            # Create folder if it doesn't exist
+            os.makedirs(save_dir, exist_ok=True)
+
+            # Safe filename
+            file_ext = os.path.splitext(url)[-1]
+            safe_name = f"{name.replace(' ', '_')}{file_ext}"
+            local_path = os.path.join(save_dir, safe_name)
+
+            try:
+                # Download image
+                img_resp = requests.get(url, stream=True, timeout=10)
+                img_resp.raise_for_status()
+                with open(local_path, "wb") as f:
+                    for chunk in img_resp.iter_content(1024):
+                        f.write(chunk)
+                local_file = local_path
+            except Exception as e:
+                print(f"❌ Error downloading image: {e}")
+                return {"download_url": None, "embed_url": None, "local_file": None}
+
+            return {"download_url": url, "embed_url": None, "local_file": local_file}
+        else:
+            # Assume embeddable link
+            return {"download_url": None, "embed_url": url, "local_file": None}
+
+    except Exception as e:
+        print(f"❌ GPT-5 API error: {e}")
+        return {"download_url": None, "embed_url": None, "local_file": None}
+
+
+# Example usage
+if __name__ == "__main__":
+    result = get_athlete_image(
+        name="Nicholas CJ",
+        sport="Taekwondo",
+        country="USA",
+        details="6ft 2, gold medalist in multiple championships"
+    )
+    print(result)

@@ -1,0 +1,27 @@
+Of course, I can help with that. After analyzing the provided analysis-result.tsx file and the corresponding JSON data, the issue is clear.The Mismatch Between Expected and Actual Data StructureThe problem lies in how the AnalysisResult component receives and processes the data prop. The component expects the biography data to be at the top level of the data object it receives. However, the actual JSON data has the biography information nested within a data property.Let's break it down:What the code expects: The renderBioAnalysis function attempts to access properties like name, bio, playersStory, and achievements directly from the data prop (e.g., bioData.name, bioData.bio).What the API provides: The JSON response wraps the biography data inside a data object. So, to access the athlete's name, for example, you would need to use data.data.name.The SolutionTo fix this, you need to modify the renderBioAnalysis function to correctly access the nested data object. Here’s how you can adjust the code: code TypeScriptdownloadcontent_copyexpand_less    const renderBioAnalysis = (data: any) => {
+    // Parse the data first using the utility function
+    const parsedData = parseAnalysisData(data);
+
+    // ** Access the nested data object **
+    const bioData = parsedData.data;
+
+    // Ensure we have a proper object to work with
+    if (!bioData || typeof bioData !== 'object') {
+      return (
+        <div className="text-center text-gray-400">
+          Biography data is missing or in an incorrect format.
+        </div>
+      );
+    }
+
+    // Extract data with safe fallbacks from the nested object
+    const name = bioData.name || "Athlete Profile";
+    const bio = bioData.bio || "";
+    const playersStory = bioData.playersStory || "";
+    const rank = bioData.currentRank || bioData.rank || "N/A";
+    const achievements = Array.isArray(bioData.achievements) ? bioData.achievements : [];
+    const recentNews = bioData.personalInfo?.recentNews || bioData.recentNews || [];
+    const profileImageUrl = bioData.profileImageUrl;
+
+    // ... rest of the component remains the same
+  By changing const bioData = parsedData; to const bioData = parsedData.data;, you are telling the component to look inside the data property of the JSON response, which is where all the biography information is located. This will allow the component to correctly parse and display the athlete's details on the front-end.Google Search Suggestions Display of Search Suggestions is required when using Grounding with Google Search.  Learn more react functional component data flowreact component props drilling issuehow to debug react component rendering

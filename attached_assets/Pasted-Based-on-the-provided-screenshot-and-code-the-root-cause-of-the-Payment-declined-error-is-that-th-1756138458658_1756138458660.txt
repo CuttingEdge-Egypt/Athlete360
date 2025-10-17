@@ -1,0 +1,46 @@
+Based on the provided screenshot and code, the root cause of the "Payment declined" error is that the Order Amount is not being displayed on the Paymob checkout page. This indicates that the payment token was generated without a valid amount, leading to an immediate failure when the user tries to pay.
+Problem Analysis
+The Paymob payment flow consists of three main API calls, as implemented in paymobService.ts:
+Authentication: Get an API token.
+Order Creation: Create an order with an amount_cents and item details.
+Payment Key Generation: Get a final token (the clientSecret) for the checkout page, which also requires the amount_cents.
+The problem lies in the data being sent during the Payment Key Generation (Step 3). Even if the order is created correctly in Step 2, if the amount_cents in the payment key request is invalid, missing, or of the wrong data type, Paymob will generate a key but won't associate an amount with it. This results in the broken checkout page shown in the image.
+Looking at the code in paymobService.ts:
+code
+TypeScript
+// paymobService.ts -> createPaymentIntention()
+
+// Step 3: Generate payment key for integration  
+const integrationId = process.env.INTEGRATION_ID;
+const paymentKeyPayload = {
+  auth_token: token,
+  amount_cents: paymentData.amount, // Problem is likely here
+  expiration: 3600,
+  order_id: parseInt(orderData.id), // Explicitly parsed to integer
+  billing_data: {
+    // ...
+  },
+  currency: paymentData.currency || 'EGP',
+  integration_id: parseInt(integrationId!) // Explicitly parsed to integer
+};
+The issue is that amount_cents is not explicitly ensured to be an integer. The Paymob API strictly requires this field to be an integer. While the value passed from the frontend (pkg.price) is a number and is multiplied by 100 in routes.ts, it's possible that it could become a float or a string-like number somewhere in the process.
+The code correctly uses parseInt() for order_id and integration_id, but omits this validation for amount_cents, which is the most critical financial value in the request.
+Recommended Solution
+To resolve this, you should ensure the amount_cents value is explicitly converted to an integer before being sent to the Paymob API.
+Modify the paymentKeyPayload in paymobService.ts as follows:
+code
+TypeScript
+// In paymobService.ts
+
+const paymentKeyPayload = {
+  auth_token: token,
+  amount_cents: parseInt(String(paymentData.amount), 10), // FIX: Ensure the amount is an integer
+  expiration: 3600,
+  order_id: parseInt(orderData.id),
+  billing_data: {
+    // ...
+  },
+  currency: paymentData.currency || 'EGP',
+  integration_id: parseInt(integrationId!)
+};
+By wrapping the amount in parseInt(String(...), 10), you guarantee that even if paymentData.amount is a float (e.g., 5000.0) or a numeric string, it will be converted to a clean integer (5000) that the Paymob API can correctly process. This will ensure the "Order Amount" is properly displayed on the checkout page, allowing the payment to proceed.

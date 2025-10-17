@@ -1,0 +1,16 @@
+{
+  "name": "athlete360-crawler-test",
+  "version": "1.0.0",
+  "description": "Web crawler test for Athlete360 signup and token purchase flow",
+  "main": "crawler_test.js",
+  "scripts": {
+    "test": "node crawler_test.js",
+    "test:headless": "HEADLESS=true node crawler_test.js",
+    "test:scenarios": "node test_scenarios.js"
+  },
+  "dependencies": {
+    "puppeteer": "^21.0.0"
+  },
+  "keywords": ["testing", "automation", "puppeteer", "athlete360"],
+  "author": "Athlete360 Development Team"
+}

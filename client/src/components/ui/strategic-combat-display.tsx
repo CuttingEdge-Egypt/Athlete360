@@ -1,0 +1,223 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import {
+  Target,
+  Shield,
+  Zap,
+  Brain,
+  TrendingUp,
+  AlertTriangle,
+  Star,
+  Clock,
+  Award,
+  ChevronRight,
+} from "lucide-react";
+import { useTranslation } from 'react-i18next';
+
+interface Strategy {
+  strategy: string;
+  description: string;
+  execution: string;
+  success_probability: string;
+  risk_level: string;
+}
+
+interface StrategicCombatData {
+  strategies: Strategy[];
+}
+
+interface StrategicCombatDisplayProps {
+  data: StrategicCombatData;
+}
+
+export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
+  const { t } = useTranslation();
+  if (!data || !data.strategies || !Array.isArray(data.strategies)) {
+    return (
+      <div className="text-center text-gray-400 py-8">
+        <AlertTriangle className="mx-auto mb-4" size={48} />
+        <p>{t("analysis.combat.noData", "Strategic combat analysis data is not available")}</p>
+      </div>
+    );
+  }
+
+  const normalizeRiskLevel = (risk: string): 'low' | 'medium' | 'high' | 'unknown' => {
+    const riskLower = risk.toLowerCase();
+    // English terms
+    if (riskLower.includes('low') || riskLower.includes('minimal')) return 'low';
+    if (riskLower.includes('medium') || riskLower.includes('moderate')) return 'medium';
+    if (riskLower.includes('high') || riskLower.includes('severe')) return 'high';
+    // Arabic terms
+    if (riskLower.includes('منخفض') || riskLower.includes('قليل')) return 'low';
+    if (riskLower.includes('متوسط') || riskLower.includes('معتدل')) return 'medium';
+    if (riskLower.includes('عالي') || riskLower.includes('مرتفع')) return 'high';
+    return 'unknown';
+  };
+
+  const getRiskColor = (risk: string) => {
+    const level = normalizeRiskLevel(risk);
+    switch (level) {
+      case 'low': return 'bg-green-500/20 text-green-400 border-green-500/30';
+      case 'medium': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+      case 'high': return 'bg-red-500/20 text-red-400 border-red-500/30';
+      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+    }
+  };
+
+  const normalizeSuccessLevel = (probability: string): 'low' | 'medium' | 'high' | 'unknown' => {
+    const probLower = probability.toLowerCase();
+    // English terms
+    if (probLower.includes('high') || probLower.includes('excellent')) return 'high';
+    if (probLower.includes('medium') || probLower.includes('moderate')) return 'medium';
+    if (probLower.includes('low') || probLower.includes('poor')) return 'low';
+    // Arabic terms
+    if (probLower.includes('عالي') || probLower.includes('مرتفع') || probLower.includes('ممتاز')) return 'high';
+    if (probLower.includes('متوسط') || probLower.includes('معتدل')) return 'medium';
+    if (probLower.includes('منخفض') || probLower.includes('قليل') || probLower.includes('ضعيف')) return 'low';
+    return 'unknown';
+  };
+
+  const getSuccessColor = (probability: string) => {
+    const level = normalizeSuccessLevel(probability);
+    switch (level) {
+      case 'high': return 'text-green-400';
+      case 'medium': return 'text-yellow-400';
+      case 'low': return 'text-red-400';
+      default: return 'text-gray-400';
+    }
+  };
+
+  const getSuccessProgress = (probability: string) => {
+    const level = normalizeSuccessLevel(probability);
+    switch (level) {
+      case 'high': return 75;
+      case 'medium': return 50;
+      case 'low': return 25;
+      default: return 0;
+    }
+  };
+
+  const getRiskIcon = (risk: string) => {
+    const level = normalizeRiskLevel(risk);
+    switch (level) {
+      case 'low': return <Shield className="w-4 h-4" />;
+      case 'medium': return <AlertTriangle className="w-4 h-4" />;
+      case 'high': return <Zap className="w-4 h-4" />;
+      default: return <Target className="w-4 h-4" />;
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="text-center space-y-2 mb-8">
+        <div className="flex items-center justify-center space-x-2 text-red-400">
+          <Target size={24} />
+          <h2 className="text-2xl font-bold">{t("analysis.combat.strategiesTitle", "Combat Strategies")}</h2>
+        </div>
+        <p className="text-gray-400">
+          {t("analysis.combat.tacticalAnalysis", "Advanced tactical analysis with {{count}} strategic approaches", { count: data.strategies.length })}
+        </p>
+      </div>
+
+      {/* Strategies Grid */}
+      <div className="space-y-6">
+        {data.strategies.map((strategy, index) => (
+          <Card 
+            key={index} 
+            className="bg-athlete-gray-800 border-gray-700 hover:border-red-500/30 transition-all duration-300"
+            data-testid={`strategy-card-${index}`}
+          >
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <CardTitle className="text-white text-lg font-semibold mb-2 flex items-center">
+                    <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center mr-3">
+                      <span className="text-red-400 font-bold text-sm">{index + 1}</span>
+                    </div>
+                    {strategy.strategy}
+                  </CardTitle>
+                </div>
+                <div className="flex space-x-2 ml-4">
+                  <Badge 
+                    variant="outline" 
+                    className={`${getRiskColor(strategy.risk_level)} border`}
+                    data-testid={`risk-badge-${index}`}
+                  >
+                    {getRiskIcon(strategy.risk_level)}
+                    <span className="ml-1">{strategy.risk_level} {t("analysis.combat.risk", "Risk")}</span>
+                  </Badge>
+                </div>
+              </div>
+            </CardHeader>
+
+            <CardContent className="space-y-4">
+              {/* Strategy Description */}
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-gray-300 flex items-center">
+                  <Brain className="w-4 h-4 mr-2 text-blue-400" />
+                  {t("analysis.combat.strategicOverview", "Strategic Overview")}
+                </h4>
+                <p className="text-gray-300 leading-relaxed text-sm bg-athlete-gray-900/50 p-3 rounded-md">
+                  {strategy.description}
+                </p>
+              </div>
+
+              <div className="border-t border-gray-600 my-4"></div>
+
+              {/* Execution Details */}
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-gray-300 flex items-center">
+                  <Zap className="w-4 h-4 mr-2 text-yellow-400" />
+                  {t("analysis.combat.executionPlan", "Execution Plan")}
+                </h4>
+                <p className="text-gray-300 leading-relaxed text-sm bg-athlete-gray-900/50 p-3 rounded-md">
+                  {strategy.execution}
+                </p>
+              </div>
+
+              <div className="border-t border-gray-600 my-4"></div>
+
+              {/* Success Probability */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-gray-300 flex items-center">
+                    <TrendingUp className="w-4 h-4 mr-2 text-green-400" />
+                    {t("analysis.combat.successProbability", "Success Probability")}
+                  </h4>
+                  <span 
+                    className={`text-sm font-semibold ${getSuccessColor(strategy.success_probability)}`}
+                    data-testid={`success-probability-${index}`}
+                  >
+                    {strategy.success_probability}
+                  </span>
+                </div>
+                <Progress 
+                  value={getSuccessProgress(strategy.success_probability)} 
+                  className="h-2 bg-gray-700"
+                  data-testid={`success-progress-${index}`}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Summary Footer */}
+      <Card className="bg-gradient-to-r from-red-900/20 to-orange-900/20 border-red-500/30 mt-8">
+        <CardContent className="p-4">
+          <div className="flex items-center space-x-3">
+            <Award className="text-red-400" size={20} />
+            <div>
+              <h3 className="text-white font-semibold">{t("analysis.combat.analysisComplete", "Strategic Analysis Complete")}</h3>
+              <p className="text-gray-300 text-sm">
+                {t("analysis.combat.tacticalApproaches", "{{count}} tactical approaches identified for optimal performance advantage", { count: data.strategies.length })}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
