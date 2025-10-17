@@ -126,6 +126,9 @@
       "strategiesTitle": "Combat Strategies",
       "tacticalAnalysis": "Advanced tactical analysis with {count} strategic approaches",
       "risk": "Risk",
+      "riskLow": "low",
+      "riskMedium": "medium",
+      "riskHigh": "high",
       "strategicOverview": "Strategic Overview",
       "executionPlan": "Execution Plan",
       "successProbability": "Success Probability",
@@ -165,9 +168,11 @@
       "phases_other": "{count} Phases"
     },
     "rank": {
+      "title": "Competitive History",
       "progression": "Ranking Progression",
       "unavailable": "⚠ Rank Analysis Unavailable",
-      "unableToGenerate": "Unable to generate authentic rank history at this time."
+      "unableToGenerate": "Unable to generate authentic rank history at this time.",
+      "internationalHistory": "International Competitive History"
     },
     "unavailable": "⚠ Analysis Unavailable",
     "tryAgainLater": "Please try again later or contact support if the issue persists.",

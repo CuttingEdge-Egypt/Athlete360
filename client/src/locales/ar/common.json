@@ -126,6 +126,9 @@
       "strategiesTitle": "استراتيجيات القتال",
       "tacticalAnalysis": "تحليل تكتيكي متقدم مع {count} نهج استراتيجي",
       "risk": "مخاطرة",
+      "riskLow": "منخفضة",
+      "riskMedium": "متوسطة",
+      "riskHigh": "عالية",
       "strategicOverview": "نظرة عامة استراتيجية",
       "executionPlan": "خطة التنفيذ",
       "successProbability": "احتمالية النجاح",
@@ -165,9 +168,11 @@
       "phases_other": "{count} مراحل"
     },
     "rank": {
+      "title": "التاريخ التنافسي",
       "progression": "تقدم الترتيب",
       "unavailable": "⚠ تحليل الترتيب غير متاح",
-      "unableToGenerate": "تعذر إنشاء تاريخ ترتيب أصيل في هذا الوقت."
+      "unableToGenerate": "تعذر إنشاء تاريخ ترتيب أصيل في هذا الوقت.",
+      "internationalHistory": "المسيرة المهنية الدولية"
     },
     "unavailable": "⚠ التحليل غير متاح",
     "tryAgainLater": "يرجى المحاولة مرة أخرى لاحقاً أو الاتصال بالدعم إذا استمرت المشكلة.",
