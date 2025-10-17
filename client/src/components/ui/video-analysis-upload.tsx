@@ -140,7 +140,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
         : `Clip Analysis: ${uploadedFile.name}`;
       queueId = (window as any).generationQueue.add(queueLabel, 'video', false);
       
-      // Add cancel callback to queue item
+      // Add cancel and retry callbacks to queue item
       (window as any).generationQueue.update(queueId, { 
         status: 'running', 
         progressMessage: 'Uploading video...',
@@ -148,6 +148,10 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
           if (abortControllerRef.current) {
             abortControllerRef.current.abort();
           }
+        },
+        onRetry: () => {
+          // Retry with the same file and parameters
+          handleAnalyze();
         }
       });
     }

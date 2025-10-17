@@ -213,7 +213,7 @@ export default function Home() {
         throw new Error(error.message || 'Failed to start nutrition plan generation');
       }
       const result = await response.json();
-      return { ...result, queueId };
+      return { ...result, queueId, formData: data };
     },
     onSuccess: (result) => {
       console.log('Nutrition plan job created:', result);
@@ -222,12 +222,16 @@ export default function Home() {
       setNutritionProgress(0);
       setNutritionJobProgressMessage("Starting nutrition plan generation...");
       
-      // Update queue to running with jobId for proper cancellation
+      // Update queue to running with jobId for proper cancellation and retry
       if (result.queueId && (window as any).generationQueue) {
         (window as any).generationQueue.update(result.queueId, { 
           status: 'running', 
           progressMessage: 'Generating nutrition plan...',
-          jobId: result.jobId
+          jobId: result.jobId,
+          onRetry: () => {
+            // Retry by resubmitting the form with the same data
+            createNutritionPlanJobMutation.mutate(result.formData);
+          }
         });
       }
       
@@ -280,7 +284,7 @@ export default function Home() {
         throw new Error(error.message || 'Failed to start development plan generation');
       }
       const result = await response.json();
-      return { ...result, queueId };
+      return { ...result, queueId, formData: data };
     },
     onSuccess: (result) => {
       console.log('Development plan job created:', result);
@@ -289,12 +293,16 @@ export default function Home() {
       setDevelopmentProgress(0);
       setDevelopmentProgressMessage("Starting development plan generation...");
       
-      // Update queue to running with jobId for proper cancellation
+      // Update queue to running with jobId for proper cancellation and retry
       if (result.queueId && (window as any).generationQueue) {
         (window as any).generationQueue.update(result.queueId, { 
           status: 'running', 
           progressMessage: 'Generating development plan...',
-          jobId: result.jobId
+          jobId: result.jobId,
+          onRetry: () => {
+            // Retry by resubmitting the form with the same data
+            createDevelopmentPlanJobMutation.mutate(result.formData);
+          }
         });
       }
       

@@ -20,6 +20,8 @@ interface GenerationItem {
   progressMessage?: string;
   jobId?: string; // Backend job ID for nutrition, development, and video analysis
   onCancel?: () => void; // Cancel callback for AbortController-based operations (like video analysis)
+  onRetry?: () => void; // Retry callback for complex operations that need original data
+  retryData?: any; // Store original request data for retry
 }
 
 interface GenerationQueueProps {
@@ -230,6 +232,13 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
 
   // Retry failed generation
   const retryGeneration = async (item: GenerationItem) => {
+    // If item has a custom retry callback, use it
+    if (item.onRetry) {
+      removeGeneration(item.id);
+      item.onRetry();
+      return;
+    }
+    
     // Remove the failed item
     removeGeneration(item.id);
     

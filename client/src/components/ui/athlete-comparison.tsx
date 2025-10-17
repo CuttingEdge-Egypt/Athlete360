@@ -382,10 +382,14 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       (window as any).generationQueue.add(comparisonName, 'comparison', false);
       // Keep using our queueId, don't overwrite it
       
-      // Immediately update status to running when we start the mutation
+      // Immediately update status to running when we start the mutation and add retry callback
       (window as any).generationQueue.update(queueId, { 
         status: 'running', 
-        progressMessage: 'Analyzing athletes...' 
+        progressMessage: 'Analyzing athletes...',
+        onRetry: () => {
+          // Retry comparison with the same athlete selections
+          handleCompare();
+        }
       });
       
       // Update queue status when mutation completes
