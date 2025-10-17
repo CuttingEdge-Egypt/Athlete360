@@ -75,8 +75,8 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
           setProgressPercent(0);
           
           toast({
-            title: "Generation Cancelled",
-            description: `${service.title} analysis was cancelled`,
+            title: t('messages.generationCancelled', { ns: 'common' }),
+            description: `${service.title} ${t('messages.generationCancelledDesc', { ns: 'common' })}`,
             variant: "destructive",
           });
         }
@@ -230,8 +230,8 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       setProgressPercent(0);
       
       toast({
-        title: "Analysis Complete",
-        description: `${service.title} analysis generated successfully!`,
+        title: t('messages.analysisComplete', { ns: 'common' }),
+        description: `${service.title} ${t('messages.analysisSuccess', { ns: 'common' })}`,
       });
       
       // Invalidate queries to refresh data immediately
@@ -265,8 +265,8 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
+          title: t('messages.unauthorized', { ns: 'common' }),
+          description: t('messages.unauthorizedDesc', { ns: 'common' }),
           variant: "destructive",
         });
         setTimeout(() => {
@@ -285,8 +285,8 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       }
 
       toast({
-        title: "Analysis Failed",
-        description: error.message || "Failed to generate analysis",
+        title: t('messages.analysisFailed', { ns: 'common' }),
+        description: error.message || t('messages.analysisFailedDesc', { ns: 'common' }),
         variant: "destructive",
       });
     },
