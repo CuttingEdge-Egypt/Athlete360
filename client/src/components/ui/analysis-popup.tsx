@@ -2534,19 +2534,16 @@ export function AnalysisPopup({
           <div className="flex items-center justify-between">
             {i18n.language === 'ar' ? (
               <>
-                <div className="flex space-x-2">
-                  <Button 
-                    onClick={handleExport}
-                    size="sm"
-                    className="bg-athlete-success hover:bg-green-600 text-white"
-                    disabled={isExporting}
-                  >
-                    <Download className="ml-2" size={16} />
-                    {isExporting ? t("common:analysis.exporting", "Exporting...") : t("common:analysis.exportPdf", "Export PDF")}
-                  </Button>
-                </div>
-                <div className="flex items-center space-x-reverse space-x-3">
-                  {getIcon(type)}
+                <Button 
+                  onClick={handleExport}
+                  size="sm"
+                  className="bg-athlete-success hover:bg-green-600 text-white"
+                  disabled={isExporting}
+                >
+                  <Download className="ml-2" size={16} />
+                  {isExporting ? t("common:analysis.exporting", "Exporting...") : t("common:analysis.exportPdf", "Export PDF")}
+                </Button>
+                <div className="flex items-center gap-3">
                   <div className="text-right">
                     <DialogTitle className="text-xl font-bold text-white text-right">
                       {getTitle(type)}
@@ -2560,11 +2557,12 @@ export function AnalysisPopup({
                       })}`}
                     </DialogDescription>
                   </div>
+                  {getIcon(type)}
                 </div>
               </>
             ) : (
               <>
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-3">
                   {getIcon(type)}
                   <div>
                     <DialogTitle className="text-xl font-bold text-white">
@@ -2580,17 +2578,15 @@ export function AnalysisPopup({
                     </DialogDescription>
                   </div>
                 </div>
-                <div className="flex space-x-2">
-                  <Button 
-                    onClick={handleExport}
-                    size="sm"
-                    className="bg-athlete-success hover:bg-green-600 text-white"
-                    disabled={isExporting}
-                  >
-                    <Download className="mr-2" size={16} />
-                    {isExporting ? t("common:analysis.exporting", "Exporting...") : t("common:analysis.exportPdf", "Export PDF")}
-                  </Button>
-                </div>
+                <Button 
+                  onClick={handleExport}
+                  size="sm"
+                  className="bg-athlete-success hover:bg-green-600 text-white"
+                  disabled={isExporting}
+                >
+                  <Download className="mr-2" size={16} />
+                  {isExporting ? t("common:analysis.exporting", "Exporting...") : t("common:analysis.exportPdf", "Export PDF")}
+                </Button>
               </>
             )}
           </div>
