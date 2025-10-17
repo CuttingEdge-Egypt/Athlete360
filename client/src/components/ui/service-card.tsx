@@ -408,7 +408,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
             data-testid={`button-preview-${service.id}`}
             variant="outline"
             size="sm"
-            className="w-full border-blue-400/50 text-blue-400 hover:bg-blue-400/10 hover:text-blue-400"
+            className="w-full border-blue-400/50 text-blue-400 hover:bg-blue-400/10 hover:text-blue-200 hover:border-blue-300"
             onClick={handlePreview}
             disabled={service.id === 'statistics'}
           >
