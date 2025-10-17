@@ -2109,7 +2109,7 @@ export function AnalysisPopup({
       case "bio":
         return t("analysis.bio.title", "Complete Athlete Biography");
       case "rank":
-        return "Competitive History";
+        return t("analysis.rank.title", "Competitive History");
       case "strengths":
         return t("analysis.strengths.title", "Competitive Strengths Profile");
       case "weaknesses":
