@@ -236,7 +236,7 @@ export function AnalysisPopup({
                 {strength.rating && (
                   <div className="mt-4">
                     <div className={`flex justify-between text-sm text-gray-400 mb-1 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                      <span>{t("analysis.strengths.strengthLevel", "Strength Level")}</span>
+                      <span>{t("common:analysis.strengths.strengthLevel", "Strength Level")}</span>
                       <span dir={i18n.language === 'ar' ? 'ltr' : 'ltr'}>{formatNumber(strength.rating, i18n.language === 'ar')}%</span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
