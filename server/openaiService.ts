@@ -1555,20 +1555,17 @@ CRITICAL ERROR HANDLING:
           "description": "Detailed tactical approach specifically designed to exploit this athlete's weaknesses",
           "execution": "Step-by-step implementation",
           "success_probability": "high|medium|low",
-          "risk_level": "high|medium|low"
+          "risk_level": "high|medium|low",
+          "references": ["Source 1 URL or description", "Source 2 URL or description"]
         }
       ]
     }
 
-CRITICAL - ABSOLUTELY NO LINKS, URLs, OR CITATIONS:
-- Do NOT include ANY links, URLs, citations, or reference sources ANYWHERE in the response
-- ESPECIALLY in title, description, and execution fields - provide ONLY clean descriptive text
-- No markdown links: [text](url)
-- No plain URLs: https://example.com or www.site.com
-- No bracketed references: [1], [2], [source]
-- No parenthetical citations: (source.com), ([website.org](https://...))
-- All text must be clean without ANY reference indicators
-- This applies to ALL fields: title, description, execution, and any text fields
+IMPORTANT - INCLUDE REFERENCES:
+- For each strategy, include a "references" array with 1-3 relevant sources
+- References can be URLs to videos, articles, match analyses, or expert commentary
+- Format references as: ["https://example.com/analysis", "Expert Coach Analysis - Match Review"]
+- Keep references clean and informative to support the strategy recommendations
 
 CRITICAL ERROR HANDLING:
 - If you cannot find any reliable data through web search, respond with exactly: {"error": "no_data_found", "success": false}

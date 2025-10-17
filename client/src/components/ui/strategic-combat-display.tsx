@@ -21,6 +21,7 @@ interface Strategy {
   execution: string;
   success_probability: string;
   risk_level: string;
+  references?: string[];
 }
 
 interface StrategicCombatData {
@@ -209,6 +210,41 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
                   data-testid={`success-progress-${index}`}
                 />
               </div>
+
+              {/* References Section */}
+              {strategy.references && strategy.references.length > 0 && (
+                <>
+                  <div className="border-t border-gray-600 my-4"></div>
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-semibold text-gray-300 flex items-center">
+                      <ChevronRight className="w-4 h-4 mr-2 text-purple-400" />
+                      {t("analysis.combat.references", "References & Sources")}
+                    </h4>
+                    <ul className="space-y-2">
+                      {strategy.references.map((ref, refIndex) => (
+                        <li 
+                          key={refIndex}
+                          className="text-sm text-gray-400 bg-athlete-gray-900/50 p-2 rounded-md hover:bg-athlete-gray-900/80 transition-colors"
+                          data-testid={`reference-${index}-${refIndex}`}
+                        >
+                          {ref.startsWith('http') ? (
+                            <a 
+                              href={ref} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-400 hover:text-blue-300 underline break-all"
+                            >
+                              {ref}
+                            </a>
+                          ) : (
+                            <span className="text-gray-300">{ref}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         ))}

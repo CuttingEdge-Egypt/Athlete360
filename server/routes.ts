@@ -2524,7 +2524,8 @@ Return only valid JSON with the missing fields.`;
           description: strategy.description,
           execution: strategy.execution || "Apply systematically during competition",
           success_probability: strategy.success_probability || "medium",
-          risk_level: strategy.risk_level || "medium"
+          risk_level: strategy.risk_level || "medium",
+          references: strategy.references || []
         }));
         
         beatStrategies = {
