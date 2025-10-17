@@ -2532,22 +2532,6 @@ export function AnalysisPopup({
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-athlete-gray-900 border-gray-700 text-white">
         <DialogHeader className="border-b border-gray-700 pb-4">
           <div className={`flex items-center justify-between ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
-            <div className={`flex items-center ${i18n.language === 'ar' ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
-              {getIcon(type)}
-              <div className={i18n.language === 'ar' ? 'text-right' : ''}>
-                <DialogTitle className={`text-xl font-bold text-white ${i18n.language === 'ar' ? 'text-right' : ''}`}>
-                  {getTitle(type)}
-                </DialogTitle>
-                <DialogDescription className={`text-gray-400 mt-1 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
-                  {athleteName && `${t("common:analysis.analysisFor", "Analysis for")} ${athleteName}`}
-                  {createdAt && ` • ${t("common:analysis.generatedOn", "Generated on")} ${new Date(createdAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { 
-                    month: 'short', 
-                    day: 'numeric', 
-                    year: 'numeric'
-                  })}`}
-                </DialogDescription>
-              </div>
-            </div>
             <div className={`flex ${i18n.language === 'ar' ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
               <Button 
                 onClick={handleExport}
@@ -2558,6 +2542,19 @@ export function AnalysisPopup({
                 <Download className={`${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} size={16} />
                 {isExporting ? t("common:analysis.exporting", "Exporting...") : t("common:analysis.exportPdf", "Export PDF")}
               </Button>
+            </div>
+            <div className="text-right">
+              <DialogTitle className="text-xl font-bold text-white text-right">
+                {getTitle(type)}
+              </DialogTitle>
+              <DialogDescription className="text-gray-400 mt-1 text-right">
+                {athleteName && `${t("common:analysis.analysisFor", "Analysis for")} ${athleteName}`}
+                {createdAt && ` • ${t("common:analysis.generatedOn", "Generated on")} ${new Date(createdAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { 
+                  month: 'short', 
+                  day: 'numeric', 
+                  year: 'numeric'
+                })}`}
+              </DialogDescription>
             </div>
           </div>
         </DialogHeader>
