@@ -139,6 +139,9 @@
       "strategicOverview": "نظرة عامة استراتيجية",
       "executionPlan": "خطة التنفيذ",
       "successProbability": "احتمالية النجاح",
+      "successLow": "منخفضة",
+      "successMedium": "متوسطة",
+      "successHigh": "عالية",
       "references": "المراجع والمصادر",
       "analysisComplete": "اكتمل التحليل الاستراتيجي",
       "tacticalApproaches": "تم تحديد {count} نهج تكتيكي لتحقيق ميزة الأداء المطلوبة"

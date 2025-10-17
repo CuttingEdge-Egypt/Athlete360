@@ -33,7 +33,7 @@ interface StrategicCombatDisplayProps {
 }
 
 export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   if (!data || !data.strategies || !Array.isArray(data.strategies)) {
     return (
       <div className="text-center text-gray-400 py-8">
@@ -109,6 +109,16 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
     }
   };
 
+  const translateSuccessProbability = (probability: string): string => {
+    const level = normalizeSuccessLevel(probability);
+    switch (level) {
+      case 'low': return t("analysis.combat.successLow", "low");
+      case 'medium': return t("analysis.combat.successMedium", "medium");
+      case 'high': return t("analysis.combat.successHigh", "high");
+      default: return probability;
+    }
+  };
+
   const getRiskIcon = (risk: string) => {
     const level = normalizeRiskLevel(risk);
     switch (level) {
@@ -157,7 +167,12 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
                     data-testid={`risk-badge-${index}`}
                   >
                     {getRiskIcon(strategy.risk_level)}
-                    <span className="ml-1">{translateRiskLevel(strategy.risk_level)} {t("analysis.combat.risk", "Risk")}</span>
+                    <span className="ml-1">
+                      {i18n.language === 'ar' 
+                        ? `${t("analysis.combat.risk", "Risk")} ${translateRiskLevel(strategy.risk_level)}`
+                        : `${translateRiskLevel(strategy.risk_level)} ${t("analysis.combat.risk", "Risk")}`
+                      }
+                    </span>
                   </Badge>
                 </div>
               </div>
@@ -201,7 +216,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
                     className={`text-sm font-semibold ${getSuccessColor(strategy.success_probability)}`}
                     data-testid={`success-probability-${index}`}
                   >
-                    {strategy.success_probability}
+                    {translateSuccessProbability(strategy.success_probability)}
                   </span>
                 </div>
                 <Progress 

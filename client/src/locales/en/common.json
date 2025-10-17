@@ -132,6 +132,9 @@
       "strategicOverview": "Strategic Overview",
       "executionPlan": "Execution Plan",
       "successProbability": "Success Probability",
+      "successLow": "low",
+      "successMedium": "medium",
+      "successHigh": "high",
       "references": "References & Sources",
       "analysisComplete": "Strategic Analysis Complete",
       "tacticalApproaches": "{count} tactical approaches identified for optimal performance advantage"

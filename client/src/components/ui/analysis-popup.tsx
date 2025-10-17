@@ -1496,7 +1496,7 @@ export function AnalysisPopup({
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-athlete-warning mb-6 flex items-center">
                 <Award className="mr-4 text-athlete-warning" size={32} />
-                Notable Achievements
+                {t("common:analysis.achievements.title", "Notable Achievements")}
               </h3>
               <div className="grid gap-4">
                 {achievements.map((achievementObj: any, index: number) => {
