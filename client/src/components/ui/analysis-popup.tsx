@@ -298,24 +298,24 @@ export function AnalysisPopup({
         
         <div className="space-y-4">
           {weaknesses.length > 0 ? weaknesses.map((weakness: any, index: number) => (
-            <Card key={index} className="bg-athlete-gray-700 border-gray-600 hover:border-athlete-danger/50 transition-colors">
+            <Card key={index} className="bg-athlete-gray-800 border-gray-600 hover:border-athlete-danger/50 transition-colors">
               <CardContent className={`p-6 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
-                <h3 className={`font-bold text-athlete-danger text-lg mb-4 flex items-start ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                <h3 className={`font-bold text-red-400 text-lg mb-4 flex items-start ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
                   <AlertTriangle className={`inline-block w-5 h-5 mt-0.5 flex-shrink-0 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
                   <span>{weakness.title}</span>
                 </h3>
                 
-                <p className={`text-gray-300 leading-relaxed mb-4 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
+                <p className={`text-gray-200 leading-relaxed mb-4 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                   {weakness.description}
                 </p>
                 
                 {weakness.evidence && (
-                  <div className={`bg-athlete-gray-800 rounded-lg p-4 ${i18n.language === 'ar' ? 'border-r-4 border-l-0' : 'border-l-4'} border-athlete-danger`}>
+                  <div className={`bg-athlete-gray-900 rounded-lg p-4 ${i18n.language === 'ar' ? 'border-r-4 border-l-0' : 'border-l-4'} border-red-400`}>
                     <h4 className={`font-semibold text-white mb-2 flex items-center ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
                       <Award className={`w-4 h-4 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
                       {t("analysis.evidence", "Evidence")}
                     </h4>
-                    <p className={`text-sm text-gray-300 italic ${i18n.language === 'ar' ? 'text-right' : ''}`}>
+                    <p className={`text-sm text-gray-200 italic ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                       {weakness.evidence}
                     </p>
                   </div>
