@@ -48,16 +48,16 @@ export function Navigation() {
   return (
     <nav className="fixed top-0 w-full z-50 bg-athlete-primary/90 backdrop-blur-lg border-b border-gray-800">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Link href="/" className="flex items-center space-x-2 cursor-pointer">
+        <Link href="/" className={`flex items-center cursor-pointer ${isArabic ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
           <Trophy className="text-athlete-accent text-2xl" />
           <span className="text-xl font-bold text-white">{t('brand')}</span>
         </Link>
         
-        <div className="hidden md:flex items-center space-x-6">
+        <div className={`hidden md:flex items-center ${isArabic ? 'space-x-reverse space-x-6' : 'space-x-6'}`}>
           {/* Token Balance Display */}
           <div 
             data-testid="token-balance"
-            className="flex items-center space-x-2 bg-athlete-gray-800 px-4 py-2 rounded-full"
+            className={`flex items-center bg-athlete-gray-800 px-4 py-2 rounded-full ${isArabic ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
           >
             <Coins className="text-athlete-warning" size={20} />
             <div className="flex flex-col items-center">
@@ -96,7 +96,7 @@ export function Navigation() {
                 setLocation('/video-analysis');
               }}
             >
-              <Video className="mr-2" size={16} />
+              <Video className={isArabic ? 'ml-2' : 'mr-2'} size={16} />
               {t('menu.videoAnalysis')}
             </Button>
           </div>
@@ -106,13 +106,13 @@ export function Navigation() {
               data-testid="button-payment-center"
               className="bg-athlete-accent hover:bg-blue-600 text-white"
             >
-              <Plus className="mr-2" size={16} />
+              <Plus className={isArabic ? 'ml-2' : 'mr-2'} size={16} />
               {t('menu.buyTokens')}
             </Button>
           </Link>
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className={`flex items-center ${isArabic ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
           {/* Mobile Token Display */}
           <div className="md:hidden">
             <Badge 
@@ -120,7 +120,7 @@ export function Navigation() {
               className="bg-athlete-gray-800 text-athlete-warning flex flex-col py-2"
             >
               <div className="flex items-center">
-                <Coins className="mr-1" size={14} />
+                <Coins className={isArabic ? 'ml-1' : 'mr-1'} size={14} />
                 {formatNumber(user?.tokens || 0, isArabic)}
               </div>
               {user?.totalTokensPurchased && (
@@ -132,7 +132,7 @@ export function Navigation() {
           </div>
 
           {/* History, Profile Menu, Logout, and Language Switcher */}
-          <div className="flex items-center space-x-4">
+          <div className={`flex items-center ${isArabic ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
             <HistoryDropdown />
             <div className={isArabic ? "mr-6" : "ml-6"}>
               <ProfileDropdown />
@@ -146,7 +146,7 @@ export function Navigation() {
               className="text-gray-300 hover:text-white"
             >
               <LogOut size={16} />
-              <span className="hidden sm:inline ml-2">{t('menu.logout')}</span>
+              <span className={`hidden sm:inline ${isArabic ? 'mr-2' : 'ml-2'}`}>{t('menu.logout')}</span>
             </Button>
             
             {/* Language switcher as last element - rightmost in LTR, leftmost in RTL due to flex inversion */}
