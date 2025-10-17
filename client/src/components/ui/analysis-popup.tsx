@@ -51,6 +51,7 @@ import { Label } from "@/components/ui/label";
 import { VideoAnalysisResults } from "@/components/ui/video-analysis-results";
 import { DevelopmentPlanDisplay } from "@/components/ui/development-plan-display";
 import { normalizeDevelopmentPlan, normalizeNutritionPlan, normalizeComparison } from "@/lib/normalize";
+import { formatNumber } from "@/lib/arabicNumbers";
 import {
   Select,
   SelectContent,
@@ -196,7 +197,7 @@ export function AnalysisPopup({
                   {strength.rating && (
                     <div className="flex items-center space-x-2">
                       <Badge variant="secondary" className="bg-athlete-success/20 text-athlete-success border-athlete-success/30">
-                        {strength.rating}/100
+                        {formatNumber(strength.rating, i18n.language === 'ar')}/{formatNumber(100, i18n.language === 'ar')}
                       </Badge>
                       {strength.impact && (
                         <Badge 
@@ -234,9 +235,9 @@ export function AnalysisPopup({
                 {/* Progress bar for rating visualization */}
                 {strength.rating && (
                   <div className="mt-4">
-                    <div className="flex justify-between text-sm text-gray-400 mb-1">
+                    <div className={`flex justify-between text-sm text-gray-400 mb-1 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
                       <span>{t("analysis.strengths.strengthLevel", "Strength Level")}</span>
-                      <span>{strength.rating}%</span>
+                      <span>{formatNumber(strength.rating, i18n.language === 'ar')}%</span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
                       <div 
