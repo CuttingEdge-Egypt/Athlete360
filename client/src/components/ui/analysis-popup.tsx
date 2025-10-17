@@ -2531,7 +2531,7 @@ export function AnalysisPopup({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-athlete-gray-900 border-gray-700 text-white">
         <DialogHeader className="border-b border-gray-700 pb-4">
-          <div className="flex items-center justify-between">
+          <div className={`flex items-center justify-between ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
             <div className={`flex items-center ${i18n.language === 'ar' ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
               {getIcon(type)}
               <div className={i18n.language === 'ar' ? 'text-right' : ''}>
@@ -2548,14 +2548,14 @@ export function AnalysisPopup({
                 </DialogDescription>
               </div>
             </div>
-            <div className="flex space-x-2">
+            <div className={`flex ${i18n.language === 'ar' ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
               <Button 
                 onClick={handleExport}
                 size="sm"
                 className="bg-athlete-success hover:bg-green-600 text-white"
                 disabled={isExporting}
               >
-                <Download className="mr-2" size={16} />
+                <Download className={`${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} size={16} />
                 {isExporting ? t("analysis.exporting", "Exporting...") : t("analysis.exportPdf", "Export PDF")}
               </Button>
             </div>
