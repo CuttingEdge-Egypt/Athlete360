@@ -178,7 +178,7 @@ export function AnalysisPopup({
 
     return (
       <div className="space-y-6">
-        <h3 className={`text-lg font-semibold text-white ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t("analysis.strengths.athleteStrengths", "Athlete Strengths")}</h3>
+        <h3 className={`text-lg font-semibold text-white ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t("common:analysis.strengths.athleteStrengths", "Athlete Strengths")}</h3>
         
         {strengths.length > 0 ? strengths.map((strength: any, index: number) => {
           // Only render if we have authentic strength data
@@ -294,7 +294,7 @@ export function AnalysisPopup({
 
     return (
       <div className="space-y-6">
-        <h3 className={`text-lg font-semibold text-white ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t("analysis.weaknesses.title", "Areas for Improvement")}</h3>
+        <h3 className={`text-lg font-semibold text-white ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t("common:analysis.weaknesses.title", "Areas for Improvement")}</h3>
         
         <div className="space-y-4">
           {weaknesses.length > 0 ? weaknesses.map((weakness: any, index: number) => (
