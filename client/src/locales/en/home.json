@@ -195,7 +195,8 @@
     },
     "analysisServices": "Analysis Services",
     "clickForBiography": "Click for Biography →",
-    "rank": "Rank"
+    "rank": "Rank",
+    "lastUpdate": "Last Update"
   },
   "nutritionPlan": {
     "title": "Create Your Nutrition Plan",

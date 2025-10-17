@@ -195,7 +195,8 @@
     },
     "analysisServices": "خدمات التحليل",
     "clickForBiography": "انقر للسيرة الذاتية ←",
-    "rank": "التصنيف"
+    "rank": "التصنيف",
+    "lastUpdate": "آخر تحديث"
   },
   "nutritionPlan": {
     "title": "أنشئ خطة التغذية الخاصة بك",
