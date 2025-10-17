@@ -1133,7 +1133,7 @@ export function AnalysisPopup({
               <CardContent className="p-8">
                 <h3 className="text-3xl font-bold text-cyan-400 mb-6 flex items-center">
                   <Star className="mr-4 text-cyan-400" size={32} />
-                  {t("analysis.bio.playersStory", "Player's Story")}
+                  {t("common:analysis.bio.playersStory", "Player's Story")}
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <p className="text-gray-200 leading-relaxed text-lg">{playersStory}</p>
@@ -1368,7 +1368,7 @@ export function AnalysisPopup({
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-emerald-400 mb-8 flex items-center">
                 <User className="mr-4 text-emerald-400" size={32} />
-                {t("analysis.bio.introduction", "Introduction")}
+                {t("common:analysis.bio.introduction", "Introduction")}
               </h3>
               <div className="prose prose-invert max-w-none space-y-5">
                 {bioSections.introduction.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => {
@@ -1452,7 +1452,7 @@ export function AnalysisPopup({
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-cyan-400 mb-8 flex items-center">
                 <Star className="mr-4 text-cyan-400" size={32} />
-                {t("analysis.bio.playersStory", "Player's Story")}
+                {t("common:analysis.bio.playersStory", "Player's Story")}
               </h3>
               <div className="prose prose-invert max-w-none space-y-5">
                 {(playersStory || bioSections.overallStory).split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => (
@@ -1750,7 +1750,7 @@ export function AnalysisPopup({
     if (bioSections.introduction) {
       pdf.setFontSize(14);
       pdf.setFont('helvetica', 'bold');
-      currentY = addText(t("analysis.bio.introduction", "Introduction"), margin, currentY, { lineHeight: 8 });
+      currentY = addText(t("common:analysis.bio.introduction", "Introduction"), margin, currentY, { lineHeight: 8 });
       currentY += 3;
       
       pdf.setFontSize(11);
@@ -1764,7 +1764,7 @@ export function AnalysisPopup({
     if (storyText) {
       pdf.setFontSize(14);
       pdf.setFont('helvetica', 'bold');
-      currentY = addText(t("analysis.bio.playersStory", "Player's Story"), margin, currentY, { lineHeight: 8 });
+      currentY = addText(t("common:analysis.bio.playersStory", "Player's Story"), margin, currentY, { lineHeight: 8 });
       currentY += 3;
       
       pdf.setFontSize(11);
