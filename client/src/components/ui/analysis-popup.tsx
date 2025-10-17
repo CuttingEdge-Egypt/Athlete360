@@ -294,13 +294,13 @@ export function AnalysisPopup({
 
     return (
       <div className="space-y-6">
-        <h3 className="text-lg font-semibold text-white">{t("analysis.weaknesses.title", "Areas for Improvement")}</h3>
+        <h3 className={`text-lg font-semibold text-white ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t("analysis.weaknesses.title", "Areas for Improvement")}</h3>
         
         <div className="space-y-4">
           {weaknesses.length > 0 ? weaknesses.map((weakness: any, index: number) => (
             <Card key={index} className="bg-athlete-gray-800 border-gray-600 hover:border-athlete-danger/50 transition-colors">
               <CardContent className={`p-6 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
-                <h3 className={`font-bold text-red-400 text-lg mb-4 flex items-start ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                <h3 className={`font-bold text-red-400 text-lg mb-4 flex items-start ${i18n.language === 'ar' ? 'flex-row-reverse text-right justify-end' : ''}`}>
                   <AlertTriangle className={`inline-block w-5 h-5 mt-0.5 flex-shrink-0 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
                   <span>{weakness.title}</span>
                 </h3>
@@ -728,17 +728,17 @@ export function AnalysisPopup({
 
                       <Card className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 border-blue-500/50">
                         <CardHeader>
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-xl text-white">{phase.phase_name}</CardTitle>
+                          <div className={`flex items-center justify-between ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                            <CardTitle className={`text-xl text-white ${i18n.language === 'ar' ? 'text-right' : ''}`}>{phase.phase_name}</CardTitle>
                             <Badge className="bg-blue-600 text-white">{phase.period}</Badge>
                           </div>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className={`space-y-4 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                           {/* Key Achievements */}
                           {phase.key_achievements && phase.key_achievements.length > 0 && (
                             <div className="space-y-3">
                               {t("common:analysis.careerPhases.internationalCompetitions", "International Competitions") && (
-                                <h4 className="text-lg font-semibold text-white mb-3">
+                                <h4 className={`text-lg font-semibold text-white mb-3 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                                   {t("common:analysis.careerPhases.internationalCompetitions", "International Competitions")}
                                 </h4>
                               )}
@@ -781,15 +781,15 @@ export function AnalysisPopup({
                                 })
                                 .map((achievement: any, achievementIndex: number) => (
                                 <div key={achievementIndex} className="p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-blue-500/50 transition-colors">
-                                  <div className="flex items-start justify-between mb-2">
+                                  <div className={`flex items-start justify-between mb-2 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
                                     <div className="flex-1">
-                                      <div className="flex items-center gap-3 mb-2">
+                                      <div className={`flex items-center gap-3 mb-2 ${i18n.language === 'ar' ? 'flex-row-reverse justify-end' : ''}`}>
                                         <Badge variant="outline" className="border-yellow-400 text-yellow-400 text-xs">
                                           {achievement.month ? `${achievement.month} ${achievement.year}` : achievement.year}
                                         </Badge>
-                                        <span className="font-bold text-white">{achievement.event_name}</span>
+                                        <span className={`font-bold text-white ${i18n.language === 'ar' ? 'text-right' : ''}`}>{achievement.event_name}</span>
                                       </div>
-                                      <div className="text-sm text-gray-400 mb-2">
+                                      <div className={`text-sm text-gray-400 mb-2 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                                         {achievement.event_tier}
                                       </div>
                                     </div>
@@ -798,7 +798,7 @@ export function AnalysisPopup({
                                   
                                   {achievement.notes && 
                                    !["simply compete result", "taekwondodata", "taekwondodata result"].includes(achievement.notes.toLowerCase().trim()) && (
-                                    <p className="text-sm text-gray-300 leading-relaxed">
+                                    <p className={`text-sm text-gray-300 leading-relaxed ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                                       {achievement.notes}
                                     </p>
                                   )}
@@ -2540,7 +2540,11 @@ export function AnalysisPopup({
                 </DialogTitle>
                 <DialogDescription className={`text-gray-400 mt-1 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                   {athleteName && `${t("analysis.analysisFor", "Analysis for")} ${athleteName}`}
-                  {createdAt && ` • ${t("analysis.generatedOn", "Generated on")} ${new Date(createdAt).toLocaleDateString()}`}
+                  {createdAt && ` • ${t("analysis.generatedOn", "Generated on")} ${new Date(createdAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    year: 'numeric'
+                  })}`}
                 </DialogDescription>
               </div>
             </div>
