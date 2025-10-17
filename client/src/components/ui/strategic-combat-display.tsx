@@ -55,6 +55,16 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
     return 'unknown';
   };
 
+  const translateRiskLevel = (risk: string): string => {
+    const level = normalizeRiskLevel(risk);
+    switch (level) {
+      case 'low': return t("analysis.combat.riskLow", "low");
+      case 'medium': return t("analysis.combat.riskMedium", "medium");
+      case 'high': return t("analysis.combat.riskHigh", "high");
+      default: return risk;
+    }
+  };
+
   const getRiskColor = (risk: string) => {
     const level = normalizeRiskLevel(risk);
     switch (level) {
@@ -146,7 +156,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
                     data-testid={`risk-badge-${index}`}
                   >
                     {getRiskIcon(strategy.risk_level)}
-                    <span className="ml-1">{strategy.risk_level} {t("analysis.combat.risk", "Risk")}</span>
+                    <span className="ml-1">{translateRiskLevel(strategy.risk_level)} {t("analysis.combat.risk", "Risk")}</span>
                   </Badge>
                 </div>
               </div>
