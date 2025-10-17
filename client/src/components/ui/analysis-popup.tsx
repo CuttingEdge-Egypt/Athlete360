@@ -196,7 +196,7 @@ export function AnalysisPopup({
                   </h3>
                   {strength.rating && (
                     <div className="flex items-center space-x-2">
-                      <Badge variant="secondary" className="bg-athlete-success/20 text-athlete-success border-athlete-success/30">
+                      <Badge variant="secondary" className="bg-athlete-success/20 text-athlete-success border-athlete-success/30" dir="ltr">
                         {formatNumber(strength.rating, i18n.language === 'ar')}/{formatNumber(100, i18n.language === 'ar')}
                       </Badge>
                       {strength.impact && (
@@ -209,7 +209,7 @@ export function AnalysisPopup({
                             : 'bg-gray-600 text-white'
                           }
                         >
-                          {strength.impact} {t("analysis.strengths.impact", "impact")}
+                          {strength.impact}
                         </Badge>
                       )}
                     </div>
@@ -237,7 +237,7 @@ export function AnalysisPopup({
                   <div className="mt-4">
                     <div className={`flex justify-between text-sm text-gray-400 mb-1 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
                       <span>{t("analysis.strengths.strengthLevel", "Strength Level")}</span>
-                      <span>{formatNumber(strength.rating, i18n.language === 'ar')}%</span>
+                      <span dir={i18n.language === 'ar' ? 'ltr' : 'ltr'}>{formatNumber(strength.rating, i18n.language === 'ar')}%</span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
                       <div 
@@ -2021,7 +2021,7 @@ export function AnalysisPopup({
       if (weakness.evidence) {
         pdf.setFontSize(10);
         pdf.setFont('helvetica', 'italic');
-        currentY = addText(`Evidence: ${weakness.evidence}`, margin + 5, currentY, { lineHeight: 6 });
+        currentY = addText(`${t("analysis.evidence", "Evidence")}: ${weakness.evidence}`, margin + 5, currentY, { lineHeight: 6 });
         currentY += 5;
       }
     });
