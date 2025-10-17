@@ -2108,22 +2108,22 @@ export function AnalysisPopup({
   const getTitle = (type: string) => {
     switch (type) {
       case "bio":
-        return t("analysis.bio.title", "Complete Athlete Biography");
+        return t("common:analysis.bio.title", "Complete Athlete Biography");
       case "rank":
-        return t("analysis.rank.title", "Competitive History");
+        return t("common:analysis.rank.title", "Competitive History");
       case "strengths":
-        return t("analysis.strengths.title", "Competitive Strengths Profile");
+        return t("common:analysis.strengths.title", "Competitive Strengths Profile");
       case "weaknesses":
-        return t("analysis.weaknesses.title", "Areas for Improvement");
+        return t("common:analysis.weaknesses.title", "Areas for Improvement");
       case "development":
       case "development-plan":
-        return t("analysis.development.plan", "Development Plan");
+        return t("common:analysis.development.plan", "Development Plan");
       case "nutrition":
       case "nutrition-plan":
-        return t("analysis.nutrition.plan", "Personalized Nutrition Plan");
+        return t("common:analysis.nutrition.plan", "Personalized Nutrition Plan");
       case "beat":
       case "beat-strategies":
-        return t("analysis.combat.title", "Strategic Combat Analysis");
+        return t("common:analysis.combat.title", "Strategic Combat Analysis");
       case "video":
       case "video-analysis":
         return "Dynamic Performance Analysis";
@@ -2539,8 +2539,8 @@ export function AnalysisPopup({
                   {getTitle(type)}
                 </DialogTitle>
                 <DialogDescription className={`text-gray-400 mt-1 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
-                  {athleteName && `${t("analysis.analysisFor", "Analysis for")} ${athleteName}`}
-                  {createdAt && ` • ${t("analysis.generatedOn", "Generated on")} ${new Date(createdAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { 
+                  {athleteName && `${t("common:analysis.analysisFor", "Analysis for")} ${athleteName}`}
+                  {createdAt && ` • ${t("common:analysis.generatedOn", "Generated on")} ${new Date(createdAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { 
                     month: 'short', 
                     day: 'numeric', 
                     year: 'numeric'
@@ -2556,7 +2556,7 @@ export function AnalysisPopup({
                 disabled={isExporting}
               >
                 <Download className={`${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} size={16} />
-                {isExporting ? t("analysis.exporting", "Exporting...") : t("analysis.exportPdf", "Export PDF")}
+                {isExporting ? t("common:analysis.exporting", "Exporting...") : t("common:analysis.exportPdf", "Export PDF")}
               </Button>
             </div>
           </div>
