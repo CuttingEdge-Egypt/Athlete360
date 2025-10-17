@@ -187,10 +187,10 @@ export function AnalysisPopup({
           }
           
           return (
-            <Card key={index} className="bg-athlete-gray-700 border-gray-600 hover:border-athlete-success/50 transition-colors">
+            <Card key={index} className="bg-athlete-gray-800 border-gray-600 hover:border-athlete-success/50 transition-colors">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
-                  <h3 className="font-bold text-athlete-success text-lg mb-2">
+                  <h3 className="font-bold text-green-400 text-lg mb-2">
                     <Star className="inline-block w-5 h-5 mr-2" />
                     {strength.title}
                   </h3>
@@ -216,17 +216,17 @@ export function AnalysisPopup({
                   )}
                 </div>
                 
-                <p className="text-gray-300 leading-relaxed mb-4">
+                <p className="text-gray-200 leading-relaxed mb-4">
                   {strength.description}
                 </p>
                 
                 {strength.evidence && (
-                  <div className="bg-athlete-gray-800 rounded-lg p-4 border-l-4 border-athlete-success">
-                    <h4 className="font-semibold text-white mb-2 flex items-center">
-                      <Award className="w-4 h-4 mr-2" />
+                  <div className={`bg-athlete-gray-900 rounded-lg p-4 ${i18n.language === 'ar' ? 'border-r-4 border-l-0' : 'border-l-4'} border-green-400`}>
+                    <h4 className={`font-semibold text-white mb-2 flex items-center ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                      <Award className={`w-4 h-4 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
                       {t("analysis.evidence", "Evidence")}
                     </h4>
-                    <p className="text-sm text-gray-300 italic">
+                    <p className={`text-sm text-gray-200 italic ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                       {strength.evidence}
                     </p>
                   </div>
