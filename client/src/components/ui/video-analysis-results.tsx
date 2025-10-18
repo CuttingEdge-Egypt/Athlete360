@@ -914,8 +914,8 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
         </div>
       )}
 
-      {/* Score Timeline */}
-      {events.scoreEvents.length > 0 && (
+      {/* Score Timeline - Only show for non-tennis sports (tennis has its own timeline above) */}
+      {events.scoreEvents.length > 0 && !tennisScoreData && (
         <Card className="bg-athlete-gray-800 border-gray-700">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-athlete-accent">
