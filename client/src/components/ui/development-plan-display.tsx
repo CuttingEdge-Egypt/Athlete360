@@ -133,16 +133,16 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
     <div className="space-y-8" data-testid="development-plan-display">
       {/* Title with Goal Areas and Videos Count */}
       <Card className="bg-gradient-to-br from-emerald-500/20 via-athlete-accent/20 to-athlete-gray-800 border-emerald-500/40 shadow-lg">
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
+        <CardHeader className="pb-4" dir={isArabic ? 'rtl' : 'ltr'}>
+          <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
             <div className="space-y-2">
-              <CardTitle className="text-3xl font-bold text-white flex items-center gap-3">
+              <CardTitle className={`text-3xl font-bold text-white flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                 <Target className="h-7 w-7 text-emerald-400" />
-                <span className="text-emerald-400">
+                <span className={`text-emerald-400 ${isArabic ? 'text-right' : ''}`}>
                   {getLocalizedText(title, language)}
                 </span>
               </CardTitle>
-              <div className="flex flex-wrap items-center gap-6 text-sm text-gray-300">
+              <div className={`flex flex-wrap items-center gap-6 text-sm text-gray-300 ${isArabic ? 'flex-row-reverse' : ''}`}>
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded-full bg-emerald-500/20">
                     <Zap className="h-4 w-4 text-emerald-400 flex-shrink-0" />
@@ -167,9 +167,9 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
         </CardHeader>
         
         {intro && intro.overview && (
-          <CardContent className="pt-0">
+          <CardContent className="pt-0" dir={isArabic ? 'rtl' : 'ltr'}>
             <div className="p-4 bg-gradient-to-r from-slate-800/50 to-slate-700/50 rounded-lg border border-slate-600/30">
-              <p className="text-slate-100 leading-relaxed text-base font-medium">{intro.overview}</p>
+              <p className={`text-slate-100 leading-relaxed text-base font-medium ${isArabic ? 'text-right' : ''}`}>{intro.overview}</p>
             </div>
           </CardContent>
         )}
@@ -212,10 +212,10 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                         selectedGoalIndex === index 
                           ? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white border-emerald-400 shadow-lg" 
                           : "bg-transparent border-slate-600 text-slate-300 hover:bg-slate-700/50 hover:border-slate-500"
-                      }`}
+                      } ${isArabic ? 'flex-row-reverse' : ''}`}
                       data-testid={`goal-button-${index}`}
                     >
-                      <Target className="h-4 w-4 mr-2" />
+                      <Target className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                       {goal.area}
                     </Button>
                   ))}
@@ -227,15 +227,15 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
           {/* Current Goal Area Display */}
           {currentGoal && (
             <Card className="bg-gradient-to-br from-slate-800/50 to-slate-700/50 border-emerald-500/30 shadow-lg">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-2xl font-bold text-white flex items-center gap-3">
+              <CardHeader className="pb-4" dir={isArabic ? 'rtl' : 'ltr'}>
+                <CardTitle className={`text-2xl font-bold text-white flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                   <div className="p-2 rounded-full bg-emerald-500/20">
                     <Zap className="h-6 w-6 text-emerald-400" />
                   </div>
-                  <span className="text-emerald-50">{currentGoal.area}</span>
+                  <span className={`text-emerald-50 ${isArabic ? 'text-right' : ''}`}>{currentGoal.area}</span>
                 </CardTitle>
                 <div className="p-3 bg-slate-900/30 rounded-lg border border-slate-600/30 mt-3">
-                  <p className="text-slate-100 leading-relaxed text-base">{currentGoal.description}</p>
+                  <p className={`text-slate-100 leading-relaxed text-base ${isArabic ? 'text-right' : ''}`}>{currentGoal.description}</p>
                 </div>
               </CardHeader>
               
@@ -252,18 +252,18 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                     .slice(0, 3) // Ensure final limit of 3
                     .map((exercise, exerciseIndex) => (
                     <Card key={exercise.id || exerciseIndex} className="bg-gradient-to-br from-slate-900/60 to-slate-800/60 border-slate-600/50 hover:border-slate-500/60 transition-all duration-200 shadow-md">
-                      <CardContent className="p-5">
+                      <CardContent className="p-5" dir={isArabic ? 'rtl' : 'ltr'}>
                         <div className="space-y-3">
                           {/* Exercise Header */}
-                          <div className="flex items-start justify-between">
+                          <div className={`flex items-start justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
                             <div className="flex-1">
-                              <h4 className="font-bold text-lg text-white flex items-center gap-2">
+                              <h4 className={`font-bold text-lg text-white flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                                 <div className="p-1.5 rounded-full bg-blue-500/20">
                                   <Dumbbell className="h-4 w-4 text-blue-400" />
                                 </div>
-                                <span className="text-blue-50">{exercise.name}</span>
+                                <span className={`text-blue-50 ${isArabic ? 'text-right' : ''}`}>{exercise.name}</span>
                               </h4>
-                              <p className="text-sm text-slate-200 mt-2 leading-relaxed pl-8">
+                              <p className={`text-sm text-slate-200 mt-2 leading-relaxed ${isArabic ? 'pr-8 text-right' : 'pl-8'}`}>
                                 {exercise.description}
                               </p>
                             </div>
@@ -272,7 +272,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                                 size="sm"
                                 variant="outline"
                                 onClick={() => window.open(exercise.videoUrl, '_blank')}
-                                className="ml-4 bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-300 hover:from-purple-500 hover:to-purple-600 hover:text-white flex-shrink-0 shadow-md"
+                                className={`${isArabic ? 'mr-4' : 'ml-4'} bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-300 hover:from-purple-500 hover:to-purple-600 hover:text-white flex-shrink-0 shadow-md ${isArabic ? 'flex-row-reverse' : ''}`}
                                 data-testid={`exercise-video-${exerciseIndex}`}
                               >
                                 <Play className={`h-3 w-3 ${isArabic ? 'ml-1' : 'mr-1'}`} />
@@ -327,10 +327,10 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
             <div className="grid gap-4">
               {allExercisesWithVideos.map((exercise, index) => (
                 <Card key={index} className="bg-athlete-gray-800/30 border-athlete-gray-700">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
+                  <CardContent className="p-4" dir={isArabic ? 'rtl' : 'ltr'}>
+                    <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-white flex items-center gap-2">
+                        <h4 className={`font-semibold text-white flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                           <Play className="h-4 w-4 text-athlete-accent" />
                           {exercise.name}
                         </h4>
@@ -341,12 +341,12 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                             </Badge>
                           </div>
                         )}
-                        <p className="text-sm text-gray-300 mt-1">{exercise.description}</p>
+                        <p className={`text-sm text-gray-300 mt-1 ${isArabic ? 'text-right' : ''}`}>{exercise.description}</p>
                       </div>
                       <Button
                         size="sm"
                         onClick={() => window.open(exercise.videoUrl, '_blank')}
-                        className="bg-athlete-accent hover:bg-athlete-accent/90 text-white ml-4 flex-shrink-0"
+                        className={`bg-athlete-accent hover:bg-athlete-accent/90 text-white ${isArabic ? 'mr-4' : 'ml-4'} flex-shrink-0 ${isArabic ? 'flex-row-reverse' : ''}`}
                         data-testid={`video-button-${index}`}
                       >
                         <ExternalLink className={`h-3 w-3 ${isArabic ? 'ml-1' : 'mr-1'}`} />

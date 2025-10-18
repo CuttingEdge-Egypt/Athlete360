@@ -2471,7 +2471,7 @@ export function AnalysisPopup({
       const normalizedPlan = normalizeDevelopmentPlan(data);
       
       if (normalizedPlan) {
-        return <DevelopmentPlanDisplay plan={normalizedPlan} language="en" />;
+        return <DevelopmentPlanDisplay plan={normalizedPlan} language={i18n.language} />;
       } else {
         // Fallback to user-friendly empty state
         return (
@@ -2511,7 +2511,7 @@ export function AnalysisPopup({
 
     // Special handling for statistics analysis
     if (type === "statistics") {
-      return <StatisticsDisplay statistics={data} language="en" />;
+      return <StatisticsDisplay statistics={data} language={i18n.language} />;
     }
 
     // Parse the data to handle JSON strings consistently
