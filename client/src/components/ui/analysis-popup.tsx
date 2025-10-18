@@ -2531,31 +2531,64 @@ export function AnalysisPopup({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-athlete-gray-900 border-gray-700 text-white">
         <DialogHeader className="border-b border-gray-700 pb-4">
-          <div className={`flex items-center justify-between ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
-            <div className={i18n.language === 'ar' ? 'text-right' : 'text-left'}>
-              <DialogTitle className={`text-xl font-bold text-white ${i18n.language === 'ar' ? 'text-right' : 'text-left'}`}>
-                {getTitle(type)}
-              </DialogTitle>
-              <DialogDescription className={`text-gray-400 mt-1 ${i18n.language === 'ar' ? 'text-right' : 'text-left'}`}>
-                {athleteName && `${t("common:analysis.analysisFor", "Analysis for")} ${athleteName}`}
-                {createdAt && ` • ${t("common:analysis.generatedOn", "Generated on")} ${new Date(createdAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { 
-                  month: 'short', 
-                  day: 'numeric', 
-                  year: 'numeric'
-                })}`}
-              </DialogDescription>
-            </div>
-            <div className="flex space-x-2">
-              <Button 
-                onClick={handleExport}
-                size="sm"
-                className="bg-athlete-success hover:bg-green-600 text-white"
-                disabled={isExporting}
-              >
-                <Download className={i18n.language === 'ar' ? 'ml-2' : 'mr-2'} size={16} />
-                {isExporting ? t("common:analysis.exporting", "Exporting...") : t("common:analysis.exportPdf", "Export PDF")}
-              </Button>
-            </div>
+          <div className="flex items-center justify-between">
+            {i18n.language === 'ar' ? (
+              <>
+                {/* Arabic RTL: Button first (LEFT), Title second (RIGHT) */}
+                <div className="flex space-x-2">
+                  <Button 
+                    onClick={handleExport}
+                    size="sm"
+                    className="bg-athlete-success hover:bg-green-600 text-white"
+                    disabled={isExporting}
+                  >
+                    <Download className="ml-2" size={16} />
+                    {isExporting ? t("common:analysis.exporting", "Exporting...") : t("common:analysis.exportPdf", "Export PDF")}
+                  </Button>
+                </div>
+                <div className="text-right">
+                  <DialogTitle className="text-xl font-bold text-white text-right">
+                    {getTitle(type)}
+                  </DialogTitle>
+                  <DialogDescription className="text-gray-400 mt-1 text-right">
+                    {athleteName && `${t("common:analysis.analysisFor", "Analysis for")} ${athleteName}`}
+                    {createdAt && ` • ${t("common:analysis.generatedOn", "Generated on")} ${new Date(createdAt).toLocaleDateString('ar-EG', { 
+                      month: 'short', 
+                      day: 'numeric', 
+                      year: 'numeric'
+                    })}`}
+                  </DialogDescription>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* English LTR: Title first (LEFT), Button second (RIGHT) */}
+                <div className="text-left">
+                  <DialogTitle className="text-xl font-bold text-white text-left">
+                    {getTitle(type)}
+                  </DialogTitle>
+                  <DialogDescription className="text-gray-400 mt-1 text-left">
+                    {athleteName && `${t("common:analysis.analysisFor", "Analysis for")} ${athleteName}`}
+                    {createdAt && ` • ${t("common:analysis.generatedOn", "Generated on")} ${new Date(createdAt).toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric', 
+                      year: 'numeric'
+                    })}`}
+                  </DialogDescription>
+                </div>
+                <div className="flex space-x-2">
+                  <Button 
+                    onClick={handleExport}
+                    size="sm"
+                    className="bg-athlete-success hover:bg-green-600 text-white"
+                    disabled={isExporting}
+                  >
+                    <Download className="mr-2" size={16} />
+                    {isExporting ? t("common:analysis.exporting", "Exporting...") : t("common:analysis.exportPdf", "Export PDF")}
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </DialogHeader>
 
