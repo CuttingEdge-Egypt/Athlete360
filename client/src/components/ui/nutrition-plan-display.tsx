@@ -316,16 +316,16 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
             {/* Week Slider - Inline above day/date */}
             <div className="mb-4 text-center" dir={isArabic ? 'rtl' : 'ltr'}>
               <div className="text-sm text-muted-foreground mb-3">{t('analysis.nutrition.selectWeek', 'Select Week')}</div>
-              <div className={`flex items-center justify-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <div className="flex items-center justify-center gap-3">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleWeekChange(isArabic ? currentWeek + 1 : currentWeek - 1)}
-                  disabled={isArabic ? currentWeek === totalWeeks - 1 : currentWeek === 0}
+                  onClick={() => handleWeekChange(currentWeek - 1)}
+                  disabled={currentWeek === 0}
                   className="bg-blue-600 border-blue-500 text-white hover:bg-blue-500 disabled:bg-blue-800 disabled:border-blue-700"
                   data-testid="button-week-previous"
                 >
-                  {isArabic ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                  <ChevronLeft className="h-4 w-4" />
                 </Button>
                 
                 <div className="flex gap-2">
@@ -349,12 +349,12 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleWeekChange(isArabic ? currentWeek - 1 : currentWeek + 1)}
-                  disabled={isArabic ? currentWeek === 0 : currentWeek === totalWeeks - 1}
+                  onClick={() => handleWeekChange(currentWeek + 1)}
+                  disabled={currentWeek === totalWeeks - 1}
                   className="bg-orange-600 border-orange-500 text-white hover:bg-orange-500 disabled:bg-orange-800 disabled:border-orange-700"
                   data-testid="button-week-next"
                 >
-                  {isArabic ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -383,16 +383,16 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                     : t('analysis.nutrition.selectDayInWeek', `Select Day in Week ${currentWeek + 1}`).replace('{{weekNumber}}', String(currentWeek + 1))
                   }
                 </div>
-                <div className={`flex items-center justify-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <div className="flex items-center justify-center gap-3">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleDayChange(isArabic ? safCurrentDay + 1 : safCurrentDay - 1)}
-                    disabled={isArabic ? safCurrentDay === maxDayInWeek : safCurrentDay === 0}
+                    onClick={() => handleDayChange(safCurrentDay - 1)}
+                    disabled={safCurrentDay === 0}
                     className="bg-blue-600 border-blue-500 text-white hover:bg-blue-500 disabled:bg-blue-800 disabled:border-blue-700"
                     data-testid="button-day-previous"
                   >
-                    {isArabic ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                    <ChevronLeft className="h-4 w-4" />
                   </Button>
                   
                   <div className="flex gap-2">
@@ -416,12 +416,12 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleDayChange(isArabic ? safCurrentDay - 1 : safCurrentDay + 1)}
-                    disabled={isArabic ? safCurrentDay === 0 : safCurrentDay === maxDayInWeek}
+                    onClick={() => handleDayChange(safCurrentDay + 1)}
+                    disabled={safCurrentDay === maxDayInWeek}
                     className="bg-orange-600 border-orange-500 text-white hover:bg-orange-500 disabled:bg-orange-800 disabled:border-orange-700"
                     data-testid="button-day-next"
                   >
-                    {isArabic ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                    <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
