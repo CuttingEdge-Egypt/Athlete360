@@ -2531,7 +2531,7 @@ export function AnalysisPopup({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-athlete-gray-900 border-gray-700 text-white">
         <DialogHeader className="border-b border-gray-700 pb-4">
-          <div className={`flex items-center justify-between ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
+          <div className={`flex items-center justify-between ${i18n.language === 'ar' ? '' : 'flex-row-reverse'}`}>
             <div className={`flex ${i18n.language === 'ar' ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
               <Button 
                 onClick={handleExport}
@@ -2543,11 +2543,11 @@ export function AnalysisPopup({
                 {isExporting ? t("common:analysis.exporting", "Exporting...") : t("common:analysis.exportPdf", "Export PDF")}
               </Button>
             </div>
-            <div className="text-right">
-              <DialogTitle className="text-xl font-bold text-white text-right">
+            <div className={`${i18n.language === 'ar' ? 'text-right' : 'text-left'}`}>
+              <DialogTitle className={`text-xl font-bold text-white ${i18n.language === 'ar' ? 'text-right' : 'text-left'}`}>
                 {getTitle(type)}
               </DialogTitle>
-              <DialogDescription className="text-gray-400 mt-1 text-right">
+              <DialogDescription className={`text-gray-400 mt-1 ${i18n.language === 'ar' ? 'text-right' : 'text-left'}`}>
                 {athleteName && `${t("common:analysis.analysisFor", "Analysis for")} ${athleteName}`}
                 {createdAt && ` • ${t("common:analysis.generatedOn", "Generated on")} ${new Date(createdAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { 
                   month: 'short', 
