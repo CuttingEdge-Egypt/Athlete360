@@ -875,11 +875,16 @@ export class DatabaseStorage implements IStorage {
           results.push(latestLog);
         }
       } else {
-        // For other types, get the latest
+        // For other types, get the latest with language filtering
         const [latestLog] = await db
           .select()
           .from(analysisLogs)
-          .where(eq(analysisLogs.serviceType, serviceType))
+          .where(
+            and(
+              eq(analysisLogs.serviceType, serviceType),
+              language ? eq(analysisLogs.language, language) : sql`TRUE`
+            )
+          )
           .orderBy(desc(analysisLogs.createdAt))
           .limit(1);
         
