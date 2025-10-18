@@ -4322,7 +4322,10 @@ Return only valid JSON with the missing fields.`;
       // Format and map service types for frontend
       const previewData = latestAnalyses.map(log => ({
         serviceType: serviceTypeMapping[log.serviceType] || log.serviceType,
-        resultData: log.resultData,
+        resultData: {
+          ...(typeof log.resultData === 'object' && log.resultData !== null ? log.resultData : {}),
+          language: log.language  // Include language from analysis log
+        },
         createdAt: log.createdAt
       }));
       
