@@ -2879,7 +2879,7 @@ export default function Home() {
                                     )}
                                   </Button>
                                 )}
-                                <div className={`flex items-center gap-3 ${i18n.language === 'ar' ? 'flex-1 justify-end' : ''}`}>
+                                <div className={`flex items-center gap-3 ${i18n.language === 'ar' ? 'flex-1 justify-end flex-row-reverse' : ''}`}>
                                   <div className="relative">
                                     <div className="animate-spin rounded-full h-6 w-6 border-2 border-emerald-500/30 border-t-emerald-400"></div>
                                     <div className="absolute inset-0 rounded-full h-6 w-6 bg-emerald-500/10"></div>
