@@ -2428,7 +2428,7 @@ export function AnalysisPopup({
       const normalizedPlan = normalizeNutritionPlan(data);
       
       if (normalizedPlan) {
-        return <NutritionPlanDisplay plan={normalizedPlan} language={i18n.language} />;
+        return <NutritionPlanDisplay plan={normalizedPlan} language={data.language || i18n.language} />;
       } else {
         // Fallback to user-friendly empty state
         return (
@@ -2471,7 +2471,7 @@ export function AnalysisPopup({
       const normalizedPlan = normalizeDevelopmentPlan(data);
       
       if (normalizedPlan) {
-        return <DevelopmentPlanDisplay plan={normalizedPlan} language={i18n.language} />;
+        return <DevelopmentPlanDisplay plan={normalizedPlan} language={data.language || i18n.language} />;
       } else {
         // Fallback to user-friendly empty state
         return (
