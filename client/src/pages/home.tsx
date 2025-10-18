@@ -2853,42 +2853,66 @@ export default function Home() {
                         
                         {/* Enhanced Progress indicator */}
                         {developmentJobId && (
-                          <div className="mt-6 p-6 bg-gradient-to-r from-slate-800/80 to-slate-700/80 rounded-xl border border-slate-600/50 shadow-lg">
+                          <div className="mt-6 p-6 bg-gradient-to-r from-slate-800/80 to-slate-700/80 rounded-xl border border-slate-600/50 shadow-lg" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
                             <div className="space-y-4">
                               {/* Progress Header with Cancel Button */}
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
+                              <div className={`flex items-center ${i18n.language === 'ar' ? 'flex-row-reverse' : 'justify-between'}`}>
+                                {i18n.language === 'ar' && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => cancelDevelopmentPlanJobMutation.mutate(developmentJobId)}
+                                    disabled={cancelDevelopmentPlanJobMutation.isPending}
+                                    className="bg-red-500/10 border-red-400/50 text-red-300 hover:bg-red-500/20 hover:border-red-400 transition-all duration-200"
+                                    data-testid="button-cancel-development-plan"
+                                  >
+                                    {cancelDevelopmentPlanJobMutation.isPending ? (
+                                      <>
+                                        <Loader2 className="ml-2 h-3 w-3 animate-spin" />
+                                        Cancelling
+                                      </>
+                                    ) : (
+                                      <>
+                                        <X className="ml-2 h-3 w-3" />
+                                        Cancel
+                                      </>
+                                    )}
+                                  </Button>
+                                )}
+                                <div className={`flex items-center gap-3 ${i18n.language === 'ar' ? 'flex-1 justify-end' : ''}`}>
                                   <div className="relative">
                                     <div className="animate-spin rounded-full h-6 w-6 border-2 border-emerald-500/30 border-t-emerald-400"></div>
                                     <div className="absolute inset-0 rounded-full h-6 w-6 bg-emerald-500/10"></div>
                                   </div>
-                                  <div>
-                                    <p className="text-emerald-100 font-semibold">
+                                  <div className={i18n.language === 'ar' ? 'text-right' : ''}>
+                                    <p className={`text-emerald-100 font-semibold ${i18n.language === 'ar' ? 'text-lg' : ''}`}>
                                       {developmentProgressMessage || t('common:messages.generatingDevelopmentPlan', 'Generating your development plan...')}
                                     </p>
-                                    <p className="text-slate-300 text-sm">{t('common:messages.thisMayTakeFewMinutes', 'This may take a few minutes')}</p>
+                                    <p className={`text-slate-300 ${i18n.language === 'ar' ? 'text-base' : 'text-sm'}`}>{t('common:messages.thisMayTakeFewMinutes', 'This may take a few minutes')}</p>
                                   </div>
                                 </div>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => cancelDevelopmentPlanJobMutation.mutate(developmentJobId)}
-                                  disabled={cancelDevelopmentPlanJobMutation.isPending}
-                                  className="bg-red-500/10 border-red-400/50 text-red-300 hover:bg-red-500/20 hover:border-red-400 transition-all duration-200"
-                                  data-testid="button-cancel-development-plan"
-                                >
-                                  {cancelDevelopmentPlanJobMutation.isPending ? (
-                                    <>
-                                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                                      Cancelling
-                                    </>
-                                  ) : (
-                                    <>
-                                      <X className="mr-2 h-3 w-3" />
-                                      Cancel
-                                    </>
-                                  )}
-                                </Button>
+                                {i18n.language !== 'ar' && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => cancelDevelopmentPlanJobMutation.mutate(developmentJobId)}
+                                    disabled={cancelDevelopmentPlanJobMutation.isPending}
+                                    className="bg-red-500/10 border-red-400/50 text-red-300 hover:bg-red-500/20 hover:border-red-400 transition-all duration-200"
+                                    data-testid="button-cancel-development-plan"
+                                  >
+                                    {cancelDevelopmentPlanJobMutation.isPending ? (
+                                      <>
+                                        <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                                        Cancelling
+                                      </>
+                                    ) : (
+                                      <>
+                                        <X className="mr-2 h-3 w-3" />
+                                        Cancel
+                                      </>
+                                    )}
+                                  </Button>
+                                )}
                               </div>
 
                               {/* Progress Bar with Percentage */}
