@@ -227,7 +227,17 @@
       "mealDescription": "وصف الوجبة",
       "noMeals": "لا توجد وجبات متاحة",
       "invalidPlan": "خطة تغذية غير صالحة",
-      "invalidPlanMessage": "بيانات خطة التغذية غير صالحة. يرجى المحاولة مرة أخرى لإنشاء خطة جديدة."
+      "invalidPlanMessage": "بيانات خطة التغذية غير صالحة. يرجى المحاولة مرة أخرى لإنشاء خطة جديدة.",
+      "selectWeek": "اختر الأسبوع",
+      "selectDayInWeek": "اختر اليوم في الأسبوع {{weekNumber}}",
+      "meal": "وجبة",
+      "dailyFocus": "التركيز اليومي",
+      "personalizedInstructions": "تعليمات مخصصة",
+      "planOverview": "نظرة عامة على الخطة",
+      "weeksPlanned": "أسابيع مخططة",
+      "totalDays": "إجمالي الأيام",
+      "totalMeals": "إجمالي الوجبات",
+      "avgCaloriesPerDay": "متوسط السعرات/اليوم"
     },
     "videoAnalysis": {
       "title": "تحليل الفيديو",

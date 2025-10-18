@@ -247,9 +247,9 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
         <Card className="bg-card border-border">
           <CardHeader>
             {/* Week Slider - Inline above day/date */}
-            <div className="mb-4 text-center">
-              <div className="text-sm text-muted-foreground mb-3">Select Week</div>
-              <div className="flex items-center justify-center gap-3">
+            <div className="mb-4 text-center" dir={isArabic ? 'rtl' : 'ltr'}>
+              <div className="text-sm text-muted-foreground mb-3">{t('nutrition.selectWeek', 'Select Week')}</div>
+              <div className={`flex items-center justify-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                 <Button
                   variant="outline"
                   size="sm"
@@ -292,12 +292,12 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
               </div>
             </div>
             
-            <CardTitle className="flex items-center justify-between text-foreground">
-              <div className="flex items-center gap-3">
+            <CardTitle className={`flex items-center justify-between text-foreground ${isArabic ? 'flex-row-reverse' : ''}`} dir={isArabic ? 'rtl' : 'ltr'}>
+              <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                 <div className="bg-green-500 text-white rounded-full w-12 h-12 flex items-center justify-center text-xl font-bold">
                   {(currentWeek * 7) + safCurrentDay + 1}
                 </div>
-                <div>
+                <div className={isArabic ? 'text-right' : ''}>
                   <h3 className="text-2xl font-bold">{currentDayData.day.name}</h3>
                   <p className="text-muted-foreground">{currentDayData.day.date}</p>
                 </div>
@@ -308,10 +308,10 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
             </CardTitle>
             
             {/* Day Slider */}
-            <div className="mt-4 pt-4 border-t border-border">
+            <div className="mt-4 pt-4 border-t border-border" dir={isArabic ? 'rtl' : 'ltr'}>
               <div className="text-center">
-                <div className="text-sm text-muted-foreground mb-3">Select Day in Week {currentWeek + 1}</div>
-                <div className="flex items-center justify-center gap-3">
+                <div className="text-sm text-muted-foreground mb-3">{t('nutrition.selectDayInWeek', 'Select Day in Week {{weekNumber}}', { weekNumber: currentWeek + 1 })}</div>
+                <div className={`flex items-center justify-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                   <Button
                     variant="outline"
                     size="sm"
@@ -355,7 +355,7 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent dir={isArabic ? 'rtl' : 'ltr'}>
             {/* Enhanced Meals Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
               {currentDayData.meals.map((meal, mealIndex) => (
@@ -364,11 +364,11 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
                   className="bg-gradient-to-br from-slate-700 to-slate-600 border-2 border-slate-500 rounded-xl p-5 hover:shadow-xl transition-all duration-300 hover:border-green-400 hover:scale-105"
                 >
                   {/* Meal Header */}
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
+                  <div className={`flex items-center justify-between mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                    <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                       <div className="w-4 h-4 bg-green-400 rounded-full animate-pulse"></div>
                       <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">
-                        Meal {mealIndex + 1}
+                        {t('nutrition.meal', 'Meal')} {mealIndex + 1}
                       </span>
                     </div>
                     <div className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full px-4 py-2 shadow-lg border-2 border-green-400">
@@ -395,12 +395,12 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
 
             {/* Daily Explanation */}
             {currentDayData.explanation && (
-              <div className="p-6 bg-gradient-to-r from-blue-900/30 to-blue-800/20 rounded-xl border-l-4 border-blue-400">
-                <div className="flex items-start gap-3">
+              <div className={`p-6 bg-gradient-to-r from-blue-900/30 to-blue-800/20 rounded-xl border-blue-400 ${isArabic ? 'border-r-4' : 'border-l-4'}`} dir={isArabic ? 'rtl' : 'ltr'}>
+                <div className={`flex items-start gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                   <Target className="h-6 w-6 text-blue-400 mt-1 flex-shrink-0" />
-                  <div>
+                  <div className={isArabic ? 'text-right' : ''}>
                     <h4 className="font-bold text-lg text-blue-300 mb-2">
-                      Daily Focus
+                      {t('nutrition.dailyFocus', 'Daily Focus')}
                     </h4>
                     <p className="text-slate-200 leading-relaxed">
                       {currentDayData.explanation}
@@ -412,12 +412,12 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
 
             {/* Personalized Instructions - Moved after Daily Focus */}
             {nutritionData.instructions && (
-              <div className="mt-6 p-6 bg-gradient-to-r from-purple-900/30 to-purple-800/20 rounded-xl border-l-4 border-purple-400">
-                <div className="flex items-start gap-3">
+              <div className={`mt-6 p-6 bg-gradient-to-r from-purple-900/30 to-purple-800/20 rounded-xl border-purple-400 ${isArabic ? 'border-r-4' : 'border-l-4'}`} dir={isArabic ? 'rtl' : 'ltr'}>
+                <div className={`flex items-start gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                   <Target className="h-6 w-6 text-purple-400 mt-1 flex-shrink-0" />
-                  <div>
+                  <div className={isArabic ? 'text-right' : ''}>
                     <h4 className="font-bold text-lg text-purple-300 mb-2">
-                      Personalized Instructions
+                      {t('nutrition.personalizedInstructions', 'Personalized Instructions')}
                     </h4>
                     <div className="text-slate-200 leading-relaxed whitespace-pre-wrap">
                       {nutritionData.instructions}
@@ -432,37 +432,37 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
 
       {/* Overall Plan Summary */}
       <Card className="bg-card border-border">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-foreground">
+        <CardHeader dir={isArabic ? 'rtl' : 'ltr'}>
+          <CardTitle className={`flex items-center gap-2 text-foreground ${isArabic ? 'flex-row-reverse' : ''}`}>
             <Target className="h-5 w-5 text-purple-400" />
-            Plan Overview
+            {t('nutrition.planOverview', 'Plan Overview')}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent dir={isArabic ? 'rtl' : 'ltr'}>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="text-center p-6 bg-gradient-to-br from-purple-900/30 to-purple-800/20 rounded-xl border border-purple-700">
               <div className="text-3xl font-bold text-purple-400 mb-1">
                 {totalWeeks}
               </div>
-              <div className="text-sm text-muted-foreground">Week{totalWeeks > 1 ? 's' : ''} Planned</div>
+              <div className="text-sm text-muted-foreground">{t('nutrition.weeksPlanned', 'Weeks Planned')}</div>
             </div>
             <div className="text-center p-6 bg-gradient-to-br from-blue-900/30 to-blue-800/20 rounded-xl border border-blue-700">
               <div className="text-3xl font-bold text-blue-400 mb-1">
                 {totalDays}
               </div>
-              <div className="text-sm text-muted-foreground">Total Days</div>
+              <div className="text-sm text-muted-foreground">{t('nutrition.totalDays', 'Total Days')}</div>
             </div>
             <div className="text-center p-6 bg-gradient-to-br from-orange-900/30 to-orange-800/20 rounded-xl border border-orange-700">
               <div className="text-3xl font-bold text-orange-400 mb-1">
                 {totalMeals}
               </div>
-              <div className="text-sm text-muted-foreground">Total Meals</div>
+              <div className="text-sm text-muted-foreground">{t('nutrition.totalMeals', 'Total Meals')}</div>
             </div>
             <div className="text-center p-6 bg-gradient-to-br from-green-900/30 to-green-800/20 rounded-xl border border-green-700">
               <div className="text-3xl font-bold text-green-400 mb-1">
                 {avgCaloriesPerDay}
               </div>
-              <div className="text-sm text-muted-foreground">Avg Calories/Day</div>
+              <div className="text-sm text-muted-foreground">{t('nutrition.avgCaloriesPerDay', 'Avg Calories/Day')}</div>
             </div>
           </div>
         </CardContent>

@@ -229,7 +229,17 @@
       "mealDescription": "Meal Description",
       "noMeals": "No meals available",
       "invalidPlan": "Invalid Nutrition Plan",
-      "invalidPlanMessage": "The nutrition plan data is invalid. Please try generating a new plan."
+      "invalidPlanMessage": "The nutrition plan data is invalid. Please try generating a new plan.",
+      "selectWeek": "Select Week",
+      "selectDayInWeek": "Select Day in Week {{weekNumber}}",
+      "meal": "Meal",
+      "dailyFocus": "Daily Focus",
+      "personalizedInstructions": "Personalized Instructions",
+      "planOverview": "Plan Overview",
+      "weeksPlanned": "Weeks Planned",
+      "totalDays": "Total Days",
+      "totalMeals": "Total Meals",
+      "avgCaloriesPerDay": "Avg Calories/Day"
     },
     "videoAnalysis": {
       "title": "Video Analysis",
