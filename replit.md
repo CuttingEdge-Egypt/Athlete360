@@ -4,14 +4,13 @@
 Athlete360 is an AI-powered athletic performance analysis platform that analyzes athlete performance across various sports. It provides comprehensive insights, including biographies, ranking analysis, strengths/weaknesses, development plans, nutrition guidance, and strategic analysis. The platform leverages AI to deliver personalized, real-time athletic insights for performance development and strategic advantages, aiming to be an authentic and essential tool for athletes and coaches.
 
 ## Recent Changes (October 18, 2025)
+- **Queue & History Arabic Translations**: Added full translation support for generation queue and history dropdown - all service types now display in Arabic (e.g., "خطة التطوير" for development-plan, "خطة التغذية" for nutrition-plan)
+- **All Videos Section RTL Layout**: Fixed "All Videos" tab in development plans to properly display in RTL - exercise titles now appear on the right with Play icon, video buttons on the left in Arabic mode
 - **Development Plan Full Arabic Content**: Enhanced AI prompts to generate ALL development plan content in Arabic when language is set to Arabic, including exercise names, descriptions, tags, equipment, and prescription details
 - **Development Plan Loading UI Arabic RTL**: Fixed loading progress display to show messages and spinner on the right side in Arabic, Cancel button on the left, and increased font sizes (text-lg for main message, text-base for subtitle) for better Arabic readability
-- **Development Plan Progress Display**: Added Arabic numerals for progress percentages and translated "Progress" label to "التقدم" when site language is Arabic
-- **Video Button RTL Positioning**: Video buttons in development plan cards now appear on the left side in Arabic mode through conditional rendering
+- **Video Button RTL Positioning**: Unified video button implementation using flex-row-reverse pattern with conditional margins for cleaner, more maintainable code
 - **Complete Arabic Toast Messages**: Added comprehensive Arabic translations for all toast notifications including generation started/failed/cancelled, plan generated, ranking updates, athlete creation, image search, and payment success messages
-- **Arabic Loading Messages**: Added full bilingual loading messages with 7 development plan progress stages that automatically display in Arabic when UI language is Arabic
-- **Nutrition Plan Arabic UI**: Fixed navigation arrows for RTL (left arrow increases, right arrow decreases), swapped title/days positions, right-aligned cards, increased font sizes
-- **Translation System**: All toast and loading messages use translation system (common:toast.*, common:messages.*) with automatic language switching
+- **Translation System**: All UI elements (queue, history, toast, loading messages) use translation system with automatic language switching
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
