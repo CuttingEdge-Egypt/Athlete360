@@ -835,13 +835,13 @@ export class DatabaseStorage implements IStorage {
           results.push(latestLog);
         }
       } else if (serviceType === 'development-plan' || serviceType === 'development') {
-        // For development plans, get the most recent one, with fallback to English
+        // For development plans, search for BOTH 'development-plan' AND 'development' types
         const [latestLog] = await db
           .select()
           .from(analysisLogs)
           .where(
             and(
-              eq(analysisLogs.serviceType, serviceType),
+              sql`(${analysisLogs.serviceType} = 'development-plan' OR ${analysisLogs.serviceType} = 'development')`,
               getLanguageFilter(language)
             )
           )
@@ -855,7 +855,7 @@ export class DatabaseStorage implements IStorage {
             .from(analysisLogs)
             .where(
               and(
-                eq(analysisLogs.serviceType, serviceType),
+                sql`(${analysisLogs.serviceType} = 'development-plan' OR ${analysisLogs.serviceType} = 'development')`,
                 eq(analysisLogs.language, 'en')
               )
             )
