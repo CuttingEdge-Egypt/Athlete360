@@ -2126,7 +2126,7 @@ export function AnalysisPopup({
         return t("common:analysis.combat.title", "Strategic Combat Analysis");
       case "video":
       case "video-analysis":
-        return "Dynamic Performance Analysis";
+        return t("common:analysis.videoAnalysis.dynamicPerformanceAnalysis", "Dynamic Performance Analysis");
       default:
         return "Analysis Results";
     }

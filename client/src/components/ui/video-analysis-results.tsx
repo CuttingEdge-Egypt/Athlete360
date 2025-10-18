@@ -246,7 +246,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
             <div className="mt-6 pt-4 border-t border-gray-700">
               <div className="flex items-center gap-2 text-sm text-gray-400">
                 <Calendar size={14} />
-                <span>Analyzed on {new Date(analysisData.processedAt).toLocaleString()}</span>
+                <span>{t('analysis.videoAnalysis.analyzedOn', 'Analyzed on')} {new Date(analysisData.processedAt).toLocaleString()}</span>
               </div>
             </div>
           </CardContent>
@@ -641,11 +641,11 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
       <div className="bg-athlete-gray-800 border-gray-700 rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-2xl font-bold text-white">Video Analysis Results</h2>
-            <p className="text-gray-300">Round {analysisData.roundAnalyzed || 1} Analysis</p>
+            <h2 className="text-2xl font-bold text-white">{t('analysis.videoAnalysis.videoAnalysisResults', 'Video Analysis Results')}</h2>
+            <p className="text-gray-300">{t('analysis.videoAnalysis.round', 'Round')} {analysisData.roundAnalyzed || 1} {t('analysis.videoAnalysis.analysis', 'Analysis')}</p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-gray-400">Analyzed on</p>
+            <p className="text-sm text-gray-400">{t('analysis.videoAnalysis.analyzedOn', 'Analyzed on')}</p>
             <p className="text-white">{new Date(analysisData.processedAt || Date.now()).toLocaleDateString()}</p>
           </div>
         </div>
@@ -656,7 +656,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-athlete-accent">
             <Users className="h-5 w-5" />
-            Match Analysis
+            {t('analysis.videoAnalysis.matchAnalysis', 'Match Analysis')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -755,7 +755,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-athlete-accent">
               <Trophy className="h-5 w-5" />
-              Score Timeline
+              {t('analysis.videoAnalysis.scoreTimeline', 'Score Timeline')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -920,7 +920,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-athlete-accent">
               <Clock className="h-5 w-5" />
-              Score Timeline
+              {t('analysis.videoAnalysis.scoreTimeline', 'Score Timeline')}
             </CardTitle>
           </CardHeader>
           <CardContent>
