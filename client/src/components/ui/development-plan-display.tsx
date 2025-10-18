@@ -138,15 +138,15 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
       {/* Title with Goal Areas and Videos Count */}
       <Card className="bg-gradient-to-br from-emerald-500/20 via-athlete-accent/20 to-athlete-gray-800 border-emerald-500/40 shadow-lg">
         <CardHeader className="pb-4" dir={isArabic ? 'rtl' : 'ltr'}>
-          <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
-            <div className="space-y-2">
-              <CardTitle className={`text-3xl font-bold text-white flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
+          <div className={`flex items-center ${isArabic ? 'flex-row-reverse justify-end' : 'justify-between'}`}>
+            <div className={`space-y-2 ${isArabic ? 'w-full' : ''}`}>
+              <CardTitle className={`text-3xl font-bold text-white flex items-center gap-3 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
                 <Target className="h-7 w-7 text-emerald-400" />
-                <span className={`text-emerald-400 ${isArabic ? 'text-right' : ''}`}>
+                <span className="text-emerald-400">
                   {getLocalizedText(title, language)}
                 </span>
               </CardTitle>
-              <div className={`flex flex-wrap items-center gap-6 text-sm text-gray-300 ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <div className={`flex flex-wrap items-center gap-6 text-sm text-gray-300 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded-full bg-emerald-500/20">
                     <Zap className="h-4 w-4 text-emerald-400 flex-shrink-0" />
@@ -204,8 +204,8 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
           {/* Goal Area Navigation */}
           {goalAnalysis.length > 1 && (
             <Card className="bg-gradient-to-r from-slate-800/70 to-slate-700/70 border-slate-600/50">
-              <CardContent className="p-4">
-                <div className="flex flex-wrap gap-2">
+              <CardContent className="p-4" dir={isArabic ? 'rtl' : 'ltr'}>
+                <div className={`flex flex-wrap gap-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
                   {goalAnalysis.map((goal, index) => (
                     <Button
                       key={index}
@@ -232,14 +232,14 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
           {currentGoal && (
             <Card className="bg-gradient-to-br from-slate-800/50 to-slate-700/50 border-emerald-500/30 shadow-lg">
               <CardHeader className="pb-4" dir={isArabic ? 'rtl' : 'ltr'}>
-                <CardTitle className={`text-2xl font-bold text-white flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <CardTitle className={`text-2xl font-bold text-white flex items-center gap-3 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
                   <div className="p-2 rounded-full bg-emerald-500/20">
                     <Zap className="h-6 w-6 text-emerald-400" />
                   </div>
-                  <span className={`text-emerald-50 ${isArabic ? 'text-right' : ''}`}>{currentGoal.area}</span>
+                  <span className="text-emerald-50">{currentGoal.area}</span>
                 </CardTitle>
-                <div className="p-3 bg-slate-900/30 rounded-lg border border-slate-600/30 mt-3">
-                  <p className={`text-slate-100 leading-relaxed text-base ${isArabic ? 'text-right' : ''}`}>{currentGoal.description}</p>
+                <div className="p-3 bg-slate-900/30 rounded-lg border border-slate-600/30 mt-3" dir={isArabic ? 'rtl' : 'ltr'}>
+                  <p className="text-slate-100 leading-relaxed text-base">{currentGoal.description}</p>
                 </div>
               </CardHeader>
               
@@ -259,15 +259,15 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                       <CardContent className="p-5" dir={isArabic ? 'rtl' : 'ltr'}>
                         <div className="space-y-3">
                           {/* Exercise Header */}
-                          <div className={`flex items-start justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
+                          <div className={`flex items-start ${isArabic ? 'flex-row-reverse justify-end' : 'justify-between'}`}>
                             <div className="flex-1">
-                              <h4 className={`font-bold text-lg text-white flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                              <h4 className={`font-bold text-lg text-white flex items-center gap-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
                                 <div className="p-1.5 rounded-full bg-blue-500/20">
                                   <Dumbbell className="h-4 w-4 text-blue-400" />
                                 </div>
-                                <span className={`text-blue-50 ${isArabic ? 'text-right' : ''}`}>{exercise.name}</span>
+                                <span className="text-blue-50">{exercise.name}</span>
                               </h4>
-                              <p className={`text-sm text-slate-200 mt-2 leading-relaxed ${isArabic ? 'pr-8 text-right' : 'pl-8'}`}>
+                              <p className={`text-sm text-slate-200 mt-2 leading-relaxed ${isArabic ? 'pr-8' : 'pl-8'}`}>
                                 {exercise.description}
                               </p>
                             </div>
@@ -376,10 +376,10 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
 
       {/* Summary Card */}
       <Card className="bg-athlete-gray-800/30 border-athlete-gray-700">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-3 mb-4">
+        <CardContent className="p-6" dir={isArabic ? 'rtl' : 'ltr'}>
+          <div className={`flex items-center gap-3 mb-4 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
             <CheckCircle className="h-5 w-5 text-green-400" />
-            <h3 className={`text-lg font-semibold text-white ${isArabic ? 'text-right' : ''}`}>{t('analysis.development.trainingSummary', 'Training Summary')}</h3>
+            <h3 className="text-lg font-semibold text-white">{t('analysis.development.trainingSummary', 'Training Summary')}</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
             <div className="space-y-1">
