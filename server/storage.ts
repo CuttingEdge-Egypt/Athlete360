@@ -728,6 +728,17 @@ export class DatabaseStorage implements IStorage {
   async getLatestAnalysisByType(serviceTypes: string[], language?: string): Promise<AnalysisLog[]> {
     const results = [];
     
+    // Helper function to create language filter that handles both 'en' and 'en-US', 'ar' etc.
+    const getLanguageFilter = (lang?: string) => {
+      if (!lang) return sql`TRUE`;
+      // For 'en', match both 'en' and 'en-US'
+      if (lang === 'en') {
+        return sql`(${analysisLogs.language} = 'en' OR ${analysisLogs.language} = 'en-US')`;
+      }
+      // For other languages, exact match
+      return eq(analysisLogs.language, lang);
+    };
+    
     for (const serviceType of serviceTypes) {
       if (serviceType === 'video') {
         // For video analysis preview, prefer videos with player-specific advice, fall back to match data
@@ -748,7 +759,7 @@ export class DatabaseStorage implements IStorage {
                  ${analysisLogs.resultData}::jsonb->'errors' IS NOT NULL AND
                  (SELECT bool_and(value = 'null'::jsonb) FROM jsonb_each(${analysisLogs.resultData}::jsonb->'errors')))
               )`,
-              language ? eq(analysisLogs.language, language) : sql`TRUE`,
+              getLanguageFilter(language),
               sql`${analysisLogs.resultData}::text LIKE '%advice_analysis%'`
             )
           )
@@ -772,7 +783,7 @@ export class DatabaseStorage implements IStorage {
                    ${analysisLogs.resultData}::jsonb->'errors' IS NOT NULL AND
                    (SELECT bool_and(value = 'null'::jsonb) FROM jsonb_each(${analysisLogs.resultData}::jsonb->'errors')))
                 )`,
-                language ? eq(analysisLogs.language, language) : sql`TRUE`,
+                getLanguageFilter(language),
                 sql`(
                   ${analysisLogs.resultData}::text LIKE '%match_analysis%' OR
                   ${analysisLogs.resultData}::text LIKE '%events%' OR
@@ -796,7 +807,7 @@ export class DatabaseStorage implements IStorage {
             and(
               eq(analysisLogs.serviceType, serviceType),
               sql`LENGTH(${analysisLogs.resultData}::text) > 600`,
-              language ? eq(analysisLogs.language, language) : sql`TRUE`
+              getLanguageFilter(language)
             )
           )
           .orderBy(desc(analysisLogs.createdAt))
@@ -814,7 +825,7 @@ export class DatabaseStorage implements IStorage {
             and(
               eq(analysisLogs.serviceType, serviceType),
               sql`LENGTH(${analysisLogs.resultData}::text) > 2000`,
-              language ? eq(analysisLogs.language, language) : sql`TRUE`
+              getLanguageFilter(language)
             )
           )
           .orderBy(desc(analysisLogs.createdAt))
@@ -831,7 +842,7 @@ export class DatabaseStorage implements IStorage {
           .where(
             and(
               eq(analysisLogs.serviceType, serviceType),
-              language ? eq(analysisLogs.language, language) : sql`TRUE`
+              getLanguageFilter(language)
             )
           )
           .orderBy(desc(analysisLogs.createdAt))
@@ -865,7 +876,7 @@ export class DatabaseStorage implements IStorage {
           .where(
             and(
               eq(analysisLogs.serviceType, serviceType),
-              language ? eq(analysisLogs.language, language) : sql`TRUE`
+              getLanguageFilter(language)
             )
           )
           .orderBy(desc(analysisLogs.createdAt))
@@ -875,14 +886,14 @@ export class DatabaseStorage implements IStorage {
           results.push(latestLog);
         }
       } else {
-        // For other types, get the latest with language filtering
+        // For other types (rank, strengths, beat, comparison, etc.), get the latest with language filtering
         const [latestLog] = await db
           .select()
           .from(analysisLogs)
           .where(
             and(
               eq(analysisLogs.serviceType, serviceType),
-              language ? eq(analysisLogs.language, language) : sql`TRUE`
+              getLanguageFilter(language)
             )
           )
           .orderBy(desc(analysisLogs.createdAt))
