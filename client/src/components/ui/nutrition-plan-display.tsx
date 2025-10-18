@@ -8,6 +8,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 
 interface NutritionPlanProps {
   plan: string | any;
+  language?: string;
 }
 
 interface NutritionPlanDay {
@@ -36,12 +37,22 @@ interface WeekData {
   endDate: string;
 }
 
-export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
+export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
   const [currentWeek, setCurrentWeek] = useState(0);
   const [currentDay, setCurrentDay] = useState(0);
   const { t, i18n } = useTranslation('common');
   const { direction, isRTL } = useLanguage();
-  const isArabic = i18n.language === 'ar';
+  
+  // Detect language from prop, or detect from plan content, or fall back to global language
+  const detectLanguageFromContent = (content: any): boolean => {
+    if (!content) return false;
+    const contentStr = JSON.stringify(content);
+    // Check if content contains Arabic characters
+    const arabicRegex = /[\u0600-\u06FF]/;
+    return arabicRegex.test(contentStr);
+  };
+  
+  const isArabic = language === 'ar' || (language === undefined && detectLanguageFromContent(plan)) || i18n.language === 'ar';
   let nutritionData: StructuredNutritionPlan | null = null;
 
   console.log("NutritionPlanDisplay received plan:", typeof plan, plan);
