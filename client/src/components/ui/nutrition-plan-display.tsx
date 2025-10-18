@@ -54,6 +54,8 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
   const displayLanguage = language || (detectLanguageFromContent(plan) ? 'ar' : i18n.language);
   const isArabic = displayLanguage === 'ar';
   
+  console.log("NutritionPlanDisplay language detection:", { language, displayLanguage, isArabic, i18nLang: i18n.language });
+  
   // Function to convert numbers to Arabic numerals
   const toArabicNumerals = (num: number | string): string => {
     if (!isArabic) return String(num);
@@ -63,7 +65,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
   
   // Function to translate text based on display language
   const translateText = (key: string, fallback?: string): string => {
-    return t(key, { lng: displayLanguage, fallbackLng: displayLanguage, defaultValue: fallback || key });
+    return i18n.t(key, { lng: displayLanguage }) || fallback || key;
   };
   
   let nutritionData: StructuredNutritionPlan | null = null;
