@@ -259,7 +259,19 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                       <CardContent className="p-5" dir={isArabic ? 'rtl' : 'ltr'}>
                         <div className="space-y-3">
                           {/* Exercise Header */}
-                          <div className={`flex items-start ${isArabic ? 'flex-row-reverse justify-end' : 'justify-between'}`}>
+                          <div className={`flex items-start justify-between ${isArabic ? '' : ''}`}>
+                            {exercise.videoUrl && isArabic && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => window.open(exercise.videoUrl, '_blank')}
+                                className="ml-4 bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-300 hover:from-purple-500 hover:to-purple-600 hover:text-white flex-shrink-0 shadow-md flex-row-reverse"
+                                data-testid={`exercise-video-${exerciseIndex}`}
+                              >
+                                <Play className="ml-1 h-3 w-3" />
+                                {t('analysis.development.video', 'Video')}
+                              </Button>
+                            )}
                             <div className="flex-1">
                               <h4 className={`font-bold text-lg text-white flex items-center gap-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
                                 <div className="p-1.5 rounded-full bg-blue-500/20">
@@ -271,15 +283,15 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                                 {exercise.description}
                               </p>
                             </div>
-                            {exercise.videoUrl && (
+                            {exercise.videoUrl && !isArabic && (
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => window.open(exercise.videoUrl, '_blank')}
-                                className={`${isArabic ? 'mr-4' : 'ml-4'} bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-300 hover:from-purple-500 hover:to-purple-600 hover:text-white flex-shrink-0 shadow-md ${isArabic ? 'flex-row-reverse' : ''}`}
+                                className="ml-4 bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-300 hover:from-purple-500 hover:to-purple-600 hover:text-white flex-shrink-0 shadow-md"
                                 data-testid={`exercise-video-${exerciseIndex}`}
                               >
-                                <Play className={`h-3 w-3 ${isArabic ? 'ml-1' : 'mr-1'}`} />
+                                <Play className="mr-1 h-3 w-3" />
                                 {t('analysis.development.video', 'Video')}
                               </Button>
                             )}
