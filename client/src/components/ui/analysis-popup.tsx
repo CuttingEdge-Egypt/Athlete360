@@ -2527,6 +2527,7 @@ export function AnalysisPopup({
     );
   };
 
+  // Force rebuild - layout fix for RTL
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-athlete-gray-900 border-gray-700 text-white">
