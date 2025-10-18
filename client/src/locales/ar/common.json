@@ -78,7 +78,9 @@
     "developmentProgress4": "📊 حساب المجموعات والتكرارات وفترات الراحة المثلى...",
     "developmentProgress5": "🎬 العثور على مقاطع الفيديو التعليمية المثالية لكل تمرين...",
     "developmentProgress6": "⚡ تحسين شدة التدريب والتقدم...",
-    "developmentProgress7": "📋 تجميع خطة التطوير الكاملة الخاصة بك..."
+    "developmentProgress7": "📋 تجميع خطة التطوير الكاملة الخاصة بك...",
+    "progress": "التقدم",
+    "loading": "جارٍ التحميل"
   },
   "toast": {
     "generationStarted": "بدأ التوليد!",

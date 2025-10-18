@@ -50,6 +50,12 @@ function AnimatedDots({ isRTL }: { isRTL: boolean }) {
   return <span className="inline-block">{dots}</span>;
 }
 
+// Helper to convert numbers to Arabic numerals
+function toArabicNumerals(num: number | string): string {
+  const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+  return String(num).replace(/\d/g, (digit) => arabicNumerals[parseInt(digit)]);
+}
+
 export default function Home() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -447,7 +453,7 @@ export default function Home() {
       setDevelopmentProgress(cappedProgress);
       
       if (status === 'in_progress') {
-        const messages = i18n.language === 'ar' ? [
+        const messages = [
           t('common:messages.developmentProgress1', "🎯 Analyzing your training goals and current fitness level..."),
           t('common:messages.developmentProgress2', "🧠 AI is crafting your personalized training strategy..."),
           t('common:messages.developmentProgress3', "💪 Designing targeted exercises for your specific weaknesses..."),
@@ -455,14 +461,6 @@ export default function Home() {
           t('common:messages.developmentProgress5', "🎬 Finding the perfect instructional videos for each exercise..."),
           t('common:messages.developmentProgress6', "⚡ Optimizing training intensity and progression..."),
           t('common:messages.developmentProgress7', "📋 Assembling your complete development plan...")
-        ] : [
-          "🎯 Analyzing your training goals and current fitness level...",
-          "🧠 AI is crafting your personalized training strategy...",
-          "💪 Designing targeted exercises for your specific weaknesses...",
-          "📊 Calculating optimal sets, reps, and rest periods...",
-          "🎬 Finding the perfect instructional videos for each exercise...",
-          "⚡ Optimizing training intensity and progression...",
-          "📋 Assembling your complete development plan..."
         ];
         const messageIndex = Math.min(Math.floor((progress || 0) / 14), messages.length - 1);
         setDevelopmentProgressMessage(messages[messageIndex]);
@@ -2579,10 +2577,12 @@ export default function Home() {
                             {/* Progress bar */}
                             <div className="space-y-2">
                               <div className="flex justify-between items-center text-sm">
-                                <span className="text-slate-300 font-medium">Progress</span>
+                                <span className="text-slate-300 font-medium">{t('common:messages.progress', 'Progress')}</span>
                                 <div className="flex items-center gap-2">
                                   <div className="px-2 py-1 bg-emerald-500/20 rounded-full">
-                                    <span className="text-emerald-200 font-bold text-xs">{nutritionProgress}%</span>
+                                    <span className="text-emerald-200 font-bold text-xs">
+                                      {i18n.language === 'ar' ? toArabicNumerals(nutritionProgress) : nutritionProgress}٪
+                                    </span>
                                   </div>
                                 </div>
                               </div>
@@ -2894,10 +2894,12 @@ export default function Home() {
                               {/* Progress Bar with Percentage */}
                               <div className="space-y-2">
                                 <div className="flex justify-between items-center text-sm">
-                                  <span className="text-slate-300 font-medium">Progress</span>
+                                  <span className="text-slate-300 font-medium">{t('common:messages.progress', 'Progress')}</span>
                                   <div className="flex items-center gap-2">
                                     <div className="px-2 py-1 bg-emerald-500/20 rounded-full">
-                                      <span className="text-emerald-200 font-bold text-xs">{developmentProgress}%</span>
+                                      <span className="text-emerald-200 font-bold text-xs">
+                                        {i18n.language === 'ar' ? toArabicNumerals(developmentProgress) : developmentProgress}٪
+                                      </span>
                                     </div>
                                   </div>
                                 </div>
