@@ -40,7 +40,7 @@ interface WeekData {
 export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
   const [currentWeek, setCurrentWeek] = useState(0);
   const [currentDay, setCurrentDay] = useState(0);
-  const { t, i18n } = useTranslation('common');
+  const { t: globalT, i18n } = useTranslation('common');
   const { direction, isRTL } = useLanguage();
   
   // Determine display language from prop or plan content
@@ -56,13 +56,8 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
   
   console.log("NutritionPlanDisplay language detection:", { language, displayLanguage, isArabic, i18nLang: i18n.language });
   
-  // Change i18n language if different from detected language
-  useEffect(() => {
-    if (displayLanguage && displayLanguage !== i18n.language) {
-      console.log(`Switching i18n language to: ${displayLanguage}`);
-      i18n.changeLanguage(displayLanguage);
-    }
-  }, [displayLanguage, i18n]);
+  // Use language-specific translation
+  const { t } = useTranslation('common', { lng: displayLanguage });
   
   // Function to convert numbers to Arabic numerals
   const toArabicNumerals = (num: number | string): string => {
@@ -386,33 +381,34 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
           </CardHeader>
           <CardContent dir={isArabic ? 'rtl' : 'ltr'}>
             {/* Enhanced Meals Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
               {currentDayData.meals.map((meal, mealIndex) => (
                 <div 
                   key={mealIndex} 
-                  className="bg-gradient-to-br from-slate-700 to-slate-600 border-2 border-slate-500 rounded-xl p-5 hover:shadow-xl transition-all duration-300 hover:border-green-400 hover:scale-105"
+                  className="bg-gradient-to-br from-slate-700 to-slate-600 border border-slate-500 rounded-xl p-4 hover:shadow-xl transition-all duration-300 hover:border-green-400"
                 >
                   {/* Meal Header */}
-                  <div className={`flex items-center justify-between mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                    <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                      <div className="w-4 h-4 bg-green-400 rounded-full animate-pulse"></div>
-                      <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">
+                  <div className={`mb-3 ${isArabic ? 'text-right' : 'text-left'}`}>
+                    <div className={`flex items-center gap-2 mb-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                      <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse flex-shrink-0"></div>
+                      <span className="text-xs text-gray-300 font-semibold uppercase">
                         {t('nutrition.meal', 'MEAL')} {toArabicNumerals(mealIndex + 1)}
                       </span>
                     </div>
-                    <div className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full px-4 py-2 shadow-lg border-2 border-green-400">
-                      <span className="text-sm font-bold tracking-tight">
-                        {meal.calories_intake}
-                      </span>
+                    <div className="inline-flex items-center bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full px-3 py-1 text-sm font-bold">
+                      {isArabic ? meal.calories_intake.replace(/\d+/g, match => toArabicNumerals(match)) : meal.calories_intake}
                     </div>
                   </div>
                   
                   {/* Meal Items */}
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {meal.meal_description.map((item, itemIndex) => (
                       <div 
                         key={itemIndex} 
-                        className="bg-card text-slate-200 text-sm p-3 rounded-lg text-center border border-border hover:border-green-500 hover:bg-slate-700 transition-all duration-200"
+                        className={`bg-slate-800/50 text-slate-100 text-sm p-2.5 rounded-lg border border-slate-600 ${
+                          isArabic ? 'text-right' : 'text-left'
+                        }`}
+                        dir={isArabic ? 'rtl' : 'ltr'}
                       >
                         {item}
                       </div>
