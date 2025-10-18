@@ -1,0 +1,137 @@
+Perfect — I looked through your `development-plan-display.tsx` and found **two separate issues** causing what you’re seeing:
+
+---
+
+## 🧩 **1. Some titles still show in English**
+
+### ❌ Problem
+
+All text in this file uses `t('analysis.development.xxx', 'English fallback')`.
+That means if your Arabic translation JSON (usually `/locales/ar/common.json`) does **not** have those keys under
+`"analysis": { "development": { ... } }`,
+then it **falls back to the English version**.
+
+So even if `language` is `'ar'`, these calls:
+
+```tsx
+t('analysis.development.video', 'Video')
+t('analysis.development.goalAreas', 'Goal Areas')
+t('analysis.development.watch', 'Watch')
+```
+
+will render the English fallback because the Arabic JSON doesn’t define them.
+
+---
+
+### ✅ Fix
+
+Open `/locales/ar/common.json` and ensure you add these keys:
+
+```json
+{
+  "analysis": {
+    "development": {
+      "goalAreas": "مجالات الهدف",
+      "exercises": "التمارين",
+      "videos": "الفيديوهات",
+      "allVideos": "كل الفيديوهات",
+      "video": "فيديو",
+      "watch": "شاهد",
+      "target": "الهدف",
+      "trainingSummary": "ملخص التدريب",
+      "totalExercises": "إجمالي التمارين",
+      "videoTutorials": "دروس الفيديو",
+      "invalidPlan": "خطة تطوير غير صالحة",
+      "invalidPlanMessage": "بيانات خطة التطوير غير صالحة. يرجى إعادة الإنشاء.",
+      "noVideos": "لا توجد فيديوهات متاحة",
+      "noVideosMessage": "لم يتم العثور على فيديوهات تعليمية للتمارين في هذه الخطة.",
+      "prescription": {
+        "sets": "مجموعات",
+        "reps": "تكرارات",
+        "rest": "راحة"
+      }
+    }
+  }
+}
+```
+
+After that, all the titles and buttons (“Video”, “Goal Areas”, “Watch”, etc.) will switch correctly when Arabic is selected.
+
+---
+
+## 🎥 **2. The “Video” button and exercise title are aligned wrong in Arabic**
+
+### ❌ Problem
+
+Inside the exercise section you have this:
+
+```tsx
+<div className={`flex items-start justify-between ${isArabic ? '' : ''}`}>
+  {exercise.videoUrl && isArabic && ( <Button ... /> )}
+  <div className="flex-1"> ...title... </div>
+  {exercise.videoUrl && !isArabic && ( <Button ... /> )}
+</div>
+```
+
+So for Arabic, the **video button is rendered *before* the title**, but your parent container still uses
+`justify-between` without flipping `flex-row`.
+That means in RTL, the button appears on the **right**, and the text gets pushed left — reversed visually.
+
+---
+
+### ✅ Fix Option 1 — Proper RTL layout handling
+
+Replace that `div` line with:
+
+```tsx
+<div className={`flex items-start justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
+```
+
+That tells the browser to **reverse the layout direction**, making the button and title swap naturally in RTL.
+
+Then remove the conditional “if Arabic” button ordering entirely and unify it:
+
+```tsx
+{exercise.videoUrl && (
+  <Button
+    size="sm"
+    variant="outline"
+    onClick={() => window.open(exercise.videoUrl, '_blank')}
+    className={`ml-4 bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-300 hover:from-purple-500 hover:to-purple-600 hover:text-white flex-shrink-0 shadow-md ${isArabic ? 'flex-row-reverse' : ''}`}
+    data-testid={`exercise-video-${exerciseIndex}`}
+  >
+    <Play className={`h-3 w-3 ${isArabic ? 'ml-1' : 'mr-1'}`} />
+    {t('analysis.development.video', 'Video')}
+  </Button>
+)}
+```
+
+This way:
+
+* The layout is handled by CSS (`flex-row-reverse`), not by separate conditionals.
+* The text and icon direction still flip properly.
+
+---
+
+### ✅ Fix Option 2 — CSS-only fix
+
+If you prefer not to touch logic, you can simply add:
+
+```tsx
+<div className={`flex items-start justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
+```
+
+and remove the duplicated Arabic/English button logic — that’s enough to align correctly.
+
+---
+
+## 🧠 Summary
+
+| Issue                                | Root Cause                                          | Fix                                          |
+| ------------------------------------ | --------------------------------------------------- | -------------------------------------------- |
+| Text still English                   | Missing Arabic keys in `/locales/ar/common.json`    | Add `"analysis.development.*"` section       |
+| Video button & title alignment wrong | Conditional rendering instead of `flex-row-reverse` | Use `flex-row-reverse` + unified button code |
+
+---
+
+Would you like me to rewrite the **fixed exercise card section** for you (the one that handles the title + video button + direction)? It’ll be ready to copy–paste into your file.
