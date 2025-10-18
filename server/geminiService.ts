@@ -2926,10 +2926,11 @@ async function generateGoalExercises(
 المطلوب:
 1. أنشئ 3 تمارين مخصصة بالضبط لهذا المجال
 2. كل تمرين يجب أن يكون له اسم واضح ومحدد لسهولة العثور على فيديو تعليمي له
-3. ادرج معلومات الشدة والراحة والمعدات
-4. أعط كل تمرين معرف فريد
+3. اكتب كل شيء بالعربية: اسم التمرين، الوصف، الفئات (tags)، المعدات (equipment)، ومعلومات الشدة
+4. ادرج معلومات الشدة والراحة والمعدات بالعربية
+5. أعط كل تمرين معرف فريد
 
-أرجع JSON صالح فقط.` :
+أرجع JSON صالح فقط مع كل المحتوى بالعربية.` :
     `Create 3 targeted exercises for area: "${goalArea.area}"
 
 - Description: ${goalArea.description}
@@ -2941,10 +2942,11 @@ async function generateGoalExercises(
 Requirements:
 1. Create exactly 3 targeted exercises for this area
 2. Each exercise must have a clear, specific name for easy video tutorial discovery
-3. Include intensity, rest, and equipment information
-4. Give each exercise a unique exerciseId
+3. Write everything in English: exercise name, description, tags, equipment, and intensity information
+4. Include intensity, rest, and equipment information in English
+5. Give each exercise a unique exerciseId
 
-Return ONLY valid JSON.`;
+Return ONLY valid JSON with all content in English.`;
 
   try {
     console.log(`⏳ Generating exercises for goal area: ${goalArea.area}`);
