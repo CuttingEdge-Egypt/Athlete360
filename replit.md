@@ -4,6 +4,8 @@
 Athlete360 is an AI-powered athletic performance analysis platform that analyzes athlete performance across various sports. It provides comprehensive insights, including biographies, ranking analysis, strengths/weaknesses, development plans, nutrition guidance, and strategic analysis. The platform leverages AI to deliver personalized, real-time athletic insights for performance development and strategic advantages, aiming to be an authentic and essential tool for athletes and coaches.
 
 ## Recent Changes (October 18, 2025)
+- **Video Preview Error Filtering Fix**: Fixed video preview query logic to check only core analyses (match, score, advice) for errors instead of requiring all error fields to be null. This allows videos with sport-specific optional feature errors (punch, kick, yellowCards) to appear in language-specific previews
+- **Arabic Video Preview**: Set tennis match analysis (Iga Świątek vs Marie Bouzková) as static Arabic preview for video analysis on landing page
 - **Development Plan UI Localization**: Added full bilingual support (English/Arabic) for all Development Plan UI elements including labels, buttons, tabs, and summaries with proper RTL layout support
 - **Preview Data Updates**: Set latest English and Arabic development plans as preview data for landing page
 - **Evidence Label Translation**: Fixed Arabic translation for "Evidence" label in Strengths and Weaknesses sections with proper right-alignment for Arabic layout

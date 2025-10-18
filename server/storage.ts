@@ -749,15 +749,18 @@ export class DatabaseStorage implements IStorage {
           .where(
             and(
               eq(analysisLogs.serviceType, serviceType),
-              // Include videos that either:
-              // 1. Don't have an "errors" field at all, OR
-              // 2. Have an "errors" field where all values are null (valid tracking object)
-              // This excludes only videos with actual error messages
+              // Include videos where core analyses succeeded (match, score, advice are null or don't exist)
+              // Allow sport-specific optional features (punch, kick, yellowCards) to have errors
               sql`(
                 ${analysisLogs.resultData}::text NOT LIKE '%"errors"%' OR
-                (${analysisLogs.resultData}::text LIKE '%"errors"%' AND 
-                 ${analysisLogs.resultData}::jsonb->'errors' IS NOT NULL AND
-                 (SELECT bool_and(value = 'null'::jsonb) FROM jsonb_each(${analysisLogs.resultData}::jsonb->'errors')))
+                (
+                  (${analysisLogs.resultData}::jsonb->'errors'->'match' IS NULL OR 
+                   ${analysisLogs.resultData}::jsonb->'errors'->'match' = 'null'::jsonb) AND
+                  (${analysisLogs.resultData}::jsonb->'errors'->'score' IS NULL OR 
+                   ${analysisLogs.resultData}::jsonb->'errors'->'score' = 'null'::jsonb) AND
+                  (${analysisLogs.resultData}::jsonb->'errors'->'advice' IS NULL OR 
+                   ${analysisLogs.resultData}::jsonb->'errors'->'advice' = 'null'::jsonb)
+                )
               )`,
               getLanguageFilter(language),
               sql`${analysisLogs.resultData}::text LIKE '%advice_analysis%'`
@@ -768,7 +771,7 @@ export class DatabaseStorage implements IStorage {
         
         if (logsWithAdvice[0]) {
           results.push(logsWithAdvice[0]);
-        } else {
+        } else{
           // Step 2: Fallback - get a video with match data (events, scores, analysis)
           const logsWithMatchData = await db
             .select()
@@ -776,12 +779,15 @@ export class DatabaseStorage implements IStorage {
             .where(
               and(
                 eq(analysisLogs.serviceType, serviceType),
-                // Same error filtering logic
+                // Same core error filtering logic
                 sql`(
                   ${analysisLogs.resultData}::text NOT LIKE '%"errors"%' OR
-                  (${analysisLogs.resultData}::text LIKE '%"errors"%' AND 
-                   ${analysisLogs.resultData}::jsonb->'errors' IS NOT NULL AND
-                   (SELECT bool_and(value = 'null'::jsonb) FROM jsonb_each(${analysisLogs.resultData}::jsonb->'errors')))
+                  (
+                    (${analysisLogs.resultData}::jsonb->'errors'->'match' IS NULL OR 
+                     ${analysisLogs.resultData}::jsonb->'errors'->'match' = 'null'::jsonb) AND
+                    (${analysisLogs.resultData}::jsonb->'errors'->'score' IS NULL OR 
+                     ${analysisLogs.resultData}::jsonb->'errors'->'score' = 'null'::jsonb)
+                  )
                 )`,
                 getLanguageFilter(language),
                 sql`(
