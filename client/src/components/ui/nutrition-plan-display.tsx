@@ -325,7 +325,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                   className="bg-blue-600 border-blue-500 text-white hover:bg-blue-500 disabled:bg-blue-800 disabled:border-blue-700"
                   data-testid="button-week-previous"
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  {isArabic ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
                 </Button>
                 
                 <div className="flex gap-2">
@@ -354,7 +354,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                   className="bg-orange-600 border-orange-500 text-white hover:bg-orange-500 disabled:bg-orange-800 disabled:border-orange-700"
                   data-testid="button-week-next"
                 >
-                  <ChevronRight className="h-4 w-4" />
+                  {isArabic ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                 </Button>
               </div>
             </div>
@@ -392,7 +392,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                     className="bg-blue-600 border-blue-500 text-white hover:bg-blue-500 disabled:bg-blue-800 disabled:border-blue-700"
                     data-testid="button-day-previous"
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    {isArabic ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
                   </Button>
                   
                   <div className="flex gap-2">
@@ -421,7 +421,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                     className="bg-orange-600 border-orange-500 text-white hover:bg-orange-500 disabled:bg-orange-800 disabled:border-orange-700"
                     data-testid="button-day-next"
                   >
-                    <ChevronRight className="h-4 w-4" />
+                    {isArabic ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                   </Button>
                 </div>
               </div>
