@@ -111,12 +111,12 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
             <CardHeader dir={isArabic ? 'rtl' : 'ltr'}>
               <CardTitle className={`flex items-center gap-2 text-foreground ${isArabic ? 'flex-row-reverse' : ''}`}>
                 <Apple className="h-5 w-5 text-red-400" />
-                {t('nutrition.error', 'Nutrition Plan Error')}
+                {t('analysis.nutrition.error', 'Nutrition Plan Error')}
               </CardTitle>
             </CardHeader>
             <CardContent className="text-center py-12" dir={isArabic ? 'rtl' : 'ltr'}>
               <div className="text-red-400 mb-4">
-                {parsedData.errorMessage || t('nutrition.unableToGenerate', 'Unable to generate nutrition plan')}
+                {parsedData.errorMessage || t('analysis.nutrition.unableToGenerate', 'Unable to generate nutrition plan')}
               </div>
               {parsedData.suggestion && (
                 <div className="text-muted-foreground text-sm">
@@ -153,7 +153,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
         <CardHeader dir={isArabic ? 'rtl' : 'ltr'}>
           <CardTitle className={`flex items-center gap-2 text-foreground ${isArabic ? 'flex-row-reverse' : ''}`}>
             <Utensils className="h-5 w-5" />
-            {t('nutrition.title', 'Nutrition Plan')}
+            {t('analysis.nutrition.title', 'Nutrition Plan')}
           </CardTitle>
         </CardHeader>
         <CardContent dir={isArabic ? 'rtl' : 'ltr'}>
@@ -202,12 +202,12 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
         <CardHeader dir={isArabic ? 'rtl' : 'ltr'}>
           <CardTitle className={`flex items-center gap-2 text-foreground ${isArabic ? 'flex-row-reverse' : ''}`}>
             <Apple className="h-5 w-5 text-green-400" />
-            {t('nutrition.title', 'Nutrition Plan')}
+            {t('analysis.nutrition.title', 'Nutrition Plan')}
           </CardTitle>
         </CardHeader>
         <CardContent className="text-center py-12">
           <div className="text-muted-foreground">
-            {t('nutrition.noMeals', 'No nutrition plan data available.')}
+            {t('analysis.nutrition.noMeals', 'No nutrition plan data available.')}
           </div>
         </CardContent>
       </Card>
@@ -264,15 +264,15 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
             <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
               <Apple className="h-6 w-6 text-green-400" />
               <div className={isArabic ? 'text-right' : ''}>
-                <div className="text-xl font-bold">{t('nutrition.title', 'Nutrition Plan')}</div>
+                <div className="text-xl font-bold">{t('analysis.nutrition.title', 'Nutrition Plan')}</div>
                 <div className="text-sm text-muted-foreground font-normal">
-                  {toArabicNumerals(totalDays)} {t('nutrition.days', 'Days')} • {toArabicNumerals(totalWeeks)} {t('nutrition.week', 'Week')}{totalWeeks > 1 ? 's' : ''} • {toArabicNumerals(totalMeals)} {t('nutrition.meals', 'Meals')}
+                  {toArabicNumerals(totalDays)} {t('analysis.nutrition.days', 'Days')} • {toArabicNumerals(totalWeeks)} {t('analysis.nutrition.week', 'Week')}{totalWeeks > 1 ? 's' : ''} • {toArabicNumerals(totalMeals)} {t('analysis.nutrition.meals', 'Meals')}
                 </div>
               </div>
             </div>
             <div className={isArabic ? 'text-left' : 'text-right'}>
               <Badge variant="secondary" className="bg-green-600 text-white mb-1">
-                {t('nutrition.week', 'Week')} {toArabicNumerals(currentWeek + 1)} • {t('nutrition.day', 'Day')} {toArabicNumerals(safCurrentDay + 1)}
+                {t('analysis.nutrition.week', 'Week')} {toArabicNumerals(currentWeek + 1)} • {t('analysis.nutrition.day', 'Day')} {toArabicNumerals(safCurrentDay + 1)}
               </Badge>
               <div className="text-sm text-muted-foreground">
                 {currentDayData?.day.name} - {currentDayData?.day.date}
@@ -290,7 +290,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
           <CardHeader>
             {/* Week Slider - Inline above day/date */}
             <div className="mb-4 text-center" dir={isArabic ? 'rtl' : 'ltr'}>
-              <div className="text-sm text-muted-foreground mb-3">{t('nutrition.selectWeek', 'Select Week')}</div>
+              <div className="text-sm text-muted-foreground mb-3">{t('analysis.nutrition.selectWeek', 'Select Week')}</div>
               <div className={`flex items-center justify-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                 <Button
                   variant="outline"
@@ -352,7 +352,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
             {/* Day Slider */}
             <div className="mt-4 pt-4 border-t border-border" dir={isArabic ? 'rtl' : 'ltr'}>
               <div className="text-center">
-                <div className="text-sm text-muted-foreground mb-3">{t('nutrition.selectDayInWeek', `Select Day in Week ${currentWeek + 1}`).replace(`${currentWeek + 1}`, toArabicNumerals(currentWeek + 1))}</div>
+                <div className="text-sm text-muted-foreground mb-3">{t('analysis.nutrition.selectDayInWeek', `Select Day in Week ${currentWeek + 1}`).replace(`${currentWeek + 1}`, toArabicNumerals(currentWeek + 1))}</div>
                 <div className={`flex items-center justify-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                   <Button
                     variant="outline"
@@ -410,7 +410,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                     <div className={`flex items-center gap-2 mb-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                       <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse flex-shrink-0"></div>
                       <span className="text-xs text-gray-300 font-semibold uppercase">
-                        {t('nutrition.meal', 'MEAL')} {toArabicNumerals(mealIndex + 1)}
+                        {t('analysis.nutrition.meal', 'MEAL')} {toArabicNumerals(mealIndex + 1)}
                       </span>
                     </div>
                     <div className="inline-flex items-center bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full px-3 py-1 text-sm font-bold">
@@ -443,7 +443,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                   <Target className="h-6 w-6 text-blue-400 mt-1 flex-shrink-0" />
                   <div className={isArabic ? 'text-right' : ''}>
                     <h4 className="font-bold text-lg text-blue-300 mb-2">
-                      {t('nutrition.dailyFocus', 'Daily Focus')}
+                      {t('analysis.nutrition.dailyFocus', 'Daily Focus')}
                     </h4>
                     <p className="text-slate-200 leading-relaxed">
                       {currentDayData.explanation}
@@ -460,7 +460,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                   <Target className="h-6 w-6 text-purple-400 mt-1 flex-shrink-0" />
                   <div className={isArabic ? 'text-right' : ''}>
                     <h4 className="font-bold text-lg text-purple-300 mb-2">
-                      {t('nutrition.personalizedInstructions', 'Personalized Instructions')}
+                      {t('analysis.nutrition.personalizedInstructions', 'Personalized Instructions')}
                     </h4>
                     <div className="text-slate-200 leading-relaxed whitespace-pre-wrap">
                       {nutritionData.instructions}
@@ -478,7 +478,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
         <CardHeader dir={isArabic ? 'rtl' : 'ltr'}>
           <CardTitle className={`flex items-center gap-2 text-foreground ${isArabic ? 'flex-row-reverse' : ''}`}>
             <Target className="h-5 w-5 text-purple-400" />
-            {t('nutrition.planOverview', 'Plan Overview')}
+            {t('analysis.nutrition.planOverview', 'Plan Overview')}
           </CardTitle>
         </CardHeader>
         <CardContent dir={isArabic ? 'rtl' : 'ltr'}>
@@ -487,25 +487,25 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
               <div className="text-3xl font-bold text-purple-400 mb-1">
                 {toArabicNumerals(totalWeeks)}
               </div>
-              <div className="text-sm text-muted-foreground">{t('nutrition.weeksPlanned', 'Weeks Planned')}</div>
+              <div className="text-sm text-muted-foreground">{t('analysis.nutrition.weeksPlanned', 'Weeks Planned')}</div>
             </div>
             <div className="text-center p-6 bg-gradient-to-br from-blue-900/30 to-blue-800/20 rounded-xl border border-blue-700">
               <div className="text-3xl font-bold text-blue-400 mb-1">
                 {toArabicNumerals(totalDays)}
               </div>
-              <div className="text-sm text-muted-foreground">{t('nutrition.totalDays', 'Total Days')}</div>
+              <div className="text-sm text-muted-foreground">{t('analysis.nutrition.totalDays', 'Total Days')}</div>
             </div>
             <div className="text-center p-6 bg-gradient-to-br from-orange-900/30 to-orange-800/20 rounded-xl border border-orange-700">
               <div className="text-3xl font-bold text-orange-400 mb-1">
                 {toArabicNumerals(totalMeals)}
               </div>
-              <div className="text-sm text-muted-foreground">{t('nutrition.totalMeals', 'Total Meals')}</div>
+              <div className="text-sm text-muted-foreground">{t('analysis.nutrition.totalMeals', 'Total Meals')}</div>
             </div>
             <div className="text-center p-6 bg-gradient-to-br from-green-900/30 to-green-800/20 rounded-xl border border-green-700">
               <div className="text-3xl font-bold text-green-400 mb-1">
                 {toArabicNumerals(avgCaloriesPerDay)}
               </div>
-              <div className="text-sm text-muted-foreground">{t('nutrition.avgCaloriesPerDay', 'Avg Calories/Day')}</div>
+              <div className="text-sm text-muted-foreground">{t('analysis.nutrition.avgCaloriesPerDay', 'Avg Calories/Day')}</div>
             </div>
           </div>
         </CardContent>

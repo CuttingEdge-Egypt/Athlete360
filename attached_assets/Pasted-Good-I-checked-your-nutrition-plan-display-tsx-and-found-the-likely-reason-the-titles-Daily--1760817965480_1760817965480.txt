@@ -1,0 +1,118 @@
+Good — I checked your `nutrition-plan-display.tsx` and found the likely reason the **titles (“Daily Focus”, “Personalized Instructions”) stay in English** even when Arabic is selected.
+
+Here’s what’s happening and how to fix it 👇
+
+---
+
+### 🧩 **Why this happens**
+
+You’re calling:
+
+```tsx
+t('nutrition.dailyFocus', 'Daily Focus')
+```
+
+and
+
+```tsx
+t('nutrition.personalizedInstructions', 'Personalized Instructions')
+```
+
+…but your `t()` function is **not using i18next’s translation instance** — it’s using **a manual JSON import**:
+
+```tsx
+const translations = displayLanguage === 'ar' ? arTranslations : enTranslations;
+```
+
+That means:
+
+* It looks for those keys in `ar/common.json`.
+* If they don’t exist (or are nested differently), it falls back to the English fallback text — e.g., “Daily Focus”.
+
+So, even when `isArabic = true`, you still see the English fallback because your Arabic JSON probably **doesn’t include**:
+
+```json
+{
+  "nutrition": {
+    "dailyFocus": "التركيز اليومي",
+    "personalizedInstructions": "التعليمات المخصصة"
+  }
+}
+```
+
+---
+
+### ✅ **Fix Option 1 — Add missing Arabic keys**
+
+In your file:
+`/locales/ar/common.json`, make sure you include these translations:
+
+```json
+{
+  "nutrition": {
+    "title": "خطة التغذية",
+    "days": "أيام",
+    "week": "أسبوع",
+    "weeksPlanned": "عدد الأسابيع المخطط لها",
+    "totalDays": "إجمالي الأيام",
+    "totalMeals": "إجمالي الوجبات",
+    "avgCaloriesPerDay": "متوسط السعرات اليومية",
+    "noMeals": "لا توجد بيانات لخطة التغذية.",
+    "meal": "وجبة",
+    "planOverview": "نظرة عامة على الخطة",
+    "dailyFocus": "التركيز اليومي",
+    "personalizedInstructions": "التعليمات المخصصة"
+  }
+}
+```
+
+Then reload the page — your titles will render in Arabic.
+
+---
+
+### ✅ **Fix Option 2 — Use i18next translations properly**
+
+Instead of your manual translation function, use the real i18next hook:
+
+```tsx
+const { t, i18n } = useTranslation('common');
+```
+
+Then just call:
+
+```tsx
+{t('nutrition.dailyFocus')}
+{t('nutrition.personalizedInstructions')}
+```
+
+This avoids mismatches between local JSON imports and i18next’s internal state.
+
+---
+
+### ✅ **Bonus: improve language detection**
+
+Your detection logic is good, but for clarity you can add a forced sync:
+
+```tsx
+useEffect(() => {
+  if (displayLanguage && i18n.language !== displayLanguage) {
+    i18n.changeLanguage(displayLanguage);
+  }
+}, [displayLanguage, i18n]);
+```
+
+That ensures the `useTranslation` hook matches the detected content language.
+
+---
+
+### 💡 **Summary**
+
+| Problem                       | Fix                                               |
+| ----------------------------- | ------------------------------------------------- |
+| Titles stay English           | Add missing Arabic keys or use `i18next` directly |
+| Fallback always shows English | The key is missing in `ar/common.json`            |
+| Wrong language state          | Sync `i18n.language` with `displayLanguage`       |
+
+---
+
+Would you like me to show exactly **where to insert** the `useEffect` and updated `t()` call inside your file (so it’s ready to paste)?
