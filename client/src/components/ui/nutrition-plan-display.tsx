@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Calendar, Utensils, Target, Apple } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface NutritionPlanProps {
   plan: string | any;
@@ -37,6 +39,9 @@ interface WeekData {
 export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
   const [currentWeek, setCurrentWeek] = useState(0);
   const [currentDay, setCurrentDay] = useState(0);
+  const { t, i18n } = useTranslation('common');
+  const { direction, isRTL } = useLanguage();
+  const isArabic = i18n.language === 'ar';
   let nutritionData: StructuredNutritionPlan | null = null;
 
   console.log("NutritionPlanDisplay received plan:", typeof plan, plan);
@@ -61,15 +66,15 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
       if (parsedData.error) {
         return (
           <Card className="w-full max-w-4xl mx-auto bg-card border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-foreground">
+            <CardHeader dir={isArabic ? 'rtl' : 'ltr'}>
+              <CardTitle className={`flex items-center gap-2 text-foreground ${isArabic ? 'flex-row-reverse' : ''}`}>
                 <Apple className="h-5 w-5 text-red-400" />
-                Nutrition Plan Error
+                {t('nutrition.error', 'Nutrition Plan Error')}
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-center py-12">
+            <CardContent className="text-center py-12" dir={isArabic ? 'rtl' : 'ltr'}>
               <div className="text-red-400 mb-4">
-                {parsedData.errorMessage || "Unable to generate nutrition plan"}
+                {parsedData.errorMessage || t('nutrition.unableToGenerate', 'Unable to generate nutrition plan')}
               </div>
               {parsedData.suggestion && (
                 <div className="text-muted-foreground text-sm">
@@ -103,13 +108,13 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
   if (!nutritionData) {
     return (
       <Card className="w-full max-w-4xl mx-auto bg-card border-border">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-foreground">
+        <CardHeader dir={isArabic ? 'rtl' : 'ltr'}>
+          <CardTitle className={`flex items-center gap-2 text-foreground ${isArabic ? 'flex-row-reverse' : ''}`}>
             <Utensils className="h-5 w-5" />
-            Nutrition Plan
+            {t('nutrition.title', 'Nutrition Plan')}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent dir={isArabic ? 'rtl' : 'ltr'}>
           <div className="whitespace-pre-wrap text-sm text-muted-foreground">
             {typeof plan === 'string' ? plan : JSON.stringify(plan, null, 2)}
           </div>
@@ -152,15 +157,15 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
   if (totalWeeks === 0 || totalDays === 0) {
     return (
       <Card className="w-full max-w-4xl mx-auto bg-card border-border">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-foreground">
+        <CardHeader dir={isArabic ? 'rtl' : 'ltr'}>
+          <CardTitle className={`flex items-center gap-2 text-foreground ${isArabic ? 'flex-row-reverse' : ''}`}>
             <Apple className="h-5 w-5 text-green-400" />
-            Nutrition Plan
+            {t('nutrition.title', 'Nutrition Plan')}
           </CardTitle>
         </CardHeader>
         <CardContent className="text-center py-12">
           <div className="text-muted-foreground">
-            No nutrition plan data available.
+            {t('nutrition.noMeals', 'No nutrition plan data available.')}
           </div>
         </CardContent>
       </Card>
@@ -212,20 +217,20 @@ export function NutritionPlanDisplay({ plan }: NutritionPlanProps) {
 
       {/* Consolidated Navigation Header */}
       <Card className="bg-gradient-to-r from-card to-slate-700 border-border">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between text-foreground">
-            <div className="flex items-center gap-3">
+        <CardHeader dir={isArabic ? 'rtl' : 'ltr'}>
+          <CardTitle className={`flex items-center justify-between text-foreground ${isArabic ? 'flex-row-reverse' : ''}`}>
+            <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
               <Apple className="h-6 w-6 text-green-400" />
-              <div>
-                <div className="text-xl font-bold">Nutrition Plan</div>
+              <div className={isArabic ? 'text-right' : ''}>
+                <div className="text-xl font-bold">{t('nutrition.title', 'Nutrition Plan')}</div>
                 <div className="text-sm text-muted-foreground font-normal">
-                  {totalDays} Days • {totalWeeks} Week{totalWeeks > 1 ? 's' : ''} • {totalMeals} Meals
+                  {totalDays} {t('nutrition.days', 'Days')} • {totalWeeks} {t('nutrition.week', 'Week')}{totalWeeks > 1 ? 's' : ''} • {totalMeals} {t('nutrition.meals', 'Meals')}
                 </div>
               </div>
             </div>
-            <div className="text-right">
+            <div className={isArabic ? 'text-left' : 'text-right'}>
               <Badge variant="secondary" className="bg-green-600 text-white mb-1">
-                Week {currentWeek + 1} • Day {safCurrentDay + 1}
+                {t('nutrition.week', 'Week')} {currentWeek + 1} • {t('nutrition.day', 'Day')} {safCurrentDay + 1}
               </Badge>
               <div className="text-sm text-muted-foreground">
                 {currentDayData?.day.name} - {currentDayData?.day.date}

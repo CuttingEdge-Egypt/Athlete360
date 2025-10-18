@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Clock, Target, AlertTriangle, Calendar, Users, Brain, MessageSquare, User } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/hooks/useLanguage";
 
 // Import the PlayerAdviceSection from VideoPlayerAnalysis
 import { PlayerAdviceSection } from "@/components/ui/video-player-analysis";
@@ -69,6 +71,9 @@ interface YellowCardEvent {
 
 export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: VideoAnalysisResultsProps) {
   const [selectedTimestamp, setSelectedTimestamp] = useState<number | null>(null);
+  const { t, i18n } = useTranslation('common');
+  const { direction, isRTL } = useLanguage();
+  const isArabic = i18n.language === 'ar';
   
   // Check if this is a clip analysis
   if (analysisData?.analysisType === 'clip') {
