@@ -63,26 +63,30 @@ function getLocalizedText(text: { en: string; ar?: string }, language: string): 
 }
 
 // Helper function to get exercise prescription display text
-function getExercisePrescriptionText(exercise: Exercise): string {
+function getExercisePrescriptionText(exercise: Exercise, t: any, isArabic: boolean): string {
   if (!exercise.prescription) return '';
   
   const parts: string[] = [];
   
   if (exercise.prescription.sets) {
-    parts.push(`${exercise.prescription.sets} sets`);
+    const setsLabel = t('analysis.development.prescription.sets', 'sets');
+    parts.push(isArabic ? `${setsLabel} ${exercise.prescription.sets}` : `${exercise.prescription.sets} ${setsLabel}`);
   }
   
   if (exercise.prescription.reps) {
-    parts.push(`${exercise.prescription.reps} reps`);
+    const repsLabel = t('analysis.development.prescription.reps', 'reps');
+    parts.push(isArabic ? `${repsLabel} ${exercise.prescription.reps}` : `${exercise.prescription.reps} ${repsLabel}`);
   }
   
   if (exercise.prescription.restSec) {
     const minutes = Math.floor(exercise.prescription.restSec / 60);
     const seconds = exercise.prescription.restSec % 60;
+    const restLabel = t('analysis.development.prescription.rest', 'rest');
     if (minutes > 0) {
-      parts.push(`${minutes}:${seconds.toString().padStart(2, '0')} rest`);
+      const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      parts.push(isArabic ? `${restLabel} ${timeStr}` : `${timeStr} ${restLabel}`);
     } else {
-      parts.push(`${seconds}s rest`);
+      parts.push(isArabic ? `${restLabel} ${seconds}s` : `${seconds}s ${restLabel}`);
     }
   }
   
@@ -282,16 +286,16 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                           </div>
 
                           {/* Enhanced Exercise Details */}
-                          <div className="flex flex-wrap gap-3">
-                            {getExercisePrescriptionText(exercise) && (
-                              <Badge variant="secondary" className="bg-gradient-to-r from-blue-600/80 to-blue-500/80 text-white font-semibold text-sm px-3 py-1.5 shadow-md border border-blue-400/30">
-                                <Timer className="h-4 w-4 mr-2" />
-                                {getExercisePrescriptionText(exercise)}
+                          <div className={`flex flex-wrap gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                            {getExercisePrescriptionText(exercise, t, isArabic) && (
+                              <Badge variant="secondary" className={`bg-gradient-to-r from-blue-600/80 to-blue-500/80 text-white font-semibold text-sm px-3 py-1.5 shadow-md border border-blue-400/30 ${isArabic ? 'flex-row-reverse' : ''}`} dir={isArabic ? 'rtl' : 'ltr'}>
+                                <Timer className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                                {getExercisePrescriptionText(exercise, t, isArabic)}
                               </Badge>
                             )}
                             {exercise.equipment && exercise.equipment.length > 0 && (
-                              <Badge variant="outline" className="bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-100 font-semibold text-sm px-3 py-1.5 shadow-md">
-                                <Activity className="h-4 w-4 mr-2" />
+                              <Badge variant="outline" className={`bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-100 font-semibold text-sm px-3 py-1.5 shadow-md ${isArabic ? 'flex-row-reverse' : ''}`} dir={isArabic ? 'rtl' : 'ltr'}>
+                                <Activity className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                                 {exercise.equipment.join(', ')}
                               </Badge>
                             )}
@@ -299,12 +303,13 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
 
                           {/* Enhanced Exercise Tags */}
                           {exercise.tags && exercise.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-2">
+                            <div className={`flex flex-wrap gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                               {exercise.tags.map((tag, tagIndex) => (
                                 <Badge
                                   key={tagIndex}
                                   variant="outline"
                                   className="text-sm font-medium border-2 border-emerald-400/60 text-emerald-100 bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 px-3 py-1 shadow-sm hover:bg-emerald-500/30 transition-colors duration-200"
+                                  dir={isArabic ? 'rtl' : 'ltr'}
                                 >
                                   {tag}
                                 </Badge>

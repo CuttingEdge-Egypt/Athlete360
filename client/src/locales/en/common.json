@@ -183,7 +183,12 @@
       "totalExercises": "Total Exercises",
       "videoTutorials": "Video Tutorials",
       "invalidPlan": "Invalid Development Plan",
-      "invalidPlanMessage": "The development plan data is invalid. Please try generating a new plan."
+      "invalidPlanMessage": "The development plan data is invalid. Please try generating a new plan.",
+      "prescription": {
+        "sets": "sets",
+        "reps": "reps",
+        "rest": "rest"
+      }
     },
     "rank": {
       "title": "Competitive History",
