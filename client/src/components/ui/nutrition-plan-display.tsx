@@ -261,23 +261,48 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
       <Card className="bg-gradient-to-r from-card to-slate-700 border-border">
         <CardHeader dir={isArabic ? 'rtl' : 'ltr'}>
           <CardTitle className={`flex items-center justify-between text-foreground ${isArabic ? 'flex-row-reverse' : ''}`}>
-            <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
-              <Apple className="h-6 w-6 text-green-400" />
-              <div className={isArabic ? 'text-right' : ''}>
-                <div className="text-xl font-bold">{t('analysis.nutrition.title', 'Nutrition Plan')}</div>
-                <div className="text-sm text-muted-foreground font-normal">
-                  {toArabicNumerals(totalDays)} {t('analysis.nutrition.days', 'Days')} • {toArabicNumerals(totalWeeks)} {t('analysis.nutrition.week', 'Week')}{totalWeeks > 1 ? 's' : ''} • {toArabicNumerals(totalMeals)} {t('analysis.nutrition.meals', 'Meals')}
+            {/* For Arabic: days info on left, title on right. For English: title on left, days info on right */}
+            {isArabic ? (
+              <>
+                <div className="text-left">
+                  <Badge variant="secondary" className="bg-green-600 text-white mb-1">
+                    {t('analysis.nutrition.week', 'Week')} {toArabicNumerals(currentWeek + 1)} • {t('analysis.nutrition.day', 'Day')} {toArabicNumerals(safCurrentDay + 1)}
+                  </Badge>
+                  <div className="text-sm text-muted-foreground">
+                    {currentDayData?.day.name} - {currentDayData?.day.date}
+                  </div>
                 </div>
-              </div>
-            </div>
-            <div className={isArabic ? 'text-left' : 'text-right'}>
-              <Badge variant="secondary" className="bg-green-600 text-white mb-1">
-                {t('analysis.nutrition.week', 'Week')} {toArabicNumerals(currentWeek + 1)} • {t('analysis.nutrition.day', 'Day')} {toArabicNumerals(safCurrentDay + 1)}
-              </Badge>
-              <div className="text-sm text-muted-foreground">
-                {currentDayData?.day.name} - {currentDayData?.day.date}
-              </div>
-            </div>
+                <div className="flex items-center gap-3 flex-row-reverse">
+                  <Apple className="h-6 w-6 text-green-400" />
+                  <div className="text-right">
+                    <div className="text-xl font-bold">{t('analysis.nutrition.title', 'Nutrition Plan')}</div>
+                    <div className="text-sm text-muted-foreground font-normal">
+                      {toArabicNumerals(totalDays)} {t('analysis.nutrition.days', 'Days')} • {toArabicNumerals(totalWeeks)} {t('analysis.nutrition.week', 'Week')}{totalWeeks > 1 ? 's' : ''} • {toArabicNumerals(totalMeals)} {t('analysis.nutrition.meals', 'Meals')}
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-3">
+                  <Apple className="h-6 w-6 text-green-400" />
+                  <div>
+                    <div className="text-xl font-bold">{t('analysis.nutrition.title', 'Nutrition Plan')}</div>
+                    <div className="text-sm text-muted-foreground font-normal">
+                      {toArabicNumerals(totalDays)} {t('analysis.nutrition.days', 'Days')} • {toArabicNumerals(totalWeeks)} {t('analysis.nutrition.week', 'Week')}{totalWeeks > 1 ? 's' : ''} • {toArabicNumerals(totalMeals)} {t('analysis.nutrition.meals', 'Meals')}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <Badge variant="secondary" className="bg-green-600 text-white mb-1">
+                    {t('analysis.nutrition.week', 'Week')} {toArabicNumerals(currentWeek + 1)} • {t('analysis.nutrition.day', 'Day')} {toArabicNumerals(safCurrentDay + 1)}
+                  </Badge>
+                  <div className="text-sm text-muted-foreground">
+                    {currentDayData?.day.name} - {currentDayData?.day.date}
+                  </div>
+                </div>
+              </>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -295,12 +320,12 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleWeekChange(currentWeek - 1)}
-                  disabled={currentWeek === 0}
+                  onClick={() => handleWeekChange(isArabic ? currentWeek + 1 : currentWeek - 1)}
+                  disabled={isArabic ? currentWeek === totalWeeks - 1 : currentWeek === 0}
                   className="bg-blue-600 border-blue-500 text-white hover:bg-blue-500 disabled:bg-blue-800 disabled:border-blue-700"
                   data-testid="button-week-previous"
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  {isArabic ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
                 </Button>
                 
                 <div className="flex gap-2">
@@ -324,12 +349,12 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleWeekChange(currentWeek + 1)}
-                  disabled={currentWeek === totalWeeks - 1}
+                  onClick={() => handleWeekChange(isArabic ? currentWeek - 1 : currentWeek + 1)}
+                  disabled={isArabic ? currentWeek === 0 : currentWeek === totalWeeks - 1}
                   className="bg-orange-600 border-orange-500 text-white hover:bg-orange-500 disabled:bg-orange-800 disabled:border-orange-700"
                   data-testid="button-week-next"
                 >
-                  <ChevronRight className="h-4 w-4" />
+                  {isArabic ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                 </Button>
               </div>
             </div>
@@ -352,17 +377,22 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
             {/* Day Slider */}
             <div className="mt-4 pt-4 border-t border-border" dir={isArabic ? 'rtl' : 'ltr'}>
               <div className="text-center">
-                <div className="text-sm text-muted-foreground mb-3">{t('analysis.nutrition.selectDayInWeek', `Select Day in Week ${currentWeek + 1}`).replace(`${currentWeek + 1}`, toArabicNumerals(currentWeek + 1))}</div>
+                <div className="text-sm text-muted-foreground mb-3">
+                  {isArabic 
+                    ? `اختر اليوم في الأسبوع ${toArabicNumerals(currentWeek + 1)}`
+                    : t('analysis.nutrition.selectDayInWeek', `Select Day in Week ${currentWeek + 1}`).replace('{{weekNumber}}', String(currentWeek + 1))
+                  }
+                </div>
                 <div className={`flex items-center justify-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleDayChange(safCurrentDay - 1)}
-                    disabled={safCurrentDay === 0}
+                    onClick={() => handleDayChange(isArabic ? safCurrentDay + 1 : safCurrentDay - 1)}
+                    disabled={isArabic ? safCurrentDay === maxDayInWeek : safCurrentDay === 0}
                     className="bg-blue-600 border-blue-500 text-white hover:bg-blue-500 disabled:bg-blue-800 disabled:border-blue-700"
                     data-testid="button-day-previous"
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    {isArabic ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
                   </Button>
                   
                   <div className="flex gap-2">
@@ -386,12 +416,12 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleDayChange(safCurrentDay + 1)}
-                    disabled={safCurrentDay === maxDayInWeek}
+                    onClick={() => handleDayChange(isArabic ? safCurrentDay - 1 : safCurrentDay + 1)}
+                    disabled={isArabic ? safCurrentDay === 0 : safCurrentDay === maxDayInWeek}
                     className="bg-orange-600 border-orange-500 text-white hover:bg-orange-500 disabled:bg-orange-800 disabled:border-orange-700"
                     data-testid="button-day-next"
                   >
-                    <ChevronRight className="h-4 w-4" />
+                    {isArabic ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                   </Button>
                 </div>
               </div>
@@ -423,8 +453,8 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                     {meal.meal_description.map((item, itemIndex) => (
                       <div 
                         key={itemIndex} 
-                        className={`bg-slate-800/50 text-slate-100 text-sm p-2.5 rounded-lg border border-slate-600 ${
-                          isArabic ? 'text-right' : 'text-left'
+                        className={`bg-slate-800/50 text-slate-100 p-2.5 rounded-lg border border-slate-600 ${
+                          isArabic ? 'text-right text-base' : 'text-left text-sm'
                         }`}
                         dir={isArabic ? 'rtl' : 'ltr'}
                       >
@@ -445,7 +475,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                     <h4 className="font-bold text-lg text-blue-300 mb-2">
                       {t('analysis.nutrition.dailyFocus', 'Daily Focus')}
                     </h4>
-                    <p className="text-slate-200 leading-relaxed">
+                    <p className={`text-slate-200 leading-relaxed ${isArabic ? 'text-base' : ''}`}>
                       {currentDayData.explanation}
                     </p>
                   </div>
@@ -462,7 +492,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                     <h4 className="font-bold text-lg text-purple-300 mb-2">
                       {t('analysis.nutrition.personalizedInstructions', 'Personalized Instructions')}
                     </h4>
-                    <div className="text-slate-200 leading-relaxed whitespace-pre-wrap">
+                    <div className={`text-slate-200 leading-relaxed whitespace-pre-wrap ${isArabic ? 'text-base' : ''}`}>
                       {nutritionData.instructions}
                     </div>
                   </div>
@@ -483,25 +513,25 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
         </CardHeader>
         <CardContent dir={isArabic ? 'rtl' : 'ltr'}>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="text-center p-6 bg-gradient-to-br from-purple-900/30 to-purple-800/20 rounded-xl border border-purple-700">
+            <div className={`p-6 bg-gradient-to-br from-purple-900/30 to-purple-800/20 rounded-xl border border-purple-700 ${isArabic ? 'text-right' : 'text-center'}`}>
               <div className="text-3xl font-bold text-purple-400 mb-1">
                 {toArabicNumerals(totalWeeks)}
               </div>
               <div className="text-sm text-muted-foreground">{t('analysis.nutrition.weeksPlanned', 'Weeks Planned')}</div>
             </div>
-            <div className="text-center p-6 bg-gradient-to-br from-blue-900/30 to-blue-800/20 rounded-xl border border-blue-700">
+            <div className={`p-6 bg-gradient-to-br from-blue-900/30 to-blue-800/20 rounded-xl border border-blue-700 ${isArabic ? 'text-right' : 'text-center'}`}>
               <div className="text-3xl font-bold text-blue-400 mb-1">
                 {toArabicNumerals(totalDays)}
               </div>
               <div className="text-sm text-muted-foreground">{t('analysis.nutrition.totalDays', 'Total Days')}</div>
             </div>
-            <div className="text-center p-6 bg-gradient-to-br from-orange-900/30 to-orange-800/20 rounded-xl border border-orange-700">
+            <div className={`p-6 bg-gradient-to-br from-orange-900/30 to-orange-800/20 rounded-xl border border-orange-700 ${isArabic ? 'text-right' : 'text-center'}`}>
               <div className="text-3xl font-bold text-orange-400 mb-1">
                 {toArabicNumerals(totalMeals)}
               </div>
               <div className="text-sm text-muted-foreground">{t('analysis.nutrition.totalMeals', 'Total Meals')}</div>
             </div>
-            <div className="text-center p-6 bg-gradient-to-br from-green-900/30 to-green-800/20 rounded-xl border border-green-700">
+            <div className={`p-6 bg-gradient-to-br from-green-900/30 to-green-800/20 rounded-xl border border-green-700 ${isArabic ? 'text-right' : 'text-center'}`}>
               <div className="text-3xl font-bold text-green-400 mb-1">
                 {toArabicNumerals(avgCaloriesPerDay)}
               </div>
