@@ -4283,6 +4283,10 @@ Return only valid JSON with the missing fields.`;
     try {
       const language = (req.query.language as string) || 'en';
       
+      // Set cache control headers to prevent browser caching and vary by language
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Vary', 'Accept-Language');
+      
       // Get the most recent analyses from the database (use actual service types from DB)
       const dbServiceTypes = [
         'bio',
@@ -4310,6 +4314,7 @@ Return only valid JSON with the missing fields.`;
         'nutrition': 'nutrition-plan',
         'nutrition-plan': 'nutrition-plan',
         'development-plan': 'development-plan', // Only use development-plan (has goalAnalysis)
+        'development': 'development-plan', // Map old 'development' to 'development-plan' for frontend
         'video': 'video',
         'rank': 'rank'
       };
