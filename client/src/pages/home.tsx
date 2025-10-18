@@ -2642,7 +2642,10 @@ export default function Home() {
                       New Nutrition Plan
                     </Button>
                   </div>
-                  <NutritionPlanDisplay plan={nutritionPlanData.plan || nutritionPlanData} />
+                  <NutritionPlanDisplay 
+                    plan={nutritionPlanData.plan || nutritionPlanData} 
+                    language={nutritionPlanData.language || (nutritionPlanData.resultData?.language)} 
+                  />
                 </div>
               )}
             </TabsContent>

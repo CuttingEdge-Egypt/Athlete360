@@ -2428,7 +2428,7 @@ export function AnalysisPopup({
       const normalizedPlan = normalizeNutritionPlan(data);
       
       if (normalizedPlan) {
-        return <NutritionPlanDisplay plan={normalizedPlan} />;
+        return <NutritionPlanDisplay plan={normalizedPlan} language={i18n.language} />;
       } else {
         // Fallback to user-friendly empty state
         return (
