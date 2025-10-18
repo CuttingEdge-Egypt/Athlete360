@@ -222,7 +222,7 @@ export function AnalysisPopup({
                 
                 {strength.evidence && (
                   <div className={`bg-athlete-gray-900 rounded-lg p-4 ${i18n.language === 'ar' ? 'border-r-4 border-l-0' : 'border-l-4'} border-green-400`}>
-                    <h4 className={`font-semibold text-white mb-2 flex items-center ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                    <h4 className={`font-semibold text-white mb-2 flex items-center ${i18n.language === 'ar' ? 'flex-row-reverse text-right' : ''}`}>
                       <Award className={`w-4 h-4 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
                       {t("common:analysis.evidence", "Evidence")}
                     </h4>
@@ -311,7 +311,7 @@ export function AnalysisPopup({
                 
                 {weakness.evidence && (
                   <div className={`bg-athlete-gray-900 rounded-lg p-4 ${i18n.language === 'ar' ? 'border-r-4 border-l-0' : 'border-l-4'} border-red-400`}>
-                    <h4 className={`font-semibold text-white mb-2 flex items-center ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                    <h4 className={`font-semibold text-white mb-2 flex items-center ${i18n.language === 'ar' ? 'flex-row-reverse text-right' : ''}`}>
                       <Award className={`w-4 h-4 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
                       {t("common:analysis.evidence", "Evidence")}
                     </h4>
