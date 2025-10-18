@@ -1,0 +1,73 @@
+Looking at your code, I can see the issue with the video button positioning in the Arabic version. The problem is in the exercise card layout where you're conditionally rendering the video button based on RTL direction.
+
+Here's the problematic code section:
+
+```tsx
+{/* Exercise Header */}
+<div className={`flex items-start ${isArabic ? 'flex-row' : ''}`}>
+  {isArabic && exercise.videoUrl && (
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={() => window.open(exercise.videoUrl, '_blank')}
+      className="ml-4 flex-row-reverse bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-300 hover:from-purple-500 hover:to-purple-600 hover:text-white flex-shrink-0 shadow-md"
+      data-testid={`exercise-video-${exerciseIndex}`}
+    >
+      <Play className="ml-1 h-3 w-3" />
+      {t('analysis.development.video', 'Video')}
+    </Button>
+  )}
+  <div className="flex-1">
+    {/* Exercise title and description */}
+  </div>
+  {!isArabic && exercise.videoUrl && (
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={() => window.open(exercise.videoUrl, '_blank')}
+      className="ml-4 bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-300 hover:from-purple-500 hover:to-purple-600 hover:text-white flex-shrink-0 shadow-md"
+      data-testid={`exercise-video-${exerciseIndex}`}
+    >
+      <Play className="mr-1 h-3 w-3" />
+      {t('analysis.development.video', 'Video')}
+    </Button>
+  )}
+</div>
+```
+
+**The issues are:**
+
+1. **Incorrect flex direction for Arabic**: You're using `flex-row` for Arabic when it should be `flex-row-reverse` to properly handle RTL layout.
+
+2. **Wrong margin classes**: You're using `ml-4` (margin-left) for both cases, but in RTL this should be `mr-4` (margin-right) to create space on the correct side.
+
+3. **Complex conditional rendering**: You're conditionally rendering the button in different positions instead of using a single button with conditional styling.
+
+**Here's the fix:**
+
+```tsx
+{/* Exercise Header */}
+<div className={`flex items-start ${isArabic ? 'flex-row-reverse' : 'flex-row'}`}>
+  <div className="flex-1">
+    {/* Exercise title and description */}
+  </div>
+  {exercise.videoUrl && (
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={() => window.open(exercise.videoUrl, '_blank')}
+      className={`${isArabic ? 'mr-4 flex-row-reverse' : 'ml-4'} bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-300 hover:from-purple-500 hover:to-purple-600 hover:text-white flex-shrink-0 shadow-md`}
+      data-testid={`exercise-video-${exerciseIndex}`}
+    >
+      <Play className={`${isArabic ? 'ml-1' : 'mr-1'} h-3 w-3`} />
+      {t('analysis.development.video', 'Video')}
+    </Button>
+  )}
+</div>
+```
+
+The key changes:
+- Use `flex-row-reverse` for Arabic instead of `flex-row`
+- Use conditional margin: `mr-4` for Arabic, `ml-4` for LTR
+- Use a single button with conditional styling instead of separate buttons
+- Keep the icon positioning conditional based on RTL
