@@ -4,6 +4,7 @@
 Athlete360 is an AI-powered athletic performance analysis platform that analyzes athlete performance across various sports. It provides comprehensive insights, including biographies, ranking analysis, strengths/weaknesses, development plans, nutrition guidance, and strategic analysis. The platform leverages AI to deliver personalized, real-time athletic insights for performance development and strategic advantages, aiming to be an authentic and essential tool for athletes and coaches.
 
 ## Recent Changes (October 18, 2025)
+- **Complete Arabic Toast Messages**: Added comprehensive Arabic translations for all toast notifications including generation started/failed/cancelled, plan generated, ranking updates, athlete creation, image search, and payment success messages. All toast messages now automatically display in Arabic when UI language is Arabic
 - **Card Title Alignment Fix**: Fixed "Plan Overview" card title to right-align properly in Arabic by adding `justify-end` to the flex layout
 - **Arabic Loading Messages**: Added full bilingual loading messages for Nutrition Plan, Development Plan, and Video Analysis that automatically display in Arabic when UI language is Arabic
 - **Nutrition Plan Arabic UI Improvements**: Fixed navigation arrows to work correctly in RTL (left arrow increases, right arrow decreases), swapped title/days positions in Arabic header (title on right, days on left), right-aligned overview cards, increased Arabic font sizes for better readability (text-base instead of text-sm for meal descriptions and explanations)

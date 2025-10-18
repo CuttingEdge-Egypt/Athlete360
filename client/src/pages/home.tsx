@@ -236,13 +236,13 @@ export default function Home() {
       }
       
       toast({
-        title: "Generation Started!",
-        description: "Your nutrition plan is being generated. This may take several minutes.",
+        title: t('common:toast.generationStarted', 'Generation Started!'),
+        description: t('common:toast.nutritionGenerationStartedDesc', 'Your nutrition plan is being generated. This may take several minutes.'),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Generation Failed",
+        title: t('common:toast.generationFailed', 'Generation Failed'),
         description: error.message,
         variant: "destructive",
       });
@@ -307,13 +307,13 @@ export default function Home() {
       }
       
       toast({
-        title: "Generation Started!",
-        description: "Your development plan is being generated. This may take several minutes.",
+        title: t('common:toast.generationStarted', 'Generation Started!'),
+        description: t('common:toast.developmentGenerationStartedDesc', 'Your development plan is being generated. This may take several minutes.'),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Generation Failed",
+        title: t('common:toast.generationFailed', 'Generation Failed'),
         description: error.message,
         variant: "destructive",
       });
@@ -380,13 +380,13 @@ export default function Home() {
       setDevelopmentProgress(0);
       setDevelopmentProgressMessage("");
       toast({
-        title: "Generation Cancelled",
-        description: "Development plan generation was cancelled.",
+        title: t('common:toast.generationCancelled', 'Generation Cancelled'),
+        description: t('common:toast.developmentCancelledDesc', 'Development plan generation was cancelled.'),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Cancellation Failed",
+        title: t('common:toast.cancellationFailed', 'Cancellation Failed'),
         description: error.message,
         variant: "destructive",
       });
@@ -411,13 +411,13 @@ export default function Home() {
       setNutritionProgress(0);
       setNutritionJobProgressMessage("");
       toast({
-        title: "Generation Cancelled",
-        description: "Nutrition plan generation was cancelled.",
+        title: t('common:toast.generationCancelled', 'Generation Cancelled'),
+        description: t('common:toast.nutritionCancelledDesc', 'Nutrition plan generation was cancelled.'),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Cancellation Failed",
+        title: t('common:toast.cancellationFailed', 'Cancellation Failed'),
         description: error.message,
         variant: "destructive",
       });
@@ -490,8 +490,8 @@ export default function Home() {
         setDevelopmentQueueId(null);
         
         toast({
-          title: "Development Plan Generated!",
-          description: "Your personalized training plan is ready.",
+          title: t('common:toast.developmentPlanGenerated', 'Development Plan Generated!'),
+          description: t('common:toast.developmentPlanGeneratedDesc', 'Your personalized training plan is ready.'),
         });
         // Invalidate relevant queries to refresh user data
         queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
@@ -512,8 +512,8 @@ export default function Home() {
         setDevelopmentQueueId(null);
         
         toast({
-          title: "Generation Failed",
-          description: error || "Development plan generation failed. Please try again.",
+          title: t('common:toast.generationFailed', 'Generation Failed'),
+          description: error || t('common:messages.analysisFailedDesc', 'Development plan generation failed. Please try again.'),
           variant: "destructive",
         });
       } else if (status === 'cancelled') {
@@ -586,8 +586,8 @@ export default function Home() {
         setNutritionQueueId(null);
         
         toast({
-          title: "Nutrition Plan Generated!",
-          description: "Your personalized nutrition plan is ready.",
+          title: t('common:toast.nutritionPlanGenerated', 'Nutrition Plan Generated!'),
+          description: t('common:toast.nutritionPlanGeneratedDesc', 'Your personalized nutrition plan is ready.'),
         });
         // Invalidate relevant queries to refresh user data
         queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
@@ -608,8 +608,8 @@ export default function Home() {
         setNutritionQueueId(null);
         
         toast({
-          title: "Generation Failed",
-          description: error || "Nutrition plan generation failed. Please try again.",
+          title: t('common:toast.generationFailed', 'Generation Failed'),
+          description: error || t('common:messages.analysisFailedDesc', 'Nutrition plan generation failed. Please try again.'),
           variant: "destructive",
         });
       } else if (status === 'cancelled') {
@@ -661,14 +661,14 @@ export default function Home() {
             // Show completion message to user
             if (status === 'not_found' || message.toLowerCase().includes('could not find') || message.toLowerCase().includes('not found')) {
               toast({
-                title: "Ranking Search Complete",
-                description: message || "Could not find rankings for this athlete",
+                title: t('common:toast.rankingSearchComplete', 'Ranking Search Complete'),
+                description: message || t('common:toast.rankingSearchCompleteDesc', 'Could not find rankings for this athlete'),
                 variant: "default"
               });
             } else if (status === 'complete' && !message.toLowerCase().includes('error')) {
               toast({
-                title: "Rankings Found",
-                description: message || "Rankings have been updated",
+                title: t('common:toast.rankingsFound', 'Rankings Found'),
+                description: message || t('common:toast.rankingsFoundDesc', 'Rankings have been updated'),
               });
             }
           } else {
@@ -758,7 +758,7 @@ export default function Home() {
       try {
         const paymentData = JSON.parse(paymentSuccess);
         toast({
-          title: "Payment Successful!",
+          title: t('common:toast.paymentSuccessful', 'Payment Successful!'),
           description: `Successfully purchased tokens for ${paymentData.amount} EGP. Transaction: ${paymentData.transactionId}`,
         });
         sessionStorage.removeItem('paymentSuccess');
@@ -1015,8 +1015,8 @@ export default function Home() {
       } catch (error) {
         console.error('Error fetching athletes by sport:', error);
         toast({
-          title: "Error",
-          description: "Failed to load athletes. Please try again.",
+          title: t('common:toast.loadAthletesError', 'Error'),
+          description: t('common:toast.loadAthletesErrorDesc', 'Failed to load athletes. Please try again.'),
           variant: "destructive",
         });
         return [];
@@ -1038,8 +1038,8 @@ export default function Home() {
       } catch (error) {
         console.error('Error searching athletes:', error);
         toast({
-          title: "Search Error",
-          description: "Failed to search athletes. Please try again.",
+          title: t('common:toast.searchError', 'Search Error'),
+          description: t('common:toast.searchErrorDesc', 'Failed to search athletes. Please try again.'),
           variant: "destructive",
         });
         return [];
@@ -1218,7 +1218,7 @@ export default function Home() {
         
         // Show success toast
         toast({
-          title: "Athlete Created",
+          title: t('common:toast.athleteCreated', 'Athlete Created'),
           description: `${newAthlete.name} has been added to our database${isIndividualSport ? '. Fetching rankings...' : ' with AI-powered insights.'}`,
         });
         
@@ -1252,8 +1252,8 @@ export default function Home() {
                   
                   // Show success toast
                   toast({
-                    title: "Rankings Updated!",
-                    description: `${newAthlete.name}'s ranking has been added successfully.`,
+                    title: t('common:toast.rankingsUpdated', 'Rankings Updated!'),
+                    description: t('common:toast.rankingsUpdatedDesc', `${newAthlete.name}'s ranking has been added successfully.`),
                   });
                 }
               }
@@ -1266,7 +1266,7 @@ export default function Home() {
         clearInterval(progressInterval);
         const error = await response.json();
         toast({
-          title: "Creation Failed",
+          title: t('common:toast.creationFailed', 'Creation Failed'),
           description: error.message || "Failed to create athlete with AI",
           variant: "destructive",
         });
@@ -1274,8 +1274,8 @@ export default function Home() {
     } catch (error) {
       console.error('Error creating athlete:', error);
       toast({
-        title: "Error",
-        description: "Something went wrong while creating the athlete",
+        title: t('common:toast.loadAthletesError', 'Error'),
+        description: t('common:toast.somethingWentWrong', 'Something went wrong while creating the athlete'),
         variant: "destructive",
       });
     } finally {
@@ -1334,8 +1334,8 @@ export default function Home() {
       if (response.ok) {
         const result = await response.json();
         toast({
-          title: "Ranking Search Started",
-          description: result.message || "Searching for athlete rankings...",
+          title: t('common:toast.rankingSearchStarted', 'Ranking Search Started'),
+          description: result.message || t('common:toast.rankingSearchStartedDesc', 'Searching for athlete rankings...'),
         });
         
         // Start polling for updated athlete data (no timeout - waits indefinitely)
@@ -1367,8 +1367,8 @@ export default function Home() {
                 
                 // Show success toast
                 toast({
-                  title: "Rankings Updated!",
-                  description: `${updatedAthlete.name}'s ranking has been updated successfully.`,
+                  title: t('common:toast.rankingsUpdated', 'Rankings Updated!'),
+                  description: t('common:toast.rankingsUpdatedDesc', `${updatedAthlete.name}'s ranking has been updated successfully.`),
                 });
               }
             }
@@ -1385,8 +1385,8 @@ export default function Home() {
           return rest;
         });
         toast({
-          title: "Search Failed",
-          description: error.message || "Failed to start ranking search",
+          title: t('common:toast.searchFailed', 'Search Failed'),
+          description: error.message || t('common:toast.searchFailedDesc', 'Failed to start ranking search'),
           variant: "destructive",
         });
       }
@@ -1398,7 +1398,7 @@ export default function Home() {
         return rest;
       });
       toast({
-        title: "Error",
+        title: t('common:toast.loadAthletesError', 'Error'),
         description: "Something went wrong while starting ranking search",
         variant: "destructive",
       });
@@ -1433,29 +1433,29 @@ export default function Home() {
             setSelectedAthlete(updatedAthlete);
             
             toast({
-              title: "Image Found!",
-              description: `Profile image has been updated successfully. Found ${result.type || 'image'} URL.`,
+              title: t('common:toast.imageFound', 'Image Found!'),
+              description: t('common:toast.imageFoundDesc', `Profile image has been updated successfully. Found ${result.type || 'image'} URL.`),
             });
           } else {
             console.error(`❌ Failed to refresh athlete data`);
             toast({
-              title: "Image Found but Update Failed",
-              description: "Found an image but couldn't refresh the profile data.",
+              title: t('common:toast.imageFoundButUpdateFailed', 'Image Found but Update Failed'),
+              description: t('common:toast.imageFoundButUpdateFailedDesc', "Found an image but couldn't refresh the profile data."),
               variant: "destructive",
             });
           }
         } else {
           console.log(`❌ Image search failed:`, result);
           toast({
-            title: "No Image Found",
-            description: result.message || "Could not find a suitable profile image.",
+            title: t('common:toast.noImageFound', 'No Image Found'),
+            description: result.message || t('common:toast.noImageFoundDesc', 'Could not find a suitable profile image.'),
             variant: "destructive",
           });
         }
       } else {
         const error = await response.json();
         toast({
-          title: "Search Failed",
+          title: t('common:toast.imageSearchFailed', 'Search Failed'),
           description: error.message || "Failed to search for profile image",
           variant: "destructive",
         });
@@ -1463,7 +1463,7 @@ export default function Home() {
     } catch (error) {
       console.error('Error searching for athlete image:', error);
       toast({
-        title: "Error",
+        title: t('common:toast.loadAthletesError', 'Error'),
         description: "Something went wrong while searching for the image",
         variant: "destructive",
       });

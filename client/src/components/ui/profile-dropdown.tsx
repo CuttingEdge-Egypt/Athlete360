@@ -16,11 +16,13 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { User } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 export function ProfileDropdown() {
   const { user: authUser } = useAuth();
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation('common');
   
   const { data: user } = useQuery<User>({
     queryKey: ["/api/auth/user"],
@@ -150,7 +152,7 @@ export function ProfileDropdown() {
                       variant="outline"
                       onClick={() => {
                         navigator.clipboard.writeText(user.referralCode || '');
-                        toast({ title: "Referral code copied!" });
+                        toast({ title: t('toast.referralCodeCopied', 'Referral code copied!') });
                       }}
                       className="px-2 h-7"
                     >
