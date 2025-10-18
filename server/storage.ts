@@ -962,7 +962,8 @@ export class DatabaseStorage implements IStorage {
           athleteName: athletes.name,
           athleteSport: sports.name,
           createdAt: analysisLogs.createdAt,
-          resultData: analysisLogs.resultData
+          resultData: analysisLogs.resultData,
+          language: analysisLogs.language
         })
         .from(analysisLogs)
         .leftJoin(athletes, eq(analysisLogs.athleteId, athletes.id))
@@ -979,8 +980,17 @@ export class DatabaseStorage implements IStorage {
         .limit(50)
     ]);
 
+    // Merge language into resultData for each analysis log
+    const logsWithLanguage = logResults.map(log => ({
+      ...log,
+      resultData: {
+        ...(typeof log.resultData === 'object' && log.resultData !== null ? log.resultData : {}),
+        language: log.language
+      }
+    }));
+
     // Combine and sort by date
-    const combined = [...transactionResults, ...logResults];
+    const combined = [...transactionResults, ...logsWithLanguage];
     return combined.sort((a, b) => {
       const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
