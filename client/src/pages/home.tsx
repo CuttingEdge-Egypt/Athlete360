@@ -2564,7 +2564,7 @@ export default function Home() {
                                 <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce delay-300"></div>
                               </div>
                               <p className="text-lg font-medium text-emerald-200 text-center">
-                                {nutritionJobProgressMessage || "Generating your personalized nutrition plan..."}
+                                {nutritionJobProgressMessage || t('common:messages.generatingNutritionPlan', "Generating your personalized nutrition plan...")}
                               </p>
                             </div>
                             
@@ -2856,7 +2856,7 @@ export default function Home() {
                                   </div>
                                   <div>
                                     <p className="text-emerald-100 font-semibold">
-                                      {developmentProgressMessage || 'Generating your development plan...'}
+                                      {developmentProgressMessage || t('common:messages.generatingDevelopmentPlan', 'Generating your development plan...')}
                                     </p>
                                     <p className="text-slate-300 text-sm">This may take a few minutes</p>
                                   </div>

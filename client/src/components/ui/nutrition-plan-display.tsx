@@ -506,7 +506,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
       {/* Overall Plan Summary */}
       <Card className="bg-card border-border">
         <CardHeader dir={isArabic ? 'rtl' : 'ltr'}>
-          <CardTitle className={`flex items-center gap-2 text-foreground ${isArabic ? 'flex-row-reverse' : ''}`}>
+          <CardTitle className={`flex items-center gap-2 text-foreground ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
             <Target className="h-5 w-5 text-purple-400" />
             {t('analysis.nutrition.planOverview', 'Plan Overview')}
           </CardTitle>

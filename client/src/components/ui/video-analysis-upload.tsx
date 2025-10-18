@@ -318,7 +318,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
       }
       abortControllerRef.current = null;
       setIsAnalyzing(false);
-      setLoadingMessage('Analyzing Video...');
+      setLoadingMessage(t('common:messages.analyzingVideo', 'Analyzing Video...'));
       setLoadingProgress(0);
     }
   };
