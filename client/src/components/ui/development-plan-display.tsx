@@ -65,19 +65,19 @@ function getLocalizedText(text: { en: string; ar?: string }, language: string): 
 // Helper function to get exercise prescription display text
 function getExercisePrescriptionText(exercise: Exercise, t: any, isArabic: boolean): string {
   if (!exercise.prescription) return '';
-  
+
   const parts: string[] = [];
-  
+
   if (exercise.prescription.sets) {
     const setsLabel = t('analysis.development.prescription.sets', 'sets');
     parts.push(isArabic ? `${setsLabel} ${exercise.prescription.sets}` : `${exercise.prescription.sets} ${setsLabel}`);
   }
-  
+
   if (exercise.prescription.reps) {
     const repsLabel = t('analysis.development.prescription.reps', 'reps');
     parts.push(isArabic ? `${repsLabel} ${exercise.prescription.reps}` : `${exercise.prescription.reps} ${repsLabel}`);
   }
-  
+
   if (exercise.prescription.restSec) {
     const minutes = Math.floor(exercise.prescription.restSec / 60);
     const seconds = exercise.prescription.restSec % 60;
@@ -89,11 +89,11 @@ function getExercisePrescriptionText(exercise: Exercise, t: any, isArabic: boole
       parts.push(isArabic ? `${restLabel} ${seconds}s` : `${seconds}s ${restLabel}`);
     }
   }
-  
+
   if (exercise.prescription.intensity) {
     parts.push(exercise.prescription.intensity);
   }
-  
+
   return parts.join(' • ');
 }
 
@@ -102,7 +102,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
   const [selectedGoalIndex, setSelectedGoalIndex] = useState(0);
   const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
   const isArabic = language === 'ar' || i18n.language === 'ar';
-  
+
   // Validate that plan is a valid object with goal analysis
   if (!plan || typeof plan !== 'object' || !plan.title || !plan.goalAnalysis) {
     return (
@@ -123,16 +123,16 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
   }
 
   const { title, counts, intro, goalAnalysis } = plan;
-  
+
   // Get all exercises with videos from all goal areas
   const allExercisesWithVideos = goalAnalysis.flatMap(goal => 
     goal.exercises.filter(ex => ex.videoUrl)
   );
-  
+
   // Get current goal area
   const currentGoal = goalAnalysis[selectedGoalIndex];
   const currentGoalVideos = currentGoal?.exercises.filter(ex => ex.videoUrl) || [];
-  
+
   return (
     <div className="space-y-8" data-testid="development-plan-display">
       {/* Title with Goal Areas and Videos Count */}
@@ -169,7 +169,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
             </div>
           </div>
         </CardHeader>
-        
+
         {intro && intro.overview && (
           <CardContent className="pt-0" dir={isArabic ? 'rtl' : 'ltr'}>
             <div className="p-4 bg-gradient-to-r from-slate-800/50 to-slate-700/50 rounded-lg border border-slate-600/30">
@@ -242,7 +242,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                   <p className="text-slate-100 leading-relaxed text-base">{currentGoal.description}</p>
                 </div>
               </CardHeader>
-              
+
               <CardContent className="space-y-4">
                 <div className="grid gap-4">
                   {currentGoal.exercises
@@ -258,19 +258,8 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                     <Card key={exercise.id || exerciseIndex} className="bg-gradient-to-br from-slate-900/60 to-slate-800/60 border-slate-600/50 hover:border-slate-500/60 transition-all duration-200 shadow-md">
                       <CardContent className="p-5" dir={isArabic ? 'rtl' : 'ltr'}>
                         <div className="space-y-3">
-                          {/* Exercise Header */}
+                          {/* Exercise Header - FIXED: Proper RTL layout */}
                           <div className={`flex items-start ${isArabic ? 'flex-row-reverse' : 'flex-row'}`}>
-                            <div className="flex-1">
-                              <h4 className={`font-bold text-lg text-white flex items-center gap-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
-                                <div className="p-1.5 rounded-full bg-blue-500/20">
-                                  <Dumbbell className="h-4 w-4 text-blue-400" />
-                                </div>
-                                <span className="text-blue-50">{exercise.name}</span>
-                              </h4>
-                              <p className={`text-slate-200 mt-2 leading-relaxed ${isArabic ? 'text-right text-base pr-8' : 'text-sm pl-8'}`}>
-                                {exercise.description}
-                              </p>
-                            </div>
                             {exercise.videoUrl && (
                               <Button
                                 size="sm"
@@ -283,6 +272,17 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                                 {t('analysis.development.video', 'Video')}
                               </Button>
                             )}
+                            <div className="flex-1">
+                              <h4 className={`font-bold text-lg text-white flex items-center gap-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
+                                <div className="p-1.5 rounded-full bg-blue-500/20">
+                                  <Dumbbell className="h-4 w-4 text-blue-400" />
+                                </div>
+                                <span className="text-blue-50">{exercise.name}</span>
+                              </h4>
+                              <p className={`text-slate-200 mt-2 leading-relaxed ${isArabic ? 'text-right text-base' : 'text-sm'}`}>
+                                {exercise.description}
+                              </p>
+                            </div>
                           </div>
 
                           {/* Enhanced Exercise Details */}
@@ -333,14 +333,14 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
               {allExercisesWithVideos.map((exercise, index) => (
                 <Card key={index} className="bg-athlete-gray-800/30 border-athlete-gray-700">
                   <CardContent className="p-4" dir={isArabic ? 'rtl' : 'ltr'}>
-                    <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
+                    <div className={`flex items-center ${isArabic ? 'flex-row-reverse' : 'flex-row'}`}>
                       <div className="flex-1">
-                        <h4 className={`font-semibold text-white flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                        <h4 className={`font-semibold text-white flex items-center gap-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
                           <Play className="h-4 w-4 text-athlete-accent" />
                           {exercise.name}
                         </h4>
                         {exercise.targetArea && (
-                          <div className="mt-2">
+                          <div className={`mt-2 ${isArabic ? 'text-right' : ''}`}>
                             <Badge variant="outline" className="bg-gradient-to-r from-amber-500/20 to-amber-600/20 border-amber-400 text-amber-100 font-medium text-xs px-2 py-1">
                               {t('analysis.development.target', 'Target')}: {exercise.targetArea}
                             </Badge>
@@ -351,10 +351,10 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                       <Button
                         size="sm"
                         onClick={() => window.open(exercise.videoUrl, '_blank')}
-                        className={`bg-athlete-accent hover:bg-athlete-accent/90 text-white ${isArabic ? 'mr-4' : 'ml-4'} flex-shrink-0 ${isArabic ? 'flex-row-reverse' : ''}`}
+                        className={`${isArabic ? 'mr-4 flex-row-reverse' : 'ml-4'} bg-athlete-accent hover:bg-athlete-accent/90 text-white flex-shrink-0`}
                         data-testid={`video-button-${index}`}
                       >
-                        <ExternalLink className={`h-3 w-3 ${isArabic ? 'ml-1' : 'mr-1'}`} />
+                        <ExternalLink className={`${isArabic ? 'ml-1' : 'mr-1'} h-3 w-3`} />
                         {t('analysis.development.watch', 'Watch')}
                       </Button>
                     </div>

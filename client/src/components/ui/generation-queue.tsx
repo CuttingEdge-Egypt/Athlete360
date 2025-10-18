@@ -45,6 +45,25 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [itemToCancel, setItemToCancel] = useState<string | null>(null);
 
+  // Create service labels with translations
+  const getServiceLabel = (serviceType: string) => {
+    const serviceLabels: { [key: string]: string } = {
+      bio: t('services.bioAnalysis.title'),
+      rank: t('services.rankHistory.title'),
+      strengths: t('services.strengths.title'),
+      weaknesses: t('services.weaknesses.title'),
+      development: t('services.trainingPlans.title'),
+      'development-plan': t('services.developmentPlan.title'),
+      'nutrition-plan': t('services.nutritionPlan.title'),
+      nutrition: t('services.nutritionPlan.title'),
+      beat: t('services.tacticRecommendations.title'),
+      video: t('services.videoAnalysis.title'),
+      comparison: t('services.athleteComparison.title'),
+      statistics: t('services.statistics.title'),
+    };
+    return serviceLabels[serviceType] || serviceType;
+  };
+
   // Add new generation to queue and auto-trigger (max 4 concurrent)
   const addToQueue = (athleteName: string, serviceType: string, autoTrigger: boolean = true) => {
     const itemId = `gen_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -442,7 +461,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
                         variant="outline" 
                         className="text-xs border-gray-500 text-gray-300"
                       >
-                        {item.serviceType}
+                        {getServiceLabel(item.serviceType)}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-gray-400">

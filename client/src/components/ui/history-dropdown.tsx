@@ -33,11 +33,13 @@ const serviceIcons = {
   strengths: Target,
   weaknesses: Target,
   development: Zap,
+  'development-plan': Zap,
   'nutrition-plan': Utensils,
   nutrition: Utensils,
   beat: Zap,
   video: Video,
   comparison: GitCompare,
+  statistics: TrendingUp,
 };
 
 // Moved to component to access t function
@@ -61,11 +63,13 @@ export function HistoryDropdown() {
       strengths: t('services.strengths.title', { ns: 'home' }),
       weaknesses: t('services.weaknesses.title', { ns: 'home' }),
       development: t('services.trainingPlans.title', { ns: 'home' }),
+      'development-plan': t('services.developmentPlan.title', { ns: 'home' }),
       'nutrition-plan': t('services.nutritionPlan.title', { ns: 'home' }),
       nutrition: t('services.nutritionPlan.title', { ns: 'home' }),
       beat: t('services.tacticRecommendations.title', { ns: 'home' }),
       video: t('services.videoAnalysis.title', { ns: 'home' }),
       comparison: t('services.athleteComparison.title', { ns: 'home' }),
+      statistics: t('services.statistics.title', { ns: 'home' }),
     };
     return serviceLabels[serviceType] || serviceType;
   };
