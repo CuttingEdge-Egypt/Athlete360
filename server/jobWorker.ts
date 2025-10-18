@@ -162,6 +162,7 @@ export class JobWorker {
         userId: job.userId,
         athleteId: null, // Development plans are not athlete-specific
         serviceType: "development-plan",
+        language: params.language, // Save the generation language
         resultData: parsedPlan
       });
 
@@ -214,6 +215,7 @@ export class JobWorker {
         userId: job.userId,
         athleteId: null, // Nutrition plans are not athlete-specific
         serviceType: "nutrition-plan",
+        language: params.language, // Save the generation language
         resultData: plan
       });
 

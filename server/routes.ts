@@ -2024,6 +2024,7 @@ Return only valid JSON with the missing fields.`;
         userId,
         athleteId,
         serviceType: "nutrition-plan",
+        language: "en", // Old endpoint doesn't have language parameter, default to English
         resultData: nutritionPlanData
       });
 
@@ -2158,6 +2159,7 @@ Return only valid JSON with the missing fields.`;
         await storage.createAnalysisLog({
           userId,
           serviceType: "nutrition-plan",
+          language: language, // Save the generation language
           resultData: {
             ...(nutritionPlan as any),
             userInputs: { goal, sport: sportName, age, height, currentWeight, targetWeight, country, period, language },
