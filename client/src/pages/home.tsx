@@ -291,7 +291,7 @@ export default function Home() {
       setDevelopmentJobId(result.jobId);
       setDevelopmentQueueId(result.queueId);
       setDevelopmentProgress(0);
-      setDevelopmentProgressMessage("Starting development plan generation...");
+      setDevelopmentProgressMessage(t('common:messages.startingDevelopmentPlan', 'Starting development plan generation...'));
       
       // Update queue to running with jobId for proper cancellation and retry
       if (result.queueId && (window as any).generationQueue) {
@@ -447,7 +447,15 @@ export default function Home() {
       setDevelopmentProgress(cappedProgress);
       
       if (status === 'in_progress') {
-        const messages = [
+        const messages = i18n.language === 'ar' ? [
+          t('common:messages.developmentProgress1', "🎯 Analyzing your training goals and current fitness level..."),
+          t('common:messages.developmentProgress2', "🧠 AI is crafting your personalized training strategy..."),
+          t('common:messages.developmentProgress3', "💪 Designing targeted exercises for your specific weaknesses..."),
+          t('common:messages.developmentProgress4', "📊 Calculating optimal sets, reps, and rest periods..."),
+          t('common:messages.developmentProgress5', "🎬 Finding the perfect instructional videos for each exercise..."),
+          t('common:messages.developmentProgress6', "⚡ Optimizing training intensity and progression..."),
+          t('common:messages.developmentProgress7', "📋 Assembling your complete development plan...")
+        ] : [
           "🎯 Analyzing your training goals and current fitness level...",
           "🧠 AI is crafting your personalized training strategy...",
           "💪 Designing targeted exercises for your specific weaknesses...",
@@ -2858,7 +2866,7 @@ export default function Home() {
                                     <p className="text-emerald-100 font-semibold">
                                       {developmentProgressMessage || t('common:messages.generatingDevelopmentPlan', 'Generating your development plan...')}
                                     </p>
-                                    <p className="text-slate-300 text-sm">This may take a few minutes</p>
+                                    <p className="text-slate-300 text-sm">{t('common:messages.thisMayTakeFewMinutes', 'This may take a few minutes')}</p>
                                   </div>
                                 </div>
                                 <Button

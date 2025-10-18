@@ -69,7 +69,16 @@
     "sampleAthlete": "رياضي تجريبي",
     "generatingNutritionPlan": "جارٍ إنشاء خطة التغذية الشخصية الخاصة بك...",
     "generatingDevelopmentPlan": "جارٍ إنشاء خطة التطوير الخاصة بك...",
-    "analyzingVideo": "جارٍ تحليل الفيديو..."
+    "analyzingVideo": "جارٍ تحليل الفيديو...",
+    "startingDevelopmentPlan": "بدء إنشاء خطة التطوير...",
+    "thisMayTakeFewMinutes": "قد يستغرق ذلك بضع دقائق",
+    "developmentProgress1": "🎯 تحليل أهداف التدريب الخاصة بك ومستوى اللياقة البدنية الحالي...",
+    "developmentProgress2": "🧠 الذكاء الاصطناعي يصمم استراتيجية التدريب الشخصية الخاصة بك...",
+    "developmentProgress3": "💪 تصميم تمارين مستهدفة لنقاط ضعفك المحددة...",
+    "developmentProgress4": "📊 حساب المجموعات والتكرارات وفترات الراحة المثلى...",
+    "developmentProgress5": "🎬 العثور على مقاطع الفيديو التعليمية المثالية لكل تمرين...",
+    "developmentProgress6": "⚡ تحسين شدة التدريب والتقدم...",
+    "developmentProgress7": "📋 تجميع خطة التطوير الكاملة الخاصة بك..."
   },
   "toast": {
     "generationStarted": "بدأ التوليد!",
