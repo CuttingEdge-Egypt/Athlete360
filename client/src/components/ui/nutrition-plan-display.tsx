@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Calendar, Utensils, Target, Apple } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/useLanguage";
+import arTranslations from '@/locales/ar/common.json';
+import enTranslations from '@/locales/en/common.json';
 
 interface NutritionPlanProps {
   plan: string | any;
@@ -40,7 +42,7 @@ interface WeekData {
 export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
   const [currentWeek, setCurrentWeek] = useState(0);
   const [currentDay, setCurrentDay] = useState(0);
-  const { t: globalT, i18n } = useTranslation('common');
+  const { i18n } = useTranslation('common');
   const { direction, isRTL } = useLanguage();
   
   // Determine display language from prop or plan content
@@ -56,8 +58,24 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
   
   console.log("NutritionPlanDisplay language detection:", { language, displayLanguage, isArabic, i18nLang: i18n.language });
   
-  // Use language-specific translation
-  const { t } = useTranslation('common', { lng: displayLanguage });
+  // Direct translation function using imported translations
+  const t = (key: string, fallback: string = '') => {
+    const translations = displayLanguage === 'ar' ? arTranslations : enTranslations;
+    const keys = key.split('.');
+    let value: any = translations;
+    
+    for (const k of keys) {
+      if (value && typeof value === 'object' && k in value) {
+        value = value[k];
+      } else {
+        console.log(`Translation key not found: ${key} for language: ${displayLanguage}`);
+        return fallback;
+      }
+    }
+    
+    console.log(`Translation for ${key}:`, value, 'lang:', displayLanguage);
+    return typeof value === 'string' ? value : fallback;
+  };
   
   // Function to convert numbers to Arabic numerals
   const toArabicNumerals = (num: number | string): string => {
