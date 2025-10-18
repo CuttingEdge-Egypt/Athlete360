@@ -34,6 +34,12 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [videoUrl, setVideoUrl] = useState<string>("");
+  
+  // Helper function to detect Arabic text
+  const isArabicText = (text: string): boolean => {
+    const arabicRegex = /[\u0600-\u06FF]/;
+    return arabicRegex.test(text);
+  };
 
   // Sport-specific display configurations
   const SPORT_DISPLAY_CONFIGS = {
@@ -1174,7 +1180,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                     return (
                       <Card key={index} className="bg-blue-900/20 border-blue-500/30" data-testid={`metric-${index}-team-1`}>
                         <CardContent className="p-4 text-center">
-                          <div className="text-blue-400 font-semibold text-xs mb-1">{metric.title}</div>
+                          <div className={`text-blue-400 font-semibold mb-1 ${isArabicText(metric.title) ? 'text-sm' : 'text-xs'}`}>{metric.title}</div>
                           <div className="text-xs text-blue-300 mb-1">No data</div>
                           <div className="text-2xl font-bold text-blue-300">0</div>
                         </CardContent>
@@ -1190,7 +1196,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   return (
                     <Card key={index} className="bg-blue-900/20 border-blue-500/30" data-testid={`metric-${index}-team-1`}>
                       <CardContent className="p-4 text-center">
-                        <div className="text-blue-400 font-semibold text-xs mb-1">{metric.title}</div>
+                        <div className={`text-blue-400 font-semibold mb-1 ${isArabicText(metric.title) ? 'text-sm' : 'text-xs'}`}>{metric.title}</div>
                         <div className="text-xs text-blue-300 mb-1 transition-all duration-300">
                           {lastEvent ? lastEvent.playerName : team1.name}
                         </div>
@@ -1206,7 +1212,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   return (
                     <Card key={index} className="bg-blue-900/20 border-blue-500/30" data-testid={`metric-${index}-player-1`}>
                       <CardContent className="p-4 text-center">
-                        <div className="text-blue-400 font-semibold text-xs mb-1">{metric.title}</div>
+                        <div className={`text-blue-400 font-semibold mb-1 ${isArabicText(metric.title) ? 'text-sm' : 'text-xs'}`}>{metric.title}</div>
                         <div className="text-xs text-blue-300 mb-1">{player1.name}</div>
                         <div className="text-2xl font-bold text-blue-300" data-testid={`metric-value-${index}-player-1`}>{player1.value}</div>
                       </CardContent>
@@ -1456,7 +1462,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                     return (
                       <Card key={index} className="bg-red-900/20 border-red-500/30" data-testid={`metric-${index}-team-2`}>
                         <CardContent className="p-4 text-center">
-                          <div className="text-red-400 font-semibold text-xs mb-1">{metric.title}</div>
+                          <div className={`text-red-400 font-semibold mb-1 ${isArabicText(metric.title) ? 'text-sm' : 'text-xs'}`}>{metric.title}</div>
                           <div className="text-xs text-red-300 mb-1">No data</div>
                           <div className="text-2xl font-bold text-red-300">0</div>
                         </CardContent>
@@ -1472,7 +1478,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   return (
                     <Card key={index} className="bg-red-900/20 border-red-500/30" data-testid={`metric-${index}-team-2`}>
                       <CardContent className="p-4 text-center">
-                        <div className="text-red-400 font-semibold text-xs mb-1">{metric.title}</div>
+                        <div className={`text-red-400 font-semibold mb-1 ${isArabicText(metric.title) ? 'text-sm' : 'text-xs'}`}>{metric.title}</div>
                         <div className="text-xs text-red-300 mb-1 transition-all duration-300">
                           {lastEvent ? lastEvent.playerName : team2.name}
                         </div>
@@ -1488,7 +1494,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   return (
                     <Card key={index} className="bg-red-900/20 border-red-500/30" data-testid={`metric-${index}-player-2`}>
                       <CardContent className="p-4 text-center">
-                        <div className="text-red-400 font-semibold text-xs mb-1">{metric.title}</div>
+                        <div className={`text-red-400 font-semibold mb-1 ${isArabicText(metric.title) ? 'text-sm' : 'text-xs'}`}>{metric.title}</div>
                         <div className="text-xs text-red-300 mb-1">{player2.name}</div>
                         <div className="text-2xl font-bold text-red-300" data-testid={`metric-value-${index}-player-2`}>{player2.value}</div>
                       </CardContent>
