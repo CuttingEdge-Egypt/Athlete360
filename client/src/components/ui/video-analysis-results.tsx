@@ -991,7 +991,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
       {/* Player Advice Section */}
       <PlayerAdviceSection 
         adviceData={analysisData.advice_analysis}
-        language="english" 
+        language={analysisData.language === 'ar' ? 'arabic' : 'english'} 
       />
     </div>
   );
