@@ -94,9 +94,10 @@ function getExercisePrescriptionText(exercise: Exercise): string {
 }
 
 export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: DevelopmentPlanDisplayProps) {
-  const { t } = useTranslation('home');
+  const { t, i18n } = useTranslation('common');
   const [selectedGoalIndex, setSelectedGoalIndex] = useState(0);
   const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
+  const isArabic = language === 'ar' || i18n.language === 'ar';
   
   // Validate that plan is a valid object with goal analysis
   if (!plan || typeof plan !== 'object' || !plan.title || !plan.goalAnalysis) {
@@ -107,8 +108,8 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
             <div className="flex items-center gap-3">
               <Target className="h-6 w-6 text-red-400" />
               <div>
-                <h3 className="text-lg font-semibold text-red-100">Invalid Development Plan</h3>
-                <p className="text-red-200">The development plan data is invalid. Please try generating a new plan.</p>
+                <h3 className="text-lg font-semibold text-red-100">{t('analysis.development.invalidPlan', 'Invalid Development Plan')}</h3>
+                <p className="text-red-200">{t('analysis.development.invalidPlanMessage', 'The development plan data is invalid. Please try generating a new plan.')}</p>
               </div>
             </div>
           </CardContent>
@@ -146,19 +147,19 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                   <div className="p-1.5 rounded-full bg-emerald-500/20">
                     <Zap className="h-4 w-4 text-emerald-400 flex-shrink-0" />
                   </div>
-                  <span className="font-semibold text-emerald-100">{counts?.goals || goalAnalysis.length} Goal Areas</span>
+                  <span className="font-semibold text-emerald-100" dir={isArabic ? 'rtl' : 'ltr'}>{counts?.goals || goalAnalysis.length} {t('analysis.development.goalAreas', 'Goal Areas')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded-full bg-blue-500/20">
                     <Dumbbell className="h-4 w-4 text-blue-400 flex-shrink-0" />
                   </div>
-                  <span className="font-semibold text-blue-100">{counts?.exercises || 0} Exercises</span>
+                  <span className="font-semibold text-blue-100" dir={isArabic ? 'rtl' : 'ltr'}>{counts?.exercises || 0} {t('analysis.development.exercises', 'Exercises')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded-full bg-purple-500/20">
                     <Play className="h-4 w-4 text-purple-400 flex-shrink-0" />
                   </div>
-                  <span className="font-semibold text-purple-100">{counts?.videos || allExercisesWithVideos.length} Videos</span>
+                  <span className="font-semibold text-purple-100" dir={isArabic ? 'rtl' : 'ltr'}>{counts?.videos || allExercisesWithVideos.length} {t('analysis.development.videos', 'Videos')}</span>
                 </div>
               </div>
             </div>
@@ -181,16 +182,16 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white text-slate-300 font-semibold"
             data-testid="tab-goals"
           >
-            <Target className="h-5 w-5 mr-2" />
-            Goal Areas
+            <Target className={`h-5 w-5 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+            {t('analysis.development.goalAreas', 'Goal Areas')}
           </TabsTrigger>
           <TabsTrigger 
             value="videos" 
             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white text-slate-300 font-semibold"
             data-testid="tab-videos"
           >
-            <Play className="h-5 w-5 mr-2" />
-            All Videos
+            <Play className={`h-5 w-5 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+            {t('analysis.development.allVideos', 'All Videos')}
           </TabsTrigger>
         </TabsList>
 
@@ -274,8 +275,8 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                                 className="ml-4 bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-300 hover:from-purple-500 hover:to-purple-600 hover:text-white flex-shrink-0 shadow-md"
                                 data-testid={`exercise-video-${exerciseIndex}`}
                               >
-                                <Play className="h-3 w-3 mr-1" />
-                                Video
+                                <Play className={`h-3 w-3 ${isArabic ? 'ml-1' : 'mr-1'}`} />
+                                {t('analysis.development.video', 'Video')}
                               </Button>
                             )}
                           </div>
@@ -336,7 +337,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                         {exercise.targetArea && (
                           <div className="mt-2">
                             <Badge variant="outline" className="bg-gradient-to-r from-amber-500/20 to-amber-600/20 border-amber-400 text-amber-100 font-medium text-xs px-2 py-1">
-                              Target: {exercise.targetArea}
+                              {t('analysis.development.target', 'Target')}: {exercise.targetArea}
                             </Badge>
                           </div>
                         )}
@@ -348,8 +349,8 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                         className="bg-athlete-accent hover:bg-athlete-accent/90 text-white ml-4 flex-shrink-0"
                         data-testid={`video-button-${index}`}
                       >
-                        <ExternalLink className="h-3 w-3 mr-1" />
-                        Watch
+                        <ExternalLink className={`h-3 w-3 ${isArabic ? 'ml-1' : 'mr-1'}`} />
+                        {t('analysis.development.watch', 'Watch')}
                       </Button>
                     </div>
                   </CardContent>
@@ -360,8 +361,8 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
             <Card className="bg-athlete-gray-800/30 border-athlete-gray-700">
               <CardContent className="p-6 text-center">
                 <Play className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-300 mb-2">No Videos Available</h3>
-                <p className="text-gray-400">No instructional videos were found for the exercises in this plan.</p>
+                <h3 className="text-lg font-semibold text-gray-300 mb-2">{t('analysis.development.noVideos', 'No Videos Available')}</h3>
+                <p className="text-gray-400">{t('analysis.development.noVideosMessage', 'No instructional videos were found for the exercises in this plan.')}</p>
               </CardContent>
             </Card>
           )}
@@ -373,20 +374,20 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
         <CardContent className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <CheckCircle className="h-5 w-5 text-green-400" />
-            <h3 className="text-lg font-semibold text-white">Training Summary</h3>
+            <h3 className={`text-lg font-semibold text-white ${isArabic ? 'text-right' : ''}`}>{t('analysis.development.trainingSummary', 'Training Summary')}</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
             <div className="space-y-1">
               <div className="text-2xl font-bold text-athlete-accent">{goalAnalysis.length}</div>
-              <div className="text-sm text-gray-300">Goal Areas</div>
+              <div className="text-sm text-gray-300">{t('analysis.development.goalAreas', 'Goal Areas')}</div>
             </div>
             <div className="space-y-1">
               <div className="text-2xl font-bold text-athlete-accent">{counts?.exercises || 0}</div>
-              <div className="text-sm text-gray-300">Total Exercises</div>
+              <div className="text-sm text-gray-300">{t('analysis.development.totalExercises', 'Total Exercises')}</div>
             </div>
             <div className="space-y-1">
               <div className="text-2xl font-bold text-athlete-accent">{allExercisesWithVideos.length}</div>
-              <div className="text-sm text-gray-300">Video Tutorials</div>
+              <div className="text-sm text-gray-300">{t('analysis.development.videoTutorials', 'Video Tutorials')}</div>
             </div>
           </div>
         </CardContent>
