@@ -374,7 +374,9 @@
       "searchAthletes": "Search athletes...",
       "noAthletesFound": "No athletes found",
       "noAthletesAvailable": "No athletes available",
-      "selectSportFirst": "Select a sport first"
+      "selectSportFirst": "Select a sport first",
+      "searchSports": "Search sports...",
+      "noSportsFound": "No sports found"
     }
   }
 }

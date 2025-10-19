@@ -450,7 +450,9 @@
       "searchAthletes": "البحث عن لاعبين...",
       "noAthletesFound": "لم يتم العثور على لاعبين",
       "noAthletesAvailable": "لا يوجد لاعبون متاحون",
-      "selectSportFirst": "اختر رياضة أولاً"
+      "selectSportFirst": "اختر رياضة أولاً",
+      "searchSports": "البحث عن الرياضات...",
+      "noSportsFound": "لم يتم العثور على رياضات"
     }
   }
 }

@@ -29,6 +29,7 @@ import {
   Languages,
   Search,
   ChevronsUpDown,
+  ChevronDown,
   Check,
   CalendarDays,
   RefreshCw,
@@ -67,8 +68,10 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
   const [selectedAthlete1, setSelectedAthlete1] = useState("");
   const [selectedAthlete2, setSelectedAthlete2] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState(i18n.language === 'ar' ? 'arabic' : 'english');
+  const [searchSport, setSearchSport] = useState("");
   const [searchAthlete1, setSearchAthlete1] = useState("");
   const [searchAthlete2, setSearchAthlete2] = useState("");
+  const [openSportPopover, setOpenSportPopover] = useState(false);
   const [openAthletePopover1, setOpenAthletePopover1] = useState(false);
   const [openAthletePopover2, setOpenAthletePopover2] = useState(false);
   const [showForm, setShowForm] = useState(true);
@@ -500,6 +503,16 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
     );
   });
 
+  // Filter sports based on search
+  const filteredSports = Array.isArray(sports) ? sports.filter((sport: Sport) => {
+    if (!searchSport.trim()) return true;
+    const searchLower = searchSport.toLowerCase();
+    return sport.name?.toLowerCase().includes(searchLower);
+  }) : [];
+
+  // Get selected sport name for display
+  const selectedSportObject = Array.isArray(sports) ? sports.find((s: Sport) => s.id === selectedSport) : null;
+
   return (
     <Card className="bg-athlete-gray-800 border-gray-700">
       <CardHeader>
@@ -533,28 +546,63 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                 <label className={`text-sm font-medium text-gray-300 ${isArabic ? 'text-right block' : ''}`}>
                   {t("analysis.comparison.sport", "Sport")}
                 </label>
-                <Select
-                  value={selectedSport}
-                  onValueChange={(value) => {
-                    setSelectedSport(value);
-                    setSelectedCountry1("");
-                    setSelectedCountry2("");
-                    setSelectedAthlete1("");
-                    setSelectedAthlete2("");
-                  }}
-                  data-testid="select-sport"
-                >
-                  <SelectTrigger className="bg-athlete-gray-700 border-gray-600" dir={isArabic ? 'rtl' : 'ltr'}>
-                    <SelectValue placeholder={t("analysis.comparison.selectSport", "Select sport...")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.isArray(sports) && sports.map((sport) => (
-                      <SelectItem key={sport.id} value={sport.id}>
-                        {sport.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Popover open={openSportPopover} onOpenChange={setOpenSportPopover}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={openSportPopover}
+                      className={`w-full justify-between bg-athlete-gray-700 border-gray-600 hover:bg-athlete-gray-600 text-white ${isArabic ? 'flex-row-reverse' : ''}`}
+                      data-testid="select-sport"
+                    >
+                      <span className={`${!selectedSport && 'text-gray-400'}`}>
+                        {selectedSportObject?.name || t("analysis.comparison.selectSport", "Select sport...")}
+                      </span>
+                      <ChevronDown className={`h-4 w-4 shrink-0 opacity-50 ${isArabic ? 'mr-2' : 'ml-2'}`} />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0 bg-athlete-gray-700 border-gray-600" align={isArabic ? "end" : "start"}>
+                    <div className="p-2">
+                      <div className="relative">
+                        <Search className={`absolute top-2.5 h-4 w-4 text-gray-400 ${isArabic ? 'right-2' : 'left-2'}`} />
+                        <Input
+                          placeholder={t("analysis.comparison.searchSports", "Search sports...")}
+                          value={searchSport}
+                          onChange={(e) => setSearchSport(e.target.value)}
+                          className={`bg-athlete-gray-600 border-gray-500 text-white ${isArabic ? 'pr-8 text-right' : 'pl-8'}`}
+                          dir={isArabic ? 'rtl' : 'ltr'}
+                        />
+                      </div>
+                    </div>
+                    <div className="max-h-64 overflow-y-auto">
+                      {filteredSports.length === 0 ? (
+                        <div className={`p-4 text-center text-gray-400 ${isArabic ? 'text-right' : ''}`}>
+                          {t("analysis.comparison.noSportsFound", "No sports found")}
+                        </div>
+                      ) : (
+                        filteredSports.map((sport: Sport) => (
+                          <button
+                            key={sport.id}
+                            onClick={() => {
+                              setSelectedSport(sport.id);
+                              setSelectedCountry1("");
+                              setSelectedCountry2("");
+                              setSelectedAthlete1("");
+                              setSelectedAthlete2("");
+                              setOpenSportPopover(false);
+                              setSearchSport("");
+                            }}
+                            className={`w-full px-4 py-2 text-left hover:bg-athlete-gray-600 text-white transition-colors ${
+                              selectedSport === sport.id ? 'bg-athlete-gray-600' : ''
+                            } ${isArabic ? 'text-right' : ''}`}
+                          >
+                            {sport.name}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               <div className="space-y-2">
@@ -696,8 +744,8 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       <div className="mt-4">
                         {/* Last Update */}
                         {selectedAthleteObject1.updatedAt && (
-                          <div className={`flex items-center ${isArabic ? 'gap-2 flex-row-reverse' : 'gap-2'} mb-2 text-sm text-gray-400`}>
-                            <CalendarDays className="w-4 h-4" />
+                          <div className={`flex items-center ${isArabic ? 'gap-2 flex-row-reverse' : 'gap-2'} mb-2 ${isArabic ? 'text-base font-medium' : 'text-sm'} text-gray-300`}>
+                            <CalendarDays className={`${isArabic ? 'w-5 h-5' : 'w-4 h-4'}`} />
                             <span>{t('interface.lastUpdate', 'Last Update')}: {new Date(selectedAthleteObject1.updatedAt).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                           </div>
                         )}
@@ -747,11 +795,11 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                   data-testid="button-update-info-athlete1"
                                 >
                                   <RefreshCw className={`h-3 w-3 ${isArabic ? 'ml-1' : 'mr-1'}`} />
-                                  {t('athleteSearch.imageUpdate.updateButton', 'Update Info')}
+                                  {t('athleteSearch.rankingUpdate.updateButton', 'Update Info')}
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p className="text-sm">{t('athleteSearch.imageUpdate.popup.help', 'Update athlete profile information')}</p>
+                                <p className="text-sm">{t('athleteSearch.rankingUpdate.tooltip.help', 'Update athlete profile information')}</p>
                               </TooltipContent>
                             </Tooltip>
                           </div>
@@ -869,8 +917,8 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       <div className="mt-4">
                         {/* Last Update */}
                         {selectedAthleteObject2.updatedAt && (
-                          <div className={`flex items-center ${isArabic ? 'gap-2 flex-row-reverse' : 'gap-2'} mb-2 text-sm text-gray-400`}>
-                            <CalendarDays className="w-4 h-4" />
+                          <div className={`flex items-center ${isArabic ? 'gap-2 flex-row-reverse' : 'gap-2'} mb-2 ${isArabic ? 'text-base font-medium' : 'text-sm'} text-gray-300`}>
+                            <CalendarDays className={`${isArabic ? 'w-5 h-5' : 'w-4 h-4'}`} />
                             <span>{t('interface.lastUpdate', 'Last Update')}: {new Date(selectedAthleteObject2.updatedAt).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                           </div>
                         )}
@@ -920,11 +968,11 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                   data-testid="button-update-info-athlete2"
                                 >
                                   <RefreshCw className={`h-3 w-3 ${isArabic ? 'ml-1' : 'mr-1'}`} />
-                                  {t('athleteSearch.imageUpdate.updateButton', 'Update Info')}
+                                  {t('athleteSearch.rankingUpdate.updateButton', 'Update Info')}
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p className="text-sm">{t('athleteSearch.imageUpdate.popup.help', 'Update athlete profile information')}</p>
+                                <p className="text-sm">{t('athleteSearch.rankingUpdate.tooltip.help', 'Update athlete profile information')}</p>
                               </TooltipContent>
                             </Tooltip>
                           </div>
