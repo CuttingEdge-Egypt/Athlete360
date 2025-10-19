@@ -56,6 +56,29 @@
       }
     }
   },
+  "login": {
+    "welcomeBack": "Welcome Back",
+    "signInToAccount": "Sign in to your Athlete360 account",
+    "backToHome": "Back to Home",
+    "signIn": "Sign In",
+    "enterCredentials": "Enter your credentials to access your account",
+    "emailAddress": "Email Address",
+    "password": "Password",
+    "emailPlaceholder": "example@domain.com",
+    "passwordPlaceholder": "Enter your password",
+    "signingIn": "Signing in...",
+    "secureLogin": "Secure Login",
+    "secureLoginDesc": "Your login credentials are encrypted and secure",
+    "noAccount": "Don't have an account?",
+    "signUpHere": "Sign up here",
+    "completeAllFields": "Complete all fields",
+    "emailPasswordRequired": "Email and password are required",
+    "invalidEmail": "Invalid email address",
+    "enterValidEmail": "Please enter a valid email address",
+    "loginSuccessful": "Successfully logged in as",
+    "invalidCredentials": "Invalid email or password",
+    "checkCredentials": "Please check your credentials and try again"
+  },
   "messages": {
     "welcome": "Welcome back!",
     "loginFailed": "Login failed",
