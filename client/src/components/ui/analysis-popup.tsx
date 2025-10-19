@@ -2127,8 +2127,12 @@ export function AnalysisPopup({
       case "video":
       case "video-analysis":
         return t("common:analysis.videoAnalysis.dynamicPerformanceAnalysis", "Dynamic Performance Analysis");
+      case "comparison":
+        // Check if the comparison content is in Arabic
+        const isArabicComparison = data?.language === 'arabic' || data?.language === 'ar';
+        return isArabicComparison ? "نتائج التحليل" : "Analysis Results";
       default:
-        return "Analysis Results";
+        return t("common:analysis.results", "Analysis Results");
     }
   };
 
@@ -2151,6 +2155,53 @@ export function AnalysisPopup({
     return <VideoAnalysisResults analysisData={data} sport={data.sport} />;
   };
 
+  // Helper function to translate comparison section titles to Arabic
+  const translateComparisonTitles = (content: string): string => {
+    if (!content) return content;
+    
+    const translations: Record<string, string> = {
+      'Overall Analysis:': 'التحليل العام:',
+      'Predicted Winner:': 'الفائز المتوقع:',
+      'Key Reasons:': 'الأسباب الرئيسية:',
+      'Current Rankings:': 'التصنيفات الحالية:',
+      'Strengths:': 'نقاط القوة:',
+      'Technical Strengths:': 'نقاط القوة التقنية:',
+      'Areas for Improvement:': 'مجالات التحسين:',
+      'Weaknesses:': 'نقاط الضعف:',
+      'Technical Development Areas:': 'مجالات التطوير الفني:',
+      'Performance Areas for Development:': 'مجالات تطوير الأداء:',
+      'Strategic Development Areas:': 'مجالات التطوير الاستراتيجي:',
+      'Head-to-Head Analysis': 'التحليل المباشر',
+      'Analysis:': 'التحليل:',
+      'Confidence:': 'الثقة:',
+      'Key Factors:': 'العوامل الرئيسية:',
+      'Match Scenario:': 'سيناريو المباراة:',
+      'Tactical Advice:': 'النصائح التكتيكية:',
+      'Physical Attributes:': 'الخصائص الجسدية:',
+      'Technical Skills:': 'المهارات الفنية:',
+      'Recent Performance:': 'الأداء الأخير:',
+      'Technical Profile:': 'الملف الفني:',
+      'Record:': 'السجل:',
+      'Last Competition:': 'آخر منافسة:',
+      'Current Form:': 'الحالة الحالية:',
+      'Height:': 'الطول:',
+      'Weight:': 'الوزن:',
+      'Stance:': 'الموقف:',
+      'Evidence:': 'الدليل:',
+      'Athlete 1 Strengths': 'نقاط قوة الرياضي الأول',
+      'Athlete 2 Strengths': 'نقاط قوة الرياضي الثاني',
+    };
+    
+    let translated = content;
+    Object.entries(translations).forEach(([english, arabic]) => {
+      // Use regex with global flag to replace all occurrences
+      const regex = new RegExp(english.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+      translated = translated.replace(regex, arabic);
+    });
+    
+    return translated;
+  };
+
   // Comparison analysis renderer
   const renderComparisonAnalysis = (data: any) => {
     if (!data) {
@@ -2158,6 +2209,17 @@ export function AnalysisPopup({
     }
 
     const normalizedComparison = normalizeComparison(data);
+    
+    // Check if this is an Arabic comparison and translate section titles
+    const isArabicComparison = data.language === 'arabic' || data.language === 'ar';
+    if (isArabicComparison && normalizedComparison?.tabs) {
+      const validKeys = ['overview', 'strengths', 'weaknesses', 'headToHead', 'details'] as const;
+      validKeys.forEach(key => {
+        if (normalizedComparison.tabs[key] && typeof normalizedComparison.tabs[key] === 'string') {
+          normalizedComparison.tabs[key] = translateComparisonTitles(normalizedComparison.tabs[key]!);
+        }
+      });
+    }
     
     if (normalizedComparison && normalizedComparison.tabs) {
       return (
