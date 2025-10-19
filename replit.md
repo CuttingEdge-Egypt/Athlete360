@@ -4,6 +4,7 @@
 Athlete360 is an AI-powered athletic performance analysis platform that analyzes athlete performance across various sports. It provides comprehensive insights, including biographies, ranking analysis, strengths/weaknesses, development plans, nutrition guidance, and strategic analysis. The platform leverages AI to deliver personalized, real-time athletic insights for performance development and strategic advantages, aiming to be an authentic and essential tool for athletes and coaches.
 
 ## Recent Changes (October 18, 2025)
+- **Arabic Login Page**: Implemented complete Arabic version of login page with RTL layout, mirrored icons, right-aligned labels/inputs, and all text translated including error messages and toast notifications
 - **Queue & History Arabic Translations**: Added full translation support for generation queue and history dropdown - all service types now display in Arabic (e.g., "خطة التطوير" for development-plan, "خطة التغذية" for nutrition-plan)
 - **All Videos Section RTL Layout**: Fixed "All Videos" tab in development plans to properly display in RTL - exercise titles now appear on the right with Play icon, video buttons on the left in Arabic mode
 - **Development Plan Full Arabic Content**: Enhanced AI prompts to generate ALL development plan content in Arabic when language is set to Arabic, including exercise names, descriptions, tags, equipment, and prescription details

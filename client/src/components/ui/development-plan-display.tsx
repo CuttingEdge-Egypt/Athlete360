@@ -326,7 +326,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
           )}
         </TabsContent>
 
-        {/* All Videos Tab */}
+        {/* All Videos Tab - FIXED: Proper RTL layout for watch buttons */}
         <TabsContent value="videos" className="space-y-6">
           {allExercisesWithVideos.length > 0 ? (
             <div className="grid gap-4">
@@ -334,6 +334,17 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                 <Card key={index} className="bg-athlete-gray-800/30 border-athlete-gray-700">
                   <CardContent className="p-4" dir={isArabic ? 'rtl' : 'ltr'}>
                     <div className={`flex items-center ${isArabic ? 'flex-row-reverse' : 'flex-row'}`}>
+                      {exercise.videoUrl && (
+                        <Button
+                          size="sm"
+                          onClick={() => window.open(exercise.videoUrl, '_blank')}
+                          className={`${isArabic ? 'mr-4 flex-row-reverse' : 'ml-4'} bg-athlete-accent hover:bg-athlete-accent/90 text-white flex-shrink-0`}
+                          data-testid={`video-button-${index}`}
+                        >
+                          <ExternalLink className={`${isArabic ? 'ml-1' : 'mr-1'} h-3 w-3`} />
+                          {t('analysis.development.watch', 'Watch')}
+                        </Button>
+                      )}
                       <div className="flex-1">
                         <h4 className={`font-semibold text-white flex items-center gap-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
                           <Play className="h-4 w-4 text-athlete-accent" />
@@ -348,15 +359,6 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                         )}
                         <p className={`text-sm text-gray-300 mt-1 ${isArabic ? 'text-right' : ''}`}>{exercise.description}</p>
                       </div>
-                      <Button
-                        size="sm"
-                        onClick={() => window.open(exercise.videoUrl, '_blank')}
-                        className={`${isArabic ? 'mr-4 flex-row-reverse' : 'ml-4'} bg-athlete-accent hover:bg-athlete-accent/90 text-white flex-shrink-0`}
-                        data-testid={`video-button-${index}`}
-                      >
-                        <ExternalLink className={`${isArabic ? 'ml-1' : 'mr-1'} h-3 w-3`} />
-                        {t('analysis.development.watch', 'Watch')}
-                      </Button>
                     </div>
                   </CardContent>
                 </Card>
