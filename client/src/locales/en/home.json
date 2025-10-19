@@ -103,6 +103,9 @@
       "retry": "Retry generation",
       "cancel": "Cancel Generation",
       "remove": "Remove",
+      "emptyQueue": "No generations in queue",
+      "closeQueue": "Close queue",
+      "cannotClose": "Cannot close while generation is in progress",
       "cancelDialog": {
         "title": "Cancel Generation",
         "description": "Are you sure you want to cancel this generation? This action cannot be undone.",

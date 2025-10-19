@@ -509,8 +509,10 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
 
   if (!isVisible) return null;
 
+  const isArabic = i18n.language === 'ar';
+
   return (
-    <div className="fixed bottom-4 right-4 z-50 max-w-md">
+    <div className={`fixed bottom-4 z-50 max-w-md ${isArabic ? 'left-4' : 'right-4'}`} dir={isArabic ? 'rtl' : 'ltr'}>
       <Card className="bg-athlete-gray-800 border-gray-600 shadow-2xl">
         <div className="flex items-center justify-between p-3 border-b border-gray-600">
           <div className="flex items-center gap-2">
@@ -539,7 +541,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
               }}
               disabled={queue.some(item => item.status === 'running' || item.status === 'pending')}
               className="h-6 w-6 p-0 text-gray-400 hover:text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed"
-              title={queue.some(item => item.status === 'running' || item.status === 'pending') ? "Cannot close while generation is in progress" : "Close queue"}
+              title={queue.some(item => item.status === 'running' || item.status === 'pending') ? t('services.queue.cannotClose') : t('services.queue.closeQueue')}
             >
               <X className="w-3 h-3" />
             </Button>
@@ -581,7 +583,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
                          item.status}
                       </span>
                       <span>•</span>
-                      <span>{item.createdAt.toLocaleTimeString()}</span>
+                      <span>{item.createdAt.toLocaleTimeString(isArabic ? 'ar-EG' : 'en-US')}</span>
                     </div>
                   </div>
 
