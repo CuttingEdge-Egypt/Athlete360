@@ -4,13 +4,54 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
+import { AnalysisPopup } from "@/components/ui/analysis-popup";
+import { Eye } from "lucide-react";
 
 export default function VideoAnalysis() {
-  const { t } = useTranslation('videoAnalysis');
+  const { t, i18n } = useTranslation('videoAnalysis');
   const [historyAnalysisData, setHistoryAnalysisData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false); // Don't show loading by default
   const [hasError, setHasError] = useState(false);
   const [location] = useLocation();
+
+  // Preview modal state
+  const [previewModal, setPreviewModal] = useState<{ open: boolean; serviceType: string | null }>({ open: false, serviceType: null });
+  
+  // Preview data types
+  interface PreviewAnalysisItem {
+    serviceType: string;
+    resultData: any;
+    createdAt: string;
+  }
+
+  interface PreviewApiResponse {
+    success: boolean;
+    data: PreviewAnalysisItem[];
+    count: number;
+  }
+
+  // Fetch preview data based on site language
+  const { data: previewData, isLoading: previewLoading } = useQuery<PreviewApiResponse>({
+    queryKey: ['/api/preview/latest-by-type', i18n.language],
+    queryFn: async () => {
+      const res = await fetch(`/api/preview/latest-by-type?language=${i18n.language}`, {
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to fetch preview data');
+      return res.json();
+    },
+    enabled: previewModal.open && !!previewModal.serviceType,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Get the specific analysis data for the selected service type
+  const getAnalysisForPreview = () => {
+    if (!previewData?.data || !previewModal.serviceType) return null;
+    return previewData.data.find((item: any) => item.serviceType === previewModal.serviceType);
+  };
+
+  const selectedPreviewAnalysis = getAnalysisForPreview();
 
   // Reset to upload state when user clicks header button
   const resetToUploadState = () => {
@@ -122,11 +163,22 @@ export default function VideoAnalysis() {
     };
   }, [location]);
 
+  const isArabic = i18n.language === 'ar';
+
   return (
     <div className="min-h-screen bg-athlete-gray-900 p-6">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">{t('title')}</h1>
+        <div className={`mb-8 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+          <h1 className="text-3xl font-bold text-white">{t('title')}</h1>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setPreviewModal({ open: true, serviceType: 'video' })}
+            className="text-gray-400 hover:text-white"
+            data-testid="button-preview-video"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
         </div>
         
         {isLoading ? (
@@ -173,6 +225,18 @@ export default function VideoAnalysis() {
           <VideoAnalysisUpload />
         )}
       </div>
+
+      {/* Preview Modal */}
+      {previewModal.serviceType && selectedPreviewAnalysis && (
+        <AnalysisPopup
+          open={previewModal.open && !previewLoading && !!selectedPreviewAnalysis}
+          onOpenChange={(open) => setPreviewModal({ open, serviceType: open ? previewModal.serviceType : null })}
+          type={previewModal.serviceType}
+          data={selectedPreviewAnalysis?.resultData}
+          athleteName={t('common.sampleAthlete', 'Sample Athlete')}
+          createdAt={selectedPreviewAnalysis.createdAt}
+        />
+      )}
     </div>
   );
 }
