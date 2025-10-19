@@ -1344,7 +1344,11 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                   <Card className="bg-athlete-gray-800 border-gray-600">
                                     <CardHeader>
                                       <CardTitle className={`text-sm text-blue-400 ${isComparisonArabic ? 'text-right' : ''}`}>
-                                        {t('analysis.comparison.adviceFor', 'Advice for')} {parsedData.athlete1?.name}
+                                        {isComparisonArabic ? (
+                                          <>{parsedData.athlete1?.name} {t('analysis.comparison.adviceFor', 'Advice for')}</>
+                                        ) : (
+                                          <>{t('analysis.comparison.adviceFor', 'Advice for')} {parsedData.athlete1?.name}</>
+                                        )}
                                       </CardTitle>
                                     </CardHeader>
                                     <CardContent className={`text-sm text-gray-300 ${isComparisonArabic ? 'text-right' : ''}`}>
@@ -1356,7 +1360,11 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                   <Card className="bg-athlete-gray-800 border-gray-600">
                                     <CardHeader>
                                       <CardTitle className={`text-sm text-blue-400 ${isComparisonArabic ? 'text-right' : ''}`}>
-                                        {t('analysis.comparison.adviceFor', 'Advice for')} {parsedData.athlete2?.name}
+                                        {isComparisonArabic ? (
+                                          <>{parsedData.athlete2?.name} {t('analysis.comparison.adviceFor', 'Advice for')}</>
+                                        ) : (
+                                          <>{t('analysis.comparison.adviceFor', 'Advice for')} {parsedData.athlete2?.name}</>
+                                        )}
                                       </CardTitle>
                                     </CardHeader>
                                     <CardContent className={`text-sm text-gray-300 ${isComparisonArabic ? 'text-right' : ''}`}>
