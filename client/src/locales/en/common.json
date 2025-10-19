@@ -78,7 +78,17 @@
     "loading": "Loading...",
     "error": "An error occurred",
     "unknownCountry": "Unknown Country",
-    "sampleAthlete": "Sample Athlete"
+    "sampleAthlete": "Sample Athlete",
+    "thisMayTakeFewMinutes": "This may take a few minutes",
+    "progress": "Progress",
+    "generatingDevelopmentPlan": "Generating your development plan...",
+    "developmentProgress1": "🎯 Analyzing your training goals and current fitness level...",
+    "developmentProgress2": "🧠 AI is crafting your personalized training strategy...",
+    "developmentProgress3": "💪 Designing targeted exercises for your specific weaknesses...",
+    "developmentProgress4": "📊 Calculating optimal sets, reps, and rest periods...",
+    "developmentProgress5": "🎬 Finding the perfect instructional videos for each exercise...",
+    "developmentProgress6": "⚡ Optimizing training intensity and progression...",
+    "developmentProgress7": "📋 Assembling your complete development plan..."
   },
   "tabs": {
     "overview": "Overview",

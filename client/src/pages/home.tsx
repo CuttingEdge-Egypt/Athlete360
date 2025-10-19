@@ -478,23 +478,15 @@ export default function Home() {
       setDevelopmentProgress(cappedProgress);
       
       if (status === 'in_progress') {
-        // Language-aware progress messages
-        const messages = i18n.language === 'ar' ? [
-          "🎯 جاري تحليل أهدافك التدريبية ومستوى لياقتك الحالي...",
-          "🧠 الذكاء الاصطناعي يصمم استراتيجيتك التدريبية المخصصة...",
-          "💪 تصميم تمارين مستهدفة لنقاط ضعفك المحددة...",
-          "📊 حساب المجموعات والتكرارات وفترات الراحة المثلى...",
-          "🎬 البحث عن مقاطع الفيديو التعليمية المثالية لكل تمرين...",
-          "⚡ تحسين شدة التدريب والتقدم...",
-          "📋 تجميع خطة التطوير الكاملة الخاصة بك..."
-        ] : [
-          "🎯 Analyzing your training goals and current fitness level...",
-          "🧠 AI is crafting your personalized training strategy...",
-          "💪 Designing targeted exercises for your specific weaknesses...",
-          "📊 Calculating optimal sets, reps, and rest periods...",
-          "🎬 Finding the perfect instructional videos for each exercise...",
-          "⚡ Optimizing training intensity and progression...",
-          "📋 Assembling your complete development plan..."
+        // Language-aware progress messages using translation keys
+        const messages = [
+          t('common:messages.developmentProgress1'),
+          t('common:messages.developmentProgress2'),
+          t('common:messages.developmentProgress3'),
+          t('common:messages.developmentProgress4'),
+          t('common:messages.developmentProgress5'),
+          t('common:messages.developmentProgress6'),
+          t('common:messages.developmentProgress7')
         ];
         
         // More sophisticated message selection based on actual progress
@@ -2900,6 +2892,7 @@ export default function Home() {
                               <div className={`flex items-center ${i18n.language === 'ar' ? 'flex-row-reverse' : 'justify-between'}`}>
                                 {i18n.language === 'ar' && (
                                   <Button
+                                    type="button"
                                     variant="outline"
                                     size="sm"
                                     onClick={() => {
@@ -2938,6 +2931,7 @@ export default function Home() {
                                 </div>
                                 {i18n.language !== 'ar' && (
                                   <Button
+                                    type="button"
                                     variant="outline"
                                     size="sm"
                                     onClick={() => {
