@@ -1359,7 +1359,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                   </div>
 
                   {/* Tabbed Analysis */}
-                  <Tabs defaultValue="overview" className="w-full">
+                  <Tabs defaultValue="overview" className="w-full mt-8">
                     <TabsList className="grid w-full grid-cols-5 bg-athlete-gray-700">
                       <TabsTrigger value="overview" data-testid="tab-overview">{t('analysis.comparison.tabOverview', 'Overview')}</TabsTrigger>
                       <TabsTrigger value="strengths" data-testid="tab-strengths">{t('analysis.comparison.tabStrengths', 'Strengths')}</TabsTrigger>
