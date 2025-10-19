@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +30,7 @@ const hasRounds = (sportName: string): boolean => {
 };
 
 export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
-  const { t } = useTranslation('videoAnalysis');
+  const { t, i18n } = useTranslation('videoAnalysis');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [analysisType, setAnalysisType] = useState<string>("match");
   const [whatToAnalyze, setWhatToAnalyze] = useState<string>("");
@@ -50,6 +50,45 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
   const [tokenCost, setTokenCost] = useState(200);
   const { toast } = useToast();
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Helper function to get the appropriate progress message based on current progress and analysis type
+  const getProgressMessage = (progress: number, type: string) => {
+    const stages = type === 'match' ? [
+      { threshold: 5, key: 'progressMessages.match.uploading' },
+      { threshold: 15, key: 'progressMessages.match.preparing' },
+      { threshold: 25, key: 'progressMessages.match.processing' },
+      { threshold: 35, key: 'progressMessages.match.movements' },
+      { threshold: 50, key: 'progressMessages.match.scoring' },
+      { threshold: 65, key: 'progressMessages.match.techniques' },
+      { threshold: 75, key: 'progressMessages.match.penalties' },
+      { threshold: 85, key: 'progressMessages.match.generating' },
+      { threshold: 95, key: 'progressMessages.match.finalizing' }
+    ] : [
+      { threshold: 5, key: 'progressMessages.clip.uploading' },
+      { threshold: 15, key: 'progressMessages.clip.preparing' },
+      { threshold: 30, key: 'progressMessages.clip.processing' },
+      { threshold: 45, key: 'progressMessages.clip.understanding' },
+      { threshold: 60, key: 'progressMessages.clip.evaluating' },
+      { threshold: 75, key: 'progressMessages.clip.comparing' },
+      { threshold: 90, key: 'progressMessages.clip.advice' },
+      { threshold: 95, key: 'progressMessages.clip.finalizing' }
+    ];
+
+    // Find the appropriate stage based on current progress
+    for (let i = stages.length - 1; i >= 0; i--) {
+      if (progress >= stages[i].threshold) {
+        return t(stages[i].key);
+      }
+    }
+    return t('upload.analyzing');
+  };
+
+  // Update loading message when language changes during analysis
+  useEffect(() => {
+    if (isAnalyzing && loadingProgress > 0) {
+      setLoadingMessage(getProgressMessage(loadingProgress, analysisType));
+    }
+  }, [i18n.language, isAnalyzing, loadingProgress, analysisType]);
 
   // Load sports from API
   const { data: sports = [] } = useQuery<Array<{id: string, name: string}>>({

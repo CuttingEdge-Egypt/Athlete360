@@ -49,7 +49,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
   currentAthlete,
   currentService
 }) => {
-  const { t } = useTranslation('home');
+  const { t, i18n } = useTranslation('home');
   const [queue, setQueue] = useState<GenerationItem[]>([]);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -59,6 +59,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [itemToCancel, setItemToCancel] = useState<string | null>(null);
   const timeoutsRef = useRef<Record<string, NodeJS.Timeout[]>>({});
+  const creationTimesRef = useRef<Record<string, number>>({});
 
   // Cleanup timeouts on unmount
   useEffect(() => {
@@ -70,6 +71,35 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
       timeoutsRef.current = {};
     };
   }, []);
+
+  // Helper function to get the appropriate progress message based on elapsed time
+  const getProgressMessageForElapsedTime = (elapsedMs: number) => {
+    if (elapsedMs < 2000) return t('services.queue.requestSent');
+    if (elapsedMs < 8000) return t('services.queue.takingTime');
+    if (elapsedMs < 20000) return t('services.queue.analyzingData');
+    if (elapsedMs < 40000) return t('services.queue.gatheringInsights');
+    if (elapsedMs < 70000) return t('services.queue.buildingAnalysis');
+    return t('services.queue.almostThere');
+  };
+
+  // Update progress messages when language changes
+  useEffect(() => {
+    setQueue(prev => prev.map(item => {
+      if (item.status === 'running' && creationTimesRef.current[item.id]) {
+        const elapsedMs = Date.now() - creationTimesRef.current[item.id];
+        return {
+          ...item,
+          progressMessage: getProgressMessageForElapsedTime(elapsedMs)
+        };
+      } else if (item.status === 'pending') {
+        return {
+          ...item,
+          progressMessage: t('services.queue.waiting')
+        };
+      }
+      return item;
+    }));
+  }, [i18n.language]);
 
   // Helper function to clear timeouts for a specific item
   const clearItemTimeouts = (itemId: string) => {
@@ -122,7 +152,8 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
       
       // Update progress messages over time for running items with better progression
       if (shouldStart) {
-        // Track timeouts for cleanup
+        // Track creation time and timeouts for cleanup
+        creationTimesRef.current[itemId] = Date.now();
         timeoutsRef.current[itemId] = [];
         
         const timeout1 = setTimeout(() => {
@@ -179,7 +210,8 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
           };
           
           // Update progress messages over time for newly started items with better progression
-          // Track timeouts for cleanup
+          // Track creation time and timeouts for cleanup
+          creationTimesRef.current[item.id] = Date.now();
           timeoutsRef.current[item.id] = [];
           
           const timeout1 = setTimeout(() => {
@@ -259,8 +291,9 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
       setShowCancelDialog(true);
       return;
     }
-    // Clear any pending timeouts for this item
+    // Clear any pending timeouts and creation time for this item
     clearItemTimeouts(id);
+    delete creationTimesRef.current[id];
     
     setQueue(prev => prev.filter(item => item.id !== id));
     // Process queue after removal to start pending items
