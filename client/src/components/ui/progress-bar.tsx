@@ -93,7 +93,7 @@ export function ProgressBar({ isActive, currentPhase, onCancel, className = "" }
               data-testid="progress-bar"
             />
           </div>
-          <div className={`flex items-center justify-between text-sm ${isArabic ? 'flex-row-reverse' : ''}`}>
+          <div className="flex items-center justify-between text-sm">
             <p className="text-gray-200 font-medium">
               {currentPhase?.message || t('analysis.comparison.initializing')}
             </p>
