@@ -8,11 +8,17 @@ import commonEn from '../locales/en/common.json';
 import navEn from '../locales/en/nav.json';
 import homeEn from '../locales/en/home.json';
 import videoAnalysisEn from '../locales/en/videoAnalysis.json';
+import signupEn from '../locales/en/signup.json';
+import accountEn from '../locales/en/account.json';
+import tokensEn from '../locales/en/tokens.json';
 
 import commonAr from '../locales/ar/common.json';
 import navAr from '../locales/ar/nav.json';
 import homeAr from '../locales/ar/home.json';
 import videoAnalysisAr from '../locales/ar/videoAnalysis.json';
+import signupAr from '../locales/ar/signup.json';
+import accountAr from '../locales/ar/account.json';
+import tokensAr from '../locales/ar/tokens.json';
 
 // Define the resources
 const resources = {
@@ -21,12 +27,18 @@ const resources = {
     nav: navEn,
     home: homeEn,
     videoAnalysis: videoAnalysisEn,
+    signup: signupEn,
+    account: accountEn,
+    tokens: tokensEn,
   },
   ar: {
     common: commonAr,
     nav: navAr,
     home: homeAr,
     videoAnalysis: videoAnalysisAr,
+    signup: signupAr,
+    account: accountAr,
+    tokens: tokensAr,
   },
 };
 
@@ -40,7 +52,7 @@ i18n
     fallbackLng: 'en',
     
     // Namespace configuration
-    ns: ['common', 'nav', 'home', 'videoAnalysis'],
+    ns: ['common', 'nav', 'home', 'videoAnalysis', 'signup', 'account', 'tokens'],
     defaultNS: 'common',
     
     // Language detection configuration

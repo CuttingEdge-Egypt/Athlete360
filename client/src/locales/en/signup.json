@@ -1,0 +1,74 @@
+{
+  "header": {
+    "title": "Join Athlete360",
+    "subtitle": "Create your account and start analyzing athletes with AI-powered insights",
+    "backToHome": "Back to Home"
+  },
+  "card": {
+    "title": "Create Your Account",
+    "subtitle": "Tell us about yourself to get started with 1000 free tokens"
+  },
+  "form": {
+    "firstName": "First Name",
+    "firstNamePlaceholder": "John",
+    "lastName": "Last Name",
+    "lastNamePlaceholder": "Doe",
+    "email": "Email Address",
+    "emailPlaceholder": "john.doe@example.com",
+    "referralCode": "Referral Code (Optional)",
+    "referralCodePlaceholder": "Enter referral code to earn bonus tokens",
+    "referralBonus": "You'll receive bonus tokens when you sign up!",
+    "password": "Password",
+    "passwordPlaceholder": "Min. 8 chars, 1 uppercase, 1 special",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Re-enter password",
+    "createButton": "Create Account & Get 1000 Free Tokens",
+    "creating": "Creating Account..."
+  },
+  "footer": {
+    "haveAccount": "Already have an account?",
+    "signIn": "Sign in here"
+  },
+  "toasts": {
+    "referralApplied": {
+      "title": "Referral code applied!",
+      "description": "You'll get bonus tokens when you sign up."
+    },
+    "completeInfo": {
+      "title": "Complete personal information",
+      "description": "All fields are required to continue"
+    },
+    "invalidEmail": {
+      "title": "Invalid email address",
+      "description": "Please enter a valid email address"
+    },
+    "passwordTooShort": {
+      "title": "Password too short",
+      "description": "Password must be at least 8 characters long"
+    },
+    "passwordNoUppercase": {
+      "title": "Password validation failed",
+      "description": "Password must contain at least one uppercase letter"
+    },
+    "passwordNoSpecial": {
+      "title": "Password validation failed",
+      "description": "Password must contain at least one special character"
+    },
+    "passwordMismatch": {
+      "title": "Passwords don't match",
+      "description": "Please ensure both passwords are identical"
+    },
+    "accountCreated": {
+      "title": "Account created successfully!",
+      "description": "Welcome {name}! You got 1000 free tokens."
+    },
+    "signupFailed": {
+      "title": "Signup failed",
+      "description": "Failed to create account"
+    },
+    "signupError": {
+      "title": "Signup failed",
+      "description": "Please try again or contact support"
+    }
+  }
+}

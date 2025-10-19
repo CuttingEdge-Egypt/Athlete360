@@ -1,0 +1,74 @@
+{
+  "header": {
+    "title": "انضم إلى أثليت360",
+    "subtitle": "أنشئ حسابك وابدأ في تحليل الرياضيين باستخدام رؤى مدعومة بالذكاء الاصطناعي",
+    "backToHome": "العودة للصفحة الرئيسية"
+  },
+  "card": {
+    "title": "إنشاء حسابك",
+    "subtitle": "أخبرنا عن نفسك للبدء مع 1000 رمز مجاني"
+  },
+  "form": {
+    "firstName": "الاسم الأول",
+    "firstNamePlaceholder": "محمد",
+    "lastName": "اسم العائلة",
+    "lastNamePlaceholder": "أحمد",
+    "email": "البريد الإلكتروني",
+    "emailPlaceholder": "example@email.com",
+    "referralCode": "رمز الإحالة (اختياري)",
+    "referralCodePlaceholder": "أدخل رمز الإحالة للحصول على رموز إضافية",
+    "referralBonus": "ستحصل على رموز إضافية عند التسجيل!",
+    "password": "كلمة المرور",
+    "passwordPlaceholder": "8 أحرف على الأقل، حرف كبير، رمز خاص",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "confirmPasswordPlaceholder": "أعد إدخال كلمة المرور",
+    "createButton": "إنشاء الحساب والحصول على 1000 رمز مجاني",
+    "creating": "جاري إنشاء الحساب..."
+  },
+  "footer": {
+    "haveAccount": "هل لديك حساب بالفعل؟",
+    "signIn": "سجّل الدخول هنا"
+  },
+  "toasts": {
+    "referralApplied": {
+      "title": "تم تطبيق رمز الإحالة!",
+      "description": "ستحصل على رموز إضافية عند التسجيل."
+    },
+    "completeInfo": {
+      "title": "أكمل المعلومات الشخصية",
+      "description": "جميع الحقول مطلوبة للمتابعة"
+    },
+    "invalidEmail": {
+      "title": "بريد إلكتروني غير صالح",
+      "description": "يرجى إدخال بريد إلكتروني صالح"
+    },
+    "passwordTooShort": {
+      "title": "كلمة المرور قصيرة جداً",
+      "description": "يجب أن تكون كلمة المرور 8 أحرف على الأقل"
+    },
+    "passwordNoUppercase": {
+      "title": "فشل التحقق من كلمة المرور",
+      "description": "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل"
+    },
+    "passwordNoSpecial": {
+      "title": "فشل التحقق من كلمة المرور",
+      "description": "يجب أن تحتوي كلمة المرور على رمز خاص واحد على الأقل"
+    },
+    "passwordMismatch": {
+      "title": "كلمات المرور غير متطابقة",
+      "description": "يرجى التأكد من تطابق كلمتي المرور"
+    },
+    "accountCreated": {
+      "title": "تم إنشاء الحساب بنجاح!",
+      "description": "مرحباً {name}! حصلت على 1000 رمز مجاني."
+    },
+    "signupFailed": {
+      "title": "فشل التسجيل",
+      "description": "فشل في إنشاء الحساب"
+    },
+    "signupError": {
+      "title": "فشل التسجيل",
+      "description": "يرجى المحاولة مرة أخرى أو الاتصال بالدعم"
+    }
+  }
+}

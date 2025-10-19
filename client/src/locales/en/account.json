@@ -1,0 +1,56 @@
+{
+  "header": {
+    "title": "Account Settings",
+    "subtitle": "Manage your profile and view account information",
+    "backToHome": "Back to Home"
+  },
+  "profile": {
+    "title": "Profile Information",
+    "subtitle": "Update your account details",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email Address",
+    "editButton": "Edit Profile",
+    "saveButton": "Save Changes",
+    "cancelButton": "Cancel",
+    "memberSince": "Member since"
+  },
+  "tokens": {
+    "title": "Token Balance",
+    "current": "Current Balance",
+    "totalPurchased": "Total Purchased",
+    "tokens": "Tokens",
+    "buyButton": "Buy More Tokens"
+  },
+  "history": {
+    "title": "Analysis History",
+    "subtitle": "Your recent athlete analyses",
+    "emptyState": "No analysis history yet. Start analyzing athletes to see your history here!",
+    "viewButton": "View",
+    "createdAt": "Created",
+    "unknown": "Unknown"
+  },
+  "services": {
+    "bio": "Bio Analysis",
+    "rank": "Rank History",
+    "strengths": "Strengths",
+    "weaknesses": "Weaknesses",
+    "development": "Development Plan",
+    "nutrition-plan": "Nutrition Plan",
+    "nutrition": "Nutrition Plan",
+    "beat": "Beat Strategies",
+    "video": "Video Analysis",
+    "comparison": "Athlete Comparison"
+  },
+  "toasts": {
+    "profileUpdated": {
+      "title": "Profile Updated",
+      "description": "Your profile information has been updated successfully."
+    },
+    "updateFailed": {
+      "title": "Update Failed",
+      "description": "Failed to update profile"
+    }
+  },
+  "loading": "Loading your account..."
+}

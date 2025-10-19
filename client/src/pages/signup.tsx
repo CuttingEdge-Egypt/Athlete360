@@ -7,6 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import { User, Gift, Zap, ArrowLeft } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export function SignupPage() {
   const [, setLocation] = useLocation();
@@ -21,6 +23,9 @@ export function SignupPage() {
   });
   
   const { toast } = useToast();
+  const { t } = useTranslation('signup');
+  const { language } = useLanguage();
+  const isArabic = language === 'ar';
 
   // Check for referral code in URL on component mount
   useEffect(() => {
@@ -30,17 +35,17 @@ export function SignupPage() {
       setPersonalInfo(prev => ({ ...prev, referralCode: refCode }));
       // Show a friendly message about the referral
       toast({
-        title: "Referral code applied!",
-        description: "You'll get bonus tokens when you sign up.",
+        title: t('toasts.referralApplied.title'),
+        description: t('toasts.referralApplied.description'),
       });
     }
-  }, []);
+  }, [t, toast]);
 
   const handleSignup = async () => {
     if (!personalInfo.firstName || !personalInfo.lastName || !personalInfo.email || !personalInfo.password || !personalInfo.confirmPassword) {
       toast({
-        title: "Complete personal information",
-        description: "All fields are required to continue",
+        title: t('toasts.completeInfo.title'),
+        description: t('toasts.completeInfo.description'),
         variant: "destructive",
       });
       return;
@@ -50,8 +55,8 @@ export function SignupPage() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(personalInfo.email)) {
       toast({
-        title: "Invalid email address",
-        description: "Please enter a valid email address",
+        title: t('toasts.invalidEmail.title'),
+        description: t('toasts.invalidEmail.description'),
         variant: "destructive",
       });
       return;
@@ -60,8 +65,8 @@ export function SignupPage() {
     // Password validation
     if (personalInfo.password.length < 8) {
       toast({
-        title: "Password too short",
-        description: "Password must be at least 8 characters long",
+        title: t('toasts.passwordTooShort.title'),
+        description: t('toasts.passwordTooShort.description'),
         variant: "destructive",
       });
       return;
@@ -69,8 +74,8 @@ export function SignupPage() {
 
     if (!/[A-Z]/.test(personalInfo.password)) {
       toast({
-        title: "Password validation failed",
-        description: "Password must contain at least one uppercase letter",
+        title: t('toasts.passwordNoUppercase.title'),
+        description: t('toasts.passwordNoUppercase.description'),
         variant: "destructive",
       });
       return;
@@ -78,8 +83,8 @@ export function SignupPage() {
 
     if (!/[!@#$%^&*(),.?":{}|<>]/.test(personalInfo.password)) {
       toast({
-        title: "Password validation failed",
-        description: "Password must contain at least one special character",
+        title: t('toasts.passwordNoSpecial.title'),
+        description: t('toasts.passwordNoSpecial.description'),
         variant: "destructive",
       });
       return;
@@ -87,8 +92,8 @@ export function SignupPage() {
 
     if (personalInfo.password !== personalInfo.confirmPassword) {
       toast({
-        title: "Passwords don't match",
-        description: "Please ensure both passwords are identical",
+        title: t('toasts.passwordMismatch.title'),
+        description: t('toasts.passwordMismatch.description'),
         variant: "destructive",
       });
       return;
@@ -115,8 +120,8 @@ export function SignupPage() {
 
       if (result.success) {
         toast({
-          title: "Account created successfully!",
-          description: `Welcome ${result.user.firstName}! You got 1000 free tokens.`,
+          title: t('toasts.accountCreated.title'),
+          description: t('toasts.accountCreated.description', { name: result.user.firstName }),
         });
         // Force page reload to update authentication state and redirect to dashboard
         setTimeout(() => {
@@ -124,16 +129,16 @@ export function SignupPage() {
         }, 1500);
       } else {
         toast({
-          title: "Signup failed",
-          description: result.message || "Failed to create account",
+          title: t('toasts.signupFailed.title'),
+          description: result.message || t('toasts.signupFailed.description'),
           variant: "destructive",
         });
       }
     } catch (error: any) {
       console.error('Signup error:', error);
       toast({
-        title: "Signup failed",
-        description: error.message || "Please try again or contact support",
+        title: t('toasts.signupError.title'),
+        description: error.message || t('toasts.signupError.description'),
         variant: "destructive",
       });
     } finally {
@@ -142,124 +147,124 @@ export function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-4" dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
+          <div className={`flex items-center justify-center gap-2 mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
             <Zap className="h-8 w-8 text-blue-500" />
-            <h1 className="text-3xl font-bold text-white">Join Athlete360</h1>
+            <h1 className={`${isArabic ? 'text-4xl' : 'text-3xl'} font-bold text-white`}>{t('header.title')}</h1>
           </div>
-          <p className="text-gray-300 text-lg">
-            Create your account and start analyzing athletes with AI-powered insights
+          <p className={`text-gray-300 ${isArabic ? 'text-xl' : 'text-lg'}`}>
+            {t('header.subtitle')}
           </p>
           
           {/* Back to Home Button */}
           <Button 
             variant="ghost" 
             onClick={() => setLocation('/')}
-            className="mt-4 text-gray-400 hover:text-white"
+            className={`mt-4 text-gray-400 hover:text-white ${isArabic ? 'flex-row-reverse' : ''}`}
             data-testid="button-back-home"
           >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Home
+            <ArrowLeft className={`${isArabic ? 'ml-2 rotate-180' : 'mr-2'} h-4 w-4`} />
+            {t('header.backToHome')}
           </Button>
         </div>
 
         {/* Main Content */}
         <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-white flex items-center justify-center gap-2">
+            <CardTitle className={`${isArabic ? 'text-3xl' : 'text-2xl'} font-bold text-white flex items-center justify-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
               <User className="h-6 w-6 text-blue-500" />
-              Create Your Account
+              {t('card.title')}
             </CardTitle>
-            <CardDescription className="text-gray-300 text-center">
-              Tell us about yourself to get started with 1000 free tokens
+            <CardDescription className={`text-gray-300 text-center ${isArabic ? 'text-lg' : 'text-base'}`}>
+              {t('card.subtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="firstName" className="text-sm font-medium text-gray-200">First Name</Label>
+                <Label htmlFor="firstName" className={`${isArabic ? 'text-base' : 'text-sm'} font-medium text-gray-200`}>{t('form.firstName')}</Label>
                 <Input
                   id="firstName"
                   value={personalInfo.firstName}
                   onChange={(e) => setPersonalInfo(prev => ({ ...prev, firstName: e.target.value }))}
-                  placeholder="John"
-                  className="h-12 text-base bg-gray-700 border-gray-600 text-white"
+                  placeholder={t('form.firstNamePlaceholder')}
+                  className={`h-12 ${isArabic ? 'text-lg' : 'text-base'} bg-gray-700 border-gray-600 text-white`}
                   data-testid="input-first-name"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName" className="text-sm font-medium text-gray-200">Last Name</Label>
+                <Label htmlFor="lastName" className={`${isArabic ? 'text-base' : 'text-sm'} font-medium text-gray-200`}>{t('form.lastName')}</Label>
                 <Input
                   id="lastName"
                   value={personalInfo.lastName}
                   onChange={(e) => setPersonalInfo(prev => ({ ...prev, lastName: e.target.value }))}
-                  placeholder="Doe"
-                  className="h-12 text-base bg-gray-700 border-gray-600 text-white"
+                  placeholder={t('form.lastNamePlaceholder')}
+                  className={`h-12 ${isArabic ? 'text-lg' : 'text-base'} bg-gray-700 border-gray-600 text-white`}
                   data-testid="input-last-name"
                 />
               </div>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-gray-200">Email Address</Label>
+              <Label htmlFor="email" className={`${isArabic ? 'text-base' : 'text-sm'} font-medium text-gray-200`}>{t('form.email')}</Label>
               <Input
                 id="email"
                 type="email"
                 value={personalInfo.email}
                 onChange={(e) => setPersonalInfo(prev => ({ ...prev, email: e.target.value }))}
-                placeholder="john.doe@example.com"
-                className="h-12 text-base bg-gray-700 border-gray-600 text-white"
+                placeholder={t('form.emailPlaceholder')}
+                className={`h-12 ${isArabic ? 'text-lg' : 'text-base'} bg-gray-700 border-gray-600 text-white`}
                 data-testid="input-email"
               />
             </div>
             
             {/* Referral Code Field */}
             <div className="space-y-2">
-              <Label htmlFor="referralCode" className="text-sm font-medium text-gray-200 flex items-center gap-2">
+              <Label htmlFor="referralCode" className={`${isArabic ? 'text-base flex-row-reverse' : 'text-sm'} font-medium text-gray-200 flex items-center gap-2`}>
                 <Gift className="h-4 w-4 text-green-500" />
-                Referral Code (Optional)
+                {t('form.referralCode')}
               </Label>
               <Input
                 id="referralCode"
                 value={personalInfo.referralCode}
                 onChange={(e) => setPersonalInfo(prev => ({ ...prev, referralCode: e.target.value.toUpperCase() }))}
-                placeholder="Enter referral code to earn bonus tokens"
-                className="h-12 text-base bg-gray-700 border-gray-600 text-white"
+                placeholder={t('form.referralCodePlaceholder')}
+                className={`h-12 ${isArabic ? 'text-lg' : 'text-base'} bg-gray-700 border-gray-600 text-white`}
                 data-testid="input-referral-code"
               />
               {personalInfo.referralCode && (
-                <p className="text-xs text-green-400 flex items-center gap-1">
+                <p className={`text-xs text-green-400 flex items-center gap-1 ${isArabic ? 'flex-row-reverse text-sm' : ''}`}>
                   <Gift className="h-3 w-3" />
-                  You'll receive bonus tokens when you sign up!
+                  {t('form.referralBonus')}
                 </p>
               )}
             </div>
             
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium text-gray-200">Password</Label>
+                <Label htmlFor="password" className={`${isArabic ? 'text-base' : 'text-sm'} font-medium text-gray-200`}>{t('form.password')}</Label>
                 <Input
                   id="password"
                   type="password"
                   value={personalInfo.password}
                   onChange={(e) => setPersonalInfo(prev => ({ ...prev, password: e.target.value }))}
-                  placeholder="Min. 8 chars, 1 uppercase, 1 special"
-                  className="h-12 text-base bg-gray-700 border-gray-600 text-white"
+                  placeholder={t('form.passwordPlaceholder')}
+                  className={`h-12 ${isArabic ? 'text-lg' : 'text-base'} bg-gray-700 border-gray-600 text-white`}
                   data-testid="input-password"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-200">Confirm Password</Label>
+                <Label htmlFor="confirmPassword" className={`${isArabic ? 'text-base' : 'text-sm'} font-medium text-gray-200`}>{t('form.confirmPassword')}</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
                   value={personalInfo.confirmPassword}
                   onChange={(e) => setPersonalInfo(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                  placeholder="Re-enter password"
-                  className="h-12 text-base bg-gray-700 border-gray-600 text-white"
+                  placeholder={t('form.confirmPasswordPlaceholder')}
+                  className={`h-12 ${isArabic ? 'text-lg' : 'text-base'} bg-gray-700 border-gray-600 text-white`}
                   data-testid="input-confirm-password"
                 />
               </div>
@@ -268,26 +273,26 @@ export function SignupPage() {
             <Button 
               onClick={handleSignup}
               disabled={isProcessing}
-              className="w-full bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white font-medium h-12 text-base"
+              className={`w-full bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white font-medium h-12 ${isArabic ? 'text-lg flex-row-reverse' : 'text-base'}`}
               data-testid="button-create-account"
             >
-              {isProcessing ? 'Creating Account...' : 'Create Account & Get 1000 Free Tokens'}
-              <Gift className="ml-2 h-5 w-5" />
+              {isProcessing ? t('form.creating') : t('form.createButton')}
+              <Gift className={`${isArabic ? 'mr-2' : 'ml-2'} h-5 w-5`} />
             </Button>
           </CardContent>
         </Card>
         
         {/* Footer */}
         <div className="text-center mt-8">
-          <p className="text-gray-400">
-            Already have an account?{' '}
+          <p className={`text-gray-400 ${isArabic ? 'text-lg' : 'text-base'}`}>
+            {t('footer.haveAccount')}{' '}
             <Button 
               variant="link" 
               onClick={() => setLocation('/login')}
               className="text-blue-400 hover:text-blue-300 p-0 h-auto"
               data-testid="link-login"
             >
-              Sign in here
+              {t('footer.signIn')}
             </Button>
           </p>
         </div>

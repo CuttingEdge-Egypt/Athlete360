@@ -11,6 +11,8 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useLocation } from "wouter";
 import { AnalysisPopup } from "@/components/ui/analysis-popup";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   User,
   Edit3,
@@ -23,7 +25,8 @@ import {
   Zap,
   Utensils,
   Video,
-  GitCompare
+  GitCompare,
+  ArrowLeft
 } from "lucide-react";
 
 interface UserProfile {
@@ -48,23 +51,14 @@ const serviceIcons: { [key: string]: any } = {
   comparison: GitCompare,
 };
 
-const serviceLabels: { [key: string]: string } = {
-  bio: 'Bio Analysis',
-  rank: 'Rank History',
-  strengths: 'Strengths',
-  weaknesses: 'Weaknesses',
-  development: 'Development Plan',
-  'nutrition-plan': 'Nutrition Plan',
-  nutrition: 'Nutrition Plan',
-  beat: 'Beat Strategies',
-  video: 'Video Analysis',
-  comparison: 'Athlete Comparison',
-};
-
 export default function Account() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { t } = useTranslation('account');
+  const { language } = useLanguage();
+  const isArabic = language === 'ar';
+  
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<any>(null);
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
   const [athleteForPopup, setAthleteForPopup] = useState<any>(null);
@@ -75,6 +69,23 @@ export default function Account() {
     lastName: "",
     email: ""
   });
+
+  // Service labels from translations
+  const getServiceLabel = (serviceType: string) => {
+    const serviceMap: { [key: string]: string } = {
+      bio: t('services.bio'),
+      rank: t('services.rank'),
+      strengths: t('services.strengths'),
+      weaknesses: t('services.weaknesses'),
+      development: t('services.development'),
+      'nutrition-plan': t('services.nutrition-plan'),
+      nutrition: t('services.nutrition'),
+      beat: t('services.beat'),
+      video: t('services.video'),
+      comparison: t('services.comparison'),
+    };
+    return serviceMap[serviceType] || serviceType;
+  };
 
   // Fetch user profile
   const { data: profile, isLoading } = useQuery<UserProfile>({
@@ -99,16 +110,16 @@ export default function Account() {
     },
     onSuccess: () => {
       toast({
-        title: "Profile Updated",
-        description: "Your profile information has been updated successfully.",
+        title: t('toasts.profileUpdated.title'),
+        description: t('toasts.profileUpdated.description'),
       });
       setEditingProfile(false);
       queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
     },
     onError: (error) => {
       toast({
-        title: "Update Failed",
-        description: error.message || "Failed to update profile",
+        title: t('toasts.updateFailed.title'),
+        description: error.message || t('toasts.updateFailed.description'),
         variant: "destructive",
       });
     }
@@ -157,28 +168,29 @@ export default function Account() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white">Loading your account...</div>
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center" dir={isArabic ? 'rtl' : 'ltr'}>
+        <div className={`text-white ${isArabic ? 'text-xl' : 'text-base'}`}>{t('loading')}</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-gray-900" dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="container mx-auto p-6 max-w-4xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white">Account Settings</h1>
-            <p className="text-gray-400 mt-1">Manage your profile and view account information</p>
+            <h1 className={`${isArabic ? 'text-4xl' : 'text-3xl'} font-bold text-white`}>{t('header.title')}</h1>
+            <p className={`text-gray-400 mt-1 ${isArabic ? 'text-lg' : 'text-base'}`}>{t('header.subtitle')}</p>
           </div>
           <Button 
             variant="outline" 
             onClick={() => setLocation('/')}
-            className="border-gray-600 text-gray-300 hover:bg-gray-700"
+            className={`border-gray-600 text-gray-300 hover:bg-gray-700 ${isArabic ? 'flex-row-reverse' : ''}`}
             data-testid="button-back-home"
           >
-            Back to Home
+            <ArrowLeft className={`${isArabic ? 'ml-2 rotate-180' : 'mr-2'} h-4 w-4`} />
+            {t('header.backToHome')}
           </Button>
         </div>
 
@@ -187,12 +199,12 @@ export default function Account() {
           <Card className="bg-gray-800 border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-xl text-white flex items-center gap-2">
+                <CardTitle className={`${isArabic ? 'text-2xl flex-row-reverse' : 'text-xl'} text-white flex items-center gap-2`}>
                   <User className="h-5 w-5 text-blue-400" />
-                  Profile Information
+                  {t('profile.title')}
                 </CardTitle>
-                <CardDescription className="text-gray-400">
-                  Your personal account details
+                <CardDescription className={`text-gray-400 ${isArabic ? 'text-base' : 'text-sm'}`}>
+                  {t('profile.subtitle')}
                 </CardDescription>
               </div>
               <Button
@@ -213,29 +225,29 @@ export default function Account() {
                     setEditingProfile(true);
                   }
                 }}
-                className="border-gray-600"
+                className={`border-gray-600 ${isArabic ? 'flex-row-reverse' : ''}`}
                 data-testid={editingProfile ? "button-cancel-edit" : "button-edit-profile"}
               >
-                {editingProfile ? <X className="h-4 w-4 mr-2" /> : <Edit3 className="h-4 w-4 mr-2" />}
-                {editingProfile ? "Cancel" : "Edit"}
+                {editingProfile ? <X className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} /> : <Edit3 className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />}
+                {editingProfile ? t('profile.cancelButton') : t('profile.editButton')}
               </Button>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Token Balance */}
               <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-lg border border-green-500/20">
-                <div className="flex items-center gap-3">
+                <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                   <Coins className="h-6 w-6 text-green-400" />
                   <div>
-                    <p className="font-medium text-green-400">Token Balance</p>
-                    <p className="text-sm text-gray-400">Available for analysis</p>
+                    <p className={`font-medium text-green-400 ${isArabic ? 'text-lg' : 'text-base'}`}>{t('tokens.title')}</p>
+                    <p className={`${isArabic ? 'text-base' : 'text-sm'} text-gray-400`}>{t('tokens.current')}</p>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className={`${isArabic ? 'text-left' : 'text-right'}`}>
                   <div className="text-2xl font-bold text-green-400">
                     {profile?.currentTokens ?? 0}
                   </div>
-                  <div className="text-sm text-gray-400">
-                    of {profile?.totalTokensPurchased ?? 0} purchased
+                  <div className={`${isArabic ? 'text-base' : 'text-sm'} text-gray-400`}>
+                    {t('tokens.totalPurchased')}: {profile?.totalTokensPurchased ?? 0}
                   </div>
                 </div>
               </div>
@@ -246,38 +258,38 @@ export default function Account() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
+                    <Label htmlFor="firstName" className={isArabic ? 'text-base' : 'text-sm'}>{t('profile.firstName')}</Label>
                     <Input
                       id="firstName"
                       value={profileData.firstName}
                       onChange={(e) => setProfileData(prev => ({ ...prev, firstName: e.target.value }))}
                       disabled={!editingProfile}
-                      className="bg-gray-900/50 border-gray-600"
+                      className={`bg-gray-900/50 border-gray-600 ${isArabic ? 'text-lg' : 'text-base'}`}
                       data-testid="input-first-name"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
+                    <Label htmlFor="lastName" className={isArabic ? 'text-base' : 'text-sm'}>{t('profile.lastName')}</Label>
                     <Input
                       id="lastName"
                       value={profileData.lastName}
                       onChange={(e) => setProfileData(prev => ({ ...prev, lastName: e.target.value }))}
                       disabled={!editingProfile}
-                      className="bg-gray-900/50 border-gray-600"
+                      className={`bg-gray-900/50 border-gray-600 ${isArabic ? 'text-lg' : 'text-base'}`}
                       data-testid="input-last-name"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
+                  <Label htmlFor="email" className={isArabic ? 'text-base' : 'text-sm'}>{t('profile.email')}</Label>
                   <Input
                     id="email"
                     type="email"
                     value={profileData.email}
                     onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
                     disabled={!editingProfile}
-                    className="bg-gray-900/50 border-gray-600"
+                    className={`bg-gray-900/50 border-gray-600 ${isArabic ? 'text-lg' : 'text-base'}`}
                     data-testid="input-email"
                   />
                 </div>
@@ -286,11 +298,11 @@ export default function Account() {
                   <Button 
                     onClick={handleSaveProfile}
                     disabled={updateProfileMutation.isPending}
-                    className="bg-blue-600 hover:bg-blue-700"
+                    className={`bg-blue-600 hover:bg-blue-700 ${isArabic ? 'flex-row-reverse' : ''}`}
                     data-testid="button-save-profile"
                   >
-                    <Save className="h-4 w-4 mr-2" />
-                    {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
+                    <Save className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                    {updateProfileMutation.isPending ? t('profile.saveButton') : t('profile.saveButton')}
                   </Button>
                 )}
               </div>
@@ -300,17 +312,9 @@ export default function Account() {
               {/* Account Info */}
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <Label className="text-gray-400">Member Since</Label>
-                  <div className="text-white font-medium">
-                    {profile?.memberSince ? new Date(profile.memberSince).toLocaleDateString() : 'N/A'}
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-gray-400">Account Status</Label>
-                  <div className="text-white font-medium">
-                    <Badge variant="outline" className="border-green-500 text-green-400">
-                      Active
-                    </Badge>
+                  <Label className={`text-gray-400 ${isArabic ? 'text-base' : 'text-sm'}`}>{t('profile.memberSince')}</Label>
+                  <div className={`text-white font-medium ${isArabic ? 'text-lg' : 'text-base'}`}>
+                    {profile?.memberSince ? new Date(profile.memberSince).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US') : 'N/A'}
                   </div>
                 </div>
               </div>
@@ -320,12 +324,12 @@ export default function Account() {
           {/* Analysis History */}
           <Card className="bg-gray-800 border-gray-700">
             <CardHeader>
-              <CardTitle className="text-xl text-white flex items-center gap-2">
+              <CardTitle className={`${isArabic ? 'text-2xl flex-row-reverse' : 'text-xl'} text-white flex items-center gap-2`}>
                 <History className="h-5 w-5 text-blue-400" />
-                Recent Analysis History
+                {t('history.title')}
               </CardTitle>
-              <CardDescription className="text-gray-400">
-                Your recent athlete analyses
+              <CardDescription className={`text-gray-400 ${isArabic ? 'text-base' : 'text-sm'}`}>
+                {t('history.subtitle')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -333,7 +337,7 @@ export default function Account() {
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {history.slice(0, 50).map((item: any) => {
                     const ServiceIcon = serviceIcons[item.serviceType] || User;
-                    const serviceLabel = serviceLabels[item.serviceType] || item.serviceType;
+                    const serviceLabel = getServiceLabel(item.serviceType);
                     
                     return (
                       <button
@@ -342,33 +346,32 @@ export default function Account() {
                         className="w-full flex items-center justify-between p-3 bg-gray-900/50 rounded-lg border border-gray-700 hover:border-blue-500/50 hover:bg-gray-900/80 transition-all cursor-pointer text-left"
                         data-testid={`button-history-item-${item.id}`}
                       >
-                        <div className="flex items-center gap-3 flex-1">
+                        <div className={`flex items-center gap-3 flex-1 ${isArabic ? 'flex-row-reverse' : ''}`}>
                           <div className="p-2 rounded-lg bg-blue-500/10">
                             <ServiceIcon className="h-4 w-4 text-blue-400" />
                           </div>
-                          <div className="flex-1">
-                            <div className="font-medium text-white">
+                          <div className={`flex-1 ${isArabic ? 'text-right' : 'text-left'}`}>
+                            <div className={`font-medium text-white ${isArabic ? 'text-lg' : 'text-base'}`}>
                               {serviceLabel}
                             </div>
-                            <div className="text-sm text-gray-400">
+                            <div className={`${isArabic ? 'text-base' : 'text-sm'} text-gray-400`}>
                               {item.athleteName && `${item.athleteName} • `}
                               {item.athleteSport && `${item.athleteSport} • `}
-                              {new Date(item.createdAt).toLocaleDateString()}
+                              {new Date(item.createdAt).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US')}
                             </div>
                           </div>
                         </div>
                         <Badge variant="outline" className="text-xs border-blue-500 text-blue-400">
-                          -{item.tokensDeducted} tokens
+                          -{item.tokensDeducted} {t('tokens.tokens')}
                         </Badge>
                       </button>
                     );
                   })}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-400">
+                <div className={`text-center py-8 text-gray-400 ${isArabic ? 'text-lg' : 'text-base'}`}>
                   <History className="h-8 w-8 mx-auto mb-3 opacity-50" />
-                  <p>No analysis history yet</p>
-                  <p className="text-sm">Start analyzing athletes to see your history here</p>
+                  <p>{t('history.emptyState')}</p>
                 </div>
               )}
             </CardContent>
