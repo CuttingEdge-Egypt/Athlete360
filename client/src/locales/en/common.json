@@ -44,6 +44,17 @@
     "selectSport": "Select a sport",
     "selectCountry": "Select a country"
   },
+  "interface": {
+    "lastUpdate": "Last Update"
+  },
+  "athleteSearch": {
+    "rankingUpdate": {
+      "updateButton": "Update Info",
+      "tooltip": {
+        "help": "Update athlete profile information"
+      }
+    }
+  },
   "messages": {
     "welcome": "Welcome back!",
     "loginFailed": "Login failed",

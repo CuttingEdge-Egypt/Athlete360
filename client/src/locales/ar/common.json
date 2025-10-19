@@ -44,6 +44,17 @@
     "selectSport": "اختر رياضة",
     "selectCountry": "اختر بلد"
   },
+  "interface": {
+    "lastUpdate": "آخر تحديث"
+  },
+  "athleteSearch": {
+    "rankingUpdate": {
+      "updateButton": "تحديث المعلومات",
+      "tooltip": {
+        "help": "تحديث معلومات الملف الشخصي للاعب"
+      }
+    }
+  },
   "login": {
     "welcomeBack": "مرحباً بعودتك",
     "signInToAccount": "سجل الدخول إلى حسابك على أثليت360",
