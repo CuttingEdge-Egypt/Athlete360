@@ -183,7 +183,7 @@ export default function PaymentCenter() {
                 <ArrowLeft className={`w-4 h-4 ${isArabic ? 'ml-2 rotate-180' : 'mr-2'}`} />
                 {t('checkout.backToPackages')}
               </Button>
-              <div className={isArabic ? 'text-right' : 'text-left'}>
+              <div className={`flex-1 ${isArabic ? 'text-right' : 'text-left'}`}>
                 <h1 className={`${isArabic ? 'text-3xl text-right' : 'text-2xl text-left'} font-bold text-white`} data-testid="text-payment-title">
                   {t('checkout.title')}
                 </h1>
@@ -353,7 +353,7 @@ export default function PaymentCenter() {
               <ArrowLeft className={`w-4 h-4 ${isArabic ? 'ml-2 rotate-180' : 'mr-2'}`} />
               {t('header.backToDashboard')}
             </Button>
-            <div className={isArabic ? 'text-right' : 'text-left'}>
+            <div className={`flex-1 ${isArabic ? 'text-right' : 'text-left'}`}>
               <h1 className={`${isArabic ? 'text-4xl text-right' : 'text-3xl text-left'} font-bold text-white`} data-testid="text-payment-center-title">
                 {t('header.title')}
               </h1>
