@@ -99,6 +99,11 @@
       "retry": "إعادة المحاولة",
       "cancel": "إلغاء الإنشاء",
       "remove": "إزالة",
+      "statusPending": "في الانتظار",
+      "statusRunning": "جارٍ التشغيل",
+      "statusCompleted": "مكتمل",
+      "statusError": "خطأ",
+      "emptyQueue": "لا توجد عمليات في قائمة الإنشاء",
       "cancelDialog": {
         "title": "إلغاء الإنشاء",
         "description": "هل أنت متأكد من أنك تريد إلغاء هذا الإنشاء؟ لا يمكن التراجع عن هذا الإجراء.",

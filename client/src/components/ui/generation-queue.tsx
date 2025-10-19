@@ -468,7 +468,9 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
                       {getStatusIcon(item.status)}
                       <span>
                         {item.status === 'error' ? item.error : 
-                         item.status === 'running' ? (item.progressMessage || 'running') :
+                         item.status === 'running' ? (item.progressMessage || t('services.queue.statusRunning')) :
+                         item.status === 'pending' ? t('services.queue.statusPending') :
+                         item.status === 'completed' ? t('services.queue.statusCompleted') :
                          item.status}
                       </span>
                       <span>•</span>
@@ -517,7 +519,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
 
         {queue.length === 0 && !isMinimized && (
           <CardContent className="p-4 text-center text-gray-400 text-sm">
-            No generations in queue
+            {t('services.queue.emptyQueue')}
           </CardContent>
         )}
 
