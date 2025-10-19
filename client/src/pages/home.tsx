@@ -570,7 +570,7 @@ export default function Home() {
         setDevelopmentQueueId(null);
       }
     }
-  }, [developmentJobStatus, queryClient, toast, setActiveTab, i18n.language]);
+  }, [developmentJobStatus, queryClient, toast, setActiveTab, i18n.language, t, developmentQueueId]);
 
   // Nutrition plan job status handling
   useEffect(() => {

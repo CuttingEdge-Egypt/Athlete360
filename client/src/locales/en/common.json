@@ -82,6 +82,7 @@
     "thisMayTakeFewMinutes": "This may take a few minutes",
     "progress": "Progress",
     "generatingDevelopmentPlan": "Generating your development plan...",
+    "startingDevelopmentPlan": "Starting development plan generation...",
     "developmentProgress1": "🎯 Analyzing your training goals and current fitness level...",
     "developmentProgress2": "🧠 AI is crafting your personalized training strategy...",
     "developmentProgress3": "💪 Designing targeted exercises for your specific weaknesses...",
@@ -400,5 +401,17 @@
       "searchSports": "Search sports...",
       "noSportsFound": "No sports found"
     }
+  },
+  "toast": {
+    "generationStarted": "Generation Started!",
+    "generationStartedDesc": "Your plan is being generated. This may take several minutes.",
+    "nutritionGenerationStartedDesc": "Your nutrition plan is being generated. This may take several minutes.",
+    "developmentGenerationStartedDesc": "Your development plan is being generated. This may take several minutes.",
+    "developmentPlanGenerated": "Development Plan Generated!",
+    "developmentPlanGeneratedDesc": "Your personalized training plan is ready.",
+    "generationFailed": "Generation Failed",
+    "generationFailedDesc": "Failed to generate plan. Please try again.",
+    "cancellationFailed": "Cancellation Failed",
+    "nutritionCancelledDesc": "Nutrition plan generation was cancelled."
   }
 }
