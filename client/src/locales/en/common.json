@@ -362,7 +362,12 @@
       "scenarioDescription": "Scenario Description",
       "keyFactors": "Key Factors",
       "recommendedStrategy": "Recommended Strategy",
-      "noHeadToHeadData": "No head-to-head prediction data available"
+      "noHeadToHeadData": "No head-to-head prediction data available",
+      "matchScenario": "Match Scenario",
+      "adviceFor": "Advice for",
+      "strategicMatchupAnalysis": "Strategic Matchup Analysis",
+      "currentRankingComparison": "Current Ranking Comparison",
+      "trajectory": "Trajectory"
     }
   }
 }

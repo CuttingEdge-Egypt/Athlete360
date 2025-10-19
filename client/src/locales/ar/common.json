@@ -438,7 +438,12 @@
       "scenarioDescription": "وصف السيناريو",
       "keyFactors": "العوامل الرئيسية",
       "recommendedStrategy": "الاستراتيجية الموصى بها",
-      "noHeadToHeadData": "لا توجد بيانات المواجهة المباشرة"
+      "noHeadToHeadData": "لا توجد بيانات المواجهة المباشرة",
+      "matchScenario": "سيناريو المباراة",
+      "adviceFor": "نصيحة لـ",
+      "strategicMatchupAnalysis": "تحليل المواجهة الاستراتيجية",
+      "currentRankingComparison": "مقارنة التصنيف الحالي",
+      "trajectory": "المسار"
     }
   }
 }
