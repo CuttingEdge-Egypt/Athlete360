@@ -383,9 +383,21 @@ export default function Home() {
       return response.json();
     },
     onSuccess: () => {
+      // Update queue to cancelled
+      if (developmentQueueId && (window as any).generationQueue) {
+        (window as any).generationQueue.update(developmentQueueId, { status: 'cancelled' });
+      }
+      
+      // Reset all state
       setDevelopmentJobId(null);
+      setDevelopmentQueueId(null);
       setDevelopmentProgress(0);
       setDevelopmentProgressMessage("");
+      
+      // Invalidate the job query to stop polling
+      queryClient.cancelQueries({ queryKey: ['/api/jobs', developmentJobId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/jobs', developmentJobId] });
+      
       toast({
         title: t('common:toast.generationCancelled', 'Generation Cancelled'),
         description: t('common:toast.developmentCancelledDesc', 'Development plan generation was cancelled.'),
@@ -414,9 +426,21 @@ export default function Home() {
       return response.json();
     },
     onSuccess: () => {
+      // Update queue to cancelled
+      if (nutritionQueueId && (window as any).generationQueue) {
+        (window as any).generationQueue.update(nutritionQueueId, { status: 'cancelled' });
+      }
+      
+      // Reset all state
       setNutritionJobId(null);
+      setNutritionQueueId(null);
       setNutritionProgress(0);
       setNutritionJobProgressMessage("");
+      
+      // Invalidate the job query to stop polling
+      queryClient.cancelQueries({ queryKey: ['/api/jobs', nutritionJobId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/jobs', nutritionJobId] });
+      
       toast({
         title: t('common:toast.generationCancelled', 'Generation Cancelled'),
         description: t('common:toast.nutritionCancelledDesc', 'Nutrition plan generation was cancelled.'),
