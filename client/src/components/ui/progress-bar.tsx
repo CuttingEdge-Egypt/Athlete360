@@ -57,7 +57,7 @@ export function ProgressBar({ isActive, currentPhase, onCancel, className = "" }
     <div className={`bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-lg border border-purple-500/30 p-6 ${className}`} dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="space-y-4">
         {/* Header with cancel button */}
-        <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
+        <div className="flex items-center justify-between">
           <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
             <Loader2 className="h-5 w-5 text-purple-400 animate-spin" />
             <h3 className="text-lg font-semibold text-white">

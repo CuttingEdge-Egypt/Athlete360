@@ -99,6 +99,18 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
     setSelectedLanguage(i18n.language === 'ar' ? 'arabic' : 'english');
   }, [i18n.language]);
 
+  // Helper function to translate backend progress messages
+  const translateProgressMessage = (message: string): string => {
+    const messageMap: Record<string, string> = {
+      "Loading athlete data...": t("analysis.comparison.loadingAthleteData", "Loading athlete data..."),
+      "Analyzing athlete profiles...": t("analysis.comparison.analyzingAthleteProfiles", "Analyzing athlete profiles..."),
+      "Overview complete, analyzing strengths...": t("analysis.comparison.overviewCompleteAnalyzingStrengths", "Overview complete, analyzing strengths..."),
+      "Generating head-to-head prediction...": t("analysis.comparison.generatingHeadToHead", "Generating head-to-head prediction..."),
+      "Finalizing comparison...": t("analysis.comparison.finalizingComparison", "Finalizing comparison...")
+    };
+    return messageMap[message] || message;
+  };
+
   // WebSocket connection for progress updates
   useEffect(() => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -120,7 +132,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
         if (data.type === 'comparison-progress') {
           console.log('[WS] Progress update:', data.progress, data.message);
           setProgressPhase({
-            message: data.message,
+            message: translateProgressMessage(data.message),
             progress: data.progress
           });
         }
@@ -267,7 +279,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       abortControllerRef.current = new AbortController();
       
       // Initialize progress
-      setProgressPhase({ message: "Starting comparison...", progress: 0 });
+      setProgressPhase({ message: t("analysis.comparison.startingComparison", "Starting comparison..."), progress: 0 });
       
       console.log('[COMPARISON] Sending request with queueId:', queueIdRef.current);
       
