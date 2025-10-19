@@ -2641,7 +2641,7 @@ export default function Home() {
                                 className="border-red-500/50 text-red-300 hover:bg-red-500/10 hover:border-red-500"
                               >
                                 <X className={i18n.language === 'ar' ? 'ml-2' : 'mr-2'} size={16} />
-                                {t('home:queue.cancel')}
+                                {t('home:services.queue.cancel')}
                               </Button>
                             </div>
                           </div>
