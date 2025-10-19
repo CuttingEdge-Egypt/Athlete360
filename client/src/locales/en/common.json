@@ -325,7 +325,11 @@
       "comparisonComplete": "Comparison Complete",
       "comparisonSuccess": "AI-powered athlete comparison generated successfully!",
       "comparisonFailed": "Comparison Failed",
-      "comparisonError": "Failed to generate comparison"
+      "comparisonError": "Failed to generate comparison",
+      "generatingComparison": "Generating Comparison",
+      "cancel": "Cancel",
+      "initializing": "Initializing...",
+      "mayTakeTime": "This may take up to 3 mins. We're analyzing both athletes using AI."
     }
   }
 }

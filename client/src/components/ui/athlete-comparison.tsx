@@ -293,8 +293,8 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
         });
       } else {
         toast({
-          title: t("comparison.comparisonComplete", "Comparison Complete"),
-          description: t("comparison.comparisonSuccess", "AI-powered athlete comparison generated successfully!"),
+          title: t("analysis.comparison.comparisonComplete", "Comparison Complete"),
+          description: t("analysis.comparison.comparisonSuccess", "AI-powered athlete comparison generated successfully!"),
         });
       }
     },
@@ -316,10 +316,10 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       toast({
         title: isInsufficientTokens 
           ? t("errors.insufficientTokens", "Insufficient Tokens")
-          : t("comparison.comparisonFailed", "Comparison Failed"),
+          : t("analysis.comparison.comparisonFailed", "Comparison Failed"),
         description: isInsufficientTokens
           ? "You don't have enough tokens to generate this comparison. Please purchase more tokens to continue."
-          : error.message || t("comparison.comparisonError", "Failed to generate comparison"),
+          : error.message || t("analysis.comparison.comparisonError", "Failed to generate comparison"),
         variant: "destructive",
       });
     },
@@ -349,8 +349,8 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
   const handleCompare = () => {
     if (!selectedAthlete1 || !selectedAthlete2) {
       toast({
-        title: t("comparison.selectionRequired", "Selection Required"),
-        description: t("comparison.selectTwoAthletes", "Please select two athletes to compare"),
+        title: t("analysis.comparison.selectionRequired", "Selection Required"),
+        description: t("analysis.comparison.selectTwoAthletes", "Please select two athletes to compare"),
         variant: "destructive",
       });
       return;
@@ -358,8 +358,8 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
     if (selectedAthlete1 === selectedAthlete2) {
       toast({
-        title: t("comparison.invalidSelection", "Invalid Selection"),
-        description: t("comparison.selectDifferentAthletes", "Please select two different athletes"),
+        title: t("analysis.comparison.invalidSelection", "Invalid Selection"),
+        description: t("analysis.comparison.selectDifferentAthletes", "Please select two different athletes"),
         variant: "destructive",
       });
       return;
@@ -451,14 +451,14 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-white">
           <Users2 className="h-5 w-5" />
-          {t("comparison.title", "Athlete Comparison")}
+          {t("analysis.comparison.title", "Athlete Comparison")}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Selection Controls */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">{t("comparison.sport", "Sport")}</label>
+            <label className="text-sm font-medium text-gray-300">{t("analysis.comparison.sport", "Sport")}</label>
             <Select
               value={selectedSport}
               onValueChange={(value) => {
@@ -471,7 +471,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
               data-testid="select-sport"
             >
               <SelectTrigger className="bg-athlete-gray-700 border-gray-600">
-                <SelectValue placeholder={t("comparison.selectSport", "Select sport...")} />
+                <SelectValue placeholder={t("analysis.comparison.selectSport", "Select sport...")} />
               </SelectTrigger>
               <SelectContent>
                 {Array.isArray(sports) && sports.map((sport) => (
@@ -484,26 +484,26 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">{t("comparison.language", "Language")}</label>
+            <label className="text-sm font-medium text-gray-300">{t("analysis.comparison.language", "Language")}</label>
             <Select
               value={selectedLanguage}
               onValueChange={setSelectedLanguage}
               data-testid="select-language"
             >
               <SelectTrigger className="bg-athlete-gray-700 border-gray-600">
-                <SelectValue placeholder={t("comparison.selectLanguage", "Select language...")} />
+                <SelectValue placeholder={t("analysis.comparison.selectLanguage", "Select language...")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="english">
                   <div className="flex items-center gap-2">
                     <Languages className="w-4 h-4" />
-                    {t("comparison.english", "English")}
+                    {t("analysis.comparison.english", "English")}
                   </div>
                 </SelectItem>
                 <SelectItem value="arabic">
                   <div className="flex items-center gap-2">
                     <Languages className="w-4 h-4" />
-                    {t("comparison.arabic", "عربي")}
+                    {t("analysis.comparison.arabic", "عربي")}
                   </div>
                 </SelectItem>
               </SelectContent>
@@ -511,7 +511,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">{t("comparison.countryAthlete1", "Country (Athlete 1)")}</label>
+            <label className="text-sm font-medium text-gray-300">{t("analysis.comparison.countryAthlete1", "Country (Athlete 1)")}</label>
             <CountrySelect
               value={selectedCountry1 || "all"}
               onValueChange={(value) => {
@@ -525,7 +525,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">{t("comparison.athlete1", "Athlete 1")}</label>
+            <label className="text-sm font-medium text-gray-300">{t("analysis.comparison.athlete1", "Athlete 1")}</label>
             <Select
               value={selectedAthlete1}
               onValueChange={setSelectedAthlete1}
@@ -533,7 +533,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
               data-testid="select-athlete1"
             >
               <SelectTrigger className="bg-athlete-gray-700 border-gray-600">
-                <SelectValue placeholder={t("comparison.selectFirstAthlete", "Select first athlete...")} />
+                <SelectValue placeholder={t("analysis.comparison.selectFirstAthlete", "Select first athlete...")} />
               </SelectTrigger>
               <SelectContent>
                 {availableAthletes1.length === 0 ? (
@@ -567,7 +567,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">{t("comparison.countryAthlete2", "Country (Athlete 2)")}</label>
+            <label className="text-sm font-medium text-gray-300">{t("analysis.comparison.countryAthlete2", "Country (Athlete 2)")}</label>
             <CountrySelect
               value={selectedCountry2 || "all"}
               onValueChange={(value) => {
@@ -581,7 +581,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">{t("comparison.athlete2", "Athlete 2")}</label>
+            <label className="text-sm font-medium text-gray-300">{t("analysis.comparison.athlete2", "Athlete 2")}</label>
             <Select
               value={selectedAthlete2}
               onValueChange={setSelectedAthlete2}
@@ -589,7 +589,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
               data-testid="select-athlete2"
             >
               <SelectTrigger className="bg-athlete-gray-700 border-gray-600">
-                <SelectValue placeholder={t("comparison.selectSecondAthlete", "Select second athlete...")} />
+                <SelectValue placeholder={t("analysis.comparison.selectSecondAthlete", "Select second athlete...")} />
               </SelectTrigger>
               <SelectContent>
                 {availableAthletes2.length === 0 ? (
@@ -630,7 +630,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
           data-testid="button-compare"
         >
           <Zap className="mr-2 h-4 w-4" />
-          {t("comparison.compareAthletes", "Compare Athletes")}
+          {t("analysis.comparison.compareAthletes", "Compare Athletes")}
         </Button>
 
         {/* Progress Bar */}

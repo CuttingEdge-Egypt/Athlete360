@@ -401,7 +401,11 @@
       "comparisonComplete": "اكتملت المقارنة",
       "comparisonSuccess": "تم إنشاء مقارنة الرياضيين بنجاح باستخدام الذكاء الاصطناعي!",
       "comparisonFailed": "فشلت المقارنة",
-      "comparisonError": "فشل في إنشاء المقارنة"
+      "comparisonError": "فشل في إنشاء المقارنة",
+      "generatingComparison": "جارٍ إنشاء المقارنة",
+      "cancel": "إلغاء",
+      "initializing": "جارٍ التهيئة...",
+      "mayTakeTime": "قد يستغرق ذلك حتى 3 دقائق. نحن نحلل كلا الرياضيين باستخدام الذكاء الاصطناعي."
     }
   }
 }

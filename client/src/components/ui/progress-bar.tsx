@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/hooks/useLanguage";
+
+function toArabicNumerals(num: number | string): string {
+  const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+  return String(num).replace(/\d/g, (digit) => arabicNumerals[parseInt(digit)]);
+}
 
 type ProgressPhase = {
   message: string;
@@ -16,6 +23,9 @@ type ProgressBarProps = {
 };
 
 export function ProgressBar({ isActive, currentPhase, onCancel, className = "" }: ProgressBarProps) {
+  const { t } = useTranslation();
+  const { language } = useLanguage();
+  const isArabic = language === 'ar';
   const [displayProgress, setDisplayProgress] = useState(0);
 
   // Smooth progress animation
@@ -44,14 +54,14 @@ export function ProgressBar({ isActive, currentPhase, onCancel, className = "" }
   if (!isActive) return null;
 
   return (
-    <div className={`bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-lg border border-purple-500/30 p-6 ${className}`}>
+    <div className={`bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-lg border border-purple-500/30 p-6 ${className}`} dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="space-y-4">
         {/* Header with cancel button */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
+          <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
             <Loader2 className="h-5 w-5 text-purple-400 animate-spin" />
             <h3 className="text-lg font-semibold text-white">
-              Generating Comparison
+              {t('analysis.comparison.generatingComparison')}
             </h3>
           </div>
           {onCancel && (
@@ -59,11 +69,11 @@ export function ProgressBar({ isActive, currentPhase, onCancel, className = "" }
               onClick={onCancel}
               variant="destructive"
               size="sm"
-              className="bg-red-600 hover:bg-red-700 text-white font-medium"
+              className={`bg-red-600 hover:bg-red-700 text-white font-medium ${isArabic ? 'flex-row-reverse' : ''}`}
               data-testid="button-cancel-comparison"
             >
-              <X className="h-4 w-4 mr-1" />
-              Cancel
+              <X className={`h-4 w-4 ${isArabic ? 'ml-1' : 'mr-1'}`} />
+              {t('analysis.comparison.cancel')}
             </Button>
           )}
         </div>
@@ -77,23 +87,23 @@ export function ProgressBar({ isActive, currentPhase, onCancel, className = "" }
               data-testid="progress-bar"
             />
             <div 
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full transition-all duration-300"
+              className={`absolute top-0 h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full transition-all duration-300 ${isArabic ? 'right-0' : 'left-0'}`}
               style={{ width: `${displayProgress}%` }}
             />
           </div>
-          <div className="flex items-center justify-between text-sm">
+          <div className={`flex items-center justify-between text-sm ${isArabic ? 'flex-row-reverse' : ''}`}>
             <p className="text-gray-200 font-medium">
-              {currentPhase?.message || "Initializing..."}
+              {currentPhase?.message || t('analysis.comparison.initializing')}
             </p>
             <p className="text-purple-300 font-bold text-base">
-              {Math.round(displayProgress)}%
+              {isArabic ? `${toArabicNumerals(Math.round(displayProgress))}٪` : `${Math.round(displayProgress)}%`}
             </p>
           </div>
         </div>
 
         {/* Helpful info */}
-        <p className="text-xs text-gray-500">
-          This may take up to 3 mins. We're analyzing both athletes using AI.
+        <p className={`text-xs text-gray-500 ${isArabic ? 'text-right' : ''}`}>
+          {t('analysis.comparison.mayTakeTime')}
         </p>
       </div>
     </div>
