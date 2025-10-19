@@ -32,6 +32,7 @@
     "analyzing": "Analyzing Your Video",
     "progress": "{percent}%",
     "pleaseWait": "This may take 4-7 minutes, feel free to explore until results are ready:)",
+    "cancel": "Cancel",
     "analyzeNewVideo": "Analyze New Video",
     "close": "Close",
     "readyForAnalysis": "Ready for Analysis",

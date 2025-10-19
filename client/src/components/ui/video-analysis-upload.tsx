@@ -653,22 +653,23 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
                 data-testid="progress-bar"
               />
               
-              <div className="flex items-start space-x-2 text-sm">
-                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 animate-pulse"></div>
-                <p className="text-gray-300 leading-relaxed">{loadingMessage}</p>
-              </div>
+              <p className="text-gray-300 text-base leading-relaxed text-center font-medium mb-3">{loadingMessage}</p>
               
-              <div className="flex flex-col items-center space-y-3">
-                <p className="text-xs text-gray-500 text-center">
+              <div className="flex items-start justify-center space-x-2 text-sm mb-4">
+                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 animate-pulse"></div>
+                <p className="text-gray-400 text-sm">
                   {t('upload.pleaseWait')}
                 </p>
+              </div>
+              
+              <div className="flex justify-center">
                 <Button
                   onClick={handleCancelAnalysis}
                   variant="outline"
                   className="border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-400"
                   data-testid="button-cancel-analysis"
                 >
-                  Cancel
+                  {t('upload.cancel', 'Cancel')}
                 </Button>
               </div>
             </div>
