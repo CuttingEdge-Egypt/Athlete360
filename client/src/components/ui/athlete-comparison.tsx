@@ -15,6 +15,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useTranslation } from 'react-i18next';
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { Flag } from "@/components/ui/flag";
+import { AnalysisPopup } from "@/components/ui/analysis-popup";
 import { 
   Users2, 
   Zap, 
@@ -33,7 +34,8 @@ import {
   Check,
   CalendarDays,
   RefreshCw,
-  Sparkles
+  Sparkles,
+  Eye
 } from "lucide-react";
 
 type Sport = {
@@ -95,6 +97,44 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
     return preloadedComparisonData || null;
   });
   const { toast } = useToast();
+
+  // Preview modal state
+  const [previewModal, setPreviewModal] = useState<{ open: boolean; serviceType: string | null }>({ open: false, serviceType: null });
+  
+  // Preview data types
+  interface PreviewAnalysisItem {
+    serviceType: string;
+    resultData: any;
+    createdAt: string;
+  }
+
+  interface PreviewApiResponse {
+    success: boolean;
+    data: PreviewAnalysisItem[];
+    count: number;
+  }
+
+  // Fetch preview data based on site language
+  const { data: previewData, isLoading: previewLoading } = useQuery<PreviewApiResponse>({
+    queryKey: ['/api/preview/latest-by-type', i18n.language],
+    queryFn: async () => {
+      const res = await fetch(`/api/preview/latest-by-type?language=${i18n.language}`, {
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to fetch preview data');
+      return res.json();
+    },
+    enabled: previewModal.open && !!previewModal.serviceType,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Get the specific analysis data for the selected service type
+  const getAnalysisForPreview = () => {
+    if (!previewData?.data || !previewModal.serviceType) return null;
+    return previewData.data.find((item: any) => item.serviceType === previewModal.serviceType);
+  };
+
+  const selectedPreviewAnalysis = getAnalysisForPreview();
 
   // Update comparison data when preloaded data changes
   useEffect(() => {
@@ -537,12 +577,24 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
   const selectedSportObject = Array.isArray(sports) ? sports.find((s: Sport) => s.id === selectedSport) : null;
 
   return (
+    <>
     <Card className="bg-athlete-gray-800 border-gray-700">
       <CardHeader>
-        <CardTitle className={`flex items-center gap-2 text-white ${isArabic ? 'flex-row-reverse' : ''}`}>
-          <Users2 className="h-5 w-5" />
-          {t("analysis.comparison.title", "Athlete Comparison")}
-        </CardTitle>
+        <div className={`flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+          <CardTitle className={`flex items-center gap-2 text-white ${isArabic ? 'flex-row-reverse' : ''}`}>
+            <Users2 className="h-5 w-5" />
+            {t("analysis.comparison.title", "Athlete Comparison")}
+          </CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setPreviewModal({ open: true, serviceType: 'comparison' })}
+            className="text-gray-400 hover:text-white"
+            data-testid="button-preview-comparison"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Show "Generate New Comparison" button when results are displayed */}
@@ -1793,5 +1845,18 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
         )}
       </CardContent>
     </Card>
+
+    {/* Preview Modal */}
+    {previewModal.serviceType && selectedPreviewAnalysis && (
+      <AnalysisPopup
+        open={previewModal.open && !previewLoading && !!selectedPreviewAnalysis}
+        onOpenChange={(open) => setPreviewModal({ open, serviceType: open ? previewModal.serviceType : null })}
+        type={previewModal.serviceType}
+        data={selectedPreviewAnalysis?.resultData}
+        athleteName={t('common.sampleAthlete', 'Sample Athlete')}
+        createdAt={selectedPreviewAnalysis.createdAt}
+      />
+    )}
+    </>
   );
 }
