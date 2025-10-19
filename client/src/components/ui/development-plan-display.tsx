@@ -101,7 +101,10 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
   const { t, i18n } = useTranslation('common');
   const [selectedGoalIndex, setSelectedGoalIndex] = useState(0);
   const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
-  const isArabic = language === 'ar' || i18n.language === 'ar';
+  // Content generation language (for video button positioning based on content language)
+  const contentIsArabic = language === 'ar';
+  // UI language (for UI elements like tabs, labels)
+  const isArabic = i18n.language === 'ar';
 
   // Validate that plan is a valid object with goal analysis
   if (!plan || typeof plan !== 'object' || !plan.title || !plan.goalAnalysis) {
@@ -258,17 +261,17 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                     <Card key={exercise.id || exerciseIndex} className="bg-gradient-to-br from-slate-900/60 to-slate-800/60 border-slate-600/50 hover:border-slate-500/60 transition-all duration-200 shadow-md">
                       <CardContent className="p-5" dir={isArabic ? 'rtl' : 'ltr'}>
                         <div className="space-y-3">
-                          {/* Exercise Header - FIXED: Proper RTL layout */}
-                          <div className={`flex items-start ${isArabic ? 'flex-row-reverse' : 'flex-row'}`}>
+                          {/* Exercise Header - Video button positioning based on content language */}
+                          <div className={`flex items-start ${contentIsArabic ? 'flex-row-reverse' : 'flex-row'}`}>
                             {exercise.videoUrl && (
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => window.open(exercise.videoUrl, '_blank')}
-                                className={`${isArabic ? 'mr-4 flex-row-reverse' : 'ml-4'} bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-300 hover:from-purple-500 hover:to-purple-600 hover:text-white flex-shrink-0 shadow-md`}
+                                className={`${contentIsArabic ? 'mr-4 flex-row-reverse' : 'ml-4'} bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-300 hover:from-purple-500 hover:to-purple-600 hover:text-white flex-shrink-0 shadow-md`}
                                 data-testid={`exercise-video-${exerciseIndex}`}
                               >
-                                <Play className={`${isArabic ? 'ml-1' : 'mr-1'} h-3 w-3`} />
+                                <Play className={`${contentIsArabic ? 'ml-1' : 'mr-1'} h-3 w-3`} />
                                 {t('analysis.development.video', 'Video')}
                               </Button>
                             )}
@@ -326,22 +329,22 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
           )}
         </TabsContent>
 
-        {/* All Videos Tab - FIXED: Proper RTL layout for watch buttons */}
+        {/* All Videos Tab - Video button positioning based on content language */}
         <TabsContent value="videos" className="space-y-6">
           {allExercisesWithVideos.length > 0 ? (
             <div className="grid gap-4">
               {allExercisesWithVideos.map((exercise, index) => (
                 <Card key={index} className="bg-athlete-gray-800/30 border-athlete-gray-700">
                   <CardContent className="p-4" dir={isArabic ? 'rtl' : 'ltr'}>
-                    <div className={`flex items-center ${isArabic ? 'flex-row-reverse' : 'flex-row'}`}>
+                    <div className={`flex items-center ${contentIsArabic ? 'flex-row-reverse' : 'flex-row'}`}>
                       {exercise.videoUrl && (
                         <Button
                           size="sm"
                           onClick={() => window.open(exercise.videoUrl, '_blank')}
-                          className={`${isArabic ? 'mr-4 flex-row-reverse' : 'ml-4'} bg-athlete-accent hover:bg-athlete-accent/90 text-white flex-shrink-0`}
+                          className={`${contentIsArabic ? 'mr-4 flex-row-reverse' : 'ml-4'} bg-athlete-accent hover:bg-athlete-accent/90 text-white flex-shrink-0`}
                           data-testid={`video-button-${index}`}
                         >
-                          <ExternalLink className={`${isArabic ? 'ml-1' : 'mr-1'} h-3 w-3`} />
+                          <ExternalLink className={`${contentIsArabic ? 'ml-1' : 'mr-1'} h-3 w-3`} />
                           {t('analysis.development.watch', 'Watch')}
                         </Button>
                       )}
