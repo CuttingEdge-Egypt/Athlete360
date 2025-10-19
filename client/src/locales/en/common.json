@@ -73,6 +73,8 @@
     "unauthorizedDesc": "You are logged out. Logging in again...",
     "referralLinkCopied": "Referral link copied!",
     "athleteNotFound": "Athlete not found",
+    "previewNotAvailable": "Preview Not Available",
+    "previewNotAvailableDesc": "Sorry, no preview is available for this analysis type in English at the moment.",
     "searchWithAI": "Search with AI",
     "searchingWithAI": "Searching with AI...",
     "loading": "Loading...",
