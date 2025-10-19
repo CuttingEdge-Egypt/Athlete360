@@ -2712,10 +2712,10 @@ export default function Home() {
                     <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                       <h2 className="text-2xl font-bold text-white">{t('nutritionPlan.yourPlan')}</h2>
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
                         onClick={() => setPreviewModal({ open: true, serviceType: 'nutrition' })}
-                        className="text-gray-400 hover:text-white"
+                        className="border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300"
                         data-testid="button-preview-nutrition"
                       >
                         <Eye className="h-4 w-4" />
@@ -3046,10 +3046,10 @@ export default function Home() {
                       <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                         <h2 className="text-2xl font-bold text-white">{t('developmentPlan.yourPlan')}</h2>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
                           onClick={() => setPreviewModal({ open: true, serviceType: 'development' })}
-                          className="text-gray-400 hover:text-white"
+                          className="border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300"
                           data-testid="button-preview-development"
                         >
                           <Eye className="h-4 w-4" />

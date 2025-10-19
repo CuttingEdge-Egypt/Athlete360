@@ -171,10 +171,10 @@ export default function VideoAnalysis() {
         <div className={`mb-8 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
           <h1 className="text-3xl font-bold text-white">{t('title')}</h1>
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={() => setPreviewModal({ open: true, serviceType: 'video' })}
-            className="text-gray-400 hover:text-white"
+            className="border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300"
             data-testid="button-preview-video"
           >
             <Eye className="h-4 w-4" />
