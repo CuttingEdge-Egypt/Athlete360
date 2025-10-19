@@ -365,14 +365,14 @@ export default function PaymentCenter() {
 
           {user && (
             <div className="bg-athlete-gray-800 border border-gray-700 rounded-lg p-6 mb-8">
-              <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
-                <div className={isArabic ? 'text-right' : 'text-left'}>
+              <div className="flex items-center justify-between">
+                <div className={isArabic ? 'text-left' : 'text-left'}>
                   <h3 className={`${isArabic ? 'text-xl' : 'text-lg'} font-semibold text-white mb-1`} data-testid="text-current-balance">
                     {t('balance.title')}
                   </h3>
                   <p className={`text-gray-400 ${isArabic ? 'text-base' : 'text-sm'}`}>{t('balance.subtitle')}</p>
                 </div>
-                <div className={isArabic ? 'text-left' : 'text-right'}>
+                <div className={isArabic ? 'text-right' : 'text-right'}>
                   <div className="text-2xl font-bold text-athlete-accent" data-testid="text-token-balance">
                     {(user.tokens || 0).toLocaleString(isArabic ? 'ar-EG' : 'en-US')}
                   </div>
