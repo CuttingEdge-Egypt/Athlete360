@@ -78,9 +78,9 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
   const isComparisonArabic = selectedLanguage === 'arabic';
   const isArabic = i18n.language === 'ar';
   const abortControllerRef = useRef<AbortController | null>(null);
-  const queueIdRef = useRef<String | null>(null);
+  const queueIdRef = useRef<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
-  const [progressPhase, setProgressPhase] = useState<{ message: string; progress: number } | null>(null);
+  const [progressPhase, setProgressPhase] = useState<{ message: string; progress: number; originalMessage?: string } | null>(null);
   const [comparisonData, setComparisonData] = useState(() => {
     console.log("AthleteComparison received preloadedComparisonData:", preloadedComparisonData);
     if (preloadedComparisonData) {
@@ -118,9 +118,20 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
     setSelectedLanguage(i18n.language === 'ar' ? 'arabic' : 'english');
   }, [i18n.language]);
 
+  // Re-translate progress message when language changes
+  useEffect(() => {
+    if (progressPhase?.originalMessage) {
+      setProgressPhase(prev => prev ? {
+        ...prev,
+        message: translateProgressMessage(prev.originalMessage!)
+      } : null);
+    }
+  }, [i18n.language]);
+
   // Helper function to translate backend progress messages
   const translateProgressMessage = (message: string): string => {
     const messageMap: Record<string, string> = {
+      "Starting comparison...": t("analysis.comparison.startingComparison", "Starting comparison..."),
       "Loading athlete data...": t("analysis.comparison.loadingAthleteData", "Loading athlete data..."),
       "Analyzing athlete profiles...": t("analysis.comparison.analyzingAthleteProfiles", "Analyzing athlete profiles..."),
       "Overview complete, analyzing strengths...": t("analysis.comparison.overviewCompleteAnalyzingStrengths", "Overview complete, analyzing strengths..."),
@@ -152,13 +163,14 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
           console.log('[WS] Progress update:', data.progress, data.message);
           setProgressPhase({
             message: translateProgressMessage(data.message),
-            progress: data.progress
+            progress: data.progress,
+            originalMessage: data.message // Store original English message for re-translation
           });
         } else if (data.type === 'comparison-complete') {
           console.log('[WS] Comparison complete, updating queue');
-          // Update queue status to completed
-          if ((window as any).generationQueue && data.queueId) {
-            (window as any).generationQueue.update(data.queueId, { status: 'completed' });
+          // Update queue status to completed using the correct queue ID
+          if (window.generationQueue && queueIdRef.current) {
+            window.generationQueue.update(queueIdRef.current, { status: 'completed' });
           }
         }
       } catch (error) {
@@ -181,7 +193,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
   // Register cancel handler for comparison generations
   useEffect(() => {
-    const originalCancelGeneration = (window as any).cancelGeneration;
+    const originalCancelGeneration = window.cancelGeneration;
 
     const comparisonCancelHandler = (athleteName: string, serviceType: string) => {
       // Only handle comparison cancellation if we have an active controller
@@ -189,7 +201,8 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
         console.log('[COMPARISON] Cancelling comparison request:', athleteName);
         abortControllerRef.current.abort();
         abortControllerRef.current = null;
-        queueIdRef.current = null;
+        // Don't clear queueIdRef - let the mutation's onSettled handler do it
+        // so the onError handler can still update the queue status
         setProgressPhase(null); // Clear progress
         return; // Don't call original handler since we handled it
       }
@@ -200,13 +213,13 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       }
     };
 
-    (window as any).cancelGeneration = comparisonCancelHandler;
+    window.cancelGeneration = comparisonCancelHandler;
 
     // Cleanup on unmount - only restore if our handler is still active
     return () => {
       // Only restore original handler if the current handler is still ours
-      if ((window as any).cancelGeneration === comparisonCancelHandler) {
-        (window as any).cancelGeneration = originalCancelGeneration;
+      if (window.cancelGeneration === comparisonCancelHandler) {
+        window.cancelGeneration = originalCancelGeneration;
       }
     };
   }, []);
@@ -303,8 +316,12 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       // Create a new AbortController for this request
       abortControllerRef.current = new AbortController();
 
-      // Initialize progress
-      setProgressPhase({ message: t("analysis.comparison.startingComparison", "Starting comparison..."), progress: 0 });
+      // Initialize progress with original message for re-translation
+      setProgressPhase({ 
+        message: t("analysis.comparison.startingComparison", "Starting comparison..."), 
+        progress: 0,
+        originalMessage: "Starting comparison..."
+      });
 
       console.log('[COMPARISON] Sending request with queueId:', queueIdRef.current);
 
@@ -323,8 +340,8 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       setProgressPhase(null); // Clear progress on success
 
       // Update queue to completed
-      if ((window as any).generationQueue && queueIdRef.current) {
-        (window as any).generationQueue.update(queueIdRef.current, { status: 'completed' });
+      if (window.generationQueue && queueIdRef.current) {
+        window.generationQueue.update(queueIdRef.current, { status: 'completed' });
       }
 
       // Check for partial refund notification
@@ -378,7 +395,8 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
-      queueIdRef.current = null;
+      // Don't clear queueIdRef yet - let the mutation's onSettled handler do it
+      // so the onError handler can still update the queue status
       setProgressPhase(null);
 
       toast({
@@ -413,20 +431,16 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
     const athlete2 = athletes2.find(a => a && a.id === selectedAthlete2);
     const comparisonName = `${athlete1?.name || 'Athlete 1'} vs ${athlete2?.name || 'Athlete 2'}`;
 
-    // Generate queue ID for progress tracking FIRST, before adding to queue
-    const queueId = `comp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    queueIdRef.current = queueId;
+    // Add to generation queue if available and capture the queue ID
+    if (window.generationQueue) {
+      // Capture the queue ID returned by add() - this is the correct ID to use
+      const queueId = window.generationQueue.add(comparisonName, 'comparison', false);
+      queueIdRef.current = queueId;
 
-    console.log('[COMPARISON] Generated queueId:', queueId);
-
-    // Add to generation queue if available
-    if ((window as any).generationQueue) {
-      // Use our generated queueId instead of the one from the queue system
-      (window as any).generationQueue.add(comparisonName, 'comparison', false);
-      // Keep using our queueId, don't overwrite it
+      console.log('[COMPARISON] Generated queueId:', queueId);
 
       // Immediately update status to running when we start the mutation and add retry callback
-      (window as any).generationQueue.update(queueId, { 
+      window.generationQueue.update(queueId, { 
         status: 'running', 
         progressMessage: 'Analyzing athletes...',
         onRetry: () => {
@@ -447,17 +461,17 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
             error?.response?.status === 402 ||
             error?.message?.toLowerCase().includes('insufficient');
 
-          if ((window as any).generationQueue) {
+          if (window.generationQueue && queueIdRef.current) {
             if (isCancelled) {
               // Update queue status to show cancellation
-              (window as any).generationQueue.update(queueId, { 
+              window.generationQueue.update(queueIdRef.current, { 
                 status: 'error',
-                errorMessage: 'Cancelled by user'
+                error: 'Cancelled by user'
               });
             } else {
-              (window as any).generationQueue.update(queueId, { 
+              window.generationQueue.update(queueIdRef.current, { 
                 status: 'error',
-                errorMessage: isInsufficientTokens 
+                error: isInsufficientTokens 
                   ? 'Insufficient tokens' 
                   : (error.message || 'Comparison failed - tokens refunded')
               });
@@ -465,13 +479,14 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
           }
 
           // Show error toast with appropriate message (skip for cancellation)
-          if (!isCancelled && (window as any).showToast) {
-            (window as any).showToast({
-              title: isInsufficientTokens ? "Insufficient Tokens" : "Comparison Failed",
-              description: isInsufficientTokens 
+          if (!isCancelled && window.showToast) {
+            window.showToast(
+              isInsufficientTokens ? "Insufficient Tokens" : "Comparison Failed",
+              isInsufficientTokens 
                 ? "You don't have enough tokens to generate this comparison. Please purchase more tokens to continue."
-                : "Unable to generate comparison. Tokens have been refunded."
-            });
+                : "Unable to generate comparison. Tokens have been refunded.",
+              "destructive"
+            );
           }
         }
       });
