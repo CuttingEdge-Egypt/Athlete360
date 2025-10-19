@@ -172,18 +172,8 @@ export default function PaymentCenter() {
       <div className="min-h-screen bg-athlete-gray-900 text-white" dir={isArabic ? 'rtl' : 'ltr'}>
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
-            <div className="flex items-center gap-4 mb-6">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleBackToPackages}
-                className={`border-gray-600 text-gray-300 hover:bg-gray-700 ${isArabic ? 'flex-row-reverse' : ''}`}
-                data-testid="button-back-packages"
-              >
-                <ArrowLeft className={`w-4 h-4 ${isArabic ? 'ml-2 rotate-180' : 'mr-2'}`} />
-                {t('checkout.backToPackages')}
-              </Button>
-              <div className={`flex-1 ${isArabic ? 'text-right' : 'text-left'}`}>
+            <div className={`flex items-center gap-4 mb-6 ${isArabic ? 'flex-row-reverse' : 'justify-between'}`}>
+              <div className={`${isArabic ? 'flex-1 text-right' : ''}`}>
                 <h1 className={`${isArabic ? 'text-3xl text-right' : 'text-2xl text-left'} font-bold text-white`} data-testid="text-payment-title">
                   {t('checkout.title')}
                 </h1>
@@ -195,6 +185,16 @@ export default function PaymentCenter() {
                   })}
                 </p>
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBackToPackages}
+                className={`border-gray-600 text-gray-300 hover:bg-gray-700 ${isArabic ? 'flex-row-reverse' : ''}`}
+                data-testid="button-back-packages"
+              >
+                <ArrowLeft className={`w-4 h-4 ${isArabic ? 'ml-2 rotate-180' : 'mr-2'}`} />
+                {t('checkout.backToPackages')}
+              </Button>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
@@ -342,7 +342,15 @@ export default function PaymentCenter() {
     <div className="min-h-screen bg-athlete-gray-900 text-white" dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center gap-4 mb-8">
+          <div className={`flex items-center gap-4 mb-8 ${isArabic ? 'flex-row-reverse' : 'justify-between'}`}>
+            <div className={`${isArabic ? 'flex-1 text-right' : ''}`}>
+              <h1 className={`${isArabic ? 'text-4xl text-right' : 'text-3xl text-left'} font-bold text-white`} data-testid="text-payment-center-title">
+                {t('header.title')}
+              </h1>
+              <p className={`text-gray-400 ${isArabic ? 'text-xl text-right' : 'text-base text-left'}`} data-testid="text-payment-center-subtitle">
+                {t('header.subtitle')}
+              </p>
+            </div>
             <Button
               variant="outline"
               size="sm"
@@ -353,14 +361,6 @@ export default function PaymentCenter() {
               <ArrowLeft className={`w-4 h-4 ${isArabic ? 'ml-2 rotate-180' : 'mr-2'}`} />
               {t('header.backToDashboard')}
             </Button>
-            <div className={`flex-1 ${isArabic ? 'text-right' : 'text-left'}`}>
-              <h1 className={`${isArabic ? 'text-4xl text-right' : 'text-3xl text-left'} font-bold text-white`} data-testid="text-payment-center-title">
-                {t('header.title')}
-              </h1>
-              <p className={`text-gray-400 ${isArabic ? 'text-xl text-right' : 'text-base text-left'}`} data-testid="text-payment-center-subtitle">
-                {t('header.subtitle')}
-              </p>
-            </div>
           </div>
 
           {user && (
