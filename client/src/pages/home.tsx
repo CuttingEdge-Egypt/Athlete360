@@ -478,23 +478,39 @@ export default function Home() {
       setDevelopmentProgress(cappedProgress);
       
       if (status === 'in_progress') {
-        const messages = [
-          t('common:messages.developmentProgress1', "🎯 Analyzing your training goals and current fitness level..."),
-          t('common:messages.developmentProgress2', "🧠 AI is crafting your personalized training strategy..."),
-          t('common:messages.developmentProgress3', "💪 Designing targeted exercises for your specific weaknesses..."),
-          t('common:messages.developmentProgress4', "📊 Calculating optimal sets, reps, and rest periods..."),
-          t('common:messages.developmentProgress5', "🎬 Finding the perfect instructional videos for each exercise..."),
-          t('common:messages.developmentProgress6', "⚡ Optimizing training intensity and progression..."),
-          t('common:messages.developmentProgress7', "📋 Assembling your complete development plan...")
+        // Language-aware progress messages
+        const messages = i18n.language === 'ar' ? [
+          "🎯 جاري تحليل أهدافك التدريبية ومستوى لياقتك الحالي...",
+          "🧠 الذكاء الاصطناعي يصمم استراتيجيتك التدريبية المخصصة...",
+          "💪 تصميم تمارين مستهدفة لنقاط ضعفك المحددة...",
+          "📊 حساب المجموعات والتكرارات وفترات الراحة المثلى...",
+          "🎬 البحث عن مقاطع الفيديو التعليمية المثالية لكل تمرين...",
+          "⚡ تحسين شدة التدريب والتقدم...",
+          "📋 تجميع خطة التطوير الكاملة الخاصة بك..."
+        ] : [
+          "🎯 Analyzing your training goals and current fitness level...",
+          "🧠 AI is crafting your personalized training strategy...",
+          "💪 Designing targeted exercises for your specific weaknesses...",
+          "📊 Calculating optimal sets, reps, and rest periods...",
+          "🎬 Finding the perfect instructional videos for each exercise...",
+          "⚡ Optimizing training intensity and progression...",
+          "📋 Assembling your complete development plan..."
         ];
-        const messageIndex = Math.min(Math.floor((progress || 0) / 14), messages.length - 1);
-        setDevelopmentProgressMessage(messages[messageIndex]);
+        
+        // More sophisticated message selection based on actual progress
+        const messageIndex = Math.min(
+          Math.floor((cappedProgress / 100) * messages.length),
+          messages.length - 1
+        );
+        
+        const newMessage = messages[messageIndex];
+        setDevelopmentProgressMessage(newMessage);
         
         // Update queue progress
         if (developmentQueueId && (window as any).generationQueue) {
           (window as any).generationQueue.update(developmentQueueId, { 
             status: 'running', 
-            progressMessage: messages[messageIndex] 
+            progressMessage: newMessage 
           });
         }
         
@@ -562,7 +578,7 @@ export default function Home() {
         setDevelopmentQueueId(null);
       }
     }
-  }, [developmentJobStatus, queryClient, toast, setActiveTab]);
+  }, [developmentJobStatus, queryClient, toast, setActiveTab, i18n.language]);
 
   // Nutrition plan job status handling
   useEffect(() => {
@@ -2886,7 +2902,11 @@ export default function Home() {
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => cancelDevelopmentPlanJobMutation.mutate(developmentJobId)}
+                                    onClick={() => {
+                                      // Prevent multiple clicks
+                                      if (cancelDevelopmentPlanJobMutation.isPending) return;
+                                      cancelDevelopmentPlanJobMutation.mutate(developmentJobId);
+                                    }}
                                     disabled={cancelDevelopmentPlanJobMutation.isPending}
                                     className="bg-red-500/10 border-red-400/50 text-red-300 hover:bg-red-500/20 hover:border-red-400 transition-all duration-200"
                                     data-testid="button-cancel-development-plan"
@@ -2920,7 +2940,11 @@ export default function Home() {
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => cancelDevelopmentPlanJobMutation.mutate(developmentJobId)}
+                                    onClick={() => {
+                                      // Prevent multiple clicks
+                                      if (cancelDevelopmentPlanJobMutation.isPending) return;
+                                      cancelDevelopmentPlanJobMutation.mutate(developmentJobId);
+                                    }}
                                     disabled={cancelDevelopmentPlanJobMutation.isPending}
                                     className="bg-red-500/10 border-red-400/50 text-red-300 hover:bg-red-500/20 hover:border-red-400 transition-all duration-200"
                                     data-testid="button-cancel-development-plan"
@@ -2947,7 +2971,7 @@ export default function Home() {
                                   <div className="flex items-center gap-2">
                                     <div className="px-2 py-1 bg-emerald-500/20 rounded-full">
                                       <span className="text-emerald-200 font-bold text-xs">
-                                        {i18n.language === 'ar' ? toArabicNumerals(developmentProgress) : developmentProgress}٪
+                                        {i18n.language === 'ar' ? toArabicNumerals(developmentProgress) : developmentProgress}%
                                       </span>
                                     </div>
                                   </div>

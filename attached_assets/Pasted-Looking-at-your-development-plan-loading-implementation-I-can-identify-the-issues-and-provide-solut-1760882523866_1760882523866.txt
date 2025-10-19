@@ -1,0 +1,196 @@
+Looking at your development plan loading implementation, I can identify the issues and provide solutions:
+
+## Issues Identified:
+
+1. **Cancel button starts new generation** - The mutation is not properly stopping the job
+2. **Progress messages not rotating** - The message selection logic is too simplistic
+3. **Language switching mid-loading** - Messages are cached and not reactive to language changes
+
+## Here's the fix:
+
+Replace your current development plan loading section (around lines 2855-2943) with this improved version:
+
+```tsx
+{developmentJobId && (
+  <div className="mt-6 p-6 bg-gradient-to-r from-slate-800/80 to-slate-700/80 rounded-xl border border-slate-600/50 shadow-lg" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="space-y-4">
+      {/* Progress Header with Cancel Button */}
+      <div className={`flex items-center ${i18n.language === 'ar' ? 'flex-row-reverse' : 'justify-between'}`}>
+        {i18n.language === 'ar' && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              // Prevent multiple clicks
+              if (cancelDevelopmentPlanJobMutation.isPending) return;
+              cancelDevelopmentPlanJobMutation.mutate(developmentJobId);
+            }}
+            disabled={cancelDevelopmentPlanJobMutation.isPending}
+            className="bg-red-500/10 border-red-400/50 text-red-300 hover:bg-red-500/20 hover:border-red-400 transition-all duration-200"
+            data-testid="button-cancel-development-plan"
+          >
+            {cancelDevelopmentPlanJobMutation.isPending ? (
+              <>
+                <Loader2 className="ml-2 h-3 w-3 animate-spin" />
+                {t('common:buttons.cancelling')}
+              </>
+            ) : (
+              <>
+                <X className="ml-2 h-3 w-3" />
+                {t('common:buttons.cancel')}
+              </>
+            )}
+          </Button>
+        )}
+        <div className={`flex items-center gap-3 ${i18n.language === 'ar' ? 'flex-1 justify-end flex-row-reverse' : ''}`}>
+          <div className="relative">
+            <div className="animate-spin rounded-full h-6 w-6 border-2 border-emerald-500/30 border-t-emerald-400"></div>
+            <div className="absolute inset-0 rounded-full h-6 w-6 bg-emerald-500/10"></div>
+          </div>
+          <div className={i18n.language === 'ar' ? 'text-right' : ''}>
+            <p className={`text-emerald-100 font-semibold ${i18n.language === 'ar' ? 'text-lg' : ''}`}>
+              {developmentProgressMessage || t('common:messages.generatingDevelopmentPlan', 'Generating your development plan...')}
+            </p>
+            <p className={`text-slate-300 ${i18n.language === 'ar' ? 'text-base' : 'text-sm'}`}>
+              {t('common:messages.thisMayTakeFewMinutes', 'This may take a few minutes')}
+            </p>
+          </div>
+        </div>
+        {i18n.language !== 'ar' && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              // Prevent multiple clicks
+              if (cancelDevelopmentPlanJobMutation.isPending) return;
+              cancelDevelopmentPlanJobMutation.mutate(developmentJobId);
+            }}
+            disabled={cancelDevelopmentPlanJobMutation.isPending}
+            className="bg-red-500/10 border-red-400/50 text-red-300 hover:bg-red-500/20 hover:border-red-400 transition-all duration-200"
+            data-testid="button-cancel-development-plan"
+          >
+            {cancelDevelopmentPlanJobMutation.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                {t('common:buttons.cancelling')}
+              </>
+            ) : (
+              <>
+                <X className="mr-2 h-3 w-3" />
+                {t('common:buttons.cancel')}
+              </>
+            )}
+          </Button>
+        )}
+      </div>
+
+      {/* Progress Bar with Percentage */}
+      <div className="space-y-2">
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-slate-300 font-medium">{t('common:messages.progress', 'Progress')}</span>
+          <div className="flex items-center gap-2">
+            <div className="px-2 py-1 bg-emerald-500/20 rounded-full">
+              <span className="text-emerald-200 font-bold text-xs">
+                {i18n.language === 'ar' ? toArabicNumerals(developmentProgress) : developmentProgress}%
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="relative w-full bg-slate-700 rounded-full h-3 overflow-hidden shadow-inner">
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700"></div>
+          <div 
+            className="bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-400 h-3 rounded-full transition-all duration-700 ease-out shadow-sm relative" 
+            style={{ width: `${developmentProgress}%` }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+```
+
+## Also update the progress message logic in your development job status effect:
+
+Replace the progress message logic in your `useEffect` for `developmentJobStatus` (around lines 479-491) with this improved version:
+
+```tsx
+// Handle development plan job completion
+useEffect(() => {
+  if (developmentJobStatus) {
+    const { status, progress, result, error } = developmentJobStatus;
+    const results = result;
+
+    // Cap progress at 100% to prevent values like 138%
+    const cappedProgress = Math.min(Math.max(progress || 0, 0), 100);
+    setDevelopmentProgress(cappedProgress);
+    
+    if (status === 'in_progress') {
+      // Language-aware progress messages
+      const messages = i18n.language === 'ar' ? [
+        "🎯 جاري تحليل أهدافك التدريبية ومستوى لياقتك الحالي...",
+        "🧠 الذكاء الاصطناعي يصمم استراتيجيتك التدريبية المخصصة...",
+        "💪 تصميم تمارين مستهدفة لنقاط ضعفك المحددة...",
+        "📊 حساب المجموعات والتكرارات وفترات الراحة المثلى...",
+        "🎬 البحث عن مقاطع الفيديو التعليمية المثالية لكل تمرين...",
+        "⚡ تحسين شدة التدريب والتقدم...",
+        "📋 تجميع خطة التطوير الكاملة الخاصة بك..."
+      ] : [
+        "🎯 Analyzing your training goals and current fitness level...",
+        "🧠 AI is crafting your personalized training strategy...",
+        "💪 Designing targeted exercises for your specific weaknesses...",
+        "📊 Calculating optimal sets, reps, and rest periods...",
+        "🎬 Finding the perfect instructional videos for each exercise...",
+        "⚡ Optimizing training intensity and progression...",
+        "📋 Assembling your complete development plan..."
+      ];
+      
+      // More sophisticated message selection based on actual progress
+      const messageIndex = Math.min(
+        Math.floor((cappedProgress / 100) * messages.length),
+        messages.length - 1
+      );
+      
+      const newMessage = messages[messageIndex];
+      setDevelopmentProgressMessage(newMessage);
+      
+      // Update queue progress
+      if (developmentQueueId && (window as any).generationQueue) {
+        (window as any).generationQueue.update(developmentQueueId, { 
+          status: 'running', 
+          progressMessage: newMessage 
+        });
+      }
+      
+      // Display incremental results if available during processing
+      if (results) {
+        console.log('Displaying incremental results:', results);
+        setDevelopmentPlanData(results);
+        setShowDevelopmentForm(false);
+        setActiveTab('development');
+      }
+    } else if (status === 'completed' && results) {
+      // ... rest of your completion logic
+    }
+    // ... rest of your status handling
+  }
+}, [developmentJobStatus, queryClient, toast, setActiveTab, i18n.language]); // Added i18n.language dependency
+```
+
+## Key Changes Made:
+
+1. **Fixed Cancel Button**: Added click prevention and proper mutation handling
+2. **Improved Progress Messages**: 
+   - Language-aware messages that switch with i18n.language
+   - Better progress-based message selection
+   - Added dependency on `i18n.language` to react to language changes
+3. **Enhanced Message Rotation**: More sophisticated calculation based on actual progress percentage
+
+The main issues were:
+- The cancel button wasn't preventing multiple clicks
+- Progress messages were hardcoded in English only
+- The effect wasn't watching for language changes
+- Message selection was too simplistic
+
+This should resolve all three issues you mentioned!
