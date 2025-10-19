@@ -285,6 +285,11 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       setComparisonData(data);
       setProgressPhase(null); // Clear progress on success
       
+      // Update queue to completed
+      if ((window as any).generationQueue && queueIdRef.current) {
+        (window as any).generationQueue.update(queueIdRef.current, { status: 'completed' });
+      }
+      
       // Check for partial refund notification
       if (data.partialRefund) {
         toast({
@@ -395,11 +400,6 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       
       // Update queue status when mutation completes
       comparisonMutation.mutate(undefined, {
-        onSuccess: (data) => {
-          if ((window as any).generationQueue) {
-            (window as any).generationQueue.update(queueId, { status: 'completed' });
-          }
-        },
         onError: (error: any) => {
           // Check if this is a cancellation
           const isCancelled = error.name === 'AbortError' || error.message?.includes('aborted');
