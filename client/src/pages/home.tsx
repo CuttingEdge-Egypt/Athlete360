@@ -477,7 +477,7 @@ export default function Home() {
       const cappedProgress = Math.min(Math.max(progress || 0, 0), 100);
       setDevelopmentProgress(cappedProgress);
       
-      if (status === 'in_progress') {
+      if (status === 'running' || status === 'in_progress') {
         // Language-aware progress messages using translation keys
         const messages = [
           t('common:messages.developmentProgress1'),
