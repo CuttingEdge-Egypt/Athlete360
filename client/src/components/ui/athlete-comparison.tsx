@@ -997,15 +997,17 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
               <Zap className="h-4 w-4" />
               {t("analysis.comparison.compareAthletes", "Compare Athletes")}
             </Button>
-
-            {/* Progress Bar */}
-            <ProgressBar 
-              isActive={comparisonMutation.isPending}
-              currentPhase={progressPhase || undefined}
-              onCancel={handleCancelComparison}
-              className="mt-4"
-            />
           </>
+        )}
+
+        {/* Progress Bar - Shown outside form so it remains visible during generation */}
+        {comparisonMutation.isPending && (
+          <ProgressBar 
+            isActive={true}
+            currentPhase={progressPhase || undefined}
+            onCancel={handleCancelComparison}
+            className="mt-4"
+          />
         )}
 
         {/* Parsed Comparison Results - New Modular Tab Structure */}
