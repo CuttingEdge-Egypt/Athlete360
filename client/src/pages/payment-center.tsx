@@ -184,10 +184,10 @@ export default function PaymentCenter() {
                 {t('checkout.backToPackages')}
               </Button>
               <div className={isArabic ? 'text-right' : 'text-left'}>
-                <h1 className={`${isArabic ? 'text-3xl' : 'text-2xl'} font-bold text-white`} data-testid="text-payment-title">
+                <h1 className={`${isArabic ? 'text-3xl text-right' : 'text-2xl text-left'} font-bold text-white`} data-testid="text-payment-title">
                   {t('checkout.title')}
                 </h1>
-                <p className={`text-gray-400 ${isArabic ? 'text-lg' : 'text-base'}`} data-testid="text-payment-subtitle">
+                <p className={`text-gray-400 ${isArabic ? 'text-lg text-right' : 'text-base text-left'}`} data-testid="text-payment-subtitle">
                   {t('checkout.subtitle', { 
                     name: selectedPackage?.name, 
                     tokens: selectedPackage?.tokens.toLocaleString(isArabic ? 'ar-EG' : 'en-US'), 
@@ -354,10 +354,10 @@ export default function PaymentCenter() {
               {t('header.backToDashboard')}
             </Button>
             <div className={isArabic ? 'text-right' : 'text-left'}>
-              <h1 className={`${isArabic ? 'text-4xl' : 'text-3xl'} font-bold text-white`} data-testid="text-payment-center-title">
+              <h1 className={`${isArabic ? 'text-4xl text-right' : 'text-3xl text-left'} font-bold text-white`} data-testid="text-payment-center-title">
                 {t('header.title')}
               </h1>
-              <p className={`text-gray-400 ${isArabic ? 'text-xl' : 'text-base'}`} data-testid="text-payment-center-subtitle">
+              <p className={`text-gray-400 ${isArabic ? 'text-xl text-right' : 'text-base text-left'}`} data-testid="text-payment-center-subtitle">
                 {t('header.subtitle')}
               </p>
             </div>
