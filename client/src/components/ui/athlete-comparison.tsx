@@ -57,6 +57,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
   const [selectedAthlete1, setSelectedAthlete1] = useState("");
   const [selectedAthlete2, setSelectedAthlete2] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState(i18n.language === 'ar' ? 'arabic' : 'english');
+  const isComparisonArabic = selectedLanguage === 'arabic';
   const abortControllerRef = useRef<AbortController | null>(null);
   const queueIdRef = useRef<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -855,7 +856,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
               };
 
               return (
-                <>
+                <div dir={isComparisonArabic ? 'rtl' : 'ltr'}>
                   {/* Athlete Headers */}
                   <div className="grid grid-cols-2 gap-6">
                     <div className="text-center">
@@ -986,28 +987,28 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                   {/* Tabbed Analysis */}
                   <Tabs defaultValue="overview" className="w-full">
                     <TabsList className="grid w-full grid-cols-5 bg-athlete-gray-700">
-                      <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
-                      <TabsTrigger value="strengths" data-testid="tab-strengths">Strengths</TabsTrigger>
-                      <TabsTrigger value="weaknesses" data-testid="tab-weaknesses">Weaknesses</TabsTrigger>
-                      <TabsTrigger value="ranking" data-testid="tab-ranking">Competition History</TabsTrigger>
-                      <TabsTrigger value="head-to-head" data-testid="tab-head-to-head">Head-to-Head</TabsTrigger>
+                      <TabsTrigger value="overview" data-testid="tab-overview">{t('analysis.comparison.tabOverview')}</TabsTrigger>
+                      <TabsTrigger value="strengths" data-testid="tab-strengths">{t('analysis.comparison.tabStrengths')}</TabsTrigger>
+                      <TabsTrigger value="weaknesses" data-testid="tab-weaknesses">{t('analysis.comparison.tabWeaknesses')}</TabsTrigger>
+                      <TabsTrigger value="ranking" data-testid="tab-ranking">{t('analysis.comparison.tabCompetitionHistory')}</TabsTrigger>
+                      <TabsTrigger value="head-to-head" data-testid="tab-head-to-head">{t('analysis.comparison.tabHeadToHead')}</TabsTrigger>
                     </TabsList>
 
                     {/* Overview Tab */}
                     <TabsContent value="overview" className="space-y-4">
                       <Card className="bg-athlete-gray-900 border-gray-600">
                         <CardContent className="p-4">
-                          <div className="flex items-center gap-2 mb-3">
+                          <div className={`flex items-center gap-2 mb-3 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                             <Brain className="h-5 w-5 text-blue-400" />
-                            <h4 className="font-semibold text-white">Overall Analysis</h4>
+                            <h4 className="font-semibold text-white">{t('analysis.comparison.overallAnalysis')}</h4>
                           </div>
                           {parsedData.overallAnalysis?.summary ? (
-                            <p className="text-gray-300 leading-relaxed">
+                            <p className={`text-gray-300 leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>
                               {parsedData.overallAnalysis.summary}
                             </p>
                           ) : (
                             <div className="p-3 bg-yellow-900/30 border border-yellow-600/50 rounded-lg">
-                              <p className="text-yellow-300">Overall analysis not available</p>
+                              <p className={`text-yellow-300 ${isComparisonArabic ? 'text-right' : ''}`}>{t('analysis.comparison.overallAnalysisNotAvailable')}</p>
                             </div>
                           )}
                         </CardContent>
@@ -1017,14 +1018,14 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       <Card className="bg-gradient-to-r from-indigo-900/30 to-purple-900/30 border-purple-600">
                         <CardContent className="p-6 text-center">
                           <Target className="h-12 w-12 text-purple-400 mx-auto mb-3" />
-                          <div className="text-sm text-gray-400 mb-2">Final Predicted Winner</div>
+                          <div className="text-sm text-gray-400 mb-2">{t('analysis.comparison.finalPredictedWinner')}</div>
                           <div className="text-2xl font-bold text-white mb-2">
                             {parsedData.headToHead?.prediction === 'athlete1' ? parsedData.athlete1?.name :
-                             parsedData.headToHead?.prediction === 'athlete2' ? parsedData.athlete2?.name : 'Even Match'}
+                             parsedData.headToHead?.prediction === 'athlete2' ? parsedData.athlete2?.name : t('analysis.comparison.evenMatch')}
                           </div>
                           {parsedData.headToHead?.confidence && (
                             <div className="text-sm text-purple-300">
-                              {parsedData.headToHead.confidence}% confidence
+                              {parsedData.headToHead.confidence}% {t('analysis.comparison.confidence')}
                             </div>
                           )}
                         </CardContent>
@@ -1036,29 +1037,29 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <Card className="bg-athlete-gray-900 border-gray-600">
                           <CardHeader>
-                            <CardTitle className="text-lg text-white">{parsedData.athlete1?.name || "Athlete 1"} Strengths</CardTitle>
+                            <CardTitle className={`text-lg text-white ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.athlete1?.name || "Athlete 1"} {t('analysis.comparison.strengths')}</CardTitle>
                           </CardHeader>
                           <CardContent className="space-y-3">
                             {(parsedData.strengths?.athlete1 || []).map((strength: any, index: number) => (
-                              <div key={index} className="border-l-4 border-green-500 pl-4 py-2 bg-gray-800/50">
-                                <div className="flex items-start justify-between">
+                              <div key={index} className={`${isComparisonArabic ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-green-500 py-2 bg-gray-800/50`}>
+                                <div className={`flex items-start justify-between ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                                   <div className="flex-1">
-                                    <div className="font-medium text-white">
+                                    <div className={`font-medium text-white ${isComparisonArabic ? 'text-right' : ''}`}>
                                       {typeof strength === 'string' ? strength : strength.title}
                                     </div>
                                     {typeof strength === 'object' && strength.description && (
-                                      <div className="text-sm text-gray-400 mt-1">
+                                      <div className={`text-sm text-gray-400 mt-1 ${isComparisonArabic ? 'text-right' : ''}`}>
                                         {strength.description}
                                       </div>
                                     )}
                                     {typeof strength === 'object' && strength.evidence && (
-                                      <div className="text-xs text-green-300 mt-2 italic">
-                                        Evidence: {strength.evidence}
+                                      <div className={`text-xs text-green-300 mt-2 italic ${isComparisonArabic ? 'text-right' : ''}`}>
+                                        {t('analysis.comparison.evidence')}: {strength.evidence}
                                       </div>
                                     )}
                                   </div>
                                   {typeof strength === 'object' && strength.rating && (
-                                    <div className="text-sm font-bold text-green-400 ml-2">
+                                    <div className={`text-sm font-bold text-green-400 ${isComparisonArabic ? 'mr-2' : 'ml-2'}`}>
                                       {strength.rating}
                                     </div>
                                   )}
@@ -1066,36 +1067,36 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               </div>
                             ))}
                             {(!parsedData.strengths?.athlete1 || parsedData.strengths.athlete1.length === 0) && (
-                              <div className="text-gray-400 text-center py-4">No strengths data available</div>
+                              <div className="text-gray-400 text-center py-4">{t('analysis.comparison.noStrengthsData')}</div>
                             )}
                           </CardContent>
                         </Card>
 
                         <Card className="bg-athlete-gray-900 border-gray-600">
                           <CardHeader>
-                            <CardTitle className="text-lg text-white">{parsedData.athlete2?.name || "Athlete 2"} Strengths</CardTitle>
+                            <CardTitle className={`text-lg text-white ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.athlete2?.name || "Athlete 2"} {t('analysis.comparison.strengths')}</CardTitle>
                           </CardHeader>
                           <CardContent className="space-y-3">
                             {(parsedData.strengths?.athlete2 || []).map((strength: any, index: number) => (
-                              <div key={index} className="border-l-4 border-green-500 pl-4 py-2 bg-gray-800/50">
-                                <div className="flex items-start justify-between">
+                              <div key={index} className={`${isComparisonArabic ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-green-500 py-2 bg-gray-800/50`}>
+                                <div className={`flex items-start justify-between ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                                   <div className="flex-1">
-                                    <div className="font-medium text-white">
+                                    <div className={`font-medium text-white ${isComparisonArabic ? 'text-right' : ''}`}>
                                       {typeof strength === 'string' ? strength : strength.title}
                                     </div>
                                     {typeof strength === 'object' && strength.description && (
-                                      <div className="text-sm text-gray-400 mt-1">
+                                      <div className={`text-sm text-gray-400 mt-1 ${isComparisonArabic ? 'text-right' : ''}`}>
                                         {strength.description}
                                       </div>
                                     )}
                                     {typeof strength === 'object' && strength.evidence && (
-                                      <div className="text-xs text-green-300 mt-2 italic">
-                                        Evidence: {strength.evidence}
+                                      <div className={`text-xs text-green-300 mt-2 italic ${isComparisonArabic ? 'text-right' : ''}`}>
+                                        {t('analysis.comparison.evidence')}: {strength.evidence}
                                       </div>
                                     )}
                                   </div>
                                   {typeof strength === 'object' && strength.rating && (
-                                    <div className="text-sm font-bold text-green-400 ml-2">
+                                    <div className={`text-sm font-bold text-green-400 ${isComparisonArabic ? 'mr-2' : 'ml-2'}`}>
                                       {strength.rating}
                                     </div>
                                   )}
@@ -1103,7 +1104,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               </div>
                             ))}
                             {(!parsedData.strengths?.athlete2 || parsedData.strengths.athlete2.length === 0) && (
-                              <div className="text-gray-400 text-center py-4">No strengths data available</div>
+                              <div className="text-gray-400 text-center py-4">{t('analysis.comparison.noStrengthsData')}</div>
                             )}
                           </CardContent>
                         </Card>
@@ -1386,7 +1387,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       </Card>
                     </TabsContent>
                   </Tabs>
-                </>
+                </div>
               );
             })()}
           </div>
