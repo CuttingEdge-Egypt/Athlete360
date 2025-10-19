@@ -360,6 +360,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
     },
     onError: (error: any) => {
       setProgressPhase(null); // Clear progress on error
+      setShowForm(true); // Show form again so user can retry
 
       // Check if this is a cancellation
       if (error.name === 'AbortError' || error.message?.includes('aborted')) {
@@ -398,6 +399,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       // Don't clear queueIdRef yet - let the mutation's onSettled handler do it
       // so the onError handler can still update the queue status
       setProgressPhase(null);
+      setShowForm(true); // Show form again after cancellation
 
       toast({
         title: "Comparison Cancelled",
