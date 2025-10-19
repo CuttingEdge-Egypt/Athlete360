@@ -75,9 +75,9 @@ export function HistoryDropdown() {
   };
 
   const { data: historyItems = [], isLoading } = useQuery<HistoryItem[]>({
-    queryKey: ["/api/user-history", language],
+    queryKey: ["/api/user-history"],
     queryFn: async () => {
-      const response = await fetch(`/api/user-history?language=${language}`);
+      const response = await fetch(`/api/user-history`);
       if (!response.ok) throw new Error('Failed to fetch history');
       return response.json();
     }

@@ -130,7 +130,7 @@ export interface IStorage {
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
   
   // History operations
-  getUserHistory(userId: string, language?: string): Promise<any[]>;
+  getUserHistory(userId: string): Promise<any[]>;
   getUserTransactions(userId: string): Promise<Transaction[]>;
 
   // Analysis logs
@@ -914,7 +914,7 @@ export class DatabaseStorage implements IStorage {
     return results;
   }
 
-  async getUserHistory(userId: string, language?: string): Promise<any[]> {
+  async getUserHistory(userId: string): Promise<any[]> {
     const [transactionResults, logResults] = await Promise.all([
       // Get transactions with athlete info
       db
@@ -942,7 +942,7 @@ export class DatabaseStorage implements IStorage {
         .orderBy(desc(transactions.createdAt))
         .limit(50),
         
-      // Get analysis logs with athlete info
+      // Get analysis logs with athlete info - no language filtering
       db
         .select({
           id: analysisLogs.id,
@@ -968,14 +968,7 @@ export class DatabaseStorage implements IStorage {
         .from(analysisLogs)
         .leftJoin(athletes, eq(analysisLogs.athleteId, athletes.id))
         .leftJoin(sports, eq(athletes.sportId, sports.id))
-        .where(
-          language 
-            ? and(
-                eq(analysisLogs.userId, userId),
-                eq(analysisLogs.language, language)
-              )
-            : eq(analysisLogs.userId, userId)
-        )
+        .where(eq(analysisLogs.userId, userId))
         .orderBy(desc(analysisLogs.createdAt))
         .limit(50)
     ]);

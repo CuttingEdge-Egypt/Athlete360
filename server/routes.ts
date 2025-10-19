@@ -2710,8 +2710,8 @@ Return only valid JSON with the missing fields.`;
   app.get('/api/user-history', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const language = req.query.language as string | undefined; // Filter by language if provided
-      const historyItems = await storage.getUserHistory(userId, language);
+      // Don't filter by language - show all history items
+      const historyItems = await storage.getUserHistory(userId);
       res.json(historyItems);
     } catch (error) {
       console.error("Error fetching user history:", error);
