@@ -154,6 +154,12 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
             message: translateProgressMessage(data.message),
             progress: data.progress
           });
+        } else if (data.type === 'comparison-complete') {
+          console.log('[WS] Comparison complete, updating queue');
+          // Update queue status to completed
+          if ((window as any).generationQueue && data.queueId) {
+            (window as any).generationQueue.update(data.queueId, { status: 'completed' });
+          }
         }
       } catch (error) {
         console.error('[WS] Error parsing message:', error);

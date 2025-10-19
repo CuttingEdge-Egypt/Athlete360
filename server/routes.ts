@@ -3391,6 +3391,22 @@ Return only valid JSON with the missing fields.`;
         resultData: responseData
       });
 
+      // Send completion message to update queue status
+      broadcastProgress("Comparison complete!", 100);
+      
+      // Also send a completion event to mark queue item as completed
+      if (wss) {
+        wss.clients.forEach((client) => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({
+              type: 'comparison-complete',
+              queueId,
+              userId
+            }));
+          }
+        });
+      }
+
       return res.json(responseData);
         
     } catch (error) {
