@@ -2966,7 +2966,7 @@ export default function Home() {
                     
                     <DevelopmentPlanDisplay 
                       plan={developmentPlanData}
-                      language={i18n.language}
+                      language={developmentPlanData.language || 'en'}
                       sport={developmentForm.getValues('sport') || selectedSport || 'training'}
                     />
                   </div>
