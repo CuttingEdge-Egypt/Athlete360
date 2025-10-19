@@ -51,7 +51,7 @@
     "match": {
       "uploading": "Uploading video to AI processing server...",
       "preparing": "Preparing video for analysis...",
-      "processing": "Processing video with Our AI...",
+      "processing": "Processing video with AI...",
       "movements": "Analyzing athlete movements and positioning...",
       "scoring": "Detecting scoring events and key moments...",
       "techniques": "Identifying techniques and strikes...",
@@ -62,7 +62,7 @@
     "clip": {
       "uploading": "Uploading video to AI processing server...",
       "preparing": "Preparing video for analysis...",
-      "processing": "Processing video with Our AI...",
+      "processing": "Processing video with AI...",
       "understanding": "Understanding your analysis request...",
       "evaluating": "Evaluating technique and form...",
       "comparing": "Comparing to professional standards...",

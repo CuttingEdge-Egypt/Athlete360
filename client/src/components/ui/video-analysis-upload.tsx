@@ -637,6 +637,9 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
           {/* Analysis Button / Progress Bar */}
           {isAnalyzing ? (
             <div className="space-y-4 bg-athlete-gray-700 rounded-lg p-6 border-2 border-indigo-500/30">
+              {/* Main loading message at the top */}
+              <p className="text-gray-300 text-lg leading-relaxed text-center font-medium">{loadingMessage}</p>
+              
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-3">
                   <Loader2 className="h-5 w-5 animate-spin text-indigo-400" />
@@ -652,8 +655,6 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
                 className="h-3 bg-athlete-gray-600"
                 data-testid="progress-bar"
               />
-              
-              <p className="text-gray-300 text-base leading-relaxed text-center font-medium mb-3">{loadingMessage}</p>
               
               <div className="flex items-start justify-center space-x-2 text-sm mb-4">
                 <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 animate-pulse"></div>
