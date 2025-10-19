@@ -1,0 +1,112 @@
+{
+  "header": {
+    "title": "Payment Center",
+    "subtitle": "Purchase tokens to unlock powerful athlete analysis features",
+    "backToDashboard": "Back to Dashboard"
+  },
+  "balance": {
+    "title": "Current Balance",
+    "subtitle": "Available tokens for analysis",
+    "tokens": "tokens"
+  },
+  "packages": {
+    "starter": {
+      "name": "Starter Pack",
+      "badge": "Most Popular",
+      "features": {
+        "tokens": "{count} analysis tokens",
+        "profiles": "Basic athlete profiles",
+        "insights": "Performance insights",
+        "support": "Standard support"
+      }
+    },
+    "professional": {
+      "name": "Professional Pack",
+      "badge": "Most Popular",
+      "features": {
+        "tokens": "{count} analysis tokens",
+        "comparisons": "Advanced comparisons",
+        "breakdowns": "Detailed breakdowns",
+        "support": "Priority support",
+        "plans": "Development plans"
+      }
+    },
+    "elite": {
+      "name": "Elite Pack",
+      "badge": "Most Popular",
+      "features": {
+        "tokens": "{count} analysis tokens",
+        "comparisons": "Unlimited comparisons",
+        "video": "Video analysis",
+        "support": "VIP support",
+        "strategies": "Custom strategies",
+        "nutrition": "Nutrition plans"
+      }
+    },
+    "purchaseButton": "Purchase Now",
+    "creatingPayment": "Creating Payment...",
+    "tokensLabel": "Tokens"
+  },
+  "checkout": {
+    "title": "Secure Payment Gateway",
+    "subtitle": "{name} - {tokens} tokens for {price} EGP",
+    "backToPackages": "Back to Packages",
+    "orderSummary": {
+      "title": "Order Summary",
+      "subtitle": "Review your purchase details",
+      "package": "Package:",
+      "tokens": "Tokens:",
+      "total": "Total:"
+    },
+    "gateway": {
+      "title": "Secure Payment Gateway",
+      "subtitle": "Secure payment with Paymob Flash - supports all Egyptian payment methods",
+      "checkoutTitle": "Secure Checkout",
+      "checkoutDescription": "Proceed to Paymob's secure checkout to complete your purchase.",
+      "proceedButton": "Proceed to Checkout"
+    },
+    "instructions": {
+      "title": "Payment Instructions",
+      "step1": "Click \"Proceed to Checkout\" to go to Paymob's secure payment page",
+      "step2": "Choose your payment method (cards, wallets, Valu, etc.)",
+      "step3": "Enter your payment details and complete 3D Secure (OTP) if required",
+      "step4": "After successful payment, you'll be redirected back to our site",
+      "step5": "Your tokens will be added automatically to your account"
+    },
+    "security": "SSL Secured by Paymob"
+  },
+  "footer": {
+    "secure": "🔒 Secure payments powered by Paymob",
+    "encrypted": "All transactions are encrypted and protected"
+  },
+  "toasts": {
+    "paymentSuccess": {
+      "title": "Payment Successful!",
+      "description": "Your tokens have been added to your account."
+    },
+    "paymentFailed": {
+      "title": "Payment Failed",
+      "description": "Your payment could not be processed. Please try again."
+    },
+    "paymentError": {
+      "title": "Payment Error",
+      "description": "An unexpected error occurred while processing your payment."
+    },
+    "authRequired": {
+      "title": "Authentication Required",
+      "description": "Please log in to purchase tokens."
+    },
+    "paymentReady": {
+      "title": "Payment Ready",
+      "description": "Complete your payment in the secure payment window."
+    },
+    "redirecting": {
+      "title": "Redirecting to Payment",
+      "description": "Taking you to the secure checkout page..."
+    },
+    "urlNotAvailable": {
+      "title": "Payment Error",
+      "description": "Payment checkout URL not available. Please try again."
+    }
+  }
+}

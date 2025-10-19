@@ -1,0 +1,112 @@
+{
+  "header": {
+    "title": "مركز الدفع",
+    "subtitle": "شراء الرموز لفتح ميزات تحليل الرياضيين القوية",
+    "backToDashboard": "العودة للوحة التحكم"
+  },
+  "balance": {
+    "title": "الرصيد الحالي",
+    "subtitle": "الرموز المتاحة للتحليل",
+    "tokens": "رمز"
+  },
+  "packages": {
+    "starter": {
+      "name": "الباقة الأساسية",
+      "badge": "الأكثر شعبية",
+      "features": {
+        "tokens": "{count} رمز تحليل",
+        "profiles": "ملفات رياضيين أساسية",
+        "insights": "رؤى الأداء",
+        "support": "دعم قياسي"
+      }
+    },
+    "professional": {
+      "name": "الباقة الاحترافية",
+      "badge": "الأكثر شعبية",
+      "features": {
+        "tokens": "{count} رمز تحليل",
+        "comparisons": "مقارنات متقدمة",
+        "breakdowns": "تحليلات تفصيلية",
+        "support": "دعم ذو أولوية",
+        "plans": "خطط التطوير"
+      }
+    },
+    "elite": {
+      "name": "الباقة المتميزة",
+      "badge": "الأكثر شعبية",
+      "features": {
+        "tokens": "{count} رمز تحليل",
+        "comparisons": "مقارنات غير محدودة",
+        "video": "تحليل الفيديو",
+        "support": "دعم VIP",
+        "strategies": "استراتيجيات مخصصة",
+        "nutrition": "خطط التغذية"
+      }
+    },
+    "purchaseButton": "الشراء الآن",
+    "creatingPayment": "جاري إنشاء الدفع...",
+    "tokensLabel": "رمز"
+  },
+  "checkout": {
+    "title": "بوابة الدفع الآمنة",
+    "subtitle": "{name} - {tokens} رمز مقابل {price} جنيه مصري",
+    "backToPackages": "العودة للباقات",
+    "orderSummary": {
+      "title": "ملخص الطلب",
+      "subtitle": "راجع تفاصيل الشراء",
+      "package": "الباقة:",
+      "tokens": "الرموز:",
+      "total": "الإجمالي:"
+    },
+    "gateway": {
+      "title": "بوابة الدفع الآمنة",
+      "subtitle": "دفع آمن مع Paymob Flash - يدعم جميع طرق الدفع المصرية",
+      "checkoutTitle": "إتمام الدفع الآمن",
+      "checkoutDescription": "انتقل إلى صفحة الدفع الآمنة من Paymob لإتمام عملية الشراء.",
+      "proceedButton": "المتابعة لإتمام الدفع"
+    },
+    "instructions": {
+      "title": "تعليمات الدفع",
+      "step1": "انقر على \"المتابعة لإتمام الدفع\" للانتقال إلى صفحة الدفع الآمنة من Paymob",
+      "step2": "اختر طريقة الدفع المفضلة (بطاقات، محافظ، Valu، إلخ.)",
+      "step3": "أدخل بيانات الدفع وأكمل التحقق الثلاثي (OTP) إذا لزم الأمر",
+      "step4": "بعد نجاح الدفع، سيتم إعادة توجيهك إلى موقعنا",
+      "step5": "سيتم إضافة الرموز تلقائياً إلى حسابك"
+    },
+    "security": "محمي بشهادة SSL من Paymob"
+  },
+  "footer": {
+    "secure": "🔒 مدفوعات آمنة بواسطة Paymob",
+    "encrypted": "جميع المعاملات مشفرة ومحمية"
+  },
+  "toasts": {
+    "paymentSuccess": {
+      "title": "تم الدفع بنجاح!",
+      "description": "تمت إضافة الرموز إلى حسابك."
+    },
+    "paymentFailed": {
+      "title": "فشل الدفع",
+      "description": "تعذر معالجة الدفع. يرجى المحاولة مرة أخرى."
+    },
+    "paymentError": {
+      "title": "خطأ في الدفع",
+      "description": "حدث خطأ غير متوقع أثناء معالجة الدفع."
+    },
+    "authRequired": {
+      "title": "مطلوب تسجيل الدخول",
+      "description": "يرجى تسجيل الدخول لشراء الرموز."
+    },
+    "paymentReady": {
+      "title": "الدفع جاهز",
+      "description": "أكمل عملية الدفع في نافذة الدفع الآمنة."
+    },
+    "redirecting": {
+      "title": "جاري إعادة التوجيه للدفع",
+      "description": "جاري نقلك إلى صفحة الدفع الآمنة..."
+    },
+    "urlNotAvailable": {
+      "title": "خطأ في الدفع",
+      "description": "رابط الدفع غير متاح. يرجى المحاولة مرة أخرى."
+    }
+  }
+}

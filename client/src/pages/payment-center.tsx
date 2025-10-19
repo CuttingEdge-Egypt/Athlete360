@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, CreditCard, Zap, Trophy, Coins, ArrowLeft, CheckCircle, ExternalLink, AlertCircle } from "lucide-react";
+import { Loader2, CreditCard, Zap, Trophy, Coins, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface TokenPackage {
   id: string;
@@ -28,50 +29,52 @@ export default function PaymentCenter() {
   const [, setLocation] = useLocation();
   const { user } = useAuth() as { user: User | null };
   const { toast } = useToast();
-  const { t } = useTranslation('common');
+  const { t } = useTranslation('payment');
+  const { language } = useLanguage();
+  const isArabic = language === 'ar';
 
   const tokenPackages: TokenPackage[] = [
     {
       id: "starter",
-      name: "Starter Pack",
+      name: t('packages.starter.name'),
       price: 15,
       tokens: 500,
       icon: Coins,
       features: [
-        `500 analysis ${t('units.tokens')}`,
-        "Basic athlete profiles",
-        "Performance insights",
-        "Standard support"
+        t('packages.starter.features.tokens', { count: 500 }),
+        t('packages.starter.features.profiles'),
+        t('packages.starter.features.insights'),
+        t('packages.starter.features.support')
       ]
     },
     {
       id: "professional",
-      name: "Professional Pack",
+      name: t('packages.professional.name'),
       price: 25,
       tokens: 1000,
       popular: true,
       icon: Zap,
       features: [
-        `1000 analysis ${t('units.tokens')}`,
-        "Advanced comparisons",
-        "Detailed breakdowns",
-        "Priority support",
-        "Development plans"
+        t('packages.professional.features.tokens', { count: 1000 }),
+        t('packages.professional.features.comparisons'),
+        t('packages.professional.features.breakdowns'),
+        t('packages.professional.features.support'),
+        t('packages.professional.features.plans')
       ]
     },
     {
       id: "elite",
-      name: "Elite Pack",
+      name: t('packages.elite.name'),
       price: 50,
       tokens: 2500,
       icon: Trophy,
       features: [
-        `2500 analysis ${t('units.tokens')}`,
-        "Unlimited comparisons",
-        "Video analysis",
-        "VIP support",
-        "Custom strategies",
-        "Nutrition plans"
+        t('packages.elite.features.tokens', { count: 2500 }),
+        t('packages.elite.features.comparisons'),
+        t('packages.elite.features.video'),
+        t('packages.elite.features.support'),
+        t('packages.elite.features.strategies'),
+        t('packages.elite.features.nutrition')
       ]
     }
   ];
@@ -87,33 +90,33 @@ export default function PaymentCenter() {
 
     if (paymentResult === 'success') {
       toast({
-        title: "Payment Successful!",
-        description: `Your ${t('units.tokens')} have been added to your account.`,
+        title: t('toasts.paymentSuccess.title'),
+        description: t('toasts.paymentSuccess.description'),
       });
       // Clean the URL params
       window.history.replaceState({}, '', '/payment-center');
     } else if (paymentResult === 'failed') {
       toast({
-        title: "Payment Failed",
-        description: "Your payment could not be processed. Please try again.",
+        title: t('toasts.paymentFailed.title'),
+        description: t('toasts.paymentFailed.description'),
         variant: "destructive",
       });
       window.history.replaceState({}, '', '/payment-center');
     } else if (paymentResult === 'error') {
       toast({
-        title: "Payment Error",
-        description: "An unexpected error occurred while processing your payment.",
+        title: t('toasts.paymentError.title'),
+        description: t('toasts.paymentError.description'),
         variant: "destructive",
       });
       window.history.replaceState({}, '', '/payment-center');
     }
-  }, [toast]);
+  }, [toast, t]);
 
   const handleSelectPackage = async (pkg: TokenPackage) => {
     if (!user) {
       toast({
-        title: "Authentication Required",
-        description: `Please log in to purchase ${t('units.tokens')}.`,
+        title: t('toasts.authRequired.title'),
+        description: t('toasts.authRequired.description'),
         variant: "destructive",
       });
       return;
@@ -136,8 +139,8 @@ export default function PaymentCenter() {
         setPaymentIntent(result.paymentIntent);
         setShowIframe(true);
         toast({
-          title: "Payment Ready",
-          description: "Complete your payment in the secure payment window.",
+          title: t('toasts.paymentReady.title'),
+          description: t('toasts.paymentReady.description'),
         });
       } else {
         throw new Error(result.message || 'Failed to create payment intent');
@@ -145,8 +148,8 @@ export default function PaymentCenter() {
     } catch (error: any) {
       console.error('Payment intent creation failed:', error);
       toast({
-        title: "Payment Failed",
-        description: error.message || "Failed to initialize payment. Please try again.",
+        title: t('toasts.paymentFailed.title'),
+        description: error.message || t('toasts.paymentFailed.description'),
         variant: "destructive",
       });
     } finally {
@@ -166,7 +169,7 @@ export default function PaymentCenter() {
 
   if (showIframe && paymentIntent && selectedPackage) {
     return (
-      <div className="min-h-screen bg-athlete-gray-900 text-white">
+      <div className="min-h-screen bg-athlete-gray-900 text-white" dir={isArabic ? 'rtl' : 'ltr'}>
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center gap-4 mb-6">
@@ -174,18 +177,22 @@ export default function PaymentCenter() {
                 variant="outline"
                 size="sm"
                 onClick={handleBackToPackages}
-                className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                className={`border-gray-600 text-gray-300 hover:bg-gray-700 ${isArabic ? 'flex-row-reverse' : ''}`}
                 data-testid="button-back-packages"
               >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Packages
+                <ArrowLeft className={`w-4 h-4 ${isArabic ? 'ml-2 rotate-180' : 'mr-2'}`} />
+                {t('checkout.backToPackages')}
               </Button>
-              <div>
-                <h1 className="text-2xl font-bold text-white" data-testid="text-payment-title">
-                  Secure Payment Gateway
+              <div className={isArabic ? 'text-right' : 'text-left'}>
+                <h1 className={`${isArabic ? 'text-3xl' : 'text-2xl'} font-bold text-white`} data-testid="text-payment-title">
+                  {t('checkout.title')}
                 </h1>
-                <p className="text-gray-400" data-testid="text-payment-subtitle">
-                  {selectedPackage?.name} - {selectedPackage?.tokens.toLocaleString()} tokens for {selectedPackage?.price} EGP
+                <p className={`text-gray-400 ${isArabic ? 'text-lg' : 'text-base'}`} data-testid="text-payment-subtitle">
+                  {t('checkout.subtitle', { 
+                    name: selectedPackage?.name, 
+                    tokens: selectedPackage?.tokens.toLocaleString(isArabic ? 'ar-EG' : 'en-US'), 
+                    price: selectedPackage?.price 
+                  })}
                 </p>
               </div>
             </div>
@@ -194,39 +201,38 @@ export default function PaymentCenter() {
               {/* Order Summary */}
               <Card className="bg-athlete-gray-800 border-gray-700">
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
+                  <CardTitle className={`text-white flex items-center gap-2 ${isArabic ? 'text-xl flex-row-reverse' : 'text-lg'}`}>
                     <CheckCircle className="w-5 h-5 text-green-400" />
-                    Order Summary
+                    {t('checkout.orderSummary.title')}
                   </CardTitle>
-                  <CardDescription className="text-gray-400">
-                    Review your purchase details
+                  <CardDescription className={`text-gray-400 ${isArabic ? 'text-base text-right' : 'text-sm'}`}>
+                    {t('checkout.orderSummary.subtitle')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="bg-athlete-gray-700 p-4 rounded-lg">
-                      <div className="flex justify-between items-center mb-3">
-                        <span className="text-gray-300">Package:</span>
-                        <span className="text-white font-semibold" data-testid="text-package-name">
+                      <div className={`flex justify-between items-center mb-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                        <span className={`text-gray-300 ${isArabic ? 'text-base' : 'text-sm'}`}>{t('checkout.orderSummary.package')}</span>
+                        <span className={`text-white font-semibold ${isArabic ? 'text-lg' : 'text-base'}`} data-testid="text-package-name">
                           {selectedPackage?.name}
                         </span>
                       </div>
-                      <div className="flex justify-between items-center mb-3">
-                        <span className="text-gray-300">Tokens:</span>
-                        <span className="text-athlete-accent font-bold" data-testid="text-tokens-amount">
-                          {selectedPackage?.tokens.toLocaleString()}
+                      <div className={`flex justify-between items-center mb-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                        <span className={`text-gray-300 ${isArabic ? 'text-base' : 'text-sm'}`}>{t('checkout.orderSummary.tokens')}</span>
+                        <span className={`text-athlete-accent font-bold ${isArabic ? 'text-lg' : 'text-base'}`} data-testid="text-tokens-amount">
+                          {selectedPackage?.tokens.toLocaleString(isArabic ? 'ar-EG' : 'en-US')}
                         </span>
                       </div>
                       <div className="border-t border-gray-600 pt-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-white font-semibold">Total:</span>
-                          <span className="text-white font-bold text-xl" data-testid="text-total-amount">
-                            {selectedPackage?.price} EGP
+                        <div className={`flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                          <span className={`text-white font-semibold ${isArabic ? 'text-lg' : 'text-base'}`}>{t('checkout.orderSummary.total')}</span>
+                          <span className={`text-white font-bold ${isArabic ? 'text-2xl' : 'text-xl'}`} data-testid="text-total-amount">
+                            {selectedPackage?.price} {isArabic ? 'جنيه مصري' : 'EGP'}
                           </span>
                         </div>
                       </div>
                     </div>
-                    
                   </div>
                 </CardContent>
               </Card>
@@ -234,12 +240,12 @@ export default function PaymentCenter() {
               {/* Payment Gateway */}
               <Card className="bg-athlete-gray-800 border-gray-700">
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
+                  <CardTitle className={`text-white flex items-center gap-2 ${isArabic ? 'text-xl flex-row-reverse' : 'text-lg'}`}>
                     <CreditCard className="w-5 h-5 text-athlete-accent" />
-                    Secure Payment Gateway
+                    {t('checkout.gateway.title')}
                   </CardTitle>
-                  <CardDescription className="text-gray-400">
-                    Secure payment with Paymob Flash - supports all Egyptian payment methods
+                  <CardDescription className={`text-gray-400 ${isArabic ? 'text-base text-right' : 'text-sm'}`}>
+                    {t('checkout.gateway.subtitle')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -252,9 +258,9 @@ export default function PaymentCenter() {
                             <CreditCard className="w-8 h-8 text-white" />
                           </div>
                         </div>
-                        <h3 className="text-lg font-bold text-white mb-2">Secure Checkout</h3>
-                        <p className="text-gray-300 text-sm mb-6">
-                          Proceed to Paymob's secure checkout to complete your purchase.
+                        <h3 className={`${isArabic ? 'text-xl' : 'text-lg'} font-bold text-white mb-2`}>{t('checkout.gateway.checkoutTitle')}</h3>
+                        <p className={`text-gray-300 ${isArabic ? 'text-base' : 'text-sm'} mb-6`}>
+                          {t('checkout.gateway.checkoutDescription')}
                         </p>
                         <Button 
                           size="lg"
@@ -263,55 +269,55 @@ export default function PaymentCenter() {
                             
                             if (paymentIntent?.redirect_url) {
                               toast({
-                                title: "Redirecting to Payment",
-                                description: "Taking you to the secure checkout page...",
+                                title: t('toasts.redirecting.title'),
+                                description: t('toasts.redirecting.description'),
                               });
                               
                               // Redirect directly to Paymob Flash
                               window.location.href = paymentIntent.redirect_url;
                             } else {
                               toast({
-                                title: "Payment Error",
-                                description: "Payment checkout URL not available. Please try again.",
+                                title: t('toasts.urlNotAvailable.title'),
+                                description: t('toasts.urlNotAvailable.description'),
                                 variant: "destructive",
                               });
                             }
                           }}
-                          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3"
+                          className={`bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3 ${isArabic ? 'flex-row-reverse' : ''}`}
                           data-testid="button-proceed-payment"
                         >
-                          <CreditCard className="w-5 h-5 mr-3" />
-                          Proceed to Checkout
+                          <CreditCard className={`w-5 h-5 ${isArabic ? 'ml-3' : 'mr-3'}`} />
+                          {t('checkout.gateway.proceedButton')}
                         </Button>
                       </div>
                     </div>
 
                     {/* Payment Instructions */}
                     <div className="bg-gray-800/50 border border-gray-600/30 rounded-lg p-4">
-                      <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
+                      <h4 className={`font-semibold text-white mb-3 flex items-center gap-2 ${isArabic ? 'flex-row-reverse text-lg' : 'text-base'}`}>
                         <AlertCircle className="w-4 h-4 text-blue-400" />
-                        Payment Instructions
+                        {t('checkout.instructions.title')}
                       </h4>
-                      <div className="text-xs text-gray-300 space-y-2">
-                        <div className="flex items-start gap-2">
+                      <div className={`${isArabic ? 'text-sm text-right' : 'text-xs'} text-gray-300 space-y-2`}>
+                        <div className={`flex items-start gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                           <span className="text-blue-400 font-bold">1.</span>
-                          <span>Click "Proceed to Checkout" to go to Paymob's secure payment page</span>
+                          <span>{t('checkout.instructions.step1')}</span>
                         </div>
-                        <div className="flex items-start gap-2">
+                        <div className={`flex items-start gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                           <span className="text-blue-400 font-bold">2.</span>
-                          <span>Choose your payment method (cards, wallets, Valu, etc.)</span>
+                          <span>{t('checkout.instructions.step2')}</span>
                         </div>
-                        <div className="flex items-start gap-2">
+                        <div className={`flex items-start gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                           <span className="text-blue-400 font-bold">3.</span>
-                          <span>Enter your payment details and complete 3D Secure (OTP) if required</span>
+                          <span>{t('checkout.instructions.step3')}</span>
                         </div>
-                        <div className="flex items-start gap-2">
+                        <div className={`flex items-start gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                           <span className="text-blue-400 font-bold">4.</span>
-                          <span>After successful payment, you'll be redirected back to our site</span>
+                          <span>{t('checkout.instructions.step4')}</span>
                         </div>
-                        <div className="flex items-start gap-2">
+                        <div className={`flex items-start gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                           <span className="text-blue-400 font-bold">5.</span>
-                          <span>Your tokens will be added automatically to your account</span>
+                          <span>{t('checkout.instructions.step5')}</span>
                         </div>
                       </div>
                     </div>
@@ -321,9 +327,9 @@ export default function PaymentCenter() {
             </div>
 
             <div className="mt-6 text-center">
-              <div className="inline-flex items-center gap-2 bg-green-900/20 border border-green-600/30 rounded-lg px-4 py-2">
+              <div className={`inline-flex items-center gap-2 bg-green-900/20 border border-green-600/30 rounded-lg px-4 py-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                 <CheckCircle className="w-4 h-4 text-green-400" />
-                <span className="text-green-300 text-sm">SSL Secured by Paymob</span>
+                <span className={`text-green-300 ${isArabic ? 'text-base' : 'text-sm'}`}>{t('checkout.security')}</span>
               </div>
             </div>
           </div>
@@ -333,7 +339,7 @@ export default function PaymentCenter() {
   }
 
   return (
-    <div className="min-h-screen bg-athlete-gray-900 text-white">
+    <div className="min-h-screen bg-athlete-gray-900 text-white" dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-4 mb-8">
@@ -341,36 +347,36 @@ export default function PaymentCenter() {
               variant="outline"
               size="sm"
               onClick={handleGoBack}
-              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+              className={`border-gray-600 text-gray-300 hover:bg-gray-700 ${isArabic ? 'flex-row-reverse' : ''}`}
               data-testid="button-back-home"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
+              <ArrowLeft className={`w-4 h-4 ${isArabic ? 'ml-2 rotate-180' : 'mr-2'}`} />
+              {t('header.backToDashboard')}
             </Button>
-            <div>
-              <h1 className="text-3xl font-bold text-white" data-testid="text-payment-center-title">
-                Payment Center
+            <div className={isArabic ? 'text-right' : 'text-left'}>
+              <h1 className={`${isArabic ? 'text-4xl' : 'text-3xl'} font-bold text-white`} data-testid="text-payment-center-title">
+                {t('header.title')}
               </h1>
-              <p className="text-gray-400" data-testid="text-payment-center-subtitle">
-                Purchase tokens to unlock powerful athlete analysis features
+              <p className={`text-gray-400 ${isArabic ? 'text-xl' : 'text-base'}`} data-testid="text-payment-center-subtitle">
+                {t('header.subtitle')}
               </p>
             </div>
           </div>
 
           {user && (
             <div className="bg-athlete-gray-800 border border-gray-700 rounded-lg p-6 mb-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-1" data-testid="text-current-balance">
-                    Current Balance
+              <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <div className={isArabic ? 'text-right' : 'text-left'}>
+                  <h3 className={`${isArabic ? 'text-xl' : 'text-lg'} font-semibold text-white mb-1`} data-testid="text-current-balance">
+                    {t('balance.title')}
                   </h3>
-                  <p className="text-gray-400">Available tokens for analysis</p>
+                  <p className={`text-gray-400 ${isArabic ? 'text-base' : 'text-sm'}`}>{t('balance.subtitle')}</p>
                 </div>
-                <div className="text-right">
+                <div className={isArabic ? 'text-left' : 'text-right'}>
                   <div className="text-2xl font-bold text-athlete-accent" data-testid="text-token-balance">
-                    {(user.tokens || 0).toLocaleString()}
+                    {(user.tokens || 0).toLocaleString(isArabic ? 'ar-EG' : 'en-US')}
                   </div>
-                  <p className="text-sm text-gray-400">tokens</p>
+                  <p className={`${isArabic ? 'text-base' : 'text-sm'} text-gray-400`}>{t('balance.tokens')}</p>
                 </div>
               </div>
             </div>
@@ -391,8 +397,8 @@ export default function PaymentCenter() {
                 >
                   {pkg.popular && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-athlete-accent text-white px-3 py-1">
-                        Most Popular
+                      <Badge className={`bg-athlete-accent text-white px-3 py-1 ${isArabic ? 'text-sm' : 'text-xs'}`}>
+                        {t('packages.professional.badge')}
                       </Badge>
                     </div>
                   )}
@@ -401,41 +407,41 @@ export default function PaymentCenter() {
                     <div className="mx-auto mb-4 p-3 bg-athlete-gray-700 rounded-full w-fit">
                       <IconComponent className="text-athlete-accent" size={32} />
                     </div>
-                    <CardTitle className="text-xl text-white" data-testid={`text-package-title-${pkg.id}`}>
+                    <CardTitle className={`${isArabic ? 'text-2xl' : 'text-xl'} text-white`} data-testid={`text-package-title-${pkg.id}`}>
                       {pkg.name}
                     </CardTitle>
-                    <div className="text-3xl font-bold text-white" data-testid={`text-package-price-${pkg.id}`}>
-                      {pkg.price} EGP
+                    <div className={`${isArabic ? 'text-4xl' : 'text-3xl'} font-bold text-white`} data-testid={`text-package-price-${pkg.id}`}>
+                      {pkg.price} {isArabic ? 'جنيه مصري' : 'EGP'}
                     </div>
-                    <p className="text-athlete-accent font-semibold" data-testid={`text-package-tokens-${pkg.id}`}>
-                      {pkg.tokens.toLocaleString()} Tokens
+                    <p className={`text-athlete-accent font-semibold ${isArabic ? 'text-lg' : 'text-base'}`} data-testid={`text-package-tokens-${pkg.id}`}>
+                      {pkg.tokens.toLocaleString(isArabic ? 'ar-EG' : 'en-US')} {t('packages.tokensLabel')}
                     </p>
                   </CardHeader>
 
                   <CardContent>
                     <ul className="space-y-3 mb-6">
                       {pkg.features.map((feature, index) => (
-                        <li key={index} className="flex items-center space-x-2">
+                        <li key={index} className={`flex items-center ${isArabic ? 'space-x-reverse space-x-2 flex-row-reverse' : 'space-x-2'}`}>
                           <CheckCircle className="text-athlete-success" size={16} />
-                          <span className="text-gray-300 text-sm">{feature}</span>
+                          <span className={`text-gray-300 ${isArabic ? 'text-base text-right' : 'text-sm'}`}>{feature}</span>
                         </li>
                       ))}
                     </ul>
 
                     <Button
-                      className="w-full bg-athlete-accent hover:bg-athlete-accent/90 text-white font-semibold"
+                      className={`w-full bg-athlete-accent hover:bg-athlete-accent/90 text-white font-semibold ${isArabic ? 'text-base flex-row-reverse' : 'text-sm'}`}
                       disabled={isCreatingPayment && selectedPackage?.id === pkg.id}
                       data-testid={`button-purchase-${pkg.id}`}
                     >
                       {isCreatingPayment && selectedPackage?.id === pkg.id ? (
                         <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Creating Payment...
+                          <Loader2 className={`w-4 h-4 ${isArabic ? 'ml-2' : 'mr-2'} animate-spin`} />
+                          {t('packages.creatingPayment')}
                         </>
                       ) : (
                         <>
-                          <CreditCard className="w-4 h-4 mr-2" />
-                          Purchase Now
+                          <CreditCard className={`w-4 h-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                          {t('packages.purchaseButton')}
                         </>
                       )}
                     </Button>
@@ -445,9 +451,9 @@ export default function PaymentCenter() {
             })}
           </div>
 
-          <div className="text-center text-gray-400">
-            <p className="mb-2">🔒 Secure payments powered by Paymob</p>
-            <p className="text-sm">All transactions are encrypted and protected</p>
+          <div className={`text-center text-gray-400 ${isArabic ? 'text-base' : 'text-sm'}`}>
+            <p className="mb-2">{t('footer.secure')}</p>
+            <p className={isArabic ? 'text-base' : 'text-sm'}>{t('footer.encrypted')}</p>
           </div>
         </div>
       </div>
