@@ -268,7 +268,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                                 size="sm"
                                 variant="outline"
                                 onClick={() => window.open(exercise.videoUrl, '_blank')}
-                                className={`${contentIsArabic ? 'mr-4 flex-row-reverse' : 'ml-4'} bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-300 hover:from-purple-500 hover:to-purple-600 hover:text-white flex-shrink-0 shadow-md`}
+                                className={`${contentIsArabic ? 'ml-4 flex-row-reverse' : 'mr-4'} bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-300 hover:from-purple-500 hover:to-purple-600 hover:text-white flex-shrink-0 shadow-md`}
                                 data-testid={`exercise-video-${exerciseIndex}`}
                               >
                                 <Play className={`${contentIsArabic ? 'ml-1' : 'mr-1'} h-3 w-3`} />
@@ -341,7 +341,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                         <Button
                           size="sm"
                           onClick={() => window.open(exercise.videoUrl, '_blank')}
-                          className={`${contentIsArabic ? 'mr-4 flex-row-reverse' : 'ml-4'} bg-athlete-accent hover:bg-athlete-accent/90 text-white flex-shrink-0`}
+                          className={`${contentIsArabic ? 'ml-4 flex-row-reverse' : 'mr-4'} bg-athlete-accent hover:bg-athlete-accent/90 text-white flex-shrink-0`}
                           data-testid={`video-button-${index}`}
                         >
                           <ExternalLink className={`${contentIsArabic ? 'ml-1' : 'mr-1'} h-3 w-3`} />
