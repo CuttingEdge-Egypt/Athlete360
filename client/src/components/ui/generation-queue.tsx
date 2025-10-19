@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,20 @@ import { CancelConfirmationDialog } from '@/components/ui/cancel-confirmation-di
 import { X, Play, Pause, RotateCcw, Check, Loader2, Eye, Trash2 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useTranslation } from 'react-i18next';
+
+// Extend Window interface for type safety
+declare global {
+  interface Window {
+    generationQueue?: {
+      add: (athleteName: string, serviceType: string, autoTrigger?: boolean) => string;
+      update: (id: string, updates: Partial<GenerationItem>) => void;
+      remove: (id: string) => void;
+    };
+    showToast?: (title: string, description: string, variant?: string) => void;
+    cancelGeneration?: (athleteName: string, serviceType: string) => void;
+    currentAthleteId?: string;
+  }
+}
 
 interface GenerationItem {
   id: string;
@@ -44,24 +58,49 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
   const [, setLocation] = useLocation();
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [itemToCancel, setItemToCancel] = useState<string | null>(null);
+  const timeoutsRef = useRef<Record<string, NodeJS.Timeout[]>>({});
 
-  // Create service labels with translations
-  const getServiceLabel = (serviceType: string) => {
-    const serviceLabels: { [key: string]: string } = {
-      bio: t('services.bioAnalysis.title'),
-      rank: t('services.rankHistory.title'),
-      strengths: t('services.strengths.title'),
-      weaknesses: t('services.weaknesses.title'),
-      development: t('services.trainingPlans.title'),
-      'development-plan': t('services.developmentPlan.title'),
-      'nutrition-plan': t('services.nutritionPlan.title'),
-      nutrition: t('services.nutritionPlan.title'),
-      beat: t('services.tacticRecommendations.title'),
-      video: t('services.videoAnalysis.title'),
-      comparison: t('services.athleteComparison.title'),
-      statistics: t('services.statistics.title'),
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      // Clear all timeouts when component unmounts
+      Object.values(timeoutsRef.current).forEach(timeouts => {
+        timeouts.forEach(timeout => clearTimeout(timeout));
+      });
+      timeoutsRef.current = {};
     };
-    return serviceLabels[serviceType] || serviceType;
+  }, []);
+
+  // Helper function to clear timeouts for a specific item
+  const clearItemTimeouts = (itemId: string) => {
+    if (timeoutsRef.current[itemId]) {
+      timeoutsRef.current[itemId].forEach(timeout => clearTimeout(timeout));
+      delete timeoutsRef.current[itemId];
+    }
+  };
+
+  // Create service labels with translations and error handling
+  const getServiceLabel = (serviceType: string) => {
+    try {
+      const serviceLabels: { [key: string]: string } = {
+        bio: t('services.bioAnalysis.title'),
+        rank: t('services.rankHistory.title'),
+        strengths: t('services.strengths.title'),
+        weaknesses: t('services.weaknesses.title'),
+        development: t('services.trainingPlans.title'),
+        'development-plan': t('services.developmentPlan.title'),
+        'nutrition-plan': t('services.nutritionPlan.title'),
+        nutrition: t('services.nutritionPlan.title'),
+        beat: t('services.tacticRecommendations.title'),
+        video: t('services.videoAnalysis.title'),
+        comparison: t('services.athleteComparison.title'),
+        statistics: t('services.statistics.title'),
+      };
+      return serviceLabels[serviceType] || serviceType;
+    } catch (error) {
+      console.error('Error getting service label:', error);
+      return serviceType;
+    }
   };
 
   // Add new generation to queue and auto-trigger (max 4 concurrent)
@@ -83,25 +122,33 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
       
       // Update progress messages over time for running items with better progression
       if (shouldStart) {
-        setTimeout(() => {
+        // Track timeouts for cleanup
+        timeoutsRef.current[itemId] = [];
+        
+        const timeout1 = setTimeout(() => {
           updateGeneration(itemId, { progressMessage: t('services.queue.takingTime') });
-        }, 2000); // 2 seconds
+        }, 2000);
+        timeoutsRef.current[itemId].push(timeout1);
         
-        setTimeout(() => {
+        const timeout2 = setTimeout(() => {
           updateGeneration(itemId, { progressMessage: t('services.queue.analyzingData') });
-        }, 8000); // 8 seconds
+        }, 8000);
+        timeoutsRef.current[itemId].push(timeout2);
         
-        setTimeout(() => {
+        const timeout3 = setTimeout(() => {
           updateGeneration(itemId, { progressMessage: t('services.queue.gatheringInsights') });
-        }, 20000); // 20 seconds
+        }, 20000);
+        timeoutsRef.current[itemId].push(timeout3);
         
-        setTimeout(() => {
+        const timeout4 = setTimeout(() => {
           updateGeneration(itemId, { progressMessage: t('services.queue.buildingAnalysis') });
-        }, 40000); // 40 seconds
+        }, 40000);
+        timeoutsRef.current[itemId].push(timeout4);
         
-        setTimeout(() => {
+        const timeout5 = setTimeout(() => {
           updateGeneration(itemId, { progressMessage: t('services.queue.almostThere') });
-        }, 70000); // 70 seconds
+        }, 70000);
+        timeoutsRef.current[itemId].push(timeout5);
       }
       
       setIsVisible(true);
@@ -132,25 +179,33 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
           };
           
           // Update progress messages over time for newly started items with better progression
-          setTimeout(() => {
+          // Track timeouts for cleanup
+          timeoutsRef.current[item.id] = [];
+          
+          const timeout1 = setTimeout(() => {
             updateGeneration(item.id, { progressMessage: t('services.queue.takingTime') });
-          }, 2000); // 2 seconds
+          }, 2000);
+          timeoutsRef.current[item.id].push(timeout1);
           
-          setTimeout(() => {
+          const timeout2 = setTimeout(() => {
             updateGeneration(item.id, { progressMessage: t('services.queue.analyzingData') });
-          }, 8000); // 8 seconds
+          }, 8000);
+          timeoutsRef.current[item.id].push(timeout2);
           
-          setTimeout(() => {
+          const timeout3 = setTimeout(() => {
             updateGeneration(item.id, { progressMessage: t('services.queue.gatheringInsights') });
-          }, 20000); // 20 seconds
+          }, 20000);
+          timeoutsRef.current[item.id].push(timeout3);
           
-          setTimeout(() => {
+          const timeout4 = setTimeout(() => {
             updateGeneration(item.id, { progressMessage: t('services.queue.buildingAnalysis') });
-          }, 40000); // 40 seconds
+          }, 40000);
+          timeoutsRef.current[item.id].push(timeout4);
           
-          setTimeout(() => {
+          const timeout5 = setTimeout(() => {
             updateGeneration(item.id, { progressMessage: t('services.queue.almostThere') });
-          }, 70000); // 70 seconds
+          }, 70000);
+          timeoutsRef.current[item.id].push(timeout5);
           
           return runningItem;
         }
@@ -204,6 +259,9 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
       setShowCancelDialog(true);
       return;
     }
+    // Clear any pending timeouts for this item
+    clearItemTimeouts(id);
+    
     setQueue(prev => prev.filter(item => item.id !== id));
     // Process queue after removal to start pending items
     setTimeout(() => processQueue(), 100);
@@ -213,6 +271,9 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
   const handleCancelConfirm = () => {
     if (itemToCancel) {
       const canceledItem = queue.find(item => item.id === itemToCancel);
+      
+      // Clear any pending timeouts for this item before removal
+      clearItemTimeouts(itemToCancel);
       
       // Update UI immediately
       setQueue(prev => prev.filter(item => item.id !== itemToCancel));
@@ -231,9 +292,9 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
         }).catch(error => {
           console.error('Error canceling job:', error);
         });
-      } else if (canceledItem && (window as any).cancelGeneration) {
+      } else if (canceledItem && window.cancelGeneration) {
         // For other services, use the old cancellation method
-        (window as any).cancelGeneration(canceledItem.athleteName, canceledItem.serviceType);
+        window.cancelGeneration(canceledItem.athleteName, canceledItem.serviceType);
       }
       
       // Process queue immediately to start pending items
@@ -265,7 +326,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
     const newId = addToQueue(item.athleteName, item.serviceType, true);
     
     // Find the athlete ID from the item result or global context
-    const athleteId = item.result?.athleteId || (window as any).currentAthleteId;
+    const athleteId = item.result?.athleteId || window.currentAthleteId;
     
     if (!athleteId) {
       console.error('Cannot retry: athlete ID not available');
@@ -310,6 +371,13 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
     const completedCount = queue.filter(item => item.status === 'completed' || item.status === 'error').length;
     if (completedCount === 0) return; // No completed items to clear
     
+    // Clear timeouts for all completed/error items before removal
+    queue.forEach(item => {
+      if (item.status === 'completed' || item.status === 'error') {
+        clearItemTimeouts(item.id);
+      }
+    });
+    
     setQueue(prev => prev.filter(item => item.status !== 'completed' && item.status !== 'error'));
     // Process queue after clearing completed items
     setTimeout(() => processQueue(), 100);
@@ -331,11 +399,17 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
       setTimeout(() => {
         window.history.pushState({}, '', url);
         window.dispatchEvent(new PopStateEvent('popstate'));
+        
+        // Remove the completed comparison from queue after navigation
+        removeGeneration(item.id);
       }, 100);
     } else if (item.serviceType === 'video') {
       // Navigate to video analysis page with data in sessionStorage
       sessionStorage.setItem('videoAnalysisData', JSON.stringify(item.result));
       setLocation('/video-analysis');
+      
+      // Remove the completed video analysis from queue after navigation
+      removeGeneration(item.id);
     } else if (item.serviceType === 'statistics') {
       // Show analysis popup for statistics
       setSelectedResult(item);
