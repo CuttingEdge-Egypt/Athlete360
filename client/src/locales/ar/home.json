@@ -371,5 +371,13 @@
     "tokenDeductionFailed": "فشل معالجة الرموز. يرجى المحاولة مرة أخرى",
     "networkIssue": "خطأ في الشبكة. يرجى التحقق من اتصالك والمحاولة مرة أخرى",
     "sessionExpired": "انتهت جلستك. يرجى تسجيل الدخول مرة أخرى"
+  },
+  "analysis": {
+    "comparison": {
+      "overviewTitle": "نظرة عامة على المقارنة",
+      "strengthsTitle": "تحليل نقاط القوة",
+      "detailsTitle": "التفاصيل الفنية والتحليل",
+      "headToHeadTitle": "التحليل المباشر"
+    }
   }
 }

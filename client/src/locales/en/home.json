@@ -370,5 +370,13 @@
     "tokenDeductionFailed": "Failed to process tokens. Please try again",
     "networkIssue": "Network error. Please check your connection and try again",
     "sessionExpired": "Your session has expired. Please log in again"
+  },
+  "analysis": {
+    "comparison": {
+      "overviewTitle": "Comparison Overview",
+      "strengthsTitle": "Strengths Analysis",
+      "detailsTitle": "Technical Details & Analysis",
+      "headToHeadTitle": "Head-to-Head Analysis"
+    }
   }
 }

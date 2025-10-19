@@ -2306,7 +2306,7 @@ export function AnalysisPopup({
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center">
                   <User className="mr-3" size={24} />
-                  Comparison Overview
+                  {t("analysis.comparison.overviewTitle", "Comparison Overview")}
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <div 
@@ -2324,7 +2324,7 @@ export function AnalysisPopup({
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-green-400 mb-4 flex items-center">
                   <Star className="mr-3" size={24} />
-                  Strengths Analysis
+                  {t("analysis.comparison.strengthsTitle", "Strengths Analysis")}
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <div 
@@ -2360,7 +2360,7 @@ export function AnalysisPopup({
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center">
                   <Brain className="mr-3" size={24} />
-                  Technical Details & Analysis
+                  {t("analysis.comparison.detailsTitle", "Technical Details & Analysis")}
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <div 
@@ -2378,7 +2378,7 @@ export function AnalysisPopup({
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-purple-400 mb-4 flex items-center">
                   <Target className="mr-3" size={24} />
-                  Head-to-Head Analysis
+                  {t("analysis.comparison.headToHeadTitle", "Head-to-Head Analysis")}
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <div 
