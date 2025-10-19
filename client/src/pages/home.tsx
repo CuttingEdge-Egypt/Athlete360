@@ -26,7 +26,7 @@ import { StatisticsDisplay } from "@/components/ui/statistics-display";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X, RefreshCw, TrendingUp, Check, ChevronsUpDown, Shield, Ruler, Trophy } from "lucide-react";
+import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X, RefreshCw, TrendingUp, Check, ChevronsUpDown, Shield, Ruler, Trophy, Eye } from "lucide-react";
 import type { Sport, Athlete } from "@shared/schema";
 import { CountrySelect } from "@/components/ui/country-select";
 import { Flag } from "@/components/ui/flag";
@@ -86,6 +86,44 @@ export default function Home() {
   const [nutritionJobProgressMessage, setNutritionJobProgressMessage] = useState<string>("");
   const [nutritionQueueId, setNutritionQueueId] = useState<string | null>(null);
   const [location] = useLocation();
+  
+  // Preview modal state
+  const [previewModal, setPreviewModal] = useState<{ open: boolean; serviceType: string | null }>({ open: false, serviceType: null });
+  
+  // Preview data types
+  interface PreviewAnalysisItem {
+    serviceType: string;
+    resultData: any;
+    createdAt: string;
+  }
+
+  interface PreviewApiResponse {
+    success: boolean;
+    data: PreviewAnalysisItem[];
+    count: number;
+  }
+
+  // Fetch preview data based on site language
+  const { data: previewData, isLoading: previewLoading } = useQuery<PreviewApiResponse>({
+    queryKey: ['/api/preview/latest-by-type', i18n.language],
+    queryFn: async () => {
+      const res = await fetch(`/api/preview/latest-by-type?language=${i18n.language}`, {
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to fetch preview data');
+      return res.json();
+    },
+    enabled: previewModal.open && !!previewModal.serviceType,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Get the specific analysis data for the selected service type
+  const getAnalysisForPreview = () => {
+    if (!previewData?.data || !previewModal.serviceType) return null;
+    return previewData.data.find((item: any) => item.serviceType === previewModal.serviceType);
+  };
+
+  const selectedPreviewAnalysis = getAnalysisForPreview();
   
   // Handle URL parameters from GenerationQueue navigation
   useEffect(() => {
@@ -2670,7 +2708,19 @@ export default function Home() {
               ) : nutritionPlanData && (
                 /* Nutrition Plan Results with New Plan Button */
                 <div className="space-y-6">
-                  <div className="flex justify-center">
+                  <div className={`flex justify-between items-center mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                    <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                      <h2 className="text-2xl font-bold text-white">{t('nutritionPlan.yourPlan')}</h2>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setPreviewModal({ open: true, serviceType: 'nutrition' })}
+                        className="text-gray-400 hover:text-white"
+                        data-testid="button-preview-nutrition"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </div>
                     <Button 
                       onClick={() => {
                         setShowNutritionForm(true);
@@ -2678,10 +2728,10 @@ export default function Home() {
                         nutritionForm.reset();
                       }}
                       data-testid="button-new-nutrition-plan"
-                      className="bg-athlete-accent hover:bg-blue-600 text-white px-6 py-2"
+                      className={`bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold shadow-lg ${isArabic ? 'flex-row-reverse' : ''}`}
                     >
-                      <Apple className="mr-2" size={20} />
-                      New Nutrition Plan
+                      <Apple className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                      {t('nutritionPlan.generateNew')}
                     </Button>
                   </div>
                   <NutritionPlanDisplay 
@@ -2993,7 +3043,18 @@ export default function Home() {
                 developmentPlanData && (
                   <div className="space-y-6">
                     <div className={`flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
-                      <h2 className="text-2xl font-bold text-white">{t('developmentPlan.yourPlan')}</h2>
+                      <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                        <h2 className="text-2xl font-bold text-white">{t('developmentPlan.yourPlan')}</h2>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setPreviewModal({ open: true, serviceType: 'development' })}
+                          className="text-gray-400 hover:text-white"
+                          data-testid="button-preview-development"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </div>
                       <Button
                         onClick={() => {
                           setShowDevelopmentForm(true);
@@ -3049,6 +3110,17 @@ export default function Home() {
             />
           )}
 
+          {/* Preview Modal */}
+          {previewModal.serviceType && selectedPreviewAnalysis && (
+            <AnalysisPopup
+              open={previewModal.open && !previewLoading && !!selectedPreviewAnalysis}
+              onOpenChange={(open) => setPreviewModal({ open, serviceType: open ? previewModal.serviceType : null })}
+              type={previewModal.serviceType}
+              data={selectedPreviewAnalysis?.resultData}
+              athleteName={t('common:common.sampleAthlete', 'Sample Athlete')}
+              createdAt={selectedPreviewAnalysis.createdAt}
+            />
+          )}
 
         </div>
   );
