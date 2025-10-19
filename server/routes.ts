@@ -52,7 +52,7 @@ import { generateNutritionPlan, generateEnhancedNutritionPlan, generateDevelopme
 import { generateAthleteBiography as generateAthleteBiographyO3, generateRankHistory as generateRankHistoryO3, generateAthleteStatistics as generateAthleteStatisticsO3, generateAthleteStrengths as generateAthleteStrengthsO3, generateAthleteWeaknesses as generateAthleteWeaknessesO3, generateOverviewComparison, generateStrengthsComparison, generateWeaknessesComparison, generateCompetitionHistoryComparison, generateHeadToHeadComparison } from "./o3Service";
 import { analyzeVideoFile, analyzeVideoComprehensive, getSportConfig } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
-import { isIndividualSport, fetchTaekwondoRankAndHistory, fetchGeneralSportRankAndHistory } from "./browserUseService";
+import { isIndividualSport, fetchTaekwondoRankAndHistory, fetchGeneralSportRankAndHistory, fetchTeamSportPlayerInfo } from "./browserUseService";
 import { getErrorMessage, getLanguageFromRequest, ErrorMessages } from "./errorMessages";
 
 import { TestingService } from "./testingService";
@@ -644,47 +644,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Return athlete immediately for fast response
       res.json(newAthlete);
 
-      // Fetch rankings AND competitive history asynchronously for individual sports (don't block response)
+      // Fetch rankings AND competitive history asynchronously (don't block response)
+      // Extract category from personalInfo for better search accuracy
+      const athleteCategory = personalInfo?.category && personalInfo.category !== 'N/A' 
+        ? personalInfo.category 
+        : undefined;
+      
+      console.log(`🏆 Starting async BrowserUse fetch for ${englishName} (${sport.name}, ${isIndividualSport(sport.name) ? 'individual' : 'team'} sport, category: ${athleteCategory || 'unknown'})...`);
+      
+      // Fire and forget - fetch rankings + competitive history using BrowserUse
+      let fetchPromise;
+      
       if (isIndividualSport(sport.name)) {
-        // Extract category from personalInfo for better search accuracy
-        const athleteCategory = personalInfo?.category && personalInfo.category !== 'N/A' 
-          ? personalInfo.category 
-          : undefined;
-        
-        console.log(`🏆 Starting async BrowserUse fetch for ${englishName} (${sport.name}, category: ${athleteCategory || 'unknown'})...`);
-        
-        // Fire and forget - fetch rankings + competitive history using BrowserUse with category
-        const fetchPromise = sport.name.toLowerCase() === 'taekwondo'
+        // Individual sports: Use existing ranking and history fetch
+        fetchPromise = sport.name.toLowerCase() === 'taekwondo'
           ? fetchTaekwondoRankAndHistory(englishName, athleteCountry, athleteCategory)
           : fetchGeneralSportRankAndHistory(englishName, athleteCountry, sport.name, athleteCategory);
-        
-        fetchPromise
-          .then(async (result) => {
-            if (result) {
-              console.log(`✅ Async: BrowserUse found data for ${englishName}:`, result);
-              // Update athlete with rankings AND competitive history
-              const updateData: any = {};
-              if (result.rankings) {
-                updateData.rankings = result.rankings;
-              }
-              if (result.competitiveHistory) {
-                updateData.competitiveHistory = result.competitiveHistory;
-              }
-              
-              if (Object.keys(updateData).length > 0) {
-                await storage.updateAthlete(newAthlete.id, updateData);
-                console.log(`✅ Async: Updated ${englishName} with BrowserUse data`);
-              }
-            } else {
-              console.log(`⚠️ Async: BrowserUse found no data for ${englishName}`);
-            }
-          })
-          .catch((error) => {
-            console.error(`❌ Async: BrowserUse failed for ${englishName}:`, error);
-          });
       } else {
-        console.log(`⏭️ Skipping BrowserUse for ${englishName} (team sport: ${sport.name})`);
+        // Team sports: Use new team sport info fetch with personal info
+        fetchPromise = fetchTeamSportPlayerInfo(englishName, athleteCountry, sport.name, personalInfo);
       }
+      
+      fetchPromise
+        .then(async (result) => {
+          if (result) {
+            console.log(`✅ Async: BrowserUse found data for ${englishName}:`, result);
+            // Update athlete with rankings AND competitive history
+            const updateData: any = {};
+            if (result.rankings) {
+              updateData.rankings = result.rankings;
+            }
+            if (result.competitiveHistory) {
+              updateData.competitiveHistory = result.competitiveHistory;
+            }
+            
+            if (Object.keys(updateData).length > 0) {
+              await storage.updateAthlete(newAthlete.id, updateData);
+              console.log(`✅ Async: Updated ${englishName} with BrowserUse data`);
+            }
+          } else {
+            console.log(`⚠️ Async: BrowserUse found no data for ${englishName}`);
+          }
+        })
+        .catch((error) => {
+          console.error(`❌ Async: BrowserUse failed for ${englishName}:`, error);
+        });
     } catch (error) {
       console.error("Error creating athlete with AI:", error);
       

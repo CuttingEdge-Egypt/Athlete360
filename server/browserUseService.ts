@@ -787,6 +787,189 @@ function parseRankAndHistoryOutput(taskResult: any): RankAndHistoryResponse | nu
   }
 }
 
+/**
+ * Fetch player info for team sports athletes (stats, competitions, recent performances)
+ */
+export async function fetchTeamSportPlayerInfo(
+  athleteName: string,
+  country: string,
+  sport: string,
+  personalInfo?: any
+): Promise<RankAndHistoryResponse | null> {
+  const apiKey = process.env.BROWSERUSE_API;
+  
+  if (!apiKey) {
+    console.error('❌ BROWSERUSE_API not found in environment');
+    return null;
+  }
+
+  console.log(`⚽ BrowserUse: Fetching team sport info for ${athleteName} (${country}, ${sport})`);
+
+  // Build personal info summary
+  const personalInfoSummary = personalInfo 
+    ? `Personal Info: ${JSON.stringify(personalInfo)}` 
+    : 'No additional personal info available';
+
+  const taskPrompt = `
+Search for all the info you can find on ${athleteName}, they are from ${country}, and they play ${sport}, and this is the personal info we have on the player: ${personalInfoSummary}. 
+
+Figure out their main stats, the competitions they participated in, and their most recent performances in matches. 
+
+Use official and unofficial sites, prioritize unofficial sites like Wikipedia, sports databases, news articles, and fan sites.
+
+Return the data in this JSON format:
+{
+  "rankings": {
+    "categories": [],
+    "source": "Team sport - no individual rankings",
+    "fetchedAt": "current timestamp"
+  },
+  "competitiveHistory": {
+    "career_phases": [
+      {
+        "phase_name": "Phase name (e.g., 'Recent Matches 2024-2025', '2023-2024 Season', 'Career Highlights')",
+        "period": "YYYY-YYYY or specific period",
+        "key_achievements": [
+          {
+            "year": 2024,
+            "month": "March",
+            "event_name": "Competition/match/tournament name",
+            "event_tier": "League/tournament tier (e.g., 'Olympic Games', 'World Championship', 'National League', 'Club Match')",
+            "result": "Result/performance (e.g., 'Won 3-1', 'Silver Medal', 'Scored 2 goals')",
+            "notes": "Additional context about performance or team"
+          }
+        ]
+      }
+    ]
+  },
+  "playerStats": {
+    "team": "Current team/club",
+    "position": "Playing position",
+    "careerStats": "Key career statistics (goals, assists, matches played, etc.)",
+    "recentPerformance": "Recent performance highlights"
+  }
+}
+
+CRITICAL REQUIREMENTS - PREVENT HALLUCINATION:
+1. ONLY return competitions, stats, and results that you ACTUALLY FOUND on the websites you visited
+2. DO NOT add data that was NOT shown in your search results
+3. DO NOT invent or guess competition names, dates, results, or statistics
+4. If you cannot find competition history, return an empty career_phases array []
+5. Each piece of data MUST be verified from the actual website content you see
+6. If a website doesn't load or data is unavailable, DO NOT make up data - return what you found or empty arrays
+
+IMPORTANT FOR TEAM SPORTS:
+- Focus on individual player stats and achievements within the team context
+- Include match performances, goals/points scored, tournament participations
+- List competitions chronologically from most recent to oldest
+- Include both team achievements (championships won) and individual contributions
+- Only include information you actually found on websites - NO HALLUCINATION
+`;
+
+  // Define structured output schema for team sports
+  const structuredOutputSchema = {
+    type: "object",
+    properties: {
+      rankings: {
+        type: "object",
+        properties: {
+          categories: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                category: { type: "string" },
+                rank: { type: "string" }
+              }
+            }
+          },
+          source: { type: "string" },
+          fetchedAt: { type: "string" }
+        },
+        required: ["categories", "source", "fetchedAt"]
+      },
+      competitiveHistory: {
+        type: "object",
+        properties: {
+          career_phases: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                phase_name: { type: "string" },
+                period: { type: "string" },
+                key_achievements: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      year: { type: "number" },
+                      month: { type: "string" },
+                      event_name: { type: "string" },
+                      event_tier: { type: "string" },
+                      result: { type: "string" },
+                      notes: { type: "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      playerStats: {
+        type: "object",
+        properties: {
+          team: { type: "string" },
+          position: { type: "string" },
+          careerStats: { type: "string" },
+          recentPerformance: { type: "string" }
+        }
+      }
+    },
+    required: ["rankings", "competitiveHistory"]
+  };
+
+  try {
+    const response = await fetch('https://api.browser-use.com/api/v1/run-task', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        task: taskPrompt,
+        llm_model: 'gemini-flash-latest',
+        structured_output_json: JSON.stringify(structuredOutputSchema)
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ BrowserUse API error: ${response.status} - ${errorText}`);
+      return null;
+    }
+
+    const taskData = await response.json() as any;
+    const taskId = taskData.id;
+    
+    console.log(`✅ BrowserUse task created for ${athleteName}: ${taskId}`);
+    console.log(`🔗 Live preview: ${taskData.live_url || 'N/A'}`);
+    
+    // Poll for completion
+    const result = await pollTaskCompletion(apiKey, taskId, athleteName);
+    
+    if (!result) {
+      return null;
+    }
+
+    return parseRankAndHistoryOutput(result);
+  } catch (error) {
+    console.error(`❌ Error fetching team sport data for ${athleteName}:`, error);
+    return null;
+  }
+}
+
 // Helper function to determine if a sport is individual
 export function isIndividualSport(sportName: string): boolean {
   // List of team sports that should be excluded
