@@ -581,17 +581,18 @@ export default function Home() {
       const cappedProgress = Math.min(Math.max(progress || 0, 0), 100);
       setNutritionProgress(cappedProgress);
       
-      if (status === 'in_progress') {
+      if (status === 'running' || status === 'in_progress') {
+        // Language-aware progress messages using translation keys
         const messages = [
-          "🥗 Analyzing your nutritional goals and current dietary requirements...",
-          "🧠 AI is crafting your personalized nutrition strategy...",
-          "📊 Calculating optimal macronutrient distribution and meal timing...",
-          "🍎 Designing balanced meals for your specific goals...",
-          "🌍 Incorporating local cuisine and cultural preferences...",
-          "⚖️ Optimizing caloric intake for your target weight...",
-          "📋 Assembling your complete nutrition plan..."
+          t('common:messages.nutritionProgress1'),
+          t('common:messages.nutritionProgress2'),
+          t('common:messages.nutritionProgress3'),
+          t('common:messages.nutritionProgress4'),
+          t('common:messages.nutritionProgress5'),
+          t('common:messages.nutritionProgress6'),
+          t('common:messages.nutritionProgress7')
         ];
-        const messageIndex = Math.min(Math.floor((progress || 0) / 14), messages.length - 1);
+        const messageIndex = Math.min(Math.floor((cappedProgress / 100) * 7), messages.length - 1);
         setNutritionJobProgressMessage(messages[messageIndex]);
         
         // Update queue progress
@@ -657,7 +658,7 @@ export default function Home() {
         setNutritionJobProgressMessage("");
       }
     }
-  }, [nutritionJobStatus, queryClient, toast, setActiveTab]);
+  }, [nutritionJobStatus, queryClient, toast, setActiveTab, i18n.language, t, nutritionQueueId]);
 
   // Listen for queue notifications
   useEffect(() => {
@@ -2639,8 +2640,8 @@ export default function Home() {
                                 disabled={cancelNutritionPlanJobMutation.isPending}
                                 className="border-red-500/50 text-red-300 hover:bg-red-500/10 hover:border-red-500"
                               >
-                                <X className="mr-2" size={16} />
-                                Cancel Generation
+                                <X className={i18n.language === 'ar' ? 'ml-2' : 'mr-2'} size={16} />
+                                {t('home:queue.cancel')}
                               </Button>
                             </div>
                           </div>

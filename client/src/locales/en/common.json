@@ -89,7 +89,14 @@
     "developmentProgress4": "Calculating optimal sets, reps, and rest periods...",
     "developmentProgress5": "Finding the perfect instructional videos for each exercise...",
     "developmentProgress6": "Optimizing training intensity and progression...",
-    "developmentProgress7": "Assembling your complete development plan..."
+    "developmentProgress7": "Assembling your complete development plan...",
+    "nutritionProgress1": "Analyzing your nutritional goals and current dietary requirements...",
+    "nutritionProgress2": "AI is crafting your personalized nutrition strategy...",
+    "nutritionProgress3": "Calculating optimal macronutrient distribution and meal timing...",
+    "nutritionProgress4": "Designing balanced meals for your specific goals...",
+    "nutritionProgress5": "Incorporating local cuisine and cultural preferences...",
+    "nutritionProgress6": "Optimizing caloric intake for your target weight...",
+    "nutritionProgress7": "Assembling your complete nutrition plan..."
   },
   "tabs": {
     "overview": "Overview",
