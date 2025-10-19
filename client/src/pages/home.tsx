@@ -61,6 +61,7 @@ export default function Home() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { t, i18n } = useTranslation('home');
+  const isArabic = i18n.language === 'ar';
   const [selectedSport, setSelectedSport] = useState<string>("");
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [searchName, setSearchName] = useState<string>("");
@@ -2948,17 +2949,17 @@ export default function Home() {
                 /* Development Plan Display */
                 developmentPlanData && (
                   <div className="space-y-6">
-                    <div className="flex justify-between items-center">
+                    <div className={`flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
                       <h2 className="text-2xl font-bold text-white">{t('developmentPlan.yourPlan')}</h2>
                       <Button
                         onClick={() => {
                           setShowDevelopmentForm(true);
                           setDevelopmentPlanData(null);
                         }}
-                        className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold shadow-lg"
+                        className={`bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold shadow-lg ${isArabic ? 'flex-row-reverse' : ''}`}
                         data-testid="button-new-development-plan"
                       >
-                        <RefreshCw className="mr-2 h-4 w-4" />
+                        <RefreshCw className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                         {t('developmentPlan.generateNew')}
                       </Button>
                     </div>
