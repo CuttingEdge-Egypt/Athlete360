@@ -6,11 +6,15 @@ import { CountrySelect } from "@/components/ui/country-select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useTranslation } from 'react-i18next';
 import { ProgressBar } from "@/components/ui/progress-bar";
+import { Flag } from "@/components/ui/flag";
 import { 
   Users2, 
   Zap, 
@@ -22,7 +26,13 @@ import {
   Target, 
   Star, 
   TrendingDown,
-  Languages 
+  Languages,
+  Search,
+  ChevronsUpDown,
+  Check,
+  CalendarDays,
+  RefreshCw,
+  Sparkles
 } from "lucide-react";
 
 type Sport = {
@@ -57,9 +67,15 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
   const [selectedAthlete1, setSelectedAthlete1] = useState("");
   const [selectedAthlete2, setSelectedAthlete2] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState(i18n.language === 'ar' ? 'arabic' : 'english');
+  const [searchAthlete1, setSearchAthlete1] = useState("");
+  const [searchAthlete2, setSearchAthlete2] = useState("");
+  const [openAthletePopover1, setOpenAthletePopover1] = useState(false);
+  const [openAthletePopover2, setOpenAthletePopover2] = useState(false);
+  const [showForm, setShowForm] = useState(true);
   const isComparisonArabic = selectedLanguage === 'arabic';
+  const isArabic = i18n.language === 'ar';
   const abortControllerRef = useRef<AbortController | null>(null);
-  const queueIdRef = useRef<string | null>(null);
+  const queueIdRef = useRef<String | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const [progressPhase, setProgressPhase] = useState<{ message: string; progress: number } | null>(null);
   const [comparisonData, setComparisonData] = useState(() => {
@@ -458,213 +474,491 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
   // Use comparisonData state that is initialized with preloaded data
   const availableAthletes1 = athletes1.filter((a: Athlete) => a && a.id && a.id !== selectedAthlete2);
   const availableAthletes2 = athletes2.filter((a: Athlete) => a && a.id && a.id !== selectedAthlete1);
+  
+  // Get full athlete objects for selected athletes
+  const selectedAthleteObject1 = athletes1.find((a: Athlete) => a?.id === selectedAthlete1);
+  const selectedAthleteObject2 = athletes2.find((a: Athlete) => a?.id === selectedAthlete2);
+  
+  // Filter athletes based on search
+  const filteredAthletes1 = availableAthletes1.filter((athlete: Athlete) => {
+    if (!searchAthlete1.trim()) return true;
+    const searchLower = searchAthlete1.toLowerCase();
+    return (
+      athlete.name?.toLowerCase().includes(searchLower) ||
+      athlete.nameArabic?.toLowerCase().includes(searchLower) ||
+      athlete.country?.toLowerCase().includes(searchLower)
+    );
+  });
+  
+  const filteredAthletes2 = availableAthletes2.filter((athlete: Athlete) => {
+    if (!searchAthlete2.trim()) return true;
+    const searchLower = searchAthlete2.toLowerCase();
+    return (
+      athlete.name?.toLowerCase().includes(searchLower) ||
+      athlete.nameArabic?.toLowerCase().includes(searchLower) ||
+      athlete.country?.toLowerCase().includes(searchLower)
+    );
+  });
 
   return (
     <Card className="bg-athlete-gray-800 border-gray-700">
       <CardHeader>
-        <CardTitle className={`flex items-center gap-2 text-white ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
+        <CardTitle className={`flex items-center gap-2 text-white ${isArabic ? 'flex-row-reverse' : ''}`}>
           <Users2 className="h-5 w-5" />
           {t("analysis.comparison.title", "Athlete Comparison")}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Selection Controls */}
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-          <div className="space-y-2">
-            <label className={`text-sm font-medium text-gray-300 ${isComparisonArabic ? 'text-right block' : ''}`}>
-              {t("analysis.comparison.sport", "Sport")}
-            </label>
-            <Select
-              value={selectedSport}
-              onValueChange={(value) => {
-                setSelectedSport(value);
-                setSelectedCountry1("");
-                setSelectedCountry2("");
-                setSelectedAthlete1("");
-                setSelectedAthlete2("");
-              }}
-              data-testid="select-sport"
-            >
-              <SelectTrigger className="bg-athlete-gray-700 border-gray-600" dir={isComparisonArabic ? 'rtl' : 'ltr'}>
-                <SelectValue placeholder={t("analysis.comparison.selectSport", "Select sport...")} />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.isArray(sports) && sports.map((sport) => (
-                  <SelectItem key={sport.id} value={sport.id}>
-                    {sport.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        {/* Show "Generate New Comparison" button when results are displayed */}
+        {comparisonData && !showForm && (
+          <Button
+            onClick={() => {
+              setShowForm(true);
+              setComparisonData(null);
+            }}
+            className={`w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 flex items-center justify-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}
+            data-testid="button-generate-new-comparison"
+          >
+            <Sparkles className="h-4 w-4" />
+            {t("analysis.comparison.generateNew", "Generate New Comparison")}
+          </Button>
+        )}
 
-          <div className="space-y-2">
-            <label className={`text-sm font-medium text-gray-300 ${isComparisonArabic ? 'text-right block' : ''}`}>
-              {t("analysis.comparison.language", "Language")}
-            </label>
-            <Select
-              value={selectedLanguage}
-              onValueChange={setSelectedLanguage}
-              data-testid="select-language"
-            >
-              <SelectTrigger className="bg-athlete-gray-700 border-gray-600" dir={isComparisonArabic ? 'rtl' : 'ltr'}>
-                <SelectValue placeholder={t("analysis.comparison.selectLanguage", "Select language...")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="english">
-                  <div className={`flex items-center gap-2 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
-                    <Languages className="w-4 h-4" />
-                    {t("analysis.comparison.english", "English")}
-                  </div>
-                </SelectItem>
-                <SelectItem value="arabic">
-                  <div className={`flex items-center gap-2 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
-                    <Languages className="w-4 h-4" />
-                    {t("analysis.comparison.arabic", "عربي")}
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        {/* Selection Form */}
+        {showForm && (
+          <>
+            {/* Sport and Language Selection Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className={`text-sm font-medium text-gray-300 ${isArabic ? 'text-right block' : ''}`}>
+                  {t("analysis.comparison.sport", "Sport")}
+                </label>
+                <Select
+                  value={selectedSport}
+                  onValueChange={(value) => {
+                    setSelectedSport(value);
+                    setSelectedCountry1("");
+                    setSelectedCountry2("");
+                    setSelectedAthlete1("");
+                    setSelectedAthlete2("");
+                  }}
+                  data-testid="select-sport"
+                >
+                  <SelectTrigger className="bg-athlete-gray-700 border-gray-600" dir={isArabic ? 'rtl' : 'ltr'}>
+                    <SelectValue placeholder={t("analysis.comparison.selectSport", "Select sport...")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.isArray(sports) && sports.map((sport) => (
+                      <SelectItem key={sport.id} value={sport.id}>
+                        {sport.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className="space-y-2">
-            <label className={`text-sm font-medium text-gray-300 ${isComparisonArabic ? 'text-right block' : ''}`}>
-              {t("analysis.comparison.countryAthlete1", "Country (Athlete 1)")}
-            </label>
-            <CountrySelect
-              value={selectedCountry1 || "all"}
-              onValueChange={(value) => {
-                setSelectedCountry1(value === "all" ? "" : value);
-                setSelectedAthlete1("");
-              }}
-              placeholder="All countries"
-              countries={Array.isArray(countries) ? countries : []}
-              testId="select-country1"
-            />
-          </div>
+              <div className="space-y-2">
+                <label className={`text-sm font-medium text-gray-300 ${isArabic ? 'text-right block' : ''}`}>
+                  {t("analysis.comparison.language", "Language")}
+                </label>
+                <Select
+                  value={selectedLanguage}
+                  onValueChange={setSelectedLanguage}
+                  data-testid="select-language"
+                >
+                  <SelectTrigger className="bg-athlete-gray-700 border-gray-600" dir={isArabic ? 'rtl' : 'ltr'}>
+                    <SelectValue placeholder={t("analysis.comparison.selectLanguage", "Select language...")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="english">
+                      <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                        <Languages className="w-4 h-4" />
+                        {t("analysis.comparison.english", "English")}
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="arabic">
+                      <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                        <Languages className="w-4 h-4" />
+                        {t("analysis.comparison.arabic", "عربي")}
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
-          <div className="space-y-2">
-            <label className={`text-sm font-medium text-gray-300 ${isComparisonArabic ? 'text-right block' : ''}`}>
-              {t("analysis.comparison.athlete1", "Athlete 1")}
-            </label>
-            <Select
-              value={selectedAthlete1}
-              onValueChange={setSelectedAthlete1}
-              disabled={!selectedSport}
-              data-testid="select-athlete1"
-            >
-              <SelectTrigger className="bg-athlete-gray-700 border-gray-600" dir={isComparisonArabic ? 'rtl' : 'ltr'}>
-                <SelectValue placeholder={t("analysis.comparison.selectFirstAthlete", "Select first athlete...")} />
-              </SelectTrigger>
-              <SelectContent>
-                {availableAthletes1.length === 0 ? (
-                  <div className="p-2 text-sm text-gray-400" dir={isComparisonArabic ? 'rtl' : 'ltr'}>
-                    {selectedSport ? t("analysis.comparison.noAthletesAvailable", "No athletes available for selected filters") : t("analysis.comparison.selectSportFirst", "Select a sport first")}
+            {/* Two-Column Athlete Selection */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+              {/* Athlete 1 Column */}
+              <Card className="bg-athlete-gray-700/50 border-gray-600">
+                <CardHeader>
+                  <CardTitle className={`text-lg text-white flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                    <User className="h-5 w-5 text-blue-400" />
+                    {t("analysis.comparison.athlete1", "Athlete 1")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Country Select for Athlete 1 */}
+                  <div className="space-y-2">
+                    <label className={`text-sm font-medium text-gray-300 ${isArabic ? 'text-right block' : ''}`}>
+                      {t("analysis.comparison.country", "Country")}
+                    </label>
+                    <CountrySelect
+                      value={selectedCountry1 || "all"}
+                      onValueChange={(value) => {
+                        setSelectedCountry1(value === "all" ? "" : value);
+                        setSelectedAthlete1("");
+                      }}
+                      placeholder="All countries"
+                      countries={Array.isArray(countries) ? countries : []}
+                      testId="select-country1"
+                    />
                   </div>
-                ) : (
-                  availableAthletes1.map((athlete: Athlete) => (
-                    athlete && athlete.id ? (
-                      <SelectItem key={athlete.id} value={athlete.id}>
-                        <div className={`flex items-center gap-2 truncate max-w-full ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
-                          <span className="truncate">
-                            {athlete.name || t("analysis.comparison.unknownAthlete", "Unknown Athlete")}
-                            {athlete.nameArabic && (
-                              <span className="text-gray-400 text-sm"> / {athlete.nameArabic}</span>
-                            )}
-                          </span>
-                          {athlete.country && (
-                            <span className="text-xs text-gray-400 flex-shrink-0">({athlete.country})</span>
+
+                  {/* Searchable Athlete Dropdown for Athlete 1 */}
+                  <div className="space-y-2">
+                    <label className={`text-sm font-medium text-gray-300 ${isArabic ? 'text-right block' : ''}`}>
+                      {t("analysis.comparison.selectAthlete", "Select Athlete")}
+                    </label>
+                    <Popover open={openAthletePopover1} onOpenChange={setOpenAthletePopover1}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={openAthletePopover1}
+                          className={`w-full justify-between bg-athlete-gray-700 border-gray-600 text-white hover:bg-athlete-gray-600 ${isArabic ? 'flex-row-reverse' : ''}`}
+                          disabled={!selectedSport}
+                          data-testid="select-athlete1"
+                        >
+                          {selectedAthleteObject1 ? (
+                            <span className="truncate">{selectedAthleteObject1.name}</span>
+                          ) : (
+                            <span className="text-gray-400">
+                              {selectedSport ? t("analysis.comparison.selectFirstAthlete", "Select first athlete...") : t("analysis.comparison.selectSportFirst", "Select a sport first")}
+                            </span>
                           )}
-                          {athlete.rank && (
-                            <span className="text-xs text-gray-400 flex-shrink-0">#{athlete.rank}</span>
+                          <ChevronsUpDown className={`h-4 w-4 shrink-0 opacity-50 ${isArabic ? 'mr-2' : 'ml-2'}`} />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[400px] p-0 bg-athlete-gray-700 border-gray-600" align="start">
+                        <div className="p-3 border-b border-gray-600">
+                          <div className="relative">
+                            <Search className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 ${isArabic ? 'right-3' : 'left-3'}`} />
+                            <Input
+                              placeholder={t("analysis.comparison.searchAthletes", "Search athletes...")}
+                              value={searchAthlete1}
+                              onChange={(e) => setSearchAthlete1(e.target.value)}
+                              className={`bg-athlete-gray-700 border-athlete-gray-600 text-white placeholder:text-gray-400 focus:bg-athlete-gray-700 focus:border-athlete-gray-500 ${isArabic ? 'pr-9' : 'pl-9'}`}
+                              data-testid="input-athlete1-search"
+                              dir={isArabic ? 'rtl' : 'ltr'}
+                            />
+                          </div>
+                        </div>
+                        <div className="max-h-60 overflow-auto">
+                          {filteredAthletes1.length === 0 ? (
+                            <div className="p-3 text-center text-gray-400">
+                              {searchAthlete1 ? t("analysis.comparison.noAthletesFound", "No athletes found") : t("analysis.comparison.noAthletesAvailable", "No athletes available")}
+                            </div>
+                          ) : (
+                            filteredAthletes1.map((athlete: Athlete) => (
+                              <Button
+                                key={athlete.id}
+                                variant="ghost"
+                                className={`w-full justify-start text-left hover:bg-athlete-gray-600 ${isArabic ? 'flex-row-reverse' : ''}`}
+                                onClick={() => {
+                                  setSelectedAthlete1(athlete.id);
+                                  setOpenAthletePopover1(false);
+                                  setSearchAthlete1("");
+                                }}
+                              >
+                                <Check className={`h-4 w-4 ${selectedAthlete1 === athlete.id ? 'opacity-100' : 'opacity-0'} ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                                <div className="flex-1 truncate">
+                                  <div className="text-white truncate">{athlete.name}</div>
+                                  {athlete.nameArabic && (
+                                    <div className="text-gray-400 text-sm truncate">{athlete.nameArabic}</div>
+                                  )}
+                                  <div className="text-xs text-gray-500">
+                                    {athlete.country && `${athlete.country}`}
+                                    {athlete.rank && ` • #${athlete.rank}`}
+                                  </div>
+                                </div>
+                              </Button>
+                            ))
                           )}
                         </div>
-                      </SelectItem>
-                    ) : null
-                  )).filter(Boolean)
-                )}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label className={`text-sm font-medium text-gray-300 ${isComparisonArabic ? 'text-right block' : ''}`}>
-              {t("analysis.comparison.countryAthlete2", "Country (Athlete 2)")}
-            </label>
-            <CountrySelect
-              value={selectedCountry2 || "all"}
-              onValueChange={(value) => {
-                setSelectedCountry2(value === "all" ? "" : value);
-                setSelectedAthlete2("");
-              }}
-              placeholder="All countries"
-              countries={Array.isArray(countries) ? countries : []}
-              testId="select-country2"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className={`text-sm font-medium text-gray-300 ${isComparisonArabic ? 'text-right block' : ''}`}>
-              {t("analysis.comparison.athlete2", "Athlete 2")}
-            </label>
-            <Select
-              value={selectedAthlete2}
-              onValueChange={setSelectedAthlete2}
-              disabled={!selectedSport}
-              data-testid="select-athlete2"
-            >
-              <SelectTrigger className="bg-athlete-gray-700 border-gray-600" dir={isComparisonArabic ? 'rtl' : 'ltr'}>
-                <SelectValue placeholder={t("analysis.comparison.selectSecondAthlete", "Select second athlete...")} />
-              </SelectTrigger>
-              <SelectContent>
-                {availableAthletes2.length === 0 ? (
-                  <div className="p-2 text-sm text-gray-400" dir={isComparisonArabic ? 'rtl' : 'ltr'}>
-                    {selectedSport ? t("analysis.comparison.noAthletesAvailable", "No athletes available for selected filters") : t("analysis.comparison.selectSportFirst", "Select a sport first")}
+                      </PopoverContent>
+                    </Popover>
                   </div>
-                ) : (
-                  availableAthletes2.map((athlete: Athlete) => (
-                    athlete && athlete.id ? (
-                      <SelectItem key={athlete.id} value={athlete.id}>
-                        <div className={`flex items-center gap-2 truncate max-w-full ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
-                          <span className="truncate">
-                            {athlete.name || t("analysis.comparison.unknownAthlete", "Unknown Athlete")}
-                            {athlete.nameArabic && (
-                              <span className="text-gray-400 text-sm"> / {athlete.nameArabic}</span>
+
+                  {/* Athlete 1 Profile Display */}
+                  {selectedAthleteObject1 && (
+                    <TooltipProvider>
+                      <div className="mt-4">
+                        {/* Last Update */}
+                        {selectedAthleteObject1.updatedAt && (
+                          <div className={`flex items-center ${isArabic ? 'gap-2 flex-row-reverse' : 'gap-2'} mb-2 text-sm text-gray-400`}>
+                            <CalendarDays className="w-4 h-4" />
+                            <span>{t('interface.lastUpdate', 'Last Update')}: {new Date(selectedAthleteObject1.updatedAt).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                          </div>
+                        )}
+                        
+                        {/* Profile Card */}
+                        <div className={`flex items-start gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                          {/* Profile Image */}
+                          <div className="relative w-16 h-16 flex-shrink-0">
+                            {selectedAthleteObject1.profileImageUrl ? (
+                              <img 
+                                src={selectedAthleteObject1.profileImageUrl}
+                                alt={selectedAthleteObject1.name}
+                                className="w-16 h-16 rounded-full object-cover"
+                                onError={(e) => {
+                                  const img = e.currentTarget;
+                                  img.style.display = 'none';
+                                  const fallback = img.nextElementSibling as HTMLElement;
+                                  if (fallback) fallback.style.display = 'flex';
+                                }}
+                              />
+                            ) : null}
+                            <div 
+                              className={`w-16 h-16 rounded-full bg-athlete-gray-600 flex items-center justify-center ${selectedAthleteObject1.profileImageUrl ? 'hidden' : 'flex'}`}
+                            >
+                              <User className="text-gray-400" size={24} />
+                            </div>
+                          </div>
+
+                          {/* Athlete Info and Buttons */}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-white font-semibold truncate">{selectedAthleteObject1.name}</h4>
+                            {selectedAthleteObject1.nameArabic && (
+                              <p className="text-gray-400 text-sm truncate">{selectedAthleteObject1.nameArabic}</p>
                             )}
-                          </span>
-                          {athlete.country && (
-                            <span className="text-xs text-gray-400 flex-shrink-0">({athlete.country})</span>
+                            <div className={`flex items-center gap-2 mt-1 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                              <Flag country={selectedAthleteObject1.country || "US"} className="w-6 h-4 rounded shadow-sm" />
+                              <span className="text-sm text-gray-400">{selectedAthleteObject1.country || "Unknown"}</span>
+                            </div>
+                            
+                            {/* Update Info Button */}
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="mt-2 w-full bg-blue-600/20 border-blue-500/50 text-blue-300 hover:bg-blue-600/30 text-xs"
+                                  data-testid="button-update-info-athlete1"
+                                >
+                                  <RefreshCw className={`h-3 w-3 ${isArabic ? 'ml-1' : 'mr-1'}`} />
+                                  {t('athleteSearch.imageUpdate.updateButton', 'Update Info')}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p className="text-sm">{t('athleteSearch.imageUpdate.popup.help', 'Update athlete profile information')}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </div>
+                      </div>
+                    </TooltipProvider>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Athlete 2 Column */}
+              <Card className="bg-athlete-gray-700/50 border-gray-600">
+                <CardHeader>
+                  <CardTitle className={`text-lg text-white flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                    <User className="h-5 w-5 text-purple-400" />
+                    {t("analysis.comparison.athlete2", "Athlete 2")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Country Select for Athlete 2 */}
+                  <div className="space-y-2">
+                    <label className={`text-sm font-medium text-gray-300 ${isArabic ? 'text-right block' : ''}`}>
+                      {t("analysis.comparison.country", "Country")}
+                    </label>
+                    <CountrySelect
+                      value={selectedCountry2 || "all"}
+                      onValueChange={(value) => {
+                        setSelectedCountry2(value === "all" ? "" : value);
+                        setSelectedAthlete2("");
+                      }}
+                      placeholder="All countries"
+                      countries={Array.isArray(countries) ? countries : []}
+                      testId="select-country2"
+                    />
+                  </div>
+
+                  {/* Searchable Athlete Dropdown for Athlete 2 */}
+                  <div className="space-y-2">
+                    <label className={`text-sm font-medium text-gray-300 ${isArabic ? 'text-right block' : ''}`}>
+                      {t("analysis.comparison.selectAthlete", "Select Athlete")}
+                    </label>
+                    <Popover open={openAthletePopover2} onOpenChange={setOpenAthletePopover2}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={openAthletePopover2}
+                          className={`w-full justify-between bg-athlete-gray-700 border-gray-600 text-white hover:bg-athlete-gray-600 ${isArabic ? 'flex-row-reverse' : ''}`}
+                          disabled={!selectedSport}
+                          data-testid="select-athlete2"
+                        >
+                          {selectedAthleteObject2 ? (
+                            <span className="truncate">{selectedAthleteObject2.name}</span>
+                          ) : (
+                            <span className="text-gray-400">
+                              {selectedSport ? t("analysis.comparison.selectSecondAthlete", "Select second athlete...") : t("analysis.comparison.selectSportFirst", "Select a sport first")}
+                            </span>
                           )}
-                          {athlete.rank && (
-                            <span className="text-xs text-gray-400 flex-shrink-0">#{athlete.rank}</span>
+                          <ChevronsUpDown className={`h-4 w-4 shrink-0 opacity-50 ${isArabic ? 'mr-2' : 'ml-2'}`} />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[400px] p-0 bg-athlete-gray-700 border-gray-600" align="start">
+                        <div className="p-3 border-b border-gray-600">
+                          <div className="relative">
+                            <Search className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 ${isArabic ? 'right-3' : 'left-3'}`} />
+                            <Input
+                              placeholder={t("analysis.comparison.searchAthletes", "Search athletes...")}
+                              value={searchAthlete2}
+                              onChange={(e) => setSearchAthlete2(e.target.value)}
+                              className={`bg-athlete-gray-700 border-athlete-gray-600 text-white placeholder:text-gray-400 focus:bg-athlete-gray-700 focus:border-athlete-gray-500 ${isArabic ? 'pr-9' : 'pl-9'}`}
+                              data-testid="input-athlete2-search"
+                              dir={isArabic ? 'rtl' : 'ltr'}
+                            />
+                          </div>
+                        </div>
+                        <div className="max-h-60 overflow-auto">
+                          {filteredAthletes2.length === 0 ? (
+                            <div className="p-3 text-center text-gray-400">
+                              {searchAthlete2 ? t("analysis.comparison.noAthletesFound", "No athletes found") : t("analysis.comparison.noAthletesAvailable", "No athletes available")}
+                            </div>
+                          ) : (
+                            filteredAthletes2.map((athlete: Athlete) => (
+                              <Button
+                                key={athlete.id}
+                                variant="ghost"
+                                className={`w-full justify-start text-left hover:bg-athlete-gray-600 ${isArabic ? 'flex-row-reverse' : ''}`}
+                                onClick={() => {
+                                  setSelectedAthlete2(athlete.id);
+                                  setOpenAthletePopover2(false);
+                                  setSearchAthlete2("");
+                                }}
+                              >
+                                <Check className={`h-4 w-4 ${selectedAthlete2 === athlete.id ? 'opacity-100' : 'opacity-0'} ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                                <div className="flex-1 truncate">
+                                  <div className="text-white truncate">{athlete.name}</div>
+                                  {athlete.nameArabic && (
+                                    <div className="text-gray-400 text-sm truncate">{athlete.nameArabic}</div>
+                                  )}
+                                  <div className="text-xs text-gray-500">
+                                    {athlete.country && `${athlete.country}`}
+                                    {athlete.rank && ` • #${athlete.rank}`}
+                                  </div>
+                                </div>
+                              </Button>
+                            ))
                           )}
                         </div>
-                      </SelectItem>
-                    ) : null
-                  )).filter(Boolean)
-                )}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
 
-        <Button
-          onClick={handleCompare}
-          disabled={!selectedAthlete1 || !selectedAthlete2 || comparisonMutation.isPending}
-          className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-          data-testid="button-compare"
-        >
-          <Zap className={`h-4 w-4 ${isComparisonArabic ? 'ml-2' : 'mr-2'}`} />
-          {t("analysis.comparison.compareAthletes", "Compare Athletes")}
-        </Button>
+                  {/* Athlete 2 Profile Display */}
+                  {selectedAthleteObject2 && (
+                    <TooltipProvider>
+                      <div className="mt-4">
+                        {/* Last Update */}
+                        {selectedAthleteObject2.updatedAt && (
+                          <div className={`flex items-center ${isArabic ? 'gap-2 flex-row-reverse' : 'gap-2'} mb-2 text-sm text-gray-400`}>
+                            <CalendarDays className="w-4 h-4" />
+                            <span>{t('interface.lastUpdate', 'Last Update')}: {new Date(selectedAthleteObject2.updatedAt).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                          </div>
+                        )}
+                        
+                        {/* Profile Card */}
+                        <div className={`flex items-start gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                          {/* Profile Image */}
+                          <div className="relative w-16 h-16 flex-shrink-0">
+                            {selectedAthleteObject2.profileImageUrl ? (
+                              <img 
+                                src={selectedAthleteObject2.profileImageUrl}
+                                alt={selectedAthleteObject2.name}
+                                className="w-16 h-16 rounded-full object-cover"
+                                onError={(e) => {
+                                  const img = e.currentTarget;
+                                  img.style.display = 'none';
+                                  const fallback = img.nextElementSibling as HTMLElement;
+                                  if (fallback) fallback.style.display = 'flex';
+                                }}
+                              />
+                            ) : null}
+                            <div 
+                              className={`w-16 h-16 rounded-full bg-athlete-gray-600 flex items-center justify-center ${selectedAthleteObject2.profileImageUrl ? 'hidden' : 'flex'}`}
+                            >
+                              <User className="text-gray-400" size={24} />
+                            </div>
+                          </div>
 
-        {/* Progress Bar */}
-        <ProgressBar 
-          isActive={comparisonMutation.isPending}
-          currentPhase={progressPhase || undefined}
-          onCancel={handleCancelComparison}
-          className="mt-4"
-        />
+                          {/* Athlete Info and Buttons */}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-white font-semibold truncate">{selectedAthleteObject2.name}</h4>
+                            {selectedAthleteObject2.nameArabic && (
+                              <p className="text-gray-400 text-sm truncate">{selectedAthleteObject2.nameArabic}</p>
+                            )}
+                            <div className={`flex items-center gap-2 mt-1 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                              <Flag country={selectedAthleteObject2.country || "US"} className="w-6 h-4 rounded shadow-sm" />
+                              <span className="text-sm text-gray-400">{selectedAthleteObject2.country || "Unknown"}</span>
+                            </div>
+                            
+                            {/* Update Info Button */}
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="mt-2 w-full bg-blue-600/20 border-blue-500/50 text-blue-300 hover:bg-blue-600/30 text-xs"
+                                  data-testid="button-update-info-athlete2"
+                                >
+                                  <RefreshCw className={`h-3 w-3 ${isArabic ? 'ml-1' : 'mr-1'}`} />
+                                  {t('athleteSearch.imageUpdate.updateButton', 'Update Info')}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p className="text-sm">{t('athleteSearch.imageUpdate.popup.help', 'Update athlete profile information')}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </div>
+                      </div>
+                    </TooltipProvider>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Compare Button */}
+            <Button
+              onClick={() => {
+                handleCompare();
+                setShowForm(false);
+              }}
+              disabled={!selectedAthlete1 || !selectedAthlete2 || comparisonMutation.isPending}
+              className={`w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 flex items-center justify-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}
+              data-testid="button-compare"
+            >
+              <Zap className="h-4 w-4" />
+              {t("analysis.comparison.compareAthletes", "Compare Athletes")}
+            </Button>
+
+            {/* Progress Bar */}
+            <ProgressBar 
+              isActive={comparisonMutation.isPending}
+              currentPhase={progressPhase || undefined}
+              onCancel={handleCancelComparison}
+              className="mt-4"
+            />
+          </>
+        )}
 
         {/* Parsed Comparison Results - New Modular Tab Structure */}
         {(comparisonData?.tabs || comparisonData?.isRawResponse) && (

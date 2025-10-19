@@ -443,7 +443,14 @@
       "adviceFor": "نصيحة لـ",
       "strategicMatchupAnalysis": "تحليل المواجهة الاستراتيجية",
       "currentRankingComparison": "مقارنة التصنيف الحالي",
-      "trajectory": "المسار"
+      "trajectory": "المسار",
+      "generateNew": "إنشاء مقارنة جديدة",
+      "country": "الدولة",
+      "selectAthlete": "اختر اللاعب",
+      "searchAthletes": "البحث عن لاعبين...",
+      "noAthletesFound": "لم يتم العثور على لاعبين",
+      "noAthletesAvailable": "لا يوجد لاعبون متاحون",
+      "selectSportFirst": "اختر رياضة أولاً"
     }
   }
 }

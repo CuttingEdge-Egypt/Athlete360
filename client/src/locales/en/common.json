@@ -367,7 +367,14 @@
       "adviceFor": "Advice for",
       "strategicMatchupAnalysis": "Strategic Matchup Analysis",
       "currentRankingComparison": "Current Ranking Comparison",
-      "trajectory": "Trajectory"
+      "trajectory": "Trajectory",
+      "generateNew": "Generate New Comparison",
+      "country": "Country",
+      "selectAthlete": "Select Athlete",
+      "searchAthletes": "Search athletes...",
+      "noAthletesFound": "No athletes found",
+      "noAthletesAvailable": "No athletes available",
+      "selectSportFirst": "Select a sport first"
     }
   }
 }
