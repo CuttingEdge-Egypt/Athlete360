@@ -561,7 +561,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       <ChevronDown className={`h-4 w-4 shrink-0 opacity-50 ${isArabic ? 'mr-2' : 'ml-2'}`} />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-full p-0 bg-athlete-gray-700 border-gray-600" align={isArabic ? "end" : "start"}>
+                  <PopoverContent className="w-[400px] p-0 bg-athlete-gray-700 border-gray-600" align={isArabic ? "end" : "start"}>
                     <div className="p-2">
                       <div className="relative">
                         <Search className={`absolute top-2.5 h-4 w-4 text-gray-400 ${isArabic ? 'right-2' : 'left-2'}`} />
