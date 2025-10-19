@@ -380,15 +380,43 @@ export default function Landing() {
 
       {/* Analysis Preview Modal */}
       {previewModal.serviceType && (
-        <AnalysisPopup
-          open={previewModal.open}
-          onOpenChange={(open) => setPreviewModal({ open, serviceType: open ? previewModal.serviceType : null })}
-          type={previewModal.serviceType}
-          data={selectedAnalysis?.resultData}
-          athleteName={selectedAnalysis ? t('common.sampleAthlete') : undefined}
-          createdAt={selectedAnalysis?.createdAt}
-          shared={true}
-        />
+        <>
+          <AnalysisPopup
+            open={previewModal.open && !previewLoading && !!selectedAnalysis}
+            onOpenChange={(open) => setPreviewModal({ open, serviceType: open ? previewModal.serviceType : null })}
+            type={previewModal.serviceType}
+            data={selectedAnalysis?.resultData}
+            athleteName={selectedAnalysis ? t('common.sampleAthlete') : undefined}
+            createdAt={selectedAnalysis?.createdAt}
+            shared={true}
+          />
+          
+          {/* No Data Available Modal */}
+          <Dialog open={previewModal.open && !previewLoading && !selectedAnalysis}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-center">
+                  {language === 'ar' ? 'المعاينة غير متوفرة' : 'Preview Not Available'}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="text-center py-8">
+                <p className="text-gray-400 mb-4">
+                  {language === 'ar' 
+                    ? `عذراً، لا توجد معاينة متاحة لهذا النوع من التحليل باللغة العربية حالياً.`
+                    : `Sorry, no preview is available for this analysis type in English at the moment.`
+                  }
+                </p>
+                <Button 
+                  onClick={() => setPreviewModal({ open: false, serviceType: null })}
+                  variant="outline"
+                  data-testid="button-close-no-preview"
+                >
+                  {language === 'ar' ? 'إغلاق' : 'Close'}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </>
       )}
 
       {/* Loading Modal for Preview */}
