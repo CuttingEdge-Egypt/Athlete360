@@ -259,46 +259,48 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                     .slice(0, 3) // Ensure final limit of 3
                     .map((exercise, exerciseIndex) => (
                     <Card key={exercise.id || exerciseIndex} className="bg-gradient-to-br from-slate-900/60 to-slate-800/60 border-slate-600/50 hover:border-slate-500/60 transition-all duration-200 shadow-md">
-                      <CardContent className="p-5" dir={isArabic ? 'rtl' : 'ltr'}>
+                      <CardContent className="p-5">
                         <div className="space-y-3">
                           {/* Exercise Header - Video button positioning based on content language */}
-                          <div className={`flex items-start ${contentIsArabic ? 'flex-row-reverse' : 'flex-row'}`}>
-                            {exercise.videoUrl && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => window.open(exercise.videoUrl, '_blank')}
-                                className={`${contentIsArabic ? 'ml-4 flex-row-reverse' : 'mr-4'} bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-300 hover:from-purple-500 hover:to-purple-600 hover:text-white flex-shrink-0 shadow-md`}
-                                data-testid={`exercise-video-${exerciseIndex}`}
-                              >
-                                <Play className={`${contentIsArabic ? 'ml-1' : 'mr-1'} h-3 w-3`} />
-                                {t('analysis.development.video', 'Video')}
-                              </Button>
-                            )}
-                            <div className="flex-1">
-                              <h4 className={`font-bold text-lg text-white flex items-center gap-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
+                          <div className={`flex items-start justify-between ${contentIsArabic ? 'flex-row-reverse' : 'flex-row'}`}>
+                            <div className="flex-1" dir={contentIsArabic ? 'rtl' : 'ltr'}>
+                              <h4 className={`font-bold text-lg text-white flex items-center gap-2 ${contentIsArabic ? 'flex-row-reverse justify-end' : ''}`}>
                                 <div className="p-1.5 rounded-full bg-blue-500/20">
                                   <Dumbbell className="h-4 w-4 text-blue-400" />
                                 </div>
                                 <span className="text-blue-50">{exercise.name}</span>
                               </h4>
-                              <p className={`text-slate-200 mt-2 leading-relaxed ${isArabic ? 'text-right text-base' : 'text-sm'}`}>
+                              <p className={`text-slate-200 mt-2 leading-relaxed ${contentIsArabic ? 'text-right text-base' : 'text-sm'}`}>
                                 {exercise.description}
                               </p>
                             </div>
+                            {exercise.videoUrl && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => window.open(exercise.videoUrl, '_blank')}
+                                className="bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-300 hover:from-purple-500 hover:to-purple-600 hover:text-white flex-shrink-0 shadow-md"
+                                data-testid={`exercise-video-${exerciseIndex}`}
+                              >
+                                <Play className="h-3 w-3" />
+                                <span className={contentIsArabic ? 'mr-2' : 'ml-2'}>
+                                  {t('analysis.development.video', 'Video')}
+                                </span>
+                              </Button>
+                            )}
                           </div>
 
                           {/* Enhanced Exercise Details */}
-                          <div className={`flex flex-wrap gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                            {getExercisePrescriptionText(exercise, t, isArabic) && (
-                              <Badge variant="secondary" className={`bg-gradient-to-r from-blue-600/80 to-blue-500/80 text-white font-semibold text-sm px-3 py-1.5 shadow-md border border-blue-400/30 ${isArabic ? 'flex-row-reverse' : ''}`} dir={isArabic ? 'rtl' : 'ltr'}>
-                                <Timer className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                                {getExercisePrescriptionText(exercise, t, isArabic)}
+                          <div className={`flex flex-wrap gap-3 ${contentIsArabic ? 'flex-row-reverse' : ''}`}>
+                            {getExercisePrescriptionText(exercise, t, contentIsArabic) && (
+                              <Badge variant="secondary" className={`bg-gradient-to-r from-blue-600/80 to-blue-500/80 text-white font-semibold text-sm px-3 py-1.5 shadow-md border border-blue-400/30 ${contentIsArabic ? 'flex-row-reverse' : ''}`} dir={contentIsArabic ? 'rtl' : 'ltr'}>
+                                <Timer className={`h-4 w-4 ${contentIsArabic ? 'ml-2' : 'mr-2'}`} />
+                                {getExercisePrescriptionText(exercise, t, contentIsArabic)}
                               </Badge>
                             )}
                             {exercise.equipment && exercise.equipment.length > 0 && (
-                              <Badge variant="outline" className={`bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-100 font-semibold text-sm px-3 py-1.5 shadow-md ${isArabic ? 'flex-row-reverse' : ''}`} dir={isArabic ? 'rtl' : 'ltr'}>
-                                <Activity className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                              <Badge variant="outline" className={`bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-100 font-semibold text-sm px-3 py-1.5 shadow-md ${contentIsArabic ? 'flex-row-reverse' : ''}`} dir={contentIsArabic ? 'rtl' : 'ltr'}>
+                                <Activity className={`h-4 w-4 ${contentIsArabic ? 'ml-2' : 'mr-2'}`} />
                                 {exercise.equipment.join(', ')}
                               </Badge>
                             )}
@@ -306,13 +308,13 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
 
                           {/* Enhanced Exercise Tags */}
                           {exercise.tags && exercise.tags.length > 0 && (
-                            <div className={`flex flex-wrap gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                            <div className={`flex flex-wrap gap-2 ${contentIsArabic ? 'flex-row-reverse' : ''}`}>
                               {exercise.tags.map((tag, tagIndex) => (
                                 <Badge
                                   key={tagIndex}
                                   variant="outline"
                                   className="text-sm font-medium border-2 border-emerald-400/60 text-emerald-100 bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 px-3 py-1 shadow-sm hover:bg-emerald-500/30 transition-colors duration-200"
-                                  dir={isArabic ? 'rtl' : 'ltr'}
+                                  dir={contentIsArabic ? 'rtl' : 'ltr'}
                                 >
                                   {tag}
                                 </Badge>
@@ -335,33 +337,35 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
             <div className="grid gap-4">
               {allExercisesWithVideos.map((exercise, index) => (
                 <Card key={index} className="bg-athlete-gray-800/30 border-athlete-gray-700">
-                  <CardContent className="p-4" dir={isArabic ? 'rtl' : 'ltr'}>
-                    <div className={`flex items-center ${contentIsArabic ? 'flex-row-reverse' : 'flex-row'}`}>
-                      {exercise.videoUrl && (
-                        <Button
-                          size="sm"
-                          onClick={() => window.open(exercise.videoUrl, '_blank')}
-                          className={`${contentIsArabic ? 'ml-4 flex-row-reverse' : 'mr-4'} bg-athlete-accent hover:bg-athlete-accent/90 text-white flex-shrink-0`}
-                          data-testid={`video-button-${index}`}
-                        >
-                          <ExternalLink className={`${contentIsArabic ? 'ml-1' : 'mr-1'} h-3 w-3`} />
-                          {t('analysis.development.watch', 'Watch')}
-                        </Button>
-                      )}
-                      <div className="flex-1">
-                        <h4 className={`font-semibold text-white flex items-center gap-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
+                  <CardContent className="p-4">
+                    <div className={`flex items-center justify-between ${contentIsArabic ? 'flex-row-reverse' : 'flex-row'}`}>
+                      <div className="flex-1" dir={contentIsArabic ? 'rtl' : 'ltr'}>
+                        <h4 className={`font-semibold text-white flex items-center gap-2 ${contentIsArabic ? 'flex-row-reverse justify-end' : ''}`}>
                           <Play className="h-4 w-4 text-athlete-accent" />
                           {exercise.name}
                         </h4>
                         {exercise.targetArea && (
-                          <div className={`mt-2 ${isArabic ? 'text-right' : ''}`}>
+                          <div className={`mt-2 ${contentIsArabic ? 'text-right' : ''}`}>
                             <Badge variant="outline" className="bg-gradient-to-r from-amber-500/20 to-amber-600/20 border-amber-400 text-amber-100 font-medium text-xs px-2 py-1">
                               {t('analysis.development.target', 'Target')}: {exercise.targetArea}
                             </Badge>
                           </div>
                         )}
-                        <p className={`text-sm text-gray-300 mt-1 ${isArabic ? 'text-right' : ''}`}>{exercise.description}</p>
+                        <p className={`text-sm text-gray-300 mt-1 ${contentIsArabic ? 'text-right' : ''}`}>{exercise.description}</p>
                       </div>
+                      {exercise.videoUrl && (
+                        <Button
+                          size="sm"
+                          onClick={() => window.open(exercise.videoUrl, '_blank')}
+                          className="bg-athlete-accent hover:bg-athlete-accent/90 text-white flex-shrink-0"
+                          data-testid={`video-button-${index}`}
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          <span className={contentIsArabic ? 'mr-2' : 'ml-2'}>
+                            {t('analysis.development.watch', 'Watch')}
+                          </span>
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

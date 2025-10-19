@@ -2870,12 +2870,12 @@ export default function Home() {
                                     {cancelDevelopmentPlanJobMutation.isPending ? (
                                       <>
                                         <Loader2 className="ml-2 h-3 w-3 animate-spin" />
-                                        Cancelling
+                                        {t('common:buttons.cancelling')}
                                       </>
                                     ) : (
                                       <>
                                         <X className="ml-2 h-3 w-3" />
-                                        Cancel
+                                        {t('common:buttons.cancel')}
                                       </>
                                     )}
                                   </Button>
@@ -2904,12 +2904,12 @@ export default function Home() {
                                     {cancelDevelopmentPlanJobMutation.isPending ? (
                                       <>
                                         <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                                        Cancelling
+                                        {t('common:buttons.cancelling')}
                                       </>
                                     ) : (
                                       <>
                                         <X className="mr-2 h-3 w-3" />
-                                        Cancel
+                                        {t('common:buttons.cancel')}
                                       </>
                                     )}
                                   </Button>
