@@ -2404,7 +2404,7 @@ export function AnalysisPopup({
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-red-400 mb-4 flex items-center">
                   <AlertTriangle className="mr-3" size={24} />
-                  {t("analysis.weaknesses.title", "Areas for Improvement")}
+                  {isArabicComparison ? "مجالات التحسين" : t("analysis.weaknesses.title", "Areas for Improvement")}
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <div 
