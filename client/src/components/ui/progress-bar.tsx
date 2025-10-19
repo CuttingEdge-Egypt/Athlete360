@@ -80,15 +80,17 @@ export function ProgressBar({ isActive, currentPhase, onCancel, className = "" }
 
         {/* Progress bar */}
         <div className="space-y-3">
-          <div className="relative">
-            <Progress 
-              value={displayProgress} 
-              className="h-3 bg-gray-700 border border-gray-600"
-              data-testid="progress-bar"
-            />
+          <div className="relative h-3 bg-gray-700 border border-gray-600 rounded-full overflow-hidden">
             <div 
-              className={`absolute top-0 h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full transition-all duration-300 ${isArabic ? 'right-0' : 'left-0'}`}
-              style={{ width: `${displayProgress}%` }}
+              className="absolute top-0 h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300"
+              style={isArabic ? { 
+                right: 0,
+                width: `${displayProgress}%`
+              } : { 
+                left: 0,
+                width: `${displayProgress}%`
+              }}
+              data-testid="progress-bar"
             />
           </div>
           <div className={`flex items-center justify-between text-sm ${isArabic ? 'flex-row-reverse' : ''}`}>
