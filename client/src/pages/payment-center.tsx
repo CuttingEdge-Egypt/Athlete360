@@ -172,7 +172,7 @@ export default function PaymentCenter() {
       <div className="min-h-screen bg-athlete-gray-900 text-white" dir={isArabic ? 'rtl' : 'ltr'}>
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
-            <div className="flex items-center gap-4 mb-6">
+            <div className={`flex items-center gap-4 mb-6 ${isArabic ? 'flex-row-reverse' : ''}`}>
               <Button
                 variant="outline"
                 size="sm"
@@ -342,7 +342,7 @@ export default function PaymentCenter() {
     <div className="min-h-screen bg-athlete-gray-900 text-white" dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center gap-4 mb-8">
+          <div className={`flex items-center gap-4 mb-8 ${isArabic ? 'flex-row-reverse' : ''}`}>
             <Button
               variant="outline"
               size="sm"
