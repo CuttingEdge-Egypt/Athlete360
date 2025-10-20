@@ -83,6 +83,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
   const abortControllerRef = useRef<AbortController | null>(null);
   const queueIdRef = useRef<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [progressPhase, setProgressPhase] = useState<{ message: string; progress: number; originalMessage?: string } | null>(null);
   const [comparisonData, setComparisonData] = useState(() => {
     console.log("AthleteComparison received preloadedComparisonData:", preloadedComparisonData);
@@ -149,6 +150,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       if (ongoingComparison && !progressPhase) {
         console.log('[COMPARISON] Restoring loading state from queue:', ongoingComparison);
         queueIdRef.current = ongoingComparison.id;
+        setIsLoading(true);
         setProgressPhase({
           message: ongoingComparison.progressMessage || 'Processing comparison...',
           progress: 50,
@@ -237,6 +239,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
           });
         } else if (data.type === 'comparison-complete') {
           console.log('[WS] Comparison complete, updating queue');
+          setIsLoading(false); // Clear loading state when comparison completes
           // Update queue status to completed using the correct queue ID
           if (window.generationQueue && queueIdRef.current) {
             window.generationQueue.update(queueIdRef.current, { status: 'completed' });
@@ -273,6 +276,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
         // Don't clear queueIdRef - let the mutation's onSettled handler do it
         // so the onError handler can still update the queue status
         setProgressPhase(null); // Clear progress
+        setIsLoading(false); // Clear loading state
         return; // Don't call original handler since we handled it
       }
 
@@ -386,6 +390,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       abortControllerRef.current = new AbortController();
 
       // Initialize progress with original message for re-translation
+      setIsLoading(true); // Set loading state
       setProgressPhase({ 
         message: t("analysis.comparison.startingComparison", "Starting comparison..."), 
         progress: 0,
@@ -407,6 +412,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
     onSuccess: (data) => {
       setComparisonData(data);
       setProgressPhase(null); // Clear progress on success
+      setIsLoading(false); // Clear loading state
 
       // Update queue to completed
       if (window.generationQueue && queueIdRef.current) {
@@ -429,6 +435,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
     },
     onError: (error: any) => {
       setProgressPhase(null); // Clear progress on error
+      setIsLoading(false); // Clear loading state
       setShowForm(true); // Show form again so user can retry
 
       // Check if this is a cancellation
@@ -468,6 +475,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       // Don't clear queueIdRef yet - let the mutation's onSettled handler do it
       // so the onError handler can still update the queue status
       setProgressPhase(null);
+      setIsLoading(false); // Clear loading state
       setShowForm(true); // Show form again after cancellation
 
       toast({
@@ -1113,7 +1121,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
         )}
 
         {/* Progress Bar - Shown outside form so it remains visible during generation */}
-        {comparisonMutation.isPending && (
+        {(comparisonMutation.isPending || isLoading) && (
           <ProgressBar 
             isActive={true}
             currentPhase={progressPhase || undefined}
