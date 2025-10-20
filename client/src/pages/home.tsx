@@ -2342,7 +2342,7 @@ export default function Home() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setPreviewModal({ open: true, serviceType: 'nutrition' })}
+                        onClick={() => setPreviewModal({ open: true, serviceType: 'nutrition-plan' })}
                         className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
                         data-testid="button-preview-nutrition-form"
                       >
@@ -2726,7 +2726,7 @@ export default function Home() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setPreviewModal({ open: true, serviceType: 'nutrition' })}
+                        onClick={() => setPreviewModal({ open: true, serviceType: 'nutrition-plan' })}
                         className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
                         data-testid="button-preview-nutrition"
                       >
@@ -2765,7 +2765,7 @@ export default function Home() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setPreviewModal({ open: true, serviceType: 'development' })}
+                        onClick={() => setPreviewModal({ open: true, serviceType: 'development-plan' })}
                         className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
                         data-testid="button-preview-development-form"
                       >
@@ -3073,7 +3073,7 @@ export default function Home() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setPreviewModal({ open: true, serviceType: 'development' })}
+                          onClick={() => setPreviewModal({ open: true, serviceType: 'development-plan' })}
                           className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
                           data-testid="button-preview-development"
                         >
