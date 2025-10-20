@@ -62,26 +62,56 @@ function getLocalizedText(text: { en: string; ar?: string }, language: string): 
   return text.en;
 }
 
+// Helper function to get translations based on plan language (not site language)
+function getPlanTranslation(key: string, planLanguage: string): string {
+  const translations: Record<string, { en: string; ar: string }> = {
+    'video': { en: 'Video', ar: 'فيديو' },
+    'instructions': { en: 'Instructions', ar: 'التعليمات' },
+    'logistics': { en: 'Logistics', ar: 'التفاصيل التدريبية' },
+    'categories': { en: 'Categories', ar: 'الفئات' },
+    'sets': { en: 'sets', ar: 'مجموعات' },
+    'reps': { en: 'reps', ar: 'تكرارات' },
+    'rest': { en: 'rest', ar: 'راحة' },
+    'goalAreas': { en: 'Goal Areas', ar: 'المجالات المستهدفة' },
+    'exercises': { en: 'Exercises', ar: 'تمارين' },
+    'videos': { en: 'Videos', ar: 'فيديوهات' },
+    'allVideos': { en: 'All Videos', ar: 'جميع الفيديوهات' },
+    'noVideos': { en: 'No Videos Available', ar: 'لا توجد فيديوهات متاحة' },
+    'noVideosMessage': { en: 'No instructional videos were found for the exercises in this plan.', ar: 'لم يتم العثور على فيديوهات تعليمية للتمارين في هذه الخطة.' },
+    'target': { en: 'Target', ar: 'الهدف' },
+    'watch': { en: 'Watch', ar: 'شاهد' },
+    'trainingSummary': { en: 'Training Summary', ar: 'ملخص التدريب' },
+    'totalExercises': { en: 'Total Exercises', ar: 'إجمالي التمارين' },
+    'videoTutorials': { en: 'Video Tutorials', ar: 'دروس الفيديو' }
+  };
+  
+  const translation = translations[key];
+  if (!translation) return key;
+  
+  return planLanguage === 'ar' ? translation.ar : translation.en;
+}
+
 // Helper function to get exercise prescription display text
-function getExercisePrescriptionText(exercise: Exercise, t: any, isArabic: boolean): string {
+function getExercisePrescriptionText(exercise: Exercise, planLanguage: string): string {
   if (!exercise.prescription) return '';
 
+  const isArabic = planLanguage === 'ar';
   const parts: string[] = [];
 
   if (exercise.prescription.sets) {
-    const setsLabel = t('analysis.development.prescription.sets', 'sets');
+    const setsLabel = getPlanTranslation('sets', planLanguage);
     parts.push(isArabic ? `${setsLabel} ${exercise.prescription.sets}` : `${exercise.prescription.sets} ${setsLabel}`);
   }
 
   if (exercise.prescription.reps) {
-    const repsLabel = t('analysis.development.prescription.reps', 'reps');
+    const repsLabel = getPlanTranslation('reps', planLanguage);
     parts.push(isArabic ? `${repsLabel} ${exercise.prescription.reps}` : `${exercise.prescription.reps} ${repsLabel}`);
   }
 
   if (exercise.prescription.restSec) {
     const minutes = Math.floor(exercise.prescription.restSec / 60);
     const seconds = exercise.prescription.restSec % 60;
-    const restLabel = t('analysis.development.prescription.rest', 'rest');
+    const restLabel = getPlanTranslation('rest', planLanguage);
     if (minutes > 0) {
       const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
       parts.push(isArabic ? `${restLabel} ${timeStr}` : `${timeStr} ${restLabel}`);
@@ -140,33 +170,33 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
     <div className="space-y-8" data-testid="development-plan-display">
       {/* Title with Goal Areas and Videos Count */}
       <Card className="bg-gradient-to-br from-emerald-500/20 via-athlete-accent/20 to-athlete-gray-800 border-emerald-500/40 shadow-lg">
-        <CardHeader className="pb-4" dir={isArabic ? 'rtl' : 'ltr'}>
-          <div className={`flex items-center ${isArabic ? 'flex-row-reverse justify-end' : 'justify-between'}`}>
-            <div className={`space-y-2 ${isArabic ? 'w-full' : ''}`}>
-              <CardTitle className={`text-3xl font-bold text-white flex items-center gap-3 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
+        <CardHeader className="pb-4" dir={contentIsArabic ? 'rtl' : 'ltr'}>
+          <div className={`flex items-center ${contentIsArabic ? 'flex-row-reverse justify-end' : 'justify-between'}`}>
+            <div className={`space-y-2 ${contentIsArabic ? 'w-full' : ''}`}>
+              <CardTitle className={`text-3xl font-bold text-white flex items-center gap-3 ${contentIsArabic ? 'flex-row-reverse justify-end' : ''}`}>
                 <Target className="h-7 w-7 text-emerald-400" />
                 <span className="text-emerald-400">
                   {getLocalizedText(title, language)}
                 </span>
               </CardTitle>
-              <div className={`flex flex-wrap items-center gap-6 text-sm text-gray-300 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
+              <div className={`flex flex-wrap items-center gap-6 text-sm text-gray-300 ${contentIsArabic ? 'flex-row-reverse justify-end' : ''}`}>
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded-full bg-emerald-500/20">
                     <Zap className="h-4 w-4 text-emerald-400 flex-shrink-0" />
                   </div>
-                  <span className="font-semibold text-emerald-100" dir={isArabic ? 'rtl' : 'ltr'}>{counts?.goals || goalAnalysis.length} {t('analysis.development.goalAreas', 'Goal Areas')}</span>
+                  <span className="font-semibold text-emerald-100" dir={contentIsArabic ? 'rtl' : 'ltr'}>{counts?.goals || goalAnalysis.length} {getPlanTranslation('goalAreas', language)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded-full bg-blue-500/20">
                     <Dumbbell className="h-4 w-4 text-blue-400 flex-shrink-0" />
                   </div>
-                  <span className="font-semibold text-blue-100" dir={isArabic ? 'rtl' : 'ltr'}>{counts?.exercises || 0} {t('analysis.development.exercises', 'Exercises')}</span>
+                  <span className="font-semibold text-blue-100" dir={contentIsArabic ? 'rtl' : 'ltr'}>{counts?.exercises || 0} {getPlanTranslation('exercises', language)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded-full bg-purple-500/20">
                     <Play className="h-4 w-4 text-purple-400 flex-shrink-0" />
                   </div>
-                  <span className="font-semibold text-purple-100" dir={isArabic ? 'rtl' : 'ltr'}>{counts?.videos || allExercisesWithVideos.length} {t('analysis.development.videos', 'Videos')}</span>
+                  <span className="font-semibold text-purple-100" dir={contentIsArabic ? 'rtl' : 'ltr'}>{counts?.videos || allExercisesWithVideos.length} {getPlanTranslation('videos', language)}</span>
                 </div>
               </div>
             </div>
@@ -174,9 +204,9 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
         </CardHeader>
 
         {intro && intro.overview && (
-          <CardContent className="pt-0" dir={isArabic ? 'rtl' : 'ltr'}>
+          <CardContent className="pt-0" dir={contentIsArabic ? 'rtl' : 'ltr'}>
             <div className="p-4 bg-gradient-to-r from-slate-800/50 to-slate-700/50 rounded-lg border border-slate-600/30">
-              <p className={`text-slate-100 leading-relaxed text-base font-medium ${isArabic ? 'text-right' : ''}`}>{intro.overview}</p>
+              <p className={`text-slate-100 leading-relaxed text-base font-medium ${contentIsArabic ? 'text-right' : ''}`}>{intro.overview}</p>
             </div>
           </CardContent>
         )}
@@ -189,16 +219,16 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white text-slate-300 font-semibold"
             data-testid="tab-goals"
           >
-            <Target className={`h-5 w-5 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-            {t('analysis.development.goalAreas', 'Goal Areas')}
+            <Target className={`h-5 w-5 ${contentIsArabic ? 'ml-2' : 'mr-2'}`} />
+            {getPlanTranslation('goalAreas', language)}
           </TabsTrigger>
           <TabsTrigger 
             value="videos" 
             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white text-slate-300 font-semibold"
             data-testid="tab-videos"
           >
-            <Play className={`h-5 w-5 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-            {t('analysis.development.allVideos', 'All Videos')}
+            <Play className={`h-5 w-5 ${contentIsArabic ? 'ml-2' : 'mr-2'}`} />
+            {getPlanTranslation('allVideos', language)}
           </TabsTrigger>
         </TabsList>
 
@@ -207,8 +237,8 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
           {/* Goal Area Navigation */}
           {goalAnalysis.length > 1 && (
             <Card className="bg-gradient-to-r from-slate-800/70 to-slate-700/70 border-slate-600/50">
-              <CardContent className="p-4" dir={isArabic ? 'rtl' : 'ltr'}>
-                <div className={`flex flex-wrap gap-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
+              <CardContent className="p-4" dir={contentIsArabic ? 'rtl' : 'ltr'}>
+                <div className={`flex flex-wrap gap-2 ${contentIsArabic ? 'flex-row-reverse justify-end' : ''}`}>
                   {goalAnalysis.map((goal, index) => (
                     <Button
                       key={index}
@@ -219,10 +249,10 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                         selectedGoalIndex === index 
                           ? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white border-emerald-400 shadow-lg" 
                           : "bg-transparent border-slate-600 text-slate-300 hover:bg-slate-700/50 hover:border-slate-500"
-                      } ${isArabic ? 'flex-row-reverse' : ''}`}
+                      } ${contentIsArabic ? 'flex-row-reverse' : ''}`}
                       data-testid={`goal-button-${index}`}
                     >
-                      <Target className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                      <Target className={`h-4 w-4 ${contentIsArabic ? 'ml-2' : 'mr-2'}`} />
                       {goal.area}
                     </Button>
                   ))}
@@ -234,14 +264,14 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
           {/* Current Goal Area Display */}
           {currentGoal && (
             <Card className="bg-gradient-to-br from-slate-800/50 to-slate-700/50 border-emerald-500/30 shadow-lg">
-              <CardHeader className="pb-4" dir={isArabic ? 'rtl' : 'ltr'}>
-                <CardTitle className={`text-2xl font-bold text-white flex items-center gap-3 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
+              <CardHeader className="pb-4" dir={contentIsArabic ? 'rtl' : 'ltr'}>
+                <CardTitle className={`text-2xl font-bold text-white flex items-center gap-3 ${contentIsArabic ? 'flex-row-reverse justify-end' : ''}`}>
                   <div className="p-2 rounded-full bg-emerald-500/20">
                     <Zap className="h-6 w-6 text-emerald-400" />
                   </div>
                   <span className="text-emerald-50">{currentGoal.area}</span>
                 </CardTitle>
-                <div className="p-3 bg-slate-900/30 rounded-lg border border-slate-600/30 mt-3" dir={isArabic ? 'rtl' : 'ltr'}>
+                <div className="p-3 bg-slate-900/30 rounded-lg border border-slate-600/30 mt-3" dir={contentIsArabic ? 'rtl' : 'ltr'}>
                   <p className="text-slate-100 leading-relaxed text-base">{currentGoal.description}</p>
                 </div>
               </CardHeader>
@@ -273,7 +303,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                               
                               {/* Instructions Title */}
                               <h5 className={`text-sm font-semibold text-slate-400 mt-3 mb-1 ${contentIsArabic ? 'text-right' : ''}`}>
-                                {t('analysis.development.instructions', 'Instructions')}
+                                {getPlanTranslation('instructions', language)}
                               </h5>
                               <p className={`text-slate-200 leading-relaxed ${contentIsArabic ? 'text-right text-base' : 'text-sm'}`}>
                                 {exercise.description}
@@ -289,23 +319,23 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                               >
                                 <Play className="h-3 w-3" />
                                 <span className={contentIsArabic ? 'mr-2' : 'ml-2'}>
-                                  {t('analysis.development.video', 'Video')}
+                                  {getPlanTranslation('video', language)}
                                 </span>
                               </Button>
                             )}
                           </div>
 
                           {/* Prescription Title and Details */}
-                          {(getExercisePrescriptionText(exercise, t, contentIsArabic) || (exercise.equipment && exercise.equipment.length > 0)) && (
+                          {(getExercisePrescriptionText(exercise, language) || (exercise.equipment && exercise.equipment.length > 0)) && (
                             <div className="space-y-2">
                               <h5 className={`text-sm font-semibold text-slate-400 ${contentIsArabic ? 'text-right' : ''}`}>
-                                {t('analysis.development.prescriptionTitle', 'Logistics')}
+                                {getPlanTranslation('logistics', language)}
                               </h5>
                               <div className={`flex flex-wrap gap-3 ${contentIsArabic ? 'flex-row-reverse' : ''}`}>
-                                {getExercisePrescriptionText(exercise, t, contentIsArabic) && (
+                                {getExercisePrescriptionText(exercise, language) && (
                                   <Badge variant="secondary" className={`bg-gradient-to-r from-blue-600/80 to-blue-500/80 text-white font-semibold text-sm px-3 py-1.5 shadow-md border border-blue-400/30 ${contentIsArabic ? 'flex-row-reverse' : ''}`} dir={contentIsArabic ? 'rtl' : 'ltr'}>
                                     <Timer className={`h-4 w-4 ${contentIsArabic ? 'ml-2' : 'mr-2'}`} />
-                                    {getExercisePrescriptionText(exercise, t, contentIsArabic)}
+                                    {getExercisePrescriptionText(exercise, language)}
                                   </Badge>
                                 )}
                                 {exercise.equipment && exercise.equipment.length > 0 && (
@@ -322,7 +352,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                           {exercise.tags && exercise.tags.length > 0 && (
                             <div className="space-y-2">
                               <h5 className={`text-sm font-semibold text-slate-400 ${contentIsArabic ? 'text-right' : ''}`}>
-                                {t('analysis.development.categories', 'Categories')}
+                                {getPlanTranslation('categories', language)}
                               </h5>
                               <div className={`flex flex-wrap gap-2 ${contentIsArabic ? 'flex-row-reverse' : ''}`}>
                                 {exercise.tags.map((tag, tagIndex) => (
@@ -364,7 +394,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                         {exercise.targetArea && (
                           <div className={`mt-2 ${contentIsArabic ? 'text-right' : ''}`}>
                             <Badge variant="outline" className="bg-gradient-to-r from-amber-500/20 to-amber-600/20 border-amber-400 text-amber-100 font-medium text-xs px-2 py-1">
-                              {t('analysis.development.target', 'Target')}: {exercise.targetArea}
+                              {getPlanTranslation('target', language)}: {exercise.targetArea}
                             </Badge>
                           </div>
                         )}
@@ -379,7 +409,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                         >
                           <ExternalLink className="h-3 w-3" />
                           <span className={contentIsArabic ? 'mr-2' : 'ml-2'}>
-                            {t('analysis.development.watch', 'Watch')}
+                            {getPlanTranslation('watch', language)}
                           </span>
                         </Button>
                       )}
@@ -392,8 +422,8 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
             <Card className="bg-athlete-gray-800/30 border-athlete-gray-700">
               <CardContent className="p-6 text-center">
                 <Play className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-300 mb-2">{t('analysis.development.noVideos', 'No Videos Available')}</h3>
-                <p className="text-gray-400">{t('analysis.development.noVideosMessage', 'No instructional videos were found for the exercises in this plan.')}</p>
+                <h3 className="text-lg font-semibold text-gray-300 mb-2">{getPlanTranslation('noVideos', language)}</h3>
+                <p className="text-gray-400">{getPlanTranslation('noVideosMessage', language)}</p>
               </CardContent>
             </Card>
           )}
@@ -402,23 +432,23 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
 
       {/* Summary Card */}
       <Card className="bg-athlete-gray-800/30 border-athlete-gray-700">
-        <CardContent className="p-6" dir={isArabic ? 'rtl' : 'ltr'}>
-          <div className={`flex items-center gap-3 mb-4 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
+        <CardContent className="p-6" dir={contentIsArabic ? 'rtl' : 'ltr'}>
+          <div className={`flex items-center gap-3 mb-4 ${contentIsArabic ? 'flex-row-reverse justify-end' : ''}`}>
             <CheckCircle className="h-5 w-5 text-green-400" />
-            <h3 className="text-lg font-semibold text-white">{t('analysis.development.trainingSummary', 'Training Summary')}</h3>
+            <h3 className="text-lg font-semibold text-white">{getPlanTranslation('trainingSummary', language)}</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
             <div className="space-y-1">
               <div className="text-2xl font-bold text-athlete-accent">{goalAnalysis.length}</div>
-              <div className="text-sm text-gray-300">{t('analysis.development.goalAreas', 'Goal Areas')}</div>
+              <div className="text-sm text-gray-300">{getPlanTranslation('goalAreas', language)}</div>
             </div>
             <div className="space-y-1">
               <div className="text-2xl font-bold text-athlete-accent">{counts?.exercises || 0}</div>
-              <div className="text-sm text-gray-300">{t('analysis.development.totalExercises', 'Total Exercises')}</div>
+              <div className="text-sm text-gray-300">{getPlanTranslation('totalExercises', language)}</div>
             </div>
             <div className="space-y-1">
               <div className="text-2xl font-bold text-athlete-accent">{allExercisesWithVideos.length}</div>
-              <div className="text-sm text-gray-300">{t('analysis.development.videoTutorials', 'Video Tutorials')}</div>
+              <div className="text-sm text-gray-300">{getPlanTranslation('videoTutorials', language)}</div>
             </div>
           </div>
         </CardContent>
