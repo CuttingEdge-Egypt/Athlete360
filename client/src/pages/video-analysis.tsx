@@ -168,25 +168,10 @@ export default function VideoAnalysis() {
   return (
     <div className="min-h-screen bg-athlete-gray-900 p-6">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center gap-4 mb-8">
+        <div className={`flex items-center gap-4 mb-8 ${isArabic ? 'flex-row-reverse' : ''}`}>
           <div className={`flex-1 ${isArabic ? 'text-right' : 'text-left'}`}>
             <h1 className={`${isArabic ? 'text-4xl' : 'text-3xl'} font-bold text-white`}>{t('title')}</h1>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPreviewModal({ open: true, serviceType: 'video' })}
-            disabled={previewLoading && previewModal.serviceType === 'video'}
-            className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
-            data-testid="button-preview-video"
-          >
-            {previewLoading && previewModal.serviceType === 'video' ? (
-              <Loader2 className={`h-4 w-4 animate-spin ${isArabic ? 'ml-2' : 'mr-2'}`} />
-            ) : (
-              <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-            )}
-            {t('common:buttons.preview', 'Preview')}
-          </Button>
         </div>
         
         {isLoading ? (

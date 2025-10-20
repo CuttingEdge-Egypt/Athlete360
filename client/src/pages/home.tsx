@@ -2726,24 +2726,7 @@ export default function Home() {
                 /* Nutrition Plan Results with New Plan Button */
                 <div className="space-y-6">
                   <div className={`flex justify-between items-center mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                    <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                      <h2 className="text-2xl font-bold text-white">{t('nutritionPlan.yourPlan')}</h2>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPreviewModal({ open: true, serviceType: 'nutrition-plan' })}
-                        disabled={previewLoading && previewModal.serviceType === 'nutrition-plan'}
-                        className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
-                        data-testid="button-preview-nutrition"
-                      >
-                        {previewLoading && previewModal.serviceType === 'nutrition-plan' ? (
-                          <Loader2 className={`h-4 w-4 animate-spin ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                        ) : (
-                          <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                        )}
-                        {t('common:buttons.preview')}
-                      </Button>
-                    </div>
+                    <h2 className="text-2xl font-bold text-white">{t('nutritionPlan.yourPlan')}</h2>
                     <Button 
                       onClick={() => {
                         setShowNutritionForm(true);
@@ -3083,24 +3066,7 @@ export default function Home() {
                 developmentPlanData && (
                   <div className="space-y-6">
                     <div className={`flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
-                      <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                        <h2 className="text-2xl font-bold text-white">{t('developmentPlan.yourPlan')}</h2>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setPreviewModal({ open: true, serviceType: 'development-plan' })}
-                          disabled={previewLoading && previewModal.serviceType === 'development-plan'}
-                          className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
-                          data-testid="button-preview-development"
-                        >
-                          {previewLoading && previewModal.serviceType === 'development-plan' ? (
-                            <Loader2 className={`h-4 w-4 animate-spin ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                          ) : (
-                            <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                          )}
-                          {t('common:buttons.preview')}
-                        </Button>
-                      </div>
+                      <h2 className="text-2xl font-bold text-white">{t('developmentPlan.yourPlan')}</h2>
                       <Button
                         onClick={() => {
                           setShowDevelopmentForm(true);
