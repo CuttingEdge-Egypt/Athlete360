@@ -30,8 +30,8 @@ import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X, 
 import type { Sport, Athlete } from "@shared/schema";
 import { CountrySelect } from "@/components/ui/country-select";
 import { Flag } from "@/components/ui/flag";
-import arTranslations from '@/locales/ar/common.json';
-import enTranslations from '@/locales/en/common.json';
+import arHomeTranslations from '@/locales/ar/home.json';
+import enHomeTranslations from '@/locales/en/home.json';
 
 // Animated loading dots component
 function AnimatedDots({ isRTL }: { isRTL: boolean }) {
@@ -61,7 +61,7 @@ function toArabicNumerals(num: number | string): string {
 // Helper function to get translations for nutrition/development plans based on plan language
 function getPlanTranslations(language: string | undefined, key: string): string {
   const planLang = language || 'en';
-  const translations = planLang === 'ar' ? arTranslations : enTranslations;
+  const translations = planLang === 'ar' ? arHomeTranslations : enHomeTranslations;
   const keys = key.split('.');
   let value: any = translations;
   
