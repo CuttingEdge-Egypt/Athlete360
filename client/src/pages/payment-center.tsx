@@ -172,7 +172,7 @@ export default function PaymentCenter() {
       <div className="min-h-screen bg-athlete-gray-900 text-white" dir={isArabic ? 'rtl' : 'ltr'}>
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
-            <div className={`flex items-center gap-4 mb-6 ${isArabic ? 'flex-row-reverse' : ''}`}>
+            <div className="flex items-center gap-4 mb-6">
               <div className={`flex-1 ${isArabic ? 'text-right' : 'text-left'}`}>
                 <h1 className={`${isArabic ? 'text-3xl' : 'text-2xl'} font-bold text-white`} data-testid="text-payment-title">
                   {t('checkout.title')}
@@ -342,7 +342,7 @@ export default function PaymentCenter() {
     <div className="min-h-screen bg-athlete-gray-900 text-white" dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <div className={`flex items-center gap-4 mb-8 ${isArabic ? 'flex-row-reverse' : ''}`}>
+          <div className="flex items-center gap-4 mb-8">
             <div className={`flex-1 ${isArabic ? 'text-right' : 'text-left'}`}>
               <h1 className={`${isArabic ? 'text-4xl' : 'text-3xl'} font-bold text-white`} data-testid="text-payment-center-title">
                 {t('header.title')}
