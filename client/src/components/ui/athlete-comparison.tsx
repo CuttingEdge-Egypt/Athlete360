@@ -589,10 +589,11 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
             variant="outline"
             size="sm"
             onClick={() => setPreviewModal({ open: true, serviceType: 'comparison' })}
-            className="border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300"
+            className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
             data-testid="button-preview-comparison"
           >
-            <Eye className="h-4 w-4" />
+            <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+            {t('home:preview')}
           </Button>
         </div>
       </CardHeader>

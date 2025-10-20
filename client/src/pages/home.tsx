@@ -2337,7 +2337,19 @@ export default function Home() {
                 /* Nutrition Plan Form */
                 <Card className="bg-athlete-gray-800 border-gray-700">
                   <CardContent className="p-8">
-                    <h2 className="text-2xl font-bold mb-6 text-center text-white">{t('nutritionPlan.title')}</h2>
+                    <div className={`flex justify-between items-center mb-6 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                      <h2 className="text-2xl font-bold text-white">{t('nutritionPlan.title')}</h2>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPreviewModal({ open: true, serviceType: 'nutrition' })}
+                        className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
+                        data-testid="button-preview-nutrition-form"
+                      >
+                        <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                        {t('home:preview')}
+                      </Button>
+                    </div>
                   
                   <Form {...nutritionForm}>
                     <form onSubmit={nutritionForm.handleSubmit(onSubmitNutritionPlan)} className="space-y-6">
@@ -2715,10 +2727,11 @@ export default function Home() {
                         variant="outline"
                         size="sm"
                         onClick={() => setPreviewModal({ open: true, serviceType: 'nutrition' })}
-                        className="border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300"
+                        className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
                         data-testid="button-preview-nutrition"
                       >
-                        <Eye className="h-4 w-4" />
+                        <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                        {t('home:preview')}
                       </Button>
                     </div>
                     <Button 
@@ -2747,7 +2760,19 @@ export default function Home() {
                 /* Development Plan Form */
                 <Card className="bg-athlete-gray-800 border-gray-700">
                   <CardContent className="p-8">
-                    <h2 className="text-2xl font-bold mb-6 text-center text-white">{t('developmentPlan.title')}</h2>
+                    <div className={`flex justify-between items-center mb-6 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                      <h2 className="text-2xl font-bold text-white">{t('developmentPlan.title')}</h2>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPreviewModal({ open: true, serviceType: 'development' })}
+                        className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
+                        data-testid="button-preview-development-form"
+                      >
+                        <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                        {t('home:preview')}
+                      </Button>
+                    </div>
                     
                     <Form {...developmentForm}>
                       <form onSubmit={developmentForm.handleSubmit(onSubmitDevelopmentPlan)} className="space-y-6">
@@ -3049,10 +3074,11 @@ export default function Home() {
                           variant="outline"
                           size="sm"
                           onClick={() => setPreviewModal({ open: true, serviceType: 'development' })}
-                          className="border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300"
+                          className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
                           data-testid="button-preview-development"
                         >
-                          <Eye className="h-4 w-4" />
+                          <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                          {t('home:preview')}
                         </Button>
                       </div>
                       <Button

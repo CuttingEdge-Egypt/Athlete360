@@ -174,10 +174,11 @@ export default function VideoAnalysis() {
             variant="outline"
             size="sm"
             onClick={() => setPreviewModal({ open: true, serviceType: 'video' })}
-            className="border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300"
+            className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
             data-testid="button-preview-video"
           >
-            <Eye className="h-4 w-4" />
+            <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+            {t('common:buttons.preview', 'Preview')}
           </Button>
         </div>
         
