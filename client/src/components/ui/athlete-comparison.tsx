@@ -593,7 +593,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
             data-testid="button-preview-comparison"
           >
             <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-            {t('home:preview')}
+            {t('common:buttons.preview')}
           </Button>
         </div>
       </CardHeader>

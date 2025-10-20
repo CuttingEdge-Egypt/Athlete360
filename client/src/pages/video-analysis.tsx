@@ -168,8 +168,10 @@ export default function VideoAnalysis() {
   return (
     <div className="min-h-screen bg-athlete-gray-900 p-6">
       <div className="max-w-6xl mx-auto">
-        <div className={`mb-8 flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
-          <h1 className="text-3xl font-bold text-white">{t('title')}</h1>
+        <div className="flex items-center gap-4 mb-8">
+          <div className={`flex-1 ${isArabic ? 'text-right' : 'text-left'}`}>
+            <h1 className={`${isArabic ? 'text-4xl' : 'text-3xl'} font-bold text-white`}>{t('title')}</h1>
+          </div>
           <Button
             variant="outline"
             size="sm"

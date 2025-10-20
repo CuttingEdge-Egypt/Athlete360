@@ -2347,7 +2347,7 @@ export default function Home() {
                         data-testid="button-preview-nutrition-form"
                       >
                         <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                        {t('home:preview')}
+                        {t('common:buttons.preview')}
                       </Button>
                     </div>
                   
@@ -2731,7 +2731,7 @@ export default function Home() {
                         data-testid="button-preview-nutrition"
                       >
                         <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                        {t('home:preview')}
+                        {t('common:buttons.preview')}
                       </Button>
                     </div>
                     <Button 
@@ -2770,7 +2770,7 @@ export default function Home() {
                         data-testid="button-preview-development-form"
                       >
                         <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                        {t('home:preview')}
+                        {t('common:buttons.preview')}
                       </Button>
                     </div>
                     
@@ -3078,7 +3078,7 @@ export default function Home() {
                           data-testid="button-preview-development"
                         >
                           <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                          {t('home:preview')}
+                          {t('common:buttons.preview')}
                         </Button>
                       </div>
                       <Button
