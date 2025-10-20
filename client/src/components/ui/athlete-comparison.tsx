@@ -137,6 +137,34 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
   const selectedPreviewAnalysis = getAnalysisForPreview();
 
+  // Restore loading state from queue when component mounts or becomes active
+  useEffect(() => {
+    if (window.generationQueue && (window.generationQueue as any).getQueue) {
+      const queue = (window.generationQueue as any).getQueue();
+      const ongoingComparison = queue.find((item: any) => 
+        item.serviceType === 'comparison' && 
+        (item.status === 'running' || item.status === 'pending')
+      );
+      
+      if (ongoingComparison && !progressPhase) {
+        console.log('[COMPARISON] Restoring loading state from queue:', ongoingComparison);
+        queueIdRef.current = ongoingComparison.id;
+        setProgressPhase({
+          message: ongoingComparison.progressMessage || 'Processing comparison...',
+          progress: 50,
+          originalMessage: 'Processing comparison...'
+        });
+        setShowForm(false);
+        
+        // Reconnect WebSocket if needed
+        if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+          const ws = new WebSocket(`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/comparison-progress`);
+          wsRef.current = ws;
+        }
+      }
+    }
+  }, []); // Run only once on mount
+
   // Update comparison data when preloaded data changes
   useEffect(() => {
     if (preloadedComparisonData) {

@@ -489,7 +489,8 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
       add: addToQueue,
       update: updateGeneration,
       remove: removeGeneration,
-      retry: retryGeneration
+      retry: retryGeneration,
+      getQueue: () => queue
     };
 
     // Expose toast function for notifications
@@ -505,7 +506,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
       delete (window as any).generationQueue;
       delete (window as any).showToast;
     };
-  }, [addToQueue, updateGeneration, removeGeneration, retryGeneration]);
+  }, [addToQueue, updateGeneration, removeGeneration, retryGeneration, queue]);
 
   if (!isVisible) return null;
 
