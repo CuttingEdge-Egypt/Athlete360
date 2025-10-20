@@ -30,6 +30,8 @@ import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X, 
 import type { Sport, Athlete } from "@shared/schema";
 import { CountrySelect } from "@/components/ui/country-select";
 import { Flag } from "@/components/ui/flag";
+import arTranslations from '@/locales/ar/common.json';
+import enTranslations from '@/locales/en/common.json';
 
 // Animated loading dots component
 function AnimatedDots({ isRTL }: { isRTL: boolean }) {
@@ -54,6 +56,24 @@ function AnimatedDots({ isRTL }: { isRTL: boolean }) {
 function toArabicNumerals(num: number | string): string {
   const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
   return String(num).replace(/\d/g, (digit) => arabicNumerals[parseInt(digit)]);
+}
+
+// Helper function to get translations for nutrition/development plans based on plan language
+function getPlanTranslations(language: string | undefined, key: string): string {
+  const planLang = language || 'en';
+  const translations = planLang === 'ar' ? arTranslations : enTranslations;
+  const keys = key.split('.');
+  let value: any = translations;
+  
+  for (const k of keys) {
+    if (value && typeof value === 'object' && k in value) {
+      value = value[k];
+    } else {
+      return key; // Return key if not found
+    }
+  }
+  
+  return typeof value === 'string' ? value : key;
 }
 
 export default function Home() {
@@ -2725,8 +2745,8 @@ export default function Home() {
               ) : nutritionPlanData && (
                 /* Nutrition Plan Results with New Plan Button */
                 <div className="space-y-6">
-                  <div className={`flex justify-between items-center mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                    <h2 className="text-2xl font-bold text-white">{t('nutritionPlan.yourPlan')}</h2>
+                  <div className={`flex justify-between items-center mb-4 ${(nutritionPlanData.language || 'en') === 'ar' ? 'flex-row-reverse' : ''}`} dir={(nutritionPlanData.language || 'en') === 'ar' ? 'rtl' : 'ltr'}>
+                    <h2 className={`${(nutritionPlanData.language || 'en') === 'ar' ? 'text-3xl' : 'text-2xl'} font-bold text-white`}>{getPlanTranslations(nutritionPlanData.language || nutritionPlanData.resultData?.language, 'nutritionPlan.yourPlan')}</h2>
                     <Button 
                       onClick={() => {
                         setShowNutritionForm(true);
@@ -2734,10 +2754,10 @@ export default function Home() {
                         nutritionForm.reset();
                       }}
                       data-testid="button-new-nutrition-plan"
-                      className={`bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold shadow-lg ${isArabic ? 'flex-row-reverse' : ''}`}
+                      className={`bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold shadow-lg ${(nutritionPlanData.language || 'en') === 'ar' ? 'flex-row-reverse' : ''}`}
                     >
-                      <Apple className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                      {t('nutritionPlan.generateNew')}
+                      <Apple className={`h-4 w-4 ${(nutritionPlanData.language || 'en') === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                      {getPlanTranslations(nutritionPlanData.language || nutritionPlanData.resultData?.language, 'nutritionPlan.generateNew')}
                     </Button>
                   </div>
                   <NutritionPlanDisplay 

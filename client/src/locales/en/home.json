@@ -218,6 +218,8 @@
     "inbodyReport": "InBody Report (Optional)",
     "language": "Plan Language",
     "generate": "Generate Nutrition Plan",
+    "yourPlan": "Your Nutrition Plan",
+    "generateNew": "Generate New Plan",
     "goalPlaceholder": "Be specific! Describe your fitness goals in detail - what do you want to achieve, by when, and why? The more details you provide, the better your personalized nutrition plan will be.",
     "countryHint": "This affects meal types and local food preferences",
     "weekNavigation": {
