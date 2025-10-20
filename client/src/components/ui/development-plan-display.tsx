@@ -270,7 +270,12 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                                 </div>
                                 <span className="text-blue-50">{exercise.name}</span>
                               </h4>
-                              <p className={`text-slate-200 mt-2 leading-relaxed ${contentIsArabic ? 'text-right text-base' : 'text-sm'}`}>
+                              
+                              {/* Instructions Title */}
+                              <h5 className={`text-sm font-semibold text-slate-400 mt-3 mb-1 ${contentIsArabic ? 'text-right' : ''}`}>
+                                {t('analysis.development.instructions', 'Instructions')}
+                              </h5>
+                              <p className={`text-slate-200 leading-relaxed ${contentIsArabic ? 'text-right text-base' : 'text-sm'}`}>
                                 {exercise.description}
                               </p>
                             </div>
@@ -290,35 +295,47 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                             )}
                           </div>
 
-                          {/* Enhanced Exercise Details */}
-                          <div className={`flex flex-wrap gap-3 ${contentIsArabic ? 'flex-row-reverse' : ''}`}>
-                            {getExercisePrescriptionText(exercise, t, contentIsArabic) && (
-                              <Badge variant="secondary" className={`bg-gradient-to-r from-blue-600/80 to-blue-500/80 text-white font-semibold text-sm px-3 py-1.5 shadow-md border border-blue-400/30 ${contentIsArabic ? 'flex-row-reverse' : ''}`} dir={contentIsArabic ? 'rtl' : 'ltr'}>
-                                <Timer className={`h-4 w-4 ${contentIsArabic ? 'ml-2' : 'mr-2'}`} />
-                                {getExercisePrescriptionText(exercise, t, contentIsArabic)}
-                              </Badge>
-                            )}
-                            {exercise.equipment && exercise.equipment.length > 0 && (
-                              <Badge variant="outline" className={`bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-100 font-semibold text-sm px-3 py-1.5 shadow-md ${contentIsArabic ? 'flex-row-reverse' : ''}`} dir={contentIsArabic ? 'rtl' : 'ltr'}>
-                                <Activity className={`h-4 w-4 ${contentIsArabic ? 'ml-2' : 'mr-2'}`} />
-                                {exercise.equipment.join(', ')}
-                              </Badge>
-                            )}
-                          </div>
+                          {/* Prescription Title and Details */}
+                          {(getExercisePrescriptionText(exercise, t, contentIsArabic) || (exercise.equipment && exercise.equipment.length > 0)) && (
+                            <div className="space-y-2">
+                              <h5 className={`text-sm font-semibold text-slate-400 ${contentIsArabic ? 'text-right' : ''}`}>
+                                {t('analysis.development.prescriptionTitle', 'Logistics')}
+                              </h5>
+                              <div className={`flex flex-wrap gap-3 ${contentIsArabic ? 'flex-row-reverse' : ''}`}>
+                                {getExercisePrescriptionText(exercise, t, contentIsArabic) && (
+                                  <Badge variant="secondary" className={`bg-gradient-to-r from-blue-600/80 to-blue-500/80 text-white font-semibold text-sm px-3 py-1.5 shadow-md border border-blue-400/30 ${contentIsArabic ? 'flex-row-reverse' : ''}`} dir={contentIsArabic ? 'rtl' : 'ltr'}>
+                                    <Timer className={`h-4 w-4 ${contentIsArabic ? 'ml-2' : 'mr-2'}`} />
+                                    {getExercisePrescriptionText(exercise, t, contentIsArabic)}
+                                  </Badge>
+                                )}
+                                {exercise.equipment && exercise.equipment.length > 0 && (
+                                  <Badge variant="outline" className={`bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-400 text-purple-100 font-semibold text-sm px-3 py-1.5 shadow-md ${contentIsArabic ? 'flex-row-reverse' : ''}`} dir={contentIsArabic ? 'rtl' : 'ltr'}>
+                                    <Activity className={`h-4 w-4 ${contentIsArabic ? 'ml-2' : 'mr-2'}`} />
+                                    {exercise.equipment.join(', ')}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          )}
 
-                          {/* Enhanced Exercise Tags */}
+                          {/* Categories Title and Tags */}
                           {exercise.tags && exercise.tags.length > 0 && (
-                            <div className={`flex flex-wrap gap-2 ${contentIsArabic ? 'flex-row-reverse' : ''}`}>
-                              {exercise.tags.map((tag, tagIndex) => (
-                                <Badge
-                                  key={tagIndex}
-                                  variant="outline"
-                                  className="text-sm font-medium border-2 border-emerald-400/60 text-emerald-100 bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 px-3 py-1 shadow-sm hover:bg-emerald-500/30 transition-colors duration-200"
-                                  dir={contentIsArabic ? 'rtl' : 'ltr'}
-                                >
-                                  {tag}
-                                </Badge>
-                              ))}
+                            <div className="space-y-2">
+                              <h5 className={`text-sm font-semibold text-slate-400 ${contentIsArabic ? 'text-right' : ''}`}>
+                                {t('analysis.development.categories', 'Categories')}
+                              </h5>
+                              <div className={`flex flex-wrap gap-2 ${contentIsArabic ? 'flex-row-reverse' : ''}`}>
+                                {exercise.tags.map((tag, tagIndex) => (
+                                  <Badge
+                                    key={tagIndex}
+                                    variant="outline"
+                                    className="text-sm font-medium border-2 border-emerald-400/60 text-emerald-100 bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 px-3 py-1 shadow-sm hover:bg-emerald-500/30 transition-colors duration-200"
+                                    dir={contentIsArabic ? 'rtl' : 'ltr'}
+                                  >
+                                    {tag}
+                                  </Badge>
+                                ))}
+                              </div>
                             </div>
                           )}
                         </div>

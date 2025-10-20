@@ -286,7 +286,10 @@
         "sets": "مجموعات",
         "reps": "تكرارات",
         "rest": "راحة"
-      }
+      },
+      "instructions": "التعليمات",
+      "prescriptionTitle": "التفاصيل التدريبية",
+      "categories": "الفئات"
     },
     "rank": {
       "title": "التاريخ التنافسي",
