@@ -6,7 +6,7 @@ import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { AnalysisPopup } from "@/components/ui/analysis-popup";
-import { Eye } from "lucide-react";
+import { Eye, Loader2 } from "lucide-react";
 
 export default function VideoAnalysis() {
   const { t, i18n } = useTranslation('videoAnalysis');
@@ -176,10 +176,15 @@ export default function VideoAnalysis() {
             variant="outline"
             size="sm"
             onClick={() => setPreviewModal({ open: true, serviceType: 'video' })}
+            disabled={previewLoading && previewModal.serviceType === 'video'}
             className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
             data-testid="button-preview-video"
           >
-            <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+            {previewLoading && previewModal.serviceType === 'video' ? (
+              <Loader2 className={`h-4 w-4 animate-spin ${isArabic ? 'ml-2' : 'mr-2'}`} />
+            ) : (
+              <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+            )}
             {t('common:buttons.preview', 'Preview')}
           </Button>
         </div>

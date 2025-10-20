@@ -2343,10 +2343,15 @@ export default function Home() {
                         variant="outline"
                         size="sm"
                         onClick={() => setPreviewModal({ open: true, serviceType: 'nutrition-plan' })}
+                        disabled={previewLoading && previewModal.serviceType === 'nutrition-plan'}
                         className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
                         data-testid="button-preview-nutrition-form"
                       >
-                        <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                        {previewLoading && previewModal.serviceType === 'nutrition-plan' ? (
+                          <Loader2 className={`h-4 w-4 animate-spin ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                        ) : (
+                          <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                        )}
                         {t('common:buttons.preview')}
                       </Button>
                     </div>
@@ -2727,10 +2732,15 @@ export default function Home() {
                         variant="outline"
                         size="sm"
                         onClick={() => setPreviewModal({ open: true, serviceType: 'nutrition-plan' })}
+                        disabled={previewLoading && previewModal.serviceType === 'nutrition-plan'}
                         className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
                         data-testid="button-preview-nutrition"
                       >
-                        <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                        {previewLoading && previewModal.serviceType === 'nutrition-plan' ? (
+                          <Loader2 className={`h-4 w-4 animate-spin ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                        ) : (
+                          <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                        )}
                         {t('common:buttons.preview')}
                       </Button>
                     </div>
@@ -2766,10 +2776,15 @@ export default function Home() {
                         variant="outline"
                         size="sm"
                         onClick={() => setPreviewModal({ open: true, serviceType: 'development-plan' })}
+                        disabled={previewLoading && previewModal.serviceType === 'development-plan'}
                         className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
                         data-testid="button-preview-development-form"
                       >
-                        <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                        {previewLoading && previewModal.serviceType === 'development-plan' ? (
+                          <Loader2 className={`h-4 w-4 animate-spin ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                        ) : (
+                          <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                        )}
                         {t('common:buttons.preview')}
                       </Button>
                     </div>
@@ -3074,10 +3089,15 @@ export default function Home() {
                           variant="outline"
                           size="sm"
                           onClick={() => setPreviewModal({ open: true, serviceType: 'development-plan' })}
+                          disabled={previewLoading && previewModal.serviceType === 'development-plan'}
                           className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
                           data-testid="button-preview-development"
                         >
-                          <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                          {previewLoading && previewModal.serviceType === 'development-plan' ? (
+                            <Loader2 className={`h-4 w-4 animate-spin ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                          ) : (
+                            <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                          )}
                           {t('common:buttons.preview')}
                         </Button>
                       </div>
