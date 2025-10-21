@@ -60,6 +60,8 @@ interface ScoreEvent {
   redScore: number;
   increment: number;
   player: 'blue' | 'red';
+  playerName?: string;
+  description?: string;
 }
 
 interface YellowCardEvent {
@@ -411,6 +413,8 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
       timestamp: number;
       scoreValue: number;
       player: 'blue' | 'red';
+      playerName?: string;
+      description?: string;
     }> = [];
 
     // TEAM SPORTS: Handle separate_scores format (entity_type: "team")
@@ -431,7 +435,9 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
                 allScoringEvents.push({
                   timestamp,
                   scoreValue,
-                  player: isBlue ? 'blue' : 'red'
+                  player: isBlue ? 'blue' : 'red',
+                  playerName: event.player_name || undefined,
+                  description: event.description || undefined
                 });
               }
               previousScore = currentScore;
@@ -509,7 +515,9 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
         blueScore: cumulativeBlueScore,
         redScore: cumulativeRedScore,
         increment: event.scoreValue,
-        player: event.player
+        player: event.player,
+        playerName: event.playerName,
+        description: event.description
       });
     });
     
@@ -984,9 +992,14 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
                     <Badge variant="outline" className="text-xs text-center">
                       {formatTime(event.timestamp)}
                     </Badge>
-                    <span className={event.player === 'blue' ? 'text-blue-400' : 'text-red-400'}>
-                      {event.player === 'blue' ? 'Blue' : 'Red'} +{event.increment}
-                    </span>
+                    <div className="flex flex-col">
+                      <span className={event.player === 'blue' ? 'text-blue-400' : 'text-red-400'}>
+                        {event.playerName || (event.player === 'blue' ? 'Blue' : 'Red')} +{event.increment}
+                      </span>
+                      {event.description && (
+                        <span className="text-xs text-gray-400 mt-0.5">{event.description}</span>
+                      )}
+                    </div>
                   </div>
                   <div className="text-white font-mono">
                     {event.blueScore} - {event.redScore}
