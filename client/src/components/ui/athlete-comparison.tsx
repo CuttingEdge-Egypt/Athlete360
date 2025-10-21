@@ -717,7 +717,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           placeholder={t("analysis.comparison.searchSports", "Search sports...")}
                           value={searchSport}
                           onChange={(e) => setSearchSport(e.target.value)}
-                          className={`bg-athlete-gray-600 border-gray-500 text-white ${isArabic ? 'pr-8 text-right' : 'pl-8'}`}
+                          className={`!bg-athlete-gray-600 border-gray-500 !text-white placeholder:text-gray-400 ${isArabic ? 'pr-8 text-right' : 'pl-8'}`}
                           dir={isArabic ? 'rtl' : 'ltr'}
                         />
                       </div>
@@ -844,7 +844,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               placeholder={t("analysis.comparison.searchAthletes", "Search athletes...")}
                               value={searchAthlete1}
                               onChange={(e) => setSearchAthlete1(e.target.value)}
-                              className={`bg-athlete-gray-700 border-athlete-gray-600 text-white placeholder:text-gray-400 focus:bg-athlete-gray-700 focus:border-athlete-gray-500 ${isArabic ? 'pr-9' : 'pl-9'}`}
+                              className={`!bg-athlete-gray-700 border-athlete-gray-600 !text-white placeholder:text-gray-400 focus:!bg-athlete-gray-700 focus:border-athlete-gray-500 ${isArabic ? 'pr-9' : 'pl-9'}`}
                               data-testid="input-athlete1-search"
                               dir={isArabic ? 'rtl' : 'ltr'}
                             />
@@ -1017,7 +1017,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               placeholder={t("analysis.comparison.searchAthletes", "Search athletes...")}
                               value={searchAthlete2}
                               onChange={(e) => setSearchAthlete2(e.target.value)}
-                              className={`bg-athlete-gray-700 border-athlete-gray-600 text-white placeholder:text-gray-400 focus:bg-athlete-gray-700 focus:border-athlete-gray-500 ${isArabic ? 'pr-9' : 'pl-9'}`}
+                              className={`!bg-athlete-gray-700 border-athlete-gray-600 !text-white placeholder:text-gray-400 focus:!bg-athlete-gray-700 focus:border-athlete-gray-500 ${isArabic ? 'pr-9' : 'pl-9'}`}
                               data-testid="input-athlete2-search"
                               dir={isArabic ? 'rtl' : 'ltr'}
                             />
