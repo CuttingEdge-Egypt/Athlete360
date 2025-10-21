@@ -2685,7 +2685,7 @@ export default function Home() {
                             
                             {/* Progress bar */}
                             <div className="space-y-2">
-                              <div className="flex justify-between items-center text-sm">
+                              <div className={`flex justify-between items-center text-sm ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
                                 <span className="text-slate-300 font-medium">{t('common:messages.progress', 'Progress')}</span>
                                 <div className="flex items-center gap-2">
                                   <div className="px-2 py-1 bg-emerald-500/20 rounded-full">
