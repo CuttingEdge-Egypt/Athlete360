@@ -982,7 +982,10 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
       )}
 
       {/* Score Timeline - Only show for non-tennis sports (tennis has its own timeline above) */}
-      {events.scoreEvents.length > 0 && !tennisScoreData && (
+      {events.scoreEvents.length > 0 && !tennisScoreData && (() => {
+        console.log('⭐ RENDERING SCORE TIMELINE - Total events:', events.scoreEvents.length);
+        console.log('⭐ First event full object:', JSON.stringify(events.scoreEvents[0], null, 2));
+        return (
         <Card className="bg-athlete-gray-800 border-gray-700">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-athlete-accent">
@@ -993,7 +996,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
           <CardContent>
             <div className="space-y-3 max-h-60 overflow-y-auto">
               {events.scoreEvents.map((event, index) => {
-                console.log('🎯 Rendering score event:', event);
+                console.log('🎯 Rendering score event #' + index + ':', event);
                 // Build display text: Team - Player or just Player/Blue/Red
                 let displayText = '';
                 if (event.teamName && event.playerName) {
@@ -1042,7 +1045,8 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
             </div>
           </CardContent>
         </Card>
-      )}
+        );
+      })()}
 
       {/* Yellow Card Timeline */}
       {events.yellowCardEvents.length > 0 && (
