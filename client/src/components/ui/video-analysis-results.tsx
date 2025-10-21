@@ -300,7 +300,14 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
         ? JSON.parse(analysisData.score_analysis) 
         : analysisData.score_analysis;
       
+      // ONLY for individual sports (entity_type: "player"), NOT team sports (entity_type: "team")
       if (scoreData?.separate_scores && Array.isArray(scoreData.separate_scores)) {
+        // Check if this is a team sport by looking at entity_type
+        const isTeamSport = scoreData.separate_scores.some((entity: any) => entity.entity_type === 'team');
+        if (isTeamSport) {
+          return null; // Don't use tennis timeline for team sports
+        }
+        
         const allEvents: any[] = [];
         
         scoreData.separate_scores.forEach((player: any) => {
