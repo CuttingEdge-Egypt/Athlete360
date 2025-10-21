@@ -421,34 +421,40 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
 
     // TEAM SPORTS: Handle separate_scores format (entity_type: "team")
     if (scoreAnalysis && scoreAnalysis.separate_scores && Array.isArray(scoreAnalysis.separate_scores)) {
+      console.log('🏆 Processing separate_scores:', scoreAnalysis.separate_scores);
       scoreAnalysis.separate_scores.forEach((entity: any, entityIndex: number) => {
         // First entity = blue, second entity = red
         const isBlue = entityIndex === 0;
         const teamName = entity.entity_name || undefined;
+        console.log(`🏆 Team ${entityIndex} (${teamName}):`, entity.events?.length || 0, 'events');
         
         if (entity.events && Array.isArray(entity.events)) {
           let previousScore = 0;
           entity.events.forEach((event: any) => {
+            console.log('🏆 Event:', event);
             if (event.timestamp && event.current_score !== undefined) {
               const timestamp = parseTimestamp(event.timestamp);
               const currentScore = parseInt(event.current_score) || 0;
               const scoreValue = currentScore - previousScore;
               
               if (scoreValue > 0) {
-                allScoringEvents.push({
+                const scoringEvent = {
                   timestamp,
                   scoreValue,
                   player: (isBlue ? 'blue' : 'red') as 'blue' | 'red',
                   playerName: event.player_name || undefined,
                   description: event.description || undefined,
                   teamName: teamName
-                });
+                };
+                console.log('🏆 Adding scoring event:', scoringEvent);
+                allScoringEvents.push(scoringEvent);
               }
               previousScore = currentScore;
             }
           });
         }
       });
+      console.log('🏆 All scoring events:', allScoringEvents);
     }
     // INDIVIDUAL SPORTS: Handle players format (entity_type: "player" or old format)
     else if (scoreAnalysis && scoreAnalysis.players) {
