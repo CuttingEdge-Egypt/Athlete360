@@ -928,11 +928,21 @@ async function generateSeparateScores(
     
     const team1ScorePrompt = `Watch ${roundText} of this ${sportConfig.name} match. Track EVERY scoring event for ${teamIdentification.team1} ONLY.
 
-🚨 CRITICAL REQUIREMENTS:
-1. ONLY track scoring events where ${teamIdentification.team1} scores points
-2. For each scoring event, identify WHO scored (player name from ${teamIdentification.team1})
-3. In "current_score", show ONLY ${teamIdentification.team1}'s cumulative score using the sport's scoring system
-4. All timestamps MUST be in MM:SS format
+🚨 CRITICAL REQUIREMENTS - TEAM IDENTIFICATION:
+1. First, identify which team is "${teamIdentification.team1}" by:
+   - Looking at the scoreboard (team name displayed)
+   - Jersey colors and team logos
+   - Court/field position and bench side
+   - Announcer mentions
+2. The OTHER team is "${teamIdentification.team2}" - DO NOT track their scoring events
+3. ONLY track points when a player wearing ${teamIdentification.team1}'s jersey/uniform scores
+4. VERIFY each scoring event: Did a ${teamIdentification.team1} player score this? If NO, skip it entirely.
+
+🚨 SCORING REQUIREMENTS:
+1. For each scoring event by ${teamIdentification.team1}, identify WHO scored (player name/number)
+2. In "current_score", show ONLY ${teamIdentification.team1}'s cumulative score (e.g., "2", "5", "23")
+3. All timestamps MUST be in MM:SS format
+4. If ${teamIdentification.team2} scores, DO NOT include it in this response
 
 MANDATORY JSON FORMAT:
 {
@@ -941,30 +951,44 @@ MANDATORY JSON FORMAT:
   "events": [
     {
       "timestamp": "00:15",
-      "player_name": "Player Name",
-      "description": "Scoring action",
-      "points_scored": [POINTS_AWARDED],
-      "current_score": "[TEAM_1_TOTAL_SCORE]"
+      "player_name": "Player Name or #Number from ${teamIdentification.team1}",
+      "description": "2-point layup",
+      "points_scored": 2,
+      "current_score": "2"
     },
     {
       "timestamp": "01:30",
-      "player_name": "Another Player",
-      "description": "Another score",
-      "points_scored": [POINTS_AWARDED],
-      "current_score": "[UPDATED_TEAM_1_TOTAL]"
+      "player_name": "Another ${teamIdentification.team1} player",
+      "description": "3-pointer from corner",
+      "points_scored": 3,
+      "current_score": "5"
     }
   ]
 }
 
-⚠️ CRITICAL: current_score must contain ONLY ${teamIdentification.team1}'s cumulative score as a number/string, NOT a combined score like "${teamIdentification.team1} vs ${teamIdentification.team2}"`;
+⚠️ CRITICAL VERIFICATION:
+- ONLY include events where ${teamIdentification.team1} scores
+- If you see ${teamIdentification.team2} score, DO NOT add it to this JSON
+- current_score = ONLY ${teamIdentification.team1}'s total points (NOT combined score)
+- Double-check each event: Is this player on ${teamIdentification.team1}? Yes = include, No = skip`;
 
     const team2ScorePrompt = `Watch ${roundText} of this ${sportConfig.name} match. Track EVERY scoring event for ${teamIdentification.team2} ONLY.
 
-🚨 CRITICAL REQUIREMENTS:
-1. ONLY track scoring events where ${teamIdentification.team2} scores points
-2. For each scoring event, identify WHO scored (player name from ${teamIdentification.team2})
-3. In "current_score", show ONLY ${teamIdentification.team2}'s cumulative score using the sport's scoring system
-4. All timestamps MUST be in MM:SS format
+🚨 CRITICAL REQUIREMENTS - TEAM IDENTIFICATION:
+1. First, identify which team is "${teamIdentification.team2}" by:
+   - Looking at the scoreboard (team name displayed)
+   - Jersey colors and team logos
+   - Court/field position and bench side
+   - Announcer mentions
+2. The OTHER team is "${teamIdentification.team1}" - DO NOT track their scoring events
+3. ONLY track points when a player wearing ${teamIdentification.team2}'s jersey/uniform scores
+4. VERIFY each scoring event: Did a ${teamIdentification.team2} player score this? If NO, skip it entirely.
+
+🚨 SCORING REQUIREMENTS:
+1. For each scoring event by ${teamIdentification.team2}, identify WHO scored (player name/number)
+2. In "current_score", show ONLY ${teamIdentification.team2}'s cumulative score (e.g., "2", "5", "23")
+3. All timestamps MUST be in MM:SS format
+4. If ${teamIdentification.team1} scores, DO NOT include it in this response
 
 MANDATORY JSON FORMAT:
 {
@@ -973,22 +997,26 @@ MANDATORY JSON FORMAT:
   "events": [
     {
       "timestamp": "00:45",
-      "player_name": "Player Name",
-      "description": "Scoring action",
-      "points_scored": [POINTS_AWARDED],
-      "current_score": "[TEAM_2_TOTAL_SCORE]"
+      "player_name": "Player Name or #Number from ${teamIdentification.team2}",
+      "description": "2-point jumper",
+      "points_scored": 2,
+      "current_score": "2"
     },
     {
       "timestamp": "02:15",
-      "player_name": "Another Player",
-      "description": "Another score",
-      "points_scored": [POINTS_AWARDED],
-      "current_score": "[UPDATED_TEAM_2_TOTAL]"
+      "player_name": "Another ${teamIdentification.team2} player",
+      "description": "Free throw",
+      "points_scored": 1,
+      "current_score": "3"
     }
   ]
 }
 
-⚠️ CRITICAL: current_score must contain ONLY ${teamIdentification.team2}'s cumulative score as a number/string, NOT a combined score like "${teamIdentification.team1} vs ${teamIdentification.team2}"`;
+⚠️ CRITICAL VERIFICATION:
+- ONLY include events where ${teamIdentification.team2} scores
+- If you see ${teamIdentification.team1} score, DO NOT add it to this JSON
+- current_score = ONLY ${teamIdentification.team2}'s total points (NOT combined score)
+- Double-check each event: Is this player on ${teamIdentification.team2}? Yes = include, No = skip`;
 
     try {
       const jsonModel = genai.getGenerativeModel({
