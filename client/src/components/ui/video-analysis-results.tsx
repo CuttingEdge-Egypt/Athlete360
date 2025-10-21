@@ -415,23 +415,17 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
 
     // TEAM SPORTS: Handle separate_scores format (entity_type: "team")
     if (scoreAnalysis && scoreAnalysis.separate_scores && Array.isArray(scoreAnalysis.separate_scores)) {
-      console.log('[TEAM PARSE] Processing separate_scores, count:', scoreAnalysis.separate_scores.length);
       scoreAnalysis.separate_scores.forEach((entity: any, entityIndex: number) => {
         // First entity = blue, second entity = red
         const isBlue = entityIndex === 0;
-        console.log(`[TEAM PARSE] Entity ${entityIndex}: ${entity.entity_name}, isBlue: ${isBlue}, events: ${entity.events?.length || 0}`);
         
         if (entity.events && Array.isArray(entity.events)) {
           let previousScore = 0;
-          entity.events.forEach((event: any, eventIndex: number) => {
+          entity.events.forEach((event: any) => {
             if (event.timestamp && event.current_score !== undefined) {
               const timestamp = parseTimestamp(event.timestamp);
               const currentScore = parseInt(event.current_score) || 0;
               const scoreValue = currentScore - previousScore;
-              
-              if (eventIndex < 2) { // Log first 2 events per team for debugging
-                console.log(`[TEAM PARSE] ${entity.entity_name} event ${eventIndex}: ts=${event.timestamp}, current=${currentScore}, prev=${previousScore}, value=${scoreValue}, player=${isBlue ? 'blue' : 'red'}`);
-              }
               
               if (scoreValue > 0) {
                 allScoringEvents.push({

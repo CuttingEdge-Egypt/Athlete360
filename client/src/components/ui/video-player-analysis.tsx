@@ -293,12 +293,17 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           const entity1 = separateScores[0];
           const entity2 = separateScores[1];
           
+          // Determine if this is a team sport
+          const isTeamSport = entity1.entity_type === 'team' || entity2.entity_type === 'team';
+          
           // Process all events from both entities
           const allEvents: Array<{timestamp: number, score: string, player: 'blue' | 'red'}> = [];
           
-          // Process entity 1 events (assign based on "side" field if available, else blue)
+          // Process entity 1 events
           if (entity1.events && Array.isArray(entity1.events)) {
-            const entity1Side = entity1.side === 'red' ? 'red' : 'blue';
+            // TEAM SPORTS: Use array index (entity 0 = blue, entity 1 = red)
+            // INDIVIDUAL SPORTS: Use side/color field if available
+            const entity1Side = isTeamSport ? 'blue' : (entity1.side === 'red' ? 'red' : 'blue');
             entity1.events.forEach((event: any) => {
               if (event.timestamp && event.current_score) {
                 allEvents.push({
@@ -310,9 +315,11 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
             });
           }
           
-          // Process entity 2 events (assign based on "side" field if available, else red)
+          // Process entity 2 events
           if (entity2.events && Array.isArray(entity2.events)) {
-            const entity2Side = entity2.side === 'red' ? 'red' : 'blue';
+            // TEAM SPORTS: Use array index (entity 0 = blue, entity 1 = red)
+            // INDIVIDUAL SPORTS: Use side/color field if available
+            const entity2Side = isTeamSport ? 'red' : (entity2.side === 'blue' ? 'blue' : 'red');
             entity2.events.forEach((event: any) => {
               if (event.timestamp && event.current_score) {
                 allEvents.push({
