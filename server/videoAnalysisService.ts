@@ -923,100 +923,81 @@ async function generateSeparateScores(
   const isTeamSport = teamSports.includes(sport.toLowerCase());
   
   if (isTeamSport && teamIdentification) {
-    // TEAM SPORTS: Generate one score object per team
-    console.log(`[GENERATE_SEPARATE_SCORES] Team sport - generating scores for ${teamIdentification.team1} and ${teamIdentification.team2}`);
+    // TEAM SPORTS: Generate BOTH teams' scores in a SINGLE generation (optimized)
+    console.log(`[GENERATE_SEPARATE_SCORES] Team sport - generating scores for BOTH teams in single generation: ${teamIdentification.team1} vs ${teamIdentification.team2}`);
     
-    const team1ScorePrompt = `Watch ${roundText} of this ${sportConfig.name} match. Track EVERY scoring event for ${teamIdentification.team1} ONLY.
+    const bothTeamsScorePrompt = `Watch ${roundText} of this ${sportConfig.name} match. Track EVERY scoring event for BOTH teams.
 
 🚨 CRITICAL REQUIREMENTS - TEAM IDENTIFICATION:
-1. First, identify which team is "${teamIdentification.team1}" by:
-   - Looking at the scoreboard (team name displayed)
+1. Identify the two teams by looking at:
+   - Scoreboard (team names displayed)
    - Jersey colors and team logos
    - Court/field position and bench side
    - Announcer mentions
-2. The OTHER team is "${teamIdentification.team2}" - DO NOT track their scoring events
-3. ONLY track points when a player wearing ${teamIdentification.team1}'s jersey/uniform scores
-4. VERIFY each scoring event: Did a ${teamIdentification.team1} player score this? If NO, skip it entirely.
+2. Team 1 is "${teamIdentification.team1}"
+3. Team 2 is "${teamIdentification.team2}"
+4. For EACH scoring event, identify which team scored
 
 🚨 SCORING REQUIREMENTS:
-1. For each scoring event by ${teamIdentification.team1}, identify WHO scored (player name/number)
-2. In "current_score", show ONLY ${teamIdentification.team1}'s cumulative score (e.g., "2", "5", "23")
+1. For each scoring event, identify:
+   - Which team scored (${teamIdentification.team1} or ${teamIdentification.team2})
+   - Which player scored (name or number)
+   - How many points (2-point, 3-point, free throw, etc.)
+2. In "current_score" for each event, show that team's cumulative score
 3. All timestamps MUST be in MM:SS format
-4. If ${teamIdentification.team2} scores, DO NOT include it in this response
+4. Track events chronologically as they happen in the video
 
 MANDATORY JSON FORMAT:
 {
-  "entity_name": "${teamIdentification.team1}",
-  "entity_type": "team",
-  "events": [
+  "teams": [
     {
-      "timestamp": "00:15",
-      "player_name": "Player Name or #Number from ${teamIdentification.team1}",
-      "description": "2-point layup",
-      "points_scored": 2,
-      "current_score": "2"
+      "entity_name": "${teamIdentification.team1}",
+      "entity_type": "team",
+      "events": [
+        {
+          "timestamp": "00:15",
+          "player_name": "Player Name or #Number",
+          "description": "2-point layup",
+          "points_scored": 2,
+          "current_score": "2"
+        },
+        {
+          "timestamp": "01:45",
+          "player_name": "Another Player",
+          "description": "3-pointer",
+          "points_scored": 3,
+          "current_score": "5"
+        }
+      ]
     },
     {
-      "timestamp": "01:30",
-      "player_name": "Another ${teamIdentification.team1} player",
-      "description": "3-pointer from corner",
-      "points_scored": 3,
-      "current_score": "5"
+      "entity_name": "${teamIdentification.team2}",
+      "entity_type": "team",
+      "events": [
+        {
+          "timestamp": "00:30",
+          "player_name": "Player Name or #Number",
+          "description": "2-point jumper",
+          "points_scored": 2,
+          "current_score": "2"
+        },
+        {
+          "timestamp": "02:00",
+          "player_name": "Another Player",
+          "description": "Free throw",
+          "points_scored": 1,
+          "current_score": "3"
+        }
+      ]
     }
   ]
 }
 
 ⚠️ CRITICAL VERIFICATION:
-- ONLY include events where ${teamIdentification.team1} scores
-- If you see ${teamIdentification.team2} score, DO NOT add it to this JSON
-- current_score = ONLY ${teamIdentification.team1}'s total points (NOT combined score)
-- Double-check each event: Is this player on ${teamIdentification.team1}? Yes = include, No = skip`;
-
-    const team2ScorePrompt = `Watch ${roundText} of this ${sportConfig.name} match. Track EVERY scoring event for ${teamIdentification.team2} ONLY.
-
-🚨 CRITICAL REQUIREMENTS - TEAM IDENTIFICATION:
-1. First, identify which team is "${teamIdentification.team2}" by:
-   - Looking at the scoreboard (team name displayed)
-   - Jersey colors and team logos
-   - Court/field position and bench side
-   - Announcer mentions
-2. The OTHER team is "${teamIdentification.team1}" - DO NOT track their scoring events
-3. ONLY track points when a player wearing ${teamIdentification.team2}'s jersey/uniform scores
-4. VERIFY each scoring event: Did a ${teamIdentification.team2} player score this? If NO, skip it entirely.
-
-🚨 SCORING REQUIREMENTS:
-1. For each scoring event by ${teamIdentification.team2}, identify WHO scored (player name/number)
-2. In "current_score", show ONLY ${teamIdentification.team2}'s cumulative score (e.g., "2", "5", "23")
-3. All timestamps MUST be in MM:SS format
-4. If ${teamIdentification.team1} scores, DO NOT include it in this response
-
-MANDATORY JSON FORMAT:
-{
-  "entity_name": "${teamIdentification.team2}",
-  "entity_type": "team",
-  "events": [
-    {
-      "timestamp": "00:45",
-      "player_name": "Player Name or #Number from ${teamIdentification.team2}",
-      "description": "2-point jumper",
-      "points_scored": 2,
-      "current_score": "2"
-    },
-    {
-      "timestamp": "02:15",
-      "player_name": "Another ${teamIdentification.team2} player",
-      "description": "Free throw",
-      "points_scored": 1,
-      "current_score": "3"
-    }
-  ]
-}
-
-⚠️ CRITICAL VERIFICATION:
-- ONLY include events where ${teamIdentification.team2} scores
-- If you see ${teamIdentification.team1} score, DO NOT add it to this JSON
-- current_score = ONLY ${teamIdentification.team2}'s total points (NOT combined score)
-- Double-check each event: Is this player on ${teamIdentification.team2}? Yes = include, No = skip`;
+- Track ALL scoring events for BOTH teams
+- current_score = ONLY that team's total points (NOT combined score)
+- Verify each event is attributed to the correct team
+- Events should be in chronological order within each team's array`;
 
     try {
       const jsonModel = genai.getGenerativeModel({
@@ -1028,25 +1009,37 @@ MANDATORY JSON FORMAT:
         }
       });
       
-      // Generate both team scores with retry logic for empty responses
-      const generateWithRetry = async (prompt: string, teamName: string, maxRetries = 3) => {
+      // Generate both teams' scores in a single API call with retry logic
+      const generateWithRetry = async (maxRetries = 3) => {
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
           try {
-            const response = await jsonModel.generateContent([videoFile, prompt]);
+            console.log(`[GENERATE_SEPARATE_SCORES] Attempt ${attempt}/${maxRetries} - Generating scores for both teams...`);
+            const response = await jsonModel.generateContent([videoFile, bothTeamsScorePrompt]);
             const text = response.response.text();
             
             if (!text || text.length === 0) {
-              console.log(`[GENERATE_SEPARATE_SCORES] ${teamName} attempt ${attempt}: Empty response, retrying...`);
+              console.log(`[GENERATE_SEPARATE_SCORES] Attempt ${attempt}: Empty response, retrying...`);
               if (attempt < maxRetries) {
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retry
+                await new Promise(resolve => setTimeout(resolve, 2000));
                 continue;
               }
             }
             
-            console.log(`[GENERATE_SEPARATE_SCORES] ${teamName} response length: ${text.length} chars`);
-            return JSON.parse(text);
+            console.log(`[GENERATE_SEPARATE_SCORES] Response length: ${text.length} chars`);
+            const parsedData = JSON.parse(text);
+            
+            // Validate that we got both teams
+            if (!parsedData.teams || parsedData.teams.length !== 2) {
+              console.error(`[GENERATE_SEPARATE_SCORES] Invalid response structure - expected 2 teams, got ${parsedData.teams?.length || 0}`);
+              if (attempt < maxRetries) {
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                continue;
+              }
+            }
+            
+            return parsedData;
           } catch (error) {
-            console.error(`[GENERATE_SEPARATE_SCORES] ${teamName} attempt ${attempt} failed:`, error);
+            console.error(`[GENERATE_SEPARATE_SCORES] Attempt ${attempt} failed:`, error);
             if (attempt < maxRetries) {
               await new Promise(resolve => setTimeout(resolve, 2000));
             } else {
@@ -1054,24 +1047,18 @@ MANDATORY JSON FORMAT:
             }
           }
         }
-        throw new Error(`Failed to generate scores for ${teamName} after ${maxRetries} attempts`);
+        throw new Error(`Failed to generate scores for both teams after ${maxRetries} attempts`);
       };
       
-      // Generate team scores sequentially with retry to avoid overload
-      console.log(`[GENERATE_SEPARATE_SCORES] Generating Team 1 scores...`);
-      const team1Score = await generateWithRetry(team1ScorePrompt, teamIdentification.team1);
+      // Single generation for both teams
+      const bothTeamsData = await generateWithRetry();
       
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Delay between teams
-      
-      console.log(`[GENERATE_SEPARATE_SCORES] Generating Team 2 scores...`);
-      const team2Score = await generateWithRetry(team2ScorePrompt, teamIdentification.team2);
-      
-      console.log(`[GENERATE_SEPARATE_SCORES] Team 1 (${teamIdentification.team1}) events: ${team1Score.events?.length || 0}`);
-      console.log(`[GENERATE_SEPARATE_SCORES] Team 2 (${teamIdentification.team2}) events: ${team2Score.events?.length || 0}`);
+      console.log(`[GENERATE_SEPARATE_SCORES] Team 1 (${bothTeamsData.teams[0].entity_name}) events: ${bothTeamsData.teams[0].events?.length || 0}`);
+      console.log(`[GENERATE_SEPARATE_SCORES] Team 2 (${bothTeamsData.teams[1].entity_name}) events: ${bothTeamsData.teams[1].events?.length || 0}`);
       
       // Return both team scores
       return {
-        scores: [team1Score, team2Score],
+        scores: bothTeamsData.teams,
         type: 'team'
       };
     } catch (error) {
