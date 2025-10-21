@@ -151,10 +151,14 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
         console.log('[COMPARISON] Restoring loading state from queue:', ongoingComparison);
         queueIdRef.current = ongoingComparison.id;
         setIsLoading(true);
+        
+        // Translate the progress message from queue
+        const translatedMessage = translateProgressMessage(ongoingComparison.progressMessage || 'Analyzing athlete profiles...');
+        
         setProgressPhase({
-          message: ongoingComparison.progressMessage || 'Processing comparison...',
-          progress: 50,
-          originalMessage: 'Processing comparison...'
+          message: translatedMessage,
+          progress: 15, // Start with initial progress
+          originalMessage: ongoingComparison.progressMessage || 'Analyzing athlete profiles...'
         });
         setShowForm(false);
         
@@ -238,8 +242,32 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
             originalMessage: data.message // Store original English message for re-translation
           });
         } else if (data.type === 'comparison-complete') {
-          console.log('[WS] Comparison complete, updating queue');
+          console.log('[WS] Comparison complete, fetching result');
           setIsLoading(false); // Clear loading state when comparison completes
+          setProgressPhase(null); // Clear progress
+          
+          // Fetch the comparison result from history if we don't have it (e.g., user switched tabs)
+          if (!comparisonData) {
+            console.log('[WS] Fetching comparison data from API');
+            fetch('/api/user-history?limit=1&serviceType=comparison', {
+              credentials: 'include'
+            })
+              .then(res => res.json())
+              .then(history => {
+                if (history && history.length > 0) {
+                  const latestComparison = history[0];
+                  console.log('[WS] Loaded comparison data from history');
+                  setComparisonData(latestComparison.resultData);
+                  
+                  toast({
+                    title: t("analysis.comparison.comparisonComplete", "Comparison Complete"),
+                    description: t("analysis.comparison.comparisonSuccess", "AI-powered athlete comparison generated successfully!"),
+                  });
+                }
+              })
+              .catch(err => console.error('[WS] Failed to fetch comparison:', err));
+          }
+          
           // Update queue status to completed using the correct queue ID
           if (window.generationQueue && queueIdRef.current) {
             window.generationQueue.update(queueIdRef.current, { status: 'completed' });
@@ -521,7 +549,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       // Immediately update status to running when we start the mutation and add retry callback
       window.generationQueue.update(queueId, { 
         status: 'running', 
-        progressMessage: 'Analyzing athletes...',
+        progressMessage: t("analysis.comparison.analyzingAthleteProfiles", "Analyzing athlete profiles..."),
         onRetry: () => {
           // Retry comparison with the same athlete selections
           handleCompare();
