@@ -147,7 +147,8 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
         (item.status === 'running' || item.status === 'pending')
       );
       
-      if (ongoingComparison && !progressPhase) {
+      // Only restore if there's an ongoing comparison AND we're not already in an error state
+      if (ongoingComparison && !progressPhase && !comparisonData) {
         console.log('[COMPARISON] Restoring loading state from queue:', ongoingComparison);
         queueIdRef.current = ongoingComparison.id;
         setIsLoading(true);
@@ -169,7 +170,24 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
         }
       }
     }
-  }, []); // Run only once on mount
+    
+    // Poll queue status to detect if the comparison failed while we were on another tab
+    const pollInterval = setInterval(() => {
+      if (window.generationQueue && queueIdRef.current && (window.generationQueue as any).getQueue) {
+        const queue = (window.generationQueue as any).getQueue();
+        const currentItem = queue.find((item: any) => item.id === queueIdRef.current);
+        
+        if (currentItem && currentItem.status === 'error' && isLoading) {
+          console.log('[COMPARISON] Detected error in queue, clearing loading state');
+          setIsLoading(false);
+          setProgressPhase(null);
+          setShowForm(true);
+        }
+      }
+    }, 500); // Check every 500ms
+    
+    return () => clearInterval(pollInterval);
+  }, [isLoading]); // Re-run when loading state changes
 
   // Update comparison data when preloaded data changes
   useEffect(() => {
