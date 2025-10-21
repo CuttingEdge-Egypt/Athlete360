@@ -990,16 +990,21 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
           <CardContent>
             <div className="space-y-3 max-h-60 overflow-y-auto">
               {events.scoreEvents.map((event, index) => {
+                console.log('🎯 Rendering score event:', event);
                 // Build display text: Team - Player or just Player/Blue/Red
                 let displayText = '';
                 if (event.teamName && event.playerName) {
                   displayText = `${event.teamName} - ${event.playerName}`;
+                  console.log('🎯 Display text (team + player):', displayText);
                 } else if (event.teamName) {
                   displayText = event.teamName;
+                  console.log('🎯 Display text (team only):', displayText);
                 } else if (event.playerName) {
                   displayText = event.playerName;
+                  console.log('🎯 Display text (player only):', displayText);
                 } else {
                   displayText = event.player === 'blue' ? 'Blue' : 'Red';
+                  console.log('🎯 Display text (fallback):', displayText);
                 }
                 
                 return (
