@@ -2695,7 +2695,7 @@ export default function Home() {
                                   </div>
                                 </div>
                               </div>
-                              <div className="relative w-full bg-slate-700 rounded-full h-3 overflow-hidden shadow-inner">
+                              <div className="relative w-full bg-slate-700 rounded-full h-3 overflow-hidden shadow-inner" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
                                 <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700"></div>
                                 <div 
                                   className="bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-400 h-3 rounded-full transition-all duration-700 ease-out shadow-sm relative" 
@@ -2735,7 +2735,7 @@ export default function Home() {
                           ) : (
                             <Apple className="mr-2" size={20} />
                           )}
-                          {(nutritionJobId || createNutritionPlanJobMutation.isPending) ? "Generating..." : t('nutritionPlan.generate')}
+                          {(nutritionJobId || createNutritionPlanJobMutation.isPending) ? t('nutritionPlan.generating') : t('nutritionPlan.generate')}
                         </Button>
                       </div>
                     </form>
