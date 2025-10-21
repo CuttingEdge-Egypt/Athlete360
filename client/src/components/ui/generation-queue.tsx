@@ -446,7 +446,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
     } else if (item.serviceType === 'development-plan' || item.serviceType === 'development') {
       // Navigate to home with development tab and store result in sessionStorage
       sessionStorage.setItem('developmentPlanData', JSON.stringify(item.result));
-      setLocation('/?tab=development');
+      setLocation('/?tab=development&data=fromStorage');
       
       // Remove the completed development plan from queue after navigation
       setTimeout(() => {
@@ -455,7 +455,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
     } else if (item.serviceType === 'nutrition-plan' || item.serviceType === 'nutrition') {
       // Navigate to home with nutrition tab and store result in sessionStorage
       sessionStorage.setItem('nutritionPlanData', JSON.stringify(item.result));
-      setLocation('/?tab=nutrition');
+      setLocation('/?tab=nutrition&data=fromStorage');
       
       // Remove the completed nutrition plan from queue after navigation
       setTimeout(() => {

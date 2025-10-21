@@ -155,22 +155,46 @@ export default function Home() {
     
     if (tab && data) {
       try {
-        const result = JSON.parse(decodeURIComponent(data));
+        let result;
         
-        if (tab === 'comparison' && result.serviceType === 'compare') {
-          setComparisonData(result);
-          setActiveTab('comparison');
-        } else if (tab === 'video' && result.serviceType === 'video') {
-          setVideoAnalysisData(result);
-          setActiveTab('video');
-        } else if (tab === 'nutrition' && result.serviceType === 'nutrition-plan') {
-          setNutritionPlanData(result);
-          setShowNutritionForm(false);
-          setActiveTab('nutrition');
-        } else if (tab === 'development' && result.serviceType === 'development-plan') {
-          setDevelopmentPlanData(result);
-          setShowDevelopmentForm(false);
-          setActiveTab('development');
+        // Check if data is the special 'fromStorage' flag
+        if (data === 'fromStorage') {
+          // Load from sessionStorage based on tab
+          if (tab === 'development') {
+            const storedData = sessionStorage.getItem('developmentPlanData');
+            if (storedData) {
+              result = JSON.parse(storedData);
+              sessionStorage.removeItem('developmentPlanData');
+            }
+          } else if (tab === 'nutrition') {
+            const storedData = sessionStorage.getItem('nutritionPlanData');
+            if (storedData) {
+              result = JSON.parse(storedData);
+              sessionStorage.removeItem('nutritionPlanData');
+            }
+          }
+        } else {
+          // Parse data from URL parameter
+          result = JSON.parse(decodeURIComponent(data));
+        }
+        
+        // Apply the result if we have one
+        if (result) {
+          if (tab === 'comparison' && result.serviceType === 'compare') {
+            setComparisonData(result);
+            setActiveTab('comparison');
+          } else if (tab === 'video' && result.serviceType === 'video') {
+            setVideoAnalysisData(result);
+            setActiveTab('video');
+          } else if (tab === 'nutrition') {
+            setNutritionPlanData(result);
+            setShowNutritionForm(false);
+            setActiveTab('nutrition');
+          } else if (tab === 'development') {
+            setDevelopmentPlanData(result);
+            setShowDevelopmentForm(false);
+            setActiveTab('development');
+          }
         }
         
         // Clean up URL after processing
