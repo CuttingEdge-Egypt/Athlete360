@@ -205,7 +205,7 @@ export function ComparisonHistoryDialog({
                                 <div key={index} className="bg-athlete-gray-800 p-3 rounded-lg">
                                   <div className="flex justify-between items-center mb-1">
                                     <span className="font-medium text-white">{skill.skill}</span>
-                                    <Badge variant="outline" className="text-xs">
+                                    <Badge variant="outline" className="text-xs text-center">
                                       {skill.proficiency}%
                                     </Badge>
                                   </div>
@@ -268,7 +268,7 @@ export function ComparisonHistoryDialog({
                                 <div key={index} className="bg-athlete-gray-800 p-3 rounded-lg">
                                   <div className="flex justify-between items-center mb-1">
                                     <span className="font-medium text-white">{skill.skill}</span>
-                                    <Badge variant="outline" className="text-xs">
+                                    <Badge variant="outline" className="text-xs text-center">
                                       {skill.proficiency}%
                                     </Badge>
                                   </div>

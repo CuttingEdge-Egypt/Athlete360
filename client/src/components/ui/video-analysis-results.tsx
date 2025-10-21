@@ -775,7 +775,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
                     onClick={() => setSelectedTimestamp(event.timestamp)}
                   >
                     <div className="flex items-center gap-3">
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs text-center">
                         {formatTime(event.timestamp)}
                       </Badge>
                       <span className={`font-medium ${isFirstPlayer ? 'text-blue-400' : 'text-red-400'}`}>
@@ -883,7 +883,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
                               }}
                             >
                               <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="text-xs">
+                                <Badge variant="outline" className="text-xs text-center">
                                   {event.timestamp}
                                 </Badge>
                                 <span className={`text-sm ${isFirstPlayer ? 'text-blue-400' : 'text-red-400'}`}>
@@ -892,7 +892,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
                               </div>
                               <div className="flex items-center gap-2">
                                 {event.value && (
-                                  <Badge variant="secondary" className="text-xs bg-green-600">
+                                  <Badge variant="secondary" className="text-xs bg-green-600 text-center">
                                     +{event.value}
                                   </Badge>
                                 )}
@@ -936,7 +936,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
                   onClick={() => setSelectedTimestamp(event.timestamp)}
                 >
                   <div className="flex items-center gap-3">
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs text-center">
                       {formatTime(event.timestamp)}
                     </Badge>
                     <span className={event.player === 'blue' ? 'text-blue-400' : 'text-red-400'}>
@@ -971,7 +971,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
                   onClick={() => setSelectedTimestamp(event.timestamp)}
                 >
                   <div className="flex items-center gap-3">
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs text-center">
                       {formatTime(event.timestamp)}
                     </Badge>
                     <span className={event.player === 'blue' ? 'text-blue-400' : 'text-red-400'}>

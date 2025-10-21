@@ -459,7 +459,7 @@ export function AnalysisPopup({
                                   )}
                                   {exercise.videoUrl && (
                                     <div className="mt-2">
-                                      <Badge variant="outline" className="border-purple-400 text-purple-400 text-xs">
+                                      <Badge variant="outline" className="border-purple-400 text-purple-400 text-xs text-center">
                                         📹 {t("analysis.development.videoAvailable", "Video Available")}
                                       </Badge>
                                     </div>
@@ -784,7 +784,7 @@ export function AnalysisPopup({
                                   <div className={`flex items-start justify-between mb-2 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
                                     <div className="flex-1">
                                       <div className={`flex items-center gap-3 mb-2 ${i18n.language === 'ar' ? 'flex-row-reverse justify-end' : ''}`}>
-                                        <Badge variant="outline" className="border-yellow-400 text-yellow-400 text-xs">
+                                        <Badge variant="outline" className="border-yellow-400 text-yellow-400 text-xs text-center">
                                           {achievement.month ? `${achievement.month} ${achievement.year}` : achievement.year}
                                         </Badge>
                                         <span className={`font-bold text-white ${i18n.language === 'ar' ? 'text-right' : ''}`}>{achievement.event_name}</span>

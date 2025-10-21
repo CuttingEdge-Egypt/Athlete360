@@ -587,7 +587,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
                       </span>
                       <Badge 
                         variant="outline" 
-                        className="text-xs border-gray-500 text-gray-300"
+                        className="text-xs border-gray-500 text-gray-300 text-center"
                       >
                         {getServiceLabel(item.serviceType)}
                       </Badge>

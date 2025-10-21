@@ -393,7 +393,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                         </h4>
                         {exercise.targetArea && (
                           <div className={`mt-2 ${contentIsArabic ? 'text-right' : ''}`}>
-                            <Badge variant="outline" className={`bg-gradient-to-r from-amber-500/20 to-amber-600/20 border-amber-400 text-amber-100 font-medium ${contentIsArabic ? 'text-sm' : 'text-xs'} px-2 py-1`}>
+                            <Badge variant="outline" className={`bg-gradient-to-r from-amber-500/20 to-amber-600/20 border-amber-400 text-amber-100 font-medium ${contentIsArabic ? 'text-sm' : 'text-xs'} px-2 py-1 text-center`}>
                               {getPlanTranslation('target', language)}: {exercise.targetArea}
                             </Badge>
                           </div>
