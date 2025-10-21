@@ -826,8 +826,30 @@ export default function Home() {
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        const { athleteId, message, isComplete, status } = data;
+        const { type, athleteId, message, isComplete, status, queueId, progress } = data;
         
+        // Handle comparison progress updates
+        if (type === 'comparison-progress' && queueId) {
+          if (window.generationQueue) {
+            window.generationQueue.update(queueId, { 
+              progressMessage: message,
+              status: 'running'
+            });
+          }
+          console.log('📊 Comparison progress:', message, progress);
+        }
+        
+        // Handle comparison completion
+        if (type === 'comparison-complete' && queueId) {
+          if (window.generationQueue) {
+            window.generationQueue.update(queueId, { 
+              status: 'completed'
+            });
+          }
+          console.log('✅ Comparison complete');
+        }
+        
+        // Handle ranking progress updates (existing logic)
         if (athleteId) {
           if (isComplete) {
             // Clear loading state when complete
