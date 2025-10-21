@@ -26,14 +26,14 @@ export default function Landing() {
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [, setLocation] = useLocation();
   const [previewModal, setPreviewModal] = useState<{ open: boolean; serviceType: string | null }>({ open: false, serviceType: null });
-  const { t } = useTranslation(['home', 'common']);
+  const { t, i18n } = useTranslation(['home', 'common']);
   const { language } = useLanguage();
 
   // Fetch all preview data (not filtered by service type)
   const { data: previewData, isLoading: previewLoading } = useQuery<PreviewApiResponse>({
-    queryKey: ['/api/preview/latest-by-type', language],
+    queryKey: ['/api/preview/latest-by-type', i18n.language],
     queryFn: async () => {
-      const res = await fetch(`/api/preview/latest-by-type?language=${language}`, {
+      const res = await fetch(`/api/preview/latest-by-type?language=${i18n.language}`, {
         credentials: 'include',
       });
       if (!res.ok) throw new Error('Failed to fetch preview data');
