@@ -2384,7 +2384,7 @@ export default function Home() {
                         name="goal"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-gray-300">{t('nutritionPlan.goal')} *</FormLabel>
+                            <FormLabel className={`text-gray-300 ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t('nutritionPlan.goal')} *</FormLabel>
                             <FormControl>
                               <Textarea
                                 {...field}
@@ -2406,7 +2406,7 @@ export default function Home() {
                           name="sport"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-gray-300">{t('nutritionPlan.sport')}</FormLabel>
+                              <FormLabel className={`text-gray-300 ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t('nutritionPlan.sport')}</FormLabel>
                               <FormControl>
                                 <div className="flex gap-2">
                                   <Popover open={nutritionSportDropdownOpen} onOpenChange={setNutritionSportDropdownOpen}>
@@ -2498,7 +2498,7 @@ export default function Home() {
                           name="age"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-gray-300">{t('nutritionPlan.age')} *</FormLabel>
+                              <FormLabel className={`text-gray-300 ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t('nutritionPlan.age')} *</FormLabel>
                               <FormControl>
                                 <Input
                                   {...field}
@@ -2518,7 +2518,7 @@ export default function Home() {
                           name="height"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-gray-300">{t('nutritionPlan.height')} *</FormLabel>
+                              <FormLabel className={`text-gray-300 ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t('nutritionPlan.height')} *</FormLabel>
                               <FormControl>
                                 <Input
                                   {...field}
@@ -2538,7 +2538,7 @@ export default function Home() {
                           name="currentWeight"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-gray-300">{t('nutritionPlan.currentWeight')} *</FormLabel>
+                              <FormLabel className={`text-gray-300 ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t('nutritionPlan.currentWeight')} *</FormLabel>
                               <FormControl>
                                 <Input
                                   {...field}
@@ -2558,7 +2558,7 @@ export default function Home() {
                           name="targetWeight"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-gray-300">{t('nutritionPlan.targetWeight')} *</FormLabel>
+                              <FormLabel className={`text-gray-300 ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t('nutritionPlan.targetWeight')} *</FormLabel>
                               <FormControl>
                                 <Input
                                   {...field}
@@ -2578,7 +2578,7 @@ export default function Home() {
                           name="country"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-gray-300">{t('nutritionPlan.country')} *</FormLabel>
+                              <FormLabel className={`text-gray-300 ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t('nutritionPlan.country')} *</FormLabel>
                               <FormControl>
                                 <CountrySelect
                                   value={field.value || ""}
@@ -2602,7 +2602,7 @@ export default function Home() {
                           name="period"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-gray-300">{t('nutritionPlan.period')}</FormLabel>
+                              <FormLabel className={`text-gray-300 ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t('nutritionPlan.period')}</FormLabel>
                               <FormControl>
                                 <Input
                                   {...field}
@@ -2625,7 +2625,7 @@ export default function Home() {
                           name="inbodyReport"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-gray-300">{t('nutritionPlan.inbodyReport')}</FormLabel>
+                              <FormLabel className={`text-gray-300 ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t('nutritionPlan.inbodyReport')}</FormLabel>
                               <FormControl>
                                 <Input
                                   data-testid="input-inbody-report"
@@ -2646,7 +2646,7 @@ export default function Home() {
                           name="language"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-gray-300">{t('nutritionPlan.language')}</FormLabel>
+                              <FormLabel className={`text-gray-300 ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t('nutritionPlan.language')}</FormLabel>
                               <FormControl>
                                 <Select value={field.value} onValueChange={field.onChange}>
                                   <SelectTrigger 
@@ -2800,7 +2800,7 @@ export default function Home() {
                           name="goal"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-gray-200">{t('developmentPlan.goal')}</FormLabel>
+                              <FormLabel className={`text-gray-200 ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t('developmentPlan.goal')}</FormLabel>
                               <FormControl>
                                 <Textarea 
                                   {...field}
@@ -2821,7 +2821,7 @@ export default function Home() {
                             name="age"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-gray-200">{t('developmentPlan.age')}</FormLabel>
+                                <FormLabel className={`text-gray-200 ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t('developmentPlan.age')}</FormLabel>
                                 <FormControl>
                                   <Input 
                                     {...field}
@@ -2842,7 +2842,7 @@ export default function Home() {
                             name="height"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-gray-200">{t('developmentPlan.height')}</FormLabel>
+                                <FormLabel className={`text-gray-200 ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t('developmentPlan.height')}</FormLabel>
                                 <FormControl>
                                   <Input 
                                     {...field}
@@ -2863,7 +2863,7 @@ export default function Home() {
                             name="weight"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-gray-200">{t('developmentPlan.weight')}</FormLabel>
+                                <FormLabel className={`text-gray-200 ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t('developmentPlan.weight')}</FormLabel>
                                 <FormControl>
                                   <Input 
                                     {...field}
@@ -2884,7 +2884,7 @@ export default function Home() {
                             name="gender"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-gray-200">{t('developmentPlan.gender')}</FormLabel>
+                                <FormLabel className={`text-gray-200 ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t('developmentPlan.gender')}</FormLabel>
                                 <Select onValueChange={field.onChange} value={field.value}>
                                   <FormControl>
                                     <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white" data-testid="select-development-gender">
@@ -2912,7 +2912,7 @@ export default function Home() {
                           name="sport"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-gray-200">{t('developmentPlan.sport')}</FormLabel>
+                              <FormLabel className={`text-gray-200 ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t('developmentPlan.sport')}</FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white" data-testid="select-development-sport">
@@ -2942,7 +2942,7 @@ export default function Home() {
                           name="language"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-gray-200">{t('developmentPlan.language')}</FormLabel>
+                              <FormLabel className={`text-gray-200 ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t('developmentPlan.language')}</FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white" data-testid="select-development-language">
