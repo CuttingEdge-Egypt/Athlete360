@@ -87,20 +87,6 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
   const [progressPhase, setProgressPhase] = useState<{ message: string; progress: number; originalMessage?: string } | null>(null);
   const [comparisonData, setComparisonData] = useState(() => {
     console.log("AthleteComparison received preloadedComparisonData:", preloadedComparisonData);
-    
-    // Check if there's an ongoing comparison in the queue before preloading old data
-    const queue = (window.generationQueue as any)?.getQueue?.();
-    const ongoingComparison = queue?.find((item: any) => 
-      item.serviceType === 'comparison' && 
-      (item.status === 'running' || item.status === 'pending')
-    );
-    
-    // Don't preload old data if there's an ongoing comparison
-    if (ongoingComparison) {
-      console.log('[COMPARISON] Ongoing comparison found in queue, skipping preloaded data');
-      return null;
-    }
-    
     if (preloadedComparisonData) {
       return {
         ...preloadedComparisonData,
@@ -206,26 +192,16 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
   // Update comparison data when preloaded data changes
   useEffect(() => {
     if (preloadedComparisonData) {
-      // Don't restore old data if there's an ongoing comparison in the queue
-      const queue = (window.generationQueue as any)?.getQueue?.();
-      const ongoingComparison = queue?.find((item: any) => 
-        item.serviceType === 'comparison' && 
-        (item.status === 'running' || item.status === 'pending')
-      );
-      
-      // Only restore preloaded data if there's no ongoing comparison
-      if (!ongoingComparison) {
-        if (preloadedComparisonData?.isRawResponse) {
-          setComparisonData({
-            gptResponse: preloadedComparisonData.gptResponse,
-            geminiResponse: preloadedComparisonData.geminiResponse,
-            isRawResponse: true,
-            athlete1: { name: "Athlete 1", country: "Unknown", rank: "N/A" },
-            athlete2: { name: "Athlete 2", country: "Unknown", rank: "N/A" }
-          });
-        } else {
-          setComparisonData(preloadedComparisonData);
-        }
+      if (preloadedComparisonData?.isRawResponse) {
+        setComparisonData({
+          gptResponse: preloadedComparisonData.gptResponse,
+          geminiResponse: preloadedComparisonData.geminiResponse,
+          isRawResponse: true,
+          athlete1: { name: "Athlete 1", country: "Unknown", rank: "N/A" },
+          athlete2: { name: "Athlete 2", country: "Unknown", rank: "N/A" }
+        });
+      } else {
+        setComparisonData(preloadedComparisonData);
       }
     }
   }, [preloadedComparisonData]);
@@ -301,17 +277,6 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                   console.log('[WS] Loaded comparison data from history');
                   setComparisonData(latestComparison.resultData);
                   
-                  // Update queue with result after fetching data
-                  if (window.generationQueue && queueIdRef.current) {
-                    window.generationQueue.update(queueIdRef.current, { 
-                      status: 'completed',
-                      result: {
-                        ...latestComparison.resultData,
-                        serviceType: 'compare'
-                      }
-                    });
-                  }
-                  
                   toast({
                     title: t("analysis.comparison.comparisonComplete", "Comparison Complete"),
                     description: t("analysis.comparison.comparisonSuccess", "AI-powered athlete comparison generated successfully!"),
@@ -319,17 +284,11 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                 }
               })
               .catch(err => console.error('[WS] Failed to fetch comparison:', err));
-          } else {
-            // Update queue with existing comparison data
-            if (window.generationQueue && queueIdRef.current) {
-              window.generationQueue.update(queueIdRef.current, { 
-                status: 'completed',
-                result: {
-                  ...comparisonData,
-                  serviceType: 'compare'
-                }
-              });
-            }
+          }
+          
+          // Update queue status to completed using the correct queue ID
+          if (window.generationQueue && queueIdRef.current) {
+            window.generationQueue.update(queueIdRef.current, { status: 'completed' });
           }
         }
       } catch (error) {
@@ -501,15 +460,9 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       setProgressPhase(null); // Clear progress on success
       setIsLoading(false); // Clear loading state
 
-      // Update queue to completed with result
+      // Update queue to completed
       if (window.generationQueue && queueIdRef.current) {
-        window.generationQueue.update(queueIdRef.current, { 
-          status: 'completed',
-          result: {
-            ...data,
-            serviceType: 'compare'
-          }
-        });
+        window.generationQueue.update(queueIdRef.current, { status: 'completed' });
       }
 
       // Check for partial refund notification
