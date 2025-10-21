@@ -62,6 +62,7 @@ interface ScoreEvent {
   player: 'blue' | 'red';
   playerName?: string;
   description?: string;
+  teamName?: string;
 }
 
 interface YellowCardEvent {
@@ -415,6 +416,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
       player: 'blue' | 'red';
       playerName?: string;
       description?: string;
+      teamName?: string;
     }> = [];
 
     // TEAM SPORTS: Handle separate_scores format (entity_type: "team")
@@ -422,6 +424,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
       scoreAnalysis.separate_scores.forEach((entity: any, entityIndex: number) => {
         // First entity = blue, second entity = red
         const isBlue = entityIndex === 0;
+        const teamName = entity.entity_name || undefined;
         
         if (entity.events && Array.isArray(entity.events)) {
           let previousScore = 0;
@@ -437,7 +440,8 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
                   scoreValue,
                   player: isBlue ? 'blue' : 'red',
                   playerName: event.player_name || undefined,
-                  description: event.description || undefined
+                  description: event.description || undefined,
+                  teamName: teamName
                 });
               }
               previousScore = currentScore;
@@ -517,7 +521,8 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
         increment: event.scoreValue,
         player: event.player,
         playerName: event.playerName,
-        description: event.description
+        description: event.description,
+        teamName: event.teamName
       });
     });
     
@@ -978,34 +983,48 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
           </CardHeader>
           <CardContent>
             <div className="space-y-3 max-h-60 overflow-y-auto">
-              {events.scoreEvents.map((event, index) => (
-                <div
-                  key={index}
-                  className={`flex items-center justify-between p-3 rounded-lg border ${
-                    event.player === 'blue'
-                      ? 'bg-blue-500/10 border-blue-500/20'
-                      : 'bg-red-500/10 border-red-500/20'
-                  } cursor-pointer hover:opacity-80`}
-                  onClick={() => setSelectedTimestamp(event.timestamp)}
-                >
-                  <div className="flex items-center gap-3">
-                    <Badge variant="outline" className="text-xs text-center">
-                      {formatTime(event.timestamp)}
-                    </Badge>
-                    <div className="flex flex-col">
-                      <span className={event.player === 'blue' ? 'text-blue-400' : 'text-red-400'}>
-                        {event.playerName || (event.player === 'blue' ? 'Blue' : 'Red')} +{event.increment}
-                      </span>
-                      {event.description && (
-                        <span className="text-xs text-gray-400 mt-0.5">{event.description}</span>
-                      )}
+              {events.scoreEvents.map((event, index) => {
+                // Build display text: Team - Player or just Player/Blue/Red
+                let displayText = '';
+                if (event.teamName && event.playerName) {
+                  displayText = `${event.teamName} - ${event.playerName}`;
+                } else if (event.teamName) {
+                  displayText = event.teamName;
+                } else if (event.playerName) {
+                  displayText = event.playerName;
+                } else {
+                  displayText = event.player === 'blue' ? 'Blue' : 'Red';
+                }
+                
+                return (
+                  <div
+                    key={index}
+                    className={`flex items-center justify-between p-3 rounded-lg border ${
+                      event.player === 'blue'
+                        ? 'bg-blue-500/10 border-blue-500/20'
+                        : 'bg-red-500/10 border-red-500/20'
+                    } cursor-pointer hover:opacity-80`}
+                    onClick={() => setSelectedTimestamp(event.timestamp)}
+                  >
+                    <div className="flex items-center gap-3 flex-1">
+                      <Badge variant="outline" className="text-xs text-center shrink-0">
+                        {formatTime(event.timestamp)}
+                      </Badge>
+                      <div className="flex items-center gap-2 flex-1">
+                        <span className={`font-medium ${event.player === 'blue' ? 'text-blue-400' : 'text-red-400'}`}>
+                          {displayText}
+                        </span>
+                        {event.description && (
+                          <span className="text-xs text-gray-400">· {event.description}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-white font-mono shrink-0">
+                      {event.blueScore} - {event.redScore}
                     </div>
                   </div>
-                  <div className="text-white font-mono">
-                    {event.blueScore} - {event.redScore}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
