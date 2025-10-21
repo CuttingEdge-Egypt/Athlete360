@@ -3807,43 +3807,46 @@ Return only valid JSON with the missing fields.`;
       const analysisTime = Date.now() - analysisStartTime;
       console.log(`[ROUTE ${requestId}] Video analysis completed in ${analysisTime}ms`);
 
-      // Store result temporarily with unique ID (will be saved after user accepts)
-      const tempResultId = `temp_video_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-      
-      // Store in global temporary cache (in-memory)
-      if (!(global as any).tempVideoResults) {
-        (global as any).tempVideoResults = new Map();
+      // Check if user still has enough tokens (they might have spent them during analysis)
+      const userAfterAnalysis = await storage.getUser(userId);
+      if (!userAfterAnalysis || (userAfterAnalysis.tokens || 0) < tokenCost) {
+        console.error(`[ROUTE ${requestId}] Insufficient tokens after analysis - required: ${tokenCost}, available: ${userAfterAnalysis?.tokens || 0}`);
+        return res.status(402).json({ 
+          message: "Insufficient tokens",
+          required: tokenCost,
+          available: userAfterAnalysis?.tokens || 0
+        });
       }
       
-      (global as any).tempVideoResults.set(tempResultId, {
+      // Automatically deduct tokens and save result
+      console.log(`[ROUTE ${requestId}] Deducting ${tokenCost} tokens from user ${userId}`);
+      await storage.deductTokens(userId, tokenCost);
+      
+      // Create transaction record
+      console.log(`[ROUTE ${requestId}] Creating transaction record`);
+      await storage.createTransaction({
         userId,
-        analysisResults,
-        fileName,
-        analysisType,
-        sport: sportName,
-        language,
-        tokenCost,
-        createdAt: Date.now(),
-        requestId
+        action: "Video Analysis",
+        tokensDeducted: tokenCost,
+        athleteId: null,
+        serviceType: "video"
       });
       
-      // Auto-cleanup after 1 hour
-      setTimeout(() => {
-        if ((global as any).tempVideoResults) {
-          (global as any).tempVideoResults.delete(tempResultId);
-          console.log(`[CLEANUP] Removed expired temp result ${tempResultId}`);
-        }
-      }, 3600000); // 1 hour
-
-      console.log(`[ROUTE ${requestId}] Sending successful response (unpaid preview, tempId: ${tempResultId})`);
+      // Save analysis log to database
+      console.log(`[ROUTE ${requestId}] Saving analysis log to database`);
+      await storage.createAnalysisLog({
+        userId,
+        athleteId: null,
+        serviceType: "video",
+        resultData: analysisResults
+      });
+      
+      console.log(`[ROUTE ${requestId}] Video analysis completed and saved successfully`);
       res.json({
         success: true,
-        message: "Video analysis completed successfully - preview ready",
+        message: "Video analysis completed successfully",
         data: analysisResults,
-        isPaid: false,
-        tempResultId,
-        tokenCost,
-        requiresAcceptance: true
+        isPaid: true
       });
 
     } catch (error) {
@@ -3894,83 +3897,6 @@ Return only valid JSON with the missing fields.`;
       }
       
       console.log(`[ROUTE ${requestId}] ===== VIDEO ANALYSIS REQUEST COMPLETED =====`);
-    }
-  });
-
-  // Accept video analysis result and deduct tokens
-  app.post('/api/analysis/video/accept', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { tempResultId } = req.body;
-      
-      if (!tempResultId) {
-        return res.status(400).json({ message: "Missing tempResultId" });
-      }
-      
-      // Check if temp results storage exists
-      if (!(global as any).tempVideoResults || !(global as any).tempVideoResults.has(tempResultId)) {
-        return res.status(404).json({ 
-          message: "Result not found or expired. Please run the analysis again." 
-        });
-      }
-      
-      // Retrieve temp result
-      const tempResult = (global as any).tempVideoResults.get(tempResultId);
-      
-      // Verify this result belongs to the requesting user
-      if (tempResult.userId !== userId) {
-        return res.status(403).json({ message: "Unauthorized access to this result" });
-      }
-      
-      // Check if user still has enough tokens
-      const user = await storage.getUser(userId);
-      if (!user || (user.tokens || 0) < tempResult.tokenCost) {
-        return res.status(402).json({ 
-          message: "Insufficient tokens",
-          required: tempResult.tokenCost,
-          available: user?.tokens || 0
-        });
-      }
-      
-      // Deduct tokens
-      console.log(`[ACCEPT VIDEO] Deducting ${tempResult.tokenCost} tokens for user ${userId}`);
-      await storage.deductTokens(userId, tempResult.tokenCost);
-      
-      // Create transaction
-      await storage.createTransaction({
-        userId,
-        action: "Video Analysis",
-        tokensDeducted: tempResult.tokenCost,
-        athleteId: null,
-        serviceType: "video"
-      });
-      
-      // Save analysis log to database
-      await storage.createAnalysisLog({
-        userId,
-        athleteId: null,
-        serviceType: "video",
-        resultData: tempResult.analysisResults
-      });
-      
-      // Remove from temporary storage
-      (global as any).tempVideoResults.delete(tempResultId);
-      
-      console.log(`[ACCEPT VIDEO] Video analysis accepted and paid for by user ${userId}`);
-      
-      res.json({
-        success: true,
-        message: "Video analysis accepted and saved",
-        data: tempResult.analysisResults,
-        isPaid: true
-      });
-      
-    } catch (error) {
-      console.error('[ACCEPT VIDEO] Error accepting video analysis:', error);
-      res.status(500).json({ 
-        message: "Failed to accept video analysis",
-        error: error instanceof Error ? error.message : String(error)
-      });
     }
   });
 

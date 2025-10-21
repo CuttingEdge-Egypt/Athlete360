@@ -44,10 +44,6 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
   const [dragOver, setDragOver] = useState(false);
   const [sportDropdownOpen, setSportDropdownOpen] = useState(false);
   const [sportSearchTerm, setSportSearchTerm] = useState("");
-  const [tempResultId, setTempResultId] = useState<string | null>(null);
-  const [isAccepting, setIsAccepting] = useState(false);
-  const [showPaymentPrompt, setShowPaymentPrompt] = useState(false);
-  const [tokenCost, setTokenCost] = useState(200);
   const { toast } = useToast();
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -314,34 +310,16 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
         throw new Error(result.message || 'Analysis failed');
       }
 
-      // Check if result requires acceptance (new pay-after-preview flow)
-      if (result.requiresAcceptance && result.tempResultId) {
-        setTempResultId(result.tempResultId);
-        setTokenCost(result.tokenCost || 200);
-        setAnalysisResult(result.data);
-        setShowPaymentPrompt(true);
-        
-        toast({
-          title: t('toast.analysisComplete') || 'Analysis Complete!',
-          description: 'Review your results and accept to save them.',
-        });
-        
-        // Update queue to show completion (unpaid)
-        if (queueId && (window as any).generationQueue) {
-          (window as any).generationQueue.update(queueId, { status: 'completed', result: result.data });
-        }
-      } else {
-        // Old flow - analysis is already paid
-        setAnalysisResult(result.data);
-        toast({
-          title: t('toast.analysisComplete'),
-          description: t('toast.analysisCompleteDesc'),
-        });
-        
-        // Update queue status on success
-        if (queueId && (window as any).generationQueue) {
-          (window as any).generationQueue.update(queueId, { status: 'completed', result: result.data });
-        }
+      // Analysis is complete and tokens have been automatically deducted
+      setAnalysisResult(result.data);
+      toast({
+        title: t('toast.analysisComplete'),
+        description: t('toast.analysisCompleteDesc'),
+      });
+      
+      // Update queue status on success
+      if (queueId && (window as any).generationQueue) {
+        (window as any).generationQueue.update(queueId, { status: 'completed', result: result.data });
       }
 
     } catch (error) {
@@ -393,148 +371,8 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
     }
   };
 
-  const handleAcceptResult = async () => {
-    if (!tempResultId) return;
-    
-    setIsAccepting(true);
-    
-    try {
-      const response = await fetch('/api/analysis/video/accept', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ tempResultId }),
-        credentials: 'include'
-      });
-      
-      const result = await response.json();
-      
-      if (!response.ok) {
-        if (response.status === 402) {
-          toast({
-            title: 'Insufficient Tokens',
-            description: `You need ${result.required} tokens but only have ${result.available}.`,
-            variant: "destructive",
-          });
-        } else if (response.status === 404) {
-          toast({
-            title: 'Result Expired',
-            description: result.message || 'Please run the analysis again.',
-            variant: "destructive",
-          });
-          // Reset to allow new analysis
-          setAnalysisResult(null);
-          setShowPaymentPrompt(false);
-          setTempResultId(null);
-        } else {
-          throw new Error(result.message || 'Failed to accept result');
-        }
-        return;
-      }
-      
-      // Success - result is now paid and saved
-      setShowPaymentPrompt(false);
-      setTempResultId(null);
-      toast({
-        title: 'Video Analysis Saved!',
-        description: `Successfully saved for ${tokenCost} tokens.`,
-      });
-      
-    } catch (error) {
-      console.error('Error accepting result:', error);
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to accept result',
-        variant: "destructive",
-      });
-    } finally {
-      setIsAccepting(false);
-    }
-  };
-  
-  const handleDeclineResult = () => {
-    // User declined - don't charge tokens, just clear the preview
-    setAnalysisResult(null);
-    setShowPaymentPrompt(false);
-    setTempResultId(null);
-    toast({
-      title: 'Analysis Declined',
-      description: 'No tokens were charged.',
-    });
-  };
-
   if (analysisResult && uploadedFile) {
-    // Show payment prompt if result requires acceptance
-    if (showPaymentPrompt && tempResultId) {
-      return (
-        <div className="space-y-6">
-          <Card className="bg-athlete-gray-800 border-emerald-500/50 border-2">
-            <CardHeader className="bg-gradient-to-r from-emerald-500/10 to-blue-500/10 border-b border-gray-700">
-              <CardTitle className="text-white text-center flex items-center justify-center space-x-2">
-                <Trophy className="text-emerald-400" size={24} />
-                <span>Analysis Complete! 🎉</span>
-              </CardTitle>
-              <p className="text-gray-300 text-center mt-2">
-                Your video analysis is ready. Accept to save it to your account.
-              </p>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="space-y-6">
-                <div className="bg-athlete-gray-700 rounded-lg p-6 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-white font-semibold text-lg">Video Analysis Preview</h4>
-                      <p className="text-gray-400 text-sm mt-1">
-                        {analysisResult.analysisType === 'clip' ? 'Clip Analysis' : 'Match Analysis'}
-                      </p>
-                    </div>
-                    <Badge className="bg-indigo-500/20 text-indigo-300 border-indigo-500/50 text-lg px-4 py-2">
-                      {tokenCost} Tokens
-                    </Badge>
-                  </div>
-                  
-                  <div className="border-t border-gray-600 pt-4">
-                    <p className="text-gray-300 text-sm">
-                      ✓ Full analysis results ready<br/>
-                      ✓ Video player with timeline<br/>
-                      ✓ Saved to your history<br/>
-                      ✓ No charge if you decline
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Button
-                    onClick={handleAcceptResult}
-                    disabled={isAccepting}
-                    className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all"
-                    data-testid="button-accept-payment"
-                  >
-                    {isAccepting ? (
-                      <><Loader2 className="mr-2 animate-spin" size={20} />Processing...</>
-                    ) : (
-                      <>Accept & Pay {tokenCost} Tokens</>
-                    )}
-                  </Button>
-                  <Button
-                    onClick={handleDeclineResult}
-                    disabled={isAccepting}
-                    variant="outline"
-                    className="border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300 px-8 py-6 text-lg"
-                    data-testid="button-decline-payment"
-                  >
-                    Decline (No Charge)
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      );
-    }
-
-    // Show full results if payment is complete
+    // Show full results (tokens have been automatically deducted)
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
