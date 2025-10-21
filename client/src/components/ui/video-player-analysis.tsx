@@ -18,6 +18,8 @@ interface ScoreEvent {
   increment: number;
   player: 'blue' | 'red';
   scoreString?: string; // Tennis score string like "15-30" or "40-Ad"
+  playerName?: string; // Name of the player/athlete who scored (team sports)
+  description?: string; // Description of the scoring event (e.g., "2-point layup")
 }
 
 interface YellowCardEvent {
@@ -297,19 +299,28 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           const isTeamSport = entity1.entity_type === 'team' || entity2.entity_type === 'team';
           
           // Process all events from both entities
-          const allEvents: Array<{timestamp: number, score: string, player: 'blue' | 'red'}> = [];
+          const allEvents: Array<{
+            timestamp: number, 
+            score: string, 
+            player: 'blue' | 'red',
+            playerName?: string,
+            description?: string
+          }> = [];
           
           // Process entity 1 events
           if (entity1.events && Array.isArray(entity1.events)) {
             // TEAM SPORTS: Use array index (entity 0 = blue, entity 1 = red)
             // INDIVIDUAL SPORTS: Use side/color field if available
             const entity1Side = isTeamSport ? 'blue' : (entity1.side === 'red' ? 'red' : 'blue');
+            const entity1Name = entity1.entity_name || (entity1Side === 'blue' ? 'Team 1' : 'Team 2');
             entity1.events.forEach((event: any) => {
               if (event.timestamp && event.current_score) {
                 allEvents.push({
                   timestamp: parseTimestamp(event.timestamp),
                   score: event.current_score,
-                  player: entity1Side
+                  player: entity1Side,
+                  playerName: event.player_name || entity1Name,
+                  description: event.description
                 });
               }
             });
@@ -320,12 +331,15 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
             // TEAM SPORTS: Use array index (entity 0 = blue, entity 1 = red)
             // INDIVIDUAL SPORTS: Use side/color field if available
             const entity2Side = isTeamSport ? 'red' : (entity2.side === 'blue' ? 'blue' : 'red');
+            const entity2Name = entity2.entity_name || (entity2Side === 'blue' ? 'Team 1' : 'Team 2');
             entity2.events.forEach((event: any) => {
               if (event.timestamp && event.current_score) {
                 allEvents.push({
                   timestamp: parseTimestamp(event.timestamp),
                   score: event.current_score,
-                  player: entity2Side
+                  player: entity2Side,
+                  playerName: event.player_name || entity2Name,
+                  description: event.description
                 });
               }
             });
@@ -349,7 +363,9 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                 redScore: 0,  // Not used for tennis display
                 increment: 1, // Always 1 for tennis points
                 player: event.player,
-                scoreString: event.score // Store the actual tennis score string
+                scoreString: event.score, // Store the actual tennis score string
+                playerName: event.playerName,
+                description: event.description
               });
             } else {
               // Numeric scores (fencing, basketball, soccer, etc.) - calculate cumulative scores
@@ -363,7 +379,9 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   blueScore,
                   redScore,
                   increment: increment > 0 ? increment : 1,
-                  player: 'blue'
+                  player: 'blue',
+                  playerName: event.playerName,
+                  description: event.description
                 });
               } else {
                 const increment = currentScore - redScore;
@@ -373,7 +391,9 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   blueScore,
                   redScore,
                   increment: increment > 0 ? increment : 1,
-                  player: 'red'
+                  player: 'red',
+                  playerName: event.playerName,
+                  description: event.description
                 });
               }
             }
@@ -1334,19 +1354,34 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                       />
                       
                       {/* Score Event Markers */}
-                      {scoreEvents.map((event, index) => (
-                        <div
-                          key={`score-${index}`}
-                          className="absolute top-0 w-0.5 h-3 -mt-1 cursor-pointer bg-yellow-400 hover:bg-yellow-300 z-10"
-                          style={{ left: `${(event.timestamp / duration) * 100}%` }}
-                          title={`${event.player.toUpperCase()} scores ${event.increment} points - Click to jump`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSeek(event.timestamp);
-                          }}
-                          data-testid={`score-marker-${index}`}
-                        />
-                      ))}
+                      {scoreEvents.map((event, index) => {
+                        // Build tooltip with player name and description if available
+                        let tooltipText = event.playerName 
+                          ? `${event.playerName}` 
+                          : `${event.player.toUpperCase()}`;
+                        
+                        if (event.description) {
+                          tooltipText += ` - ${event.description}`;
+                        } else {
+                          tooltipText += ` scores ${event.increment} points`;
+                        }
+                        
+                        tooltipText += ` - Click to jump`;
+                        
+                        return (
+                          <div
+                            key={`score-${index}`}
+                            className="absolute top-0 w-0.5 h-3 -mt-1 cursor-pointer bg-yellow-400 hover:bg-yellow-300 z-10"
+                            style={{ left: `${(event.timestamp / duration) * 100}%` }}
+                            title={tooltipText}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSeek(event.timestamp);
+                            }}
+                            data-testid={`score-marker-${index}`}
+                          />
+                        );
+                      })}
                       
                       {/* Yellow Card Markers */}
                       {yellowCardEvents.map((event, index) => (
