@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useTranslation } from 'react-i18next';
@@ -99,6 +99,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
     return preloadedComparisonData || null;
   });
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Preview modal state
   const [previewModal, setPreviewModal] = useState<{ open: boolean; serviceType: string | null }>({ open: false, serviceType: null });
@@ -464,6 +465,9 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       if (window.generationQueue && queueIdRef.current) {
         window.generationQueue.update(queueIdRef.current, { status: 'completed' });
       }
+
+      // Invalidate history to show comparison immediately
+      queryClient.invalidateQueries({ queryKey: ["/api/user-history"] });
 
       // Check for partial refund notification
       if (data.partialRefund) {
