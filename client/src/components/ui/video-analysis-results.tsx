@@ -520,7 +520,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
         cumulativeRedScore += event.scoreValue;
       }
 
-      scoreEvents.push({
+      const scoreEvent = {
         timestamp: event.timestamp,
         blueScore: cumulativeBlueScore,
         redScore: cumulativeRedScore,
@@ -529,8 +529,11 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
         playerName: event.playerName,
         description: event.description,
         teamName: event.teamName
-      });
+      };
+      console.log('📊 Creating scoreEvent:', scoreEvent);
+      scoreEvents.push(scoreEvent);
     });
+    console.log('📊 Final scoreEvents array:', scoreEvents);
     
     // For new format with current_score, also extract final scores directly from last events
     if (scoreAnalysis && scoreAnalysis.separate_scores && Array.isArray(scoreAnalysis.separate_scores)) {
