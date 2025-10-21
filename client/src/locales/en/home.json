@@ -118,7 +118,7 @@
       "description": "Complete athlete biography with career highlights and achievements"
     },
     "rankHistory": {
-      "title": "Competitive History", 
+      "title": "Competitive History",
       "description": "Interactive charts showing ranking progression and improvement recommendations"
     },
     "strengths": {
@@ -158,7 +158,7 @@
       "description": "Personalized training roadmap with specific goals and timelines"
     },
     "statistics": {
-      "title": "Statistics", 
+      "title": "Statistics",
       "description": "Comprehensive performance statistics and metrics analysis"
     }
   },
