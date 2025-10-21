@@ -438,7 +438,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
                 allScoringEvents.push({
                   timestamp,
                   scoreValue,
-                  player: isBlue ? 'blue' : 'red',
+                  player: (isBlue ? 'blue' : 'red') as 'blue' | 'red',
                   playerName: event.player_name || undefined,
                   description: event.description || undefined,
                   teamName: teamName
