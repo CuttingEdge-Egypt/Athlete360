@@ -413,7 +413,35 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
       player: 'blue' | 'red';
     }> = [];
 
-    if (scoreAnalysis && scoreAnalysis.players) {
+    // TEAM SPORTS: Handle separate_scores format (entity_type: "team")
+    if (scoreAnalysis && scoreAnalysis.separate_scores && Array.isArray(scoreAnalysis.separate_scores)) {
+      scoreAnalysis.separate_scores.forEach((entity: any, entityIndex: number) => {
+        // First entity = blue, second entity = red
+        const isBlue = entityIndex === 0;
+        
+        if (entity.events && Array.isArray(entity.events)) {
+          let previousScore = 0;
+          entity.events.forEach((event: any) => {
+            if (event.timestamp && event.current_score !== undefined) {
+              const timestamp = parseTimestamp(event.timestamp);
+              const currentScore = parseInt(event.current_score) || 0;
+              const scoreValue = currentScore - previousScore;
+              
+              if (scoreValue > 0) {
+                allScoringEvents.push({
+                  timestamp,
+                  scoreValue,
+                  player: isBlue ? 'blue' : 'red'
+                });
+              }
+              previousScore = currentScore;
+            }
+          });
+        }
+      });
+    }
+    // INDIVIDUAL SPORTS: Handle players format (entity_type: "player" or old format)
+    else if (scoreAnalysis && scoreAnalysis.players) {
       scoreAnalysis.players.forEach((player: any) => {
         // Determine player side from color, side, or name
         const isBlue = player.color === 'Blue' || 
@@ -486,7 +514,24 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
     });
     
     // For new format with current_score, also extract final scores directly from last events
-    if (scoreAnalysis && scoreAnalysis.players) {
+    if (scoreAnalysis && scoreAnalysis.separate_scores && Array.isArray(scoreAnalysis.separate_scores)) {
+      // TEAM SPORTS: Extract final scores from separate_scores
+      scoreAnalysis.separate_scores.forEach((entity: any, entityIndex: number) => {
+        if (entity.events && Array.isArray(entity.events) && entity.events.length > 0) {
+          const isBlue = entityIndex === 0;
+          const lastEvent = entity.events[entity.events.length - 1];
+          if (lastEvent && lastEvent.current_score !== undefined) {
+            const finalScore = parseInt(lastEvent.current_score) || 0;
+            if (isBlue) {
+              cumulativeBlueScore = Math.max(cumulativeBlueScore, finalScore);
+            } else {
+              cumulativeRedScore = Math.max(cumulativeRedScore, finalScore);
+            }
+          }
+        }
+      });
+    } else if (scoreAnalysis && scoreAnalysis.players) {
+      // INDIVIDUAL SPORTS: Extract final scores from players
       scoreAnalysis.players.forEach((player: any) => {
         if (player.events && Array.isArray(player.events) && player.events.length > 0) {
           const isBlue = player.color === 'Blue' || 
