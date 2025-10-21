@@ -660,9 +660,15 @@ export default function Home() {
         setDevelopmentProgress(0);
         setDevelopmentProgressMessage("");
         
-        // Update queue to completed
+        // Update queue to completed with result
         if (developmentQueueId && (window as any).generationQueue) {
-          (window as any).generationQueue.update(developmentQueueId, { status: 'completed' });
+          (window as any).generationQueue.update(developmentQueueId, { 
+            status: 'completed',
+            result: {
+              ...results,
+              serviceType: 'development-plan'
+            }
+          });
         }
         setDevelopmentQueueId(null);
         
@@ -757,9 +763,15 @@ export default function Home() {
         setNutritionProgress(0);
         setNutritionJobProgressMessage("");
         
-        // Update queue to completed
+        // Update queue to completed with result
         if (nutritionQueueId && (window as any).generationQueue) {
-          (window as any).generationQueue.update(nutritionQueueId, { status: 'completed' });
+          (window as any).generationQueue.update(nutritionQueueId, { 
+            status: 'completed',
+            result: {
+              ...result,
+              serviceType: 'nutrition-plan'
+            }
+          });
         }
         setNutritionQueueId(null);
         

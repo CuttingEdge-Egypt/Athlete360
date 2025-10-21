@@ -328,7 +328,13 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
         
         // Update queue to show completion (unpaid)
         if (queueId && (window as any).generationQueue) {
-          (window as any).generationQueue.update(queueId, { status: 'completed', result: result.data });
+          (window as any).generationQueue.update(queueId, { 
+            status: 'completed', 
+            result: {
+              ...result.data,
+              serviceType: 'video'
+            }
+          });
         }
       } else {
         // Old flow - analysis is already paid
@@ -340,7 +346,13 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
         
         // Update queue status on success
         if (queueId && (window as any).generationQueue) {
-          (window as any).generationQueue.update(queueId, { status: 'completed', result: result.data });
+          (window as any).generationQueue.update(queueId, { 
+            status: 'completed', 
+            result: {
+              ...result.data,
+              serviceType: 'video'
+            }
+          });
         }
       }
 
