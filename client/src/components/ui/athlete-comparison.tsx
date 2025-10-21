@@ -1450,7 +1450,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               >
                                 <Trophy className={`w-3 h-3 ${textColor} ${isComparisonArabic ? 'ml-1.5' : 'mr-1.5'}`} />
                                 <span className={`font-bold text-xs ${textColor}`}>
-                                  {rankingCategory.category}
+                                  #{rankingCategory.rank} | {rankingCategory.category}
                                 </span>
                               </div>
                             );
@@ -1512,7 +1512,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               >
                                 <Trophy className={`w-3 h-3 ${textColor} ${isComparisonArabic ? 'ml-1.5' : 'mr-1.5'}`} />
                                 <span className={`font-bold text-xs ${textColor}`}>
-                                  {rankingCategory.category}
+                                  #{rankingCategory.rank} | {rankingCategory.category}
                                 </span>
                               </div>
                             );
