@@ -186,6 +186,8 @@ export default function Home() {
   const [sportSearchTerm, setSportSearchTerm] = useState("");
   const [nutritionSportDropdownOpen, setNutritionSportDropdownOpen] = useState(false);
   const [nutritionSportSearchTerm, setNutritionSportSearchTerm] = useState("");
+  const [developmentSportDropdownOpen, setDevelopmentSportDropdownOpen] = useState(false);
+  const [developmentSportSearchTerm, setDevelopmentSportSearchTerm] = useState("");
   
   // Ranking progress states (for in-card loading display)
   const [rankingFetchStatus, setRankingFetchStatus] = useState<Record<string, { isLoading: boolean; currentPhase: string }>>({});
@@ -1211,6 +1213,10 @@ export default function Home() {
   
   const filteredNutritionSports = sports.filter(sport => 
     sport.name.toLowerCase().includes(nutritionSportSearchTerm.toLowerCase())
+  );
+  
+  const filteredDevelopmentSports = sports.filter(sport => 
+    sport.name.toLowerCase().includes(developmentSportSearchTerm.toLowerCase())
   );
 
   // Handle creating athlete with AI
@@ -2913,24 +2919,61 @@ export default function Home() {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className={`text-gray-200 ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('developmentPlan.sport')}</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white" data-testid="select-development-sport">
-                                    <SelectValue placeholder={t('developmentPlan.sportPlaceholder')} />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent className="bg-athlete-gray-700 border-gray-600">
-                                  {sports.map((sport) => (
-                                    <SelectItem 
-                                      key={sport.id} 
-                                      value={sport.name} 
-                                      className="text-white hover:bg-athlete-gray-600"
+                              <FormControl>
+                                <Popover open={developmentSportDropdownOpen} onOpenChange={setDevelopmentSportDropdownOpen}>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      role="combobox"
+                                      aria-expanded={developmentSportDropdownOpen}
+                                      className="bg-athlete-gray-700 border-gray-600 text-white w-full justify-between hover:bg-athlete-gray-600"
+                                      data-testid="select-development-sport"
                                     >
-                                      {sport.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                                      {field.value
+                                        ? sports.find(s => s.name === field.value)?.name
+                                        : t('developmentPlan.sportPlaceholder')}
+                                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-[300px] p-0 bg-athlete-gray-700 border-gray-600" align="start">
+                                    <div className="p-3 border-b border-gray-600">
+                                      <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                        <Input
+                                          placeholder={i18n.language === 'ar' ? 'ابحث عن رياضة...' : 'Search sports...'}
+                                          value={developmentSportSearchTerm}
+                                          onChange={(e) => setDevelopmentSportSearchTerm(e.target.value)}
+                                          className="pl-9 bg-athlete-gray-700 border-athlete-gray-600 text-white placeholder:text-gray-400 focus:bg-athlete-gray-700 focus:border-athlete-gray-500"
+                                          data-testid="input-development-sport-search"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="max-h-60 overflow-auto">
+                                      {filteredDevelopmentSports.length === 0 ? (
+                                        <div className="p-3 text-center text-gray-400">
+                                          {i18n.language === 'ar' ? 'لم يتم العثور على رياضات.' : 'No sports found.'}
+                                        </div>
+                                      ) : (
+                                        filteredDevelopmentSports.map((sportItem) => (
+                                          <div
+                                            key={sportItem.id}
+                                            className="flex items-center px-3 py-2 cursor-pointer hover:bg-athlete-gray-600 text-white"
+                                            onClick={() => {
+                                              field.onChange(sportItem.name);
+                                              setDevelopmentSportDropdownOpen(false);
+                                              setDevelopmentSportSearchTerm("");
+                                            }}
+                                            data-testid={`option-development-sport-${sportItem.name.toLowerCase().replace(/\s+/g, '-')}`}
+                                          >
+                                            <Check className={`mr-2 h-4 w-4 ${field.value === sportItem.name ? "opacity-100" : "opacity-0"}`} />
+                                            {sportItem.name}
+                                          </div>
+                                        ))
+                                      )}
+                                    </div>
+                                  </PopoverContent>
+                                </Popover>
+                              </FormControl>
                               <FormMessage className="text-red-400" />
                             </FormItem>
                           )}
