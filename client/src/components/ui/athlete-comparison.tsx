@@ -860,20 +860,20 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               <Button
                                 key={athlete.id}
                                 variant="ghost"
-                                className={`w-full justify-start text-left hover:bg-athlete-gray-600 ${isArabic ? 'flex-row-reverse' : ''}`}
+                                className={`w-full justify-start text-left hover:bg-athlete-gray-600 h-auto py-3 px-3 ${isArabic ? 'flex-row-reverse' : ''}`}
                                 onClick={() => {
                                   setSelectedAthlete1(athlete.id);
                                   setOpenAthletePopover1(false);
                                   setSearchAthlete1("");
                                 }}
                               >
-                                <Check className={`h-4 w-4 ${selectedAthlete1 === athlete.id ? 'opacity-100' : 'opacity-0'} ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                                <div className="flex-1 truncate">
-                                  <div className="text-white truncate">{athlete.name}</div>
+                                <Check className={`h-4 w-4 flex-shrink-0 ${selectedAthlete1 === athlete.id ? 'opacity-100' : 'opacity-0'} ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                                <div className="flex-1 min-w-0 space-y-1">
+                                  <div className="text-white font-medium truncate">{athlete.name}</div>
                                   {athlete.nameArabic && (
                                     <div className="text-gray-400 text-sm truncate">{athlete.nameArabic}</div>
                                   )}
-                                  <div className="text-xs text-gray-500">
+                                  <div className="text-xs text-gray-500 truncate">
                                     {athlete.country && `${athlete.country}`}
                                     {athlete.rank && ` • #${athlete.rank}`}
                                   </div>
@@ -1033,20 +1033,20 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               <Button
                                 key={athlete.id}
                                 variant="ghost"
-                                className={`w-full justify-start text-left hover:bg-athlete-gray-600 ${isArabic ? 'flex-row-reverse' : ''}`}
+                                className={`w-full justify-start text-left hover:bg-athlete-gray-600 h-auto py-3 px-3 ${isArabic ? 'flex-row-reverse' : ''}`}
                                 onClick={() => {
                                   setSelectedAthlete2(athlete.id);
                                   setOpenAthletePopover2(false);
                                   setSearchAthlete2("");
                                 }}
                               >
-                                <Check className={`h-4 w-4 ${selectedAthlete2 === athlete.id ? 'opacity-100' : 'opacity-0'} ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                                <div className="flex-1 truncate">
-                                  <div className="text-white truncate">{athlete.name}</div>
+                                <Check className={`h-4 w-4 flex-shrink-0 ${selectedAthlete2 === athlete.id ? 'opacity-100' : 'opacity-0'} ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                                <div className="flex-1 min-w-0 space-y-1">
+                                  <div className="text-white font-medium truncate">{athlete.name}</div>
                                   {athlete.nameArabic && (
                                     <div className="text-gray-400 text-sm truncate">{athlete.nameArabic}</div>
                                   )}
-                                  <div className="text-xs text-gray-500">
+                                  <div className="text-xs text-gray-500 truncate">
                                     {athlete.country && `${athlete.country}`}
                                     {athlete.rank && ` • #${athlete.rank}`}
                                   </div>
