@@ -1275,6 +1275,21 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   entity2Score = currentStats.redScore.toString();
                 }
                 
+                // Get most recent scorer for each team (only for team sports)
+                let entity1Scorer = '';
+                let entity2Scorer = '';
+                if (isTeamSport) {
+                  const eventsUpToNow = scoreEvents.filter(event => event.timestamp <= currentTime);
+                  const blueEvents = eventsUpToNow.filter(e => e.player === 'blue');
+                  const redEvents = eventsUpToNow.filter(e => e.player === 'red');
+                  
+                  const lastBlueEvent = blueEvents[blueEvents.length - 1];
+                  const lastRedEvent = redEvents[redEvents.length - 1];
+                  
+                  entity1Scorer = lastBlueEvent?.playerName || '';
+                  entity2Scorer = lastRedEvent?.playerName || '';
+                }
+                
                 return (
                   <div className="bg-gradient-to-r from-blue-900/40 via-athlete-gray-800 to-red-900/40 border-b border-gray-700 px-6 py-4">
                     <div className="flex items-center justify-between max-w-4xl mx-auto">
@@ -1288,7 +1303,12 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                         )}
                         <div className="flex-1 text-left">
                           <div className="text-lg font-bold text-blue-300">{entity1Name}</div>
-                          {entity1Country && (
+                          {isTeamSport && entity1Scorer && (
+                            <div className="text-xs text-blue-400 font-medium mt-0.5" data-testid="entity1-scorer">
+                              {entity1Scorer}
+                            </div>
+                          )}
+                          {entity1Country && !isTeamSport && (
                             <div className="text-xs text-gray-400">{entity1Country}</div>
                           )}
                         </div>
@@ -1309,7 +1329,12 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                       <div className="flex items-center gap-3 flex-1 justify-end">
                         <div className="flex-1 text-right">
                           <div className="text-lg font-bold text-red-300">{entity2Name}</div>
-                          {entity2Country && (
+                          {isTeamSport && entity2Scorer && (
+                            <div className="text-xs text-red-400 font-medium mt-0.5" data-testid="entity2-scorer">
+                              {entity2Scorer}
+                            </div>
+                          )}
+                          {entity2Country && !isTeamSport && (
                             <div className="text-xs text-gray-400">{entity2Country}</div>
                           )}
                         </div>
