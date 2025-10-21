@@ -1103,6 +1103,9 @@ export function AnalysisPopup({
                       bioData.personalInfo?.recentNews || bioData.recentNews || [];
     const profileImageUrl = actualData.profileImageUrl || bioData.profileImageUrl;
     
+    // Extract athlete data for rankings display (from data or from prop)
+    const athleteData = actualData.athlete || bioData.athlete || athlete;
+    
     // If bio content is empty or just basic text, display it directly
     if (!bio || bio.length < 50) {
       return (
@@ -1308,10 +1311,10 @@ export function AnalysisPopup({
             </div>
           )}
 
-          {athlete?.rankings?.categories && athlete.rankings.categories.length > 0 && (
+          {athleteData?.rankings?.categories && athleteData.rankings.categories.length > 0 && (
             <div className="mt-4 space-y-2">
               <div className="flex flex-wrap justify-center gap-3">
-                {athlete.rankings.categories.map((rankingCategory: any, index: number) => {
+                {athleteData.rankings.categories.map((rankingCategory: any, index: number) => {
                   // Determine color based on category type
                   const isOlympic = rankingCategory.category.toLowerCase().includes('olympic');
                   const isContinental = rankingCategory.category.toLowerCase().includes('continental') || 
