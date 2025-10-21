@@ -443,6 +443,24 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
       
       // Remove the completed video analysis from queue after navigation
       removeGeneration(item.id);
+    } else if (item.serviceType === 'development-plan' || item.serviceType === 'development') {
+      // Navigate to home with development tab and store result in sessionStorage
+      sessionStorage.setItem('developmentPlanData', JSON.stringify(item.result));
+      setLocation('/?tab=development');
+      
+      // Remove the completed development plan from queue after navigation
+      setTimeout(() => {
+        removeGeneration(item.id);
+      }, 100);
+    } else if (item.serviceType === 'nutrition-plan' || item.serviceType === 'nutrition') {
+      // Navigate to home with nutrition tab and store result in sessionStorage
+      sessionStorage.setItem('nutritionPlanData', JSON.stringify(item.result));
+      setLocation('/?tab=nutrition');
+      
+      // Remove the completed nutrition plan from queue after navigation
+      setTimeout(() => {
+        removeGeneration(item.id);
+      }, 100);
     } else if (item.serviceType === 'statistics') {
       // Show analysis popup for statistics
       setSelectedResult(item);

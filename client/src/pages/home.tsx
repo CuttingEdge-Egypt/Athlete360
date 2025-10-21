@@ -181,6 +181,60 @@ export default function Home() {
     }
   }, [location]);
   
+  // Restore loading states from queue when navigating back to tabs
+  useEffect(() => {
+    const queue = (window as any).generationQueue?.getQueue?.();
+    if (!queue) return;
+    
+    // Check for running development plan jobs
+    const runningDevelopmentJob = queue.find((item: any) => 
+      (item.serviceType === 'development-plan' || item.serviceType === 'development') && 
+      (item.status === 'running' || item.status === 'pending')
+    );
+    
+    if (runningDevelopmentJob && runningDevelopmentJob.jobId) {
+      setDevelopmentJobId(runningDevelopmentJob.jobId);
+      setDevelopmentProgressMessage(runningDevelopmentJob.progressMessage || '');
+      // Progress will be updated by the polling system
+    } else if (!runningDevelopmentJob && developmentJobId) {
+      // Clear state if no running job in queue
+      const completedJob = queue.find((item: any) => 
+        (item.serviceType === 'development-plan' || item.serviceType === 'development') && 
+        item.status === 'completed' && 
+        item.jobId === developmentJobId
+      );
+      
+      if (!completedJob) {
+        setDevelopmentJobId(null);
+        setDevelopmentProgress(0);
+        setDevelopmentProgressMessage('');
+      }
+    }
+    
+    // Check for running nutrition plan jobs
+    const runningNutritionJob = queue.find((item: any) => 
+      (item.serviceType === 'nutrition-plan' || item.serviceType === 'nutrition') && 
+      (item.status === 'running' || item.status === 'pending')
+    );
+    
+    if (runningNutritionJob && runningNutritionJob.jobId) {
+      setNutritionJobId(runningNutritionJob.jobId);
+      setNutritionJobProgressMessage(runningNutritionJob.progressMessage || '');
+    } else if (!runningNutritionJob && nutritionJobId) {
+      const completedJob = queue.find((item: any) => 
+        (item.serviceType === 'nutrition-plan' || item.serviceType === 'nutrition') && 
+        item.status === 'completed' && 
+        item.jobId === nutritionJobId
+      );
+      
+      if (!completedJob) {
+        setNutritionJobId(null);
+        setNutritionProgress(0);
+        setNutritionJobProgressMessage('');
+      }
+    }
+  }, [activeTab, location, developmentJobId, nutritionJobId]);
+  
   // Sports dropdown search states
   const [sportDropdownOpen, setSportDropdownOpen] = useState(false);
   const [sportSearchTerm, setSportSearchTerm] = useState("");
