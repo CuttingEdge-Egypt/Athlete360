@@ -36,9 +36,8 @@ async function retryWithBackoff<T>(
 }
 
 // Initialize Gemini API clients
-const GEMINI_API_KEY = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || "";
-const genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-const googleGenAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+const genAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY || "" });
+const googleGenAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || "");
 
 // Initialize Gemini 2.5 Pro model with web search capabilities
 const model = googleGenAI.getGenerativeModel({ 
