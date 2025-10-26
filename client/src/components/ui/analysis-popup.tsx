@@ -728,13 +728,24 @@ export function AnalysisPopup({
 
                       <Card className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 border-blue-500/50">
                         <CardHeader>
-                          <div className={`flex items-center justify-between ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                            <CardTitle className={`text-xl text-white ${i18n.language === 'ar' ? 'text-right' : ''}`}>
-                              {i18n.language === 'ar' && phase.phase_name?.toLowerCase().includes('international competitive history') 
-                                ? 'المسيرة المهنية الدولية'
-                                : phase.phase_name}
-                            </CardTitle>
-                            <Badge className="bg-blue-600 text-white">{phase.period}</Badge>
+                          <div className="flex items-center justify-between">
+                            {i18n.language === 'ar' ? (
+                              <>
+                                <Badge className="bg-blue-600 text-white">{phase.period}</Badge>
+                                <CardTitle className="text-xl text-white text-right">
+                                  {phase.phase_name?.toLowerCase().includes('international competitive history') 
+                                    ? 'المسيرة المهنية الدولية'
+                                    : phase.phase_name}
+                                </CardTitle>
+                              </>
+                            ) : (
+                              <>
+                                <CardTitle className="text-xl text-white">
+                                  {phase.phase_name}
+                                </CardTitle>
+                                <Badge className="bg-blue-600 text-white">{phase.period}</Badge>
+                              </>
+                            )}
                           </div>
                         </CardHeader>
                         <CardContent className={`space-y-4 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
