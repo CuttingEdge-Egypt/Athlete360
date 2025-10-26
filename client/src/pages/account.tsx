@@ -140,15 +140,37 @@ export default function Account() {
     if (item.serviceType === 'comparison') {
       // Store comparison data in sessionStorage to avoid URL length limits
       sessionStorage.setItem('comparisonData', JSON.stringify(item.resultData));
-      setLocation("/?tab=comparison&data=fromStorage");
+      const url = "/?tab=comparison&data=fromStorage";
+      
+      // Use both wouter navigation and manual URL update
+      setLocation(url);
+      
+      // Also update the URL directly and trigger event
+      setTimeout(() => {
+        window.history.pushState({}, '', url);
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      }, 100);
     } else if (item.serviceType === 'video') {
       // Navigate to video analysis page with data in sessionStorage
       sessionStorage.setItem('videoAnalysisData', JSON.stringify(item.resultData));
+      
+      // Dispatch custom event to trigger reload even if already on the page
+      window.dispatchEvent(new CustomEvent('videoAnalysisDataUpdated'));
+      
       setLocation('/video-analysis');
     } else if (item.serviceType === 'development-plan') {
       // Store development plan data in sessionStorage to avoid URL length limits
       sessionStorage.setItem('developmentPlanData', JSON.stringify(item.resultData));
-      setLocation("/?tab=development&data=fromStorage");
+      const url = "/?tab=development&data=fromStorage";
+      
+      // Use both wouter navigation and manual URL update
+      setLocation(url);
+      
+      // Also update the URL directly and trigger event
+      setTimeout(() => {
+        window.history.pushState({}, '', url);
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      }, 100);
     } else {
       // For bio, rank, strengths, weaknesses - fetch athlete data to include rankings
       if (item.athleteId) {
