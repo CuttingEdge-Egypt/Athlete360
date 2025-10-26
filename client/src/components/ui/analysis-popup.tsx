@@ -741,11 +741,6 @@ export function AnalysisPopup({
                           {/* Key Achievements */}
                           {phase.key_achievements && phase.key_achievements.length > 0 && (
                             <div className="space-y-3">
-                              {t("common:analysis.careerPhases.internationalCompetitions", "International Competitions") && (
-                                <h4 className={`text-lg font-semibold text-white mb-3 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
-                                  {t("common:analysis.rank.internationalHistory", "International Competitive History")}
-                                </h4>
-                              )}
                               {phase.key_achievements
                                 .slice()
                                 .sort((a: any, b: any) => {

@@ -3,10 +3,10 @@ import { GoogleAIFileManager } from '@google/generative-ai/server';
 import fs from 'fs';
 import path from 'path';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_API_KEY = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
 
 if (!GEMINI_API_KEY) {
-  throw new Error('GEMINI_API_KEY environment variable is required');
+  throw new Error('GOOGLE_API_KEY or GEMINI_API_KEY environment variable is required');
 }
 
 const genai = new GoogleGenerativeAI(GEMINI_API_KEY!);
