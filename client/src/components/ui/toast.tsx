@@ -17,6 +17,8 @@ const ToastViewport = React.forwardRef<
       "fixed top-0 z-[99999] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
       className
     )}
+    data-react-remove-scroll-lock="false"
+    data-radix-toast-viewport=""
     {...props}
   />
 ))
@@ -47,6 +49,7 @@ const Toast = React.forwardRef<
     <ToastPrimitives.Root
       ref={ref}
       className={cn(toastVariants({ variant }), className)}
+      data-react-remove-scroll-lock="false"
       {...props}
     />
   )
