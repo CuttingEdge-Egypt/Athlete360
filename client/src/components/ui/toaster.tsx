@@ -1,4 +1,5 @@
 import { useToast } from "@/hooks/use-toast"
+import { createPortal } from "react-dom"
 import {
   Toast,
   ToastClose,
@@ -11,7 +12,7 @@ import {
 export function Toaster() {
   const { toasts } = useToast()
 
-  return (
+  const toasterContent = (
     <ToastProvider duration={5000}>
       {toasts.map(function ({ id, title, description, action, ...props }) {
         return (
@@ -29,5 +30,8 @@ export function Toaster() {
       })}
       <ToastViewport />
     </ToastProvider>
-  )
+  );
+
+  // Portal the entire toaster to document.body to avoid dialog inert issues
+  return typeof document !== 'undefined' ? createPortal(toasterContent, document.body) : toasterContent;
 }
