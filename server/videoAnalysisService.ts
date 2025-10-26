@@ -237,6 +237,9 @@ Make sure you're not scanning ${sportConfig.violationsEvents[0]} as an actual sc
   const promptScore = isTeamSport ? 
     `Watch ${roundText} only. Track EVERY scoring event in this ${sportConfig.name} match. Focus on the scoreboard for accuracy.${timeRangeInstruction}
 
+🎯 HIGHLIGHTS VIDEO INSTRUCTION:
+Only count every point you saw, you can reference how many points it was by the scoreboard and the rules of the sport. But in general this might be a highlights video so some points are not seen in the video, so again; INSTRUCTION: Only count points that were seen in the video.
+
 CRITICAL: All timestamps MUST be in MM:SS format (Minutes:Seconds). Never use HH:MM:SS format.
 
 🚨🚨🚨 ABSOLUTELY MANDATORY - NO EXCEPTIONS 🚨🚨🚨
