@@ -1017,6 +1017,14 @@ MANDATORY JSON FORMAT:
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
           try {
             console.log(`[GENERATE_SEPARATE_SCORES] Attempt ${attempt}/${maxRetries} - Generating scores for both teams...`);
+            
+            // Log the full prompt being sent
+            if (attempt === 1) {
+              console.log(`[GEMINI_PROMPT_SCORE] ===== FULL SCORE GENERATION PROMPT =====`);
+              console.log(bothTeamsScorePrompt);
+              console.log(`[GEMINI_PROMPT_SCORE] ===== END OF PROMPT =====`);
+            }
+            
             const response = await jsonModel.generateContent([videoFile, bothTeamsScorePrompt]);
             const text = response.response.text();
             
@@ -1029,6 +1037,12 @@ MANDATORY JSON FORMAT:
             }
             
             console.log(`[GENERATE_SEPARATE_SCORES] Response length: ${text.length} chars`);
+            
+            // Log the full JSON response
+            console.log(`[GEMINI_RESPONSE_SCORE] ===== FULL SCORE JSON RESPONSE =====`);
+            console.log(text);
+            console.log(`[GEMINI_RESPONSE_SCORE] ===== END OF RESPONSE =====`);
+            
             const parsedData = JSON.parse(text);
             
             // Validate that we got both teams
