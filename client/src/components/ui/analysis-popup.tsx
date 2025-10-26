@@ -739,7 +739,7 @@ export function AnalysisPopup({
                             <div className="space-y-3">
                               {t("common:analysis.careerPhases.internationalCompetitions", "International Competitions") && (
                                 <h4 className={`text-lg font-semibold text-white mb-3 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
-                                  {t("common:analysis.careerPhases.internationalCompetitions", "International Competitions")}
+                                  {t("common:analysis.rank.internationalHistory", "International Competitive History")}
                                 </h4>
                               )}
                               {phase.key_achievements
@@ -779,31 +779,61 @@ export function AnalysisPopup({
                                   
                                   return monthB - monthA; // Most recent month first
                                 })
-                                .map((achievement: any, achievementIndex: number) => (
-                                <div key={achievementIndex} className="p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-blue-500/50 transition-colors">
-                                  <div className={`flex items-start justify-between mb-2 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                                    <div className="flex-1">
-                                      <div className={`flex items-center gap-3 mb-2 ${i18n.language === 'ar' ? 'flex-row-reverse justify-end' : ''}`}>
-                                        <Badge variant="outline" className="border-yellow-400 text-yellow-400 text-xs text-center">
-                                          {achievement.month ? `${achievement.month} ${achievement.year}` : achievement.year}
-                                        </Badge>
-                                        <span className={`font-bold text-white ${i18n.language === 'ar' ? 'text-right' : ''}`}>{achievement.event_name}</span>
-                                      </div>
-                                      <div className={`text-sm text-gray-400 mb-2 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
-                                        {achievement.event_tier}
-                                      </div>
-                                    </div>
-                                    {getResultBadge(achievement.result)}
-                                  </div>
+                                .map((achievement: any, achievementIndex: number) => {
+                                  // Helper function to translate month names to Arabic
+                                  const translateMonth = (month: string, year: string) => {
+                                    if (!month) return year;
+                                    
+                                    if (i18n.language === 'ar') {
+                                      const monthTranslations: { [key: string]: string } = {
+                                        'january': 'يناير',
+                                        'february': 'فبراير',
+                                        'march': 'مارس',
+                                        'april': 'أبريل',
+                                        'may': 'مايو',
+                                        'june': 'يونيو',
+                                        'july': 'يوليو',
+                                        'august': 'أغسطس',
+                                        'september': 'سبتمبر',
+                                        'october': 'أكتوبر',
+                                        'november': 'نوفمبر',
+                                        'december': 'ديسمبر'
+                                      };
+                                      const translatedMonth = monthTranslations[month.toLowerCase()] || month;
+                                      return `${translatedMonth} ${year}`;
+                                    }
+                                    
+                                    return `${month} ${year}`;
+                                  };
                                   
-                                  {achievement.notes && 
-                                   !["simply compete result", "taekwondodata", "taekwondodata result"].includes(achievement.notes.toLowerCase().trim()) && (
-                                    <p className={`text-sm text-gray-300 leading-relaxed ${i18n.language === 'ar' ? 'text-right' : ''}`}>
-                                      {achievement.notes}
-                                    </p>
-                                  )}
-                                </div>
-                              ))}
+                                  return (
+                                    <div key={achievementIndex} className="p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-blue-500/50 transition-colors">
+                                      <div className={`flex items-start justify-between mb-2 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                                        <div className="flex-1">
+                                          <div className={`flex ${i18n.language === 'ar' ? 'flex-row-reverse justify-end gap-2' : 'flex-row gap-3'} items-center mb-2`}>
+                                            <Badge variant="outline" className="border-yellow-400 text-yellow-400 text-xs text-center">
+                                              {translateMonth(achievement.month, achievement.year)}
+                                            </Badge>
+                                            <span className={`font-bold text-white ${i18n.language === 'ar' ? 'text-right' : ''}`}>{achievement.event_name}</span>
+                                          </div>
+                                          <div className={`text-sm text-gray-400 mb-2 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
+                                            {achievement.event_tier}
+                                          </div>
+                                        </div>
+                                        <div className={i18n.language === 'ar' ? 'mr-3' : 'ml-3'}>
+                                          {getResultBadge(achievement.result)}
+                                        </div>
+                                      </div>
+                                      
+                                      {achievement.notes && 
+                                       !["simply compete result", "taekwondodata", "taekwondodata result"].includes(achievement.notes.toLowerCase().trim()) && (
+                                        <p className={`text-sm text-gray-300 leading-relaxed ${i18n.language === 'ar' ? 'text-right' : ''}`}>
+                                          {achievement.notes}
+                                        </p>
+                                      )}
+                                    </div>
+                                  );
+                                })}
                             </div>
                           )}
                         </CardContent>
