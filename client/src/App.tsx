@@ -85,8 +85,8 @@ function App() {
       <Suspense fallback={<I18nLoadingFallback />}>
         <LanguageProvider>
           <TooltipProvider>
-            <Toaster />
             <Router />
+            <Toaster />
           </TooltipProvider>
         </LanguageProvider>
       </Suspense>
