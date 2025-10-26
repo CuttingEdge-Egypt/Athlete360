@@ -2099,9 +2099,9 @@ export default function Home() {
                     {/* Last Update Timestamp - Above Card */}
                     {selectedAthlete.updatedAt && (
                       <div className="flex justify-end mb-2">
-                        <div className={`flex items-center ${i18n.language === 'ar' ? 'gap-2 flex-row-reverse' : 'gap-2'} px-3 py-1.5 bg-slate-800/60 backdrop-blur-sm rounded-lg border border-slate-600/40`}>
+                        <div className={`flex items-center ${i18n.language === 'ar' ? 'gap-3 flex-row-reverse px-4 py-2' : 'gap-2 px-3 py-1.5'} bg-slate-800/60 backdrop-blur-sm rounded-lg border border-slate-600/40`}>
                           <CalendarDays className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                          <p className="text-sm font-medium text-gray-300 whitespace-nowrap">
+                          <p className={`font-medium text-gray-300 whitespace-nowrap ${i18n.language === 'ar' ? 'text-base' : 'text-sm'}`}>
                             <span>{t('interface.lastUpdate')}: </span>
                             <span className="text-blue-400">{new Date(selectedAthlete.updatedAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { 
                               month: 'short', 
