@@ -729,13 +729,13 @@ export function AnalysisPopup({
                       <Card className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 border-blue-500/50">
                         <CardHeader>
                           {i18n.language === 'ar' ? (
-                            <div className="flex items-center justify-between">
-                              <Badge className="bg-blue-600 text-white">{phase.period}</Badge>
-                              <CardTitle className="text-xl text-white text-right">
+                            <div dir="rtl" className="flex items-center justify-between">
+                              <CardTitle className="text-xl text-white">
                                 {phase.phase_name?.toLowerCase().includes('international competitive history') 
                                   ? 'المسيرة المهنية الدولية'
                                   : phase.phase_name}
                               </CardTitle>
+                              <Badge className="bg-blue-600 text-white">{phase.period}</Badge>
                             </div>
                           ) : (
                             <div className="flex items-center justify-between">
