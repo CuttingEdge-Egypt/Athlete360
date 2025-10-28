@@ -148,7 +148,9 @@ Search the internet extensively to find:
 5. **Recent Performance**: Current form, recent victories
 6. **Competitive Advantages**: What makes them stand out
 
-Provide specific examples and evidence from recent competitions. Be detailed and analytical.`;
+Provide specific examples and evidence from recent competitions. Be detailed and analytical.
+
+Only include info that is 100% correct and has a very reliable resource about the player.`;
 };
 
 /**
