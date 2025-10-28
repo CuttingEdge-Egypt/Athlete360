@@ -53,6 +53,8 @@ import { generateAthleteBiography as generateAthleteBiographyO3, generateRankHis
 import { analyzeVideoFile, analyzeVideoComprehensive, getSportConfig } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
 import { isIndividualSport, fetchTaekwondoRankAndHistory, fetchGeneralSportRankAndHistory, fetchTeamSportPlayerInfo } from "./browserUseService";
+import staticDevPlanEn from "./static-data/dev-plan-en.json" with { type: "json" };
+import staticDevPlanAr from "./static-data/dev-plan-ar.json" with { type: "json" };
 import { getErrorMessage, getLanguageFromRequest, ErrorMessages } from "./errorMessages";
 
 import { TestingService } from "./testingService";
@@ -4431,106 +4433,8 @@ Return only valid JSON with the missing fields.`;
       res.set('Vary', 'Accept-Language');
       
       // Static development plan preview data - taken from the most recent EN/AR development plans
-      // English: "Explosive Speed Blueprint" - Basketball explosiveness and speed training
-      // Arabic: "خطة التفوق: سرعة البرق وتحكم الساحر" - Basketball dribbling and speed training
-      const staticDevelopmentPlanData = language === 'ar' ? {
-        "id": "dev_plan_1761683330024_dpzj1nic2",
-        "goal": "Improve dribbling and speed",
-        "intro": {
-          "overview": "برنامج تدريبي مكثف مصمم للاعب كرة السلة الطموح، يركز على تطوير مهارات المراوغة المتقدمة وزيادة السرعة الانفجارية والرشاقة في الملعب. الهدف هو تحويلك إلى صانع ألعاب لا يمكن إيقافه.",
-          "structure": "برنامج منظم حسب المجالات والأهداف المحددة"
-        },
-        "sport": "Basketball",
-        "title": {
-          "ar": "خطة التفوق: سرعة البرق وتحكم الساحر",
-          "en": "Elite Playmaker: Lightning Speed & Masterful Control"
-        },
-        "counts": { "goals": 4, "videos": 12, "exercises": 12 },
-        "gender": "male",
-        "version": "1.0",
-        "duration": {
-          "type": "goal-based",
-          "description": "خطة قائمة على تحليل الأهداف ونقاط الضعف"
-        },
-        "language": "ar",
-        "goalAnalysis": [
-          {
-            "id": "goal_dribble_control_01",
-            "area": "التحكم بالكرة والتنسيق",
-            "priority": 1,
-            "explanation": "المراوغة الفعالة هي القلب النابض للاعب كرة السلة. القدرة على التحكم بالكرة بشكل مستقل في كلتا اليدين والحفاظ على رأسك مرفوعًا لقراءة الملعب هو ما يفصل بين اللاعب العادي واللاعب المميز.",
-            "currentState": "قد تشعر بعدم الراحة في بعض حركات المراوغة، أو قد تجد صعوبة في تغيير السرعة بسلاسة أثناء المراوغة.",
-            "targetOutcome": "تحسين ملحوظ في التحكم بالكرة، والقدرة على تنفيذ حركات مراوغة معقدة دون النظر إلى الكرة، مما يتيح لك الحفاظ على رؤية كاملة للملعب.",
-            "exercises": [
-              {
-                "id": "bb_coord_001",
-                "name": "مراوغة بكرتين في نفس الوقت",
-                "tags": ["كرة سلة", "تحكم بالكرة", "تنسيق", "مراوغة"],
-                "goalId": "goal_dribble_control_01",
-                "videoId": "v0mS-juGJCE",
-                "videoUrl": "https://www.youtube.com/watch?v=v0mS-juGJCE",
-                "equipment": ["كرتا سلة"],
-                "targetArea": "التحكم بالكرة والتنسيق",
-                "description": "قم بالمراوغة بكرتين في نفس الوقت، واحدة بكل يد، مع الحفاظ على رأسك مرفوعًا. ابدأ بالمراوغة المتزامنة ثم انتقل إلى المراوغة المتبادلة. هذا التمرين يطور التنسيق بين اليدين والقدرة على التحكم بالكرة بشكل مستقل في كل يد.",
-                "prescription": {
-                  "reps": "60 ثانية",
-                  "sets": 3,
-                  "restSec": 60,
-                  "intensity": "متوسطة إلى عالية"
-                }
-              }
-            ]
-          }
-        ]
-      } : {
-        "id": "dev_plan_1761678736659_fss6rbpqu",
-        "goal": "Improve explosiveness and speed.",
-        "intro": {
-          "overview": "This analysis focuses on transforming your athletic ability by targeting the core components of basketball explosiveness and speed. The identified areas will help you develop a quicker first step, increase your vertical jump, and improve your ability to change direction rapidly, making you a more dominant and dynamic player on the court.",
-          "structure": "Organized by specific goal areas and targeted improvements"
-        },
-        "sport": "Basketball",
-        "title": {
-          "en": "Explosive Speed Blueprint"
-        },
-        "counts": { "goals": 4, "videos": 12, "exercises": 12 },
-        "gender": "male",
-        "version": "1.0",
-        "duration": {
-          "type": "goal-based",
-          "description": "Goal-based plan focusing on weakness analysis"
-        },
-        "language": "en",
-        "goalAnalysis": [
-          {
-            "id": "power_dev_01",
-            "area": "Power Development",
-            "priority": 1,
-            "explanation": "Explosiveness is fundamental for basketball. It is the foundation that allows you to accelerate quickly, jump higher, and move with force.",
-            "currentState": "You may be able to move quickly, but lack the raw explosive power necessary to truly dominate in dynamic situations.",
-            "targetOutcome": "Develop significantly greater explosive power output, enabling you to accelerate faster, jump higher, and execute explosive movements with greater force and speed.",
-            "exercises": [
-              {
-                "id": "power_dev_001",
-                "name": "Box Jumps",
-                "tags": ["Power Development", "Plyometrics", "Lower Body", "Explosiveness", "Vertical Jump"],
-                "goalId": "power_dev_01",
-                "videoId": "_ncOMwYif7I",
-                "videoUrl": "https://www.youtube.com/watch?v=_ncOMwYif7I",
-                "equipment": ["Plyometric Box"],
-                "targetArea": "Power Development",
-                "description": "Stand in front of a plyometric box with feet shoulder-width apart. Lower into a quarter squat, swing your arms back, then explode upwards, swinging your arms forward to propel yourself onto the box. Land softly in a squat position on the box with your knees bent. Step down, do not jump down, to reduce impact and reset for the next rep.",
-                "prescription": {
-                  "reps": 5,
-                  "sets": 4,
-                  "restSec": 90,
-                  "intensity": "Maximal effort on each jump. Focus on height and explosive speed. The box height should be challenging but achievable with perfect form."
-                }
-              }
-            ]
-          }
-        ]
-      };
+      // These are imported at the top of the file from server/static-data/ directory
+      const staticDevelopmentPlanData = language === 'ar' ? staticDevPlanAr : staticDevPlanEn;
       
       const staticDevelopmentPlanPreview = {
         serviceType: 'development-plan',
