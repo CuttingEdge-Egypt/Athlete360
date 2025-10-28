@@ -1349,7 +1349,8 @@ export function AnalysisPopup({
             </div>
           )}
 
-          {athleteData?.rankings?.categories && athleteData.rankings.categories.length > 0 && (
+          {/* Only show rankings when we have an athleteId (not in preview mode) */}
+          {athleteId && athleteData?.rankings?.categories && athleteData.rankings.categories.length > 0 && (
             <div className="mt-4 space-y-2">
               <div className="flex flex-wrap justify-center gap-3">
                 {athleteData.rankings.categories.map((rankingCategory: any, index: number) => {
