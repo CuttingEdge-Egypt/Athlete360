@@ -1524,7 +1524,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           rank: athlete.rank,
           country: athlete.country,
           achievements: athlete.achievements,
-          competitionRecord: enhancedData?.currentRecord || "N/A"
+          competitionRecord: enhancedData?.currentRecord || "N/A",
+          // Include personal info
+          age: athlete.personalInfo?.age || athlete.age?.toString() || "N/A",
+          dateOfBirth: athlete.personalInfo?.dateOfBirth || "N/A",
+          height: athlete.personalInfo?.height || "N/A",
+          category: athlete.personalInfo?.category || "N/A",
+          gender: athlete.gender || "N/A"
         };
         
         try {
@@ -1690,7 +1696,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           rank: athlete.rank,
           country: athlete.country,
           achievements: athlete.achievements,
-          competitionRecord: enhancedData?.currentRecord || "N/A"
+          competitionRecord: enhancedData?.currentRecord || "N/A",
+          // Include personal info
+          age: athlete.personalInfo?.age || athlete.age?.toString() || "N/A",
+          dateOfBirth: athlete.personalInfo?.dateOfBirth || "N/A",
+          height: athlete.personalInfo?.height || "N/A",
+          category: athlete.personalInfo?.category || "N/A",
+          gender: athlete.gender || "N/A"
         };
         
         try {
@@ -2516,7 +2528,13 @@ Return only valid JSON with the missing fields.`;
         rank: athlete.rank,
         country: athlete.country,
         achievements: athlete.achievements,
-        competitionRecord: enhancedData?.currentRecord || "N/A"
+        competitionRecord: enhancedData?.currentRecord || "N/A",
+        // Include personal info
+        age: athlete.personalInfo?.age || athlete.age?.toString() || "N/A",
+        dateOfBirth: athlete.personalInfo?.dateOfBirth || "N/A",
+        height: athlete.personalInfo?.height || "N/A",
+        category: athlete.personalInfo?.category || "N/A",
+        gender: athlete.gender || "N/A"
       };
       
       // Generate athlete-specific beat strategies

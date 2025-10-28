@@ -704,6 +704,11 @@ Use the following athlete information for personalized analysis:
 - Current Rank: ${athleteData?.rank || 'N/A'}
 - Competition Record: ${athleteData?.competitionRecord || 'N/A'}
 - Achievements: ${athleteData?.achievements?.join(', ') || 'N/A'}
+- Age: ${athleteData?.age || 'N/A'}
+- Date of Birth: ${athleteData?.dateOfBirth || 'N/A'}
+- Height: ${athleteData?.height || 'N/A'}
+- Category: ${athleteData?.category || 'N/A'}
+- Gender: ${athleteData?.gender || 'N/A'}
 
 WEB SEARCH STRATEGY:
 1. Search "${athleteName} ${sport} strengths analysis"
@@ -803,6 +808,11 @@ Use the following athlete information for personalized analysis:
 - Current Rank: ${athleteData?.rank || 'N/A'}
 - Competition Record: ${athleteData?.competitionRecord || 'N/A'}
 - Achievements: ${athleteData?.achievements?.join(', ') || 'N/A'}
+- Age: ${athleteData?.age || 'N/A'}
+- Date of Birth: ${athleteData?.dateOfBirth || 'N/A'}
+- Height: ${athleteData?.height || 'N/A'}
+- Category: ${athleteData?.category || 'N/A'}
+- Gender: ${athleteData?.gender || 'N/A'}
 
 WEB SEARCH STRATEGY:
 1. Search "${athleteName} ${sport} weaknesses analysis"

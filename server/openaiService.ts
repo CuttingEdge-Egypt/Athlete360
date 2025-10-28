@@ -1537,6 +1537,11 @@ CRITICAL ERROR HANDLING:
     - Current Rank: ${athleteData.rank || 'N/A'}
     - Competition Record: ${athleteData.competitionRecord || 'N/A'}
     - Known Achievements: ${athleteData.achievements?.join(', ') || 'N/A'}
+    - Age: ${athleteData.age || 'N/A'}
+    - Date of Birth: ${athleteData.dateOfBirth || 'N/A'}
+    - Height: ${athleteData.height || 'N/A'}
+    - Category: ${athleteData.category || 'N/A'}
+    - Gender: ${athleteData.gender || 'N/A'}
 
     Search the web for recent matches, fight videos, competition footage, and expert analysis of ${athleteName} to understand their:
     - Fighting style and preferred techniques
@@ -2244,7 +2249,18 @@ CRITICAL INSTRUCTIONS:
 
 ATHLETES TO RESEARCH:
 Athlete 1: ${athlete1.name} from ${athlete1.country || 'Unknown country'} (${sport})
+  - Age: ${athlete1.personalInfo?.age || athlete1.age || 'N/A'}
+  - Height: ${athlete1.personalInfo?.height || 'N/A'}
+  - Category: ${athlete1.personalInfo?.category || 'N/A'}
+  - Gender: ${athlete1.gender || 'N/A'}
+  - Current Rank: ${athlete1.rank || 'N/A'}
+
 Athlete 2: ${athlete2.name} from ${athlete2.country || 'Unknown country'} (${sport})
+  - Age: ${athlete2.personalInfo?.age || athlete2.age || 'N/A'}
+  - Height: ${athlete2.personalInfo?.height || 'N/A'}
+  - Category: ${athlete2.personalInfo?.category || 'N/A'}
+  - Gender: ${athlete2.gender || 'N/A'}
+  - Current Rank: ${athlete2.rank || 'N/A'}
 
 SEARCH AND ANALYZE:
 - Current world rankings and recent competition results
