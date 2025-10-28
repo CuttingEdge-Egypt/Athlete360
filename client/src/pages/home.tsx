@@ -2256,7 +2256,7 @@ export default function Home() {
                             </div>
                             
                             {/* Rankings Display - aligned with name */}
-                            <div className="flex flex-wrap items-start justify-end gap-1.5">
+                            <div className="flex flex-wrap items-start justify-end gap-2">
                               {selectedAthlete.rankings?.categories && selectedAthlete.rankings.categories.length > 0 ? (
                                 selectedAthlete.rankings.categories.map((rankInfo, index) => {
                                   // Determine rank type and color from the category text
@@ -2269,39 +2269,141 @@ export default function Home() {
                                                        rankInfo.category.toLowerCase().includes('pan american');
                                   const isNational = rankInfo.category.toLowerCase().includes('national');
                                   
-                                  // Choose color scheme
-                                  let bgColor = 'bg-orange-500/20';
-                                  let borderColor = 'border-orange-400';
-                                  let textColor = 'text-orange-300';
-                                  let testId = 'rank-world';
+                                  // Determine if top 3 rank
+                                  const rankNum = parseInt(rankInfo.rank);
+                                  const isTop3 = rankNum >= 1 && rankNum <= 3;
+                                  
+                                  // Choose color scheme based on rank type
+                                  let bgColor, borderColor, textColor, categoryTextColor, testId, medalEmoji;
                                   
                                   if (isOlympic) {
-                                    bgColor = 'bg-yellow-500/20';
-                                    borderColor = 'border-yellow-400';
-                                    textColor = 'text-yellow-300';
                                     testId = 'rank-olympic';
+                                    if (rankNum === 1) {
+                                      bgColor = 'bg-gradient-to-br from-yellow-400/30 via-amber-500/30 to-yellow-600/30';
+                                      borderColor = 'border-yellow-400';
+                                      textColor = 'text-yellow-300';
+                                      categoryTextColor = 'text-yellow-200/90';
+                                      medalEmoji = '🥇';
+                                    } else if (rankNum === 2) {
+                                      bgColor = 'bg-gradient-to-br from-gray-300/30 via-slate-400/30 to-gray-500/30';
+                                      borderColor = 'border-gray-300';
+                                      textColor = 'text-gray-200';
+                                      categoryTextColor = 'text-gray-300/90';
+                                      medalEmoji = '🥈';
+                                    } else if (rankNum === 3) {
+                                      bgColor = 'bg-gradient-to-br from-orange-400/30 via-amber-600/30 to-orange-700/30';
+                                      borderColor = 'border-orange-400';
+                                      textColor = 'text-orange-300';
+                                      categoryTextColor = 'text-orange-200/90';
+                                      medalEmoji = '🥉';
+                                    } else {
+                                      bgColor = 'bg-yellow-500/15';
+                                      borderColor = 'border-yellow-500/60';
+                                      textColor = 'text-yellow-300';
+                                      categoryTextColor = 'text-yellow-200/70';
+                                    }
+                                  } else if (isWorld) {
+                                    testId = 'rank-world';
+                                    if (rankNum === 1) {
+                                      bgColor = 'bg-gradient-to-br from-yellow-400/30 via-amber-500/30 to-yellow-600/30';
+                                      borderColor = 'border-yellow-400';
+                                      textColor = 'text-yellow-300';
+                                      categoryTextColor = 'text-yellow-200/90';
+                                      medalEmoji = '🥇';
+                                    } else if (rankNum === 2) {
+                                      bgColor = 'bg-gradient-to-br from-gray-300/30 via-slate-400/30 to-gray-500/30';
+                                      borderColor = 'border-gray-300';
+                                      textColor = 'text-gray-200';
+                                      categoryTextColor = 'text-gray-300/90';
+                                      medalEmoji = '🥈';
+                                    } else if (rankNum === 3) {
+                                      bgColor = 'bg-gradient-to-br from-orange-400/30 via-amber-600/30 to-orange-700/30';
+                                      borderColor = 'border-orange-400';
+                                      textColor = 'text-orange-300';
+                                      categoryTextColor = 'text-orange-200/90';
+                                      medalEmoji = '🥉';
+                                    } else {
+                                      bgColor = 'bg-orange-500/15';
+                                      borderColor = 'border-orange-500/60';
+                                      textColor = 'text-orange-300';
+                                      categoryTextColor = 'text-orange-200/70';
+                                    }
                                   } else if (isContinental) {
-                                    bgColor = 'bg-green-500/20';
-                                    borderColor = 'border-green-400';
-                                    textColor = 'text-green-300';
                                     testId = 'rank-continental';
+                                    if (rankNum === 1) {
+                                      bgColor = 'bg-gradient-to-br from-yellow-400/30 via-amber-500/30 to-yellow-600/30';
+                                      borderColor = 'border-yellow-400';
+                                      textColor = 'text-yellow-300';
+                                      categoryTextColor = 'text-yellow-200/90';
+                                      medalEmoji = '🥇';
+                                    } else if (rankNum === 2) {
+                                      bgColor = 'bg-gradient-to-br from-gray-300/30 via-slate-400/30 to-gray-500/30';
+                                      borderColor = 'border-gray-300';
+                                      textColor = 'text-gray-200';
+                                      categoryTextColor = 'text-gray-300/90';
+                                      medalEmoji = '🥈';
+                                    } else if (rankNum === 3) {
+                                      bgColor = 'bg-gradient-to-br from-orange-400/30 via-amber-600/30 to-orange-700/30';
+                                      borderColor = 'border-orange-400';
+                                      textColor = 'text-orange-300';
+                                      categoryTextColor = 'text-orange-200/90';
+                                      medalEmoji = '🥉';
+                                    } else {
+                                      bgColor = 'bg-green-500/15';
+                                      borderColor = 'border-green-500/60';
+                                      textColor = 'text-green-300';
+                                      categoryTextColor = 'text-green-200/70';
+                                    }
                                   } else if (isNational) {
-                                    bgColor = 'bg-blue-500/20';
-                                    borderColor = 'border-blue-400';
-                                    textColor = 'text-blue-300';
                                     testId = 'rank-national';
+                                    if (rankNum === 1) {
+                                      bgColor = 'bg-gradient-to-br from-yellow-400/30 via-amber-500/30 to-yellow-600/30';
+                                      borderColor = 'border-yellow-400';
+                                      textColor = 'text-yellow-300';
+                                      categoryTextColor = 'text-yellow-200/90';
+                                      medalEmoji = '🥇';
+                                    } else if (rankNum === 2) {
+                                      bgColor = 'bg-gradient-to-br from-gray-300/30 via-slate-400/30 to-gray-500/30';
+                                      borderColor = 'border-gray-300';
+                                      textColor = 'text-gray-200';
+                                      categoryTextColor = 'text-gray-300/90';
+                                      medalEmoji = '🥈';
+                                    } else if (rankNum === 3) {
+                                      bgColor = 'bg-gradient-to-br from-orange-400/30 via-amber-600/30 to-orange-700/30';
+                                      borderColor = 'border-orange-400';
+                                      textColor = 'text-orange-300';
+                                      categoryTextColor = 'text-orange-200/90';
+                                      medalEmoji = '🥉';
+                                    } else {
+                                      bgColor = 'bg-blue-500/15';
+                                      borderColor = 'border-blue-500/60';
+                                      textColor = 'text-blue-300';
+                                      categoryTextColor = 'text-blue-200/70';
+                                    }
                                   }
                                   
                                   return (
                                     <div 
                                       key={index}
-                                      className={`flex items-center space-x-1 ${bgColor} border-2 ${borderColor} px-2 py-1 rounded-lg`} 
+                                      className={`relative ${bgColor} border-2 ${borderColor} rounded-xl px-3 py-2 ${isTop3 ? 'shadow-lg' : 'shadow-md'} hover:scale-105 transition-transform duration-200 min-w-fit`} 
                                       data-testid={testId}
                                     >
-                                      <Trophy className={`w-3 h-3 ${textColor}`} />
-                                      <span className={`${textColor} font-bold text-xs`}>
-                                        {rankInfo.category} #{rankInfo.rank}
-                                      </span>
+                                      <div className="flex items-center gap-2">
+                                        {medalEmoji && (
+                                          <span className={`text-2xl ${isTop3 ? 'animate-pulse' : ''}`}>{medalEmoji}</span>
+                                        )}
+                                        {!medalEmoji && <Trophy className={`w-4 h-4 ${textColor}`} />}
+                                        <div className="flex flex-col">
+                                          <div className="flex items-baseline gap-1">
+                                            <span className={`${textColor} font-black ${isTop3 ? 'text-2xl' : 'text-xl'} leading-none`}>
+                                              #{rankInfo.rank}
+                                            </span>
+                                          </div>
+                                          <span className={`${categoryTextColor} text-[10px] font-semibold leading-tight whitespace-nowrap`}>
+                                            {rankInfo.category}
+                                          </span>
+                                        </div>
+                                      </div>
                                     </div>
                                   );
                                 })
