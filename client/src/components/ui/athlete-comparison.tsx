@@ -518,8 +518,19 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
   });
 
   // Cancel comparison handler
-  const handleCancelComparison = () => {
-    if (abortControllerRef.current) {
+  const handleCancelComparison = async () => {
+    if (abortControllerRef.current && queueIdRef.current) {
+      try {
+        // Send cancellation request to backend
+        await apiRequest("POST", "/api/athletes/compare/cancel", {
+          queueId: queueIdRef.current
+        });
+        console.log('[COMPARISON] Cancellation request sent to backend');
+      } catch (error) {
+        console.error('[COMPARISON] Failed to send cancellation to backend:', error);
+      }
+      
+      // Abort the frontend request
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
       // Don't clear queueIdRef yet - let the mutation's onSettled handler do it

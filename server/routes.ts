@@ -61,6 +61,9 @@ import { Readable } from "stream";
 import multer from "multer";
 import { spawn } from "child_process";
 
+// Track cancelled comparison generations
+const cancelledComparisons = new Set<string>();
+
 // New Python-based image search function
 async function searchAthleteImageWithPython(
   name: string,
@@ -3213,16 +3216,59 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
+  // Cancel athlete comparison
+  app.post('/api/athletes/compare/cancel', isAuthenticated, async (req, res) => {
+    try {
+      const { queueId } = req.body;
+      const userId = (req.user as any)?.claims?.sub;
+      
+      if (!queueId) {
+        return res.status(400).json({ message: "Queue ID is required" });
+      }
+
+      // Add to cancelled set
+      cancelledComparisons.add(queueId);
+      console.log(`🚫 Comparison ${queueId} marked for cancellation`);
+
+      // Broadcast cancellation message
+      if (wss) {
+        wss.clients.forEach((client) => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({
+              type: 'comparison-cancelled',
+              queueId,
+              userId
+            }));
+          }
+        });
+      }
+
+      res.json({ success: true, message: "Comparison cancellation requested" });
+    } catch (error) {
+      console.error('Error cancelling comparison:', error);
+      res.status(500).json({ message: "Failed to cancel comparison" });
+    }
+  });
+
   // Compare two athletes using modular Gemini-2.5-pro approach
   app.post('/api/athletes/compare', isAuthenticated, async (req, res) => {
     const tokenCost = 100; // Higher cost for comparison analysis
     let queueId: string | undefined; // Define queueId for queue management
+    let tokensDeducted = false; // Track if tokens were deducted
     try {
       const userId = (req.user as any)?.claims?.sub;
       const { athlete1Id, athlete2Id, language = 'english', queueId: clientQueueId } = req.body;
       
       // Use client-provided queue ID or generate one
       queueId = clientQueueId || `comp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Clear from cancelled set if it was previously cancelled
+      if (queueId) {
+        cancelledComparisons.delete(queueId);
+      }
+
+      // Helper function to check if cancelled
+      const isCancelled = () => cancelledComparisons.has(queueId!);
 
       // Helper function to broadcast progress updates
       const broadcastProgress = (message: string, progress: number) => {
@@ -3268,6 +3314,7 @@ Return only valid JSON with the missing fields.`;
 
       // Deduct tokens
       await storage.deductTokens(userId, tokenCost);
+      tokensDeducted = true;
 
       // Create transaction
       await storage.createTransaction({
@@ -3276,6 +3323,11 @@ Return only valid JSON with the missing fields.`;
         tokensDeducted: tokenCost,
         serviceType: "comparison"
       });
+      
+      // Check if cancelled before starting generation
+      if (isCancelled()) {
+        throw new Error('COMPARISON_CANCELLED');
+      }
 
       // Get sport context
       const sport = await storage.getSportById(athlete1.sportId);
@@ -3316,12 +3368,23 @@ Return only valid JSON with the missing fields.`;
       
       // Step 1: Generate Overview first with o3
       broadcastProgress("Analyzing athlete profiles...", 15);
+      
+      // Check if cancelled before overview generation
+      if (isCancelled()) {
+        throw new Error('COMPARISON_CANCELLED');
+      }
+      
       console.log(`🚀 Step 1: Generating Overview with o3...`);
       const overviewResult = await generateOverviewComparison(athlete1ForComparison, athlete2ForComparison, sportName, language);
       console.log('✅ Overview completed');
       broadcastProgress("Overview complete, analyzing strengths...", 35);
 
       // Step 2: Execute all analyses in parallel (removed Statistics)
+      // Check if cancelled before parallel analyses
+      if (isCancelled()) {
+        throw new Error('COMPARISON_CANCELLED');
+      }
+      
       console.log(`🚀 Step 2: Starting parallel o3 analyses (Strengths, Weaknesses, Competition History)...`);
       
       const [
@@ -3338,6 +3401,11 @@ Return only valid JSON with the missing fields.`;
       broadcastProgress("Generating head-to-head prediction...", 75);
 
       // Step 3: Generate Head-to-Head prediction
+      // Check if cancelled before head-to-head
+      if (isCancelled()) {
+        throw new Error('COMPARISON_CANCELLED');
+      }
+      
       console.log(`🚀 Step 3: Generating Head-to-Head prediction with o3...`);
       const headToHeadResult = await generateHeadToHeadComparison(
         athlete1ForComparison,
@@ -3416,6 +3484,11 @@ Return only valid JSON with the missing fields.`;
       // Send completion message to update queue status
       broadcastProgress("Comparison complete!", 100);
       
+      // Clean up cancellation tracking
+      if (queueId) {
+        cancelledComparisons.delete(queueId);
+      }
+      
       // Also send a completion event to mark queue item as completed
       if (wss) {
         wss.clients.forEach((client) => {
@@ -3434,27 +3507,43 @@ Return only valid JSON with the missing fields.`;
     } catch (error) {
       console.error(`❌ Modular comparison failed:`, error);
       
-      // Provide token refund for failed comparison
+      // Clean up cancellation tracking
+      if (queueId) {
+        cancelledComparisons.delete(queueId);
+      }
+      
+      // Check if this was a cancellation
+      const isCancellation = error instanceof Error && error.message === 'COMPARISON_CANCELLED';
+      
+      // Provide token refund (full refund for cancellation, partial for failure)
       const user = await storage.getUser((req.user as any)?.claims?.sub);
-      if (user && tokenCost > 0 && user.tokens !== null) {
-        const refundAmount = Math.floor(tokenCost * 0.8);
+      if (user && tokenCost > 0 && user.tokens !== null && tokensDeducted) {
+        const refundAmount = isCancellation ? tokenCost : Math.floor(tokenCost * 0.8);
         console.log(`REFUNDING ${refundAmount} tokens to user ${user.id}: ${user.tokens} → ${user.tokens + refundAmount}`);
         
         await storage.updateUserTokens(user.id, user.tokens + refundAmount);
         
         await storage.createTransaction({
           userId: user.id,
-          action: `Refund for failed athlete comparison`,
+          action: isCancellation ? `Refund for cancelled athlete comparison` : `Refund for failed athlete comparison`,
           tokensDeducted: -refundAmount, // negative for refund
           serviceType: 'comparison'
         });
         
-        console.log(`🔄 REFUNDED ${refundAmount} tokens to user ${user.id} for failed comparison`);
+        console.log(`🔄 REFUNDED ${refundAmount} tokens to user ${user.id} for ${isCancellation ? 'cancelled' : 'failed'} comparison`);
       }
       
-      // Update queue status to error if it failed
+      // Update queue status to error if it failed (or cancelled if it was cancelled)
       if (queueId && (global as any).generationQueue) {
-        (global as any).generationQueue.updateStatus(queueId, 'error');
+        (global as any).generationQueue.updateStatus(queueId, isCancellation ? 'cancelled' : 'error');
+      }
+      
+      // Return appropriate status for cancellation vs error
+      if (isCancellation) {
+        return res.status(499).json({
+          message: "Comparison cancelled by user",
+          cancelled: true
+        });
       }
       
       res.status(500).json({ 
