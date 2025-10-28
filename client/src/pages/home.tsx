@@ -2385,21 +2385,21 @@ export default function Home() {
                                   return (
                                     <div 
                                       key={index}
-                                      className={`relative ${bgColor} border-2 ${borderColor} rounded-xl px-3 py-2 ${isTop3 ? 'shadow-lg' : 'shadow-md'} hover:scale-105 transition-transform duration-200 min-w-fit`} 
+                                      className={`relative ${bgColor} border-2 ${borderColor} rounded-xl px-3 py-2 ${isTop3 ? 'shadow-lg' : 'shadow-md'} hover:scale-105 transition-transform duration-200 w-full`} 
                                       data-testid={testId}
                                     >
                                       <div className="flex items-center gap-2">
                                         {medalEmoji && (
-                                          <span className={`text-2xl ${isTop3 ? 'animate-pulse' : ''}`}>{medalEmoji}</span>
+                                          <span className={`text-2xl flex-shrink-0 ${isTop3 ? 'animate-pulse' : ''}`}>{medalEmoji}</span>
                                         )}
-                                        {!medalEmoji && <Trophy className={`w-4 h-4 ${textColor}`} />}
-                                        <div className="flex flex-col">
+                                        {!medalEmoji && <Trophy className={`w-4 h-4 flex-shrink-0 ${textColor}`} />}
+                                        <div className="flex flex-col min-w-0 flex-1">
                                           <div className="flex items-baseline gap-1">
                                             <span className={`${textColor} font-black ${isTop3 ? 'text-2xl' : 'text-xl'} leading-none`}>
                                               #{rankInfo.rank}
                                             </span>
                                           </div>
-                                          <span className={`${categoryTextColor} text-[10px] font-semibold leading-tight whitespace-nowrap`}>
+                                          <span className={`${categoryTextColor} text-[10px] font-semibold leading-tight truncate`}>
                                             {rankInfo.category}
                                           </span>
                                         </div>
