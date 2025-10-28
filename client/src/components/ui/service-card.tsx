@@ -53,6 +53,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
   const [abortController, setAbortController] = useState<AbortController | null>(null);
   const [progressPhase, setProgressPhase] = useState<string>("");
   const [progressPercent, setProgressPercent] = useState(0);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
   
   const IconComponent = iconMap[service.icon as keyof typeof iconMap] || User;
 
@@ -222,6 +223,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       }
       
       setAnalysisData(data);
+      setIsPreviewMode(false);
       setShowAnalysisPopup(true);
       setIsProcessing(false);
       setCurrentQueueId(null);
@@ -316,6 +318,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       
       if (data.success && data.data) {
         setAnalysisData(data.data);
+        setIsPreviewMode(true);
         setShowAnalysisPopup(true);
       } else {
         toast({
@@ -426,12 +429,13 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
             setShowAnalysisPopup(open);
             if (!open) {
               setAnalysisData(null);
+              setIsPreviewMode(false);
             }
           }}
           type={service.id}
           data={analysisData}
           athleteName={athlete.name}
-          athleteId={athlete.id || ""}
+          athleteId={isPreviewMode ? undefined : (athlete.id || "")}
           athlete={athlete}
           onRefresh={() => {
             // Refresh the athlete data
