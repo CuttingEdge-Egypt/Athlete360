@@ -4430,7 +4430,131 @@ Return only valid JSON with the missing fields.`;
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.set('Vary', 'Accept-Language');
       
-      // Get the most recent analyses from the database (use actual service types from DB)
+      // Static development plan preview data (not fetched from database)
+      const staticDevelopmentPlanPreview = {
+        serviceType: 'development-plan',
+        resultData: {
+          language: language,
+          goalAnalysis: {
+            primaryGoal: language === 'ar' 
+              ? 'تحسين السرعة والقدرة الانفجارية للمنافسات'
+              : 'Improve speed and explosive power for competitions',
+            keyObjectives: language === 'ar'
+              ? [
+                  'زيادة سرعة الحركة بنسبة 15%',
+                  'تحسين قوة الركلات الجانبية',
+                  'تطوير سرعة رد الفعل',
+                  'تحسين القدرة على التحمل في الجولات الثلاث'
+                ]
+              : [
+                  'Increase movement speed by 15%',
+                  'Improve side kick power',
+                  'Develop reaction time',
+                  'Enhance endurance for three rounds'
+                ],
+            targetTimeline: language === 'ar' ? '12 أسبوع' : '12 weeks',
+            currentLevel: language === 'ar' ? 'متوسط إلى متقدم' : 'Intermediate to Advanced'
+          },
+          weeklyPlan: [
+            {
+              week: 1,
+              focus: language === 'ar' ? 'بناء الأساس' : 'Foundation Building',
+              sessions: [
+                {
+                  day: language === 'ar' ? 'الإثنين' : 'Monday',
+                  type: language === 'ar' ? 'تقنية' : 'Technique',
+                  duration: language === 'ar' ? '90 دقيقة' : '90 minutes',
+                  exercises: language === 'ar'
+                    ? [
+                        { name: 'إحماء ديناميكي', sets: '1', reps: '15 دقيقة', rest: '-' },
+                        { name: 'تمرين الركلات الأمامية', sets: '3', reps: '20', rest: '60 ثانية' },
+                        { name: 'تمرين الركلات الجانبية', sets: '3', reps: '15', rest: '60 ثانية' },
+                        { name: 'تمرين الركلات الدائرية', sets: '3', reps: '15', rest: '60 ثانية' }
+                      ]
+                    : [
+                        { name: 'Dynamic Warm-up', sets: '1', reps: '15 min', rest: '-' },
+                        { name: 'Front Kick Drills', sets: '3', reps: '20', rest: '60s' },
+                        { name: 'Side Kick Drills', sets: '3', reps: '15', rest: '60s' },
+                        { name: 'Roundhouse Kick Drills', sets: '3', reps: '15', rest: '60s' }
+                      ]
+                },
+                {
+                  day: language === 'ar' ? 'الأربعاء' : 'Wednesday',
+                  type: language === 'ar' ? 'قوة وتكييف' : 'Strength & Conditioning',
+                  duration: language === 'ar' ? '75 دقيقة' : '75 minutes',
+                  exercises: language === 'ar'
+                    ? [
+                        { name: 'القرفصاء', sets: '4', reps: '8-10', rest: '90 ثانية' },
+                        { name: 'القفز العمودي', sets: '3', reps: '12', rest: '60 ثانية' },
+                        { name: 'تمارين البطن', sets: '3', reps: '20', rest: '45 ثانية' }
+                      ]
+                    : [
+                        { name: 'Squats', sets: '4', reps: '8-10', rest: '90s' },
+                        { name: 'Box Jumps', sets: '3', reps: '12', rest: '60s' },
+                        { name: 'Core Work', sets: '3', reps: '20', rest: '45s' }
+                      ]
+                },
+                {
+                  day: language === 'ar' ? 'الجمعة' : 'Friday',
+                  type: language === 'ar' ? 'مباريات' : 'Sparring',
+                  duration: language === 'ar' ? '60 دقيقة' : '60 minutes',
+                  exercises: language === 'ar'
+                    ? [
+                        { name: 'إحماء خفيف', sets: '1', reps: '10 دقائق', rest: '-' },
+                        { name: 'مباريات مضبوطة', sets: '5', reps: '3 دقائق', rest: '2 دقيقة' },
+                        { name: 'تهدئة', sets: '1', reps: '10 دقائق', rest: '-' }
+                      ]
+                    : [
+                        { name: 'Light Warm-up', sets: '1', reps: '10 min', rest: '-' },
+                        { name: 'Controlled Sparring', sets: '5', reps: '3 min', rest: '2 min' },
+                        { name: 'Cool Down', sets: '1', reps: '10 min', rest: '-' }
+                      ]
+                }
+              ]
+            }
+          ],
+          progressionPlan: language === 'ar'
+            ? [
+                'الأسابيع 1-4: بناء القاعدة الفنية والجسدية',
+                'الأسابيع 5-8: زيادة الشدة والتركيز على السرعة',
+                'الأسابيع 9-12: التلميع والتحضير للمنافسة'
+              ]
+            : [
+                'Weeks 1-4: Build technical and physical foundation',
+                'Weeks 5-8: Increase intensity and focus on speed',
+                'Weeks 9-12: Competition preparation and refinement'
+              ],
+          nutritionGuidelines: language === 'ar'
+            ? [
+                'تناول 1.8-2.2 جرام من البروتين لكل كيلوجرام من وزن الجسم',
+                'الكربوهيدرات المعقدة قبل التدريب بـ 2-3 ساعات',
+                'الترطيب: 2-3 لتر من الماء يوميًا',
+                'وجبات صغيرة متكررة (5-6 وجبات يوميًا)'
+              ]
+            : [
+                'Consume 1.8-2.2g protein per kg body weight',
+                'Complex carbs 2-3 hours before training',
+                'Hydration: 2-3L water daily',
+                'Small frequent meals (5-6 per day)'
+              ],
+          recoveryProtocol: language === 'ar'
+            ? [
+                '8 ساعات من النوم الجيد',
+                'التمدد الثابت بعد التدريب',
+                'تدليك الأنسجة العميقة أسبوعيًا',
+                'يوم راحة كامل كل 3-4 أيام'
+              ]
+            : [
+                '8 hours quality sleep',
+                'Static stretching post-training',
+                'Deep tissue massage weekly',
+                'Complete rest day every 3-4 days'
+              ]
+        },
+        createdAt: new Date().toISOString()
+      };
+      
+      // Get the most recent analyses from the database (exclude development-plan as it's static)
       const dbServiceTypes = [
         'bio',
         'strengths', 
@@ -4439,7 +4563,7 @@ Return only valid JSON with the missing fields.`;
         'comparison',
         'nutrition',      // maps to nutrition-plan in frontend  
         'nutrition-plan', // also check for this
-        'development-plan', // Use only development-plan (has goalAnalysis structure), not 'development' (old weekly structure)
+        // 'development-plan' is now static, not fetched from DB
         'video',
         'rank'
       ];
@@ -4456,8 +4580,6 @@ Return only valid JSON with the missing fields.`;
         'comparison': 'comparison',
         'nutrition': 'nutrition-plan',
         'nutrition-plan': 'nutrition-plan',
-        'development-plan': 'development-plan', // Only use development-plan (has goalAnalysis)
-        'development': 'development-plan', // Map old 'development' to 'development-plan' for frontend
         'video': 'video',
         'rank': 'rank'
       };
@@ -4471,6 +4593,9 @@ Return only valid JSON with the missing fields.`;
         },
         createdAt: log.createdAt
       }));
+      
+      // Add static development plan preview to the response
+      previewData.push(staticDevelopmentPlanPreview as any);
       
       res.json({
         success: true,
