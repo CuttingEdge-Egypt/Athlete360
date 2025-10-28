@@ -89,6 +89,7 @@ Writing requirements:
 - Maintain chronological flow from early career to present
 - Be factual and cite recent information
 - Write 4-6 detailed paragraphs (800-1200 words)
+- Only include info that is 100% correct and has a very reliable resource about the player, especially in player's story
 
 Search extensively to ensure accuracy and currency of information.`;
 };
