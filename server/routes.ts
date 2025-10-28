@@ -3425,14 +3425,16 @@ Return only valid JSON with the missing fields.`;
           country: athlete1.country || "Unknown",
           profileImageUrl: athlete1.profileImageUrl || "",
           rank: athlete1.rank || "N/A",
-          rankings: athlete1.rankings // Include full rankings object with categories
+          rankings: athlete1.rankings, // Include full rankings object with categories
+          competitiveHistory: athlete1.competitiveHistory // Include competitive history for detailed display
         },
         athlete2: {
           name: athlete2.name,
           country: athlete2.country || "Unknown", 
           profileImageUrl: athlete2.profileImageUrl || "",
           rank: athlete2.rank || "N/A",
-          rankings: athlete2.rankings // Include full rankings object with categories
+          rankings: athlete2.rankings, // Include full rankings object with categories
+          competitiveHistory: athlete2.competitiveHistory // Include competitive history for detailed display
         },
         tabs: {
           overview: {
