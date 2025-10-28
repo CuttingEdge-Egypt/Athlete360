@@ -234,3 +234,9 @@
     border-color: hsl(207, 90%, 54%);
   }
 }
+
+/* Fix for toast notifications blocked by Radix Dialog's RemoveScroll */
+[data-radix-toast-viewport],
+[data-radix-toast-viewport] * {
+  pointer-events: auto !important;
+}
