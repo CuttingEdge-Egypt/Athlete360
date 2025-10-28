@@ -1795,38 +1795,52 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                 )}
                               </div>
 
-                              {/* Competitive History Details - Scrollable */}
+                              {/* Competitive History Details - Beautified & Scrollable */}
                               {(parsedData.athlete1?.competitiveHistory || parsedData.athlete2?.competitiveHistory) && (
                                 <div className="space-y-6">
-                                  <h5 className={`font-semibold text-yellow-300 text-lg ${isComparisonArabic ? 'text-right' : ''}`}>
-                                    {t('analysis.comparison.competitiveHistoryDetails', 'Competitive History Details')}
-                                  </h5>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                  <div className={`flex items-center gap-3 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
+                                    <div className="h-1 w-12 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full"></div>
+                                    <h5 className={`font-bold text-yellow-300 text-xl tracking-tight ${isComparisonArabic ? 'text-right' : ''}`}>
+                                      {t('analysis.comparison.competitiveHistoryDetails', 'Competitive History Details')}
+                                    </h5>
+                                    <div className="h-1 flex-1 bg-gradient-to-r from-amber-500/50 to-transparent rounded-full"></div>
+                                  </div>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     {/* Athlete 1 Competitive History */}
                                     {parsedData.athlete1?.competitiveHistory && (
-                                      <div className="bg-athlete-gray-800 border border-gray-600 rounded-xl overflow-hidden">
-                                        <div className="bg-gradient-to-r from-blue-900/40 to-indigo-900/40 px-4 py-3 border-b border-gray-600">
-                                          <h6 className={`font-semibold text-blue-300 ${isComparisonArabic ? 'text-right' : ''}`}>
-                                            {parsedData.athlete1?.name}
-                                          </h6>
+                                      <div className="bg-gradient-to-br from-athlete-gray-800/90 via-athlete-gray-800 to-athlete-gray-900 border border-gray-700/50 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
+                                        <div className="bg-gradient-to-r from-blue-600/30 via-indigo-600/30 to-blue-700/30 px-5 py-4 border-b border-blue-500/20">
+                                          <div className={`flex items-center gap-2 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
+                                            <div className="w-1.5 h-6 bg-blue-400 rounded-full shadow-lg shadow-blue-500/50"></div>
+                                            <h6 className={`font-bold text-blue-200 text-lg ${isComparisonArabic ? 'text-right' : ''}`}>
+                                              {parsedData.athlete1?.name}
+                                            </h6>
+                                          </div>
                                         </div>
-                                        <div className="max-h-96 overflow-y-auto p-4 space-y-3">
+                                        <div className="max-h-96 overflow-y-auto custom-scrollbar p-5 space-y-5">
                                           {parsedData.athlete1.competitiveHistory.career_phases?.map((phase: any, index: number) => (
-                                            <div key={index} className="bg-athlete-gray-700 border border-gray-600 rounded-lg p-3">
-                                              <div className={`font-medium text-blue-300 mb-2 text-sm ${isComparisonArabic ? 'text-right' : ''}`}>
-                                                {phase.phase_name} ({phase.period})
+                                            <div key={index} className="relative bg-gradient-to-br from-athlete-gray-700/60 to-athlete-gray-800/60 border border-gray-600/40 rounded-xl p-4 shadow-lg hover:shadow-blue-500/10 hover:border-blue-500/30 transition-all duration-300">
+                                              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 via-blue-500 to-blue-600 rounded-l-xl"></div>
+                                              <div className={`font-bold text-blue-200 mb-3 text-base tracking-wide flex items-center gap-2 ${isComparisonArabic ? 'flex-row-reverse text-right' : ''}`}>
+                                                <CalendarDays className="h-4 w-4 text-blue-400" />
+                                                <span>{phase.phase_name}</span>
+                                                <span className="text-blue-400/70 text-sm font-medium">({phase.period})</span>
                                               </div>
                                               {phase.key_achievements && phase.key_achievements.length > 0 && (
-                                                <div className="space-y-2">
+                                                <div className="space-y-3 ml-6">
                                                   {phase.key_achievements.map((achievement: any, achIndex: number) => (
-                                                    <div key={achIndex} className="text-xs text-gray-300 bg-athlete-gray-600 rounded p-2">
-                                                      <div className={`flex items-start gap-2 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
-                                                        <span className="font-semibold text-yellow-400 flex-shrink-0">{achievement.year}</span>
-                                                        <div className={`flex-1 ${isComparisonArabic ? 'text-right' : ''}`}>
-                                                          <div className="font-medium text-white">{achievement.result}</div>
-                                                          <div className="text-gray-400">{achievement.event_name}</div>
+                                                    <div key={achIndex} className="relative bg-athlete-gray-600/40 backdrop-blur-sm border border-gray-500/30 rounded-lg p-3 hover:bg-athlete-gray-600/60 hover:border-blue-400/40 transition-all duration-200">
+                                                      <div className={`flex items-start gap-3 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
+                                                        <div className="flex-shrink-0 w-14 text-center">
+                                                          <div className="inline-flex items-center justify-center bg-gradient-to-br from-yellow-400 to-amber-500 text-gray-900 font-bold text-sm px-3 py-1.5 rounded-lg shadow-md">
+                                                            {achievement.year}
+                                                          </div>
+                                                        </div>
+                                                        <div className={`flex-1 min-w-0 ${isComparisonArabic ? 'text-right' : ''}`}>
+                                                          <div className="font-semibold text-white text-sm mb-1 leading-snug">{achievement.result}</div>
+                                                          <div className="text-gray-300 text-sm mb-2 leading-relaxed">{achievement.event_name}</div>
                                                           {achievement.event_tier && (
-                                                            <span className="inline-block mt-1 px-2 py-0.5 bg-purple-900/40 text-purple-300 rounded text-[10px]">
+                                                            <span className="inline-flex items-center px-2.5 py-1 bg-gradient-to-r from-purple-600/50 to-pink-600/50 border border-purple-400/30 text-purple-200 rounded-full text-xs font-medium shadow-sm">
                                                               {achievement.event_tier}
                                                             </span>
                                                           )}
@@ -1837,36 +1851,46 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                                 </div>
                                               )}
                                             </div>
-                                          )) || <p className="text-gray-400 text-sm">{t('analysis.comparison.noCompetitiveHistory', 'No competitive history available')}</p>}
+                                          )) || <p className="text-gray-400 text-center py-8">{t('analysis.comparison.noCompetitiveHistory', 'No competitive history available')}</p>}
                                         </div>
                                       </div>
                                     )}
 
                                     {/* Athlete 2 Competitive History */}
                                     {parsedData.athlete2?.competitiveHistory && (
-                                      <div className="bg-athlete-gray-800 border border-gray-600 rounded-xl overflow-hidden">
-                                        <div className="bg-gradient-to-r from-green-900/40 to-emerald-900/40 px-4 py-3 border-b border-gray-600">
-                                          <h6 className={`font-semibold text-green-300 ${isComparisonArabic ? 'text-right' : ''}`}>
-                                            {parsedData.athlete2?.name}
-                                          </h6>
+                                      <div className="bg-gradient-to-br from-athlete-gray-800/90 via-athlete-gray-800 to-athlete-gray-900 border border-gray-700/50 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
+                                        <div className="bg-gradient-to-r from-green-600/30 via-emerald-600/30 to-green-700/30 px-5 py-4 border-b border-green-500/20">
+                                          <div className={`flex items-center gap-2 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
+                                            <div className="w-1.5 h-6 bg-green-400 rounded-full shadow-lg shadow-green-500/50"></div>
+                                            <h6 className={`font-bold text-green-200 text-lg ${isComparisonArabic ? 'text-right' : ''}`}>
+                                              {parsedData.athlete2?.name}
+                                            </h6>
+                                          </div>
                                         </div>
-                                        <div className="max-h-96 overflow-y-auto p-4 space-y-3">
+                                        <div className="max-h-96 overflow-y-auto custom-scrollbar p-5 space-y-5">
                                           {parsedData.athlete2.competitiveHistory.career_phases?.map((phase: any, index: number) => (
-                                            <div key={index} className="bg-athlete-gray-700 border border-gray-600 rounded-lg p-3">
-                                              <div className={`font-medium text-green-300 mb-2 text-sm ${isComparisonArabic ? 'text-right' : ''}`}>
-                                                {phase.phase_name} ({phase.period})
+                                            <div key={index} className="relative bg-gradient-to-br from-athlete-gray-700/60 to-athlete-gray-800/60 border border-gray-600/40 rounded-xl p-4 shadow-lg hover:shadow-green-500/10 hover:border-green-500/30 transition-all duration-300">
+                                              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-green-400 via-green-500 to-green-600 rounded-l-xl"></div>
+                                              <div className={`font-bold text-green-200 mb-3 text-base tracking-wide flex items-center gap-2 ${isComparisonArabic ? 'flex-row-reverse text-right' : ''}`}>
+                                                <CalendarDays className="h-4 w-4 text-green-400" />
+                                                <span>{phase.phase_name}</span>
+                                                <span className="text-green-400/70 text-sm font-medium">({phase.period})</span>
                                               </div>
                                               {phase.key_achievements && phase.key_achievements.length > 0 && (
-                                                <div className="space-y-2">
+                                                <div className="space-y-3 ml-6">
                                                   {phase.key_achievements.map((achievement: any, achIndex: number) => (
-                                                    <div key={achIndex} className="text-xs text-gray-300 bg-athlete-gray-600 rounded p-2">
-                                                      <div className={`flex items-start gap-2 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
-                                                        <span className="font-semibold text-yellow-400 flex-shrink-0">{achievement.year}</span>
-                                                        <div className={`flex-1 ${isComparisonArabic ? 'text-right' : ''}`}>
-                                                          <div className="font-medium text-white">{achievement.result}</div>
-                                                          <div className="text-gray-400">{achievement.event_name}</div>
+                                                    <div key={achIndex} className="relative bg-athlete-gray-600/40 backdrop-blur-sm border border-gray-500/30 rounded-lg p-3 hover:bg-athlete-gray-600/60 hover:border-green-400/40 transition-all duration-200">
+                                                      <div className={`flex items-start gap-3 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
+                                                        <div className="flex-shrink-0 w-14 text-center">
+                                                          <div className="inline-flex items-center justify-center bg-gradient-to-br from-yellow-400 to-amber-500 text-gray-900 font-bold text-sm px-3 py-1.5 rounded-lg shadow-md">
+                                                            {achievement.year}
+                                                          </div>
+                                                        </div>
+                                                        <div className={`flex-1 min-w-0 ${isComparisonArabic ? 'text-right' : ''}`}>
+                                                          <div className="font-semibold text-white text-sm mb-1 leading-snug">{achievement.result}</div>
+                                                          <div className="text-gray-300 text-sm mb-2 leading-relaxed">{achievement.event_name}</div>
                                                           {achievement.event_tier && (
-                                                            <span className="inline-block mt-1 px-2 py-0.5 bg-purple-900/40 text-purple-300 rounded text-[10px]">
+                                                            <span className="inline-flex items-center px-2.5 py-1 bg-gradient-to-r from-purple-600/50 to-pink-600/50 border border-purple-400/30 text-purple-200 rounded-full text-xs font-medium shadow-sm">
                                                               {achievement.event_tier}
                                                             </span>
                                                           )}
@@ -1877,7 +1901,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                                 </div>
                                               )}
                                             </div>
-                                          )) || <p className="text-gray-400 text-sm">{t('analysis.comparison.noCompetitiveHistory', 'No competitive history available')}</p>}
+                                          )) || <p className="text-gray-400 text-center py-8">{t('analysis.comparison.noCompetitiveHistory', 'No competitive history available')}</p>}
                                         </div>
                                       </div>
                                     )}
