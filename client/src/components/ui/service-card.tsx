@@ -341,7 +341,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         } relative overflow-hidden`}
       >
       {service.id === 'statistics' && (
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-10 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-10 flex items-center justify-center">
           <div className="text-center space-y-3">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-athlete-accent/20 mb-2">
               <svg className="w-8 h-8 text-athlete-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
