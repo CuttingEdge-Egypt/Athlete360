@@ -1,0 +1,204 @@
+{
+  "sport": "التايكوندو",
+  "recent_form": "يتمتع اللاعب حالياً بمستوى أداء استثنائي، حيث يعتبر عام 2025 من أفضل أعوامه التنافسية. خلال هذا العام، نجح في الوصول إلى المباراة النهائية في أربع بطولات دولية كبرى، فاز باثنتين منها (كأس الرئيس في أوقيانوسيا وأفريقيا) وحل وصيفاً في اثنتين (ألمانيا وأستراليا المفتوحة). بالإضافة إلى ذلك، حقق مراكز متقدمة (المركز الخامس) في بطولات عالية المستوى مثل ألعاب FISU العالمية وتحدي الجائزة الكبرى، مما يؤكد أنه في قمة مستواه الفني والبدني وينافس بقوة في جميع البطولات الكبرى التي يشارك بها.",
+  "athlete_name": "معتز بالله عصام عطا أبو سريع",
+  "active_period": {
+    "end_year": "الحالي",
+    "start_year": 2022
+  },
+  "career_phases": [
+    {
+      "period": "2022-2025",
+      "phase_name": "International Competitive History",
+      "key_achievements": [
+        {
+          "year": 2025,
+          "month": "September",
+          "notes": "Simply Compete result",
+          "result": "2nd place",
+          "event_name": "German Open 2025",
+          "event_tier": "G-2"
+        },
+        {
+          "year": 2025,
+          "month": "August",
+          "notes": "Simply Compete result",
+          "result": "2nd place",
+          "event_name": "(Kyorugi) Australian Open 2025",
+          "event_tier": "G-2"
+        },
+        {
+          "year": 2025,
+          "month": "August",
+          "notes": "Simply Compete result",
+          "result": "1st place",
+          "event_name": "(Kyorugi) 2025 WT President's Cup - Oceania",
+          "event_tier": "G-3"
+        },
+        {
+          "year": 2025,
+          "month": "July",
+          "notes": "Simply Compete result",
+          "result": "5th place",
+          "event_name": "(Kyorugi) Rhine-Ruhr 2025 FISU World University Games",
+          "event_tier": "G-4"
+        },
+        {
+          "year": 2025,
+          "month": "June",
+          "notes": "Simply Compete result",
+          "result": "5th place",
+          "event_name": "Charlotte 2025 World Taekwondo Grand Prix Challenge",
+          "event_tier": "G-2"
+        },
+        {
+          "year": 2025,
+          "month": "April",
+          "notes": "Simply Compete result",
+          "result": "1st place",
+          "event_name": "2025 WT President's Cup - Africa",
+          "event_tier": "G-3"
+        },
+        {
+          "year": 2025,
+          "month": "February",
+          "notes": "Simply Compete result",
+          "result": "5th place",
+          "event_name": "12th Fujairah Open 2025",
+          "event_tier": "G-2"
+        },
+        {
+          "year": 2025,
+          "month": "February",
+          "notes": "Simply Compete result",
+          "result": "3rd place",
+          "event_name": "Fujairah 5th Arab Cup 2025 (For Arab Countries ONLY)",
+          "event_tier": "G-1"
+        },
+        {
+          "year": 2024,
+          "month": "October",
+          "notes": "Simply Compete result",
+          "result": "1st place",
+          "event_name": "2024 Malabo Open",
+          "event_tier": "G-2"
+        },
+        {
+          "year": 2024,
+          "month": "October",
+          "notes": "Simply Compete result",
+          "result": "1st place",
+          "event_name": "2024 WT President's Cup - Africa",
+          "event_tier": "G-2"
+        },
+        {
+          "year": 2024,
+          "month": null,
+          "notes": "Taekwondodata result",
+          "result": "1st place",
+          "event_name": "African Games",
+          "event_tier": null
+        },
+        {
+          "year": 2024,
+          "month": null,
+          "notes": "Taekwondodata result",
+          "result": "3rd place",
+          "event_name": "Fujairah Open",
+          "event_tier": null
+        },
+        {
+          "year": 2024,
+          "month": null,
+          "notes": "Taekwondodata result",
+          "result": "2nd place",
+          "event_name": "Arab Cup",
+          "event_tier": null
+        },
+        {
+          "year": 2023,
+          "month": null,
+          "notes": "Taekwondodata result",
+          "result": "3rd place",
+          "event_name": "African Championships",
+          "event_tier": null
+        },
+        {
+          "year": 2023,
+          "month": null,
+          "notes": "Taekwondodata result",
+          "result": "2nd place",
+          "event_name": "Beirut Open",
+          "event_tier": null
+        },
+        {
+          "year": 2023,
+          "month": null,
+          "notes": "Taekwondodata result",
+          "result": "2nd place",
+          "event_name": "Senegal Open",
+          "event_tier": null
+        },
+        {
+          "year": 2023,
+          "month": null,
+          "notes": "Taekwondodata result",
+          "result": "1st place",
+          "event_name": "WT Presidents Cup - Africa",
+          "event_tier": null
+        },
+        {
+          "year": 2022,
+          "month": null,
+          "notes": "Taekwondodata result",
+          "result": "PAR",
+          "event_name": "World Championships",
+          "event_tier": null
+        },
+        {
+          "year": 2022,
+          "month": null,
+          "notes": "Taekwondodata result",
+          "result": "1st place",
+          "event_name": "Fujairah Open",
+          "event_tier": null
+        },
+        {
+          "year": 2022,
+          "month": null,
+          "notes": "Taekwondodata result",
+          "result": "1st place",
+          "event_name": "Arab Cup",
+          "event_tier": null
+        }
+      ]
+    }
+  ],
+  "career_overview": "يقدم معتز بالله عصام مسيرة رياضية متميزة شهدت صعوداً سريعاً ومذهلاً في عالم التايكوندو. منذ انطلاقته على الساحة الدولية في عام 2022، أثبت نفسه كقوة مهيمنة على المستويين القاري والإقليمي، محققاً انتصارات متتالية في البطولات العربية والأفريقية. تطور مستواه بشكل ملحوظ لينتقل من كونه بطلاً إقليمياً إلى منافس عالمي من الطراز الرفيع، وهو ما تعكسه نتائجه القوية في البطولات الدولية المصنفة (G-2 و G-3). تتوج مسيرته الحالية باحتلاله التصنيف الأول عالمياً في فئة وزن -54 كغم، والتصنيف الثالث في فئة الوزن الأولمبي -58 كغم، مما يجعله أحد أبرز الرياضيين في فئته على مستوى العالم.",
+  "progression_patterns": "يُظهر المسار المهني للاعب نمط تطور متسارع ومنهجي. بدأ بتحقيق الهيمنة على المستوى الإقليمي في عام 2022، ثم انتقل لتأكيد تفوقه على المستوى القاري في عام 2023 بالفوز بميداليات في البطولات الأفريقية. منذ عام 2024، بدأ في المنافسة والفوز بانتظام في البطولات الدولية المصنفة (G-2 و G-3) حول العالم، مما أدى إلى تراكم سريع للنقاط التصنيفية ودفعه إلى قمة التصنيف العالمي. هذا التدرج يعكس انتقالاً ناجحاً من التفوق المحلي إلى النخبة العالمية.",
+  "peak_performance_periods": [
+    {
+      "period": "2024 - 2025",
+      "description": "تعتبر هذه الفترة هي ذروة الأداء في مسيرة اللاعب حتى الآن، حيث شهدت تحقيقه لسلسلة من الإنجازات العالمية البارزة التي رسخت مكانته في صدارة التصنيف العالمي. خلال هذه المرحلة، أظهر ثباتاً استثنائياً في المستوى وقدرة على المنافسة على أعلى المستويات، محققاً انتصارات وحضوراً قوياً على منصات التتويج في مختلف القارات.",
+      "key_results": [
+        "الميدالية الذهبية - كأس رئيس الاتحاد العالمي (أوقيانوسيا) 2025 (G-3)",
+        "الميدالية الذهبية - كأس رئيس الاتحاد العالمي (أفريقيا) 2025 (G-3)",
+        "الميدالية الذهبية - دورة الألعاب الأفريقية 2024",
+        "الميدالية الذهبية - بطولة مالابو المفتوحة 2024 (G-2)",
+        "الميدالية الفضية - بطولة ألمانيا المفتوحة 2025 (G-2)",
+        "الميدالية الفضية - بطولة أستراليا المفتوحة 2025 (G-2)"
+      ]
+    },
+    {
+      "period": "2022 - 2023",
+      "description": "شكلت هذه الفترة مرحلة التأسيس والبروز على الساحة الدولية، حيث بدأ اللاعب في حصد الألقاب الإقليمية والقارية الهامة. أظهر خلالها إمكانات كبيرة ونجح في تحقيق انتصارات متتالية في بطولات مثل كأس العرب وبطولة الفجيرة المفتوحة، بالإضافة إلى فوزه بكأس رئيس الاتحاد العالمي لأفريقيا، مما مهد الطريق لصعوده العالمي لاحقاً.",
+      "key_results": [
+        "الميدالية الذهبية - كأس رئيس الاتحاد العالمي (أفريقيا) 2023",
+        "الميدالية الذهبية - بطولة الفجيرة المفتوحة 2022",
+        "الميدالية الذهبية - كأس العرب 2022",
+        "الميدالية البرونزية - بطولة أفريقيا 2023"
+      ]
+    }
+  ],
+  "language": "ar"
+}

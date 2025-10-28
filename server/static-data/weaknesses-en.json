@@ -1,0 +1,39 @@
+{
+  "weaknesses": [
+    {
+      "title": "Difficulty breaking down tall counter-kickers",
+      "impact": "high",
+      "evidence": "German Open 2025 Men-54 kg final: 0-2 ; Rhine-Ruhr 2025 FISU WUG Men-54 kg quarter-final: 0-2 .",
+      "description": "Losses to Furkan Camoglu (0-2 in the 2025 German Open final) and Nurkhan Samidinov (0-2 in the Rhine-Ruhr FISU Games quarter-final) show repeated problems against opponents who control the center with fast front-leg cut kicks and score on back-leg counters. Abu Sree’ was held scoreless in all four rounds of those defeats, indicating insufficient angle changes and feints to open scoring lanes against longer-limbed fighters.",
+      "improvement": "Develop targeted training to address difficulty breaking down tall counter-kickers",
+      "improvement_timeline": "short-term"
+    },
+    {
+      "title": "End-stage energy management and injury risk",
+      "impact": "high",
+      "evidence": "Australian Open 2025 Men-54 kg final: withdrew before the first round; WT President’s Cup – Africa 2025 Men-54 kg final score: 1-0.",
+      "description": "He withdrew from the 2025 Australian Open gold-medal bout (recorded as 0-0 WDR) after a five-match run over two days, pointing to acute fatigue, weight-cut stress, or minor injury. Similar late-round passivity was observed in the 1-0 final at the 2025 WT President’s Cup – Africa, where he protected a slim lead rather than extend it. These signs suggest conditioning and recovery protocols need tightening for back-to-back tournament days and long travel blocks.",
+      "improvement": "Develop targeted training to address end-stage energy management and injury risk",
+      "improvement_timeline": "short-term"
+    },
+    {
+      "title": "Adjustment lag in Olympic –58 kg contests",
+      "impact": "high",
+      "evidence": "Charlotte 2025 GP Challenge Men-58 kg quarter-final: lost 1-2 after winning the opening round.",
+      "description": "At the higher Olympic weight he dropped a 1-2 decision to Korea’s Kim Jongmyeong in the 2025 Charlotte Grand Prix Challenge quarter-final. Kim repeatedly scored head-level round-house kicks off the clinch reset, exploiting Abu Sree’s upright guard and slower re-engagement speed. The bout highlighted the need to adapt his distance and defensive rhythm to taller, more explosive –58 kg specialists.",
+      "improvement": "Develop targeted training to address adjustment lag in olympic –58 kg contests",
+      "improvement_timeline": "medium-term"
+    },
+    {
+      "title": "Limited mid-match tactical adjustment",
+      "impact": "high",
+      "evidence": "German Open 2025 final and FISU Games 2025 QF: no tactical change after falling behind; Charlotte GP Challenge 2025 QF: won R1, lost next two as opponent adjusted.",
+      "description": "Across his three most recent defeats (Camoglu, Samidinov, Kim) Abu Sree’ won or remained competitive in early exchanges but failed to vary entry patterns once rivals read his preferred rear-leg turning kick. Opponents capitalised with scoring runs in rounds two and three, suggesting that in-match strategy calls and corner communication can be sharpened to halt momentum swings.",
+      "improvement": "Develop targeted training to address limited mid-match tactical adjustment",
+      "improvement_timeline": "short-term"
+    }
+  ],
+  "aiGenerated": true,
+  "lastUpdated": "Force updated with o3 web search",
+  "language": "en"
+}

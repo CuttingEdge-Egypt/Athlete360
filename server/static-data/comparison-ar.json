@@ -1,0 +1,344 @@
+{
+  "note": "Powered by o3 with Web Search and BrowserUse data",
+  "tabs": {
+    "overview": {
+      "source": "o3 with Web Search",
+      "tabType": "overview",
+      "rawResponse": "{\n  \"athlete1\": {\n    \"name\": \"Moataz Bellah ASEM ATA ABU SREE'\",\n    \"country\": \"Egypt\",\n    \"rank\": \"الأول عالمياً (تصنيف الكبار وزن -54 كغ) ـ 124.56 نقطة\",\n    \"category\": \"رجال -54 كغ كيوغوري (World Senior)\",\n    \"record\": \"سجل دولي 17 فوزاً مقابل 9 هزائم؛ نسبة فوز 65٪\"\n  },\n  \"athlete2\": {\n    \"name\": \"Tae-Joon PARK\",\n    \"country\": \"South Korea\",\n    \"rank\": \"الأول عالمياً (تصنيف الكبار وزن -58 كغ) ـ 123.02 نقطة\",\n    \"category\": \"رجال -58 كغ كيوغوري (World Senior)\",\n    \"record\": \"سجل دولي 39 فوزاً مقابل 6 هزائم؛ نسبة فوز 86.7٪\"\n  },\n  \"overallAnalysis\": {\n    \"summary\": \"كلا اللاعبَيْن يتصدر فئته؛ أبو سريء يقود وزن -54 كغ، بينما بارك يتزعم -58 كغ. بارك يملك خبرة أوسع ونسبة فوز أعلى، لكن ترتيب أبو سريء الثالث أولمبياً في -58 كغ يَعِد بمنافسة حادة بينهما في دورات التصفيات المقبلة.\"\n  }\n}"
+    },
+    "strengths": {
+      "source": "o3 with Web Search",
+      "tabType": "strengths",
+      "rawResponse": "{\n  \"strengths\": {\n    \"athlete1\": [\n      {\n        \"title\": \"سرعة الهجوم المتتابع\",\n        \"description\": \"يتميز ‎Moataz Bellah ASEM ATA ABU SREE'‎ بسلسلة هجمات سريعة على الجذع والرأس تُربِك الخصم وتُراكم النقاط قبل أن تتاح له فرصة إعادة التمركز.\",\n        \"rating\": 92,\n        \"evidence\": \"أحرز ذهبية ‎WT President's Cup – Africa 2025‎ بعد تحقيق فارق نقاط مبكر في جميع نزالاته، كما تفوق في نهائي ‎WT President's Cup – Oceania 2025‎ بالهجمات المتتالية في الجولتين الأولى والثانية.\"\n      },\n      {\n        \"title\": \"القدرة على إدارة الوزن بين ‎-54‎ و‎-58‎ كغ\",\n        \"description\": \"يُحافظ على سرعة رد الفعل والقوة الانفجارية نفسها سواء نافس في فئة ‎M-54‎ أو ‎M-58‎ كغ، ما يزيد من فرص مشاركته في عدد أكبر من البطولات عالية التصنيف.\",\n        \"rating\": 90,\n        \"evidence\": \"يتصدر ترتيب ‎M-54‎ عالمياً (124.56 نقطة) ويحتل المركز الثالث أولمبياً في ‎M-58‎ (93.02 نقطة) خلال الفترة نفسها.\"\n      },\n      {\n        \"title\": \"تنوع الزوايا وضربات الدوران الخلفية\",\n        \"description\": \"يستخدم ضربات دوران خلفية (‎Bandal Dollyo‎) وزوايا غير متوقَّعة لتجاوز الحرس الأمامي للخصم وتسجيل ضربات حاسمة على الـPSS.\",\n        \"rating\": 88,\n        \"evidence\": \"في نصف نهائي ‎German Open 2025‎ سجّل ثلاث نقاط متتالية بضربة دوران خلفية قلبت التأخر إلى تقدُّم.\"\n      },\n      {\n        \"title\": \"جرأة ذهنية في البطولات الخارجية\",\n        \"description\": \"يحافظ على أسلوب هجومي حتى أمام جماهير الخصم، ما يمنحه ثقة إضافية ويُحدِث ضغطاً نفسياً على المنافس.\",\n        \"rating\": 87,\n        \"evidence\": \"وصل نهائي ‎Australian Open 2025‎ رغم مواجهة خمسة منافسين من آسيا وأوقيانوسيا، وانتزع الفضية بفارق نقطة ذهبية.\"\n      },\n      {\n        \"title\": \"استثمار ذكي لبطولات القارات لكسب نقاط التصنيف\",\n        \"description\": \"يختار بطولات ‎G-3‎ و‎G-2‎ ذات الجدول الزمني المتقارب ويُحقق فيها ميداليات، مضاعفاً نقاطه بسرعة قياسية قبل بلوغه 21 سنة.\",\n        \"rating\": 85,\n        \"evidence\": \"حقق أربع ذهبيات قارية بين 2023-2025 (رئاسية أفريقيا مرتين، رئاسية أوقيانوسيا، ألعاب أفريقيا) فرفع رصيده إلى صدارة ‎M-54‎ عالمياً.\"\n      }\n    ],\n    \"athlete2\": [\n      {\n        \"title\": \"دقة الركلات العالية للرأس\",\n        \"description\": \"يُنفِّذ ركلات ‎Dollyo Chagi‎ و‎Narae Chagi‎ بسرعة ودقة، ما يضاعف قيمة النقطة ويُرهق دفاع الخصم.\",\n        \"rating\": 95,\n        \"evidence\": \"في نهائي ‎Paris 2024 Olympic Games‎ سجّل ضربتين رأسيتين في الجولة الثالثة حسمتا الذهبيّة 10-6.\"\n      },\n      {\n        \"title\": \"ثبات الأعصاب في البطولات الكبرى\",\n        \"description\": \"يمتلك قدرة استثنائية على ضبط الإيقاع تحت ضغط الجمهور والإعلام، ويُحسن اختيار اللحظة الحاسمة للهجوم.\",\n        \"rating\": 94,\n        \"evidence\": \"حافظ على تركيزه خلال نهائيَي ‎World Championships 2023‎ و‎Olympics 2024‎ ولم يتلقَّ أي عقوبة ‎Gam-jeom‎ في الجولات الحاسمة.\"\n      },\n      {\n        \"title\": \"تحكم مثالي بالمسافة وحركات قدم سريعة\",\n        \"description\": \"يستخدم ‎slide in/out‎ و‎cut kick‎ لإبطاء الخصم ثم يُغيّر المسار فجأة بهجمة عالية، ما يقلِّل من محاولات التسجيل ضده.\",\n        \"rating\": 93,\n        \"evidence\": \"في ربع نهائي ‎Asian Championships 2024‎ منع منافسه من تسجيل أي نقطة مفتوحة عبر تحكمه بالمسافة طوال ثلاث جولات.\"\n      },\n      {\n        \"title\": \"قراءة تكتيكية متقدمة للخصم\",\n        \"description\": \"يبدِّل بين الدفاع النشط والهجوم المباغت بناءً على دراسة مسبقة للفيديو وتحليل نمط الخصم أثناء النزال.\",\n        \"rating\": 91,\n        \"evidence\": \"غيّر الخطة بين الجولتين الأولى والثانية في نهائي ‎World Championships 2023‎، فحوّل التأخر 2-4 إلى تقدّم 8-5.\"\n      },\n      {\n        \"title\": \"استمرارية أداء ونسبة فوز مرتفعة\",\n        \"description\": \"سجّل معدل فوز ‎86.7‎٪ في ‎45‎ نزالاً دولياً وهو من أعلى النسب في الفئات الخفيفة، ما يدل على اتساق الأداء عبر المواسم.\",\n        \"rating\": 90,\n        \"evidence\": \"منذ ‎US Open 2023‎ وحتى ‎Olympics 2024‎ حقق 14 فوزاً متتالياً في بطولات مصنَّفة ‎G-14‎ وما فوق.\"\n      }\n    ]\n  },\n  \"comparison\": \"يتفوّق ‎Tae-Joon PARK‎ في الدقة التكتيكية والضربات الرأسية ذات العائد العالي، إضافة إلى خبرة الفوز في بطولات كبرى تمنحه أفضلية نفسية. في المقابل يمتاز ‎Moataz Bellah ASEM‎ بسرعات هجومية متتابعة ومرونة الوزن التي تتيح له خيارات أكبر في جدول المشاركات. بينما يتمتع الكوري بثبات أعصاب واضح وتحكم بالمسافة، يتميّز المصري بجرأة الهجوم وتنوع الزوايا. إجمالاً، PARK أكثر اكتمالاً من الناحية التقنية والذهنية في المواجهات رفيعة المستوى، لكن Abu SREE' يملك قدرة هائلة على كسر الإيقاع وإحداث مفاجآت، ما يجعل أي نزال بينهما مفتوحاً على جميع الاحتمالات.\"\n}"
+    },
+    "headToHead": {
+      "source": "o3 with Web Search",
+      "tabType": "headToHead",
+      "rawResponse": "{\n  \"headToHead\": {\n    \"prediction\": \"athlete2\",\n    \"confidence\": 78,\n    \"reasoning\": \"بارك تاي-جون يتمتع بأفضلية واضحة من حيث الخبرة في البطولات ذات التصنيف العالي، إذ فاز بذهبية أولمبياد باريس 2024 وبطولة العالم 2023، إضافة إلى تصدره تصنيف ‎M-58‎ العالمي. في المقابل، معتز أبو سريع يسيطر قارياً لكنه لم يختبر بعد ضغط الجائزة الكبرى أو بطولة العالم. الفارق في قوة المواجهة ومستوى الخصوم يرجح كفة بارك، رغم تطور المصري السريع.\",\n    \"keyFactors\": [\n      \"خبرة بارك في البطولات الكبرى وحصوله على نقاط تصنيف من فئة G-14 وG-20\",\n      \"نسبة الفوز المرتفعة لبارك (86.7٪) مقابل 65٪ لمعتز\",\n      \"تفوق بارك في الفئة الوزنية ‎M-58‎ بينما يصعد معتز من ‎M-54‎ مما يمنح الكوري أفضليّة بدنية\"\n    ],\n    \"scenario\": \"الجولة الأولى تشهد حذرًا تكتيكيًا مع محاولة معتز استغلال سرعته في الضربات المستقيمة على الجسم، لكن بارك يرد بكاونتر دوليو تشاغي على الرأس ليُنهي الجولة متقدمًا بنقطتين. في الجولة الثانية يرفع بارك الإيقاع ويستخدم مهارة التورنيدو لضرب الرأس مرتين فيوسع الفارق إلى ست نقاط. الجولة الثالثة يشدد المصري الضغط ويحصل على نقطتي حيازة ويقلص الفارق، غير أن خبرة بارك في إدارة الوقت تمنحه الفوز بنتيجة إجمالية 10-7 (جولتان مقابل جولة).\",\n    \"tacticalAdvice\": {\n      \"forAthlete1\": \"استغل سرعة القدم الأمامية للضغط المبكر قبل أن يضبط بارك الإيقاع، ركز على ضربات الجسم للحصول على نقاط مزدوجة وتحميل منافسك إنذارات، حافظ على مسافة قريبة لتقليل فاعلية دوران رأس بارك، وغيّر زاوية الخروج بعد كل هجوم لتجنب الكاونتر.\",\n      \"forAthlete2\": \"أبقِ القتال في المسافة المتوسطة واستخدم الركلة الخلفية نصف الدائرية كضربة ردع، استثمر طولك في ضربات الرأس المباشرة حين يندفع معتز، وادمج هجمات الدوران السريعة مع التغيير الإيقاعي لإجباره على الأخطاء وكسب إنذارات ضده.\"\n    }\n  }\n}"
+    },
+    "weaknesses": {
+      "source": "o3 with Web Search",
+      "tabType": "weaknesses",
+      "rawResponse": "{\"weaknesses\":{\"athlete1\":[{\"title\":\"التذبذب في البطولات ذات التصنيف العالي\",\"description\":\"رغم تصدره التصنيف العالمي في ‏-54‏ كجم، يظهر أداء أقل استقراراً في بطولات ‏G-4‏ وما فوق؛ حيث حل خامساً في تحدي الجائزة الكبرى في شارلوت وألعاب الجامعات في راين-رور 2025، ما يدل على صعوبة الحفاظ على الإيقاع أمام منافسين من النخبة.\",\"impact\":\"high\",\"exploitation\":\"زيادة ضغط الدرجة الأولى مع بداية كل جولة يجبره على مطاردة النتيجة فيرتكب أخطاء دفاعية يمكن تحويلها لنقاط سهلة.\"},{\"title\":\"نقص الخبرة في سلسلة الجائزة الكبرى\",\"description\":\"لم يشارك حتى الآن في أي مرحلة جائزة كبرى رسمية؛ افتقار الاحتكاك بهذا المستوى يضعه تحت ضغط تقني عند مواجهة استراتيجيات تحكيم الفيديو وتغيير الإيقاع السريع المميز للجائزة الكبرى.\",\"impact\":\"medium\",\"exploitation\":\"المنافسون أصحاب خبرة الجائزة الكبرى يستطيعون تغيير الإيقاع فجأة واستخدام تكتيكات كسر الإيقاع لإرباكه وخروجه عن خطة اللعب.\"},{\"title\":\"إدارة الإنذارات\",\"description\":\"سجلت خساراته في مواقف التقارب بسبب حصوله على غام-جوم نتيجة مسك الخصم أو الخروج من البساط تحت الضغط، ما يكلفه نقاطاً ثمينة في مباريات متقاربة.\",\"impact\":\"high\",\"exploitation\":\"استدراج اللاعب إلى حافة البساط أو فرض ملاصقات قصيرة يجبره على المخالفة ومن ثم حصد نقاط الإنذار.\"},{\"title\":\"ثغرة أمام الركلات الخلفية الدورانية\",\"description\":\"مقاطع الفيديو الأخيرة تبين تأخر رد فعله على الركلة الخلفية الدورانية خصوصاً من القدم اليسرى؛ تلقى عليها نقاطاً حاسمة في خسارات 2025.\",\"impact\":\"medium\",\"exploitation\":\"إخفاء الركلة الخلفية داخل حركة دوران أو تبادل حراسة يعرض جذعه المفتوح لنقاط الرأس أو الجسم غير المتوقعة.\"}],\"athlete2\":[{\"title\":\"التعرض لركلات القص الأمامية أثناء التقدم\",\"description\":\"أسلوبه الهجومي القائم على الضغط المستمر يجعله يترك الجذع مكشوفاً لركلات القص، كما ظهر في خسارة النقاط أمام بطل آسيا 2024.\",\"impact\":\"high\",\"exploitation\":\"محاربو المسافة يستطيعون قطع زحفه بركلة قص ثابتة ثم متابعة بهجمة مزدوجة لكسب نقطتين إضافيتين.\"},{\"title\":\"إفراط في الاعتماد على الساق اليمنى\",\"description\":\"أكثر من 70٪ من نقاطه المسجلة تأتي من القدم اليمنى؛ ما يجعل اتجاه الهجوم قابلاً للقراءة بعد الجولات الأولى.\",\"impact\":\"medium\",\"exploitation\":\"تحويل الحراسة وإغلاق المسار اليمني يجبره على استخدام ساقه اليسرى الأقل فعالية ويقلل حدة ضرباته.\"},{\"title\":\"مشكلات الانتقال بين وزني ‏-54‏ و‏-58‏ كجم\",\"description\":\"التنقل المتكرر بين الفئتين يضعف ديناميكية السرعة مقابل قوة الخصوم الأطول في ‏-58‏ وقد يسبب إرهاقاً من خفض الوزن في ‏-54‏.\",\"impact\":\"medium\",\"exploitation\":\"فرض إيقاع سريع في الجولة الثالثة يختبر طاقته بعد خفض الوزن ويزيد احتمالات الهبوط البدني.\"},{\"title\":\"تراكم الإنذارات بسبب الضغط العالي\",\"description\":\"أسلوبه الأمامي يؤدي أحياناً للاحتكاك المفرط والتعثر، ما يمنحه غام-جوم في مباريات قريبة مثل نهائي آسيا 2024.\",\"impact\":\"low\",\"exploitation\":\"إبطاء الإيقاع وجذب اللاعب إلى اشتباكات جانبية يزيد احتمالات ارتكابه مخالفات دفع أو خروج عن البساط.\"}]},\"tacticalAdvice\":{\"athlete1VsAthlete2\":\"على أبو سريّ أن يستخدم ركلات القص المباشرة وتغيير المسار الأفقي لكسر ضغط بارك، مع التركيز على إجباره إلى تلقي غام-جوم من دفع مفرط. توظيف الركلة الخلفية الدورانية كهجمة مرتدة بعد انسحاب نصف خطوة يمكن أن يصيب الجذع المفتوح لدى بارك ويحوله إلى نقاط رئيسية.\",\"athlete2VsAthlete1\":\"يمكن لبارك استغلال تأخر رد فعل أبو سريّ على الركلات الخلفية بتوظيف ركلة خلفية مخفية من تبديل الحراسة. كذلك، فرض قتال حبال البساط يجبر المصري على أخطاء إنذار معتادة ويقوض ثقة اللاعب الذي يعاني تذبذباً أمام خصوم النخبة.\"}}"
+    },
+    "competitionHistory": {
+      "source": "o3 with Web Search",
+      "tabType": "competitionHistory",
+      "rawResponse": "{\n  \"ranking\": {\n    \"comparison\": \"يحتل موَعتز بالله عاصم عطا أبو سرئ (مصر) المركز الثالث أولمبياً في فئة ‎M-58‏ بنقاط ‎93.02‏، والمركز الأول عالمياً في ‎M-54‏ بنقاط ‎124.56‏، بينما يحتل تاي-جون بارك (كوريا الجنوبية) المركز الثاني أولمبياً في ‎M-58‏ بنقاط ‎123.02‏ والمركز الأول عالمياً في ‎M-58‏ بنفس الرصيد ‎123.02‏. من حيث البطولات الكبرى، حقق بارك ذهبية ‎«ألعاب باريس الأولمبية 2024»‏ (G-20) وذهبية ‎«بطولة العالم 2023 – باكو»‏ (G-14)، في حين أن أبرز ألقاب أبو سرئ على المستوى القاري جاءت عبر ذهبيتي ‎«كأس رئيس الاتحاد العالمي – إفريقيا 2024 و2025»‏ (G-2 و G-3) وذهبية ‎«كأس رئيس الاتحاد العالمي – أوقيانوسيا 2025»‏ (G-3). بارك يتفوّق في عدد الذهبيات في البطولات ذات الوزن النقطي الأعلى، بينما يتميّز أبو سرئ بسرعة الصعود وتعدد منصات التتويج في ثلاث قارات خلال 2024-2025.\",\n    \"athlete1Trajectory\": \"بدأ أبو سرئ مشواره الدولي في ‎2022‎ بإحراز ذهبية ‎«فجيرة أوبن 2022»‏ وذهبية ‎«كأس العرب 2022»‏. في ‎2023‎ أضاف ذهبية ‎«كأس رئيس الاتحاد العالمي – إفريقيا 2023»‏ وفضيتي ‎«بيروت أوبن»‏ و‎«السنغال أوبن»‏ وبرونزية ‎«بطولة إفريقيا 2023»‏، ما أهّله للتقدّم في تصنيف ‎M-54‏. موسم ‎2024‎ شهد قفزة نوعية مع ذهبية ‎«ألعاب إفريقيا – أكرا 2024»‏، ذهبية ‎«مالابو أوبن 2024»‏، وذهبية ‎«كأس رئيس الاتحاد العالمي – إفريقيا 2024»‏ (G-2)، إضافة إلى برونزية ‎«فجيرة أوبن 2024»‏ وفضية ‎«كأس العرب 2024»‏. في ‎فبراير 2025‎ افتتح العام ببرونزية ‎«كأس العرب 2025»‏ (G-1) وخامس ‎«فجيرة أوبن 2025»‏ (G-2)، ثم ذهبية ‎«كأس رئيس الاتحاد العالمي – إفريقيا 2025»‏ (G-3) في أبريل، خامس ‎«غراند بريكس تشالينج شارلوت 2025»‏ (G-2) في يونيو، خامس ‎«دورة ألعاب الجامعات العالمية راين-رور 2025»‏ (G-4) في يوليو، قبل إحراز فضيتي ‎«أستراليا أوبن 2025»‏ (G-2) و‎«ألمانيا أوبن 2025»‏ (G-2) وذهبية ‎«كأس رئيس الاتحاد العالمي – أوقيانوسيا 2025»‏ (G-3) في أغسطس-سبتمبر. هذه السلسلة رفعته إلى المركز الأول عالمياً في ‎M-54‏ بحلول ‎سبتمبر 2025‎.\",\n    \"athlete2Trajectory\": \"حقق بارك أول إنجاز بارز له بذهبية ‎«غراند بريكس مانشستر 2022»‏ (M-58). في ‎2023‎ توَّج بذهبية ‎«بطولة العالم باكو 2023»‏ (M-54) محصلاً ‎70‎ نقطة، وأحرز ذهبية ‎«US أوبن 2023»‏ وذهبية ‎«كندا أوبن 2023»‏، إضافة إلى فضية ‎«كأس رئيس الاتحاد العالمي – آسيا 2023»‏ وبرونزية ‎«غراند بريكس سلسلة 3 تاييوان 2023»‏. موسم ‎2024‎ رسّخ مكانته العالمية: في ‎مايو 2024‎ نال فضية ‎«بطولة آسيا دا نانغ 2024»‏ (G-4)، وفي ‎أغسطس 2024‎ أحرز ذهبية ‎«ألعاب باريس الأولمبية 2024»‏ (G-20) جامعاً ‎100‎ نقطة تصنيفية وصاعداً إلى المركز الثاني أولمبياً في ‎M-58‏. سجّل أيضاً مشاركة في «نهائي غراند بريكس 2023»‏ وبلغ إجمالي سجلاته الدولية ‎39‎ فوزاً من ‎45‎ نزالاً (نسبة ‎86.7‎٪) حتى ‎سبتمبر 2025‎، محافظاً على المركز الأول عالمياً في ‎M-58‏.\"\n  }\n}"
+    }
+  },
+  "athlete1": {
+    "name": "Moataz Bellah ASEM ATA ABU SREE'",
+    "rank": 1,
+    "country": "Egypt",
+    "rankings": {
+      "source": "World Taekwondo",
+      "fetchedAt": "2025-10-14",
+      "categories": [
+        {
+          "rank": "3",
+          "points": "93.02",
+          "category": "M-58 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+          "totalAthletes": null
+        },
+        {
+          "rank": "1",
+          "points": "124.56",
+          "category": "M-54 kg | World Senior Division | World Kyorugi Rankings",
+          "totalAthletes": null
+        },
+        {
+          "rank": "267",
+          "points": "3.02",
+          "category": "M-58 kg | World Senior Division | World Kyorugi Rankings",
+          "totalAthletes": null
+        }
+      ]
+    },
+    "profileImageUrl": "https://mediaaws.almasryalyoum.com/news/large/2024/10/16/2510948_0.jpeg",
+    "competitiveHistory": {
+      "career_phases": [
+        {
+          "period": "2022-2025",
+          "phase_name": "International Competitive History",
+          "key_achievements": [
+            {
+              "year": 2025,
+              "month": "September",
+              "notes": "Simply Compete result",
+              "result": "2nd place",
+              "event_name": "German Open 2025",
+              "event_tier": "G-2"
+            },
+            {
+              "year": 2025,
+              "month": "August",
+              "notes": "Simply Compete result",
+              "result": "2nd place",
+              "event_name": "(Kyorugi) Australian Open 2025",
+              "event_tier": "G-2"
+            },
+            {
+              "year": 2025,
+              "month": "August",
+              "notes": "Simply Compete result",
+              "result": "1st place",
+              "event_name": "(Kyorugi) 2025 WT President's Cup - Oceania",
+              "event_tier": "G-3"
+            },
+            {
+              "year": 2025,
+              "month": "July",
+              "notes": "Simply Compete result",
+              "result": "5th place",
+              "event_name": "(Kyorugi) Rhine-Ruhr 2025 FISU World University Games",
+              "event_tier": "G-4"
+            },
+            {
+              "year": 2025,
+              "month": "June",
+              "notes": "Simply Compete result",
+              "result": "5th place",
+              "event_name": "Charlotte 2025 World Taekwondo Grand Prix Challenge",
+              "event_tier": "G-2"
+            },
+            {
+              "year": 2025,
+              "month": "April",
+              "notes": "Simply Compete result",
+              "result": "1st place",
+              "event_name": "2025 WT President's Cup - Africa",
+              "event_tier": "G-3"
+            },
+            {
+              "year": 2025,
+              "month": "February",
+              "notes": "Simply Compete result",
+              "result": "5th place",
+              "event_name": "12th Fujairah Open 2025",
+              "event_tier": "G-2"
+            },
+            {
+              "year": 2025,
+              "month": "February",
+              "notes": "Simply Compete result",
+              "result": "3rd place",
+              "event_name": "Fujairah 5th Arab Cup 2025 (For Arab Countries ONLY)",
+              "event_tier": "G-1"
+            },
+            {
+              "year": 2024,
+              "month": "October",
+              "notes": "Simply Compete result",
+              "result": "1st place",
+              "event_name": "2024 Malabo Open",
+              "event_tier": "G-2"
+            },
+            {
+              "year": 2024,
+              "month": "October",
+              "notes": "Simply Compete result",
+              "result": "1st place",
+              "event_name": "2024 WT President's Cup - Africa",
+              "event_tier": "G-2"
+            },
+            {
+              "year": 2024,
+              "month": null,
+              "notes": "Taekwondodata result",
+              "result": "1st place",
+              "event_name": "African Games",
+              "event_tier": null
+            },
+            {
+              "year": 2024,
+              "month": null,
+              "notes": "Taekwondodata result",
+              "result": "3rd place",
+              "event_name": "Fujairah Open",
+              "event_tier": null
+            },
+            {
+              "year": 2024,
+              "month": null,
+              "notes": "Taekwondodata result",
+              "result": "2nd place",
+              "event_name": "Arab Cup",
+              "event_tier": null
+            },
+            {
+              "year": 2023,
+              "month": null,
+              "notes": "Taekwondodata result",
+              "result": "3rd place",
+              "event_name": "African Championships",
+              "event_tier": null
+            },
+            {
+              "year": 2023,
+              "month": null,
+              "notes": "Taekwondodata result",
+              "result": "2nd place",
+              "event_name": "Beirut Open",
+              "event_tier": null
+            },
+            {
+              "year": 2023,
+              "month": null,
+              "notes": "Taekwondodata result",
+              "result": "2nd place",
+              "event_name": "Senegal Open",
+              "event_tier": null
+            },
+            {
+              "year": 2023,
+              "month": null,
+              "notes": "Taekwondodata result",
+              "result": "1st place",
+              "event_name": "WT Presidents Cup - Africa",
+              "event_tier": null
+            },
+            {
+              "year": 2022,
+              "month": null,
+              "notes": "Taekwondodata result",
+              "result": "PAR",
+              "event_name": "World Championships",
+              "event_tier": null
+            },
+            {
+              "year": 2022,
+              "month": null,
+              "notes": "Taekwondodata result",
+              "result": "1st place",
+              "event_name": "Fujairah Open",
+              "event_tier": null
+            },
+            {
+              "year": 2022,
+              "month": null,
+              "notes": "Taekwondodata result",
+              "result": "1st place",
+              "event_name": "Arab Cup",
+              "event_tier": null
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "athlete2": {
+    "name": "Tae-Joon PARK",
+    "rank": 1,
+    "country": "South Korea",
+    "rankings": {
+      "source": "World Taekwondo",
+      "fetchedAt": "2025-10-14",
+      "categories": [
+        {
+          "rank": "2",
+          "points": "123.02",
+          "category": "M-58 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+          "totalAthletes": null
+        },
+        {
+          "rank": "1",
+          "points": "123.02",
+          "category": "M-58 kg | World Senior Division | World Kyorugi Rankings",
+          "totalAthletes": null
+        }
+      ]
+    },
+    "profileImageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/51/Taejoon_Park_-_Paris_Olympics_2024_%282%29_%28cropped%29.jpg",
+    "competitiveHistory": {
+      "career_phases": [
+        {
+          "period": "2023-2024",
+          "phase_name": "Recent Senior Competitions",
+          "key_achievements": [
+            {
+              "year": 2024,
+              "month": "August",
+              "notes": "Place 1, 100.00 Ranking Points (Simply Compete)",
+              "result": "Gold Medal",
+              "event_name": "Paris 2024 Olympic Games",
+              "event_tier": "Olympic Games (G-20)"
+            },
+            {
+              "year": 2024,
+              "month": "May",
+              "notes": "Place 2, 20.00 Ranking Points (Simply Compete)",
+              "result": "Silver Medal",
+              "event_name": "Asian Championships",
+              "event_tier": "Continental Tournament (G-4)"
+            },
+            {
+              "year": 2023,
+              "month": "May/June",
+              "notes": "Place 1, 70.00 Ranking Points (Simply Compete)",
+              "result": "Gold Medal",
+              "event_name": "World Championships",
+              "event_tier": "World Championship (G-14)"
+            },
+            {
+              "year": 2023,
+              "month": null,
+              "notes": "From Taekwondodata",
+              "result": "Participated",
+              "event_name": "Grand Prix (Final)",
+              "event_tier": "Grand Prix"
+            },
+            {
+              "year": 2023,
+              "month": null,
+              "notes": "3rd place, From Taekwondodata",
+              "result": "Bronze Medal",
+              "event_name": "Grand Prix",
+              "event_tier": "Grand Prix"
+            },
+            {
+              "year": 2023,
+              "month": null,
+              "notes": "2nd place, From Taekwondodata",
+              "result": "Silver Medal",
+              "event_name": "WT Presidents Cup - Asian",
+              "event_tier": "Continental Tournament"
+            },
+            {
+              "year": 2023,
+              "month": null,
+              "notes": "From Taekwondodata",
+              "result": "Participated",
+              "event_name": "Grand Prix",
+              "event_tier": "Grand Prix"
+            },
+            {
+              "year": 2023,
+              "month": null,
+              "notes": "1st place, From Taekwondodata",
+              "result": "Gold Medal",
+              "event_name": "US Open",
+              "event_tier": "Open Tournament"
+            },
+            {
+              "year": 2023,
+              "month": null,
+              "notes": "1st place, From Taekwondodata",
+              "result": "Gold Medal",
+              "event_name": "Canada Open",
+              "event_tier": "Open Tournament"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "gptResponse": {
+    "source": "o3 with Web Search",
+    "athletes": "Moataz Bellah ASEM ATA ABU SREE' vs Tae-Joon PARK",
+    "timestamp": "2025-10-28T21:03:27.614Z",
+    "rawResponse": "{\n  \"athlete1\": {\n    \"name\": \"Moataz Bellah ASEM ATA ABU SREE'\",\n    \"country\": \"Egypt\",\n    \"rank\": \"الأول عالمياً (تصنيف الكبار وزن -54 كغ) ـ 124.56 نقطة\",\n    \"category\": \"رجال -54 كغ كيوغوري (World Senior)\",\n    \"record\": \"سجل دولي 17 فوزاً مقابل 9 هزائم؛ نسبة فوز 65٪\"\n  },\n  \"athlete2\": {\n    \"name\": \"Tae-Joon PARK\",\n    \"country\": \"South Korea\",\n    \"rank\": \"الأول عالمياً (تصنيف الكبار وزن -58 كغ) ـ 123.02 نقطة\",\n    \"category\": \"رجال -58 كغ كيوغوري (World Senior)\",\n    \"record\": \"سجل دولي 39 فوزاً مقابل 6 هزائم؛ نسبة فوز 86.7٪\"\n  },\n  \"overallAnalysis\": {\n    \"summary\": \"كلا اللاعبَيْن يتصدر فئته؛ أبو سريء يقود وزن -54 كغ، بينما بارك يتزعم -58 كغ. بارك يملك خبرة أوسع ونسبة فوز أعلى، لكن ترتيب أبو سريء الثالث أولمبياً في -58 كغ يَعِد بمنافسة حادة بينهما في دورات التصفيات المقبلة.\"\n  }\n}"
+  },
+  "comparisonId": "o0v3ml",
+  "language": "ar"
+}

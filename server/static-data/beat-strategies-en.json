@@ -1,0 +1,50 @@
+{
+  "strategies": [
+    {
+      "strategy": "Lateral Counter-Pivot Game",
+      "execution": "1) Start each round circling clockwise to his open side, forcing him to adjust stance.\n2) Feint a short entry to draw his front-leg cut kick; on the trigger, pivot 30° off-line and counter round-kick to the body or spinning back-kick (score +2/+4).\n3) After scoring, retreat to long distance (>2 m) for 3–4 s to disrupt his tempo; repeat.  \n4) In the final 20 s, switch to closed-stance check-cut kicks to run the clock, maintaining a 2–3-point cushion.\n5) Use video review if available to challenge any single-point trunk taps he might earn in flurries.",
+      "references": [
+        "https://web.worldtaekwondo.martial.services/competitions/german-open-2025/results",
+        "https://www.taekwondodata.com/moataz-bellah-asem-ata-abu-sree.a146m.html"
+      ],
+      "risk_level": "medium",
+      "description": "Abu Sree’ opens aggressively and likes to press in straight lines, scoring early with rapid front-leg cut kicks, then sealing rounds by point-gap (PTF).  When faced with opponents who angle off and counter-kick (e.g., Camoglu in the 2025 German Open final, 0-2), his hit rate drops sharply and he becomes impatient, over-committing on the blitz.  The plan is to keep the fight just outside his cut-kick range, take a half-step off-line as he shoots, then fire quick rear-leg round or back-kick counters to the trunk, pivoting out before he can reset.",
+      "success_probability": "high"
+    },
+    {
+      "strategy": "Early-Round Clinch-Jam & Body-Punch Disruption",
+      "execution": "1) First exchange: hop-in check-cut to stop his front leg, grip sleeve-arm inside the rules, register short knee lift (no point but freezes him).\n2) On referee break, fire a direct punch to the chest protector (aim for power, not just touch) to harvest +1.\n3) Repeat jam-clinch sequence 2–3 times; if warned for holding, switch to slide-in back-kicks to trunk.\n4) Once he hesitates to lift the front leg, explode with double-kick head attack to gain a 3-point swing.\n5) Manage penalties carefully (max two Gam-jeoms per round).",
+      "references": [
+        "https://web.worldtaekwondo.martial.services/competitions/wt-presidents-cup-africa-2025/results",
+        "https://web.worldtaekwondo.martial.services/competitions/wt-presidents-cup-oceania-2025/results"
+      ],
+      "risk_level": "medium",
+      "description": "Match logs show Abu Sree’ typically wins R1 2-0 or 2-1 (President’s Cups Africa & Oceania 2025) by building an early lead, then coasts.  He is less comfortable when his opening rhythm is broken and he is forced into close distance, where his long torso leaves space under the elbow for body punches.  By jamming his initial cut kick with a quick hop-in check and immediately clinching, you nullify his kicking combinations and sap his confidence.",
+      "success_probability": "medium"
+    },
+    {
+      "strategy": "Scoreboard Squeeze & Psychological Pressure",
+      "execution": "1) Steal first point with a fast punch during the initial clash.\n2) Immediately shift to long-range cut-kick defense, drawing him forward.\n3) Each time he commits, sidestep and let him rotate past you—collecting Gam-jeoms for falling or grabbing.\n4) Ask for video review on marginal head-shot scores to pause momentum and shave the clock.\n5) Final 15 s: lateral bounce just inside boundary; if warned for avoidance, accept one Gam-jeom (still leading) rather than risk head-contact.",
+      "references": [
+        "https://www.oalfenense.com.br/noticia/115321/brasil-finaliza-terceiro-dia-do-mundial-de-taekwondo-sem-medalhas",
+        "https://www.taekwondodata.com/moataz-bellah-asem-ata-abu-sree.a146m.html"
+      ],
+      "risk_level": "low",
+      "description": "The 2025 World Championship report notes Abu Sree’ fell in the R16 when forced to chase points late (loss to Matheus Gilliard before quarter-final).  His 65 % career win rate drops sharply when trailing, leading to rushed spin attempts and Gam-jeoms.  By securing a narrow lead and then using passive-active cadence (quick entry → exit, then slow walk-back) you amplify time pressure and provoke errors.",
+      "success_probability": "high"
+    },
+    {
+      "strategy": "Targeted Mid-Section Exploitation with Turning Kick Chains",
+      "execution": "1) From open stance, flick a light cut-kick to trunk to trigger his rear-hand block.\n2) Without setting down, rotate hip for a powerful turning kick to the same trunk zone (+2).\n3) As soon as contact registers, recoil knee and extend hook-kick to the head (+3) while he is still compressed.\n4) Drill combo in pads for speed ≤1.2 s total; use it no more than twice per round to avoid predictability.\n5) If he begins pre-emptive jam, shift to spinning back-kick variant to the body (+4).",
+      "references": [
+        "https://www.worldtaekwondo.org/index.html",
+        "https://web.worldtaekwondo.martial.services/competitions/australian-open-2025/results"
+      ],
+      "risk_level": "high",
+      "description": "Video clips from WT TV (Muju 2025 Grand Prix Challenge highlights) show Abu Sree’ keeps a high guard and leans back to defend the head, leaving ribs exposed.  A chained sequence—lead-leg cut → rear-leg turning kick to body → immediate same-leg hook-kick to head—capitalizes on that gap and can swing the round by 4–6 points if the head shot lands after drawing his guard downward.",
+      "success_probability": "medium"
+    }
+  ],
+  "keyWeaknesses": [],
+  "language": "en"
+}

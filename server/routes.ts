@@ -55,6 +55,22 @@ import { paymobService } from "./paymobService";
 import { isIndividualSport, fetchTaekwondoRankAndHistory, fetchGeneralSportRankAndHistory, fetchTeamSportPlayerInfo } from "./browserUseService";
 import staticDevPlanEn from "./static-data/dev-plan-en.json" with { type: "json" };
 import staticDevPlanAr from "./static-data/dev-plan-ar.json" with { type: "json" };
+import staticBioEn from "./static-data/bio-en.json" with { type: "json" };
+import staticBioAr from "./static-data/bio-ar.json" with { type: "json" };
+import staticRankEn from "./static-data/rank-en.json" with { type: "json" };
+import staticRankAr from "./static-data/rank-ar.json" with { type: "json" };
+import staticStrengthsEn from "./static-data/strengths-en.json" with { type: "json" };
+import staticStrengthsAr from "./static-data/strengths-ar.json" with { type: "json" };
+import staticWeaknessesEn from "./static-data/weaknesses-en.json" with { type: "json" };
+import staticWeaknessesAr from "./static-data/weaknesses-ar.json" with { type: "json" };
+import staticNutritionEn from "./static-data/nutrition-plan-en.json" with { type: "json" };
+import staticNutritionAr from "./static-data/nutrition-plan-ar.json" with { type: "json" };
+import staticComparisonEn from "./static-data/comparison-en.json" with { type: "json" };
+import staticComparisonAr from "./static-data/comparison-ar.json" with { type: "json" };
+import staticVideoEn from "./static-data/video-en.json" with { type: "json" };
+import staticVideoAr from "./static-data/video-ar.json" with { type: "json" };
+import staticBeatEn from "./static-data/beat-strategies-en.json" with { type: "json" };
+import staticBeatAr from "./static-data/beat-strategies-ar.json" with { type: "json" };
 import { getErrorMessage, getLanguageFromRequest, ErrorMessages } from "./errorMessages";
 
 import { TestingService } from "./testingService";
@@ -4371,34 +4387,31 @@ Return only valid JSON with the missing fields.`;
   });
 
   // Public endpoint for single service type preview - no authentication required
+  // Now uses static data instead of database queries
   app.get('/api/preview/latest/:serviceType', async (req, res) => {
     try {
       const { serviceType } = req.params;
       const language = (req.query.language as string) || 'en';
       
-      // Map frontend service types to database service types
-      const serviceTypeMapping: { [key: string]: string } = {
-        'bio': 'bio',
-        'strengths': 'strengths',
-        'weaknesses': 'weaknesses',
-        'beat': 'beat',
-        'beat-strategies': 'beat',
-        'comparison': 'comparison',
-        'nutrition': 'nutrition',
-        'nutrition-plan': 'nutrition',
-        'development': 'development',
-        'development-plan': 'development',
-        'video': 'video',
-        'rank': 'rank',
-        'statistics': 'statistics'
+      // Map frontend service types to static data
+      const staticDataMap: { [key: string]: { en: any; ar: any } } = {
+        'bio': { en: staticBioEn, ar: staticBioAr },
+        'strengths': { en: staticStrengthsEn, ar: staticStrengthsAr },
+        'weaknesses': { en: staticWeaknessesEn, ar: staticWeaknessesAr },
+        'beat': { en: staticBeatEn, ar: staticBeatAr },
+        'beat-strategies': { en: staticBeatEn, ar: staticBeatAr },
+        'comparison': { en: staticComparisonEn, ar: staticComparisonAr },
+        'nutrition': { en: staticNutritionEn, ar: staticNutritionAr },
+        'nutrition-plan': { en: staticNutritionEn, ar: staticNutritionAr },
+        'development': { en: staticDevPlanEn, ar: staticDevPlanAr },
+        'development-plan': { en: staticDevPlanEn, ar: staticDevPlanAr },
+        'video': { en: staticVideoEn, ar: staticVideoAr },
+        'rank': { en: staticRankEn, ar: staticRankAr }
       };
       
-      const dbServiceType = serviceTypeMapping[serviceType] || serviceType;
+      const staticData = staticDataMap[serviceType];
       
-      // Get the latest analysis for this service type
-      const latestAnalyses = await storage.getLatestAnalysisByType([dbServiceType], language);
-      
-      if (latestAnalyses.length === 0) {
+      if (!staticData) {
         return res.json({
           success: false,
           message: 'No preview data available for this service type',
@@ -4406,12 +4419,10 @@ Return only valid JSON with the missing fields.`;
         });
       }
       
-      const latestAnalysis = latestAnalyses[0];
-      
       res.json({
         success: true,
-        data: latestAnalysis.resultData,
-        createdAt: latestAnalysis.createdAt
+        data: language === 'ar' ? staticData.ar : staticData.en,
+        createdAt: new Date().toISOString()
       });
     } catch (error) {
       console.error('Error fetching preview:', error);
@@ -4424,6 +4435,7 @@ Return only valid JSON with the missing fields.`;
   });
 
   // Public endpoint for analysis previews - no authentication required
+  // Now uses static data instead of database queries for all service types
   app.get('/api/preview/latest-by-type', async (req, res) => {
     try {
       const language = (req.query.language as string) || 'en';
@@ -4432,63 +4444,59 @@ Return only valid JSON with the missing fields.`;
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.set('Vary', 'Accept-Language');
       
-      // Static development plan preview data - taken from the most recent EN/AR development plans
-      // These are imported at the top of the file from server/static-data/ directory
-      const staticDevelopmentPlanData = language === 'ar' ? staticDevPlanAr : staticDevPlanEn;
-      
-      const staticDevelopmentPlanPreview = {
-        serviceType: 'development-plan',
-        resultData: staticDevelopmentPlanData,
-        createdAt: new Date().toISOString()
-      };
-      
-      // Get the most recent analyses from the database (exclude development-plan as it's static)
-      const dbServiceTypes = [
-        'bio',
-        'strengths', 
-        'weaknesses',
-        'beat',           // maps to beat-strategies in frontend
-        'comparison',
-        'nutrition',      // maps to nutrition-plan in frontend  
-        'nutrition-plan', // also check for this
-        // 'development-plan' is now static, not fetched from DB
-        'video',
-        'rank'
-      ];
-      
-      // Get the latest analysis for each type from actual database
-      const latestAnalyses = await storage.getLatestAnalysisByType(dbServiceTypes, language);
-      
-      // Map database service types to frontend expected types
-      const serviceTypeMapping: { [key: string]: string } = {
-        'bio': 'bio',
-        'strengths': 'strengths',
-        'weaknesses': 'weaknesses', 
-        'beat': 'beat-strategies',
-        'comparison': 'comparison',
-        'nutrition': 'nutrition-plan',
-        'nutrition-plan': 'nutrition-plan',
-        'video': 'video',
-        'rank': 'rank'
-      };
-      
-      // Format and map service types for frontend
-      const previewData = latestAnalyses.map(log => ({
-        serviceType: serviceTypeMapping[log.serviceType] || log.serviceType,
-        resultData: {
-          ...(typeof log.resultData === 'object' && log.resultData !== null ? log.resultData : {}),
-          language: log.language  // Include language from analysis log
+      // All preview data is now static - taken from server/static-data/ directory
+      const staticPreviewData = [
+        {
+          serviceType: 'bio',
+          resultData: language === 'ar' ? staticBioAr : staticBioEn,
+          createdAt: new Date().toISOString()
         },
-        createdAt: log.createdAt
-      }));
-      
-      // Add static development plan preview to the response
-      previewData.push(staticDevelopmentPlanPreview as any);
+        {
+          serviceType: 'strengths',
+          resultData: language === 'ar' ? staticStrengthsAr : staticStrengthsEn,
+          createdAt: new Date().toISOString()
+        },
+        {
+          serviceType: 'weaknesses',
+          resultData: language === 'ar' ? staticWeaknessesAr : staticWeaknessesEn,
+          createdAt: new Date().toISOString()
+        },
+        {
+          serviceType: 'beat-strategies',
+          resultData: language === 'ar' ? staticBeatAr : staticBeatEn,
+          createdAt: new Date().toISOString()
+        },
+        {
+          serviceType: 'comparison',
+          resultData: language === 'ar' ? staticComparisonAr : staticComparisonEn,
+          createdAt: new Date().toISOString()
+        },
+        {
+          serviceType: 'nutrition-plan',
+          resultData: language === 'ar' ? staticNutritionAr : staticNutritionEn,
+          createdAt: new Date().toISOString()
+        },
+        {
+          serviceType: 'development-plan',
+          resultData: language === 'ar' ? staticDevPlanAr : staticDevPlanEn,
+          createdAt: new Date().toISOString()
+        },
+        {
+          serviceType: 'video',
+          resultData: language === 'ar' ? staticVideoAr : staticVideoEn,
+          createdAt: new Date().toISOString()
+        },
+        {
+          serviceType: 'rank',
+          resultData: language === 'ar' ? staticRankAr : staticRankEn,
+          createdAt: new Date().toISOString()
+        }
+      ];
       
       res.json({
         success: true,
-        data: previewData,
-        count: previewData.length
+        data: staticPreviewData,
+        count: staticPreviewData.length
       });
     } catch (error) {
       console.error('Error fetching analysis previews:', error);

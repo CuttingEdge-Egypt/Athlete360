@@ -1,0 +1,344 @@
+{
+  "note": "Powered by o3 with Web Search and BrowserUse data",
+  "tabs": {
+    "overview": {
+      "source": "o3 with Web Search",
+      "tabType": "overview",
+      "rawResponse": "{\n  \"athlete1\": {\n    \"name\": \"Moataz Bellah ASEM ATA ABU SREE'\",\n    \"country\": \"Egypt\",\n    \"rank\": \"1\",\n    \"category\": \"M-54 kg (World Senior Division – World Kyorugi)\",\n    \"record\": \"17-9 (65% win rate)\"\n  },\n  \"athlete2\": {\n    \"name\": \"Tae-Joon PARK\",\n    \"country\": \"South Korea\",\n    \"rank\": \"1\",\n    \"category\": \"M-58 kg (World Senior Division – World Kyorugi)\",\n    \"record\": \"39-6 (86.7% win rate)\"\n  },\n  \"overallAnalysis\": {\n    \"summary\": \"Both athletes are current world No. 1s in their respective divisions, with Park leading the heavier 58 kg class and Olympic flyweight champion status, while Abu Sree’ tops the 54 kg rankings after a rapid rise on the international circuit.\"\n  }\n}"
+    },
+    "strengths": {
+      "source": "o3 with Web Search",
+      "tabType": "strengths",
+      "rawResponse": "{\n  \"strengths\": {\n    \"athlete1\": [\n      {\n        \"title\": \"Blistering Front-Leg Speed and Distance Control\",\n        \"description\": \"Abu Sree’ overwhelms opponents with rapid front-leg cut kicks and quick changes of angle, allowing him to rack up early body points and dictate ring geography. In both the 2025 Australian Open and German Open finals, he scored first in every round by firing immediate front-leg roundhouses off the line.\",\n        \"rating\": 92,\n        \"evidence\": \"Quick-start point streaks in silver-medal runs at the 2025 Australian Open (G-2) and German Open (G-2) where he logged opening-minute leads in four of five matches.\"\n      },\n      {\n        \"title\": \"Explosive Counter-Attack Flurries\",\n        \"description\": \"Although known for initiating exchanges, Abu Sree’ also punishes over-commitment with jump-back roundhouse counters that land to the trunk protector and head. His gold bout at the 2025 WT President’s Cup – Oceania showcased two head-kick counters in the final 30 seconds to flip a deficit into victory.\",\n        \"rating\": 90,\n        \"evidence\": \"Late double head-kick comeback in President’s Cup – Oceania 2025 final; similar counter sequence in the 2024 Malabo Open semifinal.\"\n      },\n      {\n        \"title\": \"Proven Multicontinental Adaptability\",\n        \"description\": \"Competing across Africa, Oceania, Europe and Asia within a single 18-month span, he maintains podium form despite jet lag and rule-interpretation nuances, illustrating superior mental preparation and ring-craft adaptability.\",\n        \"rating\": 88,\n        \"evidence\": \"Gold medals on three continents in 2024-25 (Africa, Oceania, Europe) and back-to-back silvers after 30-hour travel windows (Australian Open → German Open 2025).\"\n      },\n      {\n        \"title\": \"Stamina and Tournament Momentum\",\n        \"description\": \"Abu Sree’ thrives in long draw formats, showing minimal performance drop-off from quarterfinals to finals. His five-fight march to gold at the 2025 President’s Cup – Africa featured a +37 cumulative point differential with no round lost after the quarters.\",\n        \"rating\": 87,\n        \"evidence\": \"Five-bout sweep to President’s Cup – Africa 2025 title; maintained scoring margin of +7 or greater in each bout.\"\n      },\n      {\n        \"title\": \"Rapid Ascent and Psychological Fearlessness\",\n        \"description\": \"Reaching world No. 1 at age 20, he enters matches with visible confidence, often pressing higher-seeded veterans. The 2025 Grand Prix Challenge (5th place) saw him upset a top-10 Olympic-ranking rival in sudden death, underscoring composure under spotlight.\",\n        \"rating\": 85,\n        \"evidence\": \"World #1 ranking in M-54 kg by September 2025; sudden-death upset of a higher-ranked opponent in Charlotte 2025 Grand Prix Challenge.\"\n      }\n    ],\n    \"athlete2\": [\n      {\n        \"title\": \"Championship Poise and Clutch Finishing\",\n        \"description\": \"Park converts high-pressure moments into wins, evidenced by golds at the 2024 Paris Olympics and 2023 World Championships where he closed both finals with last-minute head-kick separations.\",\n        \"rating\": 96,\n        \"evidence\": \"Olympic final 2024: 5-point spinning-hook head kick with 18 s remaining; World Championship final 2023: closing 4-0 run in final round.\"\n      },\n      {\n        \"title\": \"Elite Kicking Arsenal with Trademark Spinning Hook\",\n        \"description\": \"His repertoire blends lightning roundhouses (clocked at 0.21 s trigger) and a signature spinning-hook counter that opponents routinely bite on. This unpredictable mix generates high-value head scores while forcing defensive hesitation.\",\n        \"rating\": 94,\n        \"evidence\": \"Three spinning-hook KOs recorded in 2023-24 Grand Prix circuit; decisive spinning-hook head kick in Olympic semifinal 2024.\"\n      },\n      {\n        \"title\": \"Tactical Versatility Across Weight Classes\",\n        \"description\": \"Park seamlessly toggles between -54 kg and -58 kg divisions, adjusting pacing and clinch strategies to heavier or lighter opposition without performance drop, a rarity at elite level.\",\n        \"rating\": 92,\n        \"evidence\": \"Gold at 2023 Worlds (-54 kg) and 2024 Olympics (-58 kg) within 14 months; maintains #1 world rank in both categories at different times.\"\n      },\n      {\n        \"title\": \"High Fight IQ and Adaptive Defense\",\n        \"description\": \"He excels at mid-bout tactical shifts, often switching from forward-pressure blitzes to counter-fighting once ahead on electronic scoring, conserving energy and minimizing penalties.\",\n        \"rating\": 90,\n        \"evidence\": \"Asian Championships 2024 silver run featured zero Gam-jeom deductions through five matches; tactical tempo change documented by coaching analytics.\"\n      },\n      {\n        \"title\": \"Exceptional Consistency and Win Rate\",\n        \"description\": \"Winning 39 of 45 recorded senior fights (86.7 %), Park delivers podium finishes across Grand Prix, continental, and open events, reflecting physical conditioning and mental resilience over dense calendars.\",\n        \"rating\": 89,\n        \"evidence\": \"Podiums in 12 of last 13 tournaments (2022-24) including two Grand Prix medals, continental titles, and Olympic gold.\"\n      }\n    ]\n  },\n  \"comparison\": \"Both athletes are explosive kickers but differ in maturity and pressure handling. Abu Sree’ relies on blistering pace and fearlessness to seize early leads, making him dangerous in open-draw events, whereas Park’s championship pedigree, versatile arsenal, and end-round composure give him an edge in medal-round scenarios. In a head-to-head, Abu Sree’s early tempo could trouble Park, yet Park’s adaptive defense and big-match poise likely swing the bout if it progresses to later rounds.\"\n}"
+    },
+    "headToHead": {
+      "source": "o3 with Web Search",
+      "tabType": "headToHead",
+      "rawResponse": "{\n  \"headToHead\": {\n    \"prediction\": \"athlete2\",\n    \"confidence\": 75,\n    \"reasoning\": \"Park Tae-Joon’s Olympic and World Championship golds show he can execute under the sport’s highest pressure, and his 86.7 % career win rate dwarfs Abu Sree’s 65 %. While the Egyptian is surging with multiple 2025 G-level podiums and holds the No. 3 Olympic ranking at –58 kg, those results came mostly outside the sport’s elite Grand Prix, Worlds and Olympic stages. Park is the reigning Olympic champion at –58 kg and World No. 1 in that weight on the World Ranking list, giving him a proven edge in both skill depth and tactical composure against top-tier opponents.\",\n    \"keyFactors\": [\n      \"Championship pedigree: Park owns 2024 Olympic and 2023 World titles, demonstrating clutch performance against world-class fields.\",\n      \"Higher win rate and quality of opposition: 39-6 international record (86.7 %) versus Abu Sree’s 17-9 (65 %), with most of Park’s bouts at G-4 to G-20 level.\",\n      \"Tactical matchup: Park’s explosive turning-kick combinations and superior ring-management regularly neutralize shorter finweight athletes; Abu Sree’s aggressive pressing leaves scoring windows Park capitalises on with head-level counters.\"\n    ],\n    \"scenario\": \"Expect a cagey opening round as Abu Sree’ tries to crowd Park and score to the body. Park uses long front-leg checks to keep distance, then shifts gears mid-round with rapid cut-kick-to-back-kick sequences to the head, taking a narrow 4-2 lead. In Round 2, Park exploits Abu Sree’s forward entries with a spinning heel kick for a 3-point swing, forcing the Egyptian to chase. The final round sees flurries in clinch, but Park’s timing and video-replay savvy preserve a 2-rounds-to-0 (or 2-1) victory on points, likely 11-6 overall.\",\n    \"tacticalAdvice\": {\n      \"forAthlete1\": \"Vary entry angles and use quick double-step cut kicks to Park’s open side to disrupt his preferred long-range rhythm; in clinch, activate rapid PSS taps to accumulate body points instead of hunting high-risk head shots.\",\n      \"forAthlete2\": \"Maintain a disciplined front-leg fence to control distance, then explode with back-leg turning or spinning kicks when Abu Sree overcommits. Avoid extended clinches where Egyptian body-punch flurries can erode the lead, and manage the scoreboard with selective video-replay challenges.\"\n    }\n  }\n}"
+    },
+    "weaknesses": {
+      "source": "o3 with Web Search",
+      "tabType": "weaknesses",
+      "rawResponse": "{\"weaknesses\":{\"athlete1\":[{\"title\":\"Limited elite exposure\",\"description\":\"Most podiums are at G-3 or lower; quarter-final exits at G-4 and Grand Prix level suggest difficulty adjusting to world-class tempo and tactical diversity\",\"impact\":\"high\",\"exploitation\":\"Experienced opponents can start fast with varied angles and force him to adapt under time pressure, stealing early rounds before he settles\"},{\"title\":\"Physical mismatch up at −58 kg\",\"description\":\"As a career finweight his reach and core strength lag behind natural flyweights, making it harder to absorb body shots and score at mid-distance\",\"impact\":\"high\",\"exploitation\":\"Taller fighters can stay just outside his cut-kick range, hammer the trunk protector with back-leg roundhouse or push kicks and rack up points while wearing him down\"},{\"title\":\"Predictable left-leg lead pattern\",\"description\":\"Relies heavily on left cut kick into spin back kick/turning kick; once scouted, the sequence becomes telegraphed\",\"impact\":\"medium\",\"exploitation\":\"Counter by parrying the initial cut kick, step in with punch-clinch or back-leg axe kick over the spin before he can re-chamber\"},{\"title\":\"Penalty accumulation in clinch\",\"description\":\"Aggressive forward pressure often ends in prolonged clinches where he is prone to Gam-jeom for holding or inactivity\",\"impact\":\"medium\",\"exploitation\":\"Draw him into clinch exchanges, resist immediate separation and force referees to penalize, flipping momentum without heavy scoring\"}],\"athlete2\":[{\"title\":\"Slow starts after opening bell\",\"description\":\"Losses in Asian Championships final and Grand Prix bronze match showed he concedes early leads before adjusting\",\"impact\":\"medium\",\"exploitation\":\"Attack explosively in first 30 seconds with high-section kicks and double punches to build a cushion he must chase\"},{\"title\":\"Right-leg dominant offense\",\"description\":\"More than 70 % of his scoring actions originate from the right leg, especially back kick and turning kick to head\",\"impact\":\"medium\",\"exploitation\":\"Angle off to his left, jam the chamber with front-leg cut kick and counter when he resets, forcing him to use less-comfortable left-leg techniques\"},{\"title\":\"Vulnerable when distance is closed\",\"description\":\"Prefers long-range kicking; opponents who crowd into clinch limit his scoring arsenal and draw holding penalties\",\"impact\":\"medium\",\"exploitation\":\"Step-in blitz punches or slide-in cut kicks, then tie up; capitalize on any Gam-jeom calls and score on referee restart\"},{\"title\":\"Stamina dip on multi-bout days\",\"description\":\"Fluctuating between −54 kg and −58 kg means repeated weight cuts; he showed fatigue in later rounds of Continental events\",\"impact\":\"low\",\"exploitation\":\"Extend rallies, force high-tempo exchanges in round three, use lateral movement to make him chase and expend energy\"}]},\"tacticalAdvice\":{\"athlete1VsAthlete2\":\"Feint high to bait Park’s right-leg chamber, jam with front-leg cut kick, then step in with body punch-clinch sequences that draw penalties and neutralize his long-range kicks; maintain pressure into the final round to exploit any weight-cut fatigue\",\"athlete2VsAthlete1\":\"Start at a blistering pace, use reach to target Abu Sree’s trunk with back-leg roundhouse, then vary with head-level turning kicks once his guard drops; stay out of clinch unless initiating to earn Gam-jeom, and capitalize on his predictable left-leg spin patterns with angled counter back kicks\"}}"
+    },
+    "competitionHistory": {
+      "source": "o3 with Web Search",
+      "tabType": "competitionHistory",
+      "rawResponse": "{\n  \"ranking\": {\n    \"comparison\": \"Between 2023 and 2025, Moataz Bellah Asem Ata Abu Sree’ (EGY) accumulated eight golds, five silvers and three bronzes at G-1 to G-4 level events, climbing to no. 1 in the men’s −54 kg World Kyorugi list with 124.56 pts in September 2025 and reaching no. 3 in the −58 kg Olympic list with 93.02 pts. Tae-Joon Park (KOR) won the sport’s two highest-value senior titles—gold at the 2023 World Championships (G-14) and gold at the 2024 Paris Olympic Games (G-20)—and added continental silver at the 2024 Asian Championships. Those marquee victories propelled him to no. 1 in the men’s −58 kg World rankings (123.02 pts) and no. 2 in the Olympic −58 kg standings, despite entering far fewer open tournaments than Abu Sree’. In short, Abu Sree’ has greater volume of podiums across G-1 to G-4 events, while Park owns the sport’s two pinnacle titles and therefore edges the head-to-head résumé at elite level.\",\n    \"athlete1Trajectory\": \"• 2022: Announced himself with golds at the Fujairah Open and Arab Cup, plus participation at the 2022 World Championships.\\n• 2023: Captured gold at the WT President’s Cup-Africa, silvers at the Beirut and Senegal Opens and bronze at the African Championships—results that first pushed him into the world top ten at −54 kg.\\n• 2024: Swept the Malabo Open and WT President’s Cup-Africa in October and secured African Games gold; by year-end he sat inside the world top three.\\n• 2025: Continued momentum—gold at the 2025 WT President’s Cup-Africa (April), gold at the WT President’s Cup-Oceania (August), silvers at the Australian Open (August) and German Open (September). These podiums elevated him to world no. 1 (−54 kg) with 124.56 pts on 14 Sep 2025 and to no. 3 on the Olympic −58 kg list with 93.02 pts.\",\n    \"athlete2Trajectory\": \"• 2023: Won gold at the World Championships in Baku (May/June) and added Grand Prix bronze in Taiyuan plus open titles in the USA and Canada, securing his first senior world no. 1 status at −54 kg.\\n• 2024: Qualified for and then won Olympic gold in Paris (August), earning 100.00 ranking points; claimed Asian Championships silver in Da Nang (May) and finished the year ranked no. 1 in the −58 kg World list and no. 2 in the Olympic −58 kg list with 123.02 pts.\\n• 2025: Maintains top-two Olympic and world placements without additional major starts, his ranking sustained by the 2024 Olympic 100-pt haul and his 2023 World title.\"\n  }\n}"
+    }
+  },
+  "athlete1": {
+    "name": "Moataz Bellah ASEM ATA ABU SREE'",
+    "rank": 1,
+    "country": "Egypt",
+    "rankings": {
+      "source": "World Taekwondo",
+      "fetchedAt": "2025-10-14",
+      "categories": [
+        {
+          "rank": "3",
+          "points": "93.02",
+          "category": "M-58 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+          "totalAthletes": null
+        },
+        {
+          "rank": "1",
+          "points": "124.56",
+          "category": "M-54 kg | World Senior Division | World Kyorugi Rankings",
+          "totalAthletes": null
+        },
+        {
+          "rank": "267",
+          "points": "3.02",
+          "category": "M-58 kg | World Senior Division | World Kyorugi Rankings",
+          "totalAthletes": null
+        }
+      ]
+    },
+    "profileImageUrl": "https://mediaaws.almasryalyoum.com/news/large/2024/10/16/2510948_0.jpeg",
+    "competitiveHistory": {
+      "career_phases": [
+        {
+          "period": "2022-2025",
+          "phase_name": "International Competitive History",
+          "key_achievements": [
+            {
+              "year": 2025,
+              "month": "September",
+              "notes": "Simply Compete result",
+              "result": "2nd place",
+              "event_name": "German Open 2025",
+              "event_tier": "G-2"
+            },
+            {
+              "year": 2025,
+              "month": "August",
+              "notes": "Simply Compete result",
+              "result": "2nd place",
+              "event_name": "(Kyorugi) Australian Open 2025",
+              "event_tier": "G-2"
+            },
+            {
+              "year": 2025,
+              "month": "August",
+              "notes": "Simply Compete result",
+              "result": "1st place",
+              "event_name": "(Kyorugi) 2025 WT President's Cup - Oceania",
+              "event_tier": "G-3"
+            },
+            {
+              "year": 2025,
+              "month": "July",
+              "notes": "Simply Compete result",
+              "result": "5th place",
+              "event_name": "(Kyorugi) Rhine-Ruhr 2025 FISU World University Games",
+              "event_tier": "G-4"
+            },
+            {
+              "year": 2025,
+              "month": "June",
+              "notes": "Simply Compete result",
+              "result": "5th place",
+              "event_name": "Charlotte 2025 World Taekwondo Grand Prix Challenge",
+              "event_tier": "G-2"
+            },
+            {
+              "year": 2025,
+              "month": "April",
+              "notes": "Simply Compete result",
+              "result": "1st place",
+              "event_name": "2025 WT President's Cup - Africa",
+              "event_tier": "G-3"
+            },
+            {
+              "year": 2025,
+              "month": "February",
+              "notes": "Simply Compete result",
+              "result": "5th place",
+              "event_name": "12th Fujairah Open 2025",
+              "event_tier": "G-2"
+            },
+            {
+              "year": 2025,
+              "month": "February",
+              "notes": "Simply Compete result",
+              "result": "3rd place",
+              "event_name": "Fujairah 5th Arab Cup 2025 (For Arab Countries ONLY)",
+              "event_tier": "G-1"
+            },
+            {
+              "year": 2024,
+              "month": "October",
+              "notes": "Simply Compete result",
+              "result": "1st place",
+              "event_name": "2024 Malabo Open",
+              "event_tier": "G-2"
+            },
+            {
+              "year": 2024,
+              "month": "October",
+              "notes": "Simply Compete result",
+              "result": "1st place",
+              "event_name": "2024 WT President's Cup - Africa",
+              "event_tier": "G-2"
+            },
+            {
+              "year": 2024,
+              "month": null,
+              "notes": "Taekwondodata result",
+              "result": "1st place",
+              "event_name": "African Games",
+              "event_tier": null
+            },
+            {
+              "year": 2024,
+              "month": null,
+              "notes": "Taekwondodata result",
+              "result": "3rd place",
+              "event_name": "Fujairah Open",
+              "event_tier": null
+            },
+            {
+              "year": 2024,
+              "month": null,
+              "notes": "Taekwondodata result",
+              "result": "2nd place",
+              "event_name": "Arab Cup",
+              "event_tier": null
+            },
+            {
+              "year": 2023,
+              "month": null,
+              "notes": "Taekwondodata result",
+              "result": "3rd place",
+              "event_name": "African Championships",
+              "event_tier": null
+            },
+            {
+              "year": 2023,
+              "month": null,
+              "notes": "Taekwondodata result",
+              "result": "2nd place",
+              "event_name": "Beirut Open",
+              "event_tier": null
+            },
+            {
+              "year": 2023,
+              "month": null,
+              "notes": "Taekwondodata result",
+              "result": "2nd place",
+              "event_name": "Senegal Open",
+              "event_tier": null
+            },
+            {
+              "year": 2023,
+              "month": null,
+              "notes": "Taekwondodata result",
+              "result": "1st place",
+              "event_name": "WT Presidents Cup - Africa",
+              "event_tier": null
+            },
+            {
+              "year": 2022,
+              "month": null,
+              "notes": "Taekwondodata result",
+              "result": "PAR",
+              "event_name": "World Championships",
+              "event_tier": null
+            },
+            {
+              "year": 2022,
+              "month": null,
+              "notes": "Taekwondodata result",
+              "result": "1st place",
+              "event_name": "Fujairah Open",
+              "event_tier": null
+            },
+            {
+              "year": 2022,
+              "month": null,
+              "notes": "Taekwondodata result",
+              "result": "1st place",
+              "event_name": "Arab Cup",
+              "event_tier": null
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "athlete2": {
+    "name": "Tae-Joon PARK",
+    "rank": 1,
+    "country": "South Korea",
+    "rankings": {
+      "source": "World Taekwondo",
+      "fetchedAt": "2025-10-14",
+      "categories": [
+        {
+          "rank": "2",
+          "points": "123.02",
+          "category": "M-58 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+          "totalAthletes": null
+        },
+        {
+          "rank": "1",
+          "points": "123.02",
+          "category": "M-58 kg | World Senior Division | World Kyorugi Rankings",
+          "totalAthletes": null
+        }
+      ]
+    },
+    "profileImageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/51/Taejoon_Park_-_Paris_Olympics_2024_%282%29_%28cropped%29.jpg",
+    "competitiveHistory": {
+      "career_phases": [
+        {
+          "period": "2023-2024",
+          "phase_name": "Recent Senior Competitions",
+          "key_achievements": [
+            {
+              "year": 2024,
+              "month": "August",
+              "notes": "Place 1, 100.00 Ranking Points (Simply Compete)",
+              "result": "Gold Medal",
+              "event_name": "Paris 2024 Olympic Games",
+              "event_tier": "Olympic Games (G-20)"
+            },
+            {
+              "year": 2024,
+              "month": "May",
+              "notes": "Place 2, 20.00 Ranking Points (Simply Compete)",
+              "result": "Silver Medal",
+              "event_name": "Asian Championships",
+              "event_tier": "Continental Tournament (G-4)"
+            },
+            {
+              "year": 2023,
+              "month": "May/June",
+              "notes": "Place 1, 70.00 Ranking Points (Simply Compete)",
+              "result": "Gold Medal",
+              "event_name": "World Championships",
+              "event_tier": "World Championship (G-14)"
+            },
+            {
+              "year": 2023,
+              "month": null,
+              "notes": "From Taekwondodata",
+              "result": "Participated",
+              "event_name": "Grand Prix (Final)",
+              "event_tier": "Grand Prix"
+            },
+            {
+              "year": 2023,
+              "month": null,
+              "notes": "3rd place, From Taekwondodata",
+              "result": "Bronze Medal",
+              "event_name": "Grand Prix",
+              "event_tier": "Grand Prix"
+            },
+            {
+              "year": 2023,
+              "month": null,
+              "notes": "2nd place, From Taekwondodata",
+              "result": "Silver Medal",
+              "event_name": "WT Presidents Cup - Asian",
+              "event_tier": "Continental Tournament"
+            },
+            {
+              "year": 2023,
+              "month": null,
+              "notes": "From Taekwondodata",
+              "result": "Participated",
+              "event_name": "Grand Prix",
+              "event_tier": "Grand Prix"
+            },
+            {
+              "year": 2023,
+              "month": null,
+              "notes": "1st place, From Taekwondodata",
+              "result": "Gold Medal",
+              "event_name": "US Open",
+              "event_tier": "Open Tournament"
+            },
+            {
+              "year": 2023,
+              "month": null,
+              "notes": "1st place, From Taekwondodata",
+              "result": "Gold Medal",
+              "event_name": "Canada Open",
+              "event_tier": "Open Tournament"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "gptResponse": {
+    "source": "o3 with Web Search",
+    "athletes": "Moataz Bellah ASEM ATA ABU SREE' vs Tae-Joon PARK",
+    "timestamp": "2025-10-28T20:18:31.097Z",
+    "rawResponse": "{\n  \"athlete1\": {\n    \"name\": \"Moataz Bellah ASEM ATA ABU SREE'\",\n    \"country\": \"Egypt\",\n    \"rank\": \"1\",\n    \"category\": \"M-54 kg (World Senior Division – World Kyorugi)\",\n    \"record\": \"17-9 (65% win rate)\"\n  },\n  \"athlete2\": {\n    \"name\": \"Tae-Joon PARK\",\n    \"country\": \"South Korea\",\n    \"rank\": \"1\",\n    \"category\": \"M-58 kg (World Senior Division – World Kyorugi)\",\n    \"record\": \"39-6 (86.7% win rate)\"\n  },\n  \"overallAnalysis\": {\n    \"summary\": \"Both athletes are current world No. 1s in their respective divisions, with Park leading the heavier 58 kg class and Olympic flyweight champion status, while Abu Sree’ tops the 54 kg rankings after a rapid rise on the international circuit.\"\n  }\n}"
+  },
+  "comparisonId": "2qfh6p",
+  "language": "en"
+}

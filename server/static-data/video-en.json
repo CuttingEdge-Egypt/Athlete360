@@ -1,0 +1,165 @@
+{
+  "sport": "Karate",
+  "errors": {
+    "match": null,
+    "punch": "Punch analysis failed",
+    "score": null,
+    "advice": null,
+    "kickCount": "Kick count analysis failed",
+    "yellowCards": "Yellow card analysis failed"
+  },
+  "isTaekwondo": false,
+  "processedAt": "2025-10-28T18:09:48.270Z",
+  "roundAnalyzed": "no-rounds",
+  "match_analysis": "**Match Analysis: Full Game**\n\n**Match Score:**\n*   **AZE (Rafael Aghayev):** 3\n*   **TUR (Erman Eltemur):** 0\n\n**Actions Count & Types:**\nThis analysis is limited by the fast action and occasional obscured views, but here are some highlights. Precise numbers are hard to determine but I will use as many markers as possible.\n\n**Player 1 (Blue): Rafael Aghayev (AZE)**\n*   **Technique Style:** Aghayev employs a highly dynamic and explosive style, characterized by a very low center of gravity. He excels at closing the distance rapidly, often ducking under his opponent's guard to deliver powerful counter-punches. His background in judo is evident in his exceptional balance, clinching ability, and takedown attempts.\n*   **Key Actions & Techniques:**\n    *   **Gyaku-zuki (Reverse Punch):** His primary scoring technique. He scored all three of his points (Yuko) with perfectly timed counter gyaku-zuki to the body and head.\n    *   **Clinching & Control:** Frequently initiated clinches to neutralize Eltemur's attacks and disrupt his rhythm.\n    *   **Ashi-barai (Foot Sweep):** Executed a powerful sweep at 04:17, demonstrating his grappling prowess, though it was not scored due to a preceding hold.\n    *   **Defensive Movement:** Utilized excellent head movement and footwork to evade Eltemur's attacks, creating openings for counters.\n\n**Player 2 (Red): Erman Eltemur (TUR)**\n*   **Technique Style:** Eltemur fought with an aggressive, forward-pressure style. He consistently tried to be the aggressor, initiating exchanges with a combination of hand and foot techniques.\n*   **Key Actions & Techniques:**\n    *   **Kizami-zuki / Gyaku-zuki Combinations:** Attempted numerous punching combinations to break through Aghayev's defense.\n    *   **Mawashi-geri (Roundhouse Kick):** Attempted several high kicks (Jodan Mawashi-geri) to catch Aghayev off guard, though none connected cleanly for a score.\n    *   **Jodan-zuki (Punch to the Head):** Attempted a high punch at 03:08 that was reviewed by video replay but ultimately not awarded a point.\n\n**Other Actions:**\n*   **Penalties:** Both fighters received multiple Category 2 (C2) warnings (Chukoku, Keikoku) for holding and clinching. Aghayev also received a Hansoku-Chui for stepping out of the area (Jogai).\n*   **Video Replay:** Eltemur's coach called for a video review at 03:17 after a jodan-zuki attempt, but the judges did not award a score.\n\n**Match Brief & Technical Analysis:**\nThe match began with a cautious and tactical feeling-out process. Both fighters respected each other's abilities, leading to a scoreless first minute and a half filled with feints and probing movements. Eltemur established himself as the aggressor, constantly moving forward, while Aghayev adopted a counter-striking strategy, relying on his superior timing and defensive skills.\n\nAghayev's strategy was to draw Eltemur in and exploit the openings created by his opponent's aggression. He masterfully controlled the distance, exploding forward to score and immediately clinching or moving out of range. His low stance made him a difficult target for Eltemur's kicks and allowed him to change levels effectively for his counter-punches. Eltemur's game plan to apply pressure was sound, but he struggled to land clean techniques against Aghayev's elusive movement and was often neutralized in the clinch.\n\n**Strategic Adaptation:**\n*   **Aghayev:** Remained consistent with his counter-punching strategy throughout the match. As he built a lead, he became even more defensive, content to manage the clock, evade attacks, and force Eltemur into making mistakes.\n*   **Eltemur:** As the match progressed and he fell behind on the scoreboard, Eltemur increased his aggression and output, throwing more combinations and taking more risks. However, this played into Aghayev's hands, as it created more opportunities for the veteran to land his signature counters.\n\n**Key Moments/Commentator Notes:**\n*   **Commentator Insight:** The commentators repeatedly highlighted Aghayev's legendary status, his powerful low center of gravity, and his background as a \"phenomenal judo player,\" which explains his strength and control in close-quarters exchanges.\n*   **First Point (03:24):** Aghayev scored his first Yuko with a sharp counter-punch. Eltemur's coach immediately protested, but the video panel confirmed no score for Eltemur, and Aghayev's point stood.\n*   **The Takedown (04:17):** Aghayev executed a clean and powerful foot sweep, taking Eltemur to the mat. The commentator noted that while impressive, it was preceded by a two-handed hold, making it an illegal technique and resulting in a warning rather than a score.\n*   **Final Point & Reaction (04:30):** Eltemur launched an aggressive attack, and Aghayev ducked under the punch, landing a clean gyaku-zuki to the head. The impact was significant, causing Aghayev to theatrically reel backward, emphasizing the force of the exchange before the point was awarded.\n*   **Post-Match Sportsmanship:** In a remarkable display of respect, Eltemur lifted the victorious Aghayev onto his shoulders after the match, acknowledging the greatness of his opponent.\n\n**Summary:**\nRafael Aghayev performed better, securing a decisive 3-0 victory. His win was a masterclass in experience, timing, and strategic execution. While Erman Eltemur showed courage and aggression, he was ultimately outmaneuvered by Aghayev's superior counter-striking and ability to control the fight's tempo and distance. Aghayev successfully turned Eltemur's aggression against him, punishing his advances with precise and effective counters to claim the win.",
+  "punch_analysis": null,
+  "score_analysis": "{\"separate_scores\":[{\"entity_name\":\"Erman Eltemur\",\"entity_type\":\"player\",\"country\":\"TUR\",\"side\":\"blue\",\"events\":[]},{\"entity_name\":\"Rafael Aghayev\",\"entity_type\":\"player\",\"country\":\"AZE\",\"side\":\"red\",\"events\":[{\"timestamp\":\"03:24\",\"description\":\"Point scored\",\"points_scored\":1,\"current_score\":\"1\"},{\"timestamp\":\"03:57\",\"description\":\"Point scored\",\"points_scored\":1,\"current_score\":\"2\"},{\"timestamp\":\"04:51\",\"description\":\"Point scored\",\"points_scored\":1,\"current_score\":\"3\"}]}],\"score_type\":\"individual\",\"players\":[{\"name\":\"Erman Eltemur\",\"country\":\"TUR\",\"events\":[]},{\"name\":\"Rafael Aghayev\",\"country\":\"AZE\",\"events\":[{\"timestamp\":\"03:24\",\"description\":\"Point scored\",\"current_score\":\"1\"},{\"timestamp\":\"03:57\",\"description\":\"Point scored\",\"current_score\":\"2\"},{\"timestamp\":\"04:51\",\"description\":\"Point scored\",\"current_score\":\"3\"}]}]}",
+  "advice_analysis": "```json\n{\n  \"players\": [\n    {\n      \"name\": \"Erman Eltemur\",\n      \"color\": \"Red\",\n      \"tactical_advice\": {\n        \"issues\": [\n          \"Overly predictable and linear attack patterns, primarily relying on lunging straight punches.\",\n          \"Poor distance management, often getting caught too close, which led to clinching and subsequent penalties.\",\n          \"Failed to control the center of the tatami, allowing the opponent to dictate the pace and angles of engagement.\",\n          \"Reactive strategy; frequently resorted to clinching as a primary defense instead of proactive evasion or countering.\",\n          \"Became increasingly desperate when behind on points, leading to rushed, high-risk attacks that were easily countered.\"\n        ],\n        \"improvements\": [\n          \"Incorporate more feints and combination attacks (e.g., jab-cross, hand-to-kick setups) to create openings and disrupt the opponent's timing.\",\n          \"Drill footwork for better distance control, focusing on explosive entries for attacks and immediate exits to avoid being trapped or countered.\",\n          \"Practice using lateral movement (tai sabaki) to cut off the opponent's angles and force them towards the edge of the competition area.\",\n          \"Develop a stronger counter-attacking game (sen-no-sen and go-no-sen) to punish the opponent's entries, reducing the need to clinch defensively.\",\n          \"Adhere to a structured game plan, focusing on scoring single, clean points rather than chasing the opponent with flurries when behind.\"\n        ]\n      },\n      \"technical_advice\": {\n        \"issues\": [\n          \"Stance was often too static and deep, limiting mobility and speed against a more agile opponent.\",\n          \"Dropped his guard, particularly his lead hand, during offensive movements, leaving his head exposed for counter-punches.\",\n          \"Footwork was primarily forward-and-back, making his movements easy to anticipate.\",\n          \"High kicks were telegraphed and lacked proper setup, making them ineffective and energy-inefficient.\"\n        ],\n        \"improvements\": [\n          \"Adopt a more mobile, lighter stance to improve reaction time and the ability to change direction quickly.\",\n          \"Focus on maintaining a high and tight guard during all movements. Practice shadowboxing in front of a mirror to identify and correct hand-dropping habits.\",\n          \"Integrate more angular and circular footwork into training to create unpredictable attack and defense angles.\",\n          \"Work on setting up kicking techniques with hand combinations to disguise intent and increase the probability of landing a clean strike.\"\n        ]\n      },\n      \"mental_advice\": {\n        \"issues\": [\n          \"Showed visible signs of frustration after conceding points, which negatively impacted his decision-making.\",\n          \"Lost composure in the latter half of the match, resulting in penalties for excessive contact (C1) and stepping out (Jogai).\",\n          \"Appeared somewhat hesitant in the opening minute, possibly intimidated by the opponent's reputation.\"\n        ],\n        \"improvements\": [\n          \"Practice mindfulness and emotional regulation techniques to maintain focus and composure, especially when facing adversity in a match.\",\n          \"Engage in high-pressure scenario training (e.g., starting practice bouts from a losing position) to build mental resilience and strategic discipline.\",\n          \"Develop a stronger pre-competition mental routine to build confidence and focus on executing his own strengths, regardless of the opponent.\"\n        ]\n      }\n    },\n    {\n      \"name\": \"Rafael Aghayev\",\n      \"color\": \"Blue\",\n      \"tactical_advice\": {\n        \"issues\": [\n          \"Occasionally lingered in the clinch, which could risk penalties against a stricter refereeing panel.\",\n          \"Showed a minor defensive opening when transitioning from striking to a takedown attempt, leaving his head briefly exposed.\"\n        ],\n        \"improvements\": [\n          \"While his clinch control is excellent for breaking rhythm, drilling even quicker, cleaner disengagements would eliminate any risk of penalties.\",\n          \"Ensure complete defensive awareness during level changes and transitions to grappling, keeping the guard active to protect against surprise close-range strikes.\"\n        ]\n      },\n      \"technical_advice\": {\n        \"issues\": [\n          \"Performance was technically near-flawless. The only potential long-term issue is that his style is heavily reliant on exceptional speed and reflexes.\",\n          \"His takedown at 4:16 was powerful but left him slightly off-balance, which a strong opponent could potentially exploit.\"\n        ],\n        \"improvements\": [\n          \"Continue to refine fundamental techniques to maintain efficiency and precision, as even marginal improvements can make a difference at the elite level.\",\n          \"Focus on perfecting the follow-through and balance recovery after takedown attempts to ensure immediate readiness for the next action.\"\n        ]\n      },\n      \"mental_advice\": {\n        \"issues\": [\n          \"Exaggerated his reaction to a punch at 4:31. While a common tactic to influence judges, it can be perceived as a sign of weakness or poor sportsmanship.\",\n          \"No other significant mental weaknesses were observed; he demonstrated superior composure and confidence.\"\n        ],\n        \"improvements\": [\n          \"Maintain a stoic and composed demeanor throughout the entire match. His supreme skill is evident without the need for theatrical reactions.\",\n          \"Continue to leverage his vast experience as a mental weapon, using his calm and confident presence to psychologically pressure opponents.\"\n        ]\n      }\n    }\n  ],\n  \"general_observations\": \"The match was a masterclass in tactical karate by Rafael Aghayev, who masterfully controlled distance, timing, and space. He capitalized on Erman Eltemur's linear and predictable attacks with precise, well-timed counters. Eltemur's primary challenge was a lack of tactical variety; his aggression was not channeled through a disciplined strategy, leading to frustration and penalties. Aghayev's victory was a result of superior fight IQ, footwork, and mental composure. For Eltemur to reach the next level, he must develop a more diverse offensive toolkit and a more resilient mental game to avoid being drawn into his opponent's pace.\"\n}\n```",
+  "dynamic_metrics": [
+    {
+      "data": {
+        "players": [
+          {
+            "name": "Erman Eltemur",
+            "total": 1,
+            "events": [
+              {
+                "value": 1,
+                "timestamp": "03:08",
+                "description": "Takedown attempt"
+              }
+            ],
+            "country": "TUR"
+          },
+          {
+            "name": "Rafael Aghayev",
+            "total": 3,
+            "events": [
+              {
+                "value": 1,
+                "timestamp": "01:38",
+                "description": "Takedown attempt"
+              },
+              {
+                "value": 1,
+                "timestamp": "04:17",
+                "description": "Takedown attempt"
+              },
+              {
+                "value": 1,
+                "timestamp": "05:27",
+                "description": "Takedown attempt"
+              }
+            ],
+            "country": "AZE"
+          }
+        ]
+      },
+      "title": "Takedown Attempts"
+    },
+    {
+      "data": {
+        "players": [
+          {
+            "name": "Erman Eltemur",
+            "total": 3,
+            "events": [
+              {
+                "value": 1,
+                "timestamp": "02:04",
+                "description": "Chukoku (C2) penalty for holding"
+              },
+              {
+                "value": 1,
+                "timestamp": "04:28",
+                "description": "Keikoku (C2) penalty for holding"
+              },
+              {
+                "value": 1,
+                "timestamp": "04:53",
+                "description": "Chukoku (C1) penalty for stepping out of bounds (Jogai)"
+              }
+            ],
+            "country": "TUR"
+          },
+          {
+            "name": "Rafael Aghayev",
+            "total": 3,
+            "events": [
+              {
+                "value": 1,
+                "timestamp": "02:25",
+                "description": "Chukoku (C2) penalty for holding"
+              },
+              {
+                "value": 1,
+                "timestamp": "02:45",
+                "description": "Keikoku (C2) penalty for holding"
+              },
+              {
+                "value": 1,
+                "timestamp": "05:24",
+                "description": "Hansoku-Chui (C2) penalty for holding"
+              }
+            ],
+            "country": "AZE"
+          }
+        ]
+      },
+      "title": "Penalties Issued"
+    },
+    {
+      "data": {
+        "players": [
+          {
+            "name": "Erman Eltemur",
+            "total": 6,
+            "events": [
+              {
+                "value": 1,
+                "timestamp": "00:36",
+                "description": "Jodan kick attempt"
+              },
+              {
+                "value": 1,
+                "timestamp": "01:08",
+                "description": "Jodan kick attempt"
+              },
+              {
+                "value": 1,
+                "timestamp": "01:53",
+                "description": "Jodan kick attempt"
+              },
+              {
+                "value": 1,
+                "timestamp": "03:08",
+                "description": "Jodan kick attempt"
+              },
+              {
+                "value": 1,
+                "timestamp": "04:16",
+                "description": "Jodan kick attempt"
+              },
+              {
+                "value": 1,
+                "timestamp": "05:02",
+                "description": "Jodan kick attempt"
+              }
+            ],
+            "country": null
+          },
+          {
+            "name": "Rafael Aghayev",
+            "total": 0,
+            "events": [],
+            "country": null
+          }
+        ]
+      },
+      "title": "Jodan Kick Attempts"
+    }
+  ],
+  "kick_count_analysis": null,
+  "yellow_card_analysis": null,
+  "language": "en"
+}
