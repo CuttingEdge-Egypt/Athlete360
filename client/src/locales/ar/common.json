@@ -477,7 +477,20 @@
       "noAthletesAvailable": "لا يوجد لاعبون متاحون",
       "selectSportFirst": "اختر رياضة أولاً",
       "searchSports": "البحث عن الرياضات...",
-      "noSportsFound": "لم يتم العثور على رياضات"
+      "noSportsFound": "لم يتم العثور على رياضات",
+      "competitiveHistoryDetails": "تفاصيل التاريخ التنافسي",
+      "noCompetitiveHistory": "لا يوجد تاريخ تنافسي متاح",
+      "competitiveEdge": "الميزة التنافسية",
+      "evenCompetition": "منافسة متكافئة",
+      "bothAthletesEvenlyMatched": "كلا الرياضيين متطابقان بالتساوي",
+      "hasCompetitiveAdvantage": "لديه الميزة التنافسية",
+      "competitionHistoryNotAvailable": "تحليل تاريخ المنافسة غير متاح",
+      "predictedWinner": "الفائز المتوقع",
+      "tooCloseToCall": "قريب جدًا للتحديد",
+      "headToHeadAnalysisNotAvailable": "تحليل المواجهة المباشرة غير متاح",
+      "historicalContext": "السياق التاريخي",
+      "expertPredictions": "توقعات الخبراء",
+      "strategicAnalysisDescription": "يأخذ التحليل الاستراتيجي في الاعتبار مطابقة المهارات الفنية، والشكل الأخير، والخبرة التنافسية لتحديد النتيجة الأكثر احتمالاً."
     }
   }
 }
