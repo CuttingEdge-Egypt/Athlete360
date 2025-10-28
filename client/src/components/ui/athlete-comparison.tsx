@@ -521,6 +521,14 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
   const handleCancelComparison = async () => {
     if (abortControllerRef.current && queueIdRef.current) {
       try {
+        // Update queue status to cancelled FIRST to prevent restoration
+        if (window.generationQueue && queueIdRef.current) {
+          window.generationQueue.update(queueIdRef.current, { 
+            status: 'error',
+            error: 'Cancelled by user'
+          });
+        }
+        
         // Send cancellation request to backend
         await apiRequest("POST", "/api/athletes/compare/cancel", {
           queueId: queueIdRef.current
@@ -579,10 +587,11 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
       console.log('[COMPARISON] Generated queueId:', queueId);
 
-      // Immediately update status to running when we start the mutation and add retry callback
+      // Immediately update status to running when we start the mutation and add retry/cancel callbacks
       window.generationQueue.update(queueId, { 
         status: 'running', 
         progressMessage: t("analysis.comparison.analyzingAthleteProfiles", "Analyzing athlete profiles..."),
+        onCancel: handleCancelComparison,
         onRetry: () => {
           // Retry comparison with the same athlete selections
           handleCompare();
