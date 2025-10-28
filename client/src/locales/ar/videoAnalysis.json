@@ -45,7 +45,9 @@
     "clipAnalysisResults": "نتائج تحليل المقطع",
     "videoPreview": "معاينة الفيديو",
     "yourRequest": "طلبك",
-    "analysisContent": "محتوى التحليل"
+    "analysisContent": "محتوى التحليل",
+    "aiAnalysisRecommendations": "تحليل وتوصيات الذكاء الاصطناعي",
+    "analyzedOn": "تم التحليل في"
   },
   "progressMessages": {
     "match": {

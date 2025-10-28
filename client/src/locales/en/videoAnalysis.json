@@ -45,7 +45,9 @@
     "clipAnalysisResults": "Clip Analysis Results",
     "videoPreview": "Video Preview",
     "yourRequest": "Your Request",
-    "analysisContent": "Analysis Content"
+    "analysisContent": "Analysis Content",
+    "aiAnalysisRecommendations": "AI Analysis & Recommendations",
+    "analyzedOn": "Analyzed on"
   },
   "progressMessages": {
     "match": {

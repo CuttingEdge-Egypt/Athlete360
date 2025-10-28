@@ -229,7 +229,7 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
               : 'text-white'
           }`}>
             <MessageSquare className={isArabic ? 'text-purple-400' : 'text-indigo-400'} size={20} />
-            AI Analysis & Recommendations
+            {t('results.aiAnalysisRecommendations')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -246,10 +246,10 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
             isArabic ? 'border-slate-700/50 text-right' : 'border-gray-700'
           }`}>
             <div className={`flex items-center gap-2 text-sm ${
-              isArabic ? 'text-slate-400' : 'text-gray-400'
+              isArabic ? 'text-slate-400 flex-row-reverse' : 'text-gray-400'
             }`}>
               <Calendar size={14} />
-              <span>Analyzed on {new Date(analysisData.processedAt).toLocaleString()}</span>
+              <span>{t('results.analyzedOn')} {new Date(analysisData.processedAt).toLocaleString()}</span>
             </div>
           </div>
         </CardContent>
