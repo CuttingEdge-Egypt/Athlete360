@@ -350,6 +350,7 @@ IMPORTANT:
 - If the weight category doesn't exist in the dropdown, try selecting "World Kyorugi Rankings" instead of Olympic, and you should find the weight category there.
 - Don't type into the weight category, only select from the available options.
 - If simply compete link for taekwondo didn't work, then either reload the link again or visit the world taekwondo page.
+- Stay persistent with World Taekwondo Site even if it doesn't load sometimes, refresh the page, revisit the site but stay with the world taekwondo site until you extract the proper ranking.
 
 Extract:
 - Current World Rank and Olympic rank
