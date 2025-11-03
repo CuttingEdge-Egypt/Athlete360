@@ -2649,7 +2649,7 @@ export function AnalysisPopup({
                 })}`}
               </DialogDescription>
             </div>
-            <div className={`flex-shrink-0 ${i18n.language === 'ar' ? 'mr-8' : 'ml-8'}`}>
+            <div className={`flex-shrink-0 ${i18n.language === 'ar' ? 'mr-16' : 'ml-16'}`}>
               <Button 
                 onClick={handleExport}
                 size="sm"
