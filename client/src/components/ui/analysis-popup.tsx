@@ -2634,7 +2634,7 @@ export function AnalysisPopup({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-athlete-gray-900 border-gray-700 text-white">
-        <div className="border-b border-gray-700 pb-4">
+        <div className={`border-b border-gray-700 pb-4 ${i18n.language === 'ar' ? 'pl-12' : 'pr-12'}`}>
           <div className="flex items-start justify-between gap-4" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
             <div className={`flex-1 ${i18n.language === 'ar' ? 'text-right' : 'text-left'}`}>
               <DialogTitle className="text-xl font-bold text-white">
@@ -2649,7 +2649,7 @@ export function AnalysisPopup({
                 })}`}
               </DialogDescription>
             </div>
-            <div className={`flex-shrink-0 ${i18n.language === 'ar' ? 'mr-16' : 'ml-16'}`}>
+            <div className="flex-shrink-0">
               <Button 
                 onClick={handleExport}
                 size="sm"
