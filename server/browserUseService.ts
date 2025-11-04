@@ -193,6 +193,7 @@ If the player is not found or not ranked, return:
       },
       body: JSON.stringify({
         task: taskPrompt,
+        llm_model: 'gemini-2.5-flash',
         structured_output_json: JSON.stringify(structuredOutputSchema)
       })
     });
@@ -473,7 +474,7 @@ IMPORTANT: List all competitions from most recent to oldest. Only include compet
       },
       body: JSON.stringify({
         task: taskPrompt,
-        llm_model: 'gemini-flash-latest',
+        llm_model: 'gemini-2.5-flash',
         structured_output_json: JSON.stringify(structuredOutputSchema)
       })
     });
@@ -648,7 +649,7 @@ IMPORTANT:
       },
       body: JSON.stringify({
         task: taskPrompt,
-        llm_model: 'gemini-flash-latest',
+        llm_model: 'gemini-2.5-flash',
         structured_output_json: JSON.stringify(structuredOutputSchema)
       })
     });
@@ -940,7 +941,7 @@ IMPORTANT FOR TEAM SPORTS:
       },
       body: JSON.stringify({
         task: taskPrompt,
-        llm_model: 'gemini-flash-latest',
+        llm_model: 'gemini-2.5-flash',
         structured_output_json: JSON.stringify(structuredOutputSchema)
       })
     });
