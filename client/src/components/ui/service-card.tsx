@@ -392,11 +392,12 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
               data-testid={`button-sample-${service.id}`}
               variant="ghost"
               size="sm"
-              className="h-7 px-2 text-blue-400 hover:text-blue-300 hover:bg-blue-400/10"
+              className="h-7 px-2 text-blue-400 hover:text-blue-300 hover:bg-blue-400/10 gap-1"
               onClick={handlePreview}
               disabled={service.id === 'statistics'}
             >
               <HelpCircle size={16} />
+              <span className="text-xs">{t('buttons.preview', { ns: 'common' })}</span>
             </Button>
           </div>
           {/* Bottom row: icon and token badge horizontally aligned */}
