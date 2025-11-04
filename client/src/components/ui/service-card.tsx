@@ -360,7 +360,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       <CardContent className="p-6 h-full flex flex-col">
         <div className="flex justify-between items-start mb-4">
           <IconComponent className={`text-2xl ${service.color}`} size={32} />
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col items-end gap-1">
             <Button
               data-testid={`button-sample-${service.id}`}
               variant="ghost"
