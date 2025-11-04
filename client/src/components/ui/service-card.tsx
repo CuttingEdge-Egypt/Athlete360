@@ -457,7 +457,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
               onClick={handleHistoryPreview}
             >
               <Eye className="mr-2" size={16} />
-              {t('services.preview', { ns: 'common' })}
+              {t('buttons.viewHistory', { ns: 'common' })}
             </Button>
           )}
         </div>
