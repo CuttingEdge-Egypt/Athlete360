@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus, Gift, UserPlus, TrendingDown, Target, Calendar, Video, Users, Twitter, Instagram, Linkedin, Mail, MessageCircle, Eye, Loader2 } from "lucide-react";
+import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus, Gift, UserPlus, TrendingDown, Target, Calendar, Video, Users, Twitter, Instagram, Linkedin, Mail, MessageCircle, HelpCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -161,7 +161,7 @@ export default function Landing() {
                     size="sm" 
                     className="w-full border-blue-400/50 text-blue-400 hover:bg-blue-400/10 mt-auto"
                   >
-                    <Eye className="mr-2" size={14} />
+                    <HelpCircle className="mr-2" size={14} />
                     {t('actions.preview')}
                   </Button>
                 </CardContent>
@@ -182,7 +182,7 @@ export default function Landing() {
                     size="sm" 
                     className="w-full border-yellow-400/50 text-yellow-400 hover:bg-yellow-400/10 mt-auto"
                   >
-                    <Eye className="mr-2" size={14} />
+                    <HelpCircle className="mr-2" size={14} />
                     {t('actions.preview')}
                   </Button>
                 </CardContent>
@@ -203,7 +203,7 @@ export default function Landing() {
                     size="sm" 
                     className="w-full border-green-400/50 text-green-400 hover:bg-green-400/10 mt-auto"
                   >
-                    <Eye className="mr-2" size={14} />
+                    <HelpCircle className="mr-2" size={14} />
                     {t('actions.preview')}
                   </Button>
                 </CardContent>
@@ -224,7 +224,7 @@ export default function Landing() {
                     size="sm" 
                     className="w-full border-red-400/50 text-red-400 hover:bg-red-400/10 mt-auto"
                   >
-                    <Eye className="mr-2" size={14} />
+                    <HelpCircle className="mr-2" size={14} />
                     {t('actions.preview')}
                   </Button>
                 </CardContent>
@@ -247,7 +247,7 @@ export default function Landing() {
                     size="sm" 
                     className="w-full border-purple-400/50 text-purple-400 hover:bg-purple-400/10 mt-auto"
                   >
-                    <Eye className="mr-2" size={14} />
+                    <HelpCircle className="mr-2" size={14} />
                     {t('actions.preview')}
                   </Button>
                 </CardContent>
@@ -268,7 +268,7 @@ export default function Landing() {
                     size="sm" 
                     className="w-full border-blue-400/50 text-blue-400 hover:bg-blue-400/10 mt-auto"
                   >
-                    <Eye className="mr-2" size={14} />
+                    <HelpCircle className="mr-2" size={14} />
                     {t('actions.preview')}
                   </Button>
                 </CardContent>
@@ -289,7 +289,7 @@ export default function Landing() {
                     size="sm" 
                     className="w-full border-green-400/50 text-green-400 hover:bg-green-400/10 mt-auto"
                   >
-                    <Eye className="mr-2" size={14} />
+                    <HelpCircle className="mr-2" size={14} />
                     {t('actions.preview')}
                   </Button>
                 </CardContent>
@@ -315,7 +315,7 @@ export default function Landing() {
                         size="sm" 
                         className="border-orange-400/50 text-orange-400 hover:bg-orange-400/10 h-9 px-4"
                       >
-                        <Eye className="mr-2" size={14} />
+                        <HelpCircle className="mr-2" size={14} />
                         {t('actions.preview')}
                       </Button>
                     </div>
@@ -338,7 +338,7 @@ export default function Landing() {
                         size="sm" 
                         className="border-purple-400/50 text-purple-400 hover:bg-purple-400/10 h-9 px-4"
                       >
-                        <Eye className="mr-2" size={14} />
+                        <HelpCircle className="mr-2" size={14} />
                         {t('actions.preview')}
                       </Button>
                     </div>

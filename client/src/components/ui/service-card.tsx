@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import { AnalysisPopup } from "./analysis-popup";
 import { 
   User, Trophy, Star, AlertTriangle, Calendar, Apple, 
-  Swords, Video, Loader2, Coins, BarChart3, Eye 
+  Swords, Video, Loader2, Coins, BarChart3, HelpCircle 
 } from "lucide-react";
 import type { Athlete, User as UserType } from "@shared/schema";
 
@@ -360,15 +360,27 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
       <CardContent className="p-6 h-full flex flex-col">
         <div className="flex justify-between items-start mb-4">
           <IconComponent className={`text-2xl ${service.color}`} size={32} />
-          <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">
-            {service.cost} {t('units.tokens', { ns: 'common' })}
-          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              data-testid={`button-sample-${service.id}`}
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-blue-400 hover:text-blue-300 hover:bg-blue-400/10"
+              onClick={handlePreview}
+              disabled={service.id === 'statistics'}
+            >
+              <HelpCircle size={16} />
+            </Button>
+            <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">
+              {service.cost} {t('units.tokens', { ns: 'common' })}
+            </span>
+          </div>
         </div>
         
         <h3 className="text-lg font-semibold mb-2 text-white">{service.title}</h3>
         <p className="text-gray-400 text-sm mb-4 flex-grow">{service.description}</p>
         
-        <div className="space-y-2 mt-auto">
+        <div className="mt-auto">
           <Button 
             data-testid={`button-${service.id}`}
             className="w-full bg-athlete-accent hover:bg-blue-600 text-white transition-colors min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
@@ -404,18 +416,6 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
             ) : (
               t('services.generate')
             )}
-          </Button>
-          
-          <Button
-            data-testid={`button-preview-${service.id}`}
-            variant="outline"
-            size="sm"
-            className="w-full border-blue-400/50 text-blue-400 hover:bg-blue-400/10 hover:text-blue-200 hover:border-blue-300"
-            onClick={handlePreview}
-            disabled={service.id === 'statistics'}
-          >
-            <Eye className="mr-2" size={14} />
-            {t('actions.preview')}
           </Button>
         </div>
       </CardContent>
