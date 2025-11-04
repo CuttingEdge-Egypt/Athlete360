@@ -352,6 +352,7 @@ IMPORTANT:
 - Don't type into the weight category, only select from the available options.
 - If simply compete link for taekwondo didn't work, then either reload the link again or visit the world taekwondo page.
 - Stay persistent with World Taekwondo Site even if it doesn't load sometimes, refresh the page, revisit the site but stay with the world taekwondo site until you extract the proper ranking.
+- Sometimes site won't load simply compete site won't load properly. if so, refresh page or revisit page until it loads properly, stay persistent with simply compete site until intended data is extracted.
 
 Extract:
 - Current World Rank and Olympic rank
