@@ -1,10 +1,10 @@
-modules = ["nodejs-20", "web", "postgresql-16", "python-3.11"]
+modules = ["nodejs-20", "web", "postgresql-16", "python-3.11", "python3"]
 run = "npm run dev"
 hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["chromium", "glib", "nss", "chromedriver"]
+packages = ["chromedriver", "chromium", "glib", "nss"]
 
 [deployment]
 deploymentTarget = "autoscale"
@@ -53,10 +53,6 @@ externalPort = 6800
 [[ports]]
 localPort = 35163
 externalPort = 3002
-
-[[ports]]
-localPort = 35435
-externalPort = 8081
 
 [[ports]]
 localPort = 38081
