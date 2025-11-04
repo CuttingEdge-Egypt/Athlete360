@@ -1273,6 +1273,7 @@ export default function Home() {
     return acc;
   }, []);
   const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null);
+  const [isAthleteNewlyCreated, setIsAthleteNewlyCreated] = useState(false);
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [showBioPopup, setShowBioPopup] = useState(false);
   const [bioData, setBioData] = useState(null);
@@ -1408,6 +1409,7 @@ export default function Home() {
         await new Promise(resolve => setTimeout(resolve, 500));
         
         setSelectedAthlete(newAthlete);
+        setIsAthleteNewlyCreated(true);
         setSearchName(newAthlete.name);
         
         // Determine if this is an individual sport for ranking polling
@@ -1493,6 +1495,7 @@ export default function Home() {
   const handleSportChange = (sportId: string) => {
     setSelectedSport(sportId);
     setSelectedAthlete(null);
+    setIsAthleteNewlyCreated(false);
     setSearchName("");
     // Sync with nutrition form to ensure bidirectional state consistency
     nutritionForm.setValue('sport', sportId, { shouldDirty: true, shouldValidate: true });
@@ -1502,6 +1505,7 @@ export default function Home() {
   const handleClearSport = () => {
     setSelectedSport("");
     setSelectedAthlete(null);
+    setIsAthleteNewlyCreated(false);
     setSearchName("");
     // Also clear the nutrition form's sport field to keep form state in sync
     nutritionForm.setValue('sport', '');
@@ -1511,6 +1515,7 @@ export default function Home() {
   const handleCountryChange = (country: string) => {
     setSelectedCountry(country === "all" ? "" : country);
     setSelectedAthlete(null);
+    setIsAthleteNewlyCreated(false);
   };
 
   // Handle manual ranking search for athlete
@@ -1949,6 +1954,7 @@ export default function Home() {
                           data-testid={`athlete-option-${athlete.id}`}
                           onClick={() => {
                             setSelectedAthlete(athlete);
+                            setIsAthleteNewlyCreated(false);
                             setSearchName("");
                           }}
                           className="w-full text-left px-4 py-2 hover:bg-athlete-gray-600 text-white border-b border-gray-600 last:border-b-0"
@@ -2183,37 +2189,39 @@ export default function Home() {
                             </TooltipContent>
                           </Tooltip>
                           
-                          {/* Manual Ranking Search Button (Temporary) */}
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                data-testid="button-search-rankings"
-                                onClick={() => handleSearchAthleteRankings(selectedAthlete.id)}
-                                size="sm"
-                                variant="outline"
-                                className="bg-amber-600/20 border-amber-500/50 text-amber-300 hover:bg-amber-600/30 hover:text-amber-200 text-xs px-2 py-1 h-6 w-full"
-                                disabled={rankingFetchStatus[selectedAthlete.id]?.isLoading}
-                              >
-                                {rankingFetchStatus[selectedAthlete.id]?.isLoading ? (
-                                  <div className="flex items-center space-x-1">
-                                    <div className="w-3 h-3 border border-amber-400 border-t-transparent rounded-full animate-spin" />
-                                    <span>{t('athleteSearch.rankingUpdate.updating')}</span>
-                                  </div>
-                                ) : (
-                                  <>
-                                    <Trophy className="mr-1 h-3 w-3" />
-                                    {t('athleteSearch.rankingUpdate.updateButton')}
-                                  </>
-                                )}
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <div>
-                                <p>{t('athleteSearch.rankingUpdate.tooltip.help', { name: i18n.language === 'ar' && selectedAthlete.nameArabic ? selectedAthlete.nameArabic : selectedAthlete.name })}</p>
-                                <p className="text-xs text-green-400 mt-1 font-semibold">{t('athleteSearch.rankingUpdate.tooltip.noTokens')}</p>
-                              </div>
-                            </TooltipContent>
-                          </Tooltip>
+                          {/* Manual Ranking Search Button - Only show for existing athletes */}
+                          {!isAthleteNewlyCreated && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  data-testid="button-search-rankings"
+                                  onClick={() => handleSearchAthleteRankings(selectedAthlete.id)}
+                                  size="sm"
+                                  variant="outline"
+                                  className="bg-amber-600/20 border-amber-500/50 text-amber-300 hover:bg-amber-600/30 hover:text-amber-200 text-xs px-2 py-1 h-6 w-full"
+                                  disabled={rankingFetchStatus[selectedAthlete.id]?.isLoading}
+                                >
+                                  {rankingFetchStatus[selectedAthlete.id]?.isLoading ? (
+                                    <div className="flex items-center space-x-1">
+                                      <div className="w-3 h-3 border border-amber-400 border-t-transparent rounded-full animate-spin" />
+                                      <span>{t('athleteSearch.rankingUpdate.updating')}</span>
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <Trophy className="mr-1 h-3 w-3" />
+                                      {t('athleteSearch.rankingUpdate.updateButton')}
+                                    </>
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <div>
+                                  <p>{t('athleteSearch.rankingUpdate.tooltip.help', { name: i18n.language === 'ar' && selectedAthlete.nameArabic ? selectedAthlete.nameArabic : selectedAthlete.name })}</p>
+                                  <p className="text-xs text-green-400 mt-1 font-semibold">{t('athleteSearch.rankingUpdate.tooltip.noTokens')}</p>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
                           
                           {/* Image Update Tip Popup */}
                           {showImageUpdateTip && (
