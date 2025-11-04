@@ -2773,6 +2773,53 @@ Return only valid JSON with the missing fields.`;
     }
   });
 
+  // Get most recent analysis history for a specific service type and athlete
+  app.get('/api/user-history/latest', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { athleteId, serviceType } = req.query;
+
+      if (!serviceType) {
+        return res.status(400).json({ message: "serviceType is required" });
+      }
+
+      // Get all user history
+      const historyItems = await storage.getUserHistory(userId);
+      
+      // Filter by serviceType and optionally athleteId
+      const filteredHistory = historyItems
+        .filter((item: any) => {
+          const matchesServiceType = item.serviceType === serviceType || 
+            (serviceType === 'development-plan' && (item.serviceType === 'development' || item.serviceType === 'development-plan')) ||
+            (serviceType === 'nutrition-plan' && (item.serviceType === 'nutrition' || item.serviceType === 'nutrition-plan')) ||
+            (serviceType === 'beat-strategies' && (item.serviceType === 'beat' || item.serviceType === 'beat-strategies'));
+          
+          if (!athleteId) {
+            return matchesServiceType;
+          }
+          
+          return matchesServiceType && item.athleteId === athleteId;
+        })
+        .sort((a: any, b: any) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
+
+      // Return the most recent one, or null if none exists
+      const latest = filteredHistory.length > 0 ? filteredHistory[0] : null;
+      
+      res.json({
+        success: true,
+        data: latest,
+        hasHistory: !!latest
+      });
+    } catch (error) {
+      console.error("Error fetching latest history:", error);
+      res.status(500).json({ message: "Failed to fetch latest history" });
+    }
+  });
+
   // Token purchase endpoint - simplified endpoint for modal compatibility
   app.post('/api/purchase-tokens', isAuthenticated, async (req: any, res) => {
     try {
