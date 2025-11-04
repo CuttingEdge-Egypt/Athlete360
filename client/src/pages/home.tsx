@@ -26,7 +26,7 @@ import { StatisticsDisplay } from "@/components/ui/statistics-display";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X, RefreshCw, TrendingUp, Check, ChevronsUpDown, Shield, Ruler, Trophy, Eye } from "lucide-react";
+import { Search, Star, User, Loader2, Users, Apple, CalendarDays, BarChart3, X, RefreshCw, TrendingUp, Check, ChevronsUpDown, Shield, Ruler, Trophy, Eye, HelpCircle } from "lucide-react";
 import type { Sport, Athlete } from "@shared/schema";
 import { CountrySelect } from "@/components/ui/country-select";
 import { Flag } from "@/components/ui/flag";
@@ -2586,7 +2586,7 @@ export default function Home() {
                         {previewLoading && previewModal.serviceType === 'nutrition-plan' ? (
                           <Loader2 className={`h-4 w-4 animate-spin ${isArabic ? 'ml-2' : 'mr-2'}`} />
                         ) : (
-                          <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                          <HelpCircle className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                         )}
                         {t('common:buttons.preview')}
                       </Button>
@@ -3002,7 +3002,7 @@ export default function Home() {
                         {previewLoading && previewModal.serviceType === 'development-plan' ? (
                           <Loader2 className={`h-4 w-4 animate-spin ${isArabic ? 'ml-2' : 'mr-2'}`} />
                         ) : (
-                          <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                          <HelpCircle className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                         )}
                         {t('common:buttons.preview')}
                       </Button>

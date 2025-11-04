@@ -36,7 +36,8 @@ import {
   RefreshCw,
   Sparkles,
   Eye,
-  Loader2
+  Loader2,
+  HelpCircle
 } from "lucide-react";
 
 type Sport = {
@@ -704,7 +705,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
               {previewLoading && previewModal.serviceType === 'comparison' ? (
                 <Loader2 className={`h-4 w-4 animate-spin ${isArabic ? 'ml-2' : 'mr-2'}`} />
               ) : (
-                <Eye className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                <HelpCircle className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
               )}
               {t('common:buttons.preview')}
             </Button>
