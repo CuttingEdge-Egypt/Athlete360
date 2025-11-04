@@ -353,7 +353,6 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
             </div>
             <div className="space-y-1">
               <h3 className="text-xl font-bold text-white">Coming Soon</h3>
-              <p className="text-sm text-gray-300">This feature is currently under development</p>
             </div>
           </div>
         </div>
