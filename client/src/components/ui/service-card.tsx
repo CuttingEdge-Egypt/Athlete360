@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import { AnalysisPopup } from "./analysis-popup";
 import { 
   User, Trophy, Star, AlertTriangle, Calendar, Apple, 
-  Swords, Video, Loader2, Coins, BarChart3, HelpCircle 
+  Swords, Video, Loader2, Coins, BarChart3, HelpCircle, Eye 
 } from "lucide-react";
 import type { Athlete, User as UserType } from "@shared/schema";
 
@@ -54,8 +54,24 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
   const [progressPhase, setProgressPhase] = useState<string>("");
   const [progressPercent, setProgressPercent] = useState(0);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [isHistoryMode, setIsHistoryMode] = useState(false);
   
   const IconComponent = iconMap[service.icon as keyof typeof iconMap] || User;
+
+  // Check if user has history for this service type
+  const { data: historyCheck } = useQuery({
+    queryKey: ['/api/user-history/latest', athlete.id, service.id],
+    queryFn: async () => {
+      const response = await fetch(
+        `/api/user-history/latest?athleteId=${athlete.id}&serviceType=${service.id}`,
+        { credentials: 'include' }
+      );
+      if (!response.ok) return { hasHistory: false, data: null };
+      return response.json();
+    },
+    enabled: !!athlete.id && !!user,
+    staleTime: 30000, // Cache for 30 seconds
+  });
 
   // Listen for cancellation events from the queue
   useEffect(() => {
@@ -336,6 +352,17 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
     }
   };
 
+  const handleHistoryPreview = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (historyCheck?.data?.resultData) {
+      setAnalysisData(historyCheck.data.resultData);
+      setIsPreviewMode(false);
+      setIsHistoryMode(true);
+      setShowAnalysisPopup(true);
+    }
+  };
+
   return (
     <>
       <Card 
@@ -384,7 +411,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         <h3 className="text-lg font-semibold mb-2 text-white">{service.title}</h3>
         <p className="text-gray-400 text-sm mb-4 flex-grow">{service.description}</p>
         
-        <div className="mt-auto">
+        <div className="mt-auto space-y-2">
           <Button 
             data-testid={`button-${service.id}`}
             className="w-full bg-athlete-accent hover:bg-blue-600 text-white transition-colors min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
@@ -421,6 +448,18 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
               t('services.generate')
             )}
           </Button>
+          
+          {historyCheck?.hasHistory && (
+            <Button
+              data-testid={`button-preview-history-${service.id}`}
+              variant="outline"
+              className="w-full border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white min-h-[44px]"
+              onClick={handleHistoryPreview}
+            >
+              <Eye className="mr-2" size={16} />
+              {t('services.preview', { ns: 'common' })}
+            </Button>
+          )}
         </div>
       </CardContent>
       </Card>
@@ -433,6 +472,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
             if (!open) {
               setAnalysisData(null);
               setIsPreviewMode(false);
+              setIsHistoryMode(false);
             }
           }}
           type={service.id}
@@ -443,8 +483,10 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
           onRefresh={() => {
             // Refresh the athlete data
             queryClient.invalidateQueries({ queryKey: ["/api/athletes"] });
+            // Also refresh history data after generating new analysis
+            queryClient.invalidateQueries({ queryKey: ['/api/user-history/latest'] });
           }}
-          createdAt={new Date().toISOString()}
+          createdAt={historyCheck?.data?.createdAt || new Date().toISOString()}
         />
       )}
     </>
