@@ -358,9 +358,9 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         </div>
       )}
       <CardContent className="p-6 h-full flex flex-col">
-        <div className="flex justify-between items-start mb-4">
-          <IconComponent className={`text-2xl ${service.color}`} size={32} />
-          <div className="flex flex-col items-end gap-1">
+        <div className="flex flex-col gap-1 mb-4">
+          {/* Top row: ? button only, right-aligned */}
+          <div className="flex justify-end">
             <Button
               data-testid={`button-sample-${service.id}`}
               variant="ghost"
@@ -371,6 +371,10 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
             >
               <HelpCircle size={16} />
             </Button>
+          </div>
+          {/* Bottom row: icon and token badge horizontally aligned */}
+          <div className="flex justify-between items-center">
+            <IconComponent className={`text-2xl ${service.color}`} size={32} />
             <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">
               {service.cost} {t('units.tokens', { ns: 'common' })}
             </span>
