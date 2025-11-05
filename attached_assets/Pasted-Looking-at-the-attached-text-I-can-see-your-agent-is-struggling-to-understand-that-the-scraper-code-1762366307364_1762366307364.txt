@@ -1,0 +1,57 @@
+Looking at the attached text, I can see your agent is struggling to understand that the scraper code is already working correctly - the issue is data availability, not implementation.
+
+Let me create a comprehensive guide for your agent:
+
+📚 Complete Scraper Implementation Guide
+Understanding the Architecture
+Your codebase has two working scraper systems:
+
+1. Ranking Scraper (scraper.py)
+Purpose: Fetches athlete rankings from World Taekwondo API
+
+Key Implementation Points:
+
+# Step 1: Initialize with cloudscraper (bypasses Cloudflare)
+scraper = TaekwondoScraper()
+# Step 2: Configure parameters
+scraper.configure(
+    ranking_category="World Kyorugi Rankings",
+    sub_category="World Senior Division", 
+    weight_division="M-58 kg",
+    month="July",
+    year=2025,
+    max_results=100
+)
+# Step 3: Scrape with progress callback
+def progress_callback(info):
+    print(f"{info['percentage']}%: {info['message']}")
+athletes = scraper.scrape_data(progress_callback=progress_callback)
+Critical Implementation Details:
+
+Uses UUID mappings (lines 70-300 in scraper.py) for API parameters
+API endpoint: https://worldtkd.simplycompete.com/rankingsV2
+Month is 0-indexed (January=0, December=11)
+Returns list of athlete dictionaries with userid field
+2. Competition Scraper (working_api_scraper.py)
+Purpose: Fetches detailed competition history for athletes
+
+Key Implementation Points:
+
+# Initialize
+comp_scraper = WorkingAPICompetitionScraper()
+# Get competitions for single athlete
+result = comp_scraper.get_athlete_competitions(
+    user_id="11e90126-4e0c-13f5-9a7c-0a8d8ddc92c4",
+    year=2025,
+    month=7  # 0-indexed: 7 = August
+)
+# Access competition data
+if result['success']:
+    competitions = result['competitions']  # List of competition dicts
+    athlete_info = result['athlete_info']  # Profile data
+Critical Implementation Details:
+
+API endpoint: https://worldtkd.simplycompete.com/getPlayerProfileV2
+Requires userId from ranking scraper results
+Returns nested JSON with profile + competitions
+Can fetch all athletes in parallel (100 workers) - see get_all_athletes_competitions() function
