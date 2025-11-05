@@ -929,6 +929,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Hybrid Taekwondo Profile Scraper - API first, BrowserUse fallback
+  app.post('/api/taekwondo/profile', isAuthenticated, async (req, res) => {
+    try {
+      const { name, country } = req.body;
+      
+      if (!name || typeof name !== 'string' || name.trim().length < 2) {
+        return res.status(400).json({ 
+          success: false,
+          message: "Athlete name is required (minimum 2 characters)" 
+        });
+      }
+      
+      console.log(`🥋 Hybrid Taekwondo Scraper: Fetching profile for ${name} (${country || 'any country'})`);
+      
+      // Step 1: Try Python API scraper first
+      const pythonResult = await new Promise<any>((resolve) => {
+        const pythonArgs = [
+          'taekwondo_scraper.py',
+          name,
+          ...(country ? [country] : [])
+        ];
+        
+        const pythonProcess = spawn('python3', pythonArgs);
+        let stdout = '';
+        let stderr = '';
+        
+        pythonProcess.stdout.on('data', (data) => {
+          stdout += data.toString();
+        });
+        
+        pythonProcess.stderr.on('data', (data) => {
+          stderr += data.toString();
+        });
+        
+        pythonProcess.on('close', (code) => {
+          try {
+            if (stdout.trim()) {
+              const result = JSON.parse(stdout);
+              resolve(result);
+            } else {
+              console.error('Python scraper stderr:', stderr);
+              resolve({ success: false, dataSource: 'api_error' });
+            }
+          } catch (error) {
+            console.error('Failed to parse Python output:', error);
+            resolve({ success: false, dataSource: 'api_error' });
+          }
+        });
+        
+        pythonProcess.on('error', (error) => {
+          console.error('Python process error:', error);
+          resolve({ success: false, dataSource: 'api_error' });
+        });
+      });
+      
+      // Step 2: If API succeeded, return the data
+      if (pythonResult.success && pythonResult.dataSource === 'api') {
+        console.log(`✅ API Scraper: Successfully retrieved data for ${name}`);
+        return res.json({
+          success: true,
+          dataSource: 'api',
+          data: {
+            name: pythonResult.athleteName,
+            country: pythonResult.country,
+            currentRank: pythonResult.currentRank,
+            points: pythonResult.points,
+            userId: pythonResult.userId,
+            gender: pythonResult.gender,
+            birthYear: pythonResult.birthYear,
+            profilePicUrl: pythonResult.profilePicUrl,
+            competitions: pythonResult.competitions,
+            totalCompetitions: pythonResult.totalCompetitions
+          }
+        });
+      }
+      
+      // Step 3: API returned empty, fallback to BrowserUse
+      console.log(`⚠️  API Scraper: No data available, falling back to BrowserUse for ${name}`);
+      
+      const browserResult = await fetchTaekwondoRankAndHistory(name, country || "Unknown");
+      
+      if (browserResult) {
+        console.log(`✅ BrowserUse: Successfully retrieved data for ${name}`);
+        
+        // Normalize BrowserUse data to match API format
+        const categories = browserResult.rankings?.categories || [];
+        const primaryCategory = categories[0];
+        
+        return res.json({
+          success: true,
+          dataSource: 'browseruse',
+          data: {
+            name: name,
+            country: country,
+            currentRank: primaryCategory?.rank,
+            points: primaryCategory?.points,
+            rankings: browserResult.rankings,
+            competitiveHistory: browserResult.competitiveHistory,
+            totalCompetitions: browserResult.competitiveHistory?.career_phases
+              ?.reduce((sum, phase) => sum + (phase.key_achievements?.length || 0), 0) || 0
+          }
+        });
+      } else {
+        console.log(`❌ Both API and BrowserUse failed for ${name}`);
+        return res.json({
+          success: false,
+          message: `No data found for ${name} via API or BrowserUse`,
+          searchedName: name,
+          searchedCountry: country
+        });
+      }
+      
+    } catch (error) {
+      console.error("Error in hybrid Taekwondo scraper:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Taekwondo profile fetch failed", 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
   // Update athlete data using OpenAI o3 - triggered when athlete is selected
   app.post('/api/athletes/:id/update-from-ai', isAuthenticated, async (req, res) => {
     try {
