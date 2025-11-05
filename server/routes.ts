@@ -931,58 +931,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Hybrid Taekwondo Profile Scraper - API first, BrowserUse fallback
   app.post('/api/taekwondo/profile', isAuthenticated, async (req, res) => {
+    // Request validation schema with input trimming
+    const taekwondoProfileSchema = z.object({
+      name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name too long"),
+      country: z.string().trim().min(2, "Country must be at least 2 characters").max(50, "Country name too long").optional()
+    });
+    
     try {
-      const { name, country } = req.body;
-      
-      if (!name || typeof name !== 'string' || name.trim().length < 2) {
+      // Validate request body
+      const validation = taekwondoProfileSchema.safeParse(req.body);
+      if (!validation.success) {
         return res.status(400).json({ 
           success: false,
-          message: "Athlete name is required (minimum 2 characters)" 
+          message: "Invalid request data",
+          errors: validation.error.errors
         });
       }
       
+      const { name, country } = validation.data;
       console.log(`🥋 Hybrid Taekwondo Scraper: Fetching profile for ${name} (${country || 'any country'})`);
       
-      // Step 1: Try Python API scraper first
-      const pythonResult = await new Promise<any>((resolve) => {
-        const pythonArgs = [
-          'taekwondo_scraper.py',
-          name,
-          ...(country ? [country] : [])
-        ];
-        
-        const pythonProcess = spawn('python3', pythonArgs);
-        let stdout = '';
-        let stderr = '';
-        
-        pythonProcess.stdout.on('data', (data) => {
-          stdout += data.toString();
-        });
-        
-        pythonProcess.stderr.on('data', (data) => {
-          stderr += data.toString();
-        });
-        
-        pythonProcess.on('close', (code) => {
-          try {
-            if (stdout.trim()) {
-              const result = JSON.parse(stdout);
-              resolve(result);
-            } else {
-              console.error('Python scraper stderr:', stderr);
+      // Step 1: Try Python API scraper first (with timeout and process cleanup)
+      let pythonProcess: any = null;
+      let processResolved = false;
+      
+      const pythonResult = await Promise.race([
+        new Promise<any>((resolve) => {
+          const pythonArgs = [
+            'taekwondo_scraper.py',
+            name,
+            ...(country ? [country] : [])
+          ];
+          
+          pythonProcess = spawn('python3', pythonArgs);
+          let stdout = '';
+          let stderr = '';
+          
+          pythonProcess.stdout.on('data', (data) => {
+            stdout += data.toString();
+          });
+          
+          pythonProcess.stderr.on('data', (data) => {
+            stderr += data.toString();
+          });
+          
+          pythonProcess.on('close', (code) => {
+            if (processResolved) return; // Already timed out
+            processResolved = true;
+            
+            try {
+              if (stdout.trim()) {
+                const result = JSON.parse(stdout);
+                resolve(result);
+              } else {
+                console.error('Python scraper stderr:', stderr);
+                resolve({ success: false, dataSource: 'api_error' });
+              }
+            } catch (error) {
+              console.error('Failed to parse Python output:', error);
               resolve({ success: false, dataSource: 'api_error' });
             }
-          } catch (error) {
-            console.error('Failed to parse Python output:', error);
+          });
+          
+          pythonProcess.on('error', (error) => {
+            if (processResolved) return; // Already timed out
+            processResolved = true;
+            console.error('Python process error:', error);
             resolve({ success: false, dataSource: 'api_error' });
-          }
-        });
-        
-        pythonProcess.on('error', (error) => {
-          console.error('Python process error:', error);
-          resolve({ success: false, dataSource: 'api_error' });
-        });
-      });
+          });
+        }),
+        new Promise<any>((resolve) => 
+          setTimeout(() => {
+            if (!processResolved) {
+              processResolved = true;
+              if (pythonProcess && !pythonProcess.killed) {
+                pythonProcess.kill('SIGTERM');
+                setTimeout(() => {
+                  if (!pythonProcess.killed) {
+                    pythonProcess.kill('SIGKILL');
+                  }
+                }, 2000);
+              }
+              console.log('⏱️  Python scraper timed out after 60s');
+              resolve({ success: false, dataSource: 'api_timeout' });
+            }
+          }, 60000)
+        )
+      ]);
       
       // Step 2: If API succeeded, return the data
       if (pythonResult.success && pythonResult.dataSource === 'api') {
@@ -1005,30 +1040,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Step 3: API returned empty, fallback to BrowserUse
-      console.log(`⚠️  API Scraper: No data available, falling back to BrowserUse for ${name}`);
+      // Step 3: API returned empty/error/timeout, fallback to BrowserUse
+      const fallbackReason = pythonResult.dataSource || 'unknown';
+      console.log(`⚠️  API Scraper: ${fallbackReason}, falling back to BrowserUse for ${name}`);
       
       const browserResult = await fetchTaekwondoRankAndHistory(name, country || "Unknown");
       
       if (browserResult) {
         console.log(`✅ BrowserUse: Successfully retrieved data for ${name}`);
         
-        // Normalize BrowserUse data to match API format
+        // Normalize BrowserUse data to match API schema
         const categories = browserResult.rankings?.categories || [];
         const primaryCategory = categories[0];
+        
+        // Convert competitiveHistory to competitions array to match API format
+        const competitions = browserResult.competitiveHistory?.career_phases
+          ?.flatMap(phase => 
+            (phase.key_achievements || []).map(achievement => ({
+              event: achievement.event_name,
+              date: achievement.month 
+                ? `${achievement.month} ${achievement.year}` 
+                : String(achievement.year),
+              place: achievement.result,
+              points: null,
+              category: null,
+              eventResult: achievement.notes,
+              location: null,
+              gRank: achievement.event_tier
+            }))
+          ) || [];
         
         return res.json({
           success: true,
           dataSource: 'browseruse',
           data: {
             name: name,
-            country: country,
-            currentRank: primaryCategory?.rank,
-            points: primaryCategory?.points,
+            country: country || null,
+            currentRank: primaryCategory?.rank || null,
+            points: primaryCategory?.points || null,
+            userId: null,
+            gender: null,
+            birthYear: null,
+            profilePicUrl: null,
+            competitions: competitions,
+            totalCompetitions: competitions.length,
             rankings: browserResult.rankings,
-            competitiveHistory: browserResult.competitiveHistory,
-            totalCompetitions: browserResult.competitiveHistory?.career_phases
-              ?.reduce((sum, phase) => sum + (phase.key_achievements?.length || 0), 0) || 0
+            competitiveHistory: browserResult.competitiveHistory
           }
         });
       } else {
@@ -1037,7 +1094,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           success: false,
           message: `No data found for ${name} via API or BrowserUse`,
           searchedName: name,
-          searchedCountry: country
+          searchedCountry: country || null
         });
       }
       
