@@ -1,0 +1,54 @@
+Looking at your codebase, I can explain how the time periods work in the scrapers:
+
+How Time Periods Work
+The scrapers fetch data based on month and year parameters. Here's the breakdown:
+
+1. Rankings API (scraper.py)
+Uses month and year parameters
+Month is 0-indexed (0=January, 1=February, ..., 11=December)
+Example: month=7&year=2025 fetches data for August 2025
+def _get_month_number(self, month_name: str) -> int:
+    """Convert month name to number (0-based: January=0, February=1, etc.)"""
+    months = {
+        'January': 0, 'February': 1, 'March': 2, 'April': 3,
+        'May': 4, 'June': 5, 'July': 6, 'August': 7,
+        'September': 8, 'October': 9, 'November': 10, 'December': 11
+    }
+    return months.get(month_name, 6)
+2. Competition/Profile API (working_api_scraper.py)
+Also uses month and year parameters with the same 0-indexed convention
+Fetches athlete profile data and competition history up to that date
+The API returns all competitions in the athlete's history, not just from that specific month
+3. Multi-Period Fetching (app.py)
+Your app fetches data for multiple time periods to get comprehensive history:
+
+periods = [
+    {'month': now.month - 1, 'year': now.year, 'label': f"{datetime.now().strftime('%B')} {datetime.now().year}"},
+    {'month': 11, 'year': 2024, 'label': "December 2024"},
+    {'month': 11, 'year': 2023, 'label': "December 2023"},
+    {'month': 11, 'year': 2022, 'label': "December 2022"},
+    {'month': 11, 'year': 2021, 'label': "December 2021"}
+]
+Why Multiple Periods?
+The API response can vary depending on when you query it:
+
+Rankings change over time
+Competition data may be updated or added retroactively
+Historical snapshots at different points capture the full athlete journey
+Tell Your Agent:
+For the Rankings Scraper:
+
+Specify the exact month/year you want rankings for
+Use 0-indexed months (0-11)
+Example: To get current rankings, use current month-1 and current year
+For Competition Scraper:
+
+The month/year acts as a "query date"
+You'll get the athlete's full competition history as it existed at that point in time
+To get comprehensive data, query multiple periods (current month, Dec 2024, Dec 2023, etc.)
+Key Parameters to Pass:
+
+user_id = "athlete-uuid"
+year = 2025
+month = 7  # 0-indexed, so this is August
+The time period determines when the data snapshot was taken, not necessarily which competitions to include - the API returns the full historical record as of that date.
