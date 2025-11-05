@@ -1,0 +1,131 @@
+Looking at your codebase, I can see you have two main scraping systems. Let me explain how they work:
+
+1. Ranking Scraper (scraper.py)
+This scraper fetches athlete rankings from the World Taekwondo API:
+
+How it works:
+Step 1: Session Initialization
+
+Uses cloudscraper library to bypass Cloudflare protection
+Creates a browser-like session with proper headers to mimic Chrome
+Visits the main website first to establish cookies and session
+Step 2: Building API Request
+
+URL: https://worldtkd.simplycompete.com/rankingsV2
+Parameters:
+- rankingTypeId: Which ranking system (World/Olympic)
+- subCategory1: Division (Senior/Junior)
+- rankingCategoryId: Weight division (M-58kg, W-49kg, etc.)
+- countryId: Filter by country (optional)
+- month: 0-indexed (0=Jan, 11=Dec)
+- year: Year for rankings
+- limit: Results per page (100)
+- pageNo: Pagination
+Step 3: Data Extraction
+
+Makes GET request to API endpoint
+Receives JSON response with athlete data
+Extracts: rank, name, country, points, userid, wtfLicenseId, gender, profile picture
+Handles pagination (fetches multiple pages if needed)
+Step 4: Filtering
+
+Applies athlete name filter (partial match)
+Removes duplicates
+Limits results based on max_results setting
+2. Competition Scraper (working_api_scraper.py)
+This scraper fetches detailed athlete data including competition history:
+
+How it works:
+Step 1: Uses Different API Endpoint
+
+URL: https://worldtkd.simplycompete.com/getPlayerProfileV2
+Parameters:
+- userId: Athlete's unique ID (from ranking scraper)
+- month: Same 0-indexed month
+- year: Year
+- countryId, rankingTypeId, subCategory1: Same as ranking scraper
+Step 2: Session Setup
+
+Same cloudscraper approach for Cloudflare bypass
+Visits main page and profile page to establish proper session
+Sets comprehensive browser headers
+Step 3: Data Extraction from JSON Response
+
+The API returns nested JSON with this structure:
+
+{
+  "data": {
+    "data": {
+      "preferredFirstName": "...",
+      "preferredLastName": "...",
+      "wtfLicenseId": "...",
+      "country": "...",
+      "ranks": [...],
+      "rankingCategory": [
+        {
+          "rankingCategoryName": "...",
+          "totalPoints": "...",
+          "eventResults": [
+            {
+              "eventName": "...",
+              "gRank": "...",
+              "endDate": "...",
+              "location": "...",
+              "place": "...",
+              "rankingPoints": "..."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+Step 4: Processing
+
+Extracts athlete profile information
+Extracts all ranking categories
+Loops through each category's event results
+Creates competition objects with: event name, date, location, placement, points
+Sorts competitions by date (newest first)
+3. Bulk Processing (working_api_scraper.py - get_all_athletes_competitions)
+For processing multiple athletes:
+
+Uses ThreadPoolExecutor with 100 parallel workers
+
+Processes up to 100 athletes simultaneously
+Each thread calls the competition scraper for one athlete
+Collects results as they complete
+Handles errors gracefully per athlete
+Why Two Scrapers?
+Ranking API → Fast, gets list of athletes with basic info
+Player Profile API → Detailed, gets full profile + competition history per athlete
+The Issue You Encountered
+When you moved the code to another project, it likely failed because:
+
+Missing Dependencies: cloudscraper library not installed
+Month/Year Issues: The API rejects future dates or invalid periods
+Network/Firewall: Different environment blocking requests
+Missing Session Initialization: The scraper needs to visit the main site first
+The code works here because:
+
+All dependencies are installed
+Cloudscraper handles Cloudflare automatically
+Proper session establishment with cookies
+Valid date parameters (not querying future months)
+Key Technical Points
+Why Cloudscraper?
+
+World Taekwondo uses Cloudflare protection
+Regular requests library gets blocked (403 errors)
+Cloudscraper automatically solves JavaScript challenges
+Why Session Initialization?
+
+Website requires valid cookies
+Visiting main page first establishes session
+Sets proper Referer headers for subsequent requests
+UUID Mappings
+
+All parameters use UUIDs (not human-readable values)
+Hardcoded mappings in scraper.py for countries, weights, categories
+These are discovered by inspecting website's API calls
+Would you like me to create a standalone, fully documented version of the scraper that you can use in your other project?
