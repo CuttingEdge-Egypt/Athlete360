@@ -1,0 +1,213 @@
+import datetime
+import logging
+import re
+import time
+from datetime import datetime
+
+import requests
+from bs4 import BeautifulSoup
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+class RankingScraper:
+    def __init__(self):
+        self.ranking_category = None
+        self.sub_category = None
+        self.weight_division = None
+        self.athlete_filter = None
+        self.country_filter = None
+        self.month = None
+        self.year = None
+        self.max_results = None
+        self.base_url = "https://www.worldtaekwondo.org/ranking/world-rankings"
+
+    def configure(self, ranking_category, sub_category, weight_division, athlete_filter, country_filter, month, year, max_results):
+        self.ranking_category = ranking_category
+        self.sub_category = sub_category
+        self.weight_division = weight_division
+        self.athlete_filter = athlete_filter
+        self.country_filter = country_filter
+        self.month = month
+        self.year = year
+        self.max_results = max_results
+
+    def _build_url(self):
+        params = {
+            "ranking_category": self.ranking_category,
+            "sub_category": self.sub_category,
+            "weight_division": self.weight_division,
+            "athlete_filter": self.athlete_filter,
+            "country_filter": self.country_filter,
+            "month": self.month,
+            "year": self.year,
+            "max_results": self.max_results,
+        }
+        # Filter out None values
+        params = {k: v for k, v in params.items() if v is not None}
+        
+        # Construct the URL with query parameters
+        url = f"{self.base_url}?{'&'.join(f'{k}={v}' for k, v in params.items())}"
+        return url
+
+    def scrape_data(self):
+        if not all([self.ranking_category, self.sub_category, self.weight_division, self.month, self.year]):
+            logging.error("Missing configuration. Cannot scrape data.")
+            return []
+
+        url = self._build_url()
+        logging.info(f"Scraping URL: {url}")
+
+        try:
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()  # Raise an exception for bad status codes
+
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            ranking_list_element = soup.find('div', class_='ranking_list')
+            if not ranking_list_element:
+                logging.warning("Ranking list element not found on the page.")
+                return []
+
+            athletes_data = []
+            # The actual parsing logic for athletes_data will depend on the HTML structure of the page
+            # This is a placeholder and needs to be adapted to the specific HTML
+            
+            # Example placeholder for finding athlete rows
+            athlete_rows = ranking_list_element.find_all('div', class_='athlete_row') # This class name is hypothetical
+
+            if not athlete_rows:
+                logging.warning("No athlete rows found. The page structure might have changed or no data is available for this period.")
+                return []
+
+            for row in athlete_rows:
+                # Extract data for each athlete from the row
+                # This part is highly dependent on the actual HTML structure
+                # Example extraction:
+                rank = row.find('span', class_='rank').text.strip() if row.find('span', class_='rank') else None
+                name = row.find('span', class_='athlete_name').text.strip() if row.find('span', class_='athlete_name') else None
+                country = row.find('span', class_='country').text.strip() if row.find('span', class_='country') else None
+                points = row.find('span', class_='points').text.strip() if row.find('span', class_='points') else None
+                
+                if rank and name and country and points:
+                    athletes_data.append({
+                        'rank': rank,
+                        'name': name,
+                        'country': country,
+                        'points': points
+                    })
+                else:
+                    logging.warning("Skipping a row due to missing data.")
+            
+            if not athletes_data:
+                logging.warning("Parsed data is empty after processing rows.")
+                return []
+
+            return athletes_data
+
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Error fetching data: {e}")
+            return []
+        except Exception as e:
+            logging.error(f"An unexpected error occurred during scraping: {e}")
+            return []
+
+
+def scrape_world_taekwondo_rankings(name=None, country=None, month=None, year=None):
+    """
+    Scrapes World Taekwondo rankings for a given athlete, country, month, and year.
+    Includes fallback logic for seasonal data.
+    """
+    ranking_scraper = RankingScraper()
+
+    # Use current date if not specified, but default to a known valid period
+    if month is None:
+        # Try current month first, but be prepared for empty results
+        month = datetime.now().month - 1  # 0-indexed
+    if year is None:
+        year = datetime.now().year
+
+    # Note: Rankings may only be available during active competition seasons
+    # If current period returns no data, try previous months
+
+    logger = logging.getLogger(__name__)
+
+    logger.info("Step 1: Searching rankings database...")
+    athletes = ranking_scraper.scrape_data()
+
+    # If no data found, try previous months (rankings may be seasonal)
+    if not athletes:
+        logger.info("No data for current period, trying previous months...")
+        for months_back in range(1, 6):  # Try up to 5 months back
+            # Calculate previous month and year correctly
+            current_month_num = datetime.now().month - 1 if month is None else month
+            current_year_num = datetime.now().year if year is None else year
+            
+            # Adjust month and year for previous periods
+            date_to_check = datetime(current_year_num, current_month_num + 1, 1) - datetime.timedelta(days=30 * months_back)
+            prev_month_num = date_to_check.month - 1 # 0-indexed
+            prev_year_num = date_to_check.year
+
+            month_name = date_to_check.strftime('%B') # Get month name for API
+
+            ranking_scraper.configure(
+                ranking_category="World Kyorugi Rankings",
+                sub_category="World Senior Division",
+                weight_division="All Weights",
+                athlete_filter=name,
+                country_filter=country,
+                month=month_name, # Use month name
+                year=prev_year_num,
+                max_results=10
+            )
+
+            athletes = ranking_scraper.scrape_data()
+            if athletes:
+                logger.info(f"Found data for {month_name} {prev_year_num}")
+                break
+
+    if not athletes:
+        logger.warning("No ranking data found after trying multiple periods.")
+        return None # Return None if no data is found
+
+    # Filter results if name or country is specified and wasn't handled by the scraper's filters
+    if name:
+        athletes = [a for a in athletes if name.lower() in a['name'].lower()]
+    if country:
+        athletes = [a for a in athletes if country.lower() in a['country'].lower()]
+
+    logger.info(f"Found {len(athletes)} athletes matching criteria.")
+    return athletes
+
+if __name__ == '__main__':
+    # Example Usage:
+    # Try scraping for a specific athlete and country in a known active period
+    print("--- Scraping for specific athlete/country in a known period ---")
+    known_month = "October"
+    known_year = 2023
+    specific_athletes = scrape_world_taekwondo_rankings(name="Kim", country="KOR", month=known_month, year=known_year)
+    if specific_athletes:
+        for athlete in specific_athletes:
+            print(athlete)
+    else:
+        print("No data found for the specified criteria.")
+
+    print("\n--- Scraping with current period (may return empty) ---")
+    # This might return empty if the current season's rankings are not yet published
+    current_athletes = scrape_world_taekwondo_rankings(name="Smith", country="USA")
+    if current_athletes:
+        for athlete in current_athletes:
+            print(athlete)
+    else:
+        print("No data found for current period or fallback periods. Check API or date range.")
+
+    print("\n--- Scraping without filters (will use fallback if current is empty) ---")
+    all_athletes = scrape_world_taekwondo_rankings()
+    if all_athletes:
+        print(f"Found {len(all_athletes)} athletes in total (using fallback if necessary).")
+        # Print first 5 for brevity
+        for i, athlete in enumerate(all_athletes[:5]):
+            print(athlete)
+        if len(all_athletes) > 5:
+            print("...")
+    else:
+        print("No data found at all.")
