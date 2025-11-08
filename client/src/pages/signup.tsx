@@ -147,15 +147,15 @@ export function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-4" dir={isArabic ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-3 sm:p-4" dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="w-full max-w-2xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className={`flex items-center justify-center gap-2 mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
-            <Zap className="h-8 w-8 text-blue-500" />
-            <h1 className={`${isArabic ? 'text-4xl' : 'text-3xl'} font-bold text-white`}>{t('header.title')}</h1>
+        <div className="text-center mb-6 sm:mb-8">
+          <div className={`flex items-center justify-center gap-2 mb-3 sm:mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
+            <Zap className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500" />
+            <h1 className={`${isArabic ? 'text-3xl sm:text-4xl' : 'text-2xl sm:text-3xl'} font-bold text-white`}>{t('header.title')}</h1>
           </div>
-          <p className={`text-gray-300 ${isArabic ? 'text-xl' : 'text-lg'}`}>
+          <p className={`text-gray-300 ${isArabic ? 'text-base sm:text-xl' : 'text-base sm:text-lg'} px-2`}>
             {t('header.subtitle')}
           </p>
           
@@ -163,7 +163,7 @@ export function SignupPage() {
           <Button 
             variant="ghost" 
             onClick={() => setLocation('/')}
-            className={`mt-4 text-gray-400 hover:text-white ${isArabic ? 'flex-row-reverse' : ''}`}
+            className={`mt-3 sm:mt-4 text-gray-400 hover:text-white h-11 ${isArabic ? 'flex-row-reverse' : ''}`}
             data-testid="button-back-home"
           >
             <ArrowLeft className={`${isArabic ? 'ml-2 rotate-180' : 'mr-2'} h-4 w-4`} />
@@ -173,17 +173,17 @@ export function SignupPage() {
 
         {/* Main Content */}
         <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className={`${isArabic ? 'text-3xl' : 'text-2xl'} font-bold text-white flex items-center justify-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
-              <User className="h-6 w-6 text-blue-500" />
+          <CardHeader className="px-4 sm:px-6">
+            <CardTitle className={`${isArabic ? 'text-2xl sm:text-3xl' : 'text-xl sm:text-2xl'} font-bold text-white flex items-center justify-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <User className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
               {t('card.title')}
             </CardTitle>
-            <CardDescription className={`text-gray-300 text-center ${isArabic ? 'text-lg' : 'text-base'}`}>
+            <CardDescription className={`text-gray-300 text-center ${isArabic ? 'text-base sm:text-lg' : 'text-sm sm:text-base'} px-2`}>
               {t('card.subtitle')}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
+          <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="firstName" className={`${isArabic ? 'text-base' : 'text-sm'} font-medium text-gray-200`}>{t('form.firstName')}</Label>
                 <Input
@@ -243,7 +243,7 @@ export function SignupPage() {
               )}
             </div>
             
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="password" className={`${isArabic ? 'text-base' : 'text-sm'} font-medium text-gray-200`}>{t('form.password')}</Label>
                 <Input

@@ -64,68 +64,68 @@ export default function Landing() {
     <div className="min-h-screen bg-athlete-primary text-white">
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-athlete-primary/90 backdrop-blur-lg border-b border-gray-800">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <Trophy className="text-athlete-accent text-2xl" />
-            <span className="text-xl font-bold">{t('landing.navigation.brand')}</span>
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex justify-between items-center">
+          <div className="flex items-center space-x-2 flex-shrink-0">
+            <Trophy className="text-athlete-accent text-xl sm:text-2xl" />
+            <span className="text-lg sm:text-xl font-bold">{t('landing.navigation.brand')}</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             <Button 
               onClick={() => setLocation('/signup')}
               data-testid="button-signup"
-              className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white"
+              size="sm"
+              className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white text-xs sm:text-sm px-2 sm:px-4"
             >
-              <UserPlus className="mr-2 h-4 w-4" />
-              {t('landing.navigation.signUp')}
+              <UserPlus className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">{t('landing.navigation.signUp')}</span>
+              <span className="xs:hidden">{t('landing.navigation.signUp')}</span>
             </Button>
             <Button 
               onClick={() => setLocation('/login')}
               data-testid="button-login"
               variant="outline"
-              className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white"
+              size="sm"
+              className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white text-xs sm:text-sm px-2 sm:px-4"
             >
               {t('landing.navigation.signIn')}
             </Button>
             
-            {/* Language switcher - rightmost for both languages */}
             <LanguageSwitcher />
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-20 min-h-screen gradient-bg flex items-center">
-        <div className="container mx-auto px-4 py-20">
+      <section className="pt-16 sm:pt-20 min-h-screen gradient-bg flex items-center">
+        <div className="container mx-auto px-3 sm:px-4 py-12 sm:py-20">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-white">
+            <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold mb-4 sm:mb-6 text-white leading-tight">
               <span className="bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">
                 {t('landing.hero.title')}
               </span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300 mb-8">
+            <p className="text-base sm:text-xl md:text-2xl text-gray-300 mb-6 sm:mb-8 px-2">
               {t('landing.hero.subtitle')}
             </p>
-            <p className="text-lg text-gray-400 mb-8 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-lg text-gray-400 mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
               {t('landing.hero.description')}
             </p>
             
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 px-4">
               <Button 
                 onClick={() => setLocation('/signup')}
                 data-testid="button-hero-signup"
-                size="lg"
-                className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white px-8 py-4 text-lg font-semibold"
+                className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white px-6 sm:px-8 h-12 sm:h-14 text-base sm:text-lg font-semibold w-full sm:w-auto"
               >
-                <UserPlus className="mr-2 h-5 w-5" />
+                <UserPlus className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                 {t('landing.hero.ctaStart')}
               </Button>
               <Button 
                 onClick={() => setLocation('/login')}
                 data-testid="button-hero-signin"
-                size="lg"
                 variant="outline"
-                className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white px-8 py-4 text-lg font-semibold"
+                className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white px-6 sm:px-8 h-12 sm:h-14 text-base sm:text-lg font-semibold w-full sm:w-auto"
               >
                 {t('landing.hero.ctaSignIn')}
               </Button>
@@ -145,7 +145,7 @@ export default function Landing() {
             )}
             
             {/* Analysis Preview Cards */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 px-2">
               <Card className="bg-athlete-gray-700 border-gray-600 h-full">
                 <CardContent className="p-6 h-full flex flex-col">
                   <div className="flex justify-between items-start mb-4">
@@ -231,7 +231,7 @@ export default function Landing() {
               </Card>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8 px-2">
               <Card className="bg-athlete-gray-700 border-gray-600 h-full">
                 <CardContent className="p-6 h-full flex flex-col">
                   <div className="flex justify-between items-start mb-4">
@@ -297,8 +297,8 @@ export default function Landing() {
             </div>
 
             {/* Premium Features - Video Analysis and Compare Athletes */}
-            <div className="mb-12">
-              <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div className="mb-8 sm:mb-12 px-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 max-w-4xl mx-auto">
                 <Card className="bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-400/30 h-full">
                   <CardContent className="p-8 text-center h-full flex flex-col">
                     <div className="flex justify-center mb-4">
@@ -434,9 +434,9 @@ export default function Landing() {
       </Dialog>
 
       {/* Footer */}
-      <footer className="bg-athlete-primary border-t border-gray-800 py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
+      <footer className="bg-athlete-primary border-t border-gray-800 py-8 sm:py-12">
+        <div className="container mx-auto px-3 sm:px-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
                 <Trophy className="text-athlete-accent text-xl" />

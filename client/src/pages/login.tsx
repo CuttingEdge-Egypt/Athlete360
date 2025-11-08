@@ -91,15 +91,15 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-4" dir={isArabic ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-3 sm:p-4" dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className={`flex items-center justify-center gap-2 mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
-            <LogIn className={`h-8 w-8 text-blue-500 ${isArabic ? 'scale-x-[-1]' : ''}`} />
-            <h1 className="text-3xl font-bold text-white">{t('login.welcomeBack')}</h1>
+        <div className="text-center mb-6 sm:mb-8">
+          <div className={`flex items-center justify-center gap-2 mb-3 sm:mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
+            <LogIn className={`h-6 w-6 sm:h-8 sm:w-8 text-blue-500 ${isArabic ? 'scale-x-[-1]' : ''}`} />
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">{t('login.welcomeBack')}</h1>
           </div>
-          <p className="text-gray-300 text-lg">
+          <p className="text-gray-300 text-base sm:text-lg px-2">
             {t('login.signInToAccount')}
           </p>
           
@@ -107,7 +107,7 @@ export function LoginPage() {
           <Button 
             variant="ghost" 
             onClick={() => setLocation('/')}
-            className="mt-4 text-gray-400 hover:text-white"
+            className="mt-3 sm:mt-4 text-gray-400 hover:text-white h-11"
             data-testid="button-back-home"
           >
             {isArabic ? (
@@ -126,19 +126,19 @@ export function LoginPage() {
 
         {/* Main Content */}
         <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
-          <CardHeader className="text-center pb-6">
-            <CardTitle className={`flex items-center justify-center gap-2 text-2xl text-white ${isArabic ? 'flex-row-reverse' : ''}`}>
-              <User className="h-6 w-6 text-blue-500" />
+          <CardHeader className="text-center pb-4 sm:pb-6 px-4 sm:px-6">
+            <CardTitle className={`flex items-center justify-center gap-2 text-xl sm:text-2xl text-white ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <User className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
               {t('login.signIn')}
             </CardTitle>
-            <CardDescription className="text-gray-300 text-base">
+            <CardDescription className="text-gray-300 text-sm sm:text-base px-2">
               {t('login.enterCredentials')}
             </CardDescription>
           </CardHeader>
           
-          <CardContent className="space-y-6">
-            <form onSubmit={handleLogin} className="space-y-6">
-              <div className="space-y-4">
+          <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
+            <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
+              <div className="space-y-2 sm:space-y-4">
                 <Label htmlFor="email" className={`text-sm font-medium text-gray-200 ${isArabic ? 'text-right block' : ''}`}>
                   {t('login.emailAddress')}
                 </Label>
@@ -154,7 +154,7 @@ export function LoginPage() {
                 />
               </div>
               
-              <div className="space-y-4">
+              <div className="space-y-2 sm:space-y-4">
                 <Label htmlFor="password" className={`text-sm font-medium text-gray-200 ${isArabic ? 'text-right block' : ''}`}>
                   {t('login.password')}
                 </Label>
