@@ -198,17 +198,17 @@ export default function Account() {
 
   return (
     <div className="min-h-screen bg-gray-900" dir={isArabic ? 'rtl' : 'ltr'}>
-      <div className="container mx-auto p-6 max-w-4xl">
+      <div className="container mx-auto p-3 sm:p-6 max-w-4xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-6 sm:mb-8">
           <div>
-            <h1 className={`${isArabic ? 'text-4xl' : 'text-3xl'} font-bold text-white`}>{t('header.title')}</h1>
-            <p className={`text-gray-400 mt-1 ${isArabic ? 'text-lg' : 'text-base'}`}>{t('header.subtitle')}</p>
+            <h1 className={`${isArabic ? 'text-2xl sm:text-4xl' : 'text-xl sm:text-3xl'} font-bold text-white`}>{t('header.title')}</h1>
+            <p className={`text-gray-400 mt-1 ${isArabic ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>{t('header.subtitle')}</p>
           </div>
           <Button 
             variant="outline" 
             onClick={() => setLocation('/')}
-            className={`border-gray-600 text-gray-300 hover:bg-gray-700 ${isArabic ? 'flex-row-reverse' : ''}`}
+            className={`border-gray-600 text-gray-300 hover:bg-gray-700 h-11 w-full sm:w-auto ${isArabic ? 'flex-row-reverse' : ''}`}
             data-testid="button-back-home"
           >
             <ArrowLeft className={`${isArabic ? 'ml-2 rotate-180' : 'mr-2'} h-4 w-4`} />
@@ -216,7 +216,7 @@ export default function Account() {
           </Button>
         </div>
 
-        <div className="grid gap-6">
+        <div className="grid gap-4 sm:gap-6">
           {/* Profile Information */}
           <Card className="bg-gray-800 border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between">
@@ -231,7 +231,6 @@ export default function Account() {
               </div>
               <Button
                 variant={editingProfile ? "destructive" : "outline"}
-                size="sm"
                 onClick={() => {
                   if (editingProfile) {
                     setEditingProfile(false);
@@ -247,7 +246,7 @@ export default function Account() {
                     setEditingProfile(true);
                   }
                 }}
-                className={`border-gray-600 ${isArabic ? 'flex-row-reverse' : ''}`}
+                className={`border-gray-600 h-11 ${isArabic ? 'flex-row-reverse' : ''}`}
                 data-testid={editingProfile ? "button-cancel-edit" : "button-edit-profile"}
               >
                 {editingProfile ? <X className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} /> : <Edit3 className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />}
@@ -278,7 +277,7 @@ export default function Account() {
 
               {/* Profile Fields */}
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName" className={isArabic ? 'text-base' : 'text-sm'}>{t('profile.firstName')}</Label>
                     <Input
@@ -286,7 +285,7 @@ export default function Account() {
                       value={profileData.firstName}
                       onChange={(e) => setProfileData(prev => ({ ...prev, firstName: e.target.value }))}
                       disabled={!editingProfile}
-                      className={`bg-gray-900/50 border-gray-600 ${isArabic ? 'text-lg' : 'text-base'}`}
+                      className={`bg-gray-900/50 border-gray-600 h-11 ${isArabic ? 'text-lg' : 'text-base'}`}
                       data-testid="input-first-name"
                     />
                   </div>
@@ -311,7 +310,7 @@ export default function Account() {
                     value={profileData.email}
                     onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
                     disabled={!editingProfile}
-                    className={`bg-gray-900/50 border-gray-600 ${isArabic ? 'text-lg' : 'text-base'}`}
+                    className={`bg-gray-900/50 border-gray-600 h-11 ${isArabic ? 'text-lg' : 'text-base'}`}
                     data-testid="input-email"
                   />
                 </div>
@@ -320,7 +319,7 @@ export default function Account() {
                   <Button 
                     onClick={handleSaveProfile}
                     disabled={updateProfileMutation.isPending}
-                    className={`bg-blue-600 hover:bg-blue-700 ${isArabic ? 'flex-row-reverse' : ''}`}
+                    className={`bg-blue-600 hover:bg-blue-700 h-11 ${isArabic ? 'flex-row-reverse' : ''}`}
                     data-testid="button-save-profile"
                   >
                     <Save className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
@@ -332,7 +331,7 @@ export default function Account() {
               <Separator className="bg-gray-700" />
 
               {/* Account Info */}
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div>
                   <Label className={`text-gray-400 ${isArabic ? 'text-base' : 'text-sm'}`}>{t('profile.memberSince')}</Label>
                   <div className={`text-white font-medium ${isArabic ? 'text-lg' : 'text-base'}`}>
@@ -365,7 +364,7 @@ export default function Account() {
                       <button
                         key={item.id}
                         onClick={() => handleHistoryItemClick(item)}
-                        className="w-full flex items-center justify-between p-3 bg-gray-900/50 rounded-lg border border-gray-700 hover:border-blue-500/50 hover:bg-gray-900/80 transition-all cursor-pointer text-left"
+                        className="w-full flex items-center justify-between p-3 bg-gray-900/50 rounded-lg border border-gray-700 hover:border-blue-500/50 hover:bg-gray-900/80 transition-all cursor-pointer text-left min-h-[56px]"
                         data-testid={`button-history-item-${item.id}`}
                       >
                         <div className={`flex items-center gap-3 flex-1 ${isArabic ? 'flex-row-reverse' : ''}`}>

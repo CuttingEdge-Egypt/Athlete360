@@ -170,9 +170,9 @@ export default function PaymentCenter() {
   if (showIframe && paymentIntent && selectedPackage) {
     return (
       <div className="min-h-screen bg-athlete-gray-900 text-white" dir={isArabic ? 'rtl' : 'ltr'}>
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
           <div className="max-w-4xl mx-auto">
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
               <div className={`flex-1 ${isArabic ? 'text-right' : 'text-left'}`}>
                 <h1 className={`${isArabic ? 'text-3xl' : 'text-2xl'} font-bold text-white`} data-testid="text-payment-title">
                   {t('checkout.title')}
@@ -187,9 +187,8 @@ export default function PaymentCenter() {
               </div>
               <Button
                 variant="outline"
-                size="sm"
                 onClick={handleBackToPackages}
-                className={`border-gray-600 text-gray-300 hover:bg-gray-700 ${isArabic ? 'flex-row-reverse' : ''}`}
+                className={`border-gray-600 text-gray-300 hover:bg-gray-700 h-11 ${isArabic ? 'flex-row-reverse' : ''}`}
                 data-testid="button-back-packages"
               >
                 <ArrowLeft className={`w-4 h-4 ${isArabic ? 'ml-2 rotate-180' : 'mr-2'}`} />
@@ -197,7 +196,7 @@ export default function PaymentCenter() {
               </Button>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               {/* Order Summary */}
               <Card className="bg-athlete-gray-800 border-gray-700">
                 <CardHeader>

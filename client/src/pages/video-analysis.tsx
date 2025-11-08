@@ -166,11 +166,11 @@ export default function VideoAnalysis() {
   const isArabic = i18n.language === 'ar';
 
   return (
-    <div className="min-h-screen bg-athlete-gray-900 p-6">
+    <div className="min-h-screen bg-athlete-gray-900 p-3 sm:p-6">
       <div className="max-w-6xl mx-auto">
-        <div className={`flex items-center gap-4 mb-8 ${isArabic ? 'flex-row-reverse' : ''}`}>
+        <div className={`flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8 ${isArabic ? 'flex-row-reverse' : ''}`}>
           <div className={`flex-1 ${isArabic ? 'text-right' : 'text-left'}`}>
-            <h1 className={`${isArabic ? 'text-4xl' : 'text-3xl'} font-bold text-white`}>{t('title')}</h1>
+            <h1 className={`${isArabic ? 'text-2xl sm:text-4xl' : 'text-xl sm:text-3xl'} font-bold text-white`}>{t('title')}</h1>
           </div>
         </div>
         
