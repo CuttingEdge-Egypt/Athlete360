@@ -196,7 +196,7 @@ export default function VideoAnalysis() {
                   sessionStorage.removeItem('videoAnalysisData');
                 }}
                 variant="outline"
-                className="border-red-400 text-red-600 hover:bg-red-50"
+                className="border-red-400 text-red-600 hover:bg-red-50 h-11"
                 data-testid="button-retry-loading"
               >
                 Try Again
@@ -205,7 +205,7 @@ export default function VideoAnalysis() {
                 onClick={() => {
                   resetToUploadState();
                 }}
-                className="bg-indigo-600 hover:bg-indigo-700"
+                className="bg-indigo-600 hover:bg-indigo-700 h-11"
                 data-testid="button-upload-new"
               >
                 Upload New Video

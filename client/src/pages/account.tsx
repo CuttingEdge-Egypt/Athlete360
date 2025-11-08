@@ -296,7 +296,7 @@ export default function Account() {
                       value={profileData.lastName}
                       onChange={(e) => setProfileData(prev => ({ ...prev, lastName: e.target.value }))}
                       disabled={!editingProfile}
-                      className={`bg-gray-900/50 border-gray-600 ${isArabic ? 'text-lg' : 'text-base'}`}
+                      className={`bg-gray-900/50 border-gray-600 h-11 ${isArabic ? 'text-lg' : 'text-base'}`}
                       data-testid="input-last-name"
                     />
                   </div>
