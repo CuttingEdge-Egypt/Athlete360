@@ -25,20 +25,20 @@ export default function Subscribe() {
   };
 
   return (
-    <div className="container mx-auto px-4">
+    <div className="container mx-auto px-3 sm:px-4">
           {/* Header */}
-          <div className="text-center mb-16">
-            <h1 className="text-4xl font-bold mb-4 text-white">
+          <div className="text-center mb-8 sm:mb-16 px-2">
+            <h1 className="text-2xl sm:text-4xl font-bold mb-3 sm:mb-4 text-white">
               Choose Your Plan
             </h1>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            <p className="text-base sm:text-xl text-gray-300 max-w-2xl mx-auto">
               Get tokens to unlock powerful athlete analysis features. 
               Each token gives you access to premium AI-powered insights.
             </p>
           </div>
 
           {/* Pricing Cards */}
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto mb-8 sm:mb-16">
             {/* Starter Pack */}
             <Card className="bg-athlete-gray-800 border-gray-700 relative">
               <CardHeader className="text-center">

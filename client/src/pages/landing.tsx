@@ -73,19 +73,16 @@ export default function Landing() {
             <Button 
               onClick={() => setLocation('/signup')}
               data-testid="button-signup"
-              size="sm"
-              className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white text-xs sm:text-sm px-2 sm:px-4"
+              className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white text-xs sm:text-sm px-2 sm:px-4 h-11"
             >
               <UserPlus className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline">{t('landing.navigation.signUp')}</span>
-              <span className="xs:hidden">{t('landing.navigation.signUp')}</span>
+              {t('landing.navigation.signUp')}
             </Button>
             <Button 
               onClick={() => setLocation('/login')}
               data-testid="button-login"
               variant="outline"
-              size="sm"
-              className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white text-xs sm:text-sm px-2 sm:px-4"
+              className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white text-xs sm:text-sm px-2 sm:px-4 h-11"
             >
               {t('landing.navigation.signIn')}
             </Button>

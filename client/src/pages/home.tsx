@@ -1790,53 +1790,55 @@ export default function Home() {
   }, [selectedAthlete, services]);
 
   return (
-    <div className="container mx-auto px-4 pt-20">
+    <div className="container mx-auto px-3 sm:px-4 pt-16 sm:pt-20">
           {/* Welcome Section */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4 text-white">
+          <div className="text-center mb-8 sm:mb-12 px-2">
+            <h1 className="text-2xl sm:text-4xl font-bold mb-3 sm:mb-4 text-white">
 {t('interface.welcome')}
             </h1>
-            <p className="text-xl text-gray-300 mb-8">
+            <p className="text-base sm:text-xl text-gray-300 mb-6 sm:mb-8">
 {t('interface.tagline')}
             </p>
           </div>
 
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-6xl mx-auto">
-            <TabsList className="grid w-full grid-cols-4 bg-athlete-gray-800 mb-8">
-              <TabsTrigger 
-                value="analysis" 
-                data-testid="tab-analysis"
-                className="data-[state=active]:bg-athlete-accent flex items-center gap-2"
-              >
-                <BarChart3 size={16} />
-                {t('interface.athleteAnalysis')}
-              </TabsTrigger>
-              <TabsTrigger 
-                value="comparison" 
-                data-testid="tab-comparison"
-                className="data-[state=active]:bg-athlete-accent flex items-center gap-2"
-              >
-                <Users size={16} />
-                {t('interface.compareAthletes')}
-              </TabsTrigger>
-              <TabsTrigger 
-                value="nutrition" 
-                data-testid="tab-nutrition"
-                className="data-[state=active]:bg-athlete-accent flex items-center gap-2"
-              >
-                <Apple size={16} />
-                {t('interface.nutritionPlan')}
-              </TabsTrigger>
-              <TabsTrigger 
-                value="development" 
-                data-testid="tab-development"
-                className="data-[state=active]:bg-athlete-accent flex items-center gap-2"
-              >
-                <CalendarDays size={16} />
-                {t('interface.developmentPlan')}
-              </TabsTrigger>
-            </TabsList>
+            <div className="mb-6 sm:mb-8 overflow-x-auto">
+              <TabsList className="inline-flex w-full sm:grid sm:grid-cols-4 bg-athlete-gray-800 min-w-max sm:min-w-0">
+                <TabsTrigger 
+                  value="analysis" 
+                  data-testid="tab-analysis"
+                  className="data-[state=active]:bg-athlete-accent flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm h-11"
+                >
+                  <BarChart3 size={14} className="sm:w-4 sm:h-4" />
+                  {t('interface.athleteAnalysis')}
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="comparison" 
+                  data-testid="tab-comparison"
+                  className="data-[state=active]:bg-athlete-accent flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm h-11"
+                >
+                  <Users size={14} className="sm:w-4 sm:h-4" />
+                  {t('interface.compareAthletes')}
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="nutrition" 
+                  data-testid="tab-nutrition"
+                  className="data-[state=active]:bg-athlete-accent flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm h-11"
+                >
+                  <Apple size={14} className="sm:w-4 sm:h-4" />
+                  {t('interface.nutritionPlan')}
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="development" 
+                  data-testid="tab-development"
+                  className="data-[state=active]:bg-athlete-accent flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm h-11"
+                >
+                  <CalendarDays size={14} className="sm:w-4 sm:h-4" />
+                  {t('interface.developmentPlan')}
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="analysis" className="space-y-8">
               {/* Sport & Athlete Selection */}
