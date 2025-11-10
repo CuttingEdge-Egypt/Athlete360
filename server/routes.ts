@@ -54,6 +54,7 @@ import { analyzeVideoFile, analyzeVideoComprehensive, getSportConfig } from "./v
 import { paymobService } from "./paymobService";
 import { isIndividualSport, fetchTaekwondoRankAndHistory, fetchGeneralSportRankAndHistory, fetchTeamSportPlayerInfo } from "./browserUseService";
 import { fetchTaekwondoAthleteData, parseTaekwondoCategoryToParameters } from "./taekwondoApiService";
+import { extractLatestTaekwondoRanks } from "./taekwondoUtils";
 import staticDevPlanEn from "./static-data/dev-plan-en.json" with { type: "json" };
 import staticDevPlanAr from "./static-data/dev-plan-ar.json" with { type: "json" };
 import staticBioEn from "./static-data/bio-en.json" with { type: "json" };
@@ -708,13 +709,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Transform API data to match our storage format
               const updateData: any = {};
               
-              if (apiResult.athlete.ranking) {
+              // Extract all category ranks from competition_history using shared utility
+              const categories = extractLatestTaekwondoRanks(apiResult.competition_history);
+              
+              if (categories.length > 0) {
+                updateData.rankings = {
+                  categories,
+                  fetchedAt: new Date().toISOString(),
+                  source: 'World Taekwondo API'
+                };
+              } else if (apiResult.athlete.ranking) {
+                // Fallback: Store basic ranking data when no competition history available
                 updateData.rankings = {
                   currentRank: apiResult.athlete.ranking,
                   points: apiResult.athlete.points || undefined,
                   change: apiResult.athlete.change || undefined,
                   category: categoryParams.weightDivision,
-                  lastUpdated: new Date().toISOString()
+                  fetchedAt: new Date().toISOString(),
+                  source: 'World Taekwondo API'
                 };
               }
               
@@ -1028,44 +1040,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Transform API data to match our storage format
               const updateData: any = {};
               
-              // Extract all category ranks from competition_history
-              const categoryRanks = new Map<string, { rank: string; points: string; lastUpdated: string }>();
+              // Extract all category ranks from competition_history using shared utility
+              const categories = extractLatestTaekwondoRanks(apiResult.competition_history);
+              
+              if (categories.length > 0) {
+                updateData.rankings = {
+                  categories,
+                  fetchedAt: new Date().toISOString(),
+                  source: 'World Taekwondo API'
+                };
+              } else if (apiResult.athlete.ranking) {
+                // Fallback: Store basic ranking data when no competition history available
+                updateData.rankings = {
+                  currentRank: apiResult.athlete.ranking,
+                  points: apiResult.athlete.points || undefined,
+                  change: apiResult.athlete.change || undefined,
+                  category: categoryParams.weightDivision,
+                  fetchedAt: new Date().toISOString(),
+                  source: 'World Taekwondo API'
+                };
+              }
               
               if (apiResult.competition_history && apiResult.competition_history.length > 0) {
-                // Process competition history to extract latest rank for each category
-                apiResult.competition_history.forEach((comp: any) => {
-                  if (comp.category && comp.place) {
-                    const categoryKey = comp.category;
-                    const existingRank = categoryRanks.get(categoryKey);
-                    
-                    // Only update if this is a more recent competition or first time seeing this category
-                    if (!existingRank) {
-                      categoryRanks.set(categoryKey, {
-                        rank: comp.place.toString(),
-                        points: comp.category_total_points || comp.ranking_points || '0',
-                        lastUpdated: comp.generated_end_date || new Date().toISOString()
-                      });
-                    }
-                  }
-                });
-                
-                // Convert map to array format for storage
-                const categories = Array.from(categoryRanks.entries()).map(([category, data]) => ({
-                  category,
-                  rank: data.rank,
-                  points: data.points,
-                  lastUpdated: data.lastUpdated
-                }));
-                
-                if (categories.length > 0) {
-                  updateData.rankings = {
-                    categories,
-                    fetchedAt: new Date().toISOString(),
-                    source: 'World Taekwondo API'
-                  };
-                  console.log(`📊 Extracted ${categories.length} category ranks:`, categories.map(c => `${c.category}: #${c.rank}`).join(', '));
-                }
-                
                 updateData.competitiveHistory = apiResult.competition_history;
               }
               

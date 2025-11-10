@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import fetch from 'node-fetch';
 import { DevelopmentPlanV1, developmentPlanV1Schema, Exercise, Video } from '../shared/schema.js';
 import { cleanJsonResponse } from './jsonUtils.js';
+import { enforceUppercaseSurname } from './taekwondoUtils.js';
 
 // Retry helper with exponential backoff
 async function retryWithBackoff<T>(
@@ -3196,9 +3197,11 @@ export async function getAthletePersonalInfoGemini(name: string, sport: string, 
     - Search the official World Taekwondo website (worldtkd.simplycompete.com) or rankings databases
     - Extract the EXACT name format as listed in their ranking system
     - The official name format is critical for accurate database lookups
-    - Example formats: "Mohamed KHALIL JENDOUBI", "Vito DELL'AQUILA", "Moataz Bellah ASEM ATA ABU SREE'"
+    - CRITICAL: Ensure the LAST NAME is in ALL CAPS (e.g., "Seif EISSA" not "Seif Eissa")
+    - Example formats: "Mohamed KHALIL JENDOUBI", "Vito DELL'AQUILA", "Moataz Bellah ASEM ATA ABU SREE'", "Seif EISSA"
     - Include ALL parts of the name exactly as shown in the official ranking database
     - This may include middle names, family names, and specific capitalization
+    - The SURNAME (last name/family name) MUST be in ALL CAPITAL LETTERS
     - If found on the official website, use that EXACT format for "official_name"
     - If not found, use "N/A"` : ''}
     
@@ -3272,12 +3275,19 @@ export async function getAthletePersonalInfoGemini(name: string, sport: string, 
       cleanAge = cleanAge.replace(/\s*as of.*$/gi, '').trim();
     }
     
+    // Post-process official_name for Taekwondo to ensure uppercase surname
+    let officialName: string | undefined = undefined;
+    if (isTaekwondo && parsedResult.official_name && parsedResult.official_name !== "N/A") {
+      officialName = enforceUppercaseSurname(parsedResult.official_name);
+      console.log(`📝 Post-processed official_name: "${parsedResult.official_name}" → "${officialName}"`);
+    }
+    
     return {
       age: cleanAge === "N/A" ? undefined : cleanAge,
       dateOfBirth: parsedResult.dateOfBirth === "N/A" ? undefined : parsedResult.dateOfBirth,
       height: parsedResult.height === "N/A" ? undefined : parsedResult.height,
       category: parsedResult.category === "N/A" ? undefined : parsedResult.category,
-      official_name: (isTaekwondo && parsedResult.official_name && parsedResult.official_name !== "N/A") ? parsedResult.official_name : undefined,
+      official_name: officialName,
       position: parsedResult.position === "N/A" ? undefined : parsedResult.position,
       club: parsedResult.club === "N/A" ? undefined : parsedResult.club,
       educationalBackground: parsedResult.educationalBackground === "N/A" ? undefined : parsedResult.educationalBackground,
