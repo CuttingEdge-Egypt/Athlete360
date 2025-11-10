@@ -1803,7 +1803,7 @@ export default function Home() {
 
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-6xl mx-auto">
-            <div className="mb-6 sm:mb-8 overflow-x-auto">
+            <div className="mb-6 sm:mb-8 overflow-x-auto sm:overflow-x-visible">
               <TabsList className="inline-flex w-full sm:grid sm:grid-cols-4 bg-athlete-gray-800 min-w-max sm:min-w-0">
                 <TabsTrigger 
                   value="analysis" 
