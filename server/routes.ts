@@ -988,7 +988,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log(`🔄 Missing required fields for Taekwondo API (official_name: ${!!hasOfficialName}, category: ${!!hasCategory}). Generating personal info...`);
               
               try {
-                const personalInfo = await generatePersonalInfo(athlete.name, sport.name, athlete.country || 'Unknown');
+                const personalInfo = await getAthletePersonalInfoGemini(athlete.name, sport.name, athlete.country || 'Unknown');
                 
                 if (personalInfo) {
                   // Update athlete with new personal info
