@@ -3168,6 +3168,8 @@ export async function generateDevelopmentPlan(
 export async function getAthletePersonalInfoGemini(name: string, sport: string, nationality?: string): Promise<PersonalInfo> {
   const nationalityContext = nationality ? ` from ${nationality}` : '';
   
+  const isTaekwondo = sport.toLowerCase().includes('taekwondo');
+  
   const prompt = `Search the web for factual personal information about the athlete "${name}"${nationalityContext} who competes in ${sport}.
 
     Extract ONLY the following personal information if available:
@@ -3179,15 +3181,26 @@ export async function getAthletePersonalInfoGemini(name: string, sport: string, 
     - Club (only for team sports - the team/club the athlete currently plays for)
     - Educational background (school, university - NOT including club/team names)
     - Years competing in current sport
-    - Previous sports (if any)
+    - Previous sports (if any)${isTaekwondo ? '\n    - Official name (For Taekwondo: EXACT name format as listed in World Taekwondo rankings at worldtkd.simplycompete.com)' : ''}
 
     CATEGORY EXTRACTION - CRITICAL:
     For individual sports with categories (Taekwondo, Boxing, Judo, Wrestling, Fencing, etc.), extract the EXACT category format as used by official sport federations:
-    - Taekwondo: Weight categories with gender prefix (e.g., "M-54", "W-49", "M-58", "W-67")
+    - Taekwondo: Weight categories with gender prefix (e.g., "M-58 kg", "W-49 kg", "M-68 kg", "W-67 kg")
     - Boxing/Judo: Weight categories (e.g., "M-54kg", "W-49kg", "-60kg", "+100kg")
     - Fencing: Weapon type (e.g., "Sabre", "Foil", "Épée")
     - Wrestling: Weight class (e.g., "57kg", "65kg", "86kg")
     - Athletics: Event specialization (e.g., "100m", "Marathon", "High Jump")
+    
+    ${isTaekwondo ? `
+    FOR TAEKWONDO ATHLETES - CRITICAL DATABASE NAME FORMAT:
+    - Search the official World Taekwondo website (worldtkd.simplycompete.com) or rankings databases
+    - Extract the EXACT name format as listed in their ranking system
+    - The official name format is critical for accurate database lookups
+    - Example formats: "Mohamed KHALIL JENDOUBI", "Vito DELL'AQUILA", "Moataz Bellah ASEM ATA ABU SREE'"
+    - Include ALL parts of the name exactly as shown in the official ranking database
+    - This may include middle names, family names, and specific capitalization
+    - If found on the official website, use that EXACT format for "official_name"
+    - If not found, use "N/A"` : ''}
     
     IMPORTANT:
     - Extract the PRIMARY category the athlete competes in
@@ -3214,7 +3227,7 @@ export async function getAthletePersonalInfoGemini(name: string, sport: string, 
       "age": "string or N/A",
       "dateOfBirth": "string or N/A", 
       "height": "string or N/A",
-      "category": "string or N/A",
+      "category": "string or N/A",${isTaekwondo ? '\n      "official_name": "string or N/A",' : ''}
       "position": "string or N/A",
       "club": "string or N/A",
       "educationalBackground": "string or N/A",
@@ -3264,6 +3277,7 @@ export async function getAthletePersonalInfoGemini(name: string, sport: string, 
       dateOfBirth: parsedResult.dateOfBirth === "N/A" ? undefined : parsedResult.dateOfBirth,
       height: parsedResult.height === "N/A" ? undefined : parsedResult.height,
       category: parsedResult.category === "N/A" ? undefined : parsedResult.category,
+      official_name: (isTaekwondo && parsedResult.official_name && parsedResult.official_name !== "N/A") ? parsedResult.official_name : undefined,
       position: parsedResult.position === "N/A" ? undefined : parsedResult.position,
       club: parsedResult.club === "N/A" ? undefined : parsedResult.club,
       educationalBackground: parsedResult.educationalBackground === "N/A" ? undefined : parsedResult.educationalBackground,
@@ -3302,6 +3316,7 @@ interface PersonalInfo {
   dateOfBirth?: string;
   height?: string;
   category?: string;
+  official_name?: string;
   position?: string;
   club?: string;
   educationalBackground?: string;

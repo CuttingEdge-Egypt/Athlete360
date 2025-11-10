@@ -53,6 +53,7 @@ import { generateAthleteBiography as generateAthleteBiographyO3, generateRankHis
 import { analyzeVideoFile, analyzeVideoComprehensive, getSportConfig } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
 import { isIndividualSport, fetchTaekwondoRankAndHistory, fetchGeneralSportRankAndHistory, fetchTeamSportPlayerInfo } from "./browserUseService";
+import { fetchTaekwondoAthleteData, parseTaekwondoCategoryToParameters } from "./taekwondoApiService";
 import staticDevPlanEn from "./static-data/dev-plan-en.json" with { type: "json" };
 import staticDevPlanAr from "./static-data/dev-plan-ar.json" with { type: "json" };
 import staticBioEn from "./static-data/bio-en.json" with { type: "json" };
@@ -671,45 +672,130 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ? personalInfo.category 
         : undefined;
       
-      console.log(`🏆 Starting async BrowserUse fetch for ${englishName} (${sport.name}, ${isIndividualSport(sport.name) ? 'individual' : 'team'} sport, category: ${athleteCategory || 'unknown'})...`);
+      console.log(`🏆 Starting async data fetch for ${englishName} (${sport.name}, ${isIndividualSport(sport.name) ? 'individual' : 'team'} sport, category: ${athleteCategory || 'unknown'})...`);
       
-      // Fire and forget - fetch rankings + competitive history using BrowserUse
-      let fetchPromise;
-      
-      if (isIndividualSport(sport.name)) {
-        // Individual sports: Use existing ranking and history fetch
-        fetchPromise = sport.name.toLowerCase() === 'taekwondo'
-          ? fetchTaekwondoRankAndHistory(englishName, athleteCountry, athleteCategory)
-          : fetchGeneralSportRankAndHistory(englishName, athleteCountry, sport.name, athleteCategory);
-      } else {
-        // Team sports: Use new team sport info fetch with personal info
-        fetchPromise = fetchTeamSportPlayerInfo(englishName, athleteCountry, sport.name, personalInfo);
-      }
-      
-      fetchPromise
-        .then(async (result) => {
-          if (result) {
-            console.log(`✅ Async: BrowserUse found data for ${englishName}:`, result);
-            // Update athlete with rankings AND competitive history
-            const updateData: any = {};
-            if (result.rankings) {
-              updateData.rankings = result.rankings;
-            }
-            if (result.competitiveHistory) {
-              updateData.competitiveHistory = result.competitiveHistory;
+      // For Taekwondo: Try new API scraper first, then fallback to BrowserUse
+      if (sport.name.toLowerCase() === 'taekwondo') {
+        (async () => {
+          try {
+            // Get the official name from personal info, or use the search name
+            const nameForApi = personalInfo?.official_name || englishName;
+            console.log(`🥋 Attempting Taekwondo API scraper for ${nameForApi} (category: ${athleteCategory || 'unknown'})...`);
+            
+            // Parse category to get weight division, sub-category, and ranking category
+            const categoryParams = athleteCategory ? parseTaekwondoCategoryToParameters(athleteCategory) : null;
+            
+            if (!categoryParams || !categoryParams.weightDivision) {
+              console.log(`⚠️ No valid category found, falling back to BrowserUse immediately...`);
+              throw new Error('No category information available');
             }
             
-            if (Object.keys(updateData).length > 0) {
-              await storage.updateAthlete(newAthlete.id, updateData);
-              console.log(`✅ Async: Updated ${englishName} with BrowserUse data`);
+            // Call the new Python API scraper
+            const apiResult = await fetchTaekwondoAthleteData({
+              athleteName: nameForApi,
+              country: athleteCountry,
+              weightDivision: categoryParams.weightDivision,
+              subCategory: categoryParams.subCategory,
+              rankingCategory: categoryParams.rankingCategory,
+              monthsBack: 12,
+              rankHistoryMonths: 1
+            });
+            
+            if (apiResult.success && apiResult.athlete) {
+              console.log(`✅ Taekwondo API: Successfully found data for ${nameForApi}`);
+              
+              // Transform API data to match our storage format
+              const updateData: any = {};
+              
+              if (apiResult.athlete.ranking) {
+                updateData.rankings = {
+                  currentRank: apiResult.athlete.ranking,
+                  points: apiResult.athlete.points || undefined,
+                  change: apiResult.athlete.change || undefined,
+                  category: categoryParams.weightDivision,
+                  lastUpdated: new Date().toISOString()
+                };
+              }
+              
+              if (apiResult.competition_history && apiResult.competition_history.length > 0) {
+                updateData.competitiveHistory = apiResult.competition_history;
+              }
+              
+              if (Object.keys(updateData).length > 0) {
+                await storage.updateAthlete(newAthlete.id, updateData);
+                console.log(`✅ Taekwondo API: Updated ${englishName} with API data`);
+              } else {
+                console.log(`⚠️ Taekwondo API returned success but no usable data, trying BrowserUse...`);
+                throw new Error('No usable data from API');
+              }
+            } else {
+              console.log(`⚠️ Taekwondo API: ${apiResult.error || 'No data found'}, falling back to BrowserUse...`);
+              throw new Error(apiResult.error || 'API returned no data');
             }
-          } else {
-            console.log(`⚠️ Async: BrowserUse found no data for ${englishName}`);
+          } catch (apiError) {
+            console.log(`⚠️ Taekwondo API failed: ${apiError instanceof Error ? apiError.message : String(apiError)}`);
+            console.log(`🔄 Falling back to BrowserUse for ${englishName}...`);
+            
+            // Fallback to BrowserUse
+            try {
+              const browserResult = await fetchTaekwondoRankAndHistory(englishName, athleteCountry, athleteCategory);
+              
+              if (browserResult) {
+                console.log(`✅ BrowserUse fallback: Found data for ${englishName}`);
+                const updateData: any = {};
+                if (browserResult.rankings) {
+                  updateData.rankings = browserResult.rankings;
+                }
+                if (browserResult.competitiveHistory) {
+                  updateData.competitiveHistory = browserResult.competitiveHistory;
+                }
+                
+                if (Object.keys(updateData).length > 0) {
+                  await storage.updateAthlete(newAthlete.id, updateData);
+                  console.log(`✅ BrowserUse fallback: Updated ${englishName} with data`);
+                }
+              } else {
+                console.log(`⚠️ BrowserUse fallback: No data found for ${englishName}`);
+              }
+            } catch (browserError) {
+              console.error(`❌ BrowserUse fallback failed for ${englishName}:`, browserError);
+            }
           }
-        })
-        .catch((error) => {
-          console.error(`❌ Async: BrowserUse failed for ${englishName}:`, error);
-        });
+        })();
+      } else {
+        // For other sports: Use existing BrowserUse flow
+        let fetchPromise;
+        
+        if (isIndividualSport(sport.name)) {
+          fetchPromise = fetchGeneralSportRankAndHistory(englishName, athleteCountry, sport.name, athleteCategory);
+        } else {
+          fetchPromise = fetchTeamSportPlayerInfo(englishName, athleteCountry, sport.name, personalInfo);
+        }
+        
+        fetchPromise
+          .then(async (result) => {
+            if (result) {
+              console.log(`✅ Async: BrowserUse found data for ${englishName}:`, result);
+              const updateData: any = {};
+              if (result.rankings) {
+                updateData.rankings = result.rankings;
+              }
+              if (result.competitiveHistory) {
+                updateData.competitiveHistory = result.competitiveHistory;
+              }
+              
+              if (Object.keys(updateData).length > 0) {
+                await storage.updateAthlete(newAthlete.id, updateData);
+                console.log(`✅ Async: Updated ${englishName} with BrowserUse data`);
+              }
+            } else {
+              console.log(`⚠️ Async: BrowserUse found no data for ${englishName}`);
+            }
+          })
+          .catch((error) => {
+            console.error(`❌ Async: BrowserUse failed for ${englishName}:`, error);
+          });
+      }
     } catch (error) {
       console.error("Error creating athlete with AI:", error);
       
@@ -862,7 +948,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Sport not found" });
       }
       
-      console.log(`🏆 BrowserUse update info initiated for ${athlete.name} (${sport.name})...`);
+      console.log(`🏆 Update info initiated for ${athlete.name} (${sport.name})...`);
       
       // Start ranking and competitive history fetch immediately and return
       res.json({ 
@@ -871,54 +957,139 @@ export async function registerRoutes(app: Express): Promise<Server> {
         athleteId: athlete.id
       });
       
-      // Import BrowserUse functions
-      const { fetchTaekwondoRankAndHistory, fetchGeneralSportRankAndHistory } = await import('./browserUseService.js');
-      
       // Fetch rankings and competitive history asynchronously (with category from personalInfo)
       const athleteCategory = athlete.personalInfo?.category && athlete.personalInfo.category !== 'N/A'
         ? athlete.personalInfo.category
         : undefined;
       
-      const fetchPromise = sport.name.toLowerCase() === 'taekwondo'
-        ? fetchTaekwondoRankAndHistory(
-            athlete.name,
-            athlete.country || "Unknown",
-            athleteCategory
-          )
-        : fetchGeneralSportRankAndHistory(
-            athlete.name,
-            athlete.country || "Unknown",
-            sport.name,
-            athleteCategory
-          );
-      
-      fetchPromise
-        .then(async (result) => {
-          if (result) {
-            console.log(`✅ BrowserUse: Found data for ${athlete.name}:`, result);
+      // For Taekwondo: Try new API scraper first, then fallback to BrowserUse
+      if (sport.name.toLowerCase() === 'taekwondo') {
+        (async () => {
+          try {
+            // Get the official name from personal info, or use the athlete name
+            const nameForApi = athlete.personalInfo?.official_name || athlete.name;
+            console.log(`🥋 Attempting Taekwondo API scraper for ${nameForApi} (category: ${athleteCategory || 'unknown'})...`);
             
-            // Update athlete with rankings and competitive history
-            const updateData: any = {};
+            // Parse category to get weight division, sub-category, and ranking category
+            const categoryParams = athleteCategory ? parseTaekwondoCategoryToParameters(athleteCategory) : null;
             
-            if (result.rankings) {
-              updateData.rankings = result.rankings;
+            if (!categoryParams || !categoryParams.weightDivision) {
+              console.log(`⚠️ No valid category found, falling back to BrowserUse immediately...`);
+              throw new Error('No category information available');
             }
             
-            if (result.competitiveHistory) {
-              updateData.competitiveHistory = result.competitiveHistory;
-            }
+            // Call the new Python API scraper
+            const apiResult = await fetchTaekwondoAthleteData({
+              athleteName: nameForApi,
+              country: athlete.country || undefined,
+              weightDivision: categoryParams.weightDivision,
+              subCategory: categoryParams.subCategory,
+              rankingCategory: categoryParams.rankingCategory,
+              monthsBack: 12,
+              rankHistoryMonths: 1
+            });
             
-            if (Object.keys(updateData).length > 0) {
-              await storage.updateAthlete(athlete.id, updateData);
-              console.log(`✅ BrowserUse: Updated ${athlete.name} with rankings and competitive history`);
+            if (apiResult.success && apiResult.athlete) {
+              console.log(`✅ Taekwondo API: Successfully found data for ${nameForApi}`);
+              
+              // Transform API data to match our storage format
+              const updateData: any = {};
+              
+              if (apiResult.athlete.ranking) {
+                updateData.rankings = {
+                  currentRank: apiResult.athlete.ranking,
+                  points: apiResult.athlete.points || undefined,
+                  change: apiResult.athlete.change || undefined,
+                  category: categoryParams.weightDivision,
+                  lastUpdated: new Date().toISOString()
+                };
+              }
+              
+              if (apiResult.competition_history && apiResult.competition_history.length > 0) {
+                updateData.competitiveHistory = apiResult.competition_history;
+              }
+              
+              if (Object.keys(updateData).length > 0) {
+                await storage.updateAthlete(athlete.id, updateData);
+                console.log(`✅ Taekwondo API: Updated ${athlete.name} with API data`);
+              } else {
+                console.log(`⚠️ Taekwondo API returned success but no usable data, trying BrowserUse...`);
+                throw new Error('No usable data from API');
+              }
+            } else {
+              console.log(`⚠️ Taekwondo API: ${apiResult.error || 'No data found'}, falling back to BrowserUse...`);
+              throw new Error(apiResult.error || 'API returned no data');
             }
-          } else {
-            console.log(`⚠️ BrowserUse: No data found for ${athlete.name}`);
+          } catch (apiError) {
+            console.log(`⚠️ Taekwondo API failed: ${apiError instanceof Error ? apiError.message : String(apiError)}`);
+            console.log(`🔄 Falling back to BrowserUse for ${athlete.name}...`);
+            
+            // Import and use BrowserUse fallback
+            const { fetchTaekwondoRankAndHistory } = await import('./browserUseService.js');
+            
+            try {
+              const browserResult = await fetchTaekwondoRankAndHistory(
+                athlete.name,
+                athlete.country || "Unknown",
+                athleteCategory
+              );
+              
+              if (browserResult) {
+                console.log(`✅ BrowserUse fallback: Found data for ${athlete.name}`);
+                const updateData: any = {};
+                if (browserResult.rankings) {
+                  updateData.rankings = browserResult.rankings;
+                }
+                if (browserResult.competitiveHistory) {
+                  updateData.competitiveHistory = browserResult.competitiveHistory;
+                }
+                
+                if (Object.keys(updateData).length > 0) {
+                  await storage.updateAthlete(athlete.id, updateData);
+                  console.log(`✅ BrowserUse fallback: Updated ${athlete.name} with data`);
+                }
+              } else {
+                console.log(`⚠️ BrowserUse fallback: No data found for ${athlete.name}`);
+              }
+            } catch (browserError) {
+              console.error(`❌ BrowserUse fallback failed for ${athlete.name}:`, browserError);
+            }
           }
-        })
-        .catch((error) => {
-          console.error(`❌ BrowserUse: Failed to fetch data for ${athlete.name}:`, error);
-        });
+        })();
+      } else {
+        // For other sports: Use existing BrowserUse flow
+        const { fetchGeneralSportRankAndHistory } = await import('./browserUseService.js');
+        
+        fetchGeneralSportRankAndHistory(
+          athlete.name,
+          athlete.country || "Unknown",
+          sport.name,
+          athleteCategory
+        )
+          .then(async (result) => {
+            if (result) {
+              console.log(`✅ BrowserUse: Found data for ${athlete.name}:`, result);
+              
+              const updateData: any = {};
+              if (result.rankings) {
+                updateData.rankings = result.rankings;
+              }
+              if (result.competitiveHistory) {
+                updateData.competitiveHistory = result.competitiveHistory;
+              }
+              
+              if (Object.keys(updateData).length > 0) {
+                await storage.updateAthlete(athlete.id, updateData);
+                console.log(`✅ BrowserUse: Updated ${athlete.name} with data`);
+              }
+            } else {
+              console.log(`⚠️ BrowserUse: No data found for ${athlete.name}`);
+            }
+          })
+          .catch((error) => {
+            console.error(`❌ BrowserUse: Failed to fetch data for ${athlete.name}:`, error);
+          });
+      }
       
     } catch (error) {
       console.error("Error in BrowserUse update info:", error);

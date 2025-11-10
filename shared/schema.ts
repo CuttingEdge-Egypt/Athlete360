@@ -78,6 +78,7 @@ export const athletes = pgTable("athletes", {
     dateOfBirth?: string;
     height?: string;
     category?: string; // Primary category/division the athlete competes in
+    official_name?: string; // For Taekwondo: exact name as stored in World Taekwondo database
     educationalBackground?: string;
     position?: string;
     club?: string;
