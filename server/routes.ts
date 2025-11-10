@@ -698,7 +698,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               subCategory: categoryParams.subCategory,
               rankingCategory: categoryParams.rankingCategory,
               monthsBack: 12,
-              rankHistoryMonths: 1
+              rankHistoryMonths: 10,
+              maxResults: 0 // 0 = no limit, fetch all athletes
             });
             
             if (apiResult.success && apiResult.athlete) {
@@ -958,7 +959,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Fetch rankings and competitive history asynchronously (with category from personalInfo)
-      const athleteCategory = athlete.personalInfo?.category && athlete.personalInfo.category !== 'N/A'
+      let athleteCategory = athlete.personalInfo?.category && athlete.personalInfo.category !== 'N/A'
         ? athlete.personalInfo.category
         : undefined;
       
@@ -966,6 +967,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (sport.name.toLowerCase() === 'taekwondo') {
         (async () => {
           try {
+            // Check if we have required fields for API method
+            const hasOfficialName = athlete.personalInfo?.official_name;
+            const hasCategory = athleteCategory;
+            
+            // If missing required fields, generate personal info first
+            if (!hasOfficialName || !hasCategory) {
+              console.log(`🔄 Missing required fields for Taekwondo API (official_name: ${!!hasOfficialName}, category: ${!!hasCategory}). Generating personal info...`);
+              
+              try {
+                const personalInfo = await generatePersonalInfo(athlete.name, sport.name, athlete.country || 'Unknown');
+                
+                if (personalInfo) {
+                  // Update athlete with new personal info
+                  await storage.updateAthlete(athlete.id, { personalInfo });
+                  console.log(`✅ Generated personal info for ${athlete.name}:`, personalInfo);
+                  
+                  // Update local references
+                  athlete.personalInfo = personalInfo;
+                  athleteCategory = personalInfo.category && personalInfo.category !== 'N/A' 
+                    ? personalInfo.category 
+                    : undefined;
+                } else {
+                  console.log(`⚠️ Failed to generate personal info, falling back to BrowserUse...`);
+                  throw new Error('Personal info generation failed');
+                }
+              } catch (personalInfoError) {
+                console.error(`❌ Personal info generation error:`, personalInfoError);
+                throw new Error('Failed to generate required personal info');
+              }
+            }
+            
             // Get the official name from personal info, or use the athlete name
             const nameForApi = athlete.personalInfo?.official_name || athlete.name;
             console.log(`🥋 Attempting Taekwondo API scraper for ${nameForApi} (category: ${athleteCategory || 'unknown'})...`);
@@ -986,7 +1018,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               subCategory: categoryParams.subCategory,
               rankingCategory: categoryParams.rankingCategory,
               monthsBack: 12,
-              rankHistoryMonths: 1
+              rankHistoryMonths: 10,
+              maxResults: 0 // 0 = no limit, fetch all athletes
             });
             
             if (apiResult.success && apiResult.athlete) {
@@ -995,17 +1028,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Transform API data to match our storage format
               const updateData: any = {};
               
-              if (apiResult.athlete.ranking) {
-                updateData.rankings = {
-                  currentRank: apiResult.athlete.ranking,
-                  points: apiResult.athlete.points || undefined,
-                  change: apiResult.athlete.change || undefined,
-                  category: categoryParams.weightDivision,
-                  lastUpdated: new Date().toISOString()
-                };
-              }
+              // Extract all category ranks from competition_history
+              const categoryRanks = new Map<string, { rank: string; points: string; lastUpdated: string }>();
               
               if (apiResult.competition_history && apiResult.competition_history.length > 0) {
+                // Process competition history to extract latest rank for each category
+                apiResult.competition_history.forEach((comp: any) => {
+                  if (comp.category && comp.place) {
+                    const categoryKey = comp.category;
+                    const existingRank = categoryRanks.get(categoryKey);
+                    
+                    // Only update if this is a more recent competition or first time seeing this category
+                    if (!existingRank) {
+                      categoryRanks.set(categoryKey, {
+                        rank: comp.place.toString(),
+                        points: comp.category_total_points || comp.ranking_points || '0',
+                        lastUpdated: comp.generated_end_date || new Date().toISOString()
+                      });
+                    }
+                  }
+                });
+                
+                // Convert map to array format for storage
+                const categories = Array.from(categoryRanks.entries()).map(([category, data]) => ({
+                  category,
+                  rank: data.rank,
+                  points: data.points,
+                  lastUpdated: data.lastUpdated
+                }));
+                
+                if (categories.length > 0) {
+                  updateData.rankings = {
+                    categories,
+                    fetchedAt: new Date().toISOString(),
+                    source: 'World Taekwondo API'
+                  };
+                  console.log(`📊 Extracted ${categories.length} category ranks:`, categories.map(c => `${c.category}: #${c.rank}`).join(', '));
+                }
+                
                 updateData.competitiveHistory = apiResult.competition_history;
               }
               

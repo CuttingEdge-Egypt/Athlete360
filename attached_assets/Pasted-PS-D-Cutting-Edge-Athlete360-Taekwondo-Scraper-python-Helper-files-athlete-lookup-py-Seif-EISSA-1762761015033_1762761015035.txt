@@ -1,0 +1,547 @@
+PS D:\Cutting Edge\Athlete360\Taekwondo Scraper> python "Helper files\athlete_lookup.py" "Seif EISSA" `
+>>        --country "Egypt" `
+>>        --weight "M-80 kg" `
+>>        --ranking-category "World Kyorugi Rankings" `
+>>        --sub-category "World Senior Division" `
+>>        --month November --year 2025 `
+>>        --rank-history-months 10 `
+>>        --max-results 0
+INFO:scraper:Using API URL: https://worldtkd.simplycompete.com/rankingsV2?limit=100&month=10&year=2025&rankingTypeId=11ef3b4e-05ce-797c-aca4-064aef8133e9&subCategory1=11ef3b4e-3058-36ed-aca4-064aef8133e9&rankingCategoryId=11ef3b4e-9554-6b04-aca4-064aef8133e9
+INFO:scraper:Configured weight division: M-80 kg
+INFO:scraper:Establishing session with main page...
+INFO:scraper:Using cloudscraper to bypass Cloudflare protection...
+INFO:scraper:Making request to: https://worldtkd.simplycompete.com/rankingsV2?limit=100&month=10&year=2025&rankingTypeId=11ef3b4e-05ce-797c-aca4-064aef8133e9&subCategory1=11ef3b4e-3058-36ed-aca4-064aef8133e9&rankingCategoryId=11ef3b4e-9554-6b04-aca4-064aef8133e9&pageNo=1
+INFO:scraper:Successfully bypassed Cloudflare protection. Status: 200
+INFO:scraper:Successfully parsed JSON response from page 1
+INFO:scraper:Extracted 100 athletes from JSON response
+INFO:scraper:Making request to: https://worldtkd.simplycompete.com/rankingsV2?limit=100&month=10&year=2025&rankingTypeId=11ef3b4e-05ce-797c-aca4-064aef8133e9&subCategory1=11ef3b4e-3058-36ed-aca4-064aef8133e9&rankingCategoryId=11ef3b4e-9554-6b04-aca4-064aef8133e9&pageNo=2
+INFO:scraper:Successfully bypassed Cloudflare protection. Status: 200
+INFO:scraper:Successfully parsed JSON response from page 2
+INFO:scraper:Extracted 100 athletes from JSON response
+INFO:scraper:Making request to: https://worldtkd.simplycompete.com/rankingsV2?limit=100&month=10&year=2025&rankingTypeId=11ef3b4e-05ce-797c-aca4-064aef8133e9&subCategory1=11ef3b4e-3058-36ed-aca4-064aef8133e9&rankingCategoryId=11ef3b4e-9554-6b04-aca4-064aef8133e9&pageNo=3
+INFO:scraper:Successfully bypassed Cloudflare protection. Status: 200
+INFO:scraper:Successfully parsed JSON response from page 3
+INFO:scraper:Extracted 100 athletes from JSON response
+INFO:scraper:Making request to: https://worldtkd.simplycompete.com/rankingsV2?limit=100&month=10&year=2025&rankingTypeId=11ef3b4e-05ce-797c-aca4-064aef8133e9&subCategory1=11ef3b4e-3058-36ed-aca4-064aef8133e9&rankingCategoryId=11ef3b4e-9554-6b04-aca4-064aef8133e9&pageNo=4
+INFO:scraper:Successfully bypassed Cloudflare protection. Status: 200
+INFO:scraper:Successfully parsed JSON response from page 4
+INFO:scraper:Extracted 4 athletes from JSON response
+INFO:scraper:Received 4 athletes (less than 100), likely last page
+INFO:scraper:Duplicate athletes found and removed: [{'name': 'Diego DOMINGUEZ', 'ranking': '100.0', 'country': 'United States of America', 'points': '11.52'}]
+INFO:scraper:Total athletes scraped: 304
+INFO:scraper:Athletes after filtering: 303
+INFO:scraper:Removed 1 duplicate athlete(s)
+INFO:scraper:Weight division breakdown: {'M-80 kg': 303}
+INFO:scraper:Sample athlete data: {'ranking': '1.0', 'name': 'HENRIQUE MARQUES RODRIGUES FERNANDES', 'country': 'Brazil', 'gender': 'Male', 'weight_division': 'M-80 kg', 'points': '227.45', 'change': '+6', 'profilePic': 'https://d1g2abrmx8bi9.cloudfront.net/413fa6a0-8b57-4122-9ea8-0707a47773c6.JPG?Expires=1762792568&Signature=fALUdO1cD2dk6XP0o5S8KFp161tAz65guL25BGINEqiX8NUL-o2~nMtbK8HCCt6VXeR2YKqWhKakVJTqs0s8wN15j~vwsXZGkbUCIRIbpeo-cy8Qrw554zlXICVvksSiCWhFOCA0V~NI30xgwITrhAplR5QxWwU4RQtNQ42rlfguKVbBud5n8e2b0UuReGCOnamRE4nMXP~ra8fIGnp5c9G7143Rl-4SbXI2E3XN~2n~WUVpFK9OLMeOl9sAXify4Ouucf4DdA~KXZWgWYC51FpQsJsWemxesBYA-tl~CkmCCsExPkrERKjwTOScbpEaM90fGxIc5Ps-N4BsHrPWtQ__&Key-Pair-Id=APKAJKI3OQPGU52M3A3Q', 'userid': '11e957ba-cb77-2f7d-b26f-0a47f87ce510', 'category': 'World Kyorugi Rankings', 'sub_category': 'World Senior Division', 'month': 'November', 'year': 2025}
+INFO:scraper:Attempting to fetch real competition data for athlete 11e6eef4-90bf-ab86-92b4-12f817a4f090
+INFO:scraper:Attempting to access real competition data for user_id: 11e6eef4-90bf-ab86-92b4-12f817a4f090
+INFO:scraper:Trying rankings API variation: https://worldtkd.simplycompete.com/rankingsV2?userId=11e6eef4-90bf-ab86-92b4-12f817a4f090&includeCompetitions=true&limit=100
+INFO:scraper:Trying rankings API variation: https://worldtkd.simplycompete.com/rankingsV2?userId=11e6eef4-90bf-ab86-92b4-12f817a4f090&showHistory=true&limit=100
+INFO:scraper:Trying rankings API variation: https://worldtkd.simplycompete.com/rankingsV2?userId=11e6eef4-90bf-ab86-92b4-12f817a4f090&details=true&limit=100
+INFO:scraper:Trying rankings API variation: https://worldtkd.simplycompete.com/rankingsV2?userId=11e6eef4-90bf-ab86-92b4-12f817a4f090&competitions=true&limit=100
+INFO:scraper:Trying rankings API variation: https://worldtkd.simplycompete.com/rankingsV2?playerId=11e6eef4-90bf-ab86-92b4-12f817a4f090&limit=100
+INFO:scraper:Trying rankings API variation: https://worldtkd.simplycompete.com/rankingsV2?competitorId=11e6eef4-90bf-ab86-92b4-12f817a4f090&limit=100
+INFO:scraper:🎯 Trying getPlayerProfileV2 with parameters: {'userId': '11e6eef4-90bf-ab86-92b4-12f817a4f090', 'countryId': 'null', 'month': 10, 'year': 2025, 'rankingTypeId': '11ef3b4e-05ce-797c-aca4-064aef8133e9', 'subCategory1': '11ef3b4e-3058-36ed-aca4-064aef8133e9', 'rankingCategoryId': '11ef3b4e-9554-6b04-aca4-064aef8133e9'}
+INFO:scraper:✅ SUCCESS: Found REAL competition data via getPlayerProfileV2!
+INFO:scraper:Successfully processed 14 competitions from getPlayerProfileV2
+INFO:scraper:Successfully retrieved 14 real competitions for athlete 11e6eef4-90bf-ab86-92b4-12f817a4f090
+{
+  "success": true,
+  "athlete": {
+    "ranking": "132.0",
+    "name": "Seif EISSA",
+    "country": "Egypt",
+    "gender": "Male",
+    "weight_division": "M-80 kg",
+    "points": "7.41",
+    "change": "-19",
+    "profilePic": "https://d1g2abrmx8bi9.cloudfront.net/f02c9cf7-49ca-473e-a980-bc193ae28ba2.jpg?Expires=1762794166&Signature=PMOEiWVp2jNYrAucYQRPurhnmcrftZCxoxu2bY8Ec-EVe0fyvoJXdqyDIc1fYylsIBB1TYqee5~bcJBHom5LBs1dAjtoAH2R1mGekXwt5~fZBurryix-3CPMGD1Va-bigAsvMkeMWM5sFjS3n1CoXJ9frQhZQl5TWivdtTXPaA16vCiqjo7BC9UWiWG7xr4OF9t0ynt-ik2ifc16-WrCMqjCZkzheFedPswFIxFgZH2AYYaPY7hg01VJCQRFH29mP5hdYeyd3mEsCPW8SUarsNqkeNpRsuYmWCWbH3yyzIy8WWROOOeJvDVG5irsjZ1B4QcJWd74MaG9blPoDRzn5Q__&Key-Pair-Id=APKAJKI3OQPGU52M3A3Q",
+    "userid": "11e6eef4-90bf-ab86-92b4-12f817a4f090",
+    "category": "World Kyorugi Rankings",
+    "sub_category": "World Senior Division",
+    "month": "November",
+    "year": 2025
+  },
+  "competition_history": [
+    {
+      "event_name": "Wuxi 2025 World Taekwondo Championships G-14",
+      "event_date": "30 October 2025",
+      "location": "Wuxi, China",
+      "place": 1,
+      "ranking_points": "140.00",
+      "g_rank": "",
+      "event_result": 1,
+      "event_id": "11f04375-db0c-f7e9-81a0-0225d1e4088f",
+      "start_date": "24",
+      "generated_end_date": "2025-10-30",
+      "category": "M+80 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+      "category_total_points": "220.41"
+    },
+    {
+      "event_name": "(Kyorugi) Australian Open 2025",
+      "event_date": "17 August 2025",
+      "location": "Gold Coast, Australia",
+      "place": 1,
+      "ranking_points": "20.00",
+      "g_rank": "G-2",
+      "event_result": 1,
+      "event_id": "11f02e40-0775-551a-935e-0225d1e4088f",
+      "start_date": "16",
+      "generated_end_date": "2025-08-17",
+      "category": "M+80 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+      "category_total_points": "220.41"
+    },
+    {
+      "event_name": "(Kyorugi) 2025 WT President's Cup - Oceania",
+      "event_date": "15 August 2025",
+      "location": "Gold Coast, Australia",
+      "place": 1,
+      "ranking_points": "20.00",
+      "g_rank": "G-3",
+      "event_result": 1,
+      "event_id": "11f02f28-bd9a-2b22-935e-0225d1e4088f",
+      "start_date": "14",
+      "generated_end_date": "2025-08-15",
+      "category": "M+80 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+      "category_total_points": "220.41"
+    },
+    {
+      "event_name": "2025 WT President's Cup - Africa",
+      "event_date": "27 April 2025",
+      "location": "Addis Ababa, Ethiopia",
+      "place": 1,
+      "ranking_points": "30.00",
+      "g_rank": "G-3",
+      "event_result": 1,
+      "event_id": "11efdfd7-835b-5c11-af3d-06d0d42b42ed",
+      "start_date": "25",
+      "generated_end_date": "2025-04-27",
+      "category": "M+80 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+      "category_total_points": "220.41"
+    },
+    {
+      "event_name": "(Kyorugi) Combaxx 7th Asian Taekwondo Open Championships",
+      "event_date": "20 February 2025",
+      "location": "Islamabad, Pakistan",
+      "place": 1,
+      "ranking_points": "0.00",
+      "g_rank": "G-2",
+      "event_result": 1,
+      "event_id": "11efc5bc-cd49-6f17-b97d-06f04677d3f7",
+      "start_date": "16",
+      "generated_end_date": "2025-02-20",
+      "category": "M+80 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+      "category_total_points": "220.41"
+    },
+    {
+      "event_name": "2024 Montenegro Podgorica Open",
+      "event_date": "6 October 2024",
+      "location": "Podgorica, Montenegro",
+      "place": 1,
+      "ranking_points": "3.00",
+      "g_rank": "G-1",
+      "event_result": 1,
+      "event_id": "11ef4a79-bb71-cbbb-9ac0-069b3a032309",
+      "start_date": "5",
+      "generated_end_date": "2024-10-06",
+      "category": "M+80 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+      "category_total_points": "220.41"
+    },
+    {
+      "event_name": "Paris 2024 Olympic Games",
+      "event_date": "10 August 2024",
+      "location": "Paris, France",
+      "place": 1,
+      "ranking_points": "7.41",
+      "g_rank": "G-20",
+      "event_result": 11,
+      "event_id": "11ef66ab-633e-b7bc-85c5-0698ea296bf9",
+      "start_date": "7",
+      "generated_end_date": "2024-08-10",
+      "category": "M+80 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+      "category_total_points": "220.41"
+    },
+    {
+      "event_name": "Paris 2024 Olympic Games",
+      "event_date": "10 August 2024",
+      "location": "Paris, France",
+      "place": 132,
+      "ranking_points": "7.41",
+      "g_rank": "G-20",
+      "event_result": 11,
+      "event_id": "11ef66ab-633e-b7bc-85c5-0698ea296bf9",
+      "start_date": "7",
+      "generated_end_date": "2024-08-10",
+      "category": "M-80 kg | World Senior Division | World Kyorugi Rankings",
+      "category_total_points": "7.41"
+    },
+    {
+      "event_name": "Wuxi 2025 World Taekwondo Championships G-14",
+      "event_date": "30 October 2025",
+      "location": "Wuxi, China",
+      "place": 1,
+      "ranking_points": "140.00",
+      "g_rank": "",
+      "event_result": 1,
+      "event_id": "11f04375-db0c-f7e9-81a0-0225d1e4088f",
+      "start_date": "24",
+      "generated_end_date": "2025-10-30",
+      "category": "M-87 kg | World Senior Division | World Kyorugi Rankings",
+      "category_total_points": "243.00"
+    },
+    {
+      "event_name": "(Kyorugi) Australian Open 2025",
+      "event_date": "17 August 2025",
+      "location": "Gold Coast, Australia",
+      "place": 1,
+      "ranking_points": "20.00",
+      "g_rank": "G-2",
+      "event_result": 1,
+      "event_id": "11f02e40-0775-551a-935e-0225d1e4088f",
+      "start_date": "16",
+      "generated_end_date": "2025-08-17",
+      "category": "M-87 kg | World Senior Division | World Kyorugi Rankings",
+      "category_total_points": "243.00"
+    },
+    {
+      "event_name": "(Kyorugi) 2025 WT President's Cup - Oceania",
+      "event_date": "15 August 2025",
+      "location": "Gold Coast, Australia",
+      "place": 1,
+      "ranking_points": "30.00",
+      "g_rank": "G-3",
+      "event_result": 1,
+      "event_id": "11f02f28-bd9a-2b22-935e-0225d1e4088f",
+      "start_date": "14",
+      "generated_end_date": "2025-08-15",
+      "category": "M-87 kg | World Senior Division | World Kyorugi Rankings",
+      "category_total_points": "243.00"
+    },
+    {
+      "event_name": "2025 WT President's Cup - Africa",
+      "event_date": "27 April 2025",
+      "location": "Addis Ababa, Ethiopia",
+      "place": 1,
+      "ranking_points": "30.00",
+      "g_rank": "G-3",
+      "event_result": 1,
+      "event_id": "11efdfd7-835b-5c11-af3d-06d0d42b42ed",
+      "start_date": "25",
+      "generated_end_date": "2025-04-27",
+      "category": "M-87 kg | World Senior Division | World Kyorugi Rankings",
+      "category_total_points": "243.00"
+    },
+    {
+      "event_name": "(Kyorugi) Combaxx 7th Asian Taekwondo Open Championships",
+      "event_date": "20 February 2025",
+      "location": "Islamabad, Pakistan",
+      "place": 1,
+      "ranking_points": "20.00",
+      "g_rank": "G-2",
+      "event_result": 1,
+      "event_id": "11efc5bc-cd49-6f17-b97d-06f04677d3f7",
+      "start_date": "16",
+      "generated_end_date": "2025-02-20",
+      "category": "M-87 kg | World Senior Division | World Kyorugi Rankings",
+      "category_total_points": "243.00"
+    },
+    {
+      "event_name": "2024 Montenegro Podgorica Open",
+      "event_date": "6 October 2024",
+      "location": "Podgorica, Montenegro",
+      "place": 1,
+      "ranking_points": "3.00",
+      "g_rank": "G-1",
+      "event_result": 1,
+      "event_id": "11ef4a79-bb71-cbbb-9ac0-069b3a032309",
+      "start_date": "5",
+      "generated_end_date": "2024-10-06",
+      "category": "M-87 kg | World Senior Division | World Kyorugi Rankings",
+      "category_total_points": "243.00"
+    }
+  ],
+  "metadata": {
+    "athlete_name": "Seif EISSA",
+    "country": "Egypt",
+    "weight_division": "M-80 kg",
+    "ranking_category": "World Kyorugi Rankings",
+    "sub_category": "World Senior Division",
+    "month": "November",
+    "year": 2025,
+    "months_back": 12,
+    "rankings_checked": 303,
+    "matched_count": 1
+  },
+  "category_summary": [
+    {
+      "category_name": "M+80 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+      "rank": null,
+      "total_points": "220.41",
+      "ranking_type": null,
+      "division": null,
+      "weight_division": null,
+      "history": []
+    },
+    {
+      "category_name": "M-80 kg | World Senior Division | World Kyorugi Rankings",
+      "rank": null,
+      "total_points": "7.41",
+      "ranking_type": null,
+      "division": null,
+      "weight_division": null,
+      "history": []
+    },
+    {
+      "category_name": "M-87 kg | World Senior Division | World Kyorugi Rankings",
+      "rank": null,
+      "total_points": "243.00",
+      "ranking_type": null,
+      "division": null,
+      "weight_division": null,
+      "history": []
+    }
+  ],
+  "rank_history": [
+    {
+      "category": "M+80 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+      "month": "November",
+      "year": 2025,
+      "ranking": "1.0",
+      "points": "220.41",
+      "change": "+3"
+    },
+    {
+      "category": "M+80 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+      "month": "October",
+      "year": 2025,
+      "ranking": "4.0",
+      "points": "83.41",
+      "change": "-1"
+    },
+    {
+      "category": "M+80 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+      "month": "September",
+      "year": 2025,
+      "ranking": "3.0",
+      "points": "83.41",
+      "change": "+9"
+    },
+    {
+      "category": "M+80 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+      "month": "August",
+      "year": 2025,
+      "ranking": "12.0",
+      "points": "70.82",
+      "change": "-3"
+    },
+    {
+      "category": "M+80 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+      "month": "July",
+      "year": 2025,
+      "ranking": "9.0",
+      "points": "70.82",
+      "change": "-1"
+    },
+    {
+      "category": "M+80 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+      "month": "June",
+      "year": 2025,
+      "ranking": "8.0",
+      "points": "70.82",
+      "change": "0"
+    },
+    {
+      "category": "M+80 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+      "month": "May",
+      "year": 2025,
+      "ranking": "8.0",
+      "points": "70.82",
+      "change": "+4"
+    },
+    {
+      "category": "M+80 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+      "month": "April",
+      "year": 2025,
+      "ranking": "12.0",
+      "points": "40.82",
+      "change": "-2"
+    },
+    {
+      "category": "M+80 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+      "month": "March",
+      "year": 2025,
+      "ranking": "10.0",
+      "points": "40.82",
+      "change": "+5"
+    },
+    {
+      "category": "M+80 kg | Olympic Senior Division | Olympic Kyorugi Rankings",
+      "month": "February",
+      "year": 2025,
+      "ranking": "15.0",
+      "points": "20.82",
+      "change": "0"
+    },
+    {
+      "category": "M-80 kg | World Senior Division | World Kyorugi Rankings",
+      "month": "November",
+      "year": 2025,
+      "ranking": "132.0",
+      "points": "7.41",
+      "change": "-19"
+    },
+    {
+      "category": "M-80 kg | World Senior Division | World Kyorugi Rankings",
+      "month": "October",
+      "year": 2025,
+      "ranking": "113.0",
+      "points": "7.41",
+      "change": "-4"
+    },
+    {
+      "category": "M-80 kg | World Senior Division | World Kyorugi Rankings",
+      "month": "September",
+      "year": 2025,
+      "ranking": "109.0",
+      "points": "7.41",
+      "change": "-48"
+    },
+    {
+      "category": "M-80 kg | World Senior Division | World Kyorugi Rankings",
+      "month": "August",
+      "year": 2025,
+      "ranking": "61.0",
+      "points": "14.82",
+      "change": "-9"
+    },
+    {
+      "category": "M-80 kg | World Senior Division | World Kyorugi Rankings",
+      "month": "July",
+      "year": 2025,
+      "ranking": "52.0",
+      "points": "14.82",
+      "change": "-2"
+    },
+    {
+      "category": "M-80 kg | World Senior Division | World Kyorugi Rankings",
+      "month": "June",
+      "year": 2025,
+      "ranking": "50.0",
+      "points": "14.82",
+      "change": "-6"
+    },
+    {
+      "category": "M-80 kg | World Senior Division | World Kyorugi Rankings",
+      "month": "May",
+      "year": 2025,
+      "ranking": "44.0",
+      "points": "14.82",
+      "change": "-4"
+    },
+    {
+      "category": "M-80 kg | World Senior Division | World Kyorugi Rankings",
+      "month": "April",
+      "year": 2025,
+      "ranking": "40.0",
+      "points": "14.82",
+      "change": "-5"
+    },
+    {
+      "category": "M-80 kg | World Senior Division | World Kyorugi Rankings",
+      "month": "March",
+      "year": 2025,
+      "ranking": "35.0",
+      "points": "14.82",
+      "change": "-5"
+    },
+    {
+      "category": "M-80 kg | World Senior Division | World Kyorugi Rankings",
+      "month": "February",
+      "year": 2025,
+      "ranking": "30.0",
+      "points": "14.82",
+      "change": "0"
+    },
+    {
+      "category": "M-87 kg | World Senior Division | World Kyorugi Rankings",
+      "month": "November",
+      "year": 2025,
+      "ranking": "1.0",
+      "points": "243.0",
+      "change": "0"
+    },
+    {
+      "category": "M-87 kg | World Senior Division | World Kyorugi Rankings",
+      "month": "October",
+      "year": 2025,
+      "ranking": "1.0",
+      "points": "106.0",
+      "change": "0"
+    },
+    {
+      "category": "M-87 kg | World Senior Division | World Kyorugi Rankings",
+      "month": "September",
+      "year": 2025,
+      "ranking": "1.0",
+      "points": "106.0",
+      "change": "+3"
+    },
+    {
+      "category": "M-87 kg | World Senior Division | World Kyorugi Rankings",
+      "month": "August",
+      "year": 2025,
+      "ranking": "4.0",
+      "points": "56.0",
+      "change": "-1"
+    },
+    {
+      "category": "M-87 kg | World Senior Division | World Kyorugi Rankings",
+      "month": "July",
+      "year": 2025,
+      "ranking": "3.0",
+      "points": "56.0",
+      "change": "0"
+    },
+    {
+      "category": "M-87 kg | World Senior Division | World Kyorugi Rankings",
+      "month": "June",
+      "year": 2025,
+      "ranking": "3.0",
+      "points": "56.0",
+      "change": "-2"
+    },
+    {
+      "category": "M-87 kg | World Senior Division | World Kyorugi Rankings",
+      "month": "May",
+      "year": 2025,
+      "ranking": "1.0",
+      "points": "56.0",
+      "change": "+6"
+    },
+    {
+      "category": "M-87 kg | World Senior Division | World Kyorugi Rankings",
+      "month": "April",
+      "year": 2025,
+      "ranking": "7.0",
+      "points": "26.0",
+      "change": "-3"
+    },
+    {
+      "category": "M-87 kg | World Senior Division | World Kyorugi Rankings",
+      "month": "March",
+      "year": 2025,
+      "ranking": "4.0",
+      "points": "26.0",
+      "change": "+26"
+    },
+    {
+      "category": "M-87 kg | World Senior Division | World Kyorugi Rankings",
+      "month": "February",
+      "year": 2025,
+      "ranking": "30.0",
+      "points": "6.0",
+      "change": "0"
+    }
+  ]
+}
+PS D:\Cutting Edge\Athlete360\Taekwondo Scraper> 
