@@ -1890,12 +1890,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Guard against missing/empty rank history
           if (!rankHistory || rankHistory.length === 0) {
-            console.log(`⚠️ No rank history found for ${athlete.name}, using regular competitive history analysis only`);
-            // Fall back to regular competitive history analysis
-            analysisData = await generateCompetitiveHistoryAnalysis(
+            console.log(`⚠️ No rank history found for ${athlete.name}, using competitive history analysis only`);
+            
+            // For Taekwondo without rank history, pass raw competition array to dual-analysis function
+            // This will generate competitive analysis and display raw competition data
+            const taekwondoAnalysis = await generateTaekwondoHistoryAnalysis(
               athlete.name,
-              sportName,
-              competitiveHistoryData,
+              competitiveHistoryData || [], // Pass raw competition array from API
+              [], // Empty rank history
               { 
                 country: athlete.country,
                 age: athlete.age,
@@ -1906,9 +1908,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
               language
             );
             
+            // Transform raw competition data into rankingProgression format for frontend
+            const rankingProgression = Array.isArray(competitiveHistoryData) 
+              ? competitiveHistoryData.map((comp: any) => ({
+                  competition: comp.event_name || 'Unknown Event',
+                  tournament: comp.event_name || 'Unknown Event',
+                  date: comp.event_date || comp.generated_end_date || 'Date unknown',
+                  result: comp.place ? `${comp.place}${comp.place === 1 ? 'st' : comp.place === 2 ? 'nd' : comp.place === 3 ? 'rd' : 'th'} place` : 'No result',
+                  placement: comp.place || 'N/A',
+                  location: comp.location,
+                  ranking: comp.category || 'N/A',
+                  rank: comp.category || 'N/A'
+                }))
+              : [];
+            
+            // Include both competitive analysis and structured competition data
             responseData = {
-              ...analysisData,
-              career_phases: competitiveHistoryData?.career_phases || []
+              ...taekwondoAnalysis.competitiveAnalysis,
+              competitiveAnalysis: taekwondoAnalysis.competitiveAnalysis,
+              rankingProgression: rankingProgression, // Formatted competition data for frontend
+              athlete: {
+                name: athlete.name,
+                nationality: athlete.country || 'N/A',
+                sport: sportName,
+                isActive: true
+              },
+              careerSummary: {
+                totalCompetitions: rankingProgression.length,
+                notableAchievements: taekwondoAnalysis.competitiveAnalysis.peak_performance_periods?.map((p: any) => p.description) || []
+              }
             };
           } else {
             // Transform rank history to match API format for consistency
