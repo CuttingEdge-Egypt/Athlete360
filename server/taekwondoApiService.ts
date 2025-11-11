@@ -61,6 +61,7 @@ export interface TaekwondoLookupParams {
   maxResults?: number;
   delay?: number;
   rankHistoryMonths?: number;
+  comprehensive?: boolean; // Enable comprehensive parallel fetching back to March 2021
 }
 
 export async function fetchTaekwondoAthleteData(
@@ -110,6 +111,11 @@ export async function fetchTaekwondoAthleteData(
 
     if (params.rankHistoryMonths !== undefined) {
       pythonArgs.push('--rank-history-months', params.rankHistoryMonths.toString());
+    }
+
+    if (params.comprehensive) {
+      pythonArgs.push('--comprehensive');
+      console.log(`🚀 COMPREHENSIVE MODE ENABLED - Fetching ALL data back to March 2021...`);
     }
 
     console.log(`🥋 Python args:`, pythonArgs.join(' '));

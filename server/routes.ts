@@ -693,7 +693,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               throw new Error('No category information available');
             }
             
-            // Call the new Python API scraper
+            // Call the new Python API scraper with COMPREHENSIVE mode for new athletes
             const apiResult = await fetchTaekwondoAthleteData({
               athleteName: nameForApi,
               country: athleteCountry,
@@ -702,7 +702,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               rankingCategory: categoryParams.rankingCategory,
               monthsBack: 12,
               rankHistoryMonths: 10,
-              maxResults: 0 // 0 = no limit, fetch all athletes
+              maxResults: 0, // 0 = no limit, fetch all athletes
+              comprehensive: true // NEW ATHLETES: Fetch ALL data back to March 2021 in parallel
             });
             
             if (apiResult.success && apiResult.athlete) {
