@@ -129,13 +129,37 @@ export function DualAnalysisPanel({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="prose prose-invert max-w-none">
-                <div 
-                  className="text-gray-300 leading-relaxed whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={{ 
-                    __html: rankAnalysis.replace(/\n/g, '<br/>') 
-                  }}
-                />
+              <div className="space-y-4">
+                {typeof rankAnalysis === 'string' ? (
+                  <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
+                    {rankAnalysis}
+                  </div>
+                ) : (
+                  <>
+                    {rankAnalysis.trends_and_outlook && (
+                      <div className="bg-athlete-gray-700 p-4 rounded-lg">
+                        <h4 className="font-semibold text-white mb-2">Trends & Outlook</h4>
+                        <p className="text-gray-300 text-sm leading-relaxed">{rankAnalysis.trends_and_outlook}</p>
+                      </div>
+                    )}
+                    {rankAnalysis.progression_timeline && Array.isArray(rankAnalysis.progression_timeline) && rankAnalysis.progression_timeline.length > 0 && (
+                      <div className="bg-athlete-gray-700 p-4 rounded-lg">
+                        <h4 className="font-semibold text-white mb-3">Progression Timeline</h4>
+                        <div className="space-y-2">
+                          {rankAnalysis.progression_timeline.map((item: any, index: number) => (
+                            <div key={index} className="border-l-2 border-blue-400 pl-3 py-1">
+                              <div className="font-medium text-blue-300 text-sm">{item.period}</div>
+                              <div className="text-gray-300 text-sm">{item.rank_change}</div>
+                              {item.significance && (
+                                <div className="text-gray-400 text-xs mt-1 italic">{item.significance}</div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>
