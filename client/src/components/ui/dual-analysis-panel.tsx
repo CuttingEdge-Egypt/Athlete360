@@ -1,7 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, TrendingUp, Trophy, BarChart } from "lucide-react";
+import { Calendar, TrendingUp, Trophy, BarChart, Award } from "lucide-react";
 import { Line } from 'react-chartjs-2';
 
 interface DualAnalysisPanelProps {
