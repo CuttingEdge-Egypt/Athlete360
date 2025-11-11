@@ -268,11 +268,24 @@ export function DualAnalysisPanel({
                     return dateB - dateA; // Most recent first
                   })
                   .map((comp: any, index: number) => {
-                    // Parse date for display
-                    const compDate = comp.date ? new Date(comp.date) : null;
-                    const monthYear = compDate 
-                      ? compDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-                      : 'Date unknown';
+                    // Parse date for full display (e.g., "27 April 2025")
+                    let displayDate = 'Date unknown';
+                    if (comp.date && comp.date !== 'Date unknown') {
+                      // Check if date is already in full format
+                      if (comp.date.includes(' ')) {
+                        displayDate = comp.date; // Already formatted like "27 April 2025"
+                      } else {
+                        // Parse ISO date
+                        const compDate = new Date(comp.date);
+                        if (!isNaN(compDate.getTime())) {
+                          displayDate = compDate.toLocaleDateString('en-US', { 
+                            day: 'numeric', 
+                            month: 'long', 
+                            year: 'numeric' 
+                          });
+                        }
+                      }
+                    }
 
                     return (
                       <div key={index} className="p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-blue-500/50 transition-colors">
@@ -280,7 +293,7 @@ export function DualAnalysisPanel({
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
                               <Badge variant="outline" className="border-yellow-400 text-yellow-400 text-xs">
-                                {monthYear}
+                                {displayDate}
                               </Badge>
                               <span className="font-bold text-white text-lg">{comp.competition || comp.tournament}</span>
                             </div>
@@ -289,11 +302,23 @@ export function DualAnalysisPanel({
                                 📍 {comp.location}
                               </div>
                             )}
-                            {comp.ranking && comp.ranking !== 'N/A' && (
-                              <div className="text-sm text-gray-400">
-                                Category: {comp.ranking}
-                              </div>
-                            )}
+                            <div className="flex items-center gap-4 text-sm text-gray-400">
+                              {comp.ranking && comp.ranking !== 'N/A' && (
+                                <div>
+                                  Category: <span className="text-gray-300">{comp.ranking}</span>
+                                </div>
+                              )}
+                              {comp.gRank && (
+                                <div>
+                                  G-Rank: <span className="text-blue-400 font-semibold">{comp.gRank}</span>
+                                </div>
+                              )}
+                              {comp.rankingPoints && (
+                                <div>
+                                  Points: <span className="text-green-400 font-semibold">{comp.rankingPoints}</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
                           <div className="ml-3">
                             {getResultBadge(comp.result)}

@@ -749,10 +749,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
                         ? (monthMap[rankEntry.month.toLowerCase()] || parseInt(rankEntry.month))
                         : rankEntry.month;
                       
+                      // Normalize category for database storage
+                      const { normalizeCategoryForDB } = await import('./taekwondoApiService.js');
+                      const { categoryKey, categoryLabel } = normalizeCategoryForDB(rankEntry.category);
+                      
                       await storage.createRankHistory({
                         athleteId: newAthlete.id,
                         rank: typeof rankEntry.ranking === 'string' ? parseFloat(rankEntry.ranking) : rankEntry.ranking,
-                        date: new Date(`${rankEntry.year}-${String(monthNum).padStart(2, '0')}-01`)
+                        date: new Date(`${rankEntry.year}-${String(monthNum).padStart(2, '0')}-01`),
+                        categoryKey,
+                        categoryLabel,
+                        points: rankEntry.points ? (typeof rankEntry.points === 'string' ? parseFloat(rankEntry.points) : rankEntry.points) : undefined
                       });
                     } catch (err) {
                       console.log(`⚠️ Failed to store rank history entry: ${err instanceof Error ? err.message : String(err)}`);
@@ -1945,7 +1952,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   placement: comp.place || 'N/A',
                   location: comp.location,
                   ranking: comp.category || 'N/A',
-                  rank: comp.category || 'N/A'
+                  rank: comp.category || 'N/A',
+                  rankingPoints: comp.ranking_points,
+                  gRank: comp.g_rank
                 }))
               : [];
             
@@ -2003,7 +2012,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   placement: comp.place || 'N/A',
                   location: comp.location,
                   ranking: comp.category || 'N/A',
-                  rank: comp.category || 'N/A'
+                  rank: comp.category || 'N/A',
+                  rankingPoints: comp.ranking_points,
+                  gRank: comp.g_rank
                 }))
               : [];
             
