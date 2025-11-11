@@ -45,7 +45,7 @@ const model = googleGenAI.getGenerativeModel({
   model: "gemini-2.5-pro",
   generationConfig: {
     temperature: 0.1,
-    maxOutputTokens: 2000,
+    maxOutputTokens: 9000, // Increased for complex analyses (dual-analysis, rank history)
     // Note: responseMimeType removed when using tools
   },
 });
