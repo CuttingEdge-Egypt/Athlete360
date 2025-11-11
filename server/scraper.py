@@ -1694,11 +1694,28 @@ class TaekwondoScraper:
                     })
                     
                     for event in category['eventResults']:
+                        # DEBUG: Log first event to identify placement field
+                        if len(competitions) == 0:
+                            import json
+                            self.logger.info(f"🔍 DEBUG: Sample event object keys: {list(event.keys())}")
+                            self.logger.info(f"🔍 DEBUG: Sample event object: {json.dumps(event, ensure_ascii=False, indent=2)}")
+                        
+                        # Try multiple possible field names for placement
+                        place = (
+                            event.get('place') or 
+                            event.get('placing') or 
+                            event.get('rank') or 
+                            event.get('position') or 
+                            event.get('finalRank') or 
+                            event.get('finalPosition') or
+                            'Unknown Place'
+                        )
+                        
                         competition = {
                             'event_name': event.get('eventName', 'Unknown Event'),
                             'event_date': event.get('endDate', 'Unknown Date'),
                             'location': event.get('location', 'Unknown Location'),
-                            'place': event.get('place', 'Unknown Place'),
+                            'place': place,
                             'ranking_points': event.get('rankingPoints', '0'),
                             'g_rank': event.get('gRank', 'Unknown'),
                             'event_result': event.get('eventResult', 'Unknown'),
@@ -1708,6 +1725,11 @@ class TaekwondoScraper:
                             'category': category_name,
                             'category_total_points': total_points
                         }
+                        
+                        # DEBUG: Log mapped place value
+                        if len(competitions) == 0:
+                            self.logger.info(f"🔍 DEBUG: Mapped place value: {place}")
+                        
                         competitions.append(competition)
                         
             self.logger.info(f"Successfully processed {len(competitions)} competitions from getPlayerProfileV2")
