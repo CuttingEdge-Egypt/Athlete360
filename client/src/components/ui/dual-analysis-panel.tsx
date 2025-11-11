@@ -33,6 +33,31 @@ export function DualAnalysisPanel({
   const rankingProgression = competitiveAnalysis?.rankingProgression || [];
   const careerSummary = competitiveAnalysis?.careerSummary || {};
 
+  // Extract unique years from both datasets
+  const getAvailableYears = () => {
+    const years = new Set<number>();
+    
+    // From competitive history
+    rankingProgression.forEach((comp: any) => {
+      if (comp.date) {
+        const year = new Date(comp.date).getFullYear();
+        if (!isNaN(year) && year > 2000) years.add(year);
+      }
+    });
+    
+    // From rank history
+    if (rankHistoryData) {
+      rankHistoryData.forEach(entry => {
+        if (entry.year && entry.year > 2000) years.add(entry.year);
+      });
+    }
+    
+    return Array.from(years).sort((a, b) => b - a); // Most recent first
+  };
+
+  const availableYears = getAvailableYears();
+  const defaultYear = availableYears[0]?.toString() || '2025';
+
   const renderRankHistoryContent = () => {
     if (!rankHistoryData || rankHistoryData.length === 0) {
       return (
@@ -42,9 +67,57 @@ export function DualAnalysisPanel({
       );
     }
 
-    // Group rank history data by category
+    // If no years available, show message
+    if (availableYears.length === 0) {
+      return (
+        <div className="p-6 text-center">
+          <p className="text-gray-400">No year data available</p>
+        </div>
+      );
+    }
+
+    // Render year tabs
+    return (
+      <Tabs defaultValue={defaultYear} className="w-full">
+        <TabsList className="bg-athlete-gray-700 mb-6">
+          {availableYears.map(year => (
+            <TabsTrigger
+              key={year}
+              value={year.toString()}
+              data-testid={`tab-rank-year-${year}`}
+              className="data-[state=active]:bg-athlete-accent"
+            >
+              {year}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        {availableYears.map(year => (
+          <TabsContent key={year} value={year.toString()}>
+            {renderRankHistoryForYear(year)}
+          </TabsContent>
+        ))}
+      </Tabs>
+    );
+  };
+
+  const renderRankHistoryForYear = (year: number) => {
+    if (!rankHistoryData) return null;
+
+    // Filter data for this year
+    const yearData = rankHistoryData.filter(entry => entry.year === year);
+
+    if (yearData.length === 0) {
+      return (
+        <div className="p-6 text-center">
+          <p className="text-gray-400">No rank history data for {year}</p>
+        </div>
+      );
+    }
+
+    // Group rank history data by category for this year
     const categoryGroups: { [key: string]: any[] } = {};
-    rankHistoryData.forEach((entry: any) => {
+    yearData.forEach((entry: any) => {
       const categoryKey = entry.categoryKey || 'default';
       if (!categoryGroups[categoryKey]) {
         categoryGroups[categoryKey] = [];
@@ -217,7 +290,58 @@ export function DualAnalysisPanel({
     );
   };
 
+  // Helper function for result badges
+  const getResultBadge = (result: string) => {
+    if (!result) return null;
+    
+    const resultLower = result.toLowerCase();
+    if (resultLower.includes('1st') || resultLower.includes('gold') || resultLower.includes('🥇')) {
+      return <Badge className="bg-yellow-500 text-white">🥇 {result}</Badge>;
+    } else if (resultLower.includes('2nd') || resultLower.includes('silver') || resultLower.includes('🥈')) {
+      return <Badge className="bg-gray-400 text-white">🥈 {result}</Badge>;
+    } else if (resultLower.includes('3rd') || resultLower.includes('bronze') || resultLower.includes('🥉')) {
+      return <Badge className="bg-orange-600 text-white">🥉 {result}</Badge>;
+    } else {
+      return <Badge variant="secondary">✓ {result}</Badge>;
+    }
+  };
+
   const renderCompetitiveHistoryContent = () => {
+    // If no years available or no ranking progression, show message
+    if (availableYears.length === 0 || !rankingProgression || rankingProgression.length === 0) {
+      return (
+        <div className="p-6 text-center">
+          <p className="text-gray-400">No competitive history data available</p>
+        </div>
+      );
+    }
+
+    // Render year tabs
+    return (
+      <Tabs defaultValue={defaultYear} className="w-full">
+        <TabsList className="bg-athlete-gray-700 mb-6">
+          {availableYears.map(year => (
+            <TabsTrigger
+              key={year}
+              value={year.toString()}
+              data-testid={`tab-competitive-year-${year}`}
+              className="data-[state=active]:bg-athlete-accent"
+            >
+              {year}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        {availableYears.map(year => (
+          <TabsContent key={year} value={year.toString()}>
+            {renderCompetitiveHistoryForYear(year)}
+          </TabsContent>
+        ))}
+      </Tabs>
+    );
+  };
+
+  const renderCompetitiveHistoryForYear = (year: number) => {
     // Extract data from competitiveAnalysis structure
     const careerPhases = competitiveAnalysis?.career_phases || [];
     const careerOverview = competitiveAnalysis?.career_overview;
@@ -228,39 +352,30 @@ export function DualAnalysisPanel({
     const recentForm = competitiveAnalysis?.recent_form;
     const insights = competitiveAnalysis?.insights || [];
 
-    // Helper function for result badges
-    const getResultBadge = (result: string) => {
-      if (!result) return null;
-      
-      const resultLower = result.toLowerCase();
-      if (resultLower.includes('1st') || resultLower.includes('gold') || resultLower.includes('🥇')) {
-        return <Badge className="bg-yellow-500 text-white">🥇 {result}</Badge>;
-      } else if (resultLower.includes('2nd') || resultLower.includes('silver') || resultLower.includes('🥈')) {
-        return <Badge className="bg-gray-400 text-white">🥈 {result}</Badge>;
-      } else if (resultLower.includes('3rd') || resultLower.includes('bronze') || resultLower.includes('🥉')) {
-        return <Badge className="bg-orange-600 text-white">🥉 {result}</Badge>;
-      } else {
-        return <Badge variant="secondary">✓ {result}</Badge>;
-      }
-    };
+    // Filter competitions for this year
+    const yearCompetitions = rankingProgression.filter((comp: any) => {
+      if (!comp.date) return false;
+      const compYear = new Date(comp.date).getFullYear();
+      return compYear === year;
+    });
 
     return (
       <div className="space-y-6">
-        {/* Competition Results from API Data */}
-        {rankingProgression && rankingProgression.length > 0 && (
+        {/* Competition Results from API Data for this year */}
+        {yearCompetitions && yearCompetitions.length > 0 && (
           <Card className="bg-athlete-gray-800 border-gray-600">
             <CardHeader>
               <CardTitle className="text-2xl text-gray-100 flex items-center">
                 <Calendar className="mr-3 text-blue-400" size={24} />
-                International Competitive History
+                {year} Competitive History
               </CardTitle>
               <Badge className="bg-blue-600 text-white">
-                {rankingProgression[0]?.date ? new Date(rankingProgression[0].date).getFullYear() : 'Recent'}
+                {yearCompetitions.length} {yearCompetitions.length === 1 ? 'Competition' : 'Competitions'}
               </Badge>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {rankingProgression
+                {yearCompetitions
                   .slice()
                   .sort((a: any, b: any) => {
                     const dateA = new Date(a.date || 0).getTime();
@@ -410,7 +525,7 @@ export function DualAnalysisPanel({
           </Card>
         )}
 
-        {/* Competitive History Analysis */}
+        {/* Competitive History Analysis - Overall insights for now */}
         {(careerOverview || peakPerformancePeriods?.length > 0 || notableAchievements?.length > 0 || recentForm) && (
           <Card className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 border-purple-500">
             <CardHeader>
@@ -418,7 +533,7 @@ export function DualAnalysisPanel({
                 <Calendar className="mr-3 text-purple-400" size={24} />
                 Competitive History Analysis
               </CardTitle>
-              <div className="text-sm text-gray-400">Professional analysis of career progression and achievements</div>
+              <div className="text-sm text-gray-400">AI-generated professional analysis of career progression and achievements</div>
             </CardHeader>
             <CardContent className="space-y-6">
               {careerOverview && (
