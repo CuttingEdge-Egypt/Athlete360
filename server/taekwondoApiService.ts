@@ -206,3 +206,40 @@ export function parseTaekwondoCategoryToParameters(category: string): {
 
   return null;
 }
+
+export function normalizeCategoryForDB(category: string | undefined): {
+  categoryKey: string;
+  categoryLabel: string;
+} {
+  if (!category || category === 'N/A' || category.trim() === '') {
+    return {
+      categoryKey: 'default',
+      categoryLabel: 'Overall Rank'
+    };
+  }
+
+  // Normalize category string to create a stable key
+  // Example: "M+80 kg | Olympic Senior Division | Olympic Kyorugi Rankings" 
+  // becomes "m+80-olympic-kyorugi"
+  const parsed = parseTaekwondoCategoryToParameters(category);
+  if (!parsed) {
+    return {
+      categoryKey: 'default',
+      categoryLabel: category
+    };
+  }
+
+  // Create a stable key by combining weight and ranking type
+  const weightKey = parsed.weightDivision.toLowerCase().replace(/\s+/g, '-');
+  const rankingKey = parsed.rankingCategory.toLowerCase()
+    .replace(/\s+rankings?/gi, '')
+    .replace(/\s+/g, '-')
+    .replace(/kyorugi|poomsae/gi, (match) => match.toLowerCase());
+  
+  const categoryKey = `${weightKey}-${rankingKey}`;
+  
+  return {
+    categoryKey,
+    categoryLabel: category.trim()
+  };
+}
