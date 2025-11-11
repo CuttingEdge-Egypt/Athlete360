@@ -1957,12 +1957,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
             };
           } else {
-            // Transform rank history to match API format for consistency
+            // Transform rank history to include derived ISO date for frontend chart
             const rankHistoryData = rankHistory.map(entry => ({
+              date: entry.date.toISOString().split('T')[0], // ISO date for chart
+              rank: entry.rank, // Rank value for chart y-axis
               month: (new Date(entry.date).getMonth() + 1).toString().padStart(2, '0'),
-              year: new Date(entry.date).getFullYear(),
-              ranking: entry.rank,
-              date: entry.date.toISOString().split('T')[0] // Add formatted date for chart display
+              year: new Date(entry.date).getFullYear()
             }));
             
             console.log(`📊 Found ${rankHistoryData.length} rank history entries for ${athlete.name}`);
