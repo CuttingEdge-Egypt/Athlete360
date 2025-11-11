@@ -246,6 +246,67 @@ export function DualAnalysisPanel({
 
     return (
       <div className="space-y-6">
+        {/* Competition Results from API Data */}
+        {rankingProgression && rankingProgression.length > 0 && (
+          <Card className="bg-athlete-gray-800 border-gray-600">
+            <CardHeader>
+              <CardTitle className="text-2xl text-gray-100 flex items-center">
+                <Calendar className="mr-3 text-blue-400" size={24} />
+                International Competitive History
+              </CardTitle>
+              <Badge className="bg-blue-600 text-white">
+                {rankingProgression[0]?.date ? new Date(rankingProgression[0].date).getFullYear() : 'Recent'}
+              </Badge>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {rankingProgression
+                  .slice()
+                  .sort((a: any, b: any) => {
+                    const dateA = new Date(a.date || 0).getTime();
+                    const dateB = new Date(b.date || 0).getTime();
+                    return dateB - dateA; // Most recent first
+                  })
+                  .map((comp: any, index: number) => {
+                    // Parse date for display
+                    const compDate = comp.date ? new Date(comp.date) : null;
+                    const monthYear = compDate 
+                      ? compDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                      : 'Date unknown';
+
+                    return (
+                      <div key={index} className="p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-blue-500/50 transition-colors">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <Badge variant="outline" className="border-yellow-400 text-yellow-400 text-xs">
+                                {monthYear}
+                              </Badge>
+                              <span className="font-bold text-white text-lg">{comp.competition || comp.tournament}</span>
+                            </div>
+                            {comp.location && (
+                              <div className="text-sm text-gray-400 mb-2">
+                                📍 {comp.location}
+                              </div>
+                            )}
+                            {comp.ranking && comp.ranking !== 'N/A' && (
+                              <div className="text-sm text-gray-400">
+                                Category: {comp.ranking}
+                              </div>
+                            )}
+                          </div>
+                          <div className="ml-3">
+                            {getResultBadge(comp.result)}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Career Phases Timeline */}
         {careerPhases && careerPhases.length > 0 && (
           <Card className="bg-athlete-gray-800 border-gray-600">

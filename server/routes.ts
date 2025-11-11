@@ -1971,7 +1971,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
               date: entry.date.toISOString().split('T')[0], // ISO date for chart
               rank: entry.rank, // Rank value for chart y-axis
               month: (new Date(entry.date).getMonth() + 1).toString().padStart(2, '0'),
-              year: new Date(entry.date).getFullYear()
+              year: new Date(entry.date).getFullYear(),
+              categoryKey: entry.categoryKey || 'default',
+              categoryLabel: entry.categoryLabel || 'Overall Rank',
+              points: entry.points
             }));
             
             console.log(`📊 Found ${rankHistoryData.length} rank history entries for ${athlete.name}`);
