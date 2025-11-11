@@ -1526,10 +1526,17 @@ export default function Home() {
       // Store the timestamp when we start the fetch
       const fetchStartTime = new Date().toISOString();
       
-      // Set loading state immediately
+      // Determine if it's Taekwondo to show appropriate message
+      const athleteSport = selectedAthlete ? sports.find(s => s.id === selectedAthlete.sportId) : null;
+      const isTaekwondo = athleteSport?.name.toLowerCase().includes('taekwondo');
+      const initialMessage = isTaekwondo 
+        ? 'Fetching data from World Taekwondo API...' 
+        : 'Analyzing rankings with autonomous web navigation...';
+      
+      // Set loading state immediately with sport-specific message
       setRankingFetchStatus(prev => ({
         ...prev,
-        [athleteId]: { isLoading: true, currentPhase: 'Initializing ranking search...' }
+        [athleteId]: { isLoading: true, currentPhase: initialMessage }
       }));
       
       const response = await fetch(`/api/athletes/${athleteId}/fetch-rankings`, {
