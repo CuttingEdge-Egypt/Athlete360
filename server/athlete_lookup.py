@@ -378,140 +378,6 @@ def get_athlete_rank_and_history(
     return result
 
 
-if __name__ == "__main__":
-    import argparse
-    import json
-
-    logging.basicConfig(level=logging.INFO)
-
-    parser = argparse.ArgumentParser(
-        description="Lookup Taekwondo athlete rank and competition history."
-    )
-    parser.add_argument("athlete_name", help="Full name of the athlete to look up.")
-    parser.add_argument(
-        "--country",
-        help="Exact country name as listed in World Taekwondo rankings.",
-        default=None,
-    )
-    parser.add_argument(
-        "--weight",
-        dest="weight_division",
-        required=True,
-        help="Weight division label (e.g. 'M-54 kg', 'W-57 kg').",
-    )
-    parser.add_argument(
-        "--ranking-category",
-        default=DEFAULT_RANKING_CATEGORY,
-        help="Ranking category to query.",
-    )
-    parser.add_argument(
-        "--sub-category",
-        default=DEFAULT_SUB_CATEGORY,
-        help="Ranking sub-category to query.",
-    )
-    parser.add_argument(
-        "--month",
-        help="Month name for the rankings snapshot.",
-    )
-    parser.add_argument(
-        "--year",
-        type=int,
-        help="Year for the rankings snapshot.",
-    )
-    parser.add_argument(
-        "--months-back",
-        type=int,
-        default=12,
-        help="How many months of competition history to attempt.",
-    )
-    parser.add_argument(
-        "--max-results",
-        type=int,
-        default=100,
-        help="Maximum number of ranking rows to inspect.",
-    )
-    parser.add_argument(
-        "--delay",
-        type=int,
-        default=2,
-        help="Delay between network requests.",
-    )
-    parser.add_argument(
-        "--rank-history-months",
-        type=int,
-        default=0,
-        help="Collect ranking snapshots for this many months across all detected categories (0 to disable).",
-    )
-    parser.add_argument(
-        "--comprehensive",
-        action="store_true",
-        help="Enable comprehensive parallel fetching back to March 2021 (for NEW athletes only).",
-    )
-
-    args = parser.parse_args()
-
-    # Use comprehensive parallel fetching if requested
-    if args.comprehensive:
-        logger.info(f"🚀 COMPREHENSIVE MODE: Fetching ALL data back to March 2021 in parallel for {args.athlete_name}...")
-        
-        # First get current rankings to extract category summary and user_id
-        initial_result = get_athlete_rank_and_history(
-            athlete_name=args.athlete_name,
-            country=args.country,
-            weight_division=args.weight_division,
-            ranking_category=args.ranking_category,
-            sub_category=args.sub_category,
-            month=args.month,
-            year=args.year,
-            months_back=args.months_back,
-            max_results=args.max_results,
-            delay=args.delay,
-            rank_history_months=0,  # Don't fetch history in initial call
-        )
-        
-        if initial_result.get("success") and initial_result.get("category_summary"):
-            user_id = initial_result.get("athlete", {}).get("userid") or initial_result.get("athlete", {}).get("userId")
-            category_summary = initial_result.get("category_summary", [])
-            
-            # Fetch comprehensive timeline in parallel
-            comprehensive_data = _build_comprehensive_timeline_parallel(
-                athlete_name=args.athlete_name,
-                country=args.country,
-                category_summary=category_summary,
-                delay=args.delay,
-                user_id=user_id
-            )
-            
-            # Merge comprehensive data into result
-            initial_result["rank_history"] = comprehensive_data.get("rank_history", [])
-            
-            # Replace competitive_history with comprehensive data if available
-            if comprehensive_data.get("competitive_history"):
-                initial_result["competition_history"] = comprehensive_data.get("competitive_history", [])
-            
-            lookup_result = initial_result
-        else:
-            logger.error(f"❌ Failed to get initial data for comprehensive mode")
-            lookup_result = initial_result
-    else:
-        # Standard mode - use existing logic
-        lookup_result = get_athlete_rank_and_history(
-            athlete_name=args.athlete_name,
-            country=args.country,
-            weight_division=args.weight_division,
-            ranking_category=args.ranking_category,
-            sub_category=args.sub_category,
-            month=args.month,
-            year=args.year,
-            months_back=args.months_back,
-            max_results=args.max_results,
-            delay=args.delay,
-            rank_history_months=args.rank_history_months,
-        )
-
-    print(json.dumps(lookup_result, indent=2, ensure_ascii=False))
-
-
 def _calculate_months_to_march_2021() -> int:
     """Calculate number of months from current month back to March 2021."""
     current = datetime.now().replace(day=1)
@@ -529,6 +395,13 @@ def _calculate_months_to_march_2021() -> int:
         temp = temp.replace(year=year, month=month)
     
     return months
+
+
+def _select_best_entry(rankings: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    """Helper to select best matching entry from rankings."""
+    if not rankings:
+        return None
+    return rankings[0] if isinstance(rankings, list) else None
 
 
 def _fetch_single_month_data(
@@ -731,8 +604,135 @@ def _build_comprehensive_timeline_parallel(
     }
 
 
-def _select_best_entry(rankings: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
-    """Helper to select best matching entry from rankings."""
-    if not rankings:
-        return None
-    return rankings[0] if isinstance(rankings, list) else None
+if __name__ == "__main__":
+    import argparse
+    import json
+
+    logging.basicConfig(level=logging.INFO)
+
+    parser = argparse.ArgumentParser(
+        description="Lookup Taekwondo athlete rank and competition history."
+    )
+    parser.add_argument("athlete_name", help="Full name of the athlete to look up.")
+    parser.add_argument(
+        "--country",
+        help="Exact country name as listed in World Taekwondo rankings.",
+        default=None,
+    )
+    parser.add_argument(
+        "--weight",
+        dest="weight_division",
+        required=True,
+        help="Weight division label (e.g. 'M-54 kg', 'W-57 kg').",
+    )
+    parser.add_argument(
+        "--ranking-category",
+        default=DEFAULT_RANKING_CATEGORY,
+        help="Ranking category to query.",
+    )
+    parser.add_argument(
+        "--sub-category",
+        default=DEFAULT_SUB_CATEGORY,
+        help="Ranking sub-category to query.",
+    )
+    parser.add_argument(
+        "--month",
+        help="Month name for the rankings snapshot.",
+    )
+    parser.add_argument(
+        "--year",
+        type=int,
+        help="Year for the rankings snapshot.",
+    )
+    parser.add_argument(
+        "--months-back",
+        type=int,
+        default=12,
+        help="How many months of competition history to attempt.",
+    )
+    parser.add_argument(
+        "--max-results",
+        type=int,
+        default=100,
+        help="Maximum number of ranking rows to inspect.",
+    )
+    parser.add_argument(
+        "--delay",
+        type=int,
+        default=2,
+        help="Delay between network requests.",
+    )
+    parser.add_argument(
+        "--rank-history-months",
+        type=int,
+        default=0,
+        help="Collect ranking snapshots for this many months across all detected categories (0 to disable).",
+    )
+    parser.add_argument(
+        "--comprehensive",
+        action="store_true",
+        help="Enable comprehensive parallel fetching back to March 2021 (for NEW athletes only).",
+    )
+
+    args = parser.parse_args()
+
+    # Use comprehensive parallel fetching if requested
+    if args.comprehensive:
+        logger.info(f"🚀 COMPREHENSIVE MODE: Fetching ALL data back to March 2021 in parallel for {args.athlete_name}...")
+        
+        # First get current rankings to extract category summary and user_id
+        initial_result = get_athlete_rank_and_history(
+            athlete_name=args.athlete_name,
+            country=args.country,
+            weight_division=args.weight_division,
+            ranking_category=args.ranking_category,
+            sub_category=args.sub_category,
+            month=args.month,
+            year=args.year,
+            months_back=args.months_back,
+            max_results=args.max_results,
+            delay=args.delay,
+            rank_history_months=0,  # Don't fetch history in initial call
+        )
+        
+        if initial_result.get("success") and initial_result.get("category_summary"):
+            user_id = initial_result.get("athlete", {}).get("userid") or initial_result.get("athlete", {}).get("userId")
+            category_summary = initial_result.get("category_summary", [])
+            
+            # Fetch comprehensive timeline in parallel
+            comprehensive_data = _build_comprehensive_timeline_parallel(
+                athlete_name=args.athlete_name,
+                country=args.country,
+                category_summary=category_summary,
+                delay=args.delay,
+                user_id=user_id
+            )
+            
+            # Merge comprehensive data into result
+            initial_result["rank_history"] = comprehensive_data.get("rank_history", [])
+            
+            # Replace competitive_history with comprehensive data if available
+            if comprehensive_data.get("competitive_history"):
+                initial_result["competition_history"] = comprehensive_data.get("competitive_history", [])
+            
+            lookup_result = initial_result
+        else:
+            logger.error(f"❌ Failed to get initial data for comprehensive mode")
+            lookup_result = initial_result
+    else:
+        # Standard mode - use existing logic
+        lookup_result = get_athlete_rank_and_history(
+            athlete_name=args.athlete_name,
+            country=args.country,
+            weight_division=args.weight_division,
+            ranking_category=args.ranking_category,
+            sub_category=args.sub_category,
+            month=args.month,
+            year=args.year,
+            months_back=args.months_back,
+            max_results=args.max_results,
+            delay=args.delay,
+            rank_history_months=args.rank_history_months,
+        )
+
+    print(json.dumps(lookup_result, indent=2, ensure_ascii=False))
