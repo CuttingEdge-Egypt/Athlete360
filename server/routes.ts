@@ -734,6 +734,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 updateData.competitiveHistory = apiResult.competition_history;
               }
               
+              // Store rank history if available
+              if (apiResult.rank_history && apiResult.rank_history.length > 0) {
+                for (const rankEntry of apiResult.rank_history) {
+                  if (rankEntry.month && rankEntry.year && rankEntry.ranking) {
+                    try {
+                      await storage.createRankHistory({
+                        athleteId: newAthlete.id,
+                        rank: typeof rankEntry.ranking === 'string' ? parseInt(rankEntry.ranking) : rankEntry.ranking,
+                        date: new Date(`${rankEntry.year}-${rankEntry.month}-01`),
+                        tournament: rankEntry.category || undefined
+                      });
+                    } catch (err) {
+                      console.log(`⚠️ Failed to store rank history entry: ${err instanceof Error ? err.message : String(err)}`);
+                    }
+                  }
+                }
+                console.log(`✅ Stored ${apiResult.rank_history.length} rank history entries for ${englishName}`);
+              }
+              
               if (Object.keys(updateData).length > 0) {
                 await storage.updateAthlete(newAthlete.id, updateData);
                 console.log(`✅ Taekwondo API: Updated ${englishName} with API data`);
@@ -1063,6 +1082,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               if (apiResult.competition_history && apiResult.competition_history.length > 0) {
                 updateData.competitiveHistory = apiResult.competition_history;
+              }
+              
+              // Store rank history if available
+              if (apiResult.rank_history && apiResult.rank_history.length > 0) {
+                for (const rankEntry of apiResult.rank_history) {
+                  if (rankEntry.month && rankEntry.year && rankEntry.ranking) {
+                    try {
+                      await storage.createRankHistory({
+                        athleteId: athlete.id,
+                        rank: typeof rankEntry.ranking === 'string' ? parseInt(rankEntry.ranking) : rankEntry.ranking,
+                        date: new Date(`${rankEntry.year}-${rankEntry.month}-01`),
+                        tournament: rankEntry.category || undefined
+                      });
+                    } catch (err) {
+                      console.log(`⚠️ Failed to store rank history entry: ${err instanceof Error ? err.message : String(err)}`);
+                    }
+                  }
+                }
+                console.log(`✅ Stored ${apiResult.rank_history.length} rank history entries for ${athlete.name}`);
               }
               
               if (Object.keys(updateData).length > 0) {
