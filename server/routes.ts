@@ -1861,11 +1861,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       let competitiveHistoryData = athlete.competitiveHistory;
       
-      // For Taekwondo: Check if we have raw competition array from API
+      // For Taekwondo: Check if we have raw competition array from API OR BrowserUse career_phases
       // For other sports: Check for career_phases structure from BrowserUse
       const hasCompetitiveData = isTaekwondo 
-        ? (competitiveHistoryData && Array.isArray(competitiveHistoryData) && competitiveHistoryData.length > 0)
+        ? (competitiveHistoryData && (
+            (Array.isArray(competitiveHistoryData) && competitiveHistoryData.length > 0) ||
+            (competitiveHistoryData.career_phases && Array.isArray(competitiveHistoryData.career_phases) && competitiveHistoryData.career_phases.length > 0)
+          ))
         : (competitiveHistoryData && competitiveHistoryData.career_phases && competitiveHistoryData.career_phases.length > 0);
+      
+      // NORMALIZE: For Taekwondo, if data is in BrowserUse format (object with career_phases), 
+      // convert to array format expected by generateTaekwondoHistoryAnalysis
+      if (isTaekwondo && competitiveHistoryData && !Array.isArray(competitiveHistoryData)) {
+        console.log(`🔄 Normalizing BrowserUse competitive history format for Taekwondo...`);
+        
+        // Extract competitions from career_phases structure
+        if (competitiveHistoryData.career_phases && Array.isArray(competitiveHistoryData.career_phases)) {
+          const normalizedArray = competitiveHistoryData.career_phases.flatMap((phase: any) => 
+            (phase.key_achievements || []).map((achievement: any) => ({
+              event_name: achievement.event_name || 'Unknown Event',
+              event_date: achievement.month && achievement.year 
+                ? `${achievement.year}-${String(achievement.month).padStart(2, '0')}-01`
+                : (achievement.year ? `${achievement.year}-01-01` : 'Date unknown'),
+              place: achievement.result?.match(/(\d+)(?:st|nd|rd|th)/)?.[1] || null,
+              location: achievement.notes || 'Location unknown',
+              category: achievement.event_tier || 'N/A',
+              ranking_points: null,
+              g_rank: null,
+              generated_end_date: achievement.month && achievement.year 
+                ? `${achievement.year}-${String(achievement.month).padStart(2, '0')}-01`
+                : (achievement.year ? `${achievement.year}-01-01` : null)
+            }))
+          );
+          
+          competitiveHistoryData = normalizedArray;
+          console.log(`✅ Normalized ${normalizedArray.length} competitions from BrowserUse format`);
+        } else {
+          console.warn(`⚠️ BrowserUse data missing career_phases, using empty array`);
+          competitiveHistoryData = [];
+        }
+      }
       
       // Check if we have competitive history data
       if (!hasCompetitiveData) {
