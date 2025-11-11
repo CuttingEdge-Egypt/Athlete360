@@ -2016,6 +2016,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             };
             
             console.log(`✅ Taekwondo history analysis complete for ${athlete.name}`);
+            console.log(`📋 Response structure check:`, {
+              hasCompetitiveAnalysis: !!responseData.competitiveAnalysis,
+              hasAthlete: !!responseData.competitiveAnalysis.athlete,
+              hasRankingProgression: responseData.competitiveAnalysis.rankingProgression !== undefined,
+              rankingProgressionLength: responseData.competitiveAnalysis.rankingProgression?.length,
+              hasCareerSummary: !!responseData.competitiveAnalysis.careerSummary,
+              hasRankAnalysis: !!responseData.rankAnalysis,
+              hasRankHistoryData: !!responseData.rankHistoryData,
+              rankHistoryDataLength: responseData.rankHistoryData?.length
+            });
           }
           
         } else {
