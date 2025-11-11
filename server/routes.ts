@@ -2026,6 +2026,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               hasRankHistoryData: !!responseData.rankHistoryData,
               rankHistoryDataLength: responseData.rankHistoryData?.length
             });
+            console.log(`📦 Sample rankHistoryData entries:`, rankHistoryData.slice(0, 3));
           }
           
         } else {

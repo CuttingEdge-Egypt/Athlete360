@@ -553,17 +553,32 @@ export function AnalysisPopup({
     // Parse data with comprehensive fallback strategies for adaptive UI
     const parsedData = parseAnalysisData(data);
     
+    // Debug: Check for dual-analysis structure
+    console.log('🔍 Parsed Data Keys:', Object.keys(parsedData));
+    console.log('🔍 Has competitiveAnalysis:', !!parsedData.competitiveAnalysis);
+    console.log('🔍 Has rankAnalysis:', !!parsedData.rankAnalysis);
+    console.log('🔍 Has rankHistoryData:', !!parsedData.rankHistoryData);
+    
+    // Check for dual-analysis structure (Taekwondo with rank history)
+    // For the popup, extract the competitive analysis data and render it using existing logic
+    // The full dual-tab view is handled by analysis-result.tsx
+    let actualParsedData = parsedData;
+    if (parsedData.competitiveAnalysis && parsedData.rankAnalysis && parsedData.rankHistoryData) {
+      console.log('✅ Dual-analysis structure detected! Extracting competitive analysis for popup display');
+      actualParsedData = parsedData.competitiveAnalysis;
+    }
+    
     // Initialize variables to avoid undefined errors
     let rankingProgression: any[] = [];
     let careerSummary: any = {};
     
     // Handle different data formats and error states
-    if (parsedData.error || (parsedData.message && (parsedData.message.includes('Unable to generate') || parsedData.message.includes('تعذر إنشاء')))) {
+    if (actualParsedData.error || (actualParsedData.message && (actualParsedData.message.includes('Unable to generate') || actualParsedData.message.includes('تعذر إنشاء')))) {
       return (
         <div className="p-6 text-center">
           <div className="text-red-400 mb-4">{t("analysis.rank.unavailable", "⚠ Rank Analysis Unavailable")}</div>
           <p className="text-gray-300 mb-4">
-            {parsedData.message || t("analysis.rank.unableToGenerate", "Unable to generate authentic rank history at this time.")}
+            {actualParsedData.message || t("analysis.rank.unableToGenerate", "Unable to generate authentic rank history at this time.")}
           </p>
           <p className="text-sm text-gray-400">
             {t("analysis.tryAgainLater", "Please try again later or contact support if the issue persists.")}
@@ -577,48 +592,48 @@ export function AnalysisPopup({
     let careerOverview, peakPerformancePeriods, competitionAnalysis, progressionPatterns, notableAchievements, recentForm, insights;
     
     // Handle Gemini professional analysis structure
-    if (parsedData.success !== false && parsedData.athlete_name) {
-      athleteName = parsedData.athlete_name;
-      sport = parsedData.sport;
-      nationality = parsedData.nationality;
-      activePeriod = parsedData.active_period || {};
-      rankingSystemOverview = parsedData.ranking_system_overview;
-      analysisNarrative = parsedData.analysis_narrative;
+    if (actualParsedData.success !== false && actualParsedData.athlete_name) {
+      athleteName = actualParsedData.athlete_name;
+      sport = actualParsedData.sport;
+      nationality = actualParsedData.nationality;
+      activePeriod = actualParsedData.active_period || {};
+      rankingSystemOverview = actualParsedData.ranking_system_overview;
+      analysisNarrative = actualParsedData.analysis_narrative;
       
       // Gemini professional analysis fields
-      careerOverview = parsedData.career_overview;
-      peakPerformancePeriods = parsedData.peak_performance_periods || [];
-      competitionAnalysis = parsedData.competition_analysis || {};
-      progressionPatterns = parsedData.progression_patterns;
-      notableAchievements = parsedData.notable_achievements || [];
-      recentForm = parsedData.recent_form;
-      insights = parsedData.insights || [];
+      careerOverview = actualParsedData.career_overview;
+      peakPerformancePeriods = actualParsedData.peak_performance_periods || [];
+      competitionAnalysis = actualParsedData.competition_analysis || {};
+      progressionPatterns = actualParsedData.progression_patterns;
+      notableAchievements = actualParsedData.notable_achievements || [];
+      recentForm = actualParsedData.recent_form;
+      insights = actualParsedData.insights || [];
       
       // Career Phases from raw BrowserUse data (athlete.competitiveHistory)
-      careerPhases = athlete?.competitiveHistory?.career_phases || parsedData.career_phases || [];
+      careerPhases = athlete?.competitiveHistory?.career_phases || actualParsedData.career_phases || [];
     }
     // Handle legacy career_phases structure for backwards compatibility
-    else if (parsedData.success !== false && parsedData.career_phases) {
-      careerPhases = parsedData.career_phases || [];
-      athleteName = parsedData.athlete_name;
-      sport = parsedData.sport;
-      nationality = parsedData.nationality;
-      activePeriod = parsedData.active_period || {};
-      rankingSystemOverview = parsedData.ranking_system_overview;
-      analysisNarrative = parsedData.analysis_narrative;
+    else if (actualParsedData.success !== false && actualParsedData.career_phases) {
+      careerPhases = actualParsedData.career_phases || [];
+      athleteName = actualParsedData.athlete_name;
+      sport = actualParsedData.sport;
+      nationality = actualParsedData.nationality;
+      activePeriod = actualParsedData.active_period || {};
+      rankingSystemOverview = actualParsedData.ranking_system_overview;
+      analysisNarrative = actualParsedData.analysis_narrative;
     }
     // Fallback to old structure if needed
-    else if (parsedData.athlete) {
+    else if (actualParsedData.athlete) {
       // Convert old structure to career phases display
-      athleteName = parsedData.athlete.name;
-      sport = parsedData.athlete.sport;
-      nationality = parsedData.athlete.country;
+      athleteName = actualParsedData.athlete.name;
+      sport = actualParsedData.athlete.sport;
+      nationality = actualParsedData.athlete.country;
       activePeriod = { start_year: 2017, end_year: "current" };
       rankingSystemOverview = "Traditional ranking system with competition-based progression.";
       careerPhases = [{
         phase_name: "Competition History",
         period: "Career span",
-        key_achievements: (parsedData.athlete.competitionRankingTimeline || []).map((comp: any) => ({
+        key_achievements: (actualParsedData.athlete.competitionRankingTimeline || []).map((comp: any) => ({
           year: parseInt(comp.year) || new Date().getFullYear(),
           event_name: comp.competition || "Competition",
           event_tier: comp.competitionLevel || "International",
@@ -629,13 +644,13 @@ export function AnalysisPopup({
       analysisNarrative = "Career progression based on competition history and ranking changes.";
     }
     // Format 6: Legacy synthetic structure (currentRank, peakRank, history, recommendations)
-    else if (parsedData.currentRank || parsedData.peakRank || parsedData.history) {
+    else if (actualParsedData.currentRank || actualParsedData.peakRank || actualParsedData.history) {
       athlete = {
-        name: parsedData.name || "Athlete",
-        currentWorldRank: parsedData.currentRank?.toString() || "N/A",
-        peakWorldRank: parsedData.peakRank?.toString() || "N/A"
+        name: actualParsedData.name || "Athlete",
+        currentWorldRank: actualParsedData.currentRank?.toString() || "N/A",
+        peakWorldRank: actualParsedData.peakRank?.toString() || "N/A"
       };
-      rankingProgression = parsedData.history || [];
+      rankingProgression = actualParsedData.history || [];
       careerSummary = {
         firstOfficialRanking: 'Legacy data',
         breakthroughCompetition: 'N/A',
@@ -655,7 +670,7 @@ export function AnalysisPopup({
           <div className="bg-gray-800 p-4 rounded-lg">
             <h4 className="text-sm font-semibold text-gray-400 mb-2">Raw Data Structure:</h4>
             <pre className="text-xs text-gray-300 overflow-auto max-h-40 whitespace-pre-wrap">
-              {JSON.stringify(parsedData, null, 2)}
+              {JSON.stringify(actualParsedData, null, 2)}
             </pre>
           </div>
         </div>
