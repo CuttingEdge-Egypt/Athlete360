@@ -1981,10 +1981,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
               language
             );
             
-            // Response includes BOTH analyses plus raw data
+            // Transform raw competition data into rankingProgression format
+            const rankingProgression = Array.isArray(competitiveHistoryData) 
+              ? competitiveHistoryData.map((comp: any) => ({
+                  competition: comp.event_name || 'Unknown Event',
+                  tournament: comp.event_name || 'Unknown Event',
+                  date: comp.event_date || comp.generated_end_date || 'Date unknown',
+                  result: comp.place ? `${comp.place}${comp.place === 1 ? 'st' : comp.place === 2 ? 'nd' : comp.place === 3 ? 'rd' : 'th'} place` : 'No result',
+                  placement: comp.place || 'N/A',
+                  location: comp.location,
+                  ranking: comp.category || 'N/A',
+                  rank: comp.category || 'N/A'
+                }))
+              : [];
+            
+            // Response includes BOTH analyses plus raw data for dual-tab display
             responseData = {
-              ...taekwondoAnalysis.competitiveAnalysis,
-              competitiveAnalysis: taekwondoAnalysis.competitiveAnalysis,
+              competitiveAnalysis: {
+                ...taekwondoAnalysis.competitiveAnalysis,
+                athlete: {
+                  name: athlete.name,
+                  nationality: athlete.country || 'N/A',
+                  sport: sportName,
+                  isActive: true
+                },
+                rankingProgression: rankingProgression,
+                careerSummary: {
+                  totalCompetitions: rankingProgression.length,
+                  notableAchievements: taekwondoAnalysis.competitiveAnalysis.peak_performance_periods?.map((p: any) => p.description) || []
+                }
+              },
               rankAnalysis: taekwondoAnalysis.rankAnalysis,
               rankHistoryData: rankHistoryData
             };
