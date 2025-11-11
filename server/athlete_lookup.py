@@ -36,8 +36,16 @@ MONTH_NAMES = [
 
 
 def _normalize(text: Optional[str]) -> str:
-    """Normalize text for case-insensitive comparisons."""
-    return (text or "").strip().lower()
+    """Normalize text for case-insensitive comparisons, removing hyphens and special characters."""
+    import re
+    if not text:
+        return ""
+    # Convert to lowercase, remove hyphens, and remove other non-alphanumeric chars except spaces
+    normalized = text.strip().lower()
+    normalized = normalized.replace("-", "").replace("_", "")
+    # Remove extra spaces
+    normalized = re.sub(r'\s+', ' ', normalized)
+    return normalized.strip()
 
 
 def _parse_category_fields(category_name: str) -> Optional[Dict[str, str]]:
