@@ -1,6 +1,5 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import athleteLogoUrl from '@assets/image_1758650668171.png';
 import { 
   processArabicText, 
   sanitizeArabicText, 
@@ -521,22 +520,8 @@ let logoDataUrl: string | null = null;
 const loadLogoDataUrl = async (): Promise<string> => {
   if (logoDataUrl) return logoDataUrl;
   
-  try {
-    const response = await fetch(athleteLogoUrl);
-    const blob = await response.blob();
-    
-    logoDataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-    
-    return logoDataUrl;
-  } catch (error) {
-    console.log('Error loading logo:', error);
-    throw error;
-  }
+  // Logo file is missing, throw error to trigger fallback text
+  throw new Error('Logo file not available');
 };
 
 // Function to add Athlete360 logo to PDF header
