@@ -11,6 +11,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from scraper import TaekwondoScraper
 
@@ -451,4 +452,231 @@ if __name__ == "__main__":
     )
 
     print(json.dumps(lookup_result, indent=2, ensure_ascii=False))
+
+
+
+def _calculate_months_to_march_2021() -> int:
+    """Calculate number of months from current month back to March 2021."""
+    current = datetime.now().replace(day=1)
+    target = datetime(2021, 3, 1)
+    
+    months = 0
+    temp = current
+    while temp > target:
+        months += 1
+        year = temp.year
+        month = temp.month - 1
+        if month == 0:
+            month = 12
+            year -= 1
+        temp = temp.replace(year=year, month=month)
+    
+    return months
+
+
+def _fetch_single_month_data(
+    athlete_name: str,
+    country: Optional[str],
+    ranking_category: str,
+    sub_category: str,
+    weight_division: str,
+    month_name: str,
+    year_value: int,
+    delay: int,
+    user_id: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Fetch data for a single month (rankings + competitions if user_id provided).
+    Returns dict with rank_data and competition_data.
+    """
+    try:
+        month_scraper = TaekwondoScraper()
+        month_scraper.logger.setLevel(logging.WARNING)
+        month_scraper.configure(
+            ranking_category=ranking_category,
+            sub_category=sub_category,
+            weight_division=weight_division,
+            country_filter=country,
+            athlete_filter=None,
+            month=month_name,
+            year=year_value,
+            max_results=0,
+            delay=delay,
+        )
+        
+        # Get rankings for this month
+        rankings_snapshot = month_scraper.scrape_data()
+        
+        # Find athlete in rankings
+        match_entry = _select_best_entry(rankings_snapshot)
+        
+        rank_data = {
+            "category": f"{weight_division} | {sub_category} | {ranking_category}",
+            "month": month_name,
+            "year": year_value,
+            "ranking": match_entry.get("ranking") if match_entry else None,
+            "points": match_entry.get("points") if match_entry else None,
+            "change": match_entry.get("change") if match_entry else None,
+        }
+        
+        # Try to fetch competitions for this month if we have user_id
+        competition_data = []
+        if user_id and match_entry:
+            try:
+                competitions = month_scraper.get_athlete_competitions(user_id)
+                if competitions:
+                    competition_data = competitions
+            except Exception as comp_exc:  # noqa: BLE001
+                logger.debug(f"Could not fetch competitions for {month_name} {year_value}: {comp_exc}")
+        
+        return {
+            "rank_data": rank_data,
+            "competition_data": competition_data,
+            "month": month_name,
+            "year": year_value
+        }
+        
+    except Exception as exc:  # noqa: BLE001
+        return {
+            "rank_data": {
+                "category": f"{weight_division} | {sub_category} | {ranking_category}",
+                "month": month_name,
+                "year": year_value,
+                "error": str(exc),
+            },
+            "competition_data": [],
+            "month": month_name,
+            "year": year_value
+        }
+
+
+def _build_comprehensive_timeline_parallel(
+    athlete_name: str,
+    country: Optional[str],
+    category_summary: List[Dict[str, Any]],
+    delay: int = 2,
+    user_id: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Fetch ALL historical data back to March 2021 in parallel threads.
+    Returns dict with rank_history and competitive_history, both grouped by year.
+    """
+    if not category_summary:
+        return {"rank_history": [], "competitive_history": []}
+    
+    # Calculate months back to March 2021
+    months_to_fetch = _calculate_months_to_march_2021()
+    logger.info(f"📅 Fetching {months_to_fetch} months of data back to March 2021...")
+    
+    # Generate all month-year pairs
+    month_year_pairs = _generate_month_year_pairs(months_to_fetch)
+    
+    all_rank_results = []
+    all_competition_results = []
+    
+    # Process each category
+    for category_entry in category_summary:
+        parsed = _parse_category_fields(category_entry.get("category_name", ""))
+        if not parsed:
+            continue
+        
+        ranking_category = parsed["ranking_category"]
+        sub_category = parsed["sub_category"]
+        weight_division = parsed["weight_division"]
+        
+        # Validate category mappings
+        timeline_scraper = TaekwondoScraper()
+        if ranking_category not in timeline_scraper.ranking_type_mappings:
+            continue
+        if sub_category not in timeline_scraper.sub_category_mappings:
+            continue
+        
+        if sub_category == "Olympic Senior Division":
+            weight_mapping = timeline_scraper.olympic_weight_mappings
+        else:
+            weight_mapping = timeline_scraper.world_weight_mappings
+        
+        if weight_division not in weight_mapping:
+            continue
+        
+        logger.info(f"🔄 Fetching {len(month_year_pairs)} months for {weight_division} | {sub_category}...")
+        
+        # Use ThreadPoolExecutor for parallel fetching
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = []
+            
+            for period in month_year_pairs:
+                month_index = period.get("month_index")
+                if month_index is None or not (0 <= month_index < len(MONTH_NAMES)):
+                    continue
+                
+                month_name = MONTH_NAMES[month_index]
+                year_value = period.get("year")
+                
+                # Submit parallel task
+                future = executor.submit(
+                    _fetch_single_month_data,
+                    athlete_name,
+                    country,
+                    ranking_category,
+                    sub_category,
+                    weight_division,
+                    month_name,
+                    year_value,
+                    delay,
+                    user_id
+                )
+                futures.append(future)
+            
+            # Collect results as they complete
+            for future in as_completed(futures):
+                try:
+                    result = future.result()
+                    
+                    # Add rank data
+                    if result["rank_data"]:
+                        all_rank_results.append(result["rank_data"])
+                    
+                    # Add competition data
+                    if result["competition_data"]:
+                        all_competition_results.extend(result["competition_data"])
+                        
+                except Exception as exc:  # noqa: BLE001
+                    logger.error(f"Error collecting parallel result: {exc}")
+    
+    # Sort chronologically (oldest first)
+    all_rank_results.sort(key=lambda x: (x.get("year", 0), MONTH_NAMES.index(x.get("month", "January"))))
+    
+    # Remove duplicate competitions (same event_id)
+    seen_event_ids = set()
+    unique_competitions = []
+    for comp in all_competition_results:
+        event_id = comp.get("event_id")
+        if event_id and event_id not in seen_event_ids:
+            seen_event_ids.add(event_id)
+            unique_competitions.append(comp)
+        elif not event_id:
+            unique_competitions.append(comp)
+    
+    # Sort competitions chronologically (most recent first for display)
+    unique_competitions.sort(
+        key=lambda x: (
+            x.get("generated_end_date", "1900-01-01")
+        ),
+        reverse=True
+    )
+    
+    logger.info(f"✅ Fetched {len(all_rank_results)} rank entries and {len(unique_competitions)} competitions")
+    
+    return {
+        "rank_history": all_rank_results,
+        "competitive_history": unique_competitions
+    }
+
+
+def _select_best_entry(rankings: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    """Helper to select best matching entry from rankings."""
+    if not rankings:
+        return None
+    return rankings[0] if isinstance(rankings, list) else None
 
