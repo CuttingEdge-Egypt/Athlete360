@@ -1700,8 +1700,10 @@ class TaekwondoScraper:
                             self.logger.info(f"🔍 DEBUG: Sample event object keys: {list(event.keys())}")
                             self.logger.info(f"🔍 DEBUG: Sample event object: {json.dumps(event, ensure_ascii=False, indent=2)}")
                         
-                        # Try multiple possible field names for placement
+                        # FIXED: eventResult contains the actual placement (1, 2, 3, etc.)
+                        # The 'place' field is unreliable and often defaults to 1
                         place = (
+                            event.get('eventResult') or  # PRIMARY SOURCE - actual placement
                             event.get('place') or 
                             event.get('placing') or 
                             event.get('rank') or 
