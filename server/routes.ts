@@ -48,7 +48,7 @@ type DevelopmentPlanRequest = z.infer<typeof developmentPlanSchema>;
 import { seedDatabase } from "./seedData";
 import { getAthleteProfile, generateAthleteImage, generateSpecificAnalysis, getDetailedAnalysis, generateThreadedBiography, searchTaekwondoDataProfilePicture, getEnhancedTaekwondoData, compareAthletes, generateCompetitiveHistory, AthleteStatistics, getAthleteImage, translateNameToArabic, translateNameToEnglish, getAthletePersonalInfo } from "./openaiService";
 import { getAthletePersonalInfoGemini } from "./geminiService";
-import { generateNutritionPlan, generateEnhancedNutritionPlan, generateDevelopmentPlan, searchAthleteImagesWithGemini, generateCompetitiveHistoryAnalysis, type NutritionPlanFormData, type DevelopmentPlanFormData } from "./geminiService";
+import { generateNutritionPlan, generateEnhancedNutritionPlan, generateDevelopmentPlan, searchAthleteImagesWithGemini, generateCompetitiveHistoryAnalysis, generateTaekwondoHistoryAnalysis, type NutritionPlanFormData, type DevelopmentPlanFormData } from "./geminiService";
 import { generateAthleteBiography as generateAthleteBiographyO3, generateRankHistory as generateRankHistoryO3, generateAthleteStatistics as generateAthleteStatisticsO3, generateAthleteStrengths as generateAthleteStrengthsO3, generateAthleteWeaknesses as generateAthleteWeaknessesO3, generateOverviewComparison, generateStrengthsComparison, generateWeaknessesComparison, generateCompetitionHistoryComparison, generateHeadToHeadComparison } from "./o3Service";
 import { analyzeVideoFile, analyzeVideoComprehensive, getSportConfig } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
@@ -1870,26 +1870,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Generate Gemini analysis from competitive history data
       let analysisData;
+      let responseData;
+      
       try {
-        analysisData = await generateCompetitiveHistoryAnalysis(
-          athlete.name,
-          sportName,
-          competitiveHistoryData,
-          { 
-            country: athlete.country,
-            age: athlete.age,
-            rank: athlete.rank,
-            personalInfo: athlete.personalInfo,
-            rankings: athlete.rankings
-          },
-          language
-        );
+        const isTaekwondo = sportName.toLowerCase().includes('taekwondo');
         
-        console.log(`📊 Gemini analysis result for ${athlete.name}:`, JSON.stringify(analysisData, null, 2));
-        
-        if (!analysisData) {
-          throw new Error("No analysis data returned from Gemini");
+        if (isTaekwondo) {
+          // For Taekwondo, get rank history and generate both analyses
+          console.log(`🥋 Generating Taekwondo history analysis (competitive + rank) for ${athlete.name}...`);
+          
+          const rankHistory = await storage.getRankHistory(athleteId);
+          
+          // Guard against missing/empty rank history
+          if (!rankHistory || rankHistory.length === 0) {
+            console.log(`⚠️ No rank history found for ${athlete.name}, using regular competitive history analysis only`);
+            // Fall back to regular competitive history analysis
+            analysisData = await generateCompetitiveHistoryAnalysis(
+              athlete.name,
+              sportName,
+              competitiveHistoryData,
+              { 
+                country: athlete.country,
+                age: athlete.age,
+                rank: athlete.rank,
+                personalInfo: athlete.personalInfo,
+                rankings: athlete.rankings
+              },
+              language
+            );
+            
+            responseData = {
+              ...analysisData,
+              career_phases: competitiveHistoryData?.career_phases || []
+            };
+          } else {
+            // Transform rank history to match API format for consistency
+            const rankHistoryData = rankHistory.map(entry => ({
+              month: (new Date(entry.date).getMonth() + 1).toString().padStart(2, '0'),
+              year: new Date(entry.date).getFullYear(),
+              ranking: entry.rank,
+              category: entry.tournament || undefined
+            }));
+            
+            console.log(`📊 Found ${rankHistoryData.length} rank history entries for ${athlete.name}`);
+          
+            const taekwondoAnalysis = await generateTaekwondoHistoryAnalysis(
+              athlete.name,
+              competitiveHistoryData?.career_phases || [],
+              rankHistoryData,
+              { 
+                country: athlete.country,
+                age: athlete.age,
+                rank: athlete.rank,
+                personalInfo: athlete.personalInfo,
+                rankings: athlete.rankings
+              },
+              language
+            );
+            
+            // Response includes BOTH analyses plus raw data
+            responseData = {
+              ...taekwondoAnalysis.competitiveAnalysis,
+              career_phases: competitiveHistoryData?.career_phases || [],
+              rankAnalysis: taekwondoAnalysis.rankAnalysis,
+              rankHistoryData: rankHistoryData
+            };
+            
+            console.log(`✅ Taekwondo history analysis complete for ${athlete.name}`);
+          }
+          
+        } else {
+          // For other sports, use existing competitive history analysis only
+          analysisData = await generateCompetitiveHistoryAnalysis(
+            athlete.name,
+            sportName,
+            competitiveHistoryData,
+            { 
+              country: athlete.country,
+              age: athlete.age,
+              rank: athlete.rank,
+              personalInfo: athlete.personalInfo,
+              rankings: athlete.rankings
+            },
+            language
+          );
+          
+          console.log(`📊 Gemini analysis result for ${athlete.name}:`, JSON.stringify(analysisData, null, 2));
+          
+          if (!analysisData) {
+            throw new Error("No analysis data returned from Gemini");
+          }
+          
+          // Add career_phases from competitiveHistory to the response
+          responseData = {
+            ...analysisData,
+            career_phases: competitiveHistoryData?.career_phases || []
+          };
         }
+        
       } catch (geminiError) {
         console.error(`❌ Gemini analysis failed for ${athlete.name}:`, geminiError);
         await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "rank", "Competitive History Analysis");
@@ -1900,12 +1978,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           shouldRetry: true
         });
       }
-
-      // Add career_phases from competitiveHistory to the response
-      const responseData = {
-        ...analysisData,
-        career_phases: competitiveHistoryData?.career_phases || []
-      };
 
       // Save analysis log
       await storage.createAnalysisLog({

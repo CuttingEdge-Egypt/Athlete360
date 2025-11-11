@@ -3487,6 +3487,293 @@ async function downloadImageFromUrl(url: string, athleteName: string): Promise<s
 }
 
 /**
+ * Generate BOTH competitive history AND rank history analysis for Taekwondo athletes
+ * This function receives the full API data (competition_history + rank_history) and generates two separate analyses
+ */
+export async function generateTaekwondoHistoryAnalysis(
+  athleteName: string,
+  competitionHistoryData: any[],
+  rankHistoryData: any[],
+  athleteData?: any,
+  language: string = 'en'
+): Promise<{ competitiveAnalysis: any; rankAnalysis: any }> {
+  try {
+    const languageInstruction = language === 'ar' 
+      ? 'Generate ALL content in Arabic language. Use professional Arabic sports terminology.'
+      : 'Generate ALL content in English language.';
+
+    const prompt = `You are a professional Taekwondo analyst specializing in competitive history and ranking progression analysis.
+
+${languageInstruction}
+
+Analyze the complete career data for ${athleteName}, a Taekwondo athlete.
+
+**Competition History Data:**
+${JSON.stringify(competitionHistoryData, null, 2)}
+
+**Rank History Data (Month-by-Month Rankings):**
+${JSON.stringify(rankHistoryData, null, 2)}
+
+${athleteData ? `**Additional Athlete Information:**
+${JSON.stringify(athleteData, null, 2)}` : ''}
+
+**Task:**
+Generate TWO separate analyses:
+
+## ANALYSIS 1: COMPETITIVE HISTORY
+Analyze the competition events, results, and performance patterns:
+1. **Career Overview**: Summarize competitive journey and key milestones
+2. **Peak Performance Periods**: Identify best performance phases
+3. **Competition Analysis**: Performance across different tiers (Grand Prix, World Championships, Olympics)
+4. **Progression Patterns**: Trends and improvements
+5. **Notable Achievements**: Significant accomplishments
+6. **Recent Form**: Current performance status
+
+## ANALYSIS 2: RANK HISTORY (WITH WEB SEARCH)
+**IMPORTANT: Use web search to find contextual information about this athlete's career events, club changes, coaching changes, injuries, or significant life events that correlate with ranking changes.**
+
+Analyze the ranking progression over time and identify what caused changes:
+1. **Ranking Overview**: Summary of ranking journey (highest rank, current rank, volatility)
+2. **Progression Timeline**: Key periods of improvement or decline with dates
+3. **Contextual Analysis**: What happened during ranking changes? Use web search to find:
+   - Club or coach changes
+   - Major competition wins/losses
+   - Injuries or breaks
+   - Training environment changes
+   - Experience factors (age, years competing)
+4. **Consistency Analysis**: Ranking stability over time
+5. **Category Performance**: If athlete competed in multiple weight categories, analyze performance in each
+6. **Trends and Predictions**: Current trajectory and outlook
+
+**CRITICAL REQUIREMENTS:**
+- Use web search to enrich rank history analysis with real-world context
+- Do NOT include URLs, links, or citations in your response
+- Provide evidence-based insights using the provided data
+- Structure in clear, professional paragraphs
+- Return ONLY valid JSON
+- ${languageInstruction}
+
+Return your analysis in this JSON format:
+{
+  "competitiveAnalysis": {
+    "athlete_name": "${athleteName}",
+    "sport": "Taekwondo",
+    "active_period": {
+      "start_year": 2018,
+      "end_year": "current"
+    },
+    "career_overview": "Comprehensive career summary",
+    "peak_performance_periods": [
+      {
+        "period": "Time period",
+        "description": "Analysis of this peak period",
+        "key_results": ["Notable results"]
+      }
+    ],
+    "competition_analysis": {
+      "grand_prix": "Grand Prix performance analysis",
+      "world_championships": "World Championship analysis", 
+      "olympic_games": "Olympic performance (if applicable)",
+      "continental_events": "Continental competition analysis"
+    },
+    "progression_patterns": "Career progression analysis",
+    "notable_achievements": [
+      {
+        "achievement": "Achievement description",
+        "significance": "Significance explanation"
+      }
+    ],
+    "recent_form": "Recent performance analysis",
+    "insights": ["Key insight 1", "Key insight 2"]
+  },
+  "rankAnalysis": {
+    "athlete_name": "${athleteName}",
+    "sport": "Taekwondo",
+    "ranking_overview": {
+      "highest_rank": 1,
+      "current_rank": 5,
+      "rank_range": "Best: 1, Worst: 25",
+      "volatility": "High/Medium/Low"
+    },
+    "progression_timeline": [
+      {
+        "period": "Jan 2023 - Jun 2023",
+        "rank_change": "Improved from 15 to 8",
+        "context": "What caused this change (web search findings)",
+        "significance": "Why this period was important"
+      }
+    ],
+    "contextual_factors": {
+      "club_changes": "Analysis of club/team changes impact",
+      "coaching": "Coaching changes or continuity impact",
+      "experience_growth": "How experience affected rankings",
+      "competition_impact": "Major wins/losses that affected rank",
+      "other_factors": "Injuries, breaks, or other relevant factors"
+    },
+    "consistency_analysis": "How stable rankings have been",
+    "category_performance": "Performance across weight categories (if applicable)",
+    "trends_and_outlook": "Current trajectory and future predictions",
+    "insights": ["Key insight 1", "Key insight 2"]
+  }
+}`;
+
+    const responseSchema = {
+      type: "object",
+      properties: {
+        competitiveAnalysis: {
+          type: "object",
+          properties: {
+            athlete_name: { type: "string" },
+            sport: { type: "string" },
+            active_period: {
+              type: "object",
+              properties: {
+                start_year: { type: ["number", "string"] },
+                end_year: { type: ["number", "string"] }
+              },
+              required: ["start_year", "end_year"]
+            },
+            career_overview: { type: "string" },
+            peak_performance_periods: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  period: { type: "string" },
+                  description: { type: "string" },
+                  key_results: { type: "array", items: { type: "string" } }
+                }
+              }
+            },
+            competition_analysis: {
+              type: "object",
+              properties: {
+                grand_prix: { type: "string" },
+                world_championships: { type: "string" },
+                olympic_games: { type: "string" },
+                continental_events: { type: "string" }
+              }
+            },
+            progression_patterns: { type: "string" },
+            notable_achievements: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  achievement: { type: "string" },
+                  significance: { type: "string" }
+                }
+              }
+            },
+            recent_form: { type: "string" },
+            insights: { type: "array", items: { type: "string" } }
+          },
+          required: ["athlete_name", "sport", "career_overview"]
+        },
+        rankAnalysis: {
+          type: "object",
+          properties: {
+            athlete_name: { type: "string" },
+            sport: { type: "string" },
+            ranking_overview: {
+              type: "object",
+              properties: {
+                highest_rank: { type: ["number", "string"] },
+                current_rank: { type: ["number", "string"] },
+                rank_range: { type: "string" },
+                volatility: { type: "string" }
+              }
+            },
+            progression_timeline: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  period: { type: "string" },
+                  rank_change: { type: "string" },
+                  context: { type: "string" },
+                  significance: { type: "string" }
+                }
+              }
+            },
+            contextual_factors: {
+              type: "object",
+              properties: {
+                club_changes: { type: "string" },
+                coaching: { type: "string" },
+                experience_growth: { type: "string" },
+                competition_impact: { type: "string" },
+                other_factors: { type: "string" }
+              }
+            },
+            consistency_analysis: { type: "string" },
+            category_performance: { type: "string" },
+            trends_and_outlook: { type: "string" },
+            insights: { type: "array", items: { type: "string" } }
+          },
+          required: ["athlete_name", "sport", "ranking_overview"]
+        }
+      },
+      required: ["competitiveAnalysis", "rankAnalysis"]
+    };
+
+    console.log(`⏳ Generating Taekwondo history analysis (competitive + rank) for ${athleteName}...`);
+    
+    let result;
+    try {
+      result = await retryWithBackoff(
+        async () => {
+          const res = await genAI.models.generateContent({
+            model: "gemini-2.5-pro",
+            config: {
+              responseMimeType: "application/json",
+              responseSchema: responseSchema,
+              temperature: 0.3,
+              maxOutputTokens: 12000,
+              tools: [{ googleSearch: {} }] // Enable web search
+            },
+            contents: prompt
+          });
+          
+          const text = res?.text || "{}";
+          
+          // Clean and parse the JSON response
+          let cleaned = text.trim();
+          cleaned = cleaned.replace(/```json\s*/, '').replace(/```\s*$/, '');
+          cleaned = cleaned.replace(/^```/, '').replace(/```$/, '');
+          cleaned = repairJsonString(cleaned);
+          
+          // Validate it's proper JSON
+          try {
+            JSON.parse(cleaned);
+          } catch (e) {
+            console.error('❌ Invalid JSON response from Gemini (Taekwondo history analysis)');
+            throw new Error('JSON parsing failed, will retry');
+          }
+          
+          return { text, cleaned };
+        },
+        2,
+        1000,
+        'Taekwondo History Analysis'
+      );
+    } catch (retryError) {
+      console.error('[TAEKWONDO_HISTORY] All retries failed:', retryError);
+      throw new Error('Failed to generate Taekwondo history analysis after multiple attempts');
+    }
+
+    const analysisData = JSON.parse(result.cleaned);
+    
+    console.log(`✅ Gemini Taekwondo history analysis generated for ${athleteName}`);
+    return analysisData;
+
+  } catch (error) {
+    console.error(`❌ Gemini Taekwondo history analysis failed for ${athleteName}:`, error);
+    throw error;
+  }
+}
+
+/**
  * Generate professional competitive history analysis from BrowserUse data
  * This function receives the competitive history data and generates a professional analysis
  */
