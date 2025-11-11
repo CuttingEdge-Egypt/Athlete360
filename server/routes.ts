@@ -736,14 +736,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Store rank history if available
               if (apiResult.rank_history && apiResult.rank_history.length > 0) {
+                const monthMap: { [key: string]: number } = {
+                  'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, 'june': 6,
+                  'july': 7, 'august': 8, 'september': 9, 'october': 10, 'november': 11, 'december': 12
+                };
+                
                 for (const rankEntry of apiResult.rank_history) {
                   if (rankEntry.month && rankEntry.year && rankEntry.ranking) {
                     try {
+                      // Convert month name to number
+                      const monthNum = typeof rankEntry.month === 'string' 
+                        ? (monthMap[rankEntry.month.toLowerCase()] || parseInt(rankEntry.month))
+                        : rankEntry.month;
+                      
                       await storage.createRankHistory({
                         athleteId: newAthlete.id,
-                        rank: typeof rankEntry.ranking === 'string' ? parseInt(rankEntry.ranking) : rankEntry.ranking,
-                        date: new Date(`${rankEntry.year}-${rankEntry.month}-01`),
-                        tournament: rankEntry.category || undefined
+                        rank: typeof rankEntry.ranking === 'string' ? parseFloat(rankEntry.ranking) : rankEntry.ranking,
+                        date: new Date(`${rankEntry.year}-${String(monthNum).padStart(2, '0')}-01`)
                       });
                     } catch (err) {
                       console.log(`⚠️ Failed to store rank history entry: ${err instanceof Error ? err.message : String(err)}`);
@@ -1086,14 +1095,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Store rank history if available
               if (apiResult.rank_history && apiResult.rank_history.length > 0) {
+                const monthMap: { [key: string]: number } = {
+                  'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, 'june': 6,
+                  'july': 7, 'august': 8, 'september': 9, 'october': 10, 'november': 11, 'december': 12
+                };
+                
                 for (const rankEntry of apiResult.rank_history) {
                   if (rankEntry.month && rankEntry.year && rankEntry.ranking) {
                     try {
+                      // Convert month name to number
+                      const monthNum = typeof rankEntry.month === 'string' 
+                        ? (monthMap[rankEntry.month.toLowerCase()] || parseInt(rankEntry.month))
+                        : rankEntry.month;
+                      
                       await storage.createRankHistory({
                         athleteId: athlete.id,
-                        rank: typeof rankEntry.ranking === 'string' ? parseInt(rankEntry.ranking) : rankEntry.ranking,
-                        date: new Date(`${rankEntry.year}-${rankEntry.month}-01`),
-                        tournament: rankEntry.category || undefined
+                        rank: typeof rankEntry.ranking === 'string' ? parseFloat(rankEntry.ranking) : rankEntry.ranking,
+                        date: new Date(`${rankEntry.year}-${String(monthNum).padStart(2, '0')}-01`)
                       });
                     } catch (err) {
                       console.log(`⚠️ Failed to store rank history entry: ${err instanceof Error ? err.message : String(err)}`);
