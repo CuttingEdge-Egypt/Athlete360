@@ -16,6 +16,7 @@ import { RankChart } from "./rank-chart";
 import { NutritionPlanDisplay } from "./nutrition-plan-display";
 import { StrategicCombatDisplay } from "./strategic-combat-display";
 import { StatisticsDisplay } from "./statistics-display";
+import { DualAnalysisPanel } from "./dual-analysis-panel";
 import {
   Download,
   User,
@@ -41,6 +42,31 @@ import {
   BarChart,
   Medal,
 } from "lucide-react";
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+} from 'chart.js';
+
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
+
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -560,13 +586,21 @@ export function AnalysisPopup({
     console.log('🔍 Has rankHistoryData:', !!parsedData.rankHistoryData);
     
     // Check for dual-analysis structure (Taekwondo with rank history)
-    // For the popup, extract the competitive analysis data and render it using existing logic
-    // The full dual-tab view is handled by analysis-result.tsx
-    let actualParsedData = parsedData;
     if (parsedData.competitiveAnalysis && parsedData.rankAnalysis && parsedData.rankHistoryData) {
-      console.log('✅ Dual-analysis structure detected! Extracting competitive analysis for popup display');
-      actualParsedData = parsedData.competitiveAnalysis;
+      console.log('✅ Dual-analysis structure detected! Rendering DualAnalysisPanel');
+      return (
+        <DualAnalysisPanel
+          competitiveAnalysis={parsedData.competitiveAnalysis}
+          rankAnalysis={parsedData.rankAnalysis}
+          rankHistoryData={parsedData.rankHistoryData}
+          variant="modal"
+          defaultTab="competitive"
+        />
+      );
     }
+    
+    // For single-analysis, extract the data normally
+    let actualParsedData = parsedData;
     
     // Initialize variables to avoid undefined errors
     let rankingProgression: any[] = [];
