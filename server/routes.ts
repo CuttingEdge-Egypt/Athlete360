@@ -581,36 +581,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`📝 Using name for athlete creation: "${englishName}"`);
       }
 
-      // Use Gemini-2.5-pro to get athlete personal info only (no bio)
-      console.log(`Creating athlete ${englishName} for sport ${sport.name} using Gemini-2.5-pro personal info generation...`);
-      let personalInfo = null;
-      try {
-        personalInfo = await getAthletePersonalInfoGemini(englishName, sport.name, req.body.nationality);
-      } catch (error) {
-        if (error instanceof Error && error.message === 'PERSONAL_INFO_NOT_FOUND') {
-          console.log(`⚠️ No personal info found for ${englishName}, creating athlete with basic information only`);
-          personalInfo = null;
-        } else {
-          // Check if it's a Gemini API quota error
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          if (errorMessage.includes('quota') || errorMessage.includes('RESOURCE_EXHAUSTED') || errorMessage.includes('429')) {
-            console.log(`⚠️ Gemini API quota exceeded, falling back to GPT-5 for ${englishName}...`);
-            try {
-              personalInfo = await getAthletePersonalInfo(englishName, sport.name, req.body.nationality);
-              console.log(`✅ Successfully retrieved personal info using GPT-5 fallback`);
-            } catch (gptError) {
-              console.log(`⚠️ GPT-5 fallback also failed for ${englishName}, creating athlete with basic information only`);
-              personalInfo = null;
-            }
-          } else {
-            // Re-throw other errors
-            throw error;
-          }
-        }
-      }
-
       // Use provided nationality or default to Unknown
       const athleteCountry = req.body.nationality || req.body.country || "Unknown";
+
+      // PARALLEL EXECUTION: Run personal info + image search simultaneously
+      console.log(`🚀 Starting parallel generation: personal info + image search for ${englishName}...`);
+      
+      const [personalInfo, profileImageUrl] = await Promise.all([
+        // Personal info generation
+        (async () => {
+          try {
+            const info = await getAthletePersonalInfoGemini(englishName, sport.name, req.body.nationality);
+            console.log(`✅ Personal info generated for ${englishName}`);
+            return info;
+          } catch (error) {
+            if (error instanceof Error && error.message === 'PERSONAL_INFO_NOT_FOUND') {
+              console.log(`⚠️ No personal info found for ${englishName}, using basic information`);
+              return null;
+            }
+            // Check for Gemini API quota error
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            if (errorMessage.includes('quota') || errorMessage.includes('RESOURCE_EXHAUSTED') || errorMessage.includes('429')) {
+              console.log(`⚠️ Gemini API quota exceeded, falling back to GPT-5 for ${englishName}...`);
+              try {
+                const info = await getAthletePersonalInfo(englishName, sport.name, req.body.nationality);
+                console.log(`✅ Successfully retrieved personal info using GPT-5 fallback`);
+                return info;
+              } catch (gptError) {
+                console.log(`⚠️ GPT-5 fallback also failed for ${englishName}, using basic information`);
+                return null;
+              }
+            }
+            throw error;
+          }
+        })(),
+        
+        // Image search
+        (async () => {
+          try {
+            const imageResult = await getAthleteImage(englishName, sport.name, athleteCountry, undefined);
+            if (imageResult.success) {
+              const url = imageResult.downloadUrl || imageResult.embedUrl || undefined;
+              console.log(`✅ Found image for ${englishName}`);
+              return url;
+            }
+            console.log(`⚠️ No image found for ${englishName}`);
+            return undefined;
+          } catch (error) {
+            console.error(`❌ Image search failed for ${englishName}:`, error);
+            return undefined;
+          }
+        })()
+      ]);
 
       // Translate name to Arabic for bilingual search (unless already provided from Arabic search)
       console.log(`🌐 Preparing Arabic name for ${englishName}...`);
@@ -625,26 +647,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       } else {
         console.log(`✅ Using provided Arabic name: "${nameArabic}"`);
-      }
-
-      // Search for athlete image first (now synchronous)
-      console.log(`🔍 Starting image search for ${englishName}...`);
-      let profileImageUrl: string | undefined;
-      
-      try {
-        // Use GPT-5 web search for athlete images
-        const imageResult = await getAthleteImage(englishName, sport.name, athleteCountry, personalInfo ? JSON.stringify(personalInfo) : undefined);
-        
-        if (imageResult.success) {
-          profileImageUrl = imageResult.downloadUrl || imageResult.embedUrl || undefined;
-          console.log(`✅ Found image for ${englishName}: ${profileImageUrl}`);
-        } else {
-          console.log(`⚠️ No image found for ${englishName}, proceeding with default`);
-          profileImageUrl = undefined;
-        }
-      } catch (error) {
-        console.error(`❌ Image search failed for ${englishName}:`, error);
-        profileImageUrl = undefined;
       }
 
       // Create athlete profile with image (rankings will be fetched asynchronously)
