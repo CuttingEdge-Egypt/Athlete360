@@ -181,7 +181,7 @@ export const rankHistory = pgTable("rank_history", {
   date: timestamp("date").notNull(),
   categoryKey: varchar("category_key").default("default"), // Stable identifier (e.g., "m-80-world-kyorugi")
   categoryLabel: text("category_label").default("Overall Rank"), // Full display string (e.g., "M-80 kg | World Senior Division | World Kyorugi Rankings")
-  points: integer("points"), // Optional points/score for this category
+  points: decimal("points", { precision: 10, scale: 2 }), // Optional points/score for this category (supports decimals like 220.41)
   createdAt: timestamp("created_at").defaultNow(),
 });
 

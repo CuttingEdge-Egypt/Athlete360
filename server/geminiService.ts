@@ -3682,22 +3682,17 @@ ${JSON.stringify(athleteData, null, 2)}` : ''}
 
 Analyze the ranking progression over time and identify what caused changes:
 1. **Ranking Overview**: Summary of ranking journey (highest rank, current rank, volatility)
-2. **Progression Timeline**: Key periods of improvement or decline with dates
-3. **Contextual Analysis**: What happened during ranking changes? Use web search to find:
-   - Club or coach changes
-   - Major competition wins/losses
-   - Injuries or breaks
-   - Training environment changes
-   - Experience factors (age, years competing)
-4. **Consistency Analysis**: Ranking stability over time
-5. **Category Performance**: If athlete competed in multiple weight categories, analyze performance in each
-6. **Trends and Predictions**: Current trajectory and outlook
+2. **Progression Timeline**: Limit to TOP 5 most significant periods of change
+3. **Contextual Analysis**: What happened during ranking changes? Use web search to find key factors (club/coach changes, major wins/losses, injuries)
+4. **Consistency Analysis**: Brief summary of ranking stability
+5. **Category Performance**: If athlete competed in multiple weight categories, analyze performance in each category
+6. **Trends and Predictions**: Concise outlook (2-3 sentences)
 
 **CRITICAL REQUIREMENTS:**
 - Use web search to enrich rank history analysis with real-world context
 - Do NOT include URLs, links, or citations in your response
+- Keep responses CONCISE - limit timeline to 5 items, paragraphs to 3-4 sentences max
 - Provide evidence-based insights using the provided data
-- Structure in clear, professional paragraphs
 - Return ONLY valid JSON - no markdown, no extra text
 - ${languageInstruction}
 
@@ -3740,7 +3735,7 @@ Return your analysis in this JSON format:
         model: "gemini-2.5-pro",
         config: {
           temperature: 0.3,
-          maxOutputTokens: 6000,
+          maxOutputTokens: 9000, // Increased to prevent truncation
           tools: [{ googleSearch: {} }] // Enable web search
         },
         contents: prompt
