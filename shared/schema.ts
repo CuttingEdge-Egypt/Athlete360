@@ -179,6 +179,9 @@ export const rankHistory = pgTable("rank_history", {
   athleteId: varchar("athlete_id").notNull().references(() => athletes.id),
   rank: integer("rank").notNull(),
   date: timestamp("date").notNull(),
+  categoryKey: varchar("category_key").default("default"), // Stable identifier (e.g., "m-80-world-kyorugi")
+  categoryLabel: text("category_label").default("Overall Rank"), // Full display string (e.g., "M-80 kg | World Senior Division | World Kyorugi Rankings")
+  points: integer("points"), // Optional points/score for this category
   createdAt: timestamp("created_at").defaultNow(),
 });
 

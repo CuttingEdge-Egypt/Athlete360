@@ -168,79 +168,169 @@ export function DualAnalysisPanel({
     );
   };
 
-  const renderCompetitiveHistoryContent = () => (
-    <div className="space-y-6">
-      <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-blue-400 border-gray-600">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-3xl font-bold text-blue-400 flex items-center">
-              <Trophy className="mr-3" size={28} />
-              Career Overview
-            </h3>
-            {athlete?.isActive && (
-              <Badge variant="default" className="bg-green-600 text-white px-3 py-1">
-                Active
-              </Badge>
-            )}
-          </div>
-          
-          <div className="grid md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-blue-500/20">
-              <div className="text-2xl font-bold text-white">{athlete?.currentRanking || 'N/A'}</div>
-              <div className="text-sm text-blue-300">Current Rank</div>
-            </div>
-            <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-green-500/20">
-              <div className="text-2xl font-bold text-green-400">{athlete?.peakRanking || 'N/A'}</div>
-              <div className="text-sm text-green-300">Peak Rank</div>
-            </div>
-            <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-yellow-500/20">
-              <div className="text-2xl font-bold text-yellow-400">{athlete?.officialRecord || 'N/A'}</div>
-              <div className="text-sm text-yellow-300">Record</div>
-            </div>
-            <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-purple-500/20">
-              <div className="text-2xl font-bold text-purple-400">{careerSummary.totalCompetitions || 'N/A'}</div>
-              <div className="text-sm text-purple-300">Competitions</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+  const renderCompetitiveHistoryContent = () => {
+    // Extract data from competitiveAnalysis structure
+    const careerPhases = competitiveAnalysis?.career_phases || [];
+    const careerOverview = competitiveAnalysis?.career_overview;
+    const peakPerformancePeriods = competitiveAnalysis?.peak_performance_periods || [];
+    const competitionAnalysis = competitiveAnalysis?.competition_analysis || {};
+    const progressionPatterns = competitiveAnalysis?.progression_patterns;
+    const notableAchievements = competitiveAnalysis?.notable_achievements || [];
+    const recentForm = competitiveAnalysis?.recent_form;
+    const insights = competitiveAnalysis?.insights || [];
 
-      {rankingProgression && rankingProgression.length > 0 && (
-        <Card className="bg-athlete-gray-800 border-gray-600">
-          <CardHeader>
-            <CardTitle className="text-2xl text-gray-100 flex items-center">
-              <TrendingUp className="mr-3 text-blue-400" size={24} />
-              Ranking Progression
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3 max-h-64 overflow-y-auto">
-              {rankingProgression.map((entry: any, index: number) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-gray-500 transition-colors">
-                  <div className="flex-1">
-                    <div className="font-semibold text-gray-100">
-                      {entry.competition || entry.tournament || `Event ${index + 1}`}
+    // Helper function for result badges
+    const getResultBadge = (result: string) => {
+      if (!result) return null;
+      
+      const resultLower = result.toLowerCase();
+      if (resultLower.includes('1st') || resultLower.includes('gold') || resultLower.includes('🥇')) {
+        return <Badge className="bg-yellow-500 text-white">🥇 {result}</Badge>;
+      } else if (resultLower.includes('2nd') || resultLower.includes('silver') || resultLower.includes('🥈')) {
+        return <Badge className="bg-gray-400 text-white">🥈 {result}</Badge>;
+      } else if (resultLower.includes('3rd') || resultLower.includes('bronze') || resultLower.includes('🥉')) {
+        return <Badge className="bg-orange-600 text-white">🥉 {result}</Badge>;
+      } else {
+        return <Badge variant="secondary">✓ {result}</Badge>;
+      }
+    };
+
+    return (
+      <div className="space-y-6">
+        {/* Career Phases Timeline */}
+        {careerPhases && careerPhases.length > 0 && (
+          <Card className="bg-athlete-gray-800 border-gray-600">
+            <CardHeader>
+              <CardTitle className="text-2xl text-gray-100 flex items-center">
+                <Trophy className="mr-3 text-blue-400" size={24} />
+                Career Phases
+              </CardTitle>
+              <div className="text-sm text-gray-400">Professional career progression through different phases</div>
+            </CardHeader>
+            <CardContent>
+              <div className="relative">
+                <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 to-purple-500 opacity-30"></div>
+                
+                <div className="space-y-8">
+                  {careerPhases.map((phase: any, phaseIndex: number) => (
+                    <div key={phaseIndex} className="relative ml-8">
+                      <div className="absolute -left-12 top-6 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm font-bold text-white ring-4 ring-blue-600/30">
+                        {phaseIndex + 1}
+                      </div>
+
+                      <Card className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 border-blue-500/50">
+                        <CardHeader>
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-xl text-white">
+                              {phase.phase_name}
+                            </CardTitle>
+                            <Badge className="bg-blue-600 text-white">{phase.period}</Badge>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          {phase.key_achievements && phase.key_achievements.length > 0 && (
+                            <div className="space-y-3">
+                              {phase.key_achievements
+                                .slice()
+                                .sort((a: any, b: any) => {
+                                  const yearA = parseInt(a.year) || 0;
+                                  const yearB = parseInt(b.year) || 0;
+                                  return yearB - yearA;
+                                })
+                                .map((achievement: any, achievementIndex: number) => (
+                                  <div key={achievementIndex} className="p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-blue-500/50 transition-colors">
+                                    <div className="flex items-start justify-between mb-2">
+                                      <div className="flex-1">
+                                        <div className="flex items-center gap-3 mb-2">
+                                          <Badge variant="outline" className="border-yellow-400 text-yellow-400 text-xs">
+                                            {achievement.month} {achievement.year}
+                                          </Badge>
+                                          <span className="font-bold text-white">{achievement.event_name}</span>
+                                        </div>
+                                        <div className="text-sm text-gray-400 mb-2">
+                                          {achievement.event_tier}
+                                        </div>
+                                      </div>
+                                      <div className="ml-3">
+                                        {getResultBadge(achievement.result)}
+                                      </div>
+                                    </div>
+                                    
+                                    {achievement.notes && (
+                                      <p className="text-sm text-gray-300 leading-relaxed">
+                                        {achievement.notes}
+                                      </p>
+                                    )}
+                                  </div>
+                                ))}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
                     </div>
-                    <div className="text-sm text-gray-400">
-                      {entry.location || 'Location TBD'} • {entry.date || 'Date TBD'}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-bold text-blue-400">
-                      {entry.result || entry.placement || 'Participated'}
-                    </div>
-                    {entry.ranking && (
-                      <div className="text-sm text-gray-400">Rank: #{entry.ranking}</div>
-                    )}
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Competitive History Analysis */}
+        {(careerOverview || peakPerformancePeriods?.length > 0 || notableAchievements?.length > 0 || recentForm) && (
+          <Card className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 border-purple-500">
+            <CardHeader>
+              <CardTitle className="text-2xl text-white flex items-center">
+                <Calendar className="mr-3 text-purple-400" size={24} />
+                Competitive History Analysis
+              </CardTitle>
+              <div className="text-sm text-gray-400">Professional analysis of career progression and achievements</div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {careerOverview && (
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
+                    <Trophy className="mr-2 text-yellow-400" size={20} />
+                    Career Overview
+                  </h3>
+                  <p className="text-gray-300 leading-relaxed">{careerOverview}</p>
+                </div>
+              )}
+              
+              {peakPerformancePeriods && peakPerformancePeriods.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
+                    <TrendingUp className="mr-2 text-green-400" size={20} />
+                    Peak Performance Periods
+                  </h3>
+                  <div className="space-y-4">
+                    {peakPerformancePeriods.map((period: any, index: number) => (
+                      <div key={index} className="p-4 bg-athlete-gray-700 rounded-lg border border-purple-500/30">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge className="bg-purple-600 text-white">{period.period}</Badge>
+                        </div>
+                        <p className="text-gray-300 mb-3">{period.description}</p>
+                        {period.key_results && period.key_results.length > 0 && (
+                          <div className="space-y-1">
+                            <p className="text-sm font-semibold text-gray-400 mb-2">Key Results:</p>
+                            {period.key_results.map((result: string, idx: number) => (
+                              <div key={idx} className="flex items-start gap-2">
+                                <Award className="w-4 h-4 text-green-400 mt-0.5" />
+                                <span className="text-sm text-gray-300">{result}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    );
+  };
 
   return (
     <Tabs defaultValue={defaultTab} className={`w-full ${className}`}>
