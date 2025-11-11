@@ -3792,6 +3792,9 @@ Return your analysis in this JSON format:
             JSON.parse(cleaned);
           } catch (e) {
             console.error('❌ Invalid JSON response from Gemini (Taekwondo history analysis)');
+            console.error('📄 Raw response (first 500 chars):', text.substring(0, 500));
+            console.error('🔧 Cleaned response (first 500 chars):', cleaned.substring(0, 500));
+            console.error('⚠️ Parse error:', e instanceof Error ? e.message : String(e));
             throw new Error('JSON parsing failed, will retry');
           }
           
