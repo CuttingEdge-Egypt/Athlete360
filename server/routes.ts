@@ -1820,11 +1820,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const sport = await storage.getSportById(athlete.sportId);
       const sportName = sport?.name || "Unknown Sport";
+      const isTaekwondo = sportName.toLowerCase().includes('taekwondo');
       
       let competitiveHistoryData = athlete.competitiveHistory;
       
+      // For Taekwondo: Check if we have raw competition array from API
+      // For other sports: Check for career_phases structure from BrowserUse
+      const hasCompetitiveData = isTaekwondo 
+        ? (competitiveHistoryData && Array.isArray(competitiveHistoryData) && competitiveHistoryData.length > 0)
+        : (competitiveHistoryData && competitiveHistoryData.career_phases && competitiveHistoryData.career_phases.length > 0);
+      
       // Check if we have competitive history data
-      if (!competitiveHistoryData || !competitiveHistoryData.career_phases || competitiveHistoryData.career_phases.length === 0) {
+      if (!hasCompetitiveData) {
         console.log(`📊 No competitive history found for ${athlete.name}, triggering BrowserUse...`);
         
         try {
@@ -1909,14 +1916,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
               month: (new Date(entry.date).getMonth() + 1).toString().padStart(2, '0'),
               year: new Date(entry.date).getFullYear(),
               ranking: entry.rank,
-              category: entry.tournament || undefined
+              date: entry.date.toISOString().split('T')[0] // Add formatted date for chart display
             }));
             
             console.log(`📊 Found ${rankHistoryData.length} rank history entries for ${athlete.name}`);
           
             const taekwondoAnalysis = await generateTaekwondoHistoryAnalysis(
               athlete.name,
-              competitiveHistoryData?.career_phases || [],
+              competitiveHistoryData || [], // Pass raw competition array from API
               rankHistoryData,
               { 
                 country: athlete.country,
@@ -1931,7 +1938,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Response includes BOTH analyses plus raw data
             responseData = {
               ...taekwondoAnalysis.competitiveAnalysis,
-              career_phases: competitiveHistoryData?.career_phases || [],
+              competitiveAnalysis: taekwondoAnalysis.competitiveAnalysis,
               rankAnalysis: taekwondoAnalysis.rankAnalysis,
               rankHistoryData: rankHistoryData
             };
