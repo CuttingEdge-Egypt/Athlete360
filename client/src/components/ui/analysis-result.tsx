@@ -1,12 +1,37 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RankChart } from "./rank-chart";
 import { VideoAnalysisResults } from "./video-analysis-results";
 import { Download, Share2, User, Trophy, Star, AlertTriangle, Calendar, Swords, Video, Award, TrendingUp, Clock, Target, PlayCircle, Zap, Shield, CheckCircle, BarChart, Medal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 interface AnalysisResultProps {
   type: string;
@@ -1239,9 +1264,26 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
 
     // Adaptive data extraction for multiple JSON formats
     let athlete, rankingProgression, careerSummary;
+    let isDualAnalysis = false;
+    let rankAnalysis = null;
+    let rankHistoryData = null;
     
+    // Check for dual-analysis structure (Taekwondo with rank history)
+    if (parsedData.competitiveAnalysis && parsedData.rankAnalysis && parsedData.rankHistoryData) {
+      isDualAnalysis = true;
+      rankAnalysis = parsedData.rankAnalysis;
+      rankHistoryData = parsedData.rankHistoryData;
+      
+      // Extract competitive analysis data
+      const competitiveData = parsedData.competitiveAnalysis;
+      if (competitiveData.athlete && competitiveData.rankingProgression !== undefined && competitiveData.careerSummary) {
+        athlete = competitiveData.athlete;
+        rankingProgression = competitiveData.rankingProgression;
+        careerSummary = competitiveData.careerSummary;
+      }
+    }
     // Format 1: New enhanced structure (athlete, rankingProgression, careerSummary)
-    if (parsedData.athlete && parsedData.rankingProgression !== undefined && parsedData.careerSummary) {
+    else if (parsedData.athlete && parsedData.rankingProgression !== undefined && parsedData.careerSummary) {
       athlete = parsedData.athlete;
       rankingProgression = parsedData.rankingProgression;
       careerSummary = parsedData.careerSummary;
@@ -1284,7 +1326,126 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
       );
     }
 
-    return (
+    // Helper function to render rank history chart and analysis (for Taekwondo)
+    const renderRankHistoryContent = () => {
+      if (!rankHistoryData || rankHistoryData.length === 0) {
+        return (
+          <div className="p-6 text-center">
+            <p className="text-gray-400">No rank history data available</p>
+          </div>
+        );
+      }
+
+      // Prepare chart data - reverse to show oldest to newest
+      const sortedHistory = [...rankHistoryData].sort((a: any, b: any) => 
+        new Date(a.date).getTime() - new Date(b.date).getTime()
+      );
+
+      const chartData = {
+        labels: sortedHistory.map((entry: any) => entry.date),
+        datasets: [
+          {
+            label: 'World Rank',
+            data: sortedHistory.map((entry: any) => entry.rank),
+            borderColor: 'rgb(251, 146, 60)',
+            backgroundColor: 'rgba(251, 146, 60, 0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+          }
+        ]
+      };
+
+      const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            reverse: true,
+            beginAtZero: false,
+            ticks: {
+              color: 'rgb(156, 163, 175)',
+              callback: function(value: any) {
+                return '#' + value;
+              }
+            },
+            grid: {
+              color: 'rgba(75, 85, 99, 0.3)'
+            }
+          },
+          x: {
+            ticks: {
+              color: 'rgb(156, 163, 175)',
+              maxRotation: 45,
+              minRotation: 45
+            },
+            grid: {
+              color: 'rgba(75, 85, 99, 0.3)'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              color: 'rgb(209, 213, 219)'
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context: any) {
+                return 'Rank: #' + context.parsed.y;
+              }
+            }
+          }
+        }
+      };
+
+      return (
+        <div className="space-y-6">
+          {/* Rank Progression Chart */}
+          <Card className="bg-athlete-gray-800 border-gray-600">
+            <CardHeader>
+              <CardTitle className="text-2xl text-gray-100 flex items-center">
+                <TrendingUp className="mr-3 text-orange-400" size={24} />
+                Rank Progression Over Time
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-96">
+                <Line data={chartData} options={chartOptions} />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Rank Analysis */}
+          {rankAnalysis && (
+            <Card className="bg-athlete-gray-800 border-gray-600">
+              <CardHeader>
+                <CardTitle className="text-2xl text-gray-100 flex items-center">
+                  <BarChart className="mr-3 text-blue-400" size={24} />
+                  Rank History Analysis
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose prose-invert max-w-none">
+                  <div 
+                    className="text-gray-300 leading-relaxed whitespace-pre-wrap"
+                    dangerouslySetInnerHTML={{ 
+                      __html: rankAnalysis.replace(/\n/g, '<br/>') 
+                    }}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      );
+    };
+
+    // Helper function to render competitive history content
+    const renderCompetitiveHistoryContent = () => (
       <div className="space-y-6">
         {/* Career Overview Stats */}
         <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-blue-400 border-gray-600">
@@ -1408,6 +1569,42 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
         </div>
       </div>
     );
+
+    // Main return: Use tabs if dual-analysis, otherwise show single analysis
+    if (isDualAnalysis) {
+      return (
+        <Tabs defaultValue="competitive" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-athlete-gray-700">
+            <TabsTrigger 
+              value="competitive"
+              data-testid="tab-competitive-history"
+              className="data-[state=active]:bg-athlete-accent"
+            >
+              <Calendar className="mr-2 h-4 w-4" />
+              Competitive History
+            </TabsTrigger>
+            <TabsTrigger 
+              value="rank"
+              data-testid="tab-rank-history"
+              className="data-[state=active]:bg-athlete-accent"
+            >
+              <TrendingUp className="mr-2 h-4 w-4" />
+              Rank History
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="competitive" className="mt-6">
+            {renderCompetitiveHistoryContent()}
+          </TabsContent>
+          
+          <TabsContent value="rank" className="mt-6">
+            {renderRankHistoryContent()}
+          </TabsContent>
+        </Tabs>
+      );
+    }
+
+    return renderCompetitiveHistoryContent();
   };
 
   const renderStrengthsAnalysis = (data: any) => {

@@ -3,6 +3,9 @@
 ## Overview
 Athlete360 is an AI-powered athletic performance analysis platform that analyzes athlete performance across various sports. It provides comprehensive insights, including biographies, ranking analysis, strengths/weaknesses, development plans, nutrition guidance, and strategic analysis. The platform leverages AI to deliver personalized, real-time athletic insights for performance development and strategic advantages, aiming to be an authentic and essential tool for athletes and coaches.
 
+## Recent Changes (November 11, 2025)
+- **Taekwondo Dual-Analysis Feature**: Extended competitive history generation for Taekwondo athletes to include dual-analysis of both competitive events AND rank progression over time. Backend `/api/analysis/:athleteId/rank` route now detects Taekwondo sport, fetches rank history from `rank_history` table, and generates two parallel analyses using Gemini 2.5 Pro with web search: (1) competitive event history analysis and (2) rank progression analysis with contextual insights about what caused rank changes (experience, club changes, coaching, injuries, etc.). Frontend displays dual-tab UI: "Competitive History" tab shows traditional event timeline, "Rank History" tab displays Chart.js line graph of rank progression over time plus LLM-generated analysis. Graceful fallback to single-analysis for non-Taekwondo sports or when rank history unavailable. Maintains full backward compatibility.
+
 ## Recent Changes (October 19, 2025)
 - **Athlete Comparison Loading Arabic RTL**: Added complete Arabic translation for athlete comparison loading screen with RTL layout - title on right, cancel button on left, all progress messages translated (loading data, analyzing profiles, etc.), Arabic numerals for percentage (e.g., ٪١٥ instead of 15%)
 - **Queue Status Bug Fix**: Fixed issue where athlete comparison showed as "loading" in queue even after completion - queue now properly updates to completed status
