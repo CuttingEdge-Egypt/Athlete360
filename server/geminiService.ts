@@ -3563,6 +3563,50 @@ Return your analysis in this JSON format:
       "end_year": "current"
     },
     "career_overview": "Comprehensive career summary",
+    "career_phases": [
+      {
+        "phase_name": "Early Career and Development",
+        "period": "2017-2019",
+        "key_achievements": [
+          {
+            "year": 2018,
+            "month": "June",
+            "event_name": "Specific tournament name",
+            "event_tier": "Grand Prix / World Championship / Continental",
+            "result": "Gold/Silver/Bronze or placement",
+            "notes": "Explanation of significance and impact on career"
+          }
+        ]
+      },
+      {
+        "phase_name": "Breakthrough and Ascent",
+        "period": "2020-2022",
+        "key_achievements": [
+          {
+            "year": 2021,
+            "month": "Month",
+            "event_name": "Major championship name",
+            "event_tier": "Event tier",
+            "result": "Medal/placement",
+            "notes": "Impact on ranking and career trajectory"
+          }
+        ]
+      },
+      {
+        "phase_name": "Elite Status and Recent Achievements",
+        "period": "2023-current",
+        "key_achievements": [
+          {
+            "year": 2024,
+            "month": "Month",
+            "event_name": "Recent competition",
+            "event_tier": "Event classification",
+            "result": "Achievement",
+            "notes": "Current status and implications"
+          }
+        ]
+      }
+    ],
     "peak_performance_periods": [
       {
         "period": "Time period",
