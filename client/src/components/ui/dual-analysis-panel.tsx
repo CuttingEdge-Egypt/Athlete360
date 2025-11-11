@@ -12,6 +12,9 @@ interface DualAnalysisPanelProps {
     rank: number;
     month?: string;
     year?: number;
+    categoryKey?: string;
+    categoryLabel?: string;
+    points?: number;
   }> | null;
   variant?: 'full' | 'modal';
   defaultTab?: 'competitive' | 'rank';
@@ -39,24 +42,70 @@ export function DualAnalysisPanel({
       );
     }
 
-    const sortedHistory = [...rankHistoryData].sort((a: any, b: any) => 
-      new Date(a.date).getTime() - new Date(b.date).getTime()
+    // Group rank history data by category
+    const categoryGroups: { [key: string]: any[] } = {};
+    rankHistoryData.forEach((entry: any) => {
+      const categoryKey = entry.categoryKey || 'default';
+      if (!categoryGroups[categoryKey]) {
+        categoryGroups[categoryKey] = [];
+      }
+      categoryGroups[categoryKey].push(entry);
+    });
+
+    // Sort entries within each category by date
+    Object.keys(categoryGroups).forEach(key => {
+      categoryGroups[key].sort((a: any, b: any) => 
+        new Date(a.date).getTime() - new Date(b.date).getTime()
+      );
+    });
+
+    // Category color palette
+    const categoryColors = [
+      { border: 'rgb(251, 146, 60)', bg: 'rgba(251, 146, 60, 0.1)' },   // Orange
+      { border: 'rgb(59, 130, 246)', bg: 'rgba(59, 130, 246, 0.1)' },   // Blue
+      { border: 'rgb(34, 197, 94)', bg: 'rgba(34, 197, 94, 0.1)' },     // Green
+      { border: 'rgb(168, 85, 247)', bg: 'rgba(168, 85, 247, 0.1)' },   // Purple
+      { border: 'rgb(236, 72, 153)', bg: 'rgba(236, 72, 153, 0.1)' },   // Pink
+    ];
+
+    // Create all unique date labels across all categories
+    const allDates = new Set<string>();
+    Object.values(categoryGroups).forEach(entries => {
+      entries.forEach(entry => allDates.add(entry.date));
+    });
+    const sortedLabels = Array.from(allDates).sort((a, b) => 
+      new Date(a).getTime() - new Date(b).getTime()
     );
 
+    // Create datasets for each category
+    const datasets = Object.keys(categoryGroups).map((categoryKey, index) => {
+      const categoryData = categoryGroups[categoryKey];
+      const categoryLabel = categoryData[0]?.categoryLabel || categoryKey;
+      const colorIndex = index % categoryColors.length;
+      const colors = categoryColors[colorIndex];
+
+      // Map data to all dates (null for missing dates)
+      const dataPoints = sortedLabels.map(label => {
+        const entry = categoryData.find(e => e.date === label);
+        return entry ? entry.rank : null;
+      });
+
+      return {
+        label: categoryLabel,
+        data: dataPoints,
+        borderColor: colors.border,
+        backgroundColor: colors.bg,
+        fill: true,
+        tension: 0.3,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        spanGaps: false, // Don't connect points across missing data
+      };
+    });
+
     const chartData = {
-      labels: sortedHistory.map((entry: any) => entry.date),
-      datasets: [
-        {
-          label: 'World Rank',
-          data: sortedHistory.map((entry: any) => entry.rank),
-          borderColor: 'rgb(251, 146, 60)',
-          backgroundColor: 'rgba(251, 146, 60, 0.1)',
-          fill: true,
-          tension: 0.3,
-          pointRadius: 5,
-          pointHoverRadius: 7,
-        }
-      ]
+      labels: sortedLabels,
+      datasets
     };
 
     const chartOptions = {
