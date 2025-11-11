@@ -3710,21 +3710,17 @@ Return your analysis in this JSON format:
     {
       "period": "Jan 2023 - Jun 2023",
       "rank_change": "Improved from 15 to 8",
-      "context": "What caused this change (web search findings)",
-      "significance": "Why this period was important"
+      "context": "Brief: What caused this change",
+      "significance": "Brief: Why this period was important"
     }
   ],
   "contextual_factors": {
-    "club_changes": "Analysis of club/team changes impact",
-    "coaching": "Coaching changes or continuity impact",
-    "experience_growth": "How experience affected rankings",
-    "competition_impact": "Major wins/losses that affected rank",
-    "other_factors": "Injuries, breaks, or other relevant factors"
+    "key_factor": "Most important factor affecting rankings (brief 1-2 sentences)"
   },
-  "consistency_analysis": "How stable rankings have been",
-  "category_performance": "Performance across weight categories (if applicable)",
-  "trends_and_outlook": "Current trajectory and future predictions",
-  "insights": ["Key insight 1", "Key insight 2"]
+  "consistency_analysis": "Brief stability summary (1-2 sentences)",
+  "category_performance": "Brief performance across categories (1-2 sentences if applicable)",
+  "trends_and_outlook": "Brief outlook (1-2 sentences)",
+  "insights": ["Key insight 1", "Key insight 2", "Key insight 3"]
 }`;
 
   console.log(`⏳ [PARALLEL] Generating rank history analysis with web search for ${athleteName}...`);
@@ -3741,7 +3737,15 @@ Return your analysis in this JSON format:
         contents: prompt
       });
       
+      // DIAGNOSTIC LOGGING
+      console.log('🔍 [DIAGNOSTIC] Gemini response metadata:');
+      console.log('   - finishReason:', res?.candidates?.[0]?.finishReason || 'N/A');
+      console.log('   - usageMetadata:', JSON.stringify(res?.usageMetadata || {}, null, 2));
+      console.log('   - Response length:', res?.text?.length || 0, 'characters');
+      
       const text = res?.text || "{}";
+      console.log('📄 [DIAGNOSTIC] Full raw response:', text);
+      
       let cleaned = text.trim();
       cleaned = cleaned.replace(/```json\s*/, '').replace(/```\s*$/, '');
       cleaned = cleaned.replace(/^```/, '').replace(/```$/, '');
@@ -3749,9 +3753,11 @@ Return your analysis in this JSON format:
       
       try {
         JSON.parse(cleaned);
+        console.log('✅ [DIAGNOSTIC] JSON parsing succeeded!');
       } catch (e) {
         console.error('❌ Invalid JSON response from Gemini (rank analysis)');
-        console.error('📄 Raw response (first 500 chars):', text.substring(0, 500));
+        console.error('📄 Raw response (first 1000 chars):', text.substring(0, 1000));
+        console.error('🔧 Cleaned response (first 1000 chars):', cleaned.substring(0, 1000));
         throw new Error('JSON parsing failed, will retry');
       }
       
