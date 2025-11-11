@@ -180,6 +180,82 @@ export async function fetchTaekwondoAthleteData(
   });
 }
 
+/**
+ * Sanitize weight division to fix common malformed patterns from AI
+ * Examples: "M-+87 kg" → "M+87 kg", "M--58 kg" → "M-58 kg", "w +67 kg" → "W+67 kg"
+ */
+function sanitizeWeightDivision(weightDivision: string): string | null {
+  if (!weightDivision) {
+    return null;
+  }
+
+  // Trim and normalize spacing
+  let sanitized = weightDivision.trim().replace(/\s+/g, ' ');
+  
+  // Extract components: gender prefix (M/W), sign (+/-), weight number, unit (kg)
+  // Pattern: optional spaces around the sign, flexible case for M/W
+  const pattern = /^([MWmw])\s*([+-]?)\s*(\d+(?:\.\d+)?)\s*(kg)?$/i;
+  const match = sanitized.match(pattern);
+  
+  if (!match) {
+    console.warn(`⚠️ Could not parse weight division "${weightDivision}", attempting fallback cleanup`);
+    
+    // Fallback: Handle malformed cases like "M-+87 kg", "M--58", "w +67 kg (+1 rank)"
+    // Step 1: Strip trailing annotations (anything after kg or after the number if no kg)
+    let cleaned = sanitized
+      .toUpperCase()
+      .replace(/\s+/g, ' ')
+      .trim();
+    
+    // Remove everything after "KG" or after the weight number + trailing chars
+    cleaned = cleaned.replace(/(\d+(?:\.\d+)?)\s*kg.*$/i, '$1 kg').replace(/(\d+(?:\.\d+)?)[^0-9kg]*$/i, '$1 kg');
+    
+    // Step 2: Normalize multiple/mixed signs by extracting the sign substring
+    // For "M-+87", extract "-+" and decide which sign to keep
+    const signMatch = cleaned.match(/([MW])\s*([+-]+)\s*(\d+)/i);
+    if (signMatch) {
+      const [, gender, signs, weight] = signMatch;
+      // If there's any + in the sign sequence, prefer + (over weight)
+      const finalSign = signs.includes('+') ? '+' : '-';
+      cleaned = `${gender}${finalSign}${weight} kg`;
+    }
+    
+    // Step 3: Verify cleaned string now matches the pattern
+    const fallbackMatch = cleaned.match(pattern);
+    if (!fallbackMatch) {
+      console.error(`❌ Failed to sanitize weight division "${weightDivision}" after fallback cleanup. Result: "${cleaned}"`);
+      return null;
+    }
+    
+    // Step 4: Reconstruct canonical form from the match (same as primary path)
+    const [, gender, sign, weight, unit] = fallbackMatch;
+    const normalizedGender = gender.toUpperCase();
+    const normalizedSign = sign || '-';
+    const canonical = `${normalizedGender}${normalizedSign}${weight} ${unit || 'kg'}`;
+    
+    console.log(`📝 Sanitized weight division (fallback): "${weightDivision}" → "${canonical}"`);
+    return canonical;
+  }
+  
+  const [, gender, sign, weight, unit] = match;
+  
+  // Normalize gender to uppercase
+  const normalizedGender = gender.toUpperCase();
+  
+  // Determine sign: if both +/- appear (like "M-+87"), prefer + (over weight)
+  // If no sign, default to - (under weight) as it's more common
+  const normalizedSign = sign || '-';
+  
+  // Reconstruct in canonical format
+  const canonical = `${normalizedGender}${normalizedSign}${weight} ${unit || 'kg'}`;
+  
+  if (canonical !== weightDivision) {
+    console.log(`📝 Sanitized weight division: "${weightDivision}" → "${canonical}"`);
+  }
+  
+  return canonical;
+}
+
 export function parseTaekwondoCategoryToParameters(category: string): {
   weightDivision: string;
   subCategory: string;
@@ -191,10 +267,19 @@ export function parseTaekwondoCategoryToParameters(category: string): {
 
   const parts = category.split('|').map(p => p.trim());
   
+  // Extract and sanitize weight division
+  const rawWeightDivision = parts[0];
+  const sanitizedWeightDivision = sanitizeWeightDivision(rawWeightDivision);
+  
+  if (!sanitizedWeightDivision) {
+    console.error(`❌ Invalid weight division in category "${category}"`);
+    return null;
+  }
+  
   // If category is in full format: "M-58 kg | World Senior Division | World Kyorugi Rankings"
   if (parts.length === 3) {
     return {
-      weightDivision: parts[0],
+      weightDivision: sanitizedWeightDivision,
       subCategory: parts[1],
       rankingCategory: parts[2]
     };
@@ -204,7 +289,7 @@ export function parseTaekwondoCategoryToParameters(category: string): {
   // Default to World Senior Division and World Kyorugi Rankings as they are most common
   if (parts.length === 1) {
     return {
-      weightDivision: parts[0],
+      weightDivision: sanitizedWeightDivision,
       subCategory: 'World Senior Division',
       rankingCategory: 'World Kyorugi Rankings'
     };
