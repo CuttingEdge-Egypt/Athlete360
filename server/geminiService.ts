@@ -3729,8 +3729,8 @@ Return your analysis in this JSON format:
               responseMimeType: "application/json",
               responseSchema: responseSchema,
               temperature: 0.3,
-              maxOutputTokens: 12000,
-              tools: [{ googleSearch: {} }] // Enable web search
+              maxOutputTokens: 12000
+              // Note: tools (web search) removed - not compatible with JSON mode
             },
             contents: prompt
           });

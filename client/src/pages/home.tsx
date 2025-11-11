@@ -2213,7 +2213,7 @@ export default function Home() {
                                   {rankingFetchStatus[selectedAthlete.id]?.isLoading ? (
                                     <div className="flex items-center space-x-1">
                                       <div className="w-3 h-3 border border-amber-400 border-t-transparent rounded-full animate-spin" />
-                                      <span>{t('athleteSearch.rankingUpdate.updating')}</span>
+                                      <span className="text-xs">{rankingFetchStatus[selectedAthlete.id]?.currentPhase || t('athleteSearch.rankingUpdate.updating')}</span>
                                     </div>
                                   ) : (
                                     <>
