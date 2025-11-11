@@ -3749,7 +3749,7 @@ Return your analysis in this JSON format:
       let cleaned = text.trim();
       cleaned = cleaned.replace(/```json\s*/, '').replace(/```\s*$/, '');
       cleaned = cleaned.replace(/^```/, '').replace(/```$/, '');
-      cleaned = repairJsonString(cleaned);
+      // REMOVED: repairJsonString was CORRUPTING valid JSON by adding extra quotes
       
       try {
         JSON.parse(cleaned);
