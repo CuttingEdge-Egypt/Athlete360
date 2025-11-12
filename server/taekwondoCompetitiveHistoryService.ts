@@ -57,7 +57,33 @@ export async function fetchCompetitiveHistoryParallel(
       });
     });
     
-    if (result.success && result.competitive_history && result.competitive_history.length > 0) {
+    // Check if the Python script reported success
+    if (!result.success) {
+      // Python script explicitly reported failure
+      console.error(`❌ Python script reported failure for athlete ${athleteId}`);
+      
+      await storage.updateAthlete(athleteId, {
+        apiScrapeStatus: {
+          initialFetchComplete: true,
+          competitiveHistoryFetchStatus: "error",
+          competitiveHistoryProgress: {
+            completed: 0,
+            total: 0,
+            percentage: 0
+          },
+          logs: [{
+            timestamp: new Date().toISOString(),
+            message: `❌ Failed to fetch competitive history: ${result.error || 'Unknown error'}`,
+            type: "error"
+          }],
+          lastUpdated: new Date().toISOString()
+        }
+      });
+      return; // Exit early, don't continue processing
+    }
+    
+    // Success case: check if we got data
+    if (result.competitive_history && result.competitive_history.length > 0) {
       console.log(`✅ Fetched ${result.competitive_history.length} competition events for athlete ${athleteId}`);
       
       // Store competitive history in database
@@ -80,6 +106,7 @@ export async function fetchCompetitiveHistoryParallel(
         }
       });
     } else {
+      // Success but no data found (empty results)
       console.log(`⚠️ No competitive history found for athlete ${athleteId}`);
       
       await storage.updateAthlete(athleteId, {
@@ -97,6 +124,30 @@ export async function fetchCompetitiveHistoryParallel(
     }
   } catch (error) {
     console.error(`❌ Error in fetchCompetitiveHistoryParallel: ${error instanceof Error ? error.message : String(error)}`);
+    
+    // Update status to error before throwing
+    try {
+      await storage.updateAthlete(athleteId, {
+        apiScrapeStatus: {
+          initialFetchComplete: true,
+          competitiveHistoryFetchStatus: "error",
+          competitiveHistoryProgress: {
+            completed: 0,
+            total: 0,
+            percentage: 0
+          },
+          logs: [{
+            timestamp: new Date().toISOString(),
+            message: `❌ Unexpected error: ${error instanceof Error ? error.message : String(error)}`,
+            type: "error"
+          }],
+          lastUpdated: new Date().toISOString()
+        }
+      });
+    } catch (updateError) {
+      console.error(`Failed to update error status: ${updateError}`);
+    }
+    
     throw error;
   }
 }
