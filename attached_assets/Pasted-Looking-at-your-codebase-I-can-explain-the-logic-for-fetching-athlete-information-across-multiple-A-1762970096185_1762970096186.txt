@@ -1,0 +1,133 @@
+Looking at your codebase, I can explain the logic for fetching athlete information across multiple APIs and dates. The system uses a sophisticated multi-layered approach:
+
+Core Multi-API Fetching Logic
+1. Rankings API (Primary Data Source)
+In scraper.py, the main data fetching happens through the /rankingsV2 endpoint:
+
+def _build_api_url(self) -> str:
+    # Builds URL with parameters for specific month/year
+    params.append(f"month={month_num}")
+    params.append(f"year={self.year}")
+    params.append(f"rankingTypeId={category_id}")
+    params.append(f"subCategory1={sub_category_id}")
+    params.append(f"rankingCategoryId={weight_division_id}")
+Key Logic:
+
+Each API call fetches one month of data at a time
+Pagination is handled automatically (100 athletes per page)
+Multiple requests are made until all pages are retrieved
+2. Multi-Weight Division Strategy
+When "All Weights" is selected, the system iterates through each weight division:
+
+def _scrape_all_weight_divisions(self, progress_callback):
+    # Get list of weight divisions based on category
+    if self.sub_category == "Olympic Senior Division":
+        weight_divisions = list(self.olympic_weight_mappings.keys())
+    else:
+        weight_divisions = list(self.world_weight_mappings.keys())
+    
+    # Process each weight division separately
+    for weight_division in weight_divisions:
+        # Temporarily set weight division
+        self.weight_division = weight_division
+        # Fetch data for this specific weight
+        weight_data = self._scrape_single_weight_division_data()
+        all_athletes.extend(weight_data)
+Key Logic:
+
+Each weight division requires a separate API call
+Data is aggregated from all divisions
+Duplicates are removed based on name + ranking
+3. Multi-Country Processing
+For multiple countries, the system makes separate requests per country:
+
+def _scrape_multiple_countries(self, progress_callback):
+    countries = [c.strip() for c in self.country_filter.split(',')]
+    
+    for country in countries:
+        # Temporarily set single country filter
+        self.country_filter = country
+        # Scrape data for this country
+        country_athletes = self._scrape_single_country_data()
+        all_athletes.extend(country_athletes)
+Why? The API only accepts one country UUID per request, so multiple countries must be fetched sequentially.
+
+4. Competition History API (getPlayerProfileV2)
+In scraper.py, athlete competition data uses a different endpoint:
+
+def _get_real_competition_data(self, user_id: str):
+    # Try getPlayerProfileV2 endpoint with month/year parameters
+    getPlayerProfileV2_patterns = [
+        f"{self.base_url}/getPlayerProfileV2?countryId=null&month=7&rankingTypeId={ranking_id}&userId={user_id}&year=2025",
+        f"{self.base_url}/getPlayerProfileV2?countryId=null&month=8&rankingTypeId={ranking_id}&userId={user_id}&year=2025"
+    ]
+Key Logic:
+
+Each athlete requires a separate API call using their userId
+The endpoint returns competition history across all dates
+Month/year parameters filter which ranking period to display
+5. Batch Processing for Multiple Athletes
+In api.py, batch competition extraction:
+
+async def run_batch_competition_task(task_id: str, user_ids: List[str]):
+    for i, user_id in enumerate(user_ids):
+        # Get competition data for this athlete
+        competition_data = get_athlete_competition_data(user_id, scraper_instance)
+        competitions = competition_data.get('competitions', [])
+        
+        athlete_result = {
+            "user_id": user_id,
+            "competitions": competitions,
+            "total_competitions": len(competitions)
+        }
+        all_results.append(athlete_result)
+Data Flow Example
+Here's how the system fetches data for a complex query:
+
+Query: All weights, multiple countries (USA, Korea), July 2025
+
+Session Establishment (once)
+
+Cloudscraper bypasses Cloudflare protection
+Session cookies are maintained
+For Each Weight Division (8 divisions for Olympic):
+
+For Each Country (USA, then Korea):
+Build API URL: /rankingsV2?month=7&year=2025&rankingCategoryId=M-58kg&countryId=USA
+Fetch Page 1 (100 athletes)
+If more data exists, fetch Page 2, Page 3, etc.
+Cache response (24-hour TTL)
+Aggregate all country results for this weight
+Combine & Deduplicate:
+
+Merge all weight divisions
+Remove duplicate athletes (same name + ranking)
+Apply athlete name filter if specified
+For Competition History (if requested):
+
+For Each Athlete's userId:
+Call /getPlayerProfileV2?userId={id}&month=7&year=2025
+Extract competition list from response
+Cache result
+Rate Limiting & Caching
+def _rate_limit(self):
+    """Implement rate limiting between requests"""
+    time_since_last = current_time - self.last_request_time
+    if time_since_last < self.min_delay:
+        sleep_time = self.min_delay - time_since_last + random_delay
+        time.sleep(sleep_time)
+Key Features:
+
+2-second minimum delay between requests
+Cached responses avoid redundant API calls
+Background tasks prevent UI blocking
+Summary
+The system fetches data through:
+
+One API call per month/year/weight/country combination for rankings
+Pagination handling for large result sets (100/page)
+Sequential processing for multiple weights or countries
+Separate API calls per athlete for competition history
+Intelligent caching to avoid redundant requests
+Rate limiting to be respectful to the server
+This multi-layered approach allows comprehensive data collection while managing API limitations and maintaining good performance.
