@@ -1939,6 +1939,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sportName = sport?.name || "Unknown Sport";
       const isTaekwondo = sportName.toLowerCase().includes('taekwondo');
       
+      // For Taekwondo athletes with API scraping, check if background fetch is still in progress
+      if (isTaekwondo && athlete.apiScrapeStatus) {
+        const status = athlete.apiScrapeStatus.competitiveHistoryFetchStatus;
+        
+        // Wait for both "pending" and "in_progress" states
+        if (status === "pending" || status === "in_progress") {
+          // Background competitive history fetch is still running or queued
+          await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "rank", "Competitive History Analysis");
+          return res.status(202).json({ 
+            message: language === 'ar' 
+              ? "لا يزال جاري جلب التاريخ التنافسي من واجهة برمجة التطبيقات العالمية للتايكوندو. يرجى الانتظار قليلاً والمحاولة مرة أخرى."
+              : "Competitive history is still being fetched from the World Taekwondo API. Please wait a moment and try again.",
+            status: status,
+            progress: athlete.apiScrapeStatus.competitiveHistoryProgress,
+            shouldRetry: true,
+            estimatedWaitSeconds: 30 // Rough estimate for user feedback
+          });
+        } else if (status === "error") {
+          // Background fetch failed - notify user but continue with BrowserUse fallback
+          console.log(`⚠️ API fetch failed for ${athlete.name}, falling back to BrowserUse`);
+          // Don't return here - we'll fall through to BrowserUse logic
+          // The frontend can detect this via the apiScrapeStatus field in the athlete object
+        }
+        // If status is "completed" or undefined, proceed normally with analysis generation
+      }
+      
       let competitiveHistoryData = athlete.competitiveHistory;
       
       // For Taekwondo: Check if we have raw competition array from API OR BrowserUse career_phases
