@@ -112,6 +112,21 @@ export const athletes = pgTable("athletes", {
     }>;
     [key: string]: any; // Allow model to add extra fields dynamically
   }>(),
+  apiScrapeStatus: jsonb("api_scrape_status").$type<{
+    initialFetchComplete?: boolean;
+    competitiveHistoryFetchStatus?: "pending" | "in_progress" | "completed" | "error";
+    competitiveHistoryProgress?: {
+      completed: number;
+      total: number;
+      percentage: number;
+    };
+    logs?: Array<{
+      timestamp: string;
+      message: string;
+      type: "info" | "success" | "error";
+    }>;
+    lastUpdated?: string;
+  }>(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
