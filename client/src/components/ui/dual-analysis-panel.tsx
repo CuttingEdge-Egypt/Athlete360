@@ -67,37 +67,192 @@ export function DualAnalysisPanel({
       );
     }
 
-    // If no years available, show message
-    if (availableYears.length === 0) {
-      return (
-        <div className="p-6 text-center">
-          <p className="text-gray-400">No year data available</p>
-        </div>
+    // NEW: Display all 16 months of rank history in a single continuous graph (no year division)
+    // Group rank history data by category across ALL entries
+    const categoryGroups: { [key: string]: any[] } = {};
+    rankHistoryData.forEach((entry: any) => {
+      const categoryKey = entry.categoryKey || 'default';
+      if (!categoryGroups[categoryKey]) {
+        categoryGroups[categoryKey] = [];
+      }
+      categoryGroups[categoryKey].push(entry);
+    });
+
+    // Sort entries within each category by date
+    Object.keys(categoryGroups).forEach(key => {
+      categoryGroups[key].sort((a: any, b: any) => 
+        new Date(a.date).getTime() - new Date(b.date).getTime()
       );
-    }
+    });
 
-    // Render year tabs
+    // Category color palette
+    const categoryColors = [
+      { border: 'rgb(251, 146, 60)', bg: 'rgba(251, 146, 60, 0.1)' },   // Orange
+      { border: 'rgb(59, 130, 246)', bg: 'rgba(59, 130, 246, 0.1)' },   // Blue
+      { border: 'rgb(34, 197, 94)', bg: 'rgba(34, 197, 94, 0.1)' },     // Green
+      { border: 'rgb(168, 85, 247)', bg: 'rgba(168, 85, 247, 0.1)' },   // Purple
+      { border: 'rgb(236, 72, 153)', bg: 'rgba(236, 72, 153, 0.1)' },   // Pink
+    ];
+
+    // Create all unique date labels across all categories
+    const allDates = new Set<string>();
+    Object.values(categoryGroups).forEach(entries => {
+      entries.forEach(entry => allDates.add(entry.date));
+    });
+    const sortedLabels = Array.from(allDates).sort((a, b) => 
+      new Date(a).getTime() - new Date(b).getTime()
+    );
+
+    // Create datasets for each category
+    const datasets = Object.keys(categoryGroups).map((categoryKey, index) => {
+      const categoryData = categoryGroups[categoryKey];
+      const categoryLabel = categoryData[0]?.categoryLabel || categoryKey;
+      const colorIndex = index % categoryColors.length;
+      const colors = categoryColors[colorIndex];
+
+      // Map data to all dates (null for missing dates)
+      const dataPoints = sortedLabels.map(label => {
+        const entry = categoryData.find(e => e.date === label);
+        return entry ? entry.rank : null;
+      });
+
+      return {
+        label: categoryLabel,
+        data: dataPoints,
+        borderColor: colors.border,
+        backgroundColor: colors.bg,
+        fill: true,
+        tension: 0.3,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        spanGaps: false,
+      };
+    });
+
+    const chartData = {
+      labels: sortedLabels,
+      datasets
+    };
+
+    const chartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          reverse: true,
+          beginAtZero: false,
+          ticks: {
+            color: 'rgb(156, 163, 175)',
+            callback: function(value: any) {
+              return '#' + value;
+            }
+          },
+          grid: {
+            color: 'rgba(75, 85, 99, 0.3)'
+          }
+        },
+        x: {
+          ticks: {
+            color: 'rgb(156, 163, 175)',
+            maxRotation: 45,
+            minRotation: 45
+          },
+          grid: {
+            color: 'rgba(75, 85, 99, 0.3)'
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: true,
+          labels: {
+            color: 'rgb(209, 213, 219)'
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context: any) {
+              return 'Rank: #' + context.parsed.y;
+            }
+          }
+        }
+      }
+    };
+
     return (
-      <Tabs defaultValue={defaultYear} className="w-full">
-        <TabsList className="bg-athlete-gray-700 mb-6">
-          {availableYears.map(year => (
-            <TabsTrigger
-              key={year}
-              value={year.toString()}
-              data-testid={`tab-rank-year-${year}`}
-              className="data-[state=active]:bg-athlete-accent"
-            >
-              {year}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      <div className="space-y-6">
+        <Card className="bg-athlete-gray-800 border-gray-600">
+          <CardHeader>
+            <CardTitle className="text-2xl text-gray-100 flex items-center">
+              <TrendingUp className="mr-3 text-orange-400" size={24} />
+              Rank Progression Over Time (16 Months)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-96">
+              <Line data={chartData} options={chartOptions} />
+            </div>
+          </CardContent>
+        </Card>
 
-        {availableYears.map(year => (
-          <TabsContent key={year} value={year.toString()}>
-            {renderRankHistoryForYear(year)}
-          </TabsContent>
-        ))}
-      </Tabs>
+        {rankAnalysis && (
+          <Card className="bg-athlete-gray-800 border-gray-600">
+            <CardHeader>
+              <CardTitle className="text-2xl text-gray-100 flex items-center">
+                <BarChart className="mr-3 text-blue-400" size={24} />
+                Rank History Analysis
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {typeof rankAnalysis === 'string' ? (
+                  <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
+                    {rankAnalysis}
+                  </div>
+                ) : (
+                  <>
+                    {rankAnalysis.trends_and_outlook && (
+                      <div className="bg-athlete-gray-700 p-4 rounded-lg">
+                        <h4 className="font-semibold text-white mb-2">Trends & Outlook</h4>
+                        <p className="text-gray-300 text-sm leading-relaxed">{rankAnalysis.trends_and_outlook}</p>
+                      </div>
+                    )}
+                    {rankAnalysis.progression_timeline && Array.isArray(rankAnalysis.progression_timeline) && rankAnalysis.progression_timeline.length > 0 && (
+                      <div className="bg-athlete-gray-700 p-4 rounded-lg">
+                        <h4 className="font-semibold text-white mb-3">Progression Timeline</h4>
+                        <div className="space-y-2">
+                          {rankAnalysis.progression_timeline.map((item: any, index: number) => (
+                            <div key={index} className="border-l-2 border-blue-400 pl-3 py-1">
+                              <div className="font-medium text-blue-300 text-sm">{item.period}</div>
+                              <div className="text-gray-300 text-sm">{item.rank_change}</div>
+                              {item.significance && (
+                                <div className="text-gray-400 text-xs mt-1 italic">{item.significance}</div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {rankAnalysis.performance_factors && Array.isArray(rankAnalysis.performance_factors) && rankAnalysis.performance_factors.length > 0 && (
+                      <div className="bg-athlete-gray-700 p-4 rounded-lg">
+                        <h4 className="font-semibold text-white mb-3">Performance Factors</h4>
+                        <div className="space-y-2">
+                          {rankAnalysis.performance_factors.map((factor: any, index: number) => (
+                            <div key={index} className="flex items-start space-x-2">
+                              <Trophy className="w-4 h-4 text-yellow-400 mt-1 flex-shrink-0" />
+                              <div className="text-gray-300 text-sm">{factor}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     );
   };
 
