@@ -742,6 +742,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 };
               }
               
+              // Extract and store World Taekwondo userId for future direct lookups
+              const taekwondoUserId = apiResult.athlete.userId || apiResult.athlete.userid;
+              if (taekwondoUserId) {
+                updateData.taekwondoUserId = String(taekwondoUserId);
+                console.log(`🆔 Storing World Taekwondo userId: ${taekwondoUserId}`);
+              }
+              
               if (apiResult.competition_history && apiResult.competition_history.length > 0) {
                 updateData.competitiveHistory = apiResult.competition_history;
               }
@@ -1115,6 +1122,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   fetchedAt: new Date().toISOString(),
                   source: 'World Taekwondo API'
                 };
+              }
+              
+              // Extract and store World Taekwondo userId for future direct lookups
+              const taekwondoUserId = apiResult.athlete.userId || apiResult.athlete.userid;
+              if (taekwondoUserId) {
+                updateData.taekwondoUserId = String(taekwondoUserId);
+                console.log(`🆔 Storing World Taekwondo userId: ${taekwondoUserId}`);
               }
               
               if (apiResult.competition_history && apiResult.competition_history.length > 0) {

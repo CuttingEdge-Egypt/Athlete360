@@ -63,6 +63,7 @@ export const athletes = pgTable("athletes", {
   sportId: varchar("sport_id").notNull().references(() => sports.id),
   name: varchar("name").notNull(),
   nameArabic: varchar("name_arabic"), // Arabic name for bilingual support
+  taekwondoUserId: varchar("taekwondo_user_id"), // World Taekwondo API userId for direct lookups (nullable for backward compatibility)
   age: integer("age"),
   gender: varchar("gender"), // Male, Female, Other
   country: varchar("country"), // This is nationality 

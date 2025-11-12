@@ -673,8 +673,18 @@ if __name__ == "__main__":
         action="store_true",
         help="Enable comprehensive parallel fetching back to March 2021 (for NEW athletes only).",
     )
+    parser.add_argument(
+        "--user-id",
+        dest="user_id",
+        help="World Taekwondo athlete userId for direct API lookup (bypasses name search).",
+    )
 
     args = parser.parse_args()
+    
+    # Validate: if user_id is provided, weight_division becomes optional
+    if args.user_id and not args.weight_division:
+        # Allow userId-only lookups without weight requirement
+        args.weight_division = None
 
     # Use comprehensive parallel fetching if requested
     if args.comprehensive:
