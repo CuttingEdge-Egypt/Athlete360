@@ -587,52 +587,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // PARALLEL EXECUTION: Run personal info + image search simultaneously
       console.log(`🚀 Starting parallel generation: personal info + image search for ${englishName}...`);
       
-      const [personalInfo, profileImageUrl] = await Promise.all([
-        // Personal info generation
-        (async () => {
-          try {
-            const info = await getAthletePersonalInfoGemini(englishName, sport.name, req.body.nationality);
-            console.log(`✅ Personal info generated for ${englishName}`);
-            return info;
-          } catch (error) {
-            if (error instanceof Error && error.message === 'PERSONAL_INFO_NOT_FOUND') {
-              console.log(`⚠️ No personal info found for ${englishName}, using basic information`);
-              return null;
-            }
-            // Check for Gemini API quota error
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            if (errorMessage.includes('quota') || errorMessage.includes('RESOURCE_EXHAUSTED') || errorMessage.includes('429')) {
-              console.log(`⚠️ Gemini API quota exceeded, falling back to GPT-5 for ${englishName}...`);
-              try {
-                const info = await getAthletePersonalInfo(englishName, sport.name, req.body.nationality);
-                console.log(`✅ Successfully retrieved personal info using GPT-5 fallback`);
-                return info;
-              } catch (gptError) {
-                console.log(`⚠️ GPT-5 fallback also failed for ${englishName}, using basic information`);
+      let personalInfo, profileImageUrl;
+      try {
+        [personalInfo, profileImageUrl] = await Promise.all([
+          // Personal info generation
+          (async () => {
+            try {
+              const info = await getAthletePersonalInfoGemini(englishName, sport.name, req.body.nationality);
+              console.log(`✅ Personal info generated for ${englishName}`);
+              return info;
+            } catch (error) {
+              const errorMessage = error instanceof Error ? error.message : String(error);
+              
+              // Check for country mismatch - this is a critical error that should be shown to user
+              if (errorMessage.startsWith('COUNTRY_MISMATCH:')) {
+                const correctCountry = errorMessage.split(':')[1];
+                console.error(`❌ Country mismatch for ${englishName}: Expected "${athleteCountry}", Found "${correctCountry}"`);
+                throw new Error(`COUNTRY_MISMATCH:${correctCountry}`);
+              }
+              
+              if (error instanceof Error && error.message === 'PERSONAL_INFO_NOT_FOUND') {
+                console.log(`⚠️ No personal info found for ${englishName}, using basic information`);
                 return null;
               }
+              
+              // Check for Gemini API quota error
+              if (errorMessage.includes('quota') || errorMessage.includes('RESOURCE_EXHAUSTED') || errorMessage.includes('429')) {
+                console.log(`⚠️ Gemini API quota exceeded, falling back to GPT-5 for ${englishName}...`);
+                try {
+                  const info = await getAthletePersonalInfo(englishName, sport.name, req.body.nationality);
+                  console.log(`✅ Successfully retrieved personal info using GPT-5 fallback`);
+                  return info;
+                } catch (gptError) {
+                  console.log(`⚠️ GPT-5 fallback also failed for ${englishName}, using basic information`);
+                  return null;
+                }
+              }
+              throw error;
             }
-            throw error;
-          }
-        })(),
-        
-        // Image search
-        (async () => {
-          try {
-            const imageResult = await getAthleteImage(englishName, sport.name, athleteCountry, undefined);
-            if (imageResult.success) {
-              const url = imageResult.downloadUrl || imageResult.embedUrl || undefined;
-              console.log(`✅ Found image for ${englishName}`);
-              return url;
+          })(),
+          
+          // Image search
+          (async () => {
+            try {
+              const imageResult = await getAthleteImage(englishName, sport.name, athleteCountry, undefined);
+              if (imageResult.success) {
+                const url = imageResult.downloadUrl || imageResult.embedUrl || undefined;
+                console.log(`✅ Found image for ${englishName}`);
+                return url;
+              }
+              console.log(`⚠️ No image found for ${englishName}`);
+              return undefined;
+            } catch (error) {
+              console.error(`❌ Image search failed for ${englishName}:`, error);
+              return undefined;
             }
-            console.log(`⚠️ No image found for ${englishName}`);
-            return undefined;
-          } catch (error) {
-            console.error(`❌ Image search failed for ${englishName}:`, error);
-            return undefined;
-          }
-        })()
-      ]);
+          })()
+        ]);
+      } catch (error) {
+        // Handle country mismatch error
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (errorMessage.startsWith('COUNTRY_MISMATCH:')) {
+          const correctCountry = errorMessage.split(':')[1];
+          return res.status(400).json({ 
+            message: language === 'ar' 
+              ? `تم العثور على الرياضي ${englishName} لكنه يمثل ${correctCountry} وليس ${athleteCountry}. يرجى تحديث اختيارك للدولة وإعادة المحاولة.`
+              : `Athlete ${englishName} was found, but they compete for ${correctCountry}, not ${athleteCountry}. Please update your country selection and try again.`,
+            error: 'COUNTRY_MISMATCH',
+            correctCountry
+          });
+        }
+        throw error; // Re-throw other errors
+      }
 
       // Translate name to Arabic for bilingual search (unless already provided from Arabic search)
       console.log(`🌐 Preparing Arabic name for ${englishName}...`);

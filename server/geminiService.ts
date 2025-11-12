@@ -3216,6 +3216,7 @@ export async function getAthletePersonalInfoGemini(name: string, sport: string, 
     - Use "N/A" only for information that genuinely cannot be found after extensive search
     - Prioritize finding any available personal details over strict verification
     - Only respond with {"error": "no_personal_info_found"} if absolutely no personal information exists
+    - **COUNTRY VERIFICATION**: If the athlete is found but competes for a DIFFERENT country than specified, respond with {"error": "country_mismatch", "correct_country": "COUNTRY_NAME"}
     - Include partial information when available (e.g., approximate age, category, etc.)
     - Position and Club fields are ONLY for team sports - use "N/A" for individual sports
     - Keep educational background separate from club information
@@ -3268,6 +3269,11 @@ export async function getAthletePersonalInfoGemini(name: string, sport: string, 
       throw new Error('PERSONAL_INFO_NOT_FOUND');
     }
     
+    // Check for country mismatch
+    if (parsedResult.error === 'country_mismatch') {
+      throw new Error(`COUNTRY_MISMATCH:${parsedResult.correct_country || 'Unknown'}`);
+    }
+    
     // Clean up age format - remove date references
     let cleanAge = parsedResult.age;
     if (cleanAge && cleanAge !== "N/A") {
@@ -3296,6 +3302,11 @@ export async function getAthletePersonalInfoGemini(name: string, sport: string, 
     };
   } catch (error) {
     console.error(`❌ Error getting personal info for ${name} with Gemini:`, error);
+    
+    // CRITICAL: Rethrow COUNTRY_MISMATCH errors immediately so routes.ts can handle them
+    if (error instanceof Error && error.message.startsWith('COUNTRY_MISMATCH:')) {
+      throw error;
+    }
     
     if (error instanceof Error && error.message.includes('PERSONAL_INFO_NOT_FOUND')) {
       throw error;
