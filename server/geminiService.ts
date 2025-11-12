@@ -3193,6 +3193,26 @@ export async function getAthletePersonalInfoGemini(name: string, sport: string, 
     - Athletics: Event specialization (e.g., "100m", "Marathon", "High Jump")
     
     ${isTaekwondo ? `
+    FOR TAEKWONDO ATHLETES - CRITICAL WEIGHT CATEGORY CLASSIFICATION:
+    
+    **WORLD RANKINGS (World Kyorugi Rankings / World Senior Division):**
+    Men's Weight Divisions: M-54 kg, M-58 kg, M-63 kg, M-68 kg, M-74 kg, M-80 kg, M-87 kg, M+87 kg
+    Women's Weight Divisions: W-46 kg, W-49 kg, W-53 kg, W-57 kg, W-62 kg, W-67 kg, W-73 kg, W+73 kg
+    
+    **OLYMPIC RANKINGS (Olympic Kyorugi Rankings / Olympic Senior Division):**
+    Men's Weight Divisions: M-58 kg, M-68 kg, M-80 kg, M+80 kg
+    Women's Weight Divisions: W-49 kg, W-57 kg, W-67 kg, W+67 kg
+    
+    **CRITICAL INSTRUCTIONS:**
+    1. Search the official World Taekwondo website (worldtkd.simplycompete.com) to determine which ranking the athlete appears in
+    2. If the athlete competes in Olympic rankings, use OLYMPIC weight divisions (M+80 kg for heavyweights)
+    3. If the athlete competes in World rankings, use WORLD weight divisions (M+87 kg for heavyweights)
+    4. The category you return MUST match the ranking type the athlete is found in
+    5. Examples:
+       - If athlete appears in "Olympic Kyorugi Rankings" at +80kg → return "M+80 kg"
+       - If athlete appears in "World Kyorugi Rankings" at +87kg → return "M+87 kg"
+       - If athlete appears in World rankings but you only find weight info (e.g., 85kg) → classify to correct World division (M-87 kg or M+87 kg)
+    
     FOR TAEKWONDO ATHLETES - CRITICAL DATABASE NAME FORMAT:
     - Search the official World Taekwondo website (worldtkd.simplycompete.com) or rankings databases
     - Extract the EXACT name format as listed in their ranking system
