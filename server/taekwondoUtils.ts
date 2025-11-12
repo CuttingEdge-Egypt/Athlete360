@@ -2,11 +2,20 @@
  * Taekwondo-specific utility functions for processing athlete data
  */
 
+import { normalizeCategoryForDB } from './taekwondoApiService.js';
+
 export interface CategoryRank {
   category: string;
   rank: string;
   points: string;
   lastUpdated: string;
+}
+
+export interface CategorySummaryEntry {
+  category_name?: string;
+  ranking?: string | number;
+  points?: string | number;
+  [key: string]: any;
 }
 
 export interface CompetitionEntry {
@@ -71,6 +80,51 @@ export function extractLatestTaekwondoRanks(competition_history: CompetitionEntr
   console.log(`📊 Extracted ${categories.length} category ranks from ${competition_history.length} competitions`);
   categories.forEach(cat => {
     console.log(`   - ${cat.category}: Rank #${cat.rank}, ${cat.points} points (updated: ${cat.lastUpdated})`);
+  });
+
+  return categories;
+}
+
+/**
+ * Extracts ranks from category_summary (World Taekwondo API)
+ * Transforms category summary data to CategoryRank format for storage
+ * @param category_summary Array of category summary entries from the API
+ * @returns Array of category ranks with current data
+ */
+export function extractRanksFromCategorySummary(category_summary: CategorySummaryEntry[] | undefined): CategoryRank[] {
+  if (!category_summary || category_summary.length === 0) {
+    return [];
+  }
+
+  const categories: CategoryRank[] = [];
+  const now = new Date().toISOString();
+
+  for (const entry of category_summary) {
+    // Skip entries without required fields
+    if (!entry.category_name || entry.ranking === undefined || entry.ranking === null) {
+      continue;
+    }
+
+    // Use normalizeCategoryForDB to get stable category label
+    const { categoryLabel } = normalizeCategoryForDB(entry.category_name);
+
+    // Convert ranking and points to strings
+    const rank = typeof entry.ranking === 'string' ? entry.ranking : entry.ranking.toString();
+    const points = entry.points !== undefined && entry.points !== null
+      ? (typeof entry.points === 'string' ? entry.points : entry.points.toString())
+      : '0';
+
+    categories.push({
+      category: categoryLabel,
+      rank,
+      points,
+      lastUpdated: now
+    });
+  }
+
+  console.log(`📊 Extracted ${categories.length} category ranks from category_summary`);
+  categories.forEach(cat => {
+    console.log(`   - ${cat.category}: Rank #${cat.rank}, ${cat.points} points`);
   });
 
   return categories;
