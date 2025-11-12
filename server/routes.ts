@@ -693,7 +693,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               throw new Error('No category information available');
             }
             
-            // Call the new Python API scraper with COMPREHENSIVE mode for new athletes
+            // Step 1: Initial API call to get current data + 16 months of rank history
             const apiResult = await fetchTaekwondoAthleteData({
               athleteName: nameForApi,
               country: athleteCountry,
@@ -701,9 +701,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               subCategory: categoryParams.subCategory,
               rankingCategory: categoryParams.rankingCategory,
               monthsBack: 12,
-              rankHistoryMonths: 10,
+              rankHistoryMonths: 16, // Get 16 months of rank history (API limit)
               maxResults: 0, // 0 = no limit, fetch all athletes
-              comprehensive: true // NEW ATHLETES: Fetch ALL data back to March 2021 in parallel
+              comprehensive: false // Initial call only - background thread will fetch competitive history
             });
             
             if (apiResult.success && apiResult.athlete) {
@@ -791,6 +791,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
               if (Object.keys(updateData).length > 0) {
                 await storage.updateAthlete(newAthlete.id, updateData);
                 console.log(`✅ Taekwondo API: Updated ${englishName} with API data`);
+                
+                // Step 2: Launch background thread to fetch comprehensive competitive history
+                // Only if we have userId and category_summary
+                if (taekwondoUserId && apiResult.category_summary && apiResult.category_summary.length > 0) {
+                  console.log(`🏃 Launching background thread to fetch competitive history for userId ${taekwondoUserId}...`);
+                  
+                  // Update apiScrapeStatus to mark initial fetch complete and competitive history as pending
+                  await storage.updateAthlete(newAthlete.id, {
+                    apiScrapeStatus: {
+                      initialFetchComplete: true,
+                      competitiveHistoryFetchStatus: "pending",
+                      logs: [{
+                        timestamp: new Date().toISOString(),
+                        message: `Initial API call complete. Starting competitive history fetch across 16 months...`,
+                        type: "info"
+                      }],
+                      lastUpdated: new Date().toISOString()
+                    }
+                  });
+                  
+                  // Launch background process (don't await - let it run independently)
+                  (async () => {
+                    try {
+                      const { fetchCompetitiveHistoryParallel } = await import('./taekwondoCompetitiveHistoryService.js');
+                      
+                      await fetchCompetitiveHistoryParallel(
+                        newAthlete.id,
+                        taekwondoUserId,
+                        apiResult.category_summary,
+                        storage
+                      );
+                    } catch (bgError) {
+                      console.error(`❌ Background competitive history fetch failed: ${bgError instanceof Error ? bgError.message : String(bgError)}`);
+                      await storage.updateAthlete(newAthlete.id, {
+                        apiScrapeStatus: {
+                          initialFetchComplete: true,
+                          competitiveHistoryFetchStatus: "error",
+                          logs: [{
+                            timestamp: new Date().toISOString(),
+                            message: `Error fetching competitive history: ${bgError instanceof Error ? bgError.message : String(bgError)}`,
+                            type: "error"
+                          }],
+                          lastUpdated: new Date().toISOString()
+                        }
+                      });
+                    }
+                  })();
+                }
               } else {
                 console.log(`⚠️ Taekwondo API returned success but no usable data, trying BrowserUse...`);
                 throw new Error('No usable data from API');

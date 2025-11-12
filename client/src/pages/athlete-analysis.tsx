@@ -235,6 +235,80 @@ export default function AthleteAnalysis() {
             </Card>
           </div>
 
+          {/* DEBUG: API Scraping Status (TEMPORARY - will be removed later) */}
+          {athlete.apiScrapeStatus && (
+            <Card className="bg-yellow-900/20 border-yellow-600/50 mb-8">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-bold mb-4 text-yellow-400 flex items-center">
+                  🔧 DEBUG: API Scraping Status (Temporary)
+                </h3>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm text-gray-400">Initial Fetch</label>
+                      <p className="text-white font-medium">
+                        {athlete.apiScrapeStatus.initialFetchComplete ? "✅ Complete" : "⏳ Pending"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-gray-400">Competitive History Status</label>
+                      <p className="text-white font-medium">
+                        {athlete.apiScrapeStatus.competitiveHistoryFetchStatus === "completed" && "✅ Completed"}
+                        {athlete.apiScrapeStatus.competitiveHistoryFetchStatus === "in_progress" && "🏃 In Progress"}
+                        {athlete.apiScrapeStatus.competitiveHistoryFetchStatus === "pending" && "⏳ Pending"}
+                        {athlete.apiScrapeStatus.competitiveHistoryFetchStatus === "error" && "❌ Error"}
+                        {!athlete.apiScrapeStatus.competitiveHistoryFetchStatus && "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {athlete.apiScrapeStatus.competitiveHistoryProgress && (
+                    <div>
+                      <label className="text-sm text-gray-400 mb-2 block">Progress</label>
+                      <div className="bg-gray-800 rounded-full h-6 overflow-hidden">
+                        <div 
+                          className="bg-gradient-to-r from-blue-500 to-purple-500 h-full flex items-center justify-center text-white text-xs font-bold transition-all duration-300"
+                          style={{ width: `${athlete.apiScrapeStatus.competitiveHistoryProgress.percentage}%` }}
+                        >
+                          {athlete.apiScrapeStatus.competitiveHistoryProgress.percentage}%
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-400 mt-1">
+                        {athlete.apiScrapeStatus.competitiveHistoryProgress.completed} / {athlete.apiScrapeStatus.competitiveHistoryProgress.total} API calls
+                      </p>
+                    </div>
+                  )}
+                  
+                  {athlete.apiScrapeStatus.logs && athlete.apiScrapeStatus.logs.length > 0 && (
+                    <div>
+                      <label className="text-sm text-gray-400 mb-2 block">Recent Logs</label>
+                      <div className="bg-gray-900 rounded p-3 max-h-40 overflow-y-auto font-mono text-xs space-y-1">
+                        {athlete.apiScrapeStatus.logs.slice(-10).map((log, idx) => (
+                          <div 
+                            key={idx}
+                            className={`${
+                              log.type === "error" ? "text-red-400" : 
+                              log.type === "success" ? "text-green-400" : 
+                              "text-gray-300"
+                            }`}
+                          >
+                            <span className="text-gray-500">[{new Date(log.timestamp).toLocaleTimeString()}]</span> {log.message}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {athlete.apiScrapeStatus.lastUpdated && (
+                    <p className="text-xs text-gray-500">
+                      Last updated: {new Date(athlete.apiScrapeStatus.lastUpdated).toLocaleString()}
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Personal Information Card */}
           {(athlete.country || athlete.age || athlete.personalInfo) && (
             <Card className="bg-athlete-gray-800 border-gray-700">
