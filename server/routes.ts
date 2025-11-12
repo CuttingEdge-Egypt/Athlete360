@@ -54,7 +54,7 @@ import { analyzeVideoFile, analyzeVideoComprehensive, getSportConfig } from "./v
 import { paymobService } from "./paymobService";
 import { isIndividualSport, fetchTaekwondoRankAndHistory, fetchGeneralSportRankAndHistory, fetchTeamSportPlayerInfo } from "./browserUseService";
 import { fetchTaekwondoAthleteData, parseTaekwondoCategoryToParameters } from "./taekwondoApiService";
-import { extractLatestTaekwondoRanks } from "./taekwondoUtils";
+import { extractLatestTaekwondoRanks, extractRanksFromCategorySummary } from "./taekwondoUtils";
 import staticDevPlanEn from "./static-data/dev-plan-en.json" with { type: "json" };
 import staticDevPlanAr from "./static-data/dev-plan-ar.json" with { type: "json" };
 import staticBioEn from "./static-data/bio-en.json" with { type: "json" };
@@ -712,17 +712,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Transform API data to match our storage format
               const updateData: any = {};
               
-              // Extract all category ranks from competition_history using shared utility
-              const categories = extractLatestTaekwondoRanks(apiResult.competition_history);
+              // Priority 1: Extract all category ranks from category_summary
+              let categories = extractRanksFromCategorySummary(apiResult.category_summary);
+              let rankSource = 'category_summary';
+              
+              // Priority 2: Fallback to competition_history if category_summary is empty
+              if (categories.length === 0) {
+                categories = extractLatestTaekwondoRanks(apiResult.competition_history);
+                rankSource = 'competition_history';
+              }
               
               if (categories.length > 0) {
+                console.log(`📊 Storing ${categories.length} ranks from ${rankSource}`);
                 updateData.rankings = {
                   categories,
                   fetchedAt: new Date().toISOString(),
                   source: 'World Taekwondo API'
                 };
               } else if (apiResult.athlete.ranking) {
-                // Fallback: Store basic ranking data when no competition history available
+                // Priority 3: Store basic ranking data when both category_summary and competition_history are unavailable
+                console.log(`📊 Storing single rank from athlete.ranking fallback`);
                 updateData.rankings = {
                   currentRank: apiResult.athlete.ranking,
                   points: apiResult.athlete.points || undefined,
@@ -1078,17 +1087,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Transform API data to match our storage format
               const updateData: any = {};
               
-              // Extract all category ranks from competition_history using shared utility
-              const categories = extractLatestTaekwondoRanks(apiResult.competition_history);
+              // Priority 1: Extract all category ranks from category_summary
+              let categories = extractRanksFromCategorySummary(apiResult.category_summary);
+              let rankSource = 'category_summary';
+              
+              // Priority 2: Fallback to competition_history if category_summary is empty
+              if (categories.length === 0) {
+                categories = extractLatestTaekwondoRanks(apiResult.competition_history);
+                rankSource = 'competition_history';
+              }
               
               if (categories.length > 0) {
+                console.log(`📊 Storing ${categories.length} ranks from ${rankSource}`);
                 updateData.rankings = {
                   categories,
                   fetchedAt: new Date().toISOString(),
                   source: 'World Taekwondo API'
                 };
               } else if (apiResult.athlete.ranking) {
-                // Fallback: Store basic ranking data when no competition history available
+                // Priority 3: Store basic ranking data when both category_summary and competition_history are unavailable
+                console.log(`📊 Storing single rank from athlete.ranking fallback`);
                 updateData.rankings = {
                   currentRank: apiResult.athlete.ranking,
                   points: apiResult.athlete.points || undefined,
