@@ -15,6 +15,29 @@ export async function fetchCompetitiveHistoryParallel(
 ): Promise<void> {
   console.log(`🏃 Starting competitive history fetch for athlete ${athleteId}, userId ${userId}...`);
   
+  // Guard against empty category list to avoid division by zero
+  if (!categorySummary || categorySummary.length === 0) {
+    console.log(`⚠️ No categories provided for athlete ${athleteId}, skipping competitive history fetch`);
+    await storage.updateAthlete(athleteId, {
+      apiScrapeStatus: {
+        initialFetchComplete: true,
+        competitiveHistoryFetchStatus: "completed",
+        competitiveHistoryProgress: {
+          completed: 0,
+          total: 0,
+          percentage: 0
+        },
+        logs: [{
+          timestamp: new Date().toISOString(),
+          message: `No categories available - skipping competitive history fetch`,
+          type: "info"
+        }],
+        lastUpdated: new Date().toISOString()
+      }
+    });
+    return;
+  }
+  
   try {
     // Update status to in_progress
     await storage.updateAthlete(athleteId, {
