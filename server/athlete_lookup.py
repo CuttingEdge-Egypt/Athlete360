@@ -591,7 +591,7 @@ def _build_comprehensive_timeline_parallel(
     # Sort competitions chronologically (most recent first for display)
     unique_competitions.sort(
         key=lambda x: (
-            x.get("generated_end_date", "1900-01-01")
+            x.get("generated_end_date") or "1900-01-01"
         ),
         reverse=True
     )
@@ -750,7 +750,7 @@ def fetch_competitive_history_parallel(
     
     # Sort chronologically (most recent first)
     unique_competitions.sort(
-        key=lambda x: (x.get("generated_end_date", "1900-01-01")),
+        key=lambda x: (x.get("generated_end_date") or "1900-01-01"),
         reverse=True
     )
     

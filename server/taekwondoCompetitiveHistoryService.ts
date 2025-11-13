@@ -189,7 +189,7 @@ async function callPythonCompetitiveHistory(
       'server/fetch_competitive_history.py',
       '--user-id', userId,
       '--category-summary', JSON.stringify(categorySummary),
-      '--months-back', '16' // API data retention limit
+      '--months-back', '57' // March 2021 to present
     ];
     
     console.log(`🐍 Python args: ${pythonArgs.join(' ')}`);
