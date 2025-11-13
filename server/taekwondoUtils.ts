@@ -98,6 +98,10 @@ export function extractRanksFromRankHistory(rank_history: any[] | undefined): Ca
 
   // Group by category and find the most recent entry for each
   const categoryMap = new Map<string, any>();
+  
+  // Month names for date parsing (shared across forEach and map)
+  const monthNames = ['january', 'february', 'march', 'april', 'may', 'june', 
+                      'july', 'august', 'september', 'october', 'november', 'december'];
 
   rank_history.forEach((entry) => {
     if (!entry.category || !entry.ranking || !entry.month || !entry.year) {
@@ -107,8 +111,6 @@ export function extractRanksFromRankHistory(rank_history: any[] | undefined): Ca
     const categoryKey = entry.category.trim();
     
     // Create a sortable date key
-    const monthNames = ['january', 'february', 'march', 'april', 'may', 'june', 
-                        'july', 'august', 'september', 'october', 'november', 'december'];
     const monthNum = typeof entry.month === 'string' 
       ? monthNames.indexOf(entry.month.toLowerCase()) + 1
       : entry.month;
