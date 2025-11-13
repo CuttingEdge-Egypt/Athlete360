@@ -1201,6 +1201,14 @@ export default function Home() {
   const { data: allAthletes = [] } = useQuery<Athlete[]>({
     queryKey: ["/api/athletes/by-sport", selectedSport, selectedCountry],
     enabled: !!selectedSport && !searchName.trim(),
+    refetchInterval: (query) => {
+      // Poll every 3 seconds if any athlete has competitive history being fetched
+      const athletes = query.state.data || [];
+      const hasActiveCompetitiveHistoryFetch = athletes.some((athlete: any) => 
+        athlete.apiScrapeStatus?.competitiveHistoryFetchStatus === 'in_progress'
+      );
+      return hasActiveCompetitiveHistoryFetch ? 3000 : false;
+    },
     queryFn: async () => {
       try {
         const url = new URL(`/api/athletes/by-sport/${selectedSport}`, window.location.origin);
@@ -1228,6 +1236,14 @@ export default function Home() {
   const { data: searchResults = [], isLoading: isSearchLoading } = useQuery<Athlete[]>({
     queryKey: ["/api/athletes/search-by-name", searchName.trim(), selectedSport, selectedCountry],
     enabled: !!searchName.trim() && searchName.trim().length >= 2,
+    refetchInterval: (query) => {
+      // Poll every 3 seconds if any athlete has competitive history being fetched
+      const athletes = query.state.data || [];
+      const hasActiveCompetitiveHistoryFetch = athletes.some((athlete: any) => 
+        athlete.apiScrapeStatus?.competitiveHistoryFetchStatus === 'in_progress'
+      );
+      return hasActiveCompetitiveHistoryFetch ? 3000 : false;
+    },
     queryFn: async () => {
       try {
         const response = await fetch(`/api/athletes/search-by-name?name=${encodeURIComponent(searchName.trim())}&sportId=${encodeURIComponent(selectedSport)}&country=${encodeURIComponent(selectedCountry)}`);
@@ -2126,6 +2142,42 @@ export default function Home() {
                               minute: '2-digit'
                             })}</span>
                           </p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* API Fetch Progress Indicator */}
+                    {selectedAthlete.apiScrapeStatus?.competitiveHistoryFetchStatus === 'in_progress' && (
+                      <div className="mb-2">
+                        <div className="bg-blue-900/30 border border-blue-500/40 rounded-lg p-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center space-x-2">
+                              <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
+                              <span className="text-sm font-medium text-blue-300">
+                                Fetching Competition History
+                              </span>
+                            </div>
+                            <span className="text-xs text-blue-400 font-mono">
+                              {selectedAthlete.apiScrapeStatus.competitiveHistoryProgress?.completed || 0}/{selectedAthlete.apiScrapeStatus.competitiveHistoryProgress?.total || 0}
+                            </span>
+                          </div>
+                          
+                          {/* Progress Bar */}
+                          <div className="w-full bg-gray-700/50 rounded-full h-2 overflow-hidden">
+                            <div 
+                              className="bg-gradient-to-r from-blue-500 to-blue-400 h-full transition-all duration-300 ease-out"
+                              style={{ 
+                                width: `${selectedAthlete.apiScrapeStatus.competitiveHistoryProgress?.percentage || 0}%` 
+                              }}
+                            />
+                          </div>
+                          
+                          {/* Progress Message */}
+                          {selectedAthlete.apiScrapeStatus.logs && selectedAthlete.apiScrapeStatus.logs.length > 0 && (
+                            <p className="text-xs text-gray-400 mt-2">
+                              {selectedAthlete.apiScrapeStatus.logs[selectedAthlete.apiScrapeStatus.logs.length - 1]?.message}
+                            </p>
+                          )}
                         </div>
                       </div>
                     )}
