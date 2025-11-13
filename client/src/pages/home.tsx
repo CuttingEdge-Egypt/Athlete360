@@ -2465,7 +2465,7 @@ export default function Home() {
                                         <div className="flex flex-col min-w-0 flex-1">
                                           <div className="flex items-baseline gap-1">
                                             <span className={`${textColor} font-black ${isTop3 ? 'text-lg' : 'text-base'} leading-none`}>
-                                              #{rankInfo.rank}
+                                              #{rankNum}
                                             </span>
                                           </div>
                                           <span className={`${categoryTextColor} text-[9px] font-semibold leading-tight truncate`}>
