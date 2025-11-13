@@ -49,8 +49,8 @@ def main():
     parser.add_argument(
         "--months-back",
         type=int,
-        default=16,
-        help="Number of months to fetch (default: 16 for API limit)"
+        default=57,
+        help="Number of months to fetch (default: 57 = March 2021 to present)"
     )
     parser.add_argument(
         "--delay",
@@ -87,10 +87,11 @@ def main():
         )
         
         # Prepare result
+        # NOTE: Only 1 API call per month now (API returns all categories)
         result = {
             "success": True,
             "competitive_history": competitive_history,
-            "total_calls": args.months_back * len(category_summary),
+            "total_calls": args.months_back,  # 1 call per month, not per category
             "total_competitions": len(competitive_history)
         }
         

@@ -40,18 +40,20 @@ export async function fetchCompetitiveHistoryParallel(
   
   try {
     // Update status to in_progress
+    // NOTE: API returns all categories in one call, so total = months only (57)
+    const MONTHS_BACK = 57; // March 2021 to present
     await storage.updateAthlete(athleteId, {
       apiScrapeStatus: {
         initialFetchComplete: true,
         competitiveHistoryFetchStatus: "in_progress",
         competitiveHistoryProgress: {
           completed: 0,
-          total: 16 * categorySummary.length, // 16 months × number of categories
+          total: MONTHS_BACK, // Only 1 API call per month (not per category)
           percentage: 0
         },
         logs: [{
           timestamp: new Date().toISOString(),
-          message: `Fetching competitive history across ${16 * categorySummary.length} API calls...`,
+          message: `Fetching competitive history across ${MONTHS_BACK} API calls (March 2021 to present)...`,
           type: "info"
         }],
         lastUpdated: new Date().toISOString()

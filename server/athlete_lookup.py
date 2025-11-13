@@ -646,18 +646,22 @@ def fetch_competitive_history_parallel(
     user_id: str,
     category_summary: List[Dict[str, Any]],
     delay: int = 2,
-    months_back: int = 16,
+    months_back: int = 57,
     progress_callback: Optional[Callable[[Dict[str, Any]], None]] = None
 ) -> List[Dict[str, Any]]:
     """
     Fetch ONLY competitive history across multiple months in parallel.
     Does NOT fetch rank data (that's already obtained from initial API call).
     
+    NOTE: API returns competitive history for ALL categories regardless of which 
+    category is specified in the request. Therefore, we only make 1 API call per 
+    month (using first category) instead of multiple calls per category.
+    
     Args:
         user_id: World Taekwondo athlete userId
         category_summary: List of categories from initial API call
         delay: Delay between requests
-        months_back: How many months to fetch (default 16 for API limit)
+        months_back: How many months to fetch (default 57 = March 2021 to present)
         progress_callback: Optional callback for progress updates
     
     Returns:
@@ -671,66 +675,67 @@ def fetch_competitive_history_parallel(
     # Generate month-year pairs
     month_year_pairs = _generate_month_year_pairs(months_back)
     
+    # Use ONLY the first category since API returns all categories anyway
+    first_category = category_summary[0]
+    parsed = _parse_category_fields(first_category.get("category_name", ""))
+    if not parsed:
+        logger.error("Could not parse first category, aborting competitive history fetch")
+        return []
+    
+    ranking_category = parsed["ranking_category"]
+    sub_category = parsed["sub_category"]
+    weight_division = parsed["weight_division"]
+    
+    logger.info(f"📅 Fetching {len(month_year_pairs)} months using {weight_division} (returns all categories)...")
+    
     all_competitions = []
-    total_calls = len(month_year_pairs) * len(category_summary)
+    total_calls = len(month_year_pairs)  # Only 1 call per month now!
     completed_calls = 0
     
-    # Process each category
-    for category_entry in category_summary:
-        parsed = _parse_category_fields(category_entry.get("category_name", ""))
-        if not parsed:
-            continue
+    # Parallel fetching with ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = []
         
-        ranking_category = parsed["ranking_category"]
-        sub_category = parsed["sub_category"]
-        weight_division = parsed["weight_division"]
-        
-        logger.info(f"📅 Fetching {len(month_year_pairs)} months for {weight_division}...")
-        
-        # Parallel fetching with ThreadPoolExecutor
-        with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = []
+        for period in month_year_pairs:
+            month_index = period.get("month_index")
+            if month_index is None or not (0 <= month_index < len(MONTH_NAMES)):
+                continue
             
-            for period in month_year_pairs:
-                month_index = period.get("month_index")
-                if month_index is None or not (0 <= month_index < len(MONTH_NAMES)):
-                    continue
-                
-                month_name = MONTH_NAMES[month_index]
-                year_value = period.get("year")
-                
-                # Submit parallel task
-                future = executor.submit(
-                    _fetch_competitions_for_month,
-                    user_id,
-                    ranking_category,
-                    sub_category,
-                    weight_division,
-                    month_name,
-                    year_value,
-                    delay
-                )
-                futures.append(future)
+            month_name = MONTH_NAMES[month_index]
+            year_value = period.get("year")
             
-            # Collect results as they complete
-            for future in as_completed(futures):
-                try:
-                    competitions = future.result()
-                    if competitions:
-                        all_competitions.extend(competitions)
+            # Submit parallel task
+            future = executor.submit(
+                _fetch_competitions_for_month,
+                user_id,
+                ranking_category,
+                sub_category,
+                weight_division,
+                month_name,
+                year_value,
+                delay
+            )
+            futures.append(future)
+        
+        # Collect results as they complete
+        for future in as_completed(futures):
+            try:
+                competitions = future.result()
+                if competitions:
+                    all_competitions.extend(competitions)
+                
+                completed_calls += 1
+                
+                # Report progress
+                if progress_callback:
+                    progress_callback({
+                        "completed": completed_calls,
+                        "total": total_calls,
+                        "percentage": int((completed_calls / total_calls) * 100)
+                    })
                     
-                    completed_calls += 1
-                    
-                    # Report progress
-                    if progress_callback:
-                        progress_callback({
-                            "completed": completed_calls,
-                            "total": total_calls,
-                            "percentage": int((completed_calls / total_calls) * 100)
-                        })
-                        
-                except Exception as exc:  # noqa: BLE001
-                    logger.error(f"Error collecting parallel result: {exc}")
+            except Exception as exc:  # noqa: BLE001
+                logger.error(f"Error collecting parallel result: {exc}")
     
     # Remove duplicate competitions (same event_id)
     seen_event_ids = set()
