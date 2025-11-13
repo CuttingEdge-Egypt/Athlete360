@@ -738,11 +738,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Transform API data to match our storage format
               const updateData: any = {};
               
-              // Priority 1: Extract all category ranks from category_summary
-              let categories = extractRanksFromCategorySummary(apiResult.category_summary);
-              let rankSource = 'category_summary';
+              // Import extractRanksFromRankHistory
+              const { extractRanksFromRankHistory } = await import('./taekwondoUtils.js');
               
-              // Priority 2: Fallback to competition_history if category_summary is empty
+              // Priority 1: Extract actual ranking positions from rank_history (most accurate)
+              let categories = extractRanksFromRankHistory(apiResult.rank_history);
+              let rankSource = 'rank_history';
+              
+              // Priority 2: Fallback to category_summary if rank_history is empty
+              if (categories.length === 0) {
+                categories = extractRanksFromCategorySummary(apiResult.category_summary);
+                rankSource = 'category_summary';
+              }
+              
+              // Priority 3: Fallback to competition_history if both above are empty (only extracts points, not ranks)
               if (categories.length === 0) {
                 categories = extractLatestTaekwondoRanks(apiResult.competition_history);
                 rankSource = 'competition_history';
@@ -1168,11 +1177,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Transform API data to match our storage format
               const updateData: any = {};
               
-              // Priority 1: Extract all category ranks from category_summary
-              let categories = extractRanksFromCategorySummary(apiResult.category_summary);
-              let rankSource = 'category_summary';
+              // Import extractRanksFromRankHistory
+              const { extractRanksFromRankHistory } = await import('./taekwondoUtils.js');
               
-              // Priority 2: Fallback to competition_history if category_summary is empty
+              // Priority 1: Extract actual ranking positions from rank_history (most accurate)
+              let categories = extractRanksFromRankHistory(apiResult.rank_history);
+              let rankSource = 'rank_history';
+              
+              // Priority 2: Fallback to category_summary if rank_history is empty
+              if (categories.length === 0) {
+                categories = extractRanksFromCategorySummary(apiResult.category_summary);
+                rankSource = 'category_summary';
+              }
+              
+              // Priority 3: Fallback to competition_history if both above are empty (only extracts points, not ranks)
               if (categories.length === 0) {
                 categories = extractLatestTaekwondoRanks(apiResult.competition_history);
                 rankSource = 'competition_history';

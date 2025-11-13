@@ -30,9 +30,10 @@ export interface CompetitionEntry {
 }
 
 /**
- * Extracts the latest rank for each category from competition history
+ * Extracts category points totals from competition history
+ * Note: This extracts points, NOT rankings. Competition placements are not overall rankings.
  * @param competition_history Array of competition entries from the Taekwondo API
- * @returns Array of category ranks with most recent data
+ * @returns Array of category points with most recent data
  */
 export function extractLatestTaekwondoRanks(competition_history: CompetitionEntry[] | undefined): CategoryRank[] {
   if (!competition_history || competition_history.length === 0) {
@@ -43,7 +44,7 @@ export function extractLatestTaekwondoRanks(competition_history: CompetitionEntr
   const categoryMap = new Map<string, { comp: CompetitionEntry; timestamp: number }>();
 
   competition_history.forEach((comp) => {
-    if (!comp.category || !comp.place) {
+    if (!comp.category || !comp.category_total_points) {
       return; // Skip entries without required fields
     }
 
@@ -69,17 +70,70 @@ export function extractLatestTaekwondoRanks(competition_history: CompetitionEntr
     }
   });
 
-  // Convert map to array format
+  // Convert map to array format - NO RANK, only points from competition history
   const categories: CategoryRank[] = Array.from(categoryMap.entries()).map(([category, { comp, timestamp }]) => ({
     category,
-    rank: comp.place!.toString(),
-    points: comp.category_total_points || comp.ranking_points || '0',
+    rank: 'N/A', // Competition history doesn't have ranking position, only points
+    points: comp.category_total_points || '0',
     lastUpdated: comp.generated_end_date || comp.start_date || comp.event_date || new Date().toISOString()
   }));
 
-  console.log(`📊 Extracted ${categories.length} category ranks from ${competition_history.length} competitions`);
+  console.log(`📊 Extracted ${categories.length} category points from ${competition_history.length} competitions`);
   categories.forEach(cat => {
-    console.log(`   - ${cat.category}: Rank #${cat.rank}, ${cat.points} points (updated: ${cat.lastUpdated})`);
+    console.log(`   - ${cat.category}: ${cat.points} points (updated: ${cat.lastUpdated})`);
+  });
+
+  return categories;
+}
+
+/**
+ * Extracts the latest actual ranking positions from rank_history
+ * @param rank_history Array of rank history entries from the Taekwondo API
+ * @returns Array of category ranks with most recent ranking positions
+ */
+export function extractRanksFromRankHistory(rank_history: any[] | undefined): CategoryRank[] {
+  if (!rank_history || rank_history.length === 0) {
+    return [];
+  }
+
+  // Group by category and find the most recent entry for each
+  const categoryMap = new Map<string, any>();
+
+  rank_history.forEach((entry) => {
+    if (!entry.category || !entry.ranking || !entry.month || !entry.year) {
+      return;
+    }
+
+    const categoryKey = entry.category.trim();
+    
+    // Create a sortable date key
+    const monthNames = ['january', 'february', 'march', 'april', 'may', 'june', 
+                        'july', 'august', 'september', 'october', 'november', 'december'];
+    const monthNum = typeof entry.month === 'string' 
+      ? monthNames.indexOf(entry.month.toLowerCase()) + 1
+      : entry.month;
+    const dateKey = `${entry.year}-${String(monthNum).padStart(2, '0')}`;
+
+    const existing = categoryMap.get(categoryKey);
+    if (!existing || dateKey > existing.dateKey) {
+      categoryMap.set(categoryKey, {
+        entry,
+        dateKey
+      });
+    }
+  });
+
+  // Convert to CategoryRank array
+  const categories: CategoryRank[] = Array.from(categoryMap.values()).map(({ entry }) => ({
+    category: entry.category,
+    rank: typeof entry.ranking === 'string' ? entry.ranking : entry.ranking.toString(),
+    points: entry.points ? (typeof entry.points === 'string' ? entry.points : entry.points.toString()) : '0',
+    lastUpdated: `${entry.year}-${String(typeof entry.month === 'string' ? monthNames.indexOf(entry.month.toLowerCase()) + 1 : entry.month).padStart(2, '0')}-01`
+  }));
+
+  console.log(`📊 Extracted ${categories.length} category ranks from rank_history`);
+  categories.forEach(cat => {
+    console.log(`   - ${cat.category}: Rank #${cat.rank}, ${cat.points} points (${cat.lastUpdated})`);
   });
 
   return categories;
