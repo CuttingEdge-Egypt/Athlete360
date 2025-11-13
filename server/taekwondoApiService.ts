@@ -296,21 +296,34 @@ export function getCandidateRankingParams(category: string): Array<{
     }];
   }
   
-  // If category is a single value (e.g., "M+80 kg"), return ordered candidates
-  // Try Olympic first (higher priority for heavyweight divisions), then World
+  // If category is a single value (e.g., "M+80 kg"), determine if it's Olympic or World
   if (parts.length === 1) {
-    return [
-      {
+    // Olympic Kyorugi Rankings categories (as specified by official rules):
+    const olympicCategories = [
+      'M-58 kg', 'M-68 kg', 'M-80 kg', 'M+80 kg',
+      'W-49 kg', 'W-57 kg', 'W-67 kg', 'W+67 kg'
+    ];
+    
+    // Check if this weight division is in Olympic categories
+    const isOlympicCategory = olympicCategories.some(
+      olympicCat => olympicCat.toLowerCase() === sanitizedWeightDivision.toLowerCase()
+    );
+    
+    if (isOlympicCategory) {
+      // This is an Olympic category - search Olympic rankings only
+      return [{
         weightDivision: sanitizedWeightDivision,
         subCategory: 'Olympic Senior Division',
         rankingCategory: 'Olympic Kyorugi Rankings'
-      },
-      {
+      }];
+    } else {
+      // This is a World category - search World rankings only
+      return [{
         weightDivision: sanitizedWeightDivision,
         subCategory: 'World Senior Division',
         rankingCategory: 'World Kyorugi Rankings'
-      }
-    ];
+      }];
+    }
   }
 
   return [];
