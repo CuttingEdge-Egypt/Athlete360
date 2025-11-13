@@ -99,9 +99,19 @@ export function DualAnalysisPanel({
     Object.values(categoryGroups).forEach(entries => {
       entries.forEach(entry => allDates.add(entry.date));
     });
-    const sortedLabels = Array.from(allDates).sort((a, b) => 
+    const sortedDates = Array.from(allDates).sort((a, b) => 
       new Date(a).getTime() - new Date(b).getTime()
     );
+    
+    // Format dates as "July 2025" instead of "1-7-2025"
+    const formatDateLabel = (dateStr: string) => {
+      const date = new Date(dateStr);
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
+      return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+    };
+    
+    const sortedLabels = sortedDates.map(formatDateLabel);
 
     // Create datasets for each category
     const datasets = Object.keys(categoryGroups).map((categoryKey, index) => {
@@ -111,8 +121,8 @@ export function DualAnalysisPanel({
       const colors = categoryColors[colorIndex];
 
       // Map data to all dates (null for missing dates)
-      const dataPoints = sortedLabels.map(label => {
-        const entry = categoryData.find(e => e.date === label);
+      const dataPoints = sortedDates.map(dateStr => {
+        const entry = categoryData.find(e => e.date === dateStr);
         return entry ? entry.rank : null;
       });
 
@@ -301,9 +311,19 @@ export function DualAnalysisPanel({
     Object.values(categoryGroups).forEach(entries => {
       entries.forEach(entry => allDates.add(entry.date));
     });
-    const sortedLabels = Array.from(allDates).sort((a, b) => 
+    const sortedDates = Array.from(allDates).sort((a, b) => 
       new Date(a).getTime() - new Date(b).getTime()
     );
+    
+    // Format dates as "July 2025" instead of "1-7-2025"
+    const formatDateLabel = (dateStr: string) => {
+      const date = new Date(dateStr);
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
+      return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+    };
+    
+    const sortedLabels = sortedDates.map(formatDateLabel);
 
     // Create datasets for each category
     const datasets = Object.keys(categoryGroups).map((categoryKey, index) => {
@@ -313,8 +333,8 @@ export function DualAnalysisPanel({
       const colors = categoryColors[colorIndex];
 
       // Map data to all dates (null for missing dates)
-      const dataPoints = sortedLabels.map(label => {
-        const entry = categoryData.find(e => e.date === label);
+      const dataPoints = sortedDates.map(dateStr => {
+        const entry = categoryData.find(e => e.date === dateStr);
         return entry ? entry.rank : null;
       });
 
