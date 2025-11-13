@@ -3,6 +3,9 @@
 ## Overview
 Athlete360 is an AI-powered athletic performance analysis platform that analyzes athlete performance across various sports. It provides comprehensive insights, including biographies, ranking analysis, strengths/weaknesses, development plans, nutrition guidance, and strategic analysis. The platform leverages AI to deliver personalized, real-time athletic insights for performance development and strategic advantages, aiming to be an authentic and essential tool for athletes and coaches.
 
+## Recent Changes (November 13, 2025)
+- **Critical Bug Fix: Taekwondo Rank History Storage**: Fixed JavaScript scoping error in `server/taekwondoUtils.ts` where `monthNames` array was declared inside forEach loop but referenced outside in map function, causing "monthNames is not defined" error. This critical bug prevented successful Python API data from being stored and triggered unnecessary BrowserUse fallbacks. The fix relocated `monthNames` declaration to function scope, ensuring rank history data (30+ entries across multiple categories) is now properly extracted and persisted to database. Verified working with Richard Andre ORDEMANN test case - data successfully stored with rankings, userId, and full rank history without errors.
+
 ## Recent Changes (November 12, 2025)
 - **Intelligent Taekwondo Weight Category Classification**: Enhanced personal info generation with smart weight category detection that distinguishes between Olympic and World rankings. Gemini now correctly classifies athletes into the appropriate weight division based on which ranking they appear in (Olympic: M+80 kg for heavyweights vs World: M+87 kg for heavyweights), preventing API lookup failures caused by mismatched weight categories.
 
