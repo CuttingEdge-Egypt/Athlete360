@@ -711,28 +711,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const nameForApi = personalInfo?.official_name || englishName;
             console.log(`🥋 Attempting Taekwondo API scraper for ${nameForApi} (category: ${athleteCategory || 'unknown'})...`);
             
-            // Parse category to get weight division, sub-category, and ranking category
-            const categoryParams = athleteCategory ? parseTaekwondoCategoryToParameters(athleteCategory) : null;
+            // Get candidate ranking categories for tiered lookup (Olympic first, then World)
+            const { getCandidateRankingParams } = await import('./taekwondoApiService.js');
+            const candidates = athleteCategory ? getCandidateRankingParams(athleteCategory) : [];
             
-            if (!categoryParams || !categoryParams.weightDivision) {
+            if (candidates.length === 0) {
               console.log(`⚠️ No valid category found, falling back to BrowserUse immediately...`);
               throw new Error('No category information available');
             }
             
-            // Step 1: Initial API call to get current data + 16 months of rank history
-            const apiResult = await fetchTaekwondoAthleteData({
-              athleteName: nameForApi,
-              country: athleteCountry,
-              weightDivision: categoryParams.weightDivision,
-              subCategory: categoryParams.subCategory,
-              rankingCategory: categoryParams.rankingCategory,
-              monthsBack: 12,
-              rankHistoryMonths: 16, // Get 16 months of rank history (API limit)
-              maxResults: 0, // 0 = no limit, fetch all athletes
-              comprehensive: false // Initial call only - background thread will fetch competitive history
-            });
+            // Step 1: Tiered API lookup - try each candidate ranking category sequentially
+            let apiResult: any = null;
+            let successfulCandidate: any = null;
             
-            if (apiResult.success && apiResult.athlete) {
+            for (const candidate of candidates) {
+              console.log(`🔍 Trying ${candidate.rankingCategory} (${candidate.weightDivision})...`);
+              
+              const result = await fetchTaekwondoAthleteData({
+                athleteName: nameForApi,
+                country: athleteCountry,
+                weightDivision: candidate.weightDivision,
+                subCategory: candidate.subCategory,
+                rankingCategory: candidate.rankingCategory,
+                monthsBack: 12,
+                rankHistoryMonths: 16, // Get 16 months of rank history (API limit)
+                maxResults: 0, // 0 = no limit, fetch all athletes
+                comprehensive: false // Initial call only - background thread will fetch competitive history
+              });
+              
+              if (result.success && result.athlete) {
+                console.log(`✅ Found athlete in ${candidate.rankingCategory}!`);
+                apiResult = result;
+                successfulCandidate = candidate;
+                break; // Short-circuit on first success
+              } else {
+                console.log(`❌ Not found in ${candidate.rankingCategory}, trying next...`);
+              }
+            }
+            
+            if (apiResult && apiResult.success && apiResult.athlete) {
               console.log(`✅ Taekwondo API: Successfully found data for ${nameForApi}`);
               
               // Transform API data to match our storage format
@@ -839,7 +856,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       competitiveHistoryFetchStatus: "pending",
                       logs: [{
                         timestamp: new Date().toISOString(),
-                        message: `Initial API call complete. Starting competitive history fetch across 16 months...`,
+                        message: `Initial API call complete (found in ${successfulCandidate?.rankingCategory || 'Unknown'}). Starting competitive history fetch across 57 months...`,
                         type: "info"
                       }],
                       lastUpdated: new Date().toISOString()
