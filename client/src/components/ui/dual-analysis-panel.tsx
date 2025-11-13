@@ -581,11 +581,11 @@ export function DualAnalysisPanel({
                       <div key={index} className="p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-blue-500/50 transition-colors">
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <Badge variant="outline" className="border-yellow-400 text-yellow-400 text-xs">
+                            <div className="flex items-start gap-3 mb-2">
+                              <Badge variant="outline" className="border-yellow-400 text-yellow-400 text-xs mt-1">
                                 {displayDate}
                               </Badge>
-                              <span className="font-bold text-white text-lg">{comp.competition || comp.tournament}</span>
+                              <span className="font-bold text-white text-lg leading-tight">{comp.competition || comp.tournament}</span>
                             </div>
                             {comp.location && (
                               <div className="text-sm text-gray-400 mb-2">
