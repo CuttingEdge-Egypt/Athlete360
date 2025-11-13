@@ -261,8 +261,18 @@ export function parseTaekwondoCategoryToParameters(category: string): {
   subCategory: string;
   rankingCategory: string;
 } | null {
+  // Use getCandidateRankingParams and return the first (highest priority) candidate
+  const candidates = getCandidateRankingParams(category);
+  return candidates.length > 0 ? candidates[0] : null;
+}
+
+export function getCandidateRankingParams(category: string): Array<{
+  weightDivision: string;
+  subCategory: string;
+  rankingCategory: string;
+}> {
   if (!category || category === 'N/A') {
-    return null;
+    return [];
   }
 
   const parts = category.split('|').map(p => p.trim());
@@ -273,29 +283,37 @@ export function parseTaekwondoCategoryToParameters(category: string): {
   
   if (!sanitizedWeightDivision) {
     console.error(`❌ Invalid weight division in category "${category}"`);
-    return null;
+    return [];
   }
   
   // If category is in full format: "M-58 kg | World Senior Division | World Kyorugi Rankings"
+  // Return single candidate with exact match
   if (parts.length === 3) {
-    return {
+    return [{
       weightDivision: sanitizedWeightDivision,
       subCategory: parts[1],
       rankingCategory: parts[2]
-    };
+    }];
   }
   
-  // If category is a single value (e.g., "M-58 kg"), use sensible defaults
-  // Default to World Senior Division and World Kyorugi Rankings as they are most common
+  // If category is a single value (e.g., "M+80 kg"), return ordered candidates
+  // Try Olympic first (higher priority for heavyweight divisions), then World
   if (parts.length === 1) {
-    return {
-      weightDivision: sanitizedWeightDivision,
-      subCategory: 'World Senior Division',
-      rankingCategory: 'World Kyorugi Rankings'
-    };
+    return [
+      {
+        weightDivision: sanitizedWeightDivision,
+        subCategory: 'Olympic Senior Division',
+        rankingCategory: 'Olympic Kyorugi Rankings'
+      },
+      {
+        weightDivision: sanitizedWeightDivision,
+        subCategory: 'World Senior Division',
+        rankingCategory: 'World Kyorugi Rankings'
+      }
+    ];
   }
 
-  return null;
+  return [];
 }
 
 export function normalizeCategoryForDB(category: string | undefined): {
