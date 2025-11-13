@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, TrendingUp, Trophy, BarChart, Award } from "lucide-react";
 import { Line } from 'react-chartjs-2';
+import { useTranslation } from 'react-i18next';
 
 interface DualAnalysisPanelProps {
   competitiveAnalysis: any;
@@ -29,6 +30,9 @@ export function DualAnalysisPanel({
   defaultTab = 'competitive',
   className = '',
 }: DualAnalysisPanelProps) {
+  const { i18n } = useTranslation();
+  const isArabic = i18n.language === 'ar';
+  
   const athlete = competitiveAnalysis?.athlete;
   const rankingProgression = competitiveAnalysis?.rankingProgression || [];
   const careerSummary = competitiveAnalysis?.careerSummary || {};
@@ -208,13 +212,13 @@ export function DualAnalysisPanel({
         {rankAnalysis && (
           <Card className="bg-athlete-gray-800 border-gray-600">
             <CardHeader>
-              <CardTitle className="text-2xl text-gray-100 flex items-center">
-                <BarChart className="mr-3 text-blue-400" size={24} />
+              <CardTitle className={`text-2xl text-gray-100 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <BarChart className={`${isArabic ? 'ml-3' : 'mr-3'} text-blue-400`} size={24} />
                 Rank History Analysis
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-4" dir={isArabic ? 'rtl' : 'ltr'}>
                 {typeof rankAnalysis === 'string' ? (
                   <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
                     {rankAnalysis}
@@ -232,7 +236,7 @@ export function DualAnalysisPanel({
                         <h4 className="font-semibold text-white mb-3">Progression Timeline</h4>
                         <div className="space-y-2">
                           {rankAnalysis.progression_timeline.map((item: any, index: number) => (
-                            <div key={index} className="border-l-2 border-blue-400 pl-3 py-1">
+                            <div key={index} className={`${isArabic ? 'border-r-2 pr-3' : 'border-l-2 pl-3'} border-blue-400 py-1`}>
                               <div className="font-medium text-blue-300 text-sm">{item.period}</div>
                               <div className="text-gray-300 text-sm">{item.rank_change}</div>
                               {item.significance && (
@@ -248,7 +252,7 @@ export function DualAnalysisPanel({
                         <h4 className="font-semibold text-white mb-3">Performance Factors</h4>
                         <div className="space-y-2">
                           {rankAnalysis.performance_factors.map((factor: any, index: number) => (
-                            <div key={index} className="flex items-start space-x-2">
+                            <div key={index} className={`flex items-start ${isArabic ? 'flex-row-reverse space-x-reverse' : ''} space-x-2`}>
                               <Trophy className="w-4 h-4 text-yellow-400 mt-1 flex-shrink-0" />
                               <div className="text-gray-300 text-sm">{factor}</div>
                             </div>
@@ -704,17 +708,17 @@ export function DualAnalysisPanel({
         {(careerOverview || peakPerformancePeriods?.length > 0 || notableAchievements?.length > 0 || recentForm) && (
           <Card className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 border-purple-500">
             <CardHeader>
-              <CardTitle className="text-2xl text-white flex items-center">
-                <Calendar className="mr-3 text-purple-400" size={24} />
+              <CardTitle className={`text-2xl text-white flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <Calendar className={`${isArabic ? 'ml-3' : 'mr-3'} text-purple-400`} size={24} />
                 Competitive History Analysis
               </CardTitle>
               <div className="text-sm text-gray-400">AI-generated professional analysis of career progression and achievements</div>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6" dir={isArabic ? 'rtl' : 'ltr'}>
               {careerOverview && (
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
-                    <Trophy className="mr-2 text-yellow-400" size={20} />
+                  <h3 className={`text-lg font-semibold text-white mb-3 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                    <Trophy className={`${isArabic ? 'ml-2' : 'mr-2'} text-yellow-400`} size={20} />
                     Career Overview
                   </h3>
                   <p className="text-gray-300 leading-relaxed">{careerOverview}</p>
@@ -723,8 +727,8 @@ export function DualAnalysisPanel({
               
               {peakPerformancePeriods && peakPerformancePeriods.length > 0 && (
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
-                    <TrendingUp className="mr-2 text-green-400" size={20} />
+                  <h3 className={`text-lg font-semibold text-white mb-3 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                    <TrendingUp className={`${isArabic ? 'ml-2' : 'mr-2'} text-green-400`} size={20} />
                     Peak Performance Periods
                   </h3>
                   <div className="space-y-4">
@@ -738,7 +742,7 @@ export function DualAnalysisPanel({
                           <div className="space-y-1">
                             <p className="text-sm font-semibold text-gray-400 mb-2">Key Results:</p>
                             {period.key_results.map((result: string, idx: number) => (
-                              <div key={idx} className="flex items-start gap-2">
+                              <div key={idx} className={`flex items-start gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                                 <Award className="w-4 h-4 text-green-400 mt-0.5" />
                                 <span className="text-sm text-gray-300">{result}</span>
                               </div>
