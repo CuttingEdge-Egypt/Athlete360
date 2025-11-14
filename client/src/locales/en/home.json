@@ -164,7 +164,7 @@
   },
   "competitiveHistory": {
     "title": "Competitive History Analysis",
-    "subtitle": "Professional analysis of career progression and achievements",
+    "subtitle": "AI-generated professional analysis of career progression and achievements",
     "tabs": {
       "competitive": "Competitive History",
       "rank": "Rank History"
@@ -176,6 +176,7 @@
     "points": "Points:",
     "gRank": "G-Rank:",
     "place": "place",
+    "noRankData": "No rank history data available",
     "careerOverview": "Career Overview",
     "peakPerformance": "Peak Performance Periods",
     "keyResults": "Key Results:",

@@ -30,7 +30,7 @@ export function DualAnalysisPanel({
   defaultTab = 'competitive',
   className = '',
 }: DualAnalysisPanelProps) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation('home');
   const isArabic = i18n.language === 'ar';
   
   const athlete = competitiveAnalysis?.athlete;
@@ -66,7 +66,7 @@ export function DualAnalysisPanel({
     if (!rankHistoryData || rankHistoryData.length === 0) {
       return (
         <div className="p-6 text-center">
-          <p className="text-gray-400">No rank history data available</p>
+          <p className="text-gray-400">{t('competitiveHistory.noRankData', 'No rank history data available')}</p>
         </div>
       );
     }
@@ -197,9 +197,9 @@ export function DualAnalysisPanel({
       <div className="space-y-6">
         <Card className="bg-athlete-gray-800 border-gray-600">
           <CardHeader>
-            <CardTitle className="text-2xl text-gray-100 flex items-center">
-              <TrendingUp className="mr-3 text-orange-400" size={24} />
-              Rank Progression Over Time (16 Months)
+            <CardTitle className={`text-2xl text-gray-100 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <TrendingUp className={`${isArabic ? 'ml-3' : 'mr-3'} text-orange-400`} size={24} />
+              {t('competitiveHistory.rankProgressionTitle')} ({rankHistoryData?.length || 16} {t('competitiveHistory.months')})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -214,7 +214,7 @@ export function DualAnalysisPanel({
             <CardHeader>
               <CardTitle className={`text-2xl text-gray-100 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
                 <BarChart className={`${isArabic ? 'ml-3' : 'mr-3'} text-blue-400`} size={24} />
-                Rank History Analysis
+                {t('services.rankHistory.title')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -474,12 +474,19 @@ export function DualAnalysisPanel({
     if (!result) return null;
     
     const resultLower = result.toLowerCase();
+    
+    // Extract place number if present (e.g., "17th place" -> "17")
+    const placeMatch = result.match(/(\d+)(st|nd|rd|th)/);
+    const placeNumber = placeMatch ? placeMatch[1] : null;
+    
     if (resultLower.includes('1st') || resultLower.includes('gold') || resultLower.includes('🥇')) {
-      return <Badge className="bg-yellow-500 text-white">🥇 {result}</Badge>;
+      return <Badge className="bg-yellow-500 text-white">🥇 {isArabic ? `${t('competitiveHistory.place')} 1` : result}</Badge>;
     } else if (resultLower.includes('2nd') || resultLower.includes('silver') || resultLower.includes('🥈')) {
-      return <Badge className="bg-gray-400 text-white">🥈 {result}</Badge>;
+      return <Badge className="bg-gray-400 text-white">🥈 {isArabic ? `${t('competitiveHistory.place')} 2` : result}</Badge>;
     } else if (resultLower.includes('3rd') || resultLower.includes('bronze') || resultLower.includes('🥉')) {
-      return <Badge className="bg-orange-600 text-white">🥉 {result}</Badge>;
+      return <Badge className="bg-orange-600 text-white">🥉 {isArabic ? `${t('competitiveHistory.place')} 3` : result}</Badge>;
+    } else if (placeNumber) {
+      return <Badge variant="secondary">✓ {isArabic ? `${t('competitiveHistory.place')} ${placeNumber}` : result}</Badge>;
     } else {
       return <Badge variant="secondary">✓ {result}</Badge>;
     }
@@ -544,12 +551,12 @@ export function DualAnalysisPanel({
         {yearCompetitions && yearCompetitions.length > 0 && (
           <Card className="bg-athlete-gray-800 border-gray-600">
             <CardHeader>
-              <CardTitle className="text-2xl text-gray-100 flex items-center">
-                <Calendar className="mr-3 text-blue-400" size={24} />
-                {year} Competitive History
+              <CardTitle className={`text-2xl text-gray-100 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <Calendar className={`${isArabic ? 'ml-3' : 'mr-3'} text-blue-400`} size={24} />
+                {isArabic ? `${t('competitiveHistory.yearTitle')} ${year}` : `${year} ${t('competitiveHistory.yearTitle')}`}
               </CardTitle>
               <Badge className="bg-blue-600 text-white">
-                {yearCompetitions.length} {yearCompetitions.length === 1 ? 'Competition' : 'Competitions'}
+                {yearCompetitions.length} {yearCompetitions.length === 1 ? t('competitiveHistory.competition') : t('competitiveHistory.competitions')}
               </Badge>
             </CardHeader>
             <CardContent>
@@ -596,20 +603,20 @@ export function DualAnalysisPanel({
                                 📍 {comp.location}
                               </div>
                             )}
-                            <div className="flex items-center gap-4 text-sm text-gray-400">
+                            <div className={`flex items-center gap-4 text-sm text-gray-400 ${isArabic ? 'flex-row-reverse' : ''}`}>
                               {comp.ranking && comp.ranking !== 'N/A' && (
                                 <div>
-                                  Category: <span className="text-gray-300">{comp.ranking}</span>
+                                  {t('competitiveHistory.category')} <span className="text-gray-300">{comp.ranking}</span>
                                 </div>
                               )}
                               {comp.gRank && (
                                 <div>
-                                  G-Rank: <span className="text-blue-400 font-semibold">{comp.gRank}</span>
+                                  {t('competitiveHistory.gRank')} <span className="text-blue-400 font-semibold">{comp.gRank}</span>
                                 </div>
                               )}
                               {comp.rankingPoints && (
                                 <div>
-                                  Points: <span className="text-green-400 font-semibold">{comp.rankingPoints}</span>
+                                  {t('competitiveHistory.points')} <span className="text-green-400 font-semibold">{comp.rankingPoints}</span>
                                 </div>
                               )}
                             </div>
@@ -710,16 +717,16 @@ export function DualAnalysisPanel({
             <CardHeader>
               <CardTitle className={`text-2xl text-white flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
                 <Calendar className={`${isArabic ? 'ml-3' : 'mr-3'} text-purple-400`} size={24} />
-                Competitive History Analysis
+                {t('competitiveHistory.title')}
               </CardTitle>
-              <div className="text-sm text-gray-400">AI-generated professional analysis of career progression and achievements</div>
+              <div className="text-sm text-gray-400">{t('competitiveHistory.subtitle')}</div>
             </CardHeader>
             <CardContent className="space-y-6" dir={isArabic ? 'rtl' : 'ltr'}>
               {careerOverview && (
                 <div>
                   <h3 className={`text-lg font-semibold text-white mb-3 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
                     <Trophy className={`${isArabic ? 'ml-2' : 'mr-2'} text-yellow-400`} size={20} />
-                    Career Overview
+                    {t('competitiveHistory.careerOverview')}
                   </h3>
                   <p className="text-gray-300 leading-relaxed">{careerOverview}</p>
                 </div>
@@ -729,7 +736,7 @@ export function DualAnalysisPanel({
                 <div>
                   <h3 className={`text-lg font-semibold text-white mb-3 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
                     <TrendingUp className={`${isArabic ? 'ml-2' : 'mr-2'} text-green-400`} size={20} />
-                    Peak Performance Periods
+                    {t('competitiveHistory.peakPerformance')}
                   </h3>
                   <div className="space-y-4">
                     {peakPerformancePeriods.map((period: any, index: number) => (
@@ -740,7 +747,7 @@ export function DualAnalysisPanel({
                         <p className="text-gray-300 mb-3">{period.description}</p>
                         {period.key_results && period.key_results.length > 0 && (
                           <div className="space-y-1">
-                            <p className="text-sm font-semibold text-gray-400 mb-2">Key Results:</p>
+                            <p className="text-sm font-semibold text-gray-400 mb-2">{t('competitiveHistory.keyResults')}</p>
                             {period.key_results.map((result: string, idx: number) => (
                               <div key={idx} className={`flex items-start gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                                 <Award className="w-4 h-4 text-green-400 mt-0.5" />
@@ -769,16 +776,16 @@ export function DualAnalysisPanel({
           data-testid="tab-competitive-history"
           className="data-[state=active]:bg-athlete-accent"
         >
-          <Calendar className="mr-2 h-4 w-4" />
-          Competitive History
+          <Calendar className={`${isArabic ? 'ml-2' : 'mr-2'} h-4 w-4`} />
+          {t('competitiveHistory.tabs.competitive')}
         </TabsTrigger>
         <TabsTrigger 
           value="rank"
           data-testid="tab-rank-history"
           className="data-[state=active]:bg-athlete-accent"
         >
-          <TrendingUp className="mr-2 h-4 w-4" />
-          Rank History
+          <TrendingUp className={`${isArabic ? 'ml-2' : 'mr-2'} h-4 w-4`} />
+          {t('competitiveHistory.tabs.rank')}
         </TabsTrigger>
       </TabsList>
       
