@@ -628,12 +628,20 @@ export function DualAnalysisPanel({
                               )}
                               {comp.gRank && (
                                 <div className="text-gray-400">
-                                  {t('competitiveHistory.gRank')} <span className="text-blue-400 font-semibold">{comp.gRank}</span>
+                                  {isArabic ? (
+                                    <><span className="text-blue-400 font-semibold">{comp.gRank}</span> :{t('competitiveHistory.gRank').replace(':', '')}</>
+                                  ) : (
+                                    <>{t('competitiveHistory.gRank')} <span className="text-blue-400 font-semibold">{comp.gRank}</span></>
+                                  )}
                                 </div>
                               )}
                               {comp.ranking && comp.ranking !== 'N/A' && (
                                 <div className="text-gray-400">
-                                  {t('competitiveHistory.category')} <span className="text-gray-300">{comp.ranking}</span>
+                                  {isArabic ? (
+                                    <><span className="text-gray-300">{comp.ranking}</span> :{t('competitiveHistory.category').replace(':', '')}</>
+                                  ) : (
+                                    <>{t('competitiveHistory.category')} <span className="text-gray-300">{comp.ranking}</span></>
+                                  )}
                                 </div>
                               )}
                             </div>
