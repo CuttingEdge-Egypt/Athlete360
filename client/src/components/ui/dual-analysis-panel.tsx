@@ -633,7 +633,7 @@ export function DualAnalysisPanel({
                               )}
                               {comp.ranking && comp.ranking !== 'N/A' && (
                                 <div className="text-gray-400">
-                                  <span className="text-gray-300">{comp.ranking}</span> {t('competitiveHistory.category')}
+                                  {t('competitiveHistory.category')} <span className="text-gray-300">{comp.ranking}</span>
                                 </div>
                               )}
                             </div>
