@@ -756,10 +756,10 @@ export function DualAnalysisPanel({
                         <p className="text-gray-300 mb-3">{period.description}</p>
                         {period.key_results && period.key_results.length > 0 && (
                           <div className="space-y-1">
-                            <p className="text-sm font-semibold text-gray-400 mb-2">{t('competitiveHistory.keyResults')}</p>
+                            <p className={`text-sm font-semibold text-gray-400 mb-2 ${isArabic ? 'text-right' : ''}`}>{t('competitiveHistory.keyResults')}</p>
                             {period.key_results.map((result: string, idx: number) => (
-                              <div key={idx} className={`flex items-start gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                                <Award className="w-4 h-4 text-green-400 mt-0.5" />
+                              <div key={idx} className={`flex items-start gap-2 ${isArabic ? 'flex-row-reverse text-right' : ''}`}>
+                                <Award className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
                                 <span className="text-sm text-gray-300">{result}</span>
                               </div>
                             ))}
