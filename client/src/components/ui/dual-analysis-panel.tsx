@@ -606,17 +606,17 @@ export function DualAnalysisPanel({
                     }
 
                     return (
-                      <div key={index} className="p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-blue-500/50 transition-colors">
-                        <div className="flex items-start justify-between mb-2">
+                      <div key={index} className={`p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-blue-500/50 transition-colors ${isArabic ? 'text-right' : ''}`}>
+                        <div className={`flex items-start justify-between mb-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                           <div className="flex-1">
-                            <div className="flex items-start gap-3 mb-2">
+                            <div className={`flex items-start gap-3 mb-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                               <Badge variant="outline" className="border-yellow-400 text-yellow-400 text-xs mt-1">
                                 {displayDate}
                               </Badge>
                               <span className="font-bold text-white text-lg leading-tight">{comp.competition || comp.tournament}</span>
                             </div>
                             {comp.location && (
-                              <div className="text-sm text-gray-400 mb-2">
+                              <div className={`text-sm text-gray-400 mb-2 ${isArabic ? 'text-right' : ''}`}>
                                 📍 {comp.location}
                               </div>
                             )}
@@ -646,7 +646,7 @@ export function DualAnalysisPanel({
                               )}
                             </div>
                           </div>
-                          <div className="ml-3">
+                          <div className={`${isArabic ? 'mr-3' : 'ml-3'}`}>
                             {getResultBadge(comp.result)}
                           </div>
                         </div>
@@ -662,11 +662,11 @@ export function DualAnalysisPanel({
         {careerPhases && careerPhases.length > 0 && (
           <Card className="bg-athlete-gray-800 border-gray-600">
             <CardHeader>
-              <CardTitle className="text-2xl text-gray-100 flex items-center">
-                <Trophy className="mr-3 text-blue-400" size={24} />
+              <CardTitle className={`text-2xl text-gray-100 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <Trophy className={`${isArabic ? 'ml-3' : 'mr-3'} text-blue-400`} size={24} />
                 Career Phases
               </CardTitle>
-              <div className="text-sm text-gray-400">Professional career progression through different phases</div>
+              <div className={`text-sm text-gray-400 ${isArabic ? 'text-right' : ''}`}>Professional career progression through different phases</div>
             </CardHeader>
             <CardContent>
               <div className="relative">
@@ -681,14 +681,14 @@ export function DualAnalysisPanel({
 
                       <Card className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 border-blue-500/50">
                         <CardHeader>
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-xl text-white">
+                          <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
+                            <CardTitle className={`text-xl text-white ${isArabic ? 'text-right' : ''}`}>
                               {phase.phase_name}
                             </CardTitle>
                             <Badge className="bg-blue-600 text-white">{phase.period}</Badge>
                           </div>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className={`space-y-4 ${isArabic ? 'text-right' : ''}`}>
                           {phase.key_achievements && phase.key_achievements.length > 0 && (
                             <div className="space-y-3">
                               {phase.key_achievements
@@ -699,26 +699,26 @@ export function DualAnalysisPanel({
                                   return yearB - yearA;
                                 })
                                 .map((achievement: any, achievementIndex: number) => (
-                                  <div key={achievementIndex} className="p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-blue-500/50 transition-colors">
-                                    <div className="flex items-start justify-between mb-2">
+                                  <div key={achievementIndex} className={`p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-blue-500/50 transition-colors ${isArabic ? 'text-right' : ''}`}>
+                                    <div className={`flex items-start justify-between mb-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                                       <div className="flex-1">
-                                        <div className="flex items-center gap-3 mb-2">
+                                        <div className={`flex items-center gap-3 mb-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
                                           <Badge variant="outline" className="border-yellow-400 text-yellow-400 text-xs">
                                             {achievement.month} {achievement.year}
                                           </Badge>
                                           <span className="font-bold text-white">{achievement.event_name}</span>
                                         </div>
-                                        <div className="text-sm text-gray-400 mb-2">
+                                        <div className={`text-sm text-gray-400 mb-2 ${isArabic ? 'text-right' : ''}`}>
                                           {achievement.event_tier}
                                         </div>
                                       </div>
-                                      <div className="ml-3">
+                                      <div className={`${isArabic ? 'mr-3' : 'ml-3'}`}>
                                         {getResultBadge(achievement.result)}
                                       </div>
                                     </div>
                                     
                                     {achievement.notes && (
-                                      <p className="text-sm text-gray-300 leading-relaxed">
+                                      <p className={`text-sm text-gray-300 leading-relaxed ${isArabic ? 'text-right' : ''}`}>
                                         {achievement.notes}
                                       </p>
                                     )}
