@@ -586,21 +586,27 @@ export function DualAnalysisPanel({
                     return dateB - dateA; // Most recent first
                   })
                   .map((comp: any, index: number) => {
-                    // Parse date for full display (e.g., "27 April 2025")
+                    // Parse date for full display (e.g., "27 April 2025" or "27 أبريل 2025")
                     let displayDate = 'Date unknown';
                     if (comp.date && comp.date !== 'Date unknown') {
                       // Check if date is already in full format
-                      if (comp.date.includes(' ')) {
+                      if (comp.date.includes(' ') && !comp.date.match(/^\d{4}-\d{2}-\d{2}/)) {
                         displayDate = comp.date; // Already formatted like "27 April 2025"
                       } else {
                         // Parse ISO date
                         const compDate = new Date(comp.date);
                         if (!isNaN(compDate.getTime())) {
-                          displayDate = compDate.toLocaleDateString('en-US', { 
-                            day: 'numeric', 
-                            month: 'long', 
-                            year: 'numeric' 
-                          });
+                          if (isArabic) {
+                            const monthNamesAr = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+                              'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+                            displayDate = `${compDate.getDate()} ${monthNamesAr[compDate.getMonth()]} ${compDate.getFullYear()}`;
+                          } else {
+                            displayDate = compDate.toLocaleDateString('en-US', { 
+                              day: 'numeric', 
+                              month: 'long', 
+                              year: 'numeric' 
+                            });
+                          }
                         }
                       }
                     }
@@ -746,10 +752,10 @@ export function DualAnalysisPanel({
               </CardTitle>
               <div className={`text-sm text-gray-400 ${isArabic ? 'text-right' : ''}`}>{t('competitiveHistory.subtitle')}</div>
             </CardHeader>
-            <CardContent className="space-y-6" dir={isArabic ? 'rtl' : 'ltr'}>
+            <CardContent className={`space-y-6 ${isArabic ? 'text-right' : ''}`} dir={isArabic ? 'rtl' : 'ltr'}>
               {careerOverview && (
-                <div>
-                  <h3 className={`text-lg font-semibold text-white mb-3 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <div className={isArabic ? 'text-right' : ''}>
+                  <h3 className={`text-lg font-semibold text-white mb-3 flex items-center ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
                     <Trophy className={`${isArabic ? 'ml-2' : 'mr-2'} text-yellow-400`} size={20} />
                     {t('competitiveHistory.careerOverview')}
                   </h3>
@@ -758,14 +764,14 @@ export function DualAnalysisPanel({
               )}
               
               {peakPerformancePeriods && peakPerformancePeriods.length > 0 && (
-                <div>
-                  <h3 className={`text-lg font-semibold text-white mb-3 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <div className={isArabic ? 'text-right' : ''}>
+                  <h3 className={`text-lg font-semibold text-white mb-3 flex items-center ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
                     <TrendingUp className={`${isArabic ? 'ml-2' : 'mr-2'} text-green-400`} size={20} />
                     {t('competitiveHistory.peakPerformance')}
                   </h3>
                   <div className="space-y-4">
                     {peakPerformancePeriods.map((period: any, index: number) => (
-                      <div key={index} className="p-4 bg-athlete-gray-700 rounded-lg border border-purple-500/30">
+                      <div key={index} className={`p-4 bg-athlete-gray-700 rounded-lg border border-purple-500/30 ${isArabic ? 'text-right' : ''}`}>
                         <div className={`flex items-center gap-2 mb-2 ${isArabic ? 'justify-end' : ''}`}>
                           <Badge className="bg-purple-600 text-white">{period.period}</Badge>
                         </div>
