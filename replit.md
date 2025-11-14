@@ -1,35 +1,7 @@
 # Athlete360 - AI-Powered Athletic Performance Analysis Platform
 
 ## Overview
-Athlete360 is an AI-powered athletic performance analysis platform that analyzes athlete performance across various sports. It provides comprehensive insights, including biographies, ranking analysis, strengths/weaknesses, development plans, nutrition guidance, and strategic analysis. The platform leverages AI to deliver personalized, real-time athletic insights for performance development and strategic advantages, aiming to be an authentic and essential tool for athletes and coaches.
-
-## Recent Changes (November 13, 2025)
-- **Comprehensive 57-Month Competitive History Fetch**: Successfully implemented full historical competitive data retrieval for Taekwondo athletes spanning March 2021 to present (57 months). Fixed hardcoded 16-month limit in `taekwondoCompetitiveHistoryService.ts` by changing `--months-back` parameter from '16' to '57'. Also fixed critical Python sorting bug in `server/athlete_lookup.py` where None values in `generated_end_date` field caused comparison errors during chronological sorting - changed from `.get("generated_end_date", "1900-01-01")` to `.get("generated_end_date") or "1900-01-01"` to properly handle both missing keys and None values. Real-time progress tracking working perfectly (PROGRESS:1/57 → 57/57). Verified with Richard Andre ORDEMANN test case: successfully retrieved **74 unique competitions** across 57 API calls with proper deduplication and chronological sorting (most recent first).
-- **Rank Display Format Fix**: Fixed rank display to show clean integers (e.g., "#13") instead of decimals (e.g., "#13.0") by using parsed `rankNum` value instead of raw `rankInfo.rank` string in athlete card ranking badges on `client/src/pages/home.tsx`.
-- **Critical Bug Fix: Taekwondo Rank History Storage**: Fixed JavaScript scoping error in `server/taekwondoUtils.ts` where `monthNames` array was declared inside forEach loop but referenced outside in map function, causing "monthNames is not defined" error. This critical bug prevented successful Python API data from being stored and triggered unnecessary BrowserUse fallbacks. The fix relocated `monthNames` declaration to function scope, ensuring rank history data (30+ entries across multiple categories) is now properly extracted and persisted to database. Verified working with Richard Andre ORDEMANN test case - data successfully stored with rankings, userId, and full rank history without errors.
-- **Competitive History UI Improvements**: Enhanced user experience with cleaner date formatting and better visual alignment: (1) Rank history graph now displays dates as "July 2025" instead of "1-7-2025" for improved readability, (2) Competition card dates are now properly aligned when event titles wrap to multiple lines using top-aligned flex layout with adjusted spacing.
-- **Arabic RTL Support for Competitive/Rank History**: Implemented comprehensive Arabic localization with proper RTL layout for dual-analysis panel in `client/src/components/ui/dual-analysis-panel.tsx`. Uses i18n language detection to automatically apply RTL directionality (dir="rtl") to analysis text containers, mirrored flex layouts (flex-row-reverse) for icons and metadata, and reversed timeline borders (border-r instead of border-l) while keeping charts in LTR for universal readability. Backend already generates Arabic analysis text via Gemini when language='ar'. Competition names, locations, and categories remain in original language following industry standards (ESPN Arabic, BeIN Sports) - proper nouns stay untranslated for accuracy and to avoid mistranslations of official event titles.
-
-## Recent Changes (November 12, 2025)
-- **Intelligent Taekwondo Weight Category Classification**: Enhanced personal info generation with smart weight category detection that distinguishes between Olympic and World rankings. Gemini now correctly classifies athletes into the appropriate weight division based on which ranking they appear in (Olympic: M+80 kg for heavyweights vs World: M+87 kg for heavyweights), preventing API lookup failures caused by mismatched weight categories.
-
-## Recent Changes (November 11, 2025)
-- **Taekwondo Dual-Analysis Feature**: Extended competitive history generation for Taekwondo athletes to include dual-analysis of both competitive events AND rank progression over time. Backend `/api/analysis/:athleteId/rank` route now detects Taekwondo sport, fetches rank history from `rank_history` table, and generates two parallel analyses using Gemini 2.5 Pro with web search: (1) competitive event history analysis and (2) rank progression analysis with contextual insights about what caused rank changes (experience, club changes, coaching, injuries, etc.). Frontend displays dual-tab UI: "Competitive History" tab shows traditional event timeline, "Rank History" tab displays Chart.js line graph of rank progression over time plus LLM-generated analysis. Graceful fallback to single-analysis for non-Taekwondo sports or when rank history unavailable. Maintains full backward compatibility.
-
-## Recent Changes (October 19, 2025)
-- **Athlete Comparison Loading Arabic RTL**: Added complete Arabic translation for athlete comparison loading screen with RTL layout - title on right, cancel button on left, all progress messages translated (loading data, analyzing profiles, etc.), Arabic numerals for percentage (e.g., ٪١٥ instead of 15%)
-- **Queue Status Bug Fix**: Fixed issue where athlete comparison showed as "loading" in queue even after completion - queue now properly updates to completed status
-- **Athlete Comparison UI Arabic Translation & RTL**: Translated all athlete comparison UI elements to Arabic with full RTL support - tabs (Overview, Strengths, Weaknesses, Competition History, Head-to-Head), section titles, and labels all display in Arabic when comparison language is set to Arabic. Layout flows right-to-left with proper border positioning
-- **Development Plan Header RTL**: Fixed development plan header to display in proper RTL layout for Arabic - title appears on right, "Generate New" button on left with mirrored icon positioning
-- **Queue Status Arabic Translation**: Translated all queue status messages to Arabic (في الانتظار for pending, جارٍ التشغيل for running, مكتمل for completed, خطأ for error) and empty queue message
-- **Arabic Login Page**: Implemented complete Arabic version of login page with RTL layout, mirrored icons, right-aligned labels/inputs, and all text translated including error messages and toast notifications
-- **Queue & History Arabic Translations**: Added full translation support for generation queue and history dropdown - all service types now display in Arabic (e.g., "خطة التطوير" for development-plan, "خطة التغذية" for nutrition-plan)
-- **All Videos Section RTL Layout**: Fixed "All Videos" tab in development plans to properly display in RTL - exercise titles now appear on the right with Play icon, video buttons on the left in Arabic mode
-- **Development Plan Full Arabic Content**: Enhanced AI prompts to generate ALL development plan content in Arabic when language is set to Arabic, including exercise names, descriptions, tags, equipment, and prescription details
-- **Development Plan Loading UI Arabic RTL**: Fixed loading progress display to show messages and spinner on the right side in Arabic, Cancel button on the left, and increased font sizes (text-lg for main message, text-base for subtitle) for better Arabic readability
-- **Video Button RTL Positioning**: Unified video button implementation using flex-row-reverse pattern with conditional margins for cleaner, more maintainable code
-- **Complete Arabic Toast Messages**: Added comprehensive Arabic translations for all toast notifications including generation started/failed/cancelled, plan generated, ranking updates, athlete creation, image search, and payment success messages
-- **Translation System**: All UI elements (queue, history, toast, loading messages) use translation system with automatic language switching
+Athlete360 is an AI-powered athletic performance analysis platform designed to provide comprehensive insights into athlete performance across various sports. It leverages AI to deliver personalized, real-time athletic insights for performance development and strategic advantages. The platform aims to be an authentic and essential tool for athletes and coaches, offering features such as biographies, ranking analysis, strengths/weaknesses, development plans, nutrition guidance, and strategic analysis.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -37,73 +9,71 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### Frontend
-- **Framework**: React 18 with TypeScript and Vite.
-- **UI/UX**: Radix UI primitives and shadcn/ui for components, Tailwind CSS for styling with a custom dark theme. Tab-based navigation with dedicated sections for athlete analysis and comparison.
-- **State Management**: TanStack Query (React Query) for server state.
-- **Routing**: Wouter for client-side routing.
-- **Forms**: React Hook Form with Zod validation.
-- **UI Features**: Ranking progression charts with Chart.js, enhanced career milestone layouts, and a floating queue widget for managing multiple AI generations.
+-   **Framework**: React 18 with TypeScript and Vite.
+-   **UI/UX**: Radix UI primitives and shadcn/ui for components, Tailwind CSS for styling with a custom dark theme. Features tab-based navigation, ranking progression charts with Chart.js, enhanced career milestone layouts, and a floating queue widget. Full Arabic UI translation and RTL support implemented across various features.
+-   **State Management**: TanStack Query (React Query) for server state.
+-   **Routing**: Wouter for client-side routing.
+-   **Forms**: React Hook Form with Zod validation.
 
 ### Backend
-- **Runtime**: Node.js with Express.js.
-- **Language**: TypeScript with ESM modules.
-- **Database**: PostgreSQL with Drizzle ORM.
-- **Session Management**: Express sessions with PostgreSQL store.
-- **Authentication**: Replit OIDC integration.
+-   **Runtime**: Node.js with Express.js.
+-   **Language**: TypeScript with ESM modules.
+-   **Database**: PostgreSQL with Drizzle ORM.
+-   **Session Management**: Express sessions with PostgreSQL store.
+-   **Authentication**: Replit OIDC integration.
 
 ### Core Features
-- **Analysis Services**: Eight distinct AI-powered analytical services (Bio, Rank, Strengths, Weaknesses, Development Plans, Nutrition, Beat Strategies, Video Analysis).
-- **Intelligent Ranking System**: Pre-search web discovery of athlete categories, sport-specific navigation strategies, o3 Vision-powered autonomous navigation of federation websites, and extraction of multiple ranking types.
-- **Athlete Comparison**: AI-powered one-click comparison using o3 with web search and full BrowserUse data integration. Features five comparison dimensions: Overview, Strengths, Weaknesses, Competition History, and Head-to-Head analysis. Rankings displayed with same styling as athlete cards (color-coded by category: Olympic=gold, Continental=green, National=blue, World=orange).
-- **Smart Data Extraction**: Intelligent fallback system for missing athlete data, personal info generation with exact competition categories from official sport federations using Gemini Flash Latest (with web search) for precise category and division extraction (e.g., "M-54", "W-67", "Sabre"). Category field stores primary competition category in exact federation format.
-- **Competitive History Analysis**: BrowserUse fetches raw competitive history (prioritizing Simply Compete for Taekwondo), Gemini-2.5-pro generates professional analysis. Features a dual display system with chronologically sorted competitions (most recent first) and medal-styled result badges (🥇 1st, 🥈 2nd, 🥉 3rd, ✓ Participation).
-- **Data Management**: Comprehensive athlete data storage, retrieval, and smart deduplication.
-- **Video Analysis System**: Independent video analysis with synchronized player, timeline navigation, and real-time event display. Features unified score generation supporting individual sports (tennis, table tennis, fencing) with entity-specific scores and "side" field (blue/red), team sports (basketball, soccer) with team-level scores, and proper country flag display extracted from video scoreboards. Time restrictions for round-based analysis have been removed to allow full video analysis.
-- **AI Response Handling**: Robust JSON parsing and retry mechanisms for AI model responses.
-- **Payment System**: Integrated with Paymob for token purchases, featuring a dual callback system and automatic token crediting.
-- **Generation Queue System**: Manages multiple AI generations simultaneously with real-time status updates, cancellation, and retry functionality.
-- **Error Handling**: Comprehensive system for AI web search failures, preventing token deduction and providing user-friendly messages.
-- **Bilingual Search**: Bidirectional Arabic/English name translation for athlete search with English-only display, animated loading dots with RTL support.
-- **Language-Aware Previews**: Landing page previews automatically show language-specific analysis (Arabic bio for Arabic users, English bio for English users).
+-   **Analysis Services**: Eight distinct AI-powered analytical services (Bio, Rank, Strengths, Weaknesses, Development Plans, Nutrition, Beat Strategies, Video Analysis). Includes intelligent ranking system with web discovery and sport-specific navigation.
+-   **Athlete Comparison**: AI-powered one-click comparison across five dimensions: Overview, Strengths, Weaknesses, Competition History, and Head-to-Head analysis, using o3 with web search and BrowserUse data.
+-   **Smart Data Extraction**: Intelligent fallback for missing data, personal info generation with exact competition categories from official sport federations using Gemini Flash Latest for precise category and division extraction.
+-   **Competitive History Analysis**: BrowserUse fetches raw history, Gemini 2.5 Pro generates professional analysis. Features dual display with chronological sorting and medal-styled badges. For Taekwondo, it includes dual-analysis of competitive events and rank progression with contextual insights.
+-   **Data Management**: Comprehensive athlete data storage, retrieval, and smart deduplication.
+-   **Video Analysis System**: Independent video analysis with synchronized player, timeline navigation, real-time event display, and unified score generation for individual and team sports.
+-   **AI Response Handling**: Robust JSON parsing and retry mechanisms.
+-   **Payment System**: Integrated with Paymob for token purchases, with dual callback and automatic token crediting.
+-   **Generation Queue System**: Manages multiple AI generations with real-time status, cancellation, and retry.
+-   **Error Handling**: Comprehensive system for AI web search failures, preventing token deduction.
+-   **Bilingual Search**: Bidirectional Arabic/English name translation for athlete search with English-only display.
+-   **Language-Aware Previews**: Landing page previews automatically show language-specific analysis.
 
 ### Data Storage
-- **Primary Database**: PostgreSQL via Neon serverless.
-- **ORM**: Drizzle ORM for type-safe operations and migrations.
-- **Schema Design**: Relational schema for users, sports, athletes, analysis logs, transactions, and analytical data including a `competitiveHistory` JSONB field.
+-   **Primary Database**: PostgreSQL via Neon serverless.
+-   **ORM**: Drizzle ORM for type-safe operations and migrations.
+-   **Schema Design**: Relational schema for users, sports, athletes, analysis logs, transactions, and analytical data including a `competitiveHistory` JSONB field.
 
 ### Authentication & Authorization
-- **Provider**: Replit OIDC.
-- **Session Management**: Server-side sessions with PostgreSQL persistence.
-- **Authorization**: Route-level protection with `isAuthenticated` middleware.
-- **User Management**: Automatic user creation/updates with token balance tracking.
+-   **Provider**: Replit OIDC.
+-   **Session Management**: Server-side sessions with PostgreSQL persistence.
+-   **Authorization**: Route-level protection with `isAuthenticated` middleware.
+-   **User Management**: Automatic user creation/updates with token balance tracking.
 
 ## External Dependencies
 
 ### AI and Language Models
-- **OpenAI o3**: Advanced reasoning model with web search capabilities for Bio Analysis, Rank History, Statistics, Strengths, Weaknesses, Beat Strategies generation, and all Athlete Comparison dimensions (Overview, Strengths, Weaknesses, Competition History, Head-to-Head).
-- **Google Gemini 2.5 Pro**: Specialized for competitive history analysis, nutrition plan generation, development plan generation, and video analysis.
-- **BrowserUse + Gemini Flash Latest**: Autonomous web navigation for ranking and competitive history data extraction.
-- **OpenAI SDK**: For o3 and GPT integration.
-- **Google Generative AI SDK**: For Gemini integration.
+-   **OpenAI o3**: Advanced reasoning with web search for Bio, Rank History, Statistics, Strengths, Weaknesses, Beat Strategies, and all Athlete Comparison dimensions.
+-   **Google Gemini 2.5 Pro**: For competitive history analysis, nutrition/development plan generation, and video analysis.
+-   **BrowserUse + Gemini Flash Latest**: Autonomous web navigation for ranking and competitive history data extraction.
+-   **OpenAI SDK**: For o3 and GPT integration.
+-   **Google Generative AI SDK**: For Gemini integration.
 
 ### Database and Storage
-- **Neon PostgreSQL**: Serverless PostgreSQL database.
-- **Drizzle Kit**: Database migrations and schema management.
+-   **Neon PostgreSQL**: Serverless PostgreSQL database.
+-   **Drizzle Kit**: Database migrations and schema management.
 
 ### Authentication Services
-- **Replit OIDC**: OpenID Connect authentication provider.
-- **Passport.js**: Authentication middleware.
+-   **Replit OIDC**: OpenID Connect authentication provider.
+-   **Passport.js**: Authentication middleware.
 
 ### Payment Gateway
-- **Paymob**: Payment processing for token purchases.
+-   **Paymob**: Payment processing for token purchases.
 
 ### UI and Styling
-- **Radix UI**: Headless UI primitives.
-- **Tailwind CSS**: Utility-first CSS framework.
-- **Lucide React**: Icon library.
-- **Chart.js**: Data visualization library.
+-   **Radix UI**: Headless UI primitives.
+-   **Tailwind CSS**: Utility-first CSS framework.
+-   **Lucide React**: Icon library.
+-   **Chart.js**: Data visualization library.
 
 ### Development Tools
-- **Vite**: Fast build tool.
-- **ESBuild**: Fast JavaScript bundler.
-- **TypeScript**: Static type checking.
+-   **Vite**: Fast build tool.
+-   **ESBuild**: Fast JavaScript bundler.
+-   **TypeScript**: Static type checking.
