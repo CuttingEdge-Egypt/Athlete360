@@ -158,6 +158,7 @@ export function DualAnalysisPanel({
         y: {
           reverse: true,
           beginAtZero: false,
+          min: 1,
           ticks: {
             color: 'rgb(156, 163, 175)',
             callback: function(value: any) {
@@ -172,7 +173,10 @@ export function DualAnalysisPanel({
           ticks: {
             color: 'rgb(156, 163, 175)',
             maxRotation: 45,
-            minRotation: 45
+            minRotation: 45,
+            font: {
+              weight: isArabic ? 'bold' : 'normal'
+            }
           },
           grid: {
             color: 'rgba(75, 85, 99, 0.3)'
@@ -376,6 +380,7 @@ export function DualAnalysisPanel({
         y: {
           reverse: true,
           beginAtZero: false,
+          min: 1,
           ticks: {
             color: 'rgb(156, 163, 175)',
             callback: function(value: any) {
@@ -390,7 +395,10 @@ export function DualAnalysisPanel({
           ticks: {
             color: 'rgb(156, 163, 175)',
             maxRotation: 45,
-            minRotation: 45
+            minRotation: 45,
+            font: {
+              weight: isArabic ? 'bold' : 'normal'
+            }
           },
           grid: {
             color: 'rgba(75, 85, 99, 0.3)'
@@ -625,7 +633,7 @@ export function DualAnalysisPanel({
                               )}
                               {comp.ranking && comp.ranking !== 'N/A' && (
                                 <div className="text-gray-400">
-                                  {t('competitiveHistory.category')} <span className="text-gray-300">{comp.ranking}</span>
+                                  <span className="text-gray-300">{comp.ranking}</span> {t('competitiveHistory.category')}
                                 </div>
                               )}
                             </div>
@@ -749,11 +757,11 @@ export function DualAnalysisPanel({
                   </h3>
                   <div className="space-y-4">
                     {peakPerformancePeriods.map((period: any, index: number) => (
-                      <div key={index} className="p-4 bg-athlete-gray-700 rounded-lg border border-purple-500/30">
+                      <div key={index} className="p-4 bg-athlete-gray-700 rounded-lg border border-purple-500/30" dir={isArabic ? 'rtl' : 'ltr'}>
                         <div className="flex items-center gap-2 mb-2">
                           <Badge className="bg-purple-600 text-white">{period.period}</Badge>
                         </div>
-                        <p className="text-gray-300 mb-3">{period.description}</p>
+                        <p className={`text-gray-300 mb-3 ${isArabic ? 'text-right' : ''}`}>{period.description}</p>
                         {period.key_results && period.key_results.length > 0 && (
                           <div className="space-y-1">
                             <p className={`text-sm font-semibold text-gray-400 mb-2 ${isArabic ? 'text-right' : ''}`}>{t('competitiveHistory.keyResults')}</p>
