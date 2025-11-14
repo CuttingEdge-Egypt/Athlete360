@@ -744,7 +744,7 @@ export function DualAnalysisPanel({
                 <Calendar className={`${isArabic ? 'ml-3' : 'mr-3'} text-purple-400`} size={24} />
                 {t('competitiveHistory.title')}
               </CardTitle>
-              <div className="text-sm text-gray-400">{t('competitiveHistory.subtitle')}</div>
+              <div className={`text-sm text-gray-400 ${isArabic ? 'text-right' : ''}`}>{t('competitiveHistory.subtitle')}</div>
             </CardHeader>
             <CardContent className="space-y-6" dir={isArabic ? 'rtl' : 'ltr'}>
               {careerOverview && (
@@ -753,7 +753,7 @@ export function DualAnalysisPanel({
                     <Trophy className={`${isArabic ? 'ml-2' : 'mr-2'} text-yellow-400`} size={20} />
                     {t('competitiveHistory.careerOverview')}
                   </h3>
-                  <p className="text-gray-300 leading-relaxed">{careerOverview}</p>
+                  <p className={`text-gray-300 leading-relaxed ${isArabic ? 'text-right' : ''}`}>{careerOverview}</p>
                 </div>
               )}
               
