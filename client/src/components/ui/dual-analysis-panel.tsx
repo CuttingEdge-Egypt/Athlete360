@@ -765,8 +765,8 @@ export function DualAnalysisPanel({
                   </h3>
                   <div className="space-y-4">
                     {peakPerformancePeriods.map((period: any, index: number) => (
-                      <div key={index} className="p-4 bg-athlete-gray-700 rounded-lg border border-purple-500/30" dir={isArabic ? 'rtl' : 'ltr'}>
-                        <div className="flex items-center gap-2 mb-2">
+                      <div key={index} className="p-4 bg-athlete-gray-700 rounded-lg border border-purple-500/30">
+                        <div className={`flex items-center gap-2 mb-2 ${isArabic ? 'justify-end' : ''}`}>
                           <Badge className="bg-purple-600 text-white">{period.period}</Badge>
                         </div>
                         <p className={`text-gray-300 mb-3 ${isArabic ? 'text-right' : ''}`}>{period.description}</p>
