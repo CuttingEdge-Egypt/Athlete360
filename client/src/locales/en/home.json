@@ -165,6 +165,17 @@
   "competitiveHistory": {
     "title": "Competitive History Analysis",
     "subtitle": "Professional analysis of career progression and achievements",
+    "tabs": {
+      "competitive": "Competitive History",
+      "rank": "Rank History"
+    },
+    "yearTitle": "Competitive History",
+    "competitions": "Competitions",
+    "competition": "Competition",
+    "category": "Category:",
+    "points": "Points:",
+    "gRank": "G-Rank:",
+    "place": "place",
     "careerOverview": "Career Overview",
     "peakPerformance": "Peak Performance Periods",
     "keyResults": "Key Results:",
@@ -176,7 +187,9 @@
     "progressionPatterns": "Progression Patterns",
     "notableAchievements": "Notable Achievements",
     "recentForm": "Recent Form",
-    "keyInsights": "Key Insights"
+    "keyInsights": "Key Insights",
+    "rankProgressionTitle": "Rank Progression Over Time",
+    "months": "Months"
   },
   "interface": {
     "selectSport": "Select Sport",

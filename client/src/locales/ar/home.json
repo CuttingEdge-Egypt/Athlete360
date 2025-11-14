@@ -165,8 +165,19 @@
   "competitiveHistory": {
     "title": "تحليل التاريخ التنافسي",
     "subtitle": "تحليل احترافي للتطور المهني والإنجازات",
+    "tabs": {
+      "competitive": "التاريخ التنافسي",
+      "rank": "تاريخ الترتيب"
+    },
+    "yearTitle": "التاريخ التنافسي",
+    "competitions": "منافسات",
+    "competition": "منافسة",
+    "category": "الفئة:",
+    "points": "النقاط:",
+    "gRank": "التصنيف-G:",
+    "place": "المركز",
     "careerOverview": "نظرة عامة على المسيرة",
-    "peakPerformance": "فترات الذروة في الأداء",
+    "peakPerformance": "فترات الأداء القصوى",
     "keyResults": "النتائج الرئيسية:",
     "competitionAnalysis": "تحليل البطولات",
     "grandPrix": "الجراند بري",
@@ -176,7 +187,9 @@
     "progressionPatterns": "أنماط التطور",
     "notableAchievements": "الإنجازات البارزة",
     "recentForm": "الأداء الأخير",
-    "keyInsights": "الرؤى الرئيسية"
+    "keyInsights": "الرؤى الرئيسية",
+    "rankProgressionTitle": "تطور الترتيب عبر الزمن",
+    "months": "شهرًا"
   },
   "interface": {
     "selectSport": "اختر الرياضة",
