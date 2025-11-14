@@ -190,7 +190,9 @@
     "recentForm": "Recent Form",
     "keyInsights": "Key Insights",
     "rankProgressionTitle": "Rank Progression Over Time",
-    "months": "Months"
+    "months": "Months",
+    "trendsAndOutlook": "Trends & Outlook",
+    "progressionTimeline": "Progression Timeline"
   },
   "interface": {
     "selectSport": "Select Sport",

@@ -110,8 +110,11 @@ export function DualAnalysisPanel({
     // Format dates as "July 2025" instead of "1-7-2025"
     const formatDateLabel = (dateStr: string) => {
       const date = new Date(dateStr);
-      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+      const monthNamesEn = ['January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'];
+      const monthNamesAr = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+        'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+      const monthNames = isArabic ? monthNamesAr : monthNamesEn;
       return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
     };
     
@@ -193,13 +196,16 @@ export function DualAnalysisPanel({
       }
     };
 
+    // Calculate unique months for title
+    const uniqueMonths = rankHistoryData ? new Set(rankHistoryData.map((entry: any) => `${entry.year}-${entry.month}`)).size : 0;
+    
     return (
       <div className="space-y-6">
         <Card className="bg-athlete-gray-800 border-gray-600">
           <CardHeader>
             <CardTitle className={`text-2xl text-gray-100 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
               <TrendingUp className={`${isArabic ? 'ml-3' : 'mr-3'} text-orange-400`} size={24} />
-              {t('competitiveHistory.rankProgressionTitle')} ({rankHistoryData?.length || 16} {t('competitiveHistory.months')})
+              {t('competitiveHistory.rankProgressionTitle')} ({uniqueMonths} {t('competitiveHistory.months')})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -227,13 +233,13 @@ export function DualAnalysisPanel({
                   <>
                     {rankAnalysis.trends_and_outlook && (
                       <div className="bg-athlete-gray-700 p-4 rounded-lg">
-                        <h4 className="font-semibold text-white mb-2">Trends & Outlook</h4>
+                        <h4 className="font-semibold text-white mb-2">{t('competitiveHistory.trendsAndOutlook')}</h4>
                         <p className="text-gray-300 text-sm leading-relaxed">{rankAnalysis.trends_and_outlook}</p>
                       </div>
                     )}
                     {rankAnalysis.progression_timeline && Array.isArray(rankAnalysis.progression_timeline) && rankAnalysis.progression_timeline.length > 0 && (
                       <div className="bg-athlete-gray-700 p-4 rounded-lg">
-                        <h4 className="font-semibold text-white mb-3">Progression Timeline</h4>
+                        <h4 className="font-semibold text-white mb-3">{t('competitiveHistory.progressionTimeline')}</h4>
                         <div className="space-y-2">
                           {rankAnalysis.progression_timeline.map((item: any, index: number) => (
                             <div key={index} className={`${isArabic ? 'border-r-2 pr-3' : 'border-l-2 pl-3'} border-blue-400 py-1`}>
@@ -322,8 +328,11 @@ export function DualAnalysisPanel({
     // Format dates as "July 2025" instead of "1-7-2025"
     const formatDateLabel = (dateStr: string) => {
       const date = new Date(dateStr);
-      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+      const monthNamesEn = ['January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'];
+      const monthNamesAr = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+        'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+      const monthNames = isArabic ? monthNamesAr : monthNamesEn;
       return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
     };
     
@@ -603,20 +612,20 @@ export function DualAnalysisPanel({
                                 📍 {comp.location}
                               </div>
                             )}
-                            <div className={`flex items-center gap-4 text-sm text-gray-400 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                              {comp.ranking && comp.ranking !== 'N/A' && (
-                                <div>
-                                  {t('competitiveHistory.category')} <span className="text-gray-300">{comp.ranking}</span>
+                            <div className={`flex items-center gap-4 text-sm ${isArabic ? 'flex-row-reverse' : ''}`}>
+                              {comp.rankingPoints && (
+                                <div className="text-gray-400">
+                                  {t('competitiveHistory.points')} <span className="text-green-400 font-semibold">{comp.rankingPoints}</span>
                                 </div>
                               )}
                               {comp.gRank && (
-                                <div>
+                                <div className="text-gray-400">
                                   {t('competitiveHistory.gRank')} <span className="text-blue-400 font-semibold">{comp.gRank}</span>
                                 </div>
                               )}
-                              {comp.rankingPoints && (
-                                <div>
-                                  {t('competitiveHistory.points')} <span className="text-green-400 font-semibold">{comp.rankingPoints}</span>
+                              {comp.ranking && comp.ranking !== 'N/A' && (
+                                <div className="text-gray-400">
+                                  {t('competitiveHistory.category')} <span className="text-gray-300">{comp.ranking}</span>
                                 </div>
                               )}
                             </div>

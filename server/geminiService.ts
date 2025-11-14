@@ -3613,7 +3613,8 @@ Return your analysis in this JSON format:
             period: { type: "string" },
             description: { type: "string" },
             key_results: { type: "array", items: { type: "string" } }
-          }
+          },
+          required: ["period", "description", "key_results"]
         }
       },
       competition_analysis: {

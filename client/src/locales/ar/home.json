@@ -190,7 +190,9 @@
     "recentForm": "الأداء الأخير",
     "keyInsights": "الرؤى الرئيسية",
     "rankProgressionTitle": "تطور الترتيب عبر الزمن",
-    "months": "شهرًا"
+    "months": "شهرًا",
+    "trendsAndOutlook": "الاتجاهات والتوقعات",
+    "progressionTimeline": "الجدول الزمني للتطور"
   },
   "interface": {
     "selectSport": "اختر الرياضة",
