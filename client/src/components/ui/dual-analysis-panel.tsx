@@ -186,7 +186,8 @@ export function DualAnalysisPanel({
             maxRotation: 45,
             minRotation: 45,
             font: {
-              weight: isArabic ? 'bold' as const : 'normal' as const
+              weight: isArabic ? 'bold' as const : 'normal' as const,
+              size: isArabic ? 14 : 12
             }
           },
           grid: {
@@ -420,7 +421,8 @@ export function DualAnalysisPanel({
             maxRotation: 45,
             minRotation: 45,
             font: {
-              weight: isArabic ? 'bold' as const : 'normal' as const
+              weight: isArabic ? 'bold' as const : 'normal' as const,
+              size: isArabic ? 14 : 12
             }
           },
           grid: {
@@ -807,7 +809,7 @@ export function DualAnalysisPanel({
                   <div className="space-y-4">
                     {peakPerformancePeriods.map((period: any, index: number) => (
                       <div key={index} className={`p-4 bg-athlete-gray-700 rounded-lg border border-purple-500/30 ${isArabic ? 'text-right' : ''}`}>
-                        <div className={`flex items-center gap-2 mb-2 ${isArabic ? 'justify-end' : ''}`}>
+                        <div className={`flex items-center gap-2 mb-2 w-full ${isArabic ? 'justify-end flex-row-reverse' : ''}`}>
                           <Badge className="bg-purple-600 text-white">{period.period}</Badge>
                         </div>
                         <p className={`text-gray-300 mb-3 ${isArabic ? 'text-right' : ''}`}>{period.description}</p>
