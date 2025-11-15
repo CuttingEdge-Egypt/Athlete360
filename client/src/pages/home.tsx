@@ -2147,42 +2147,6 @@ export default function Home() {
                       </div>
                     )}
                     
-                    {/* API Fetch Progress Indicator */}
-                    {selectedAthlete.apiScrapeStatus?.competitiveHistoryFetchStatus === 'in_progress' && (
-                      <div className="mb-2">
-                        <div className="bg-blue-900/30 border border-blue-500/40 rounded-lg p-3">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center space-x-2">
-                              <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
-                              <span className="text-sm font-medium text-blue-300">
-                                Fetching Competition History
-                              </span>
-                            </div>
-                            <span className="text-xs text-blue-400 font-mono">
-                              {selectedAthlete.apiScrapeStatus.competitiveHistoryProgress?.completed || 0}/{selectedAthlete.apiScrapeStatus.competitiveHistoryProgress?.total || 0}
-                            </span>
-                          </div>
-                          
-                          {/* Progress Bar */}
-                          <div className="w-full bg-gray-700/50 rounded-full h-2 overflow-hidden">
-                            <div 
-                              className="bg-gradient-to-r from-blue-500 to-blue-400 h-full transition-all duration-300 ease-out"
-                              style={{ 
-                                width: `${selectedAthlete.apiScrapeStatus.competitiveHistoryProgress?.percentage || 0}%` 
-                              }}
-                            />
-                          </div>
-                          
-                          {/* Progress Message */}
-                          {selectedAthlete.apiScrapeStatus.logs && selectedAthlete.apiScrapeStatus.logs.length > 0 && (
-                            <p className="text-xs text-gray-400 mt-2">
-                              {selectedAthlete.apiScrapeStatus.logs[selectedAthlete.apiScrapeStatus.logs.length - 1]?.message}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    
                     <Card 
                       className="bg-athlete-gray-700 border-gray-600"
                     >
