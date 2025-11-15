@@ -9,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
-import { Video, Upload, Loader2, Play, FileVideo, Search, Check, ChevronsUpDown, Trophy, MessageSquare, X } from "lucide-react";
+import { Video, Upload, Loader2, Play, FileVideo, Search, Check, ChevronsUpDown, Trophy, Film, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AnalysisResult } from "./analysis-result";
 import { VideoPlayerAnalysis } from "./video-player-analysis";
@@ -458,7 +458,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
               <div className="flex items-center space-x-3 bg-athlete-gray-700 p-3 rounded-lg">
                 <RadioGroupItem value="clip" id="clip" />
                 <Label htmlFor="clip" className="flex items-center cursor-pointer flex-1">
-                  <MessageSquare className="text-indigo-400 mr-2" size={18} />
+                  <Film className="text-indigo-400 mr-2" size={18} />
                   <div>
                     <span className="text-white font-medium">{t('upload.clipAnalysis')}</span>
                     <p className="text-gray-400 text-sm">{t('upload.clipAnalysisDesc')}</p>
