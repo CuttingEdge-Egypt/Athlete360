@@ -253,15 +253,27 @@ export function DualAnalysisPanel({
                       </div>
                     )}
                     {rankAnalysis.progression_timeline && Array.isArray(rankAnalysis.progression_timeline) && rankAnalysis.progression_timeline.length > 0 && (
-                      <div className="bg-athlete-gray-700 p-4 rounded-lg">
-                        <h4 className="font-semibold text-white mb-3">{t('competitiveHistory.progressionTimeline')}</h4>
-                        <div className="space-y-2">
+                      <div className="bg-athlete-gray-700 p-5 rounded-lg">
+                        <h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                          <TrendingUp className="text-blue-400" size={20} />
+                          {t('competitiveHistory.progressionTimeline')}
+                        </h4>
+                        <div className="space-y-4">
                           {rankAnalysis.progression_timeline.map((item: any, index: number) => (
-                            <div key={index} className={`${isArabic ? 'border-r-2 pr-3' : 'border-l-2 pl-3'} border-blue-400 py-1`}>
-                              <div className="font-medium text-blue-300 text-sm">{item.period}</div>
-                              <div className="text-gray-300 text-sm">{item.rank_change}</div>
+                            <div 
+                              key={index} 
+                              className={`bg-athlete-gray-800 rounded-lg p-4 border-l-4 ${isArabic ? 'border-l-0 border-r-4 border-r-blue-500' : 'border-l-blue-500'} hover:bg-athlete-gray-750 transition-colors`}
+                            >
+                              <div className={`font-bold text-blue-400 text-base mb-2 ${isArabic ? 'text-right' : ''}`}>
+                                {item.period}
+                              </div>
+                              <div className={`text-gray-200 leading-relaxed ${isArabic ? 'text-right text-base' : 'text-sm'}`}>
+                                {item.rank_change}
+                              </div>
                               {item.significance && (
-                                <div className="text-gray-400 text-xs mt-1 italic">{item.significance}</div>
+                                <div className={`text-gray-400 mt-2 italic leading-relaxed ${isArabic ? 'text-right text-sm' : 'text-xs'}`}>
+                                  {item.significance}
+                                </div>
                               )}
                             </div>
                           ))}
@@ -472,15 +484,27 @@ export function DualAnalysisPanel({
                       </div>
                     )}
                     {rankAnalysis.progression_timeline && Array.isArray(rankAnalysis.progression_timeline) && rankAnalysis.progression_timeline.length > 0 && (
-                      <div className="bg-athlete-gray-700 p-4 rounded-lg">
-                        <h4 className="font-semibold text-white mb-3">Progression Timeline</h4>
-                        <div className="space-y-2">
+                      <div className="bg-athlete-gray-700 p-5 rounded-lg">
+                        <h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                          <TrendingUp className="text-blue-400" size={20} />
+                          Progression Timeline
+                        </h4>
+                        <div className="space-y-4">
                           {rankAnalysis.progression_timeline.map((item: any, index: number) => (
-                            <div key={index} className="border-l-2 border-blue-400 pl-3 py-1">
-                              <div className="font-medium text-blue-300 text-sm">{item.period}</div>
-                              <div className="text-gray-300 text-sm">{item.rank_change}</div>
+                            <div 
+                              key={index} 
+                              className={`bg-athlete-gray-800 rounded-lg p-4 border-l-4 ${isArabic ? 'border-l-0 border-r-4 border-r-blue-500' : 'border-l-blue-500'} hover:bg-athlete-gray-750 transition-colors`}
+                            >
+                              <div className={`font-bold text-blue-400 text-base mb-2 ${isArabic ? 'text-right' : ''}`}>
+                                {item.period}
+                              </div>
+                              <div className={`text-gray-200 leading-relaxed ${isArabic ? 'text-right text-base' : 'text-sm'}`}>
+                                {item.rank_change}
+                              </div>
                               {item.significance && (
-                                <div className="text-gray-400 text-xs mt-1 italic">{item.significance}</div>
+                                <div className={`text-gray-400 mt-2 italic leading-relaxed ${isArabic ? 'text-right text-sm' : 'text-xs'}`}>
+                                  {item.significance}
+                                </div>
                               )}
                             </div>
                           ))}
