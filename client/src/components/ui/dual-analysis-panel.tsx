@@ -224,7 +224,7 @@ export function DualAnalysisPanel({
             <CardHeader>
               <CardTitle className={`text-2xl text-gray-100 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
                 <BarChart className={`${isArabic ? 'ml-3' : 'mr-3'} text-blue-400`} size={24} />
-                {t('services.rankHistory.title')}
+                Rank History Overview
               </CardTitle>
             </CardHeader>
             <CardContent>
