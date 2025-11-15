@@ -1796,91 +1796,147 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                 )}
                               </div>
 
-                              {/* Competitive History Details - Beautified & Scrollable */}
-                              {(parsedData.athlete1?.competitiveHistory || parsedData.athlete2?.competitiveHistory) && (
-                                <div className="space-y-6">
-                                  <div className={`flex items-center gap-3 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
-                                    <div className="h-1 w-12 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full"></div>
-                                    <h5 className={`font-bold text-yellow-300 text-xl tracking-tight ${isComparisonArabic ? 'text-right' : ''}`}>
-                                      {t('analysis.comparison.competitiveHistoryDetails', 'Competitive History Details')}
-                                    </h5>
-                                    <div className="h-1 flex-1 bg-gradient-to-r from-amber-500/50 to-transparent rounded-full"></div>
-                                  </div>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    {/* Athlete 1 Competitive History */}
-                                    {parsedData.athlete1?.competitiveHistory && (
-                                      <div className="bg-gradient-to-br from-athlete-gray-800/90 via-athlete-gray-800 to-athlete-gray-900 border border-gray-700/50 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
-                                        <div className="bg-gradient-to-r from-blue-600/30 via-indigo-600/30 to-blue-700/30 px-5 py-4 border-b border-blue-500/20">
-                                          <div className={`flex items-center gap-2 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
-                                            <div className="w-1.5 h-6 bg-blue-400 rounded-full shadow-lg shadow-blue-500/50"></div>
-                                            <h6 className={`font-bold text-blue-200 text-lg ${isComparisonArabic ? 'text-right' : ''}`}>
-                                              {parsedData.athlete1?.name}
-                                            </h6>
-                                          </div>
-                                        </div>
-                                        <div className="max-h-96 overflow-y-auto custom-scrollbar p-5 space-y-5">
-                                          {parsedData.athlete1.competitiveHistory.career_phases?.map((phase: any, index: number) => (
-                                            <div key={index} className="relative bg-gradient-to-br from-athlete-gray-700/60 to-athlete-gray-800/60 border border-gray-600/40 rounded-xl p-4 shadow-lg hover:shadow-blue-500/10 hover:border-blue-500/30 transition-all duration-300">
-                                              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 via-blue-500 to-blue-600 rounded-l-xl"></div>
-                                              <div className={`font-bold text-blue-200 mb-3 text-base tracking-wide flex items-center gap-2 ${isComparisonArabic ? 'flex-row-reverse text-right' : ''}`}>
-                                                <CalendarDays className="h-4 w-4 text-blue-400" />
-                                                <span>{phase.phase_name}</span>
-                                                <span className="text-blue-400/70 text-sm font-medium">({phase.period})</span>
-                                              </div>
-                                              {phase.key_achievements && phase.key_achievements.length > 0 && (
-                                                <div className="space-y-3 ml-6">
-                                                  {phase.key_achievements.map((achievement: any, achIndex: number) => (
-                                                    <div key={achIndex} className="relative bg-athlete-gray-600/40 backdrop-blur-sm border border-gray-500/30 rounded-lg p-3 hover:bg-athlete-gray-600/60 hover:border-blue-400/40 transition-all duration-200">
-                                                      <div className={`flex items-start gap-3 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
-                                                        <div className="flex-shrink-0 w-14 text-center">
-                                                          <div className="inline-flex items-center justify-center bg-gradient-to-br from-yellow-400 to-amber-500 text-gray-900 font-bold text-sm px-3 py-1.5 rounded-lg shadow-md">
-                                                            {achievement.year}
-                                                          </div>
-                                                        </div>
-                                                        <div className={`flex-1 min-w-0 ${isComparisonArabic ? 'text-right' : ''}`}>
-                                                          <div className="font-semibold text-white text-sm mb-1 leading-snug">{achievement.result}</div>
-                                                          <div className="text-gray-300 text-sm mb-2 leading-relaxed">{achievement.event_name}</div>
-                                                          {achievement.event_tier && (
-                                                            <span className="inline-flex items-center px-2.5 py-1 bg-gradient-to-r from-purple-600/50 to-pink-600/50 border border-purple-400/30 text-purple-200 rounded-full text-xs font-medium shadow-sm">
-                                                              {achievement.event_tier}
-                                                            </span>
-                                                          )}
-                                                        </div>
-                                                      </div>
-                                                    </div>
-                                                  ))}
-                                                </div>
-                                              )}
-                                            </div>
-                                          )) || <p className="text-gray-400 text-center py-8">{t('analysis.comparison.noCompetitiveHistory', 'No competitive history available')}</p>}
-                                        </div>
-                                      </div>
-                                    )}
+                              {/* Competitive History Details - Year-based Tabs for Taekwondo */}
+                              {(parsedData.athlete1?.competitiveHistory || parsedData.athlete2?.competitiveHistory) && (() => {
+                                const renderCompetitiveHistoryPanel = (athleteData: any, athleteName: string, colorScheme: 'blue' | 'green') => {
+                                  const history = athleteData?.competitiveHistory;
+                                  if (!history) return null;
 
-                                    {/* Athlete 2 Competitive History */}
-                                    {parsedData.athlete2?.competitiveHistory && (
+                                  const isBlue = colorScheme === 'blue';
+                                  const colorClasses = {
+                                    gradient: isBlue ? 'from-blue-600/30 via-indigo-600/30 to-blue-700/30' : 'from-green-600/30 via-emerald-600/30 to-green-700/30',
+                                    border: isBlue ? 'border-blue-500/20' : 'border-green-500/20',
+                                    accent: isBlue ? 'bg-blue-400' : 'bg-green-400',
+                                    shadow: isBlue ? 'shadow-blue-500/50' : 'shadow-green-500/50',
+                                    text: isBlue ? 'text-blue-200' : 'text-green-200',
+                                    barGradient: isBlue ? 'from-blue-400 via-blue-500 to-blue-600' : 'from-green-400 via-green-500 to-green-600',
+                                    hoverShadow: isBlue ? 'hover:shadow-blue-500/10 hover:border-blue-500/30' : 'hover:shadow-green-500/10 hover:border-green-500/30',
+                                    hoverBorder: isBlue ? 'hover:border-blue-400/40' : 'hover:border-green-400/40',
+                                    iconColor: isBlue ? 'text-blue-400' : 'text-green-400',
+                                    textLight: isBlue ? 'text-blue-400/70' : 'text-green-400/70'
+                                  };
+
+                                  const hasCareerPhases = history.career_phases && Array.isArray(history.career_phases);
+                                  const isArrayFormat = Array.isArray(history) && history.length > 0;
+
+                                  if (isArrayFormat) {
+                                    const competitions = history.filter((comp: any) => comp.event_date || comp.date);
+                                    if (competitions.length === 0) {
+                                      return (
+                                        <div className="bg-gradient-to-br from-athlete-gray-800/90 via-athlete-gray-800 to-athlete-gray-900 border border-gray-700/50 rounded-2xl p-8">
+                                          <p className="text-gray-400 text-center">{t('analysis.comparison.noCompetitiveHistory', 'No competitive history available')}</p>
+                                        </div>
+                                      );
+                                    }
+
+                                    const yearGroups: { [year: string]: any[] } = {};
+                                    competitions.forEach((comp: any) => {
+                                      const dateStr = comp.event_date || comp.date;
+                                      const year = new Date(dateStr).getFullYear().toString();
+                                      if (!yearGroups[year]) yearGroups[year] = [];
+                                      yearGroups[year].push(comp);
+                                    });
+
+                                    const sortedYears = Object.keys(yearGroups).sort((a, b) => parseInt(b) - parseInt(a));
+                                    const defaultYear = sortedYears[0] || new Date().getFullYear().toString();
+
+                                    return (
                                       <div className="bg-gradient-to-br from-athlete-gray-800/90 via-athlete-gray-800 to-athlete-gray-900 border border-gray-700/50 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
-                                        <div className="bg-gradient-to-r from-green-600/30 via-emerald-600/30 to-green-700/30 px-5 py-4 border-b border-green-500/20">
+                                        <div className={`bg-gradient-to-r ${colorClasses.gradient} px-5 py-4 border-b ${colorClasses.border}`}>
                                           <div className={`flex items-center gap-2 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
-                                            <div className="w-1.5 h-6 bg-green-400 rounded-full shadow-lg shadow-green-500/50"></div>
-                                            <h6 className={`font-bold text-green-200 text-lg ${isComparisonArabic ? 'text-right' : ''}`}>
-                                              {parsedData.athlete2?.name}
-                                            </h6>
+                                            <div className={`w-1.5 h-6 ${colorClasses.accent} rounded-full shadow-lg ${colorClasses.shadow}`}></div>
+                                            <h6 className={`font-bold ${colorClasses.text} text-lg ${isComparisonArabic ? 'text-right' : ''}`}>{athleteName}</h6>
+                                          </div>
+                                        </div>
+                                        <Tabs defaultValue={defaultYear} className="w-full">
+                                          <TabsList className="bg-athlete-gray-700 m-4 flex-wrap h-auto">
+                                            {sortedYears.map(year => (
+                                              <TabsTrigger
+                                                key={year}
+                                                value={year}
+                                                className="data-[state=active]:bg-athlete-accent"
+                                                data-testid={`tab-comp-year-${year}`}
+                                              >
+                                                {year}
+                                              </TabsTrigger>
+                                            ))}
+                                          </TabsList>
+                                          {sortedYears.map(year => (
+                                            <TabsContent key={year} value={year} className="max-h-96 overflow-y-auto custom-scrollbar p-5">
+                                              <div className="space-y-3">
+                                                {yearGroups[year]
+                                                  .sort((a: any, b: any) => {
+                                                    const dateA = new Date(a.event_date || a.date).getTime();
+                                                    const dateB = new Date(b.event_date || b.date).getTime();
+                                                    return dateB - dateA;
+                                                  })
+                                                  .map((comp: any, idx: number) => {
+                                                    const eventDate = new Date(comp.event_date || comp.date);
+                                                    const monthNames = isComparisonArabic 
+                                                      ? ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
+                                                      : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                                                    const formattedDate = `${monthNames[eventDate.getMonth()]} ${eventDate.getFullYear()}`;
+
+                                                    return (
+                                                      <div key={idx} className={`relative bg-athlete-gray-600/40 backdrop-blur-sm border border-gray-500/30 rounded-lg p-3 ${colorClasses.hoverBorder} transition-all duration-200`}>
+                                                        <div className={`flex items-start gap-3 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
+                                                          <div className="flex-shrink-0 w-16 text-center">
+                                                            <div className="inline-flex items-center justify-center bg-gradient-to-br from-yellow-400 to-amber-500 text-gray-900 font-bold text-xs px-2 py-1.5 rounded-lg shadow-md">
+                                                              {formattedDate}
+                                                            </div>
+                                                          </div>
+                                                          <div className={`flex-1 min-w-0 ${isComparisonArabic ? 'text-right' : ''}`}>
+                                                            <div className="font-semibold text-white text-sm mb-1 leading-snug">{comp.event_name}</div>
+                                                            {comp.place && (
+                                                              <div className="text-gray-300 text-sm mb-1">
+                                                                {isComparisonArabic ? `المركز: ${comp.place}` : `Place: ${comp.place}`}
+                                                              </div>
+                                                            )}
+                                                            {comp.location && (
+                                                              <div className="text-gray-400 text-xs mb-1">
+                                                                {isComparisonArabic ? `الموقع: ${comp.location}` : `Location: ${comp.location}`}
+                                                              </div>
+                                                            )}
+                                                            {comp.category && (
+                                                              <span className="inline-flex items-center px-2.5 py-1 bg-gradient-to-r from-purple-600/50 to-pink-600/50 border border-purple-400/30 text-purple-200 rounded-full text-xs font-medium shadow-sm">
+                                                                {comp.category}
+                                                              </span>
+                                                            )}
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                    );
+                                                  })}
+                                              </div>
+                                            </TabsContent>
+                                          ))}
+                                        </Tabs>
+                                      </div>
+                                    );
+                                  }
+
+                                  if (hasCareerPhases) {
+                                    return (
+                                      <div className="bg-gradient-to-br from-athlete-gray-800/90 via-athlete-gray-800 to-athlete-gray-900 border border-gray-700/50 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
+                                        <div className={`bg-gradient-to-r ${colorClasses.gradient} px-5 py-4 border-b ${colorClasses.border}`}>
+                                          <div className={`flex items-center gap-2 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
+                                            <div className={`w-1.5 h-6 ${colorClasses.accent} rounded-full shadow-lg ${colorClasses.shadow}`}></div>
+                                            <h6 className={`font-bold ${colorClasses.text} text-lg ${isComparisonArabic ? 'text-right' : ''}`}>{athleteName}</h6>
                                           </div>
                                         </div>
                                         <div className="max-h-96 overflow-y-auto custom-scrollbar p-5 space-y-5">
-                                          {parsedData.athlete2.competitiveHistory.career_phases?.map((phase: any, index: number) => (
-                                            <div key={index} className="relative bg-gradient-to-br from-athlete-gray-700/60 to-athlete-gray-800/60 border border-gray-600/40 rounded-xl p-4 shadow-lg hover:shadow-green-500/10 hover:border-green-500/30 transition-all duration-300">
-                                              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-green-400 via-green-500 to-green-600 rounded-l-xl"></div>
-                                              <div className={`font-bold text-green-200 mb-3 text-base tracking-wide flex items-center gap-2 ${isComparisonArabic ? 'flex-row-reverse text-right' : ''}`}>
-                                                <CalendarDays className="h-4 w-4 text-green-400" />
+                                          {history.career_phases.map((phase: any, index: number) => (
+                                            <div key={index} className={`relative bg-gradient-to-br from-athlete-gray-700/60 to-athlete-gray-800/60 border border-gray-600/40 rounded-xl p-4 shadow-lg ${colorClasses.hoverShadow} transition-all duration-300`}>
+                                              <div className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${colorClasses.barGradient} rounded-l-xl`}></div>
+                                              <div className={`font-bold ${colorClasses.text} mb-3 text-base tracking-wide flex items-center gap-2 ${isComparisonArabic ? 'flex-row-reverse text-right' : ''}`}>
+                                                <CalendarDays className={`h-4 w-4 ${colorClasses.iconColor}`} />
                                                 <span>{phase.phase_name}</span>
-                                                <span className="text-green-400/70 text-sm font-medium">({phase.period})</span>
+                                                <span className={`${colorClasses.textLight} text-sm font-medium`}>({phase.period})</span>
                                               </div>
                                               {phase.key_achievements && phase.key_achievements.length > 0 && (
                                                 <div className="space-y-3 ml-6">
                                                   {phase.key_achievements.map((achievement: any, achIndex: number) => (
-                                                    <div key={achIndex} className="relative bg-athlete-gray-600/40 backdrop-blur-sm border border-gray-500/30 rounded-lg p-3 hover:bg-athlete-gray-600/60 hover:border-green-400/40 transition-all duration-200">
+                                                    <div key={achIndex} className={`relative bg-athlete-gray-600/40 backdrop-blur-sm border border-gray-500/30 rounded-lg p-3 hover:bg-athlete-gray-600/60 ${colorClasses.hoverBorder} transition-all duration-200`}>
                                                       <div className={`flex items-start gap-3 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                                                         <div className="flex-shrink-0 w-14 text-center">
                                                           <div className="inline-flex items-center justify-center bg-gradient-to-br from-yellow-400 to-amber-500 text-gray-900 font-bold text-sm px-3 py-1.5 rounded-lg shadow-md">
@@ -1902,13 +1958,35 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                                 </div>
                                               )}
                                             </div>
-                                          )) || <p className="text-gray-400 text-center py-8">{t('analysis.comparison.noCompetitiveHistory', 'No competitive history available')}</p>}
+                                          ))}
                                         </div>
                                       </div>
-                                    )}
+                                    );
+                                  }
+
+                                  return (
+                                    <div className="bg-gradient-to-br from-athlete-gray-800/90 via-athlete-gray-800 to-athlete-gray-900 border border-gray-700/50 rounded-2xl p-8">
+                                      <p className="text-gray-400 text-center">{t('analysis.comparison.noCompetitiveHistory', 'No competitive history available')}</p>
+                                    </div>
+                                  );
+                                };
+
+                                return (
+                                  <div className="space-y-6">
+                                    <div className={`flex items-center gap-3 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
+                                      <div className="h-1 w-12 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full"></div>
+                                      <h5 className={`font-bold text-yellow-300 text-xl tracking-tight ${isComparisonArabic ? 'text-right' : ''}`}>
+                                        {t('analysis.comparison.competitiveHistoryDetails', 'Competitive History Details')}
+                                      </h5>
+                                      <div className="h-1 flex-1 bg-gradient-to-r from-amber-500/50 to-transparent rounded-full"></div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                      {parsedData.athlete1?.competitiveHistory && renderCompetitiveHistoryPanel(parsedData.athlete1, parsedData.athlete1?.name || 'Athlete 1', 'blue')}
+                                      {parsedData.athlete2?.competitiveHistory && renderCompetitiveHistoryPanel(parsedData.athlete2, parsedData.athlete2?.name || 'Athlete 2', 'green')}
+                                    </div>
                                   </div>
-                                </div>
-                              )}
+                                );
+                              })()}
 
                               {/* Competitive Edge Summary */}
                               {parsedData.ranking.competitiveEdge && (
