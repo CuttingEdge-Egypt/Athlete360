@@ -1,6 +1,7 @@
 import { VideoAnalysisUpload } from "@/components/ui/video-analysis-upload";
 import { VideoAnalysisResults } from "@/components/ui/video-analysis-results";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
@@ -168,9 +169,12 @@ export default function VideoAnalysis() {
   return (
     <div className="min-h-screen bg-athlete-gray-900 p-3 sm:p-6">
       <div className="max-w-6xl mx-auto">
-        <div className={`flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8 ${isArabic ? 'flex-row-reverse' : ''}`}>
-          <div className={`flex-1 ${isArabic ? 'text-right' : 'text-left'}`}>
-            <h1 className={`${isArabic ? 'text-2xl sm:text-4xl' : 'text-xl sm:text-3xl'} font-bold text-white`}>{t('title')}</h1>
+        <div className={`flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8`}>
+          <div className={`flex items-center gap-3 flex-1 ${isArabic ? 'text-right' : ''}`}>
+            <h1 className={`${isArabic ? 'text-2xl sm:text-4xl' : 'text-xl sm:text-3xl'} font-bold text-white flex-1`}>{t('title')}</h1>
+            <Badge variant="secondary" className="bg-orange-600/20 text-orange-300 border-orange-500/30 text-xs font-medium">
+              {t('tokenCost')}
+            </Badge>
           </div>
         </div>
         

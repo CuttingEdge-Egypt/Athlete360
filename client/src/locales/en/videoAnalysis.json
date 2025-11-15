@@ -1,5 +1,6 @@
 {
   "title": "Video Analysis",
+  "tokenCost": "200 tokens",
   "description": "Upload match videos for comprehensive AI-powered analysis",
   "upload": {
     "title": "Video Analysis",
