@@ -4,10 +4,21 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, TrendingUp, Trophy, BarChart, Award } from "lucide-react";
 import { Line } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
+import type { ChartOptions } from 'chart.js';
+
+interface RankAnalysisDetails {
+  trends_and_outlook?: string;
+  progression_timeline?: Array<{
+    period: string;
+    rank_change: string;
+    significance?: string;
+  }>;
+  performance_factors?: string[];
+}
 
 interface DualAnalysisPanelProps {
   competitiveAnalysis: any;
-  rankAnalysis: string | null;
+  rankAnalysis: string | RankAnalysisDetails | null;
   rankHistoryData: Array<{
     date: string;
     rank: number;
@@ -151,7 +162,7 @@ export function DualAnalysisPanel({
       datasets
     };
 
-    const chartOptions = {
+    const chartOptions: ChartOptions<'line'> = {
       responsive: true,
       maintainAspectRatio: false,
       scales: {
@@ -175,7 +186,7 @@ export function DualAnalysisPanel({
             maxRotation: 45,
             minRotation: 45,
             font: {
-              weight: isArabic ? 'bold' : 'normal'
+              weight: isArabic ? 'bold' as const : 'normal' as const
             }
           },
           grid: {
@@ -373,7 +384,7 @@ export function DualAnalysisPanel({
       datasets
     };
 
-    const chartOptions = {
+    const chartOptions: ChartOptions<'line'> = {
       responsive: true,
       maintainAspectRatio: false,
       scales: {
@@ -397,7 +408,7 @@ export function DualAnalysisPanel({
             maxRotation: 45,
             minRotation: 45,
             font: {
-              weight: isArabic ? 'bold' : 'normal'
+              weight: isArabic ? 'bold' as const : 'normal' as const
             }
           },
           grid: {
