@@ -426,8 +426,8 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
     <div className="max-w-4xl mx-auto space-y-6">
       <Card className="bg-athlete-gray-800 border-gray-700">
         <CardHeader>
-          <div className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${isArabic ? 'sm:flex-row-reverse' : ''}`}>
-            <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
               <Video className="text-indigo-400" size={28} />
               <div className={isArabic ? 'text-right' : ''}>
                 <CardTitle className="text-white">{t('upload.title')}</CardTitle>
