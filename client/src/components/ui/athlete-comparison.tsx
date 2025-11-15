@@ -689,10 +689,15 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
     <Card className="bg-athlete-gray-800 border-gray-700">
       <CardHeader>
         <div className={`flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
-          <CardTitle className={`flex items-center gap-2 text-white ${isArabic ? 'flex-row-reverse' : ''}`}>
-            <Users2 className="h-5 w-5" />
-            {t("analysis.comparison.title", "Athlete Comparison")}
-          </CardTitle>
+          <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
+            <CardTitle className={`flex items-center gap-2 text-white ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <Users2 className="h-5 w-5" />
+              {t("analysis.comparison.title", "Athlete Comparison")}
+            </CardTitle>
+            <Badge variant="secondary" className="bg-blue-600/20 text-blue-300 border-blue-500/30 text-xs font-medium">
+              {t('home:services.athleteComparison.tokenCost')}
+            </Badge>
+          </div>
           {showForm && (
             <Button
               variant="outline"

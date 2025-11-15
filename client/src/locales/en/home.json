@@ -143,7 +143,8 @@
     },
     "athleteComparison": {
       "title": "Athlete Comparison",
-      "description": "Head-to-head analysis and competitive insights"
+      "description": "Head-to-head analysis and competitive insights",
+      "tokenCost": "150 tokens"
     },
     "nutritionPlan": {
       "title": "Nutrition Plan",
@@ -223,6 +224,7 @@
   },
   "nutritionPlan": {
     "title": "Create Your Nutrition Plan",
+    "tokenCost": "75 tokens",
     "sport": "Sport",
     "goal": "Goal",
     "age": "Age",
@@ -251,6 +253,7 @@
   },
   "developmentPlan": {
     "title": "Create Your Development Plan",
+    "tokenCost": "50 tokens",
     "goal": "Training Goal",
     "age": "Age",
     "height": "Height (cm)",

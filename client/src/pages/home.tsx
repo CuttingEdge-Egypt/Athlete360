@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
@@ -2635,7 +2636,12 @@ export default function Home() {
                 <Card className="bg-athlete-gray-800 border-gray-700">
                   <CardContent className="p-8">
                     <div className={`flex justify-between items-center mb-6 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                      <h2 className="text-2xl font-bold text-white">{t('nutritionPlan.title')}</h2>
+                      <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                        <h2 className="text-2xl font-bold text-white">{t('nutritionPlan.title')}</h2>
+                        <Badge variant="secondary" className="bg-green-600/20 text-green-300 border-green-500/30 text-xs font-medium">
+                          {t('nutritionPlan.tokenCost')}
+                        </Badge>
+                      </div>
                       <Button
                         variant="outline"
                         size="sm"
@@ -3051,7 +3057,12 @@ export default function Home() {
                 <Card className="bg-athlete-gray-800 border-gray-700">
                   <CardContent className="p-8">
                     <div className={`flex justify-between items-center mb-6 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                      <h2 className="text-2xl font-bold text-white">{t('developmentPlan.title')}</h2>
+                      <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                        <h2 className="text-2xl font-bold text-white">{t('developmentPlan.title')}</h2>
+                        <Badge variant="secondary" className="bg-purple-600/20 text-purple-300 border-purple-500/30 text-xs font-medium">
+                          {t('developmentPlan.tokenCost')}
+                        </Badge>
+                      </div>
                       <Button
                         variant="outline"
                         size="sm"
