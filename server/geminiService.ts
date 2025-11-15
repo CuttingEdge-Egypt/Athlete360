@@ -2953,14 +2953,15 @@ Return ONLY valid JSON with all content in English.`;
     console.log(`⏳ Generating exercises for goal area: ${goalArea.area}`);
     const start = Date.now();
     
-    const result = await genAI.models.generateContent({
+    // Try with standard token limit first
+    let result = await genAI.models.generateContent({
       model: "gemini-2.5-pro",
       config: {
         systemInstruction: systemPrompt,
         responseMimeType: "application/json",
         responseSchema: exercisesSchema,
         temperature: 0.3,
-        maxOutputTokens: 3072  // Medium tokens for 3 exercises
+        maxOutputTokens: 5500  // Increased from 3072 to prevent truncation
       },
       contents: prompt
     });
@@ -2969,11 +2970,34 @@ Return ONLY valid JSON with all content in English.`;
     console.log(`✅ Exercises for "${goalArea.area}" generated in ${duration}ms`);
 
     // Check for truncation
-    const finishReason = (result as any)?.response?.candidates?.[0]?.finishReason || 
+    let finishReason = (result as any)?.response?.candidates?.[0]?.finishReason || 
                         (result as any)?.candidates?.[0]?.finishReason;
+    
+    // Retry with higher token limit if truncated
     if (finishReason === "MAX_TOKENS") {
-      console.error(`⚠️ Exercises for "${goalArea.area}" were truncated`);
-      throw new Error(`Exercises response was truncated for area: ${goalArea.area}`);
+      console.warn(`⚠️ Exercises for "${goalArea.area}" were truncated, retrying with higher token limit...`);
+      
+      result = await genAI.models.generateContent({
+        model: "gemini-2.5-pro",
+        config: {
+          systemInstruction: systemPrompt,
+          responseMimeType: "application/json",
+          responseSchema: exercisesSchema,
+          temperature: 0.3,
+          maxOutputTokens: 8000  // Higher limit for retry
+        },
+        contents: prompt
+      });
+      
+      finishReason = (result as any)?.response?.candidates?.[0]?.finishReason || 
+                      (result as any)?.candidates?.[0]?.finishReason;
+      
+      if (finishReason === "MAX_TOKENS") {
+        console.error(`❌ Exercises for "${goalArea.area}" still truncated after retry`);
+        throw new Error(`Exercises response was truncated for area: ${goalArea.area} even after retry`);
+      }
+      
+      console.log(`✅ Retry successful for "${goalArea.area}"`);
     }
 
     const responseText = result?.text || "";
