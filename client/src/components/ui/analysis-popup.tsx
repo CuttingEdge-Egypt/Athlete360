@@ -339,7 +339,7 @@ export function AnalysisPopup({
               <CardContent className={`p-6 ${isArabic ? 'text-right' : ''}`}>
                 <h3 className={`font-bold text-red-400 text-lg mb-4 flex items-start ${isArabic ? 'flex-row-reverse text-right' : ''}`}>
                   <AlertTriangle className={`inline-block w-5 h-5 mt-0.5 flex-shrink-0 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                  <span>{weakness.title}</span>
+                  <span className={isArabic ? 'text-right' : ''}>{weakness.title}</span>
                 </h3>
                 
                 <p className={`text-gray-200 leading-relaxed mb-4 ${isArabic ? 'text-right' : ''}`}>
