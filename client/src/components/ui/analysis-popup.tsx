@@ -1221,9 +1221,9 @@ export function AnalysisPopup({
           {playersStory && (
             <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-cyan-400 border-gray-600 shadow-xl">
               <CardContent className="p-8">
-                <h3 className="text-3xl font-bold text-cyan-400 mb-6 flex items-center">
-                  <Star className="mr-4 text-cyan-400" size={32} />
-                  {t("common:analysis.bio.playersStory", "Player's Story")}
+                <h3 className={`text-3xl font-bold text-cyan-400 mb-6 flex items-center ${(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'flex-row-reverse' : ''}`}>
+                  <Star className={`text-cyan-400 ${(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'ml-4' : 'mr-4'}`} size={32} />
+                  {(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'قصة اللاعب' : "Player's Story"}
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <p className="text-gray-200 leading-relaxed text-lg">{playersStory}</p>
@@ -1236,9 +1236,9 @@ export function AnalysisPopup({
           {achievements.length > 0 && (
             <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-warning border-gray-600 shadow-xl">
               <CardContent className="p-8">
-                <h3 className="text-3xl font-bold text-athlete-warning mb-6 flex items-center">
-                  <Award className="mr-4 text-athlete-warning" size={32} />
-                  {t("analysis.achievements.title", "Notable Achievements")}
+                <h3 className={`text-3xl font-bold text-athlete-warning mb-6 flex items-center ${(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'flex-row-reverse' : ''}`}>
+                  <Award className={`text-athlete-warning ${(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'ml-4' : 'mr-4'}`} size={32} />
+                  {(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'الإنجازات البارزة' : 'Notable Achievements'}
                 </h3>
                 <div className="grid gap-4">
                   {achievements.map((achievementObj: any, index: number) => {
@@ -1457,8 +1457,8 @@ export function AnalysisPopup({
         {bioSections.introduction && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-accent border-gray-600 shadow-xl">
             <CardContent className="p-8">
-              <h3 className="text-3xl font-bold text-emerald-400 mb-8 flex items-center">
-                <User className="mr-4 text-emerald-400" size={32} />
+              <h3 className={`text-3xl font-bold text-emerald-400 mb-8 flex items-center ${(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'flex-row-reverse' : ''}`}>
+                <User className={`text-emerald-400 ${(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'ml-4' : 'mr-4'}`} size={32} />
                 {(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'المقدمة' : 'Introduction'}
               </h3>
               <div className="prose prose-invert max-w-none space-y-5">
@@ -1541,9 +1541,9 @@ export function AnalysisPopup({
         {(playersStory || bioSections.overallStory) && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-cyan-400 border-gray-600 shadow-xl">
             <CardContent className="p-8">
-              <h3 className="text-3xl font-bold text-cyan-400 mb-8 flex items-center">
-                <Star className="mr-4 text-cyan-400" size={32} />
-                {t("common:analysis.bio.playersStory", "Player's Story")}
+              <h3 className={`text-3xl font-bold text-cyan-400 mb-8 flex items-center ${(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'flex-row-reverse' : ''}`}>
+                <Star className={`text-cyan-400 ${(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'ml-4' : 'mr-4'}`} size={32} />
+                {(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'قصة اللاعب' : "Player's Story"}
               </h3>
               <div className="prose prose-invert max-w-none space-y-5">
                 {(playersStory || bioSections.overallStory).split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => (
@@ -1585,9 +1585,9 @@ export function AnalysisPopup({
         {achievements.length > 0 && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-warning border-gray-600 shadow-xl">
             <CardContent className="p-8">
-              <h3 className="text-3xl font-bold text-athlete-warning mb-6 flex items-center">
-                <Award className="mr-4 text-athlete-warning" size={32} />
-                {t("common:analysis.achievements.title", "Notable Achievements")}
+              <h3 className={`text-3xl font-bold text-athlete-warning mb-6 flex items-center ${(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'flex-row-reverse' : ''}`}>
+                <Award className={`text-athlete-warning ${(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'ml-4' : 'mr-4'}`} size={32} />
+                {(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'الإنجازات البارزة' : 'Notable Achievements'}
               </h3>
               <div className="grid gap-4">
                 {achievements.map((achievementObj: any, index: number) => {
