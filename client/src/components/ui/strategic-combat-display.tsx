@@ -191,11 +191,11 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
             <CardHeader className="pb-3">
               <div className={`flex items-start justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
                 <div className="flex-1">
-                  <CardTitle className={`text-white text-lg font-semibold mb-2 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                  <CardTitle className={`text-white text-lg font-semibold mb-2 flex items-center ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
                     <div className={`w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center ${isArabic ? 'ml-3' : 'mr-3'}`}>
                       <span className="text-red-400 font-bold text-sm">{index + 1}</span>
                     </div>
-                    <span className={isArabic ? 'text-right' : ''}>{strategy.strategy}</span>
+                    <span>{strategy.strategy}</span>
                   </CardTitle>
                 </div>
                 <div className={`flex ${isArabic ? 'mr-4 space-x-reverse space-x-2' : 'ml-4 space-x-2'}`}>
@@ -219,7 +219,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
             <CardContent className="space-y-4">
               {/* Strategy Description */}
               <div className="space-y-2">
-                <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'flex-row-reverse text-right' : ''}`}>
+                <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
                   <Brain className={`w-4 h-4 text-blue-400 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                   {isArabic ? 'نظرة استراتيجية عامة' : 'Strategic Overview'}
                 </h4>
@@ -232,7 +232,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
 
               {/* Execution Details */}
               <div className="space-y-2">
-                <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'flex-row-reverse text-right' : ''}`}>
+                <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
                   <Zap className={`w-4 h-4 text-yellow-400 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                   {isArabic ? 'خطة التنفيذ' : 'Execution Plan'}
                 </h4>
@@ -246,7 +246,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
               {/* Success Probability */}
               <div className="space-y-3">
                 <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
-                  <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'flex-row-reverse text-right' : ''}`}>
+                  <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
                     <TrendingUp className={`w-4 h-4 text-green-400 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                     {isArabic ? 'احتمالية النجاح' : 'Success Probability'}
                   </h4>
