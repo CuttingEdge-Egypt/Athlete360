@@ -1232,10 +1232,10 @@ export function AnalysisPopup({
           {playersStory && (
             <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-cyan-400 border-gray-600 shadow-xl">
               <CardContent className="p-8">
-                <h3 className={`text-3xl font-bold text-cyan-400 mb-6 flex items-center ${(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'flex-row-reverse w-full' : ''}`}>
-                  <Star className={`text-cyan-400 ${(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'ml-4' : 'mr-4'}`} size={32} />
-                  <span className={(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'flex-1 text-right' : ''}>
-                    {(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'قصة اللاعب' : "Player's Story"}
+                <h3 className={`text-3xl font-bold text-cyan-400 mb-6 flex items-center ${isContentArabic ? 'flex-row-reverse w-full' : ''}`}>
+                  <Star className={`text-cyan-400 ${isContentArabic ? 'ml-4' : 'mr-4'}`} size={32} />
+                  <span className={isContentArabic ? 'flex-1 text-right' : ''}>
+                    {isContentArabic ? 'قصة اللاعب' : "Player's Story"}
                   </span>
                 </h3>
                 <div className="prose prose-invert max-w-none">
@@ -1249,10 +1249,10 @@ export function AnalysisPopup({
           {achievements.length > 0 && (
             <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-warning border-gray-600 shadow-xl">
               <CardContent className="p-8">
-                <h3 className={`text-3xl font-bold text-athlete-warning mb-6 flex items-center ${(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'flex-row-reverse w-full' : ''}`}>
-                  <Award className={`text-athlete-warning ${(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'ml-4' : 'mr-4'}`} size={32} />
-                  <span className={(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'flex-1 text-right' : ''}>
-                    {(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'الإنجازات البارزة' : 'Notable Achievements'}
+                <h3 className={`text-3xl font-bold text-athlete-warning mb-6 flex items-center ${isContentArabic ? 'flex-row-reverse w-full' : ''}`}>
+                  <Award className={`text-athlete-warning ${isContentArabic ? 'ml-4' : 'mr-4'}`} size={32} />
+                  <span className={isContentArabic ? 'flex-1 text-right' : ''}>
+                    {isContentArabic ? 'الإنجازات البارزة' : 'Notable Achievements'}
                   </span>
                 </h3>
                 <div className="grid gap-4">
@@ -1472,10 +1472,10 @@ export function AnalysisPopup({
         {bioSections.introduction && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-accent border-gray-600 shadow-xl">
             <CardContent className="p-8">
-              <h3 className={`text-3xl font-bold text-emerald-400 mb-8 flex items-center ${(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'flex-row-reverse w-full' : ''}`}>
-                <User className={`text-emerald-400 ${(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'ml-4' : 'mr-4'}`} size={32} />
-                <span className={(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'flex-1 text-right' : ''}>
-                  {(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'المقدمة' : 'Introduction'}
+              <h3 className={`text-3xl font-bold text-emerald-400 mb-8 flex items-center ${isContentArabic ? 'flex-row-reverse w-full' : ''}`}>
+                <User className={`text-emerald-400 ${isContentArabic ? 'ml-4' : 'mr-4'}`} size={32} />
+                <span className={isContentArabic ? 'flex-1 text-right' : ''}>
+                  {isContentArabic ? 'المقدمة' : 'Introduction'}
                 </span>
               </h3>
               <div className="prose prose-invert max-w-none space-y-5">
@@ -1559,10 +1559,10 @@ export function AnalysisPopup({
         {(playersStory || bioSections.overallStory) && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-cyan-400 border-gray-600 shadow-xl">
             <CardContent className="p-8">
-              <h3 className={`text-3xl font-bold text-cyan-400 mb-8 flex items-center ${(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'flex-row-reverse w-full' : ''}`}>
-                <Star className={`text-cyan-400 ${(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'ml-4' : 'mr-4'}`} size={32} />
-                <span className={(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'flex-1 text-right' : ''}>
-                  {(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'قصة اللاعب' : "Player's Story"}
+              <h3 className={`text-3xl font-bold text-cyan-400 mb-8 flex items-center ${isContentArabic ? 'flex-row-reverse w-full' : ''}`}>
+                <Star className={`text-cyan-400 ${isContentArabic ? 'ml-4' : 'mr-4'}`} size={32} />
+                <span className={isContentArabic ? 'flex-1 text-right' : ''}>
+                  {isContentArabic ? 'قصة اللاعب' : "Player's Story"}
                 </span>
               </h3>
               <div className="prose prose-invert max-w-none space-y-5">
@@ -1607,10 +1607,10 @@ export function AnalysisPopup({
         {achievements.length > 0 && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-warning border-gray-600 shadow-xl">
             <CardContent className="p-8">
-              <h3 className={`text-3xl font-bold text-athlete-warning mb-6 flex items-center ${(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'flex-row-reverse w-full' : ''}`}>
-                <Award className={`text-athlete-warning ${(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'ml-4' : 'mr-4'}`} size={32} />
-                <span className={(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'flex-1 text-right' : ''}>
-                  {(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'الإنجازات البارزة' : 'Notable Achievements'}
+              <h3 className={`text-3xl font-bold text-athlete-warning mb-6 flex items-center ${isContentArabic ? 'flex-row-reverse w-full' : ''}`}>
+                <Award className={`text-athlete-warning ${isContentArabic ? 'ml-4' : 'mr-4'}`} size={32} />
+                <span className={isContentArabic ? 'flex-1 text-right' : ''}>
+                  {isContentArabic ? 'الإنجازات البارزة' : 'Notable Achievements'}
                 </span>
               </h3>
               <div className="grid gap-4">
