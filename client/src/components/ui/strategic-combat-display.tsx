@@ -146,9 +146,9 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={isArabic ? 'rtl' : 'ltr'}>
       {/* Header */}
-      <div className={`text-center space-y-2 mb-8 ${isArabic ? 'rtl' : ''}`}>
+      <div className="text-center space-y-2 mb-8">
         <div className={`flex items-center justify-center text-red-400 ${isArabic ? 'flex-row-reverse space-x-reverse space-x-2' : 'space-x-2'}`}>
           <Target size={24} />
           <h2 className="text-2xl font-bold">{isArabic ? 'استراتيجيات القتال' : 'Combat Strategies'}</h2>
