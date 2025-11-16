@@ -12,6 +12,7 @@ import {
   Clock,
   Award,
 } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface Strategy {
   strategy: string;
@@ -31,7 +32,8 @@ interface StrategicCombatDisplayProps {
 }
 
 export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
-  const isArabic = data?.language === 'ar' || data?.generationLanguage === 'ar';
+  const { language } = useLanguage();
+  const isArabic = language === 'ar';
   if (!data || !data.strategies || !Array.isArray(data.strategies)) {
     return (
       <div className="text-center text-gray-400 py-8">
