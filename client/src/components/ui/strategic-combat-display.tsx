@@ -195,7 +195,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
                     <div className={`w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center ${isArabic ? 'ml-3' : 'mr-3'}`}>
                       <span className="text-red-400 font-bold text-sm">{index + 1}</span>
                     </div>
-                    <span>{strategy.strategy}</span>
+                    <span className={isArabic ? 'text-right' : ''}>{strategy.strategy}</span>
                   </CardTitle>
                 </div>
                 <div className={`flex ${isArabic ? 'mr-4 space-x-reverse space-x-2' : 'ml-4 space-x-2'}`}>
