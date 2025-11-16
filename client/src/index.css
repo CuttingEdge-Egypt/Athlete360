@@ -43,15 +43,25 @@
   color: hsl(207, 90%, 54%);
 }
 
+[dir="rtl"] .bio-first-letter {
+  direction: rtl;
+}
+
 [dir="rtl"] .bio-first-letter::first-letter {
   float: right;
-  margin-inline-start: 0.25rem;
+  margin-left: 0.25rem;
+  margin-right: 0;
   margin-top: -0.75rem;
+}
+
+[dir="ltr"] .bio-first-letter {
+  direction: ltr;
 }
 
 [dir="ltr"] .bio-first-letter::first-letter {
   float: left;
-  margin-inline-end: 0.25rem;
+  margin-right: 0.25rem;
+  margin-left: 0;
   margin-top: 0;
 }
 
