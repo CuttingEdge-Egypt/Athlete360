@@ -33,7 +33,23 @@ interface StrategicCombatDisplayProps {
 
 export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
   const { language } = useLanguage();
-  const isArabic = language === 'ar';
+  
+  // Helper function to detect if text contains Arabic characters
+  const containsArabic = (text: string): boolean => {
+    const arabicPattern = /[\u0600-\u06FF\u0750-\u077F]/;
+    return arabicPattern.test(text);
+  };
+  
+  // Determine if content is Arabic based on:
+  // 1. Data generation language
+  // 2. Data language 
+  // 3. UI language
+  // 4. Actual content detection
+  const isArabic = 
+    data?.generationLanguage === 'ar' || 
+    data?.language === 'ar' ||
+    language === 'ar' ||
+    (data?.strategies?.[0]?.strategy && containsArabic(data.strategies[0].strategy));
   if (!data || !data.strategies || !Array.isArray(data.strategies)) {
     return (
       <div className="text-center text-gray-400 py-8">
