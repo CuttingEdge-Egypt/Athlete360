@@ -221,7 +221,9 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
               <div className="space-y-2">
                 <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'justify-end' : ''}`}>
                   <Brain className={`w-4 h-4 text-blue-400 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                  {isArabic ? 'نظرة استراتيجية عامة' : 'Strategic Overview'}
+                  <span className={isArabic ? 'text-right' : ''}>
+                    {isArabic ? 'نظرة استراتيجية عامة' : 'Strategic Overview'}
+                  </span>
                 </h4>
                 <p className={`text-gray-300 leading-relaxed text-sm bg-athlete-gray-900/50 p-3 rounded-md ${isArabic ? 'text-right' : 'text-left'}`}>
                   {strategy.description}
@@ -234,7 +236,9 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
               <div className="space-y-2">
                 <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'justify-end' : ''}`}>
                   <Zap className={`w-4 h-4 text-yellow-400 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                  {isArabic ? 'خطة التنفيذ' : 'Execution Plan'}
+                  <span className={isArabic ? 'text-right' : ''}>
+                    {isArabic ? 'خطة التنفيذ' : 'Execution Plan'}
+                  </span>
                 </h4>
                 <p className={`text-gray-300 leading-relaxed text-sm bg-athlete-gray-900/50 p-3 rounded-md ${isArabic ? 'text-right' : 'text-left'}`}>
                   {strategy.execution}
@@ -248,7 +252,9 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
                 <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
                   <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'justify-end' : ''}`}>
                     <TrendingUp className={`w-4 h-4 text-green-400 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                    {isArabic ? 'احتمالية النجاح' : 'Success Probability'}
+                    <span className={isArabic ? 'text-right' : ''}>
+                      {isArabic ? 'احتمالية النجاح' : 'Success Probability'}
+                    </span>
                   </h4>
                   <span 
                     className={`text-sm font-semibold ${getSuccessColor(strategy.success_probability)}`}
