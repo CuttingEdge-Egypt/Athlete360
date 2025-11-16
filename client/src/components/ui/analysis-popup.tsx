@@ -2620,7 +2620,8 @@ export function AnalysisPopup({
 
     // Special handling for strategic combat analysis
     if (type === "beat" || type === "beat-strategies") {
-      return <StrategicCombatDisplay data={data} />;
+      const parsedCombatData = parseAnalysisData(data);
+      return <StrategicCombatDisplay data={{ ...parsedCombatData, language: contentLanguage || parsedCombatData?.language, generationLanguage: parsedCombatData?.generationLanguage || contentLanguage }} />;
     }
 
     // Special handling for strengths analysis
