@@ -1091,18 +1091,20 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                   const matchedTitle = sectionTitles.find(title => trimmedPara.startsWith(title));
                   
                   if (matchedTitle) {
+                    const isArabic = data?.language === 'ar' || data?.generationLanguage === 'ar';
                     return (
-                      <p key={index} className="text-lg">
+                      <p key={index} className={`text-lg ${isArabic ? 'text-right' : ''}`}>
                         <span className="font-bold text-cyan-400 text-xl">{matchedTitle}</span>
                         <span className="text-gray-200 leading-loose"> {trimmedPara.substring(matchedTitle.length)}</span>
                       </p>
                     );
                   }
                   
+                  const isArabic = data?.language === 'ar' || data?.generationLanguage === 'ar';
                   return (
                     <p 
                       key={index} 
-                      className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
+                      className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''} ${isArabic ? 'text-right' : ''}`}
                     >
                       {trimmedPara}
                     </p>
@@ -1122,14 +1124,17 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                 {(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'قصة اللاعب' : "Player's Story"}
               </h3>
               <div className="prose prose-invert max-w-none space-y-5">
-                {playersStory.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => (
+                {playersStory.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => {
+                  const isArabic = data?.language === 'ar' || data?.generationLanguage === 'ar';
+                  return (
                   <p 
                     key={index} 
-                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
+                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''} ${isArabic ? 'text-right' : ''}`}
                   >
                     {paragraph.trim()}
                   </p>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
@@ -1167,14 +1172,17 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                 Career Record and Rankings
               </h3>
               <div className="prose prose-invert max-w-none space-y-5">
-                {bioSections.careerRecord.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => (
+                {bioSections.careerRecord.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => {
+                  const isArabic = data?.language === 'ar' || data?.generationLanguage === 'ar';
+                  return (
                   <p 
                     key={index} 
-                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
+                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''} ${isArabic ? 'text-right' : ''}`}
                   >
                     {paragraph.trim()}
                   </p>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
@@ -1193,17 +1201,18 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                   // Extract text and medal directly from object
                   const text = achievementObj?.achievement || '';
                   const medal = achievementObj?.medal || 'Participation';
+                  const isArabic = data?.language === 'ar' || data?.generationLanguage === 'ar';
                   
                   return (
                     <div 
                       key={index}
-                      className="flex items-start space-x-4 p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20"
+                      className={`flex items-start p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20 ${isArabic ? 'flex-row-reverse space-x-reverse space-x-4' : 'space-x-4'}`}
                       data-testid={`achievement-item-${index}`}
                     >
                       <div className="mt-1 flex-shrink-0">
                         {getMedalIcon(medal)}
                       </div>
-                      <p className="text-gray-200 leading-relaxed text-lg font-medium">
+                      <p className={`text-gray-200 leading-relaxed text-lg font-medium ${isArabic ? 'text-right' : ''}`}>
                         {text}
                       </p>
                     </div>
