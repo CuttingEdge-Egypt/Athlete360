@@ -4,6 +4,17 @@
 
 /* RTL Support for Arabic Language - Essential Rules Only */
 
+/* Global RTL text alignment */
+[dir="rtl"] {
+  text-align: right;
+  direction: rtl;
+}
+
+[dir="ltr"] {
+  text-align: left;
+  direction: ltr;
+}
+
 /* Icon rotation for arrows and chevrons */
 [dir="rtl"] .rtl-flip {
   transform: scaleX(-1);
