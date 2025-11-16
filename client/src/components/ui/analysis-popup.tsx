@@ -202,9 +202,11 @@ export function AnalysisPopup({
       strengths = [];
     }
 
+    const isArabic = parsedData?.language === 'ar' || parsedData?.generationLanguage === 'ar';
+
     return (
       <div className="space-y-6">
-        <h3 className={`text-lg font-semibold text-white ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t("common:analysis.strengths.athleteStrengths", "Athlete Strengths")}</h3>
+        <h3 className={`text-lg font-semibold text-white ${isArabic ? 'text-right' : ''}`}>{isArabic ? 'نقاط القوة للرياضي' : t("common:analysis.strengths.athleteStrengths", "Athlete Strengths")}</h3>
         
         {strengths.length > 0 ? strengths.map((strength: any, index: number) => {
           // Only render if we have authentic strength data
@@ -215,15 +217,15 @@ export function AnalysisPopup({
           return (
             <Card key={index} className="bg-athlete-gray-800 border-gray-600 hover:border-athlete-success/50 transition-colors">
               <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <h3 className="font-bold text-green-400 text-lg mb-2">
-                    <Star className="inline-block w-5 h-5 mr-2" />
+                <div className={`flex items-start justify-between mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                  <h3 className={`font-bold text-green-400 text-lg mb-2 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                    <Star className={`inline-block w-5 h-5 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                     {strength.title}
                   </h3>
                   {strength.rating && (
                     <div className="flex items-center space-x-2">
                       <Badge variant="secondary" className="bg-athlete-success/20 text-athlete-success border-athlete-success/30" dir="ltr">
-                        {formatNumber(strength.rating, i18n.language === 'ar')}/{formatNumber(100, i18n.language === 'ar')}
+                        {strength.rating}/100
                       </Badge>
                       {strength.impact && (
                         <Badge 
@@ -247,12 +249,12 @@ export function AnalysisPopup({
                 </p>
                 
                 {strength.evidence && (
-                  <div className={`bg-athlete-gray-900 rounded-lg p-4 ${i18n.language === 'ar' ? 'border-r-4 border-l-0' : 'border-l-4'} border-green-400`}>
-                    <h4 className={`font-semibold text-white mb-2 flex items-center ${i18n.language === 'ar' ? 'flex-row-reverse justify-end' : ''}`}>
-                      <Award className={`w-4 h-4 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
-                      {t("common:analysis.evidence", "Evidence")}
+                  <div className={`bg-athlete-gray-900 rounded-lg p-4 border-green-400 ${isArabic ? 'border-r-4' : 'border-l-4'}`}>
+                    <h4 className={`font-semibold text-white mb-2 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                      <Award className={`w-4 h-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                      {isArabic ? 'دليل' : t("common:analysis.evidence", "Evidence")}
                     </h4>
-                    <p className={`text-sm text-gray-200 italic ${i18n.language === 'ar' ? 'text-right' : ''}`}>
+                    <p className={`text-sm text-gray-200 italic ${isArabic ? 'text-right' : ''}`}>
                       {strength.evidence}
                     </p>
                   </div>
@@ -261,9 +263,9 @@ export function AnalysisPopup({
                 {/* Progress bar for rating visualization */}
                 {strength.rating && (
                   <div className="mt-4">
-                    <div className={`flex justify-between text-sm text-gray-400 mb-1 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                      <span>{t("common:analysis.strengths.strengthLevel", "Strength Level")}</span>
-                      <span dir={i18n.language === 'ar' ? 'ltr' : 'ltr'}>{formatNumber(strength.rating, i18n.language === 'ar')}%</span>
+                    <div className={`flex justify-between text-sm text-gray-400 mb-1 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                      <span>{isArabic ? 'مستوى القوة' : t("common:analysis.strengths.strengthLevel", "Strength Level")}</span>
+                      <span dir="ltr">{strength.rating}%</span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
                       <div 
@@ -318,30 +320,32 @@ export function AnalysisPopup({
       weaknesses = [];
     }
 
+    const isArabic = parsedData?.language === 'ar' || parsedData?.generationLanguage === 'ar';
+
     return (
       <div className="space-y-6">
-        <h3 className={`text-lg font-semibold text-white ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t("common:analysis.weaknesses.title", "Areas for Improvement")}</h3>
+        <h3 className={`text-lg font-semibold text-white ${isArabic ? 'text-right' : ''}`}>{isArabic ? 'مجالات التحسين' : t("common:analysis.weaknesses.title", "Areas for Improvement")}</h3>
         
         <div className="space-y-4">
           {weaknesses.length > 0 ? weaknesses.map((weakness: any, index: number) => (
             <Card key={index} className="bg-athlete-gray-800 border-gray-600 hover:border-athlete-danger/50 transition-colors">
-              <CardContent className={`p-6 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
-                <h3 className={`font-bold text-red-400 text-lg mb-4 flex items-start ${i18n.language === 'ar' ? 'flex-row-reverse text-right justify-end' : ''}`}>
-                  <AlertTriangle className={`inline-block w-5 h-5 mt-0.5 flex-shrink-0 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+              <CardContent className={`p-6 ${isArabic ? 'text-right' : ''}`}>
+                <h3 className={`font-bold text-red-400 text-lg mb-4 flex items-start ${isArabic ? 'flex-row-reverse text-right' : ''}`}>
+                  <AlertTriangle className={`inline-block w-5 h-5 mt-0.5 flex-shrink-0 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                   <span>{weakness.title}</span>
                 </h3>
                 
-                <p className={`text-gray-200 leading-relaxed mb-4 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
+                <p className={`text-gray-200 leading-relaxed mb-4 ${isArabic ? 'text-right' : ''}`}>
                   {weakness.description}
                 </p>
                 
                 {weakness.evidence && (
-                  <div className={`bg-athlete-gray-900 rounded-lg p-4 ${i18n.language === 'ar' ? 'border-r-4 border-l-0' : 'border-l-4'} border-red-400`}>
-                    <h4 className={`font-semibold text-white mb-2 flex items-center ${i18n.language === 'ar' ? 'flex-row-reverse justify-end' : ''}`}>
-                      <Award className={`w-4 h-4 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
-                      {t("common:analysis.evidence", "Evidence")}
+                  <div className={`bg-athlete-gray-900 rounded-lg p-4 border-red-400 ${isArabic ? 'border-r-4' : 'border-l-4'}`}>
+                    <h4 className={`font-semibold text-white mb-2 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                      <Award className={`w-4 h-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                      {isArabic ? 'دليل' : t("common:analysis.evidence", "Evidence")}
                     </h4>
-                    <p className={`text-sm text-gray-200 italic ${i18n.language === 'ar' ? 'text-right' : ''}`}>
+                    <p className={`text-sm text-gray-200 italic ${isArabic ? 'text-right' : ''}`}>
                       {weakness.evidence}
                     </p>
                   </div>

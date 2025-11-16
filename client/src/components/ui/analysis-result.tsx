@@ -1571,6 +1571,8 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
     );
 
     // Main return: Use tabs if dual-analysis, otherwise show single analysis
+    const isArabic = parsedData?.language === 'ar' || parsedData?.generationLanguage === 'ar';
+    
     if (isDualAnalysis) {
       return (
         <Tabs defaultValue="competitive" className="w-full">
@@ -1578,18 +1580,18 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
             <TabsTrigger 
               value="competitive"
               data-testid="tab-competitive-history"
-              className="data-[state=active]:bg-athlete-accent"
+              className={`data-[state=active]:bg-athlete-accent ${isArabic ? 'flex-row-reverse' : ''}`}
             >
-              <Calendar className="mr-2 h-4 w-4" />
-              Competitive History
+              <Calendar className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+              {isArabic ? 'التاريخ التنافسي' : 'Competitive History'}
             </TabsTrigger>
             <TabsTrigger 
               value="rank"
               data-testid="tab-rank-history"
-              className="data-[state=active]:bg-athlete-accent"
+              className={`data-[state=active]:bg-athlete-accent ${isArabic ? 'flex-row-reverse' : ''}`}
             >
-              <TrendingUp className="mr-2 h-4 w-4" />
-              Rank History
+              <TrendingUp className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+              {isArabic ? 'تاريخ التصنيف' : 'Rank History'}
             </TabsTrigger>
           </TabsList>
           
@@ -1645,12 +1647,14 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
             return null;
           }
           
+          const isArabic = parsedData?.language === 'ar' || parsedData?.generationLanguage === 'ar';
+          
           return (
             <Card key={index} className="bg-athlete-gray-700 border-gray-600 hover:border-athlete-success/50 transition-colors">
               <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <h3 className="font-bold text-athlete-success text-lg mb-2">
-                    <Star className="inline-block w-5 h-5 mr-2" />
+                <div className={`flex items-start justify-between mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                  <h3 className={`font-bold text-athlete-success text-lg mb-2 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                    <Star className={`inline-block w-5 h-5 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                     {strength.title}
                   </h3>
                   {strength.rating && (
@@ -1680,10 +1684,10 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                 </p>
                 
                 {strength.evidence && (
-                  <div className="bg-athlete-gray-800 rounded-lg p-4 border-l-4 border-athlete-success">
-                    <h4 className="font-semibold text-white mb-2 flex items-center">
-                      <Award className="w-4 h-4 mr-2" />
-                      Evidence
+                  <div className={`bg-athlete-gray-800 rounded-lg p-4 border-athlete-success ${isArabic ? 'border-r-4' : 'border-l-4'}`}>
+                    <h4 className={`font-semibold text-white mb-2 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                      <Award className={`w-4 h-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                      {isArabic ? 'دليل' : 'Evidence'}
                     </h4>
                     <p className="text-sm text-gray-300 italic">
                       {strength.evidence}
@@ -1723,18 +1727,22 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
     );
   };
 
-  const renderWeaknessesAnalysis = (data: any) => (
-    <div className="space-y-4">
-      {data.weaknesses?.map((weakness: any, index: number) => (
-        <Card key={index} className="bg-athlete-gray-700 border-gray-600">
-          <CardContent className="p-4">
-            <h5 className="font-semibold text-athlete-danger mb-2">{weakness.title}</h5>
-            <p className="text-sm text-gray-300">{weakness.description}</p>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
+  const renderWeaknessesAnalysis = (data: any) => {
+    const isArabic = data?.language === 'ar' || data?.generationLanguage === 'ar';
+    
+    return (
+      <div className="space-y-4">
+        {data.weaknesses?.map((weakness: any, index: number) => (
+          <Card key={index} className="bg-athlete-gray-700 border-gray-600">
+            <CardContent className="p-4">
+              <h5 className={`font-semibold text-athlete-danger mb-2 ${isArabic ? 'text-right' : ''}`}>{weakness.title}</h5>
+              <p className={`text-sm text-gray-300 ${isArabic ? 'text-right' : ''}`}>{weakness.description}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  };
 
   const renderDevelopmentPlan = (data: any) => {
     console.log('Frontend Development Plan Data RECEIVED:', JSON.stringify(data, null, 2));
@@ -1955,6 +1963,8 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
       strategies = [];
     }
 
+    const isArabic = data?.language === 'ar' || data?.generationLanguage === 'ar';
+
     return (
       <div>
         <div className="grid gap-4 mb-6">
@@ -1967,16 +1977,16 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
             return (
               <Card key={index} className="bg-athlete-gray-700 border-gray-600">
                 <CardContent className="p-4">
-                  <h5 className="font-semibold text-red-400 mb-2">
+                  <h5 className={`font-semibold text-red-400 mb-2 ${isArabic ? 'text-right' : ''}`}>
                     {strategy.strategy || strategy.title || strategy.name}
                   </h5>
                   {strategy.description && (
-                    <p className="text-sm text-gray-300">
+                    <p className={`text-sm text-gray-300 ${isArabic ? 'text-right' : ''}`}>
                       {strategy.description}
                     </p>
                   )}
                   {strategy.details && (
-                    <p className="text-sm text-gray-300 mt-2">
+                    <p className={`text-sm text-gray-300 mt-2 ${isArabic ? 'text-right' : ''}`}>
                       {strategy.details}
                     </p>
                   )}
@@ -1992,7 +2002,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
         {data.keyWeaknesses && Array.isArray(data.keyWeaknesses) && data.keyWeaknesses.length > 0 && (
           <Card className="bg-athlete-gray-700 border-gray-600">
             <CardContent className="p-4">
-              <h5 className="font-semibold text-athlete-warning mb-2">Key Weaknesses to Exploit</h5>
+              <h5 className={`font-semibold text-athlete-warning mb-2 ${isArabic ? 'text-right' : ''}`}>{isArabic ? 'نقاط الضعف الرئيسية للاستغلال' : 'Key Weaknesses to Exploit'}</h5>
               <ul className="text-sm text-gray-300 space-y-1">
                 {data.keyWeaknesses.map((weakness: string, index: number) => (
                   <li key={index}>• {weakness}</li>
