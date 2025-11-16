@@ -170,6 +170,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
             key={index} 
             className="bg-athlete-gray-800 border-gray-700 hover:border-red-500/30 transition-all duration-300"
             data-testid={`strategy-card-${index}`}
+            dir={isArabic ? 'rtl' : 'ltr'}
           >
             <CardHeader className="pb-3">
               <div className={`flex items-start justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
@@ -252,7 +253,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
       </div>
 
       {/* Summary Footer */}
-      <Card className="bg-gradient-to-r from-red-900/20 to-orange-900/20 border-red-500/30 mt-8">
+      <Card className="bg-gradient-to-r from-red-900/20 to-orange-900/20 border-red-500/30 mt-8" dir={isArabic ? 'rtl' : 'ltr'}>
         <CardContent className="p-4">
           <div className={`flex items-center ${isArabic ? 'flex-row-reverse space-x-reverse space-x-3' : 'space-x-3'}`}>
             <Award className="text-red-400" size={20} />
