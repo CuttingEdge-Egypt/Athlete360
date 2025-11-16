@@ -219,7 +219,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
             <CardContent className="space-y-4">
               {/* Strategy Description */}
               <div className="space-y-2">
-                <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
+                <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'justify-end' : ''}`}>
                   <Brain className={`w-4 h-4 text-blue-400 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                   {isArabic ? 'نظرة استراتيجية عامة' : 'Strategic Overview'}
                 </h4>
@@ -232,7 +232,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
 
               {/* Execution Details */}
               <div className="space-y-2">
-                <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
+                <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'justify-end' : ''}`}>
                   <Zap className={`w-4 h-4 text-yellow-400 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                   {isArabic ? 'خطة التنفيذ' : 'Execution Plan'}
                 </h4>
@@ -246,7 +246,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
               {/* Success Probability */}
               <div className="space-y-3">
                 <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
-                  <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
+                  <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'justify-end' : ''}`}>
                     <TrendingUp className={`w-4 h-4 text-green-400 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                     {isArabic ? 'احتمالية النجاح' : 'Success Probability'}
                   </h4>
