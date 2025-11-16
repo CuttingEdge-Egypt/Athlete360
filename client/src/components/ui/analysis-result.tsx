@@ -1105,6 +1105,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                     <p 
                       key={index} 
                       className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''} ${isArabic ? 'text-right' : ''}`}
+                      dir={isArabic ? 'rtl' : 'ltr'}
                     >
                       {trimmedPara}
                     </p>
@@ -1130,6 +1131,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                   <p 
                     key={index} 
                     className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''} ${isArabic ? 'text-right' : ''}`}
+                    dir={isArabic ? 'rtl' : 'ltr'}
                   >
                     {paragraph.trim()}
                   </p>
@@ -1149,14 +1151,18 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                 {(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'قصة اللاعب' : "Player's Story"}
               </h3>
               <div className="prose prose-invert max-w-none space-y-5">
-                {bioSections.overallStory.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => (
+                {bioSections.overallStory.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => {
+                  const isArabic = data?.language === 'ar' || data?.generationLanguage === 'ar';
+                  return (
                   <p 
                     key={index} 
-                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
+                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''} ${isArabic ? 'text-right' : ''}`}
+                    dir={isArabic ? 'rtl' : 'ltr'}
                   >
                     {paragraph.trim()}
                   </p>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
@@ -1178,6 +1184,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                   <p 
                     key={index} 
                     className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''} ${isArabic ? 'text-right' : ''}`}
+                    dir={isArabic ? 'rtl' : 'ltr'}
                   >
                     {paragraph.trim()}
                   </p>

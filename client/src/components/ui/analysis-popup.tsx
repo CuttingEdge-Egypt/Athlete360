@@ -1519,7 +1519,8 @@ export function AnalysisPopup({
                   return (
                     <p 
                       key={index} 
-                      className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
+                      className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''} ${isContentArabic ? 'text-right' : ''}`}
+                      dir={isContentArabic ? 'rtl' : 'ltr'}
                     >
                       {trimmedPara}
                     </p>
@@ -1560,7 +1561,8 @@ export function AnalysisPopup({
                 {(playersStory || bioSections.overallStory).split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => (
                   <p 
                     key={index} 
-                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
+                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''} ${isContentArabic ? 'text-right' : ''}`}
+                    dir={isContentArabic ? 'rtl' : 'ltr'}
                   >
                     {paragraph.trim()}
                   </p>
@@ -1582,7 +1584,8 @@ export function AnalysisPopup({
                 {bioSections.careerRecord.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => (
                   <p 
                     key={index} 
-                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
+                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''} ${isContentArabic ? 'text-right' : ''}`}
+                    dir={isContentArabic ? 'rtl' : 'ltr'}
                   >
                     {paragraph.trim()}
                   </p>
