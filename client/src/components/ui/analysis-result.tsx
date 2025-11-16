@@ -1328,10 +1328,11 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
 
     // Helper function to render rank history chart and analysis (for Taekwondo)
     const renderRankHistoryContent = () => {
+      const isArabic = parsedData?.language === 'ar' || parsedData?.generationLanguage === 'ar';
       if (!rankHistoryData || rankHistoryData.length === 0) {
         return (
-          <div className="p-6 text-center">
-            <p className="text-gray-400">No rank history data available</p>
+          <div className={`p-6 text-center ${isArabic ? 'text-right' : ''}`}>
+            <p className="text-gray-400">{isArabic ? 'لا توجد بيانات تاريخ التصنيف متاحة' : 'No rank history data available'}</p>
           </div>
         );
       }
@@ -1407,9 +1408,9 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
           {/* Rank Progression Chart */}
           <Card className="bg-athlete-gray-800 border-gray-600">
             <CardHeader>
-              <CardTitle className="text-2xl text-gray-100 flex items-center">
-                <TrendingUp className="mr-3 text-orange-400" size={24} />
-                Rank Progression Over Time
+              <CardTitle className={`text-2xl text-gray-100 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <TrendingUp className={`text-orange-400 ${isArabic ? 'ml-3' : 'mr-3'}`} size={24} />
+                {isArabic ? 'تطور التصنيف عبر الزمن' : 'Rank Progression Over Time'}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1423,15 +1424,15 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
           {rankAnalysis && (
             <Card className="bg-athlete-gray-800 border-gray-600">
               <CardHeader>
-                <CardTitle className="text-2xl text-gray-100 flex items-center">
-                  <BarChart className="mr-3 text-blue-400" size={24} />
-                  Rank History Analysis
+                <CardTitle className={`text-2xl text-gray-100 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                  <BarChart className={`text-blue-400 ${isArabic ? 'ml-3' : 'mr-3'}`} size={24} />
+                  {isArabic ? 'تحليل تاريخ التصنيف' : 'Rank History Analysis'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="prose prose-invert max-w-none">
                   <div 
-                    className="text-gray-300 leading-relaxed whitespace-pre-wrap"
+                    className={`text-gray-300 leading-relaxed whitespace-pre-wrap ${isArabic ? 'text-right' : ''}`}
                     dangerouslySetInnerHTML={{ 
                       __html: rankAnalysis.replace(/\n/g, '<br/>') 
                     }}
@@ -1445,19 +1446,21 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
     };
 
     // Helper function to render competitive history content
-    const renderCompetitiveHistoryContent = () => (
+    const renderCompetitiveHistoryContent = () => {
+      const isArabic = parsedData?.language === 'ar' || parsedData?.generationLanguage === 'ar';
+      return (
       <div className="space-y-6">
         {/* Career Overview Stats */}
         <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-blue-400 border-gray-600">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-3xl font-bold text-blue-400 flex items-center">
-                <Trophy className="mr-3" size={28} />
-                Career Overview
+            <div className={`flex items-center justify-between mb-6 ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <h3 className={`text-3xl font-bold text-blue-400 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <Trophy className={`${isArabic ? 'ml-3' : 'mr-3'}`} size={28} />
+                {isArabic ? 'نظرة عامة على المسيرة' : 'Career Overview'}
               </h3>
               {athlete.isActive && (
                 <Badge variant="default" className="bg-green-600 text-white px-3 py-1">
-                  Active
+                  {isArabic ? 'نشط' : 'Active'}
                 </Badge>
               )}
             </div>
@@ -1465,19 +1468,19 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
             <div className="grid md:grid-cols-4 gap-4">
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-blue-500/20">
                 <div className="text-2xl font-bold text-white">{athlete.currentRanking || 'N/A'}</div>
-                <div className="text-sm text-blue-300">Current Rank</div>
+                <div className="text-sm text-blue-300">{isArabic ? 'التصنيف الحالي' : 'Current Rank'}</div>
               </div>
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-green-500/20">
                 <div className="text-2xl font-bold text-green-400">{athlete.peakRanking || 'N/A'}</div>
-                <div className="text-sm text-green-300">Peak Rank</div>
+                <div className="text-sm text-green-300">{isArabic ? 'أعلى تصنيف' : 'Peak Rank'}</div>
               </div>
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-yellow-500/20">
                 <div className="text-2xl font-bold text-yellow-400">{athlete.officialRecord || 'N/A'}</div>
-                <div className="text-sm text-yellow-300">Record</div>
+                <div className="text-sm text-yellow-300">{isArabic ? 'السجل' : 'Record'}</div>
               </div>
               <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-purple-500/20">
                 <div className="text-2xl font-bold text-purple-400">{careerSummary.totalCompetitions || 'N/A'}</div>
-                <div className="text-sm text-purple-300">Competitions</div>
+                <div className="text-sm text-purple-300">{isArabic ? 'المنافسات' : 'Competitions'}</div>
               </div>
             </div>
           </CardContent>
@@ -1487,16 +1490,16 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
         {rankingProgression && rankingProgression.length > 0 && (
           <Card className="bg-athlete-gray-800 border-gray-600">
             <CardHeader>
-              <CardTitle className="text-2xl text-gray-100 flex items-center">
-                <TrendingUp className="mr-3 text-blue-400" size={24} />
-                Ranking Progression
+              <CardTitle className={`text-2xl text-gray-100 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <TrendingUp className={`text-blue-400 ${isArabic ? 'ml-3' : 'mr-3'}`} size={24} />
+                {isArabic ? 'تطور التصنيف' : 'Ranking Progression'}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3 max-h-64 overflow-y-auto">
                 {rankingProgression.map((entry: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-gray-500 transition-colors">
-                    <div className="flex-1">
+                  <div key={index} className={`flex items-center justify-between p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-gray-500 transition-colors ${isArabic ? 'flex-row-reverse' : ''}`}>
+                    <div className={`flex-1 ${isArabic ? 'text-right' : ''}`}>
                       <div className="font-semibold text-gray-100">
                         {entry.competition || entry.tournament || `Event ${index + 1}`}
                       </div>
@@ -1523,52 +1526,53 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
         <div className="grid md:grid-cols-2 gap-6">
           <Card className="bg-athlete-gray-800 border-gray-600">
             <CardHeader>
-              <CardTitle className="text-xl text-gray-100 flex items-center">
-                <Award className="mr-3 text-yellow-400" size={24} />
-                Career Summary
+              <CardTitle className={`text-xl text-gray-100 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <Award className={`text-yellow-400 ${isArabic ? 'ml-3' : 'mr-3'}`} size={24} />
+                {isArabic ? 'ملخص المسيرة' : 'Career Summary'}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex justify-between items-center py-2 border-b border-gray-600">
-                <span className="text-gray-300">Major Titles:</span>
+              <div className={`flex justify-between items-center py-2 border-b border-gray-600 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <span className="text-gray-300">{isArabic ? 'الألقاب الرئيسية:' : 'Major Titles:'}</span>
                 <span className="text-yellow-400 font-semibold">{careerSummary.majorTitles || 'N/A'}</span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-gray-600">
-                <span className="text-gray-300">Ranking Trend:</span>
+              <div className={`flex justify-between items-center py-2 border-b border-gray-600 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <span className="text-gray-300">{isArabic ? 'اتجاه التصنيف:' : 'Ranking Trend:'}</span>
                 <span className="text-blue-400 font-semibold">{careerSummary.rankingTrend || 'N/A'}</span>
               </div>
-              <div className="flex justify-between items-center py-2">
-                <span className="text-gray-300">Current Form:</span>
-                <span className="text-green-400 font-semibold">{careerSummary.currentForm || 'Data not available'}</span>
+              <div className={`flex justify-between items-center py-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <span className="text-gray-300">{isArabic ? 'الأداء الحالي:' : 'Current Form:'}</span>
+                <span className="text-green-400 font-semibold">{careerSummary.currentForm || (isArabic ? 'البيانات غير متوفرة' : 'Data not available')}</span>
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-athlete-gray-800 border-gray-600">
             <CardHeader>
-              <CardTitle className="text-xl text-gray-100 flex items-center">
-                <Star className="mr-3 text-purple-400" size={24} />
-                Notable Achievements
+              <CardTitle className={`text-xl text-gray-100 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <Star className={`text-purple-400 ${isArabic ? 'ml-3' : 'mr-3'}`} size={24} />
+                {isArabic ? 'الإنجازات البارزة' : 'Notable Achievements'}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {careerSummary.notableAchievements && careerSummary.notableAchievements.length > 0 ? (
                 <ul className="space-y-3">
                   {careerSummary.notableAchievements.map((achievement: string, index: number) => (
-                    <li key={index} className="flex items-start text-gray-300">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                      <span className="text-sm">{achievement}</span>
+                    <li key={index} className={`flex items-start text-gray-300 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                      <div className={`w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0 ${isArabic ? 'ml-3' : 'mr-3'}`}></div>
+                      <span className={`text-sm ${isArabic ? 'text-right' : ''}`}>{achievement}</span>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-gray-400 text-sm">No specific achievements data available</p>
+                <p className={`text-gray-400 text-sm ${isArabic ? 'text-right' : ''}`}>{isArabic ? 'لا توجد بيانات إنجازات محددة متاحة' : 'No specific achievements data available'}</p>
               )}
             </CardContent>
           </Card>
         </div>
       </div>
     );
+    };
 
     // Main return: Use tabs if dual-analysis, otherwise show single analysis
     const isArabic = parsedData?.language === 'ar' || parsedData?.generationLanguage === 'ar';
