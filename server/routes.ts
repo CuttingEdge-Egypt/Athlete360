@@ -1957,7 +1957,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.warn(`⚠️ Failed to save analysis log for ${athlete.name}, but continuing:`, logError);
       }
 
-      res.json(bioAnalysis);
+      res.json({ ...bioAnalysis, generationLanguage: language });
     } catch (error) {
       console.error("Error generating bio analysis:", error);
       // Refund tokens for unexpected errors

@@ -1435,7 +1435,7 @@ export function AnalysisPopup({
                     >
                       <div className="flex items-center gap-2">
                         <Trophy className={`w-5 h-5 ${textColor}`} />
-                        <span className={`font-black text-2xl ${textColor}`}>#{rankingCategory.rank}</span>
+                        <span className={`font-black text-2xl ${textColor}`}>#{!isNaN(Number(rankingCategory.rank)) ? Math.floor(Number(rankingCategory.rank)) : rankingCategory.rank}</span>
                       </div>
                       <div className={`text-xs font-semibold mt-1 text-center max-w-[200px] line-clamp-2 ${textColor}`}>
                         {rankingCategory.category}
@@ -1459,7 +1459,7 @@ export function AnalysisPopup({
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-emerald-400 mb-8 flex items-center">
                 <User className="mr-4 text-emerald-400" size={32} />
-                {t("common:analysis.bio.introduction", "Introduction")}
+                {(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'المقدمة' : 'Introduction'}
               </h3>
               <div className="prose prose-invert max-w-none space-y-5">
                 {bioSections.introduction.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => {
@@ -2368,7 +2368,7 @@ export function AnalysisPopup({
                             "bg-gray-500/20 text-gray-400 border-gray-500/30"
                           }
                         >
-                          {rankingCategory.category}: #{rankingCategory.rank}
+                          {rankingCategory.category}: #{!isNaN(Number(rankingCategory.rank)) ? Math.floor(Number(rankingCategory.rank)) : rankingCategory.rank}
                         </Badge>
                       );
                     })}
@@ -2426,7 +2426,7 @@ export function AnalysisPopup({
                             "bg-gray-500/20 text-gray-400 border-gray-500/30"
                           }
                         >
-                          {rankingCategory.category}: #{rankingCategory.rank}
+                          {rankingCategory.category}: #{!isNaN(Number(rankingCategory.rank)) ? Math.floor(Number(rankingCategory.rank)) : rankingCategory.rank}
                         </Badge>
                       );
                     })}

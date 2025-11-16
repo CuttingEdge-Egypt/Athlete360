@@ -2446,25 +2446,25 @@ export default function Home() {
                                   {selectedAthlete.olympicRank ? (
                                     <div className="flex items-center space-x-1 bg-yellow-500/20 border-2 border-yellow-400 px-2 py-1 rounded-lg" data-testid="rank-olympic">
                                       <Trophy className="w-3 h-3 text-yellow-300" />
-                                      <span className="text-yellow-300 font-bold text-xs">Olympic #{selectedAthlete.olympicRank}</span>
+                                      <span className="text-yellow-300 font-bold text-xs">Olympic #{typeof selectedAthlete.olympicRank === 'number' || !isNaN(Number(selectedAthlete.olympicRank)) ? Math.floor(Number(selectedAthlete.olympicRank)) : selectedAthlete.olympicRank}</span>
                                     </div>
                                   ) : null}
                                   {selectedAthlete.rank ? (
                                     <div className="flex items-center space-x-1 bg-orange-500/20 border-2 border-orange-400 px-2 py-1 rounded-lg" data-testid="rank-world">
                                       <Trophy className="w-3 h-3 text-orange-300" />
-                                      <span className="text-orange-300 font-bold text-xs">World #{selectedAthlete.rank}</span>
+                                      <span className="text-orange-300 font-bold text-xs">World #{typeof selectedAthlete.rank === 'number' || !isNaN(Number(selectedAthlete.rank)) ? Math.floor(Number(selectedAthlete.rank)) : selectedAthlete.rank}</span>
                                     </div>
                                   ) : null}
                                   {selectedAthlete.continentalRank ? (
                                     <div className="flex items-center space-x-1 bg-green-500/20 border-2 border-green-400 px-2 py-1 rounded-lg" data-testid="rank-continental">
                                       <Trophy className="w-3 h-3 text-green-300" />
-                                      <span className="text-green-300 font-bold text-xs">Continental #{selectedAthlete.continentalRank}</span>
+                                      <span className="text-green-300 font-bold text-xs">Continental #{typeof selectedAthlete.continentalRank === 'number' || !isNaN(Number(selectedAthlete.continentalRank)) ? Math.floor(Number(selectedAthlete.continentalRank)) : selectedAthlete.continentalRank}</span>
                                     </div>
                                   ) : null}
                                   {selectedAthlete.nationalRank ? (
                                     <div className="flex items-center space-x-1 bg-blue-500/20 border-2 border-blue-400 px-2 py-1 rounded-lg" data-testid="rank-national">
                                       <TrendingUp className="w-3 h-3 text-blue-300" />
-                                      <span className="text-blue-300 font-bold text-xs">National #{selectedAthlete.nationalRank}</span>
+                                      <span className="text-blue-300 font-bold text-xs">National #{typeof selectedAthlete.nationalRank === 'number' || !isNaN(Number(selectedAthlete.nationalRank)) ? Math.floor(Number(selectedAthlete.nationalRank)) : selectedAthlete.nationalRank}</span>
                                     </div>
                                   ) : null}
                                 </>

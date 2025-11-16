@@ -184,25 +184,25 @@ export default function AthleteAnalysis() {
                       {athlete.olympicRank ? (
                         <div className="flex items-center space-x-1 bg-yellow-500/20 border-2 border-yellow-400 px-3 py-1.5 rounded-lg" data-testid="rank-olympic">
                           <Trophy className="w-4 h-4 text-yellow-300" />
-                          <span className="text-yellow-300 font-bold text-sm">Olympic #{athlete.olympicRank}</span>
+                          <span className="text-yellow-300 font-bold text-sm">Olympic #{!isNaN(Number(athlete.olympicRank)) ? Math.floor(Number(athlete.olympicRank)) : athlete.olympicRank}</span>
                         </div>
                       ) : null}
                       {athlete.rank ? (
                         <div className="flex items-center space-x-1 bg-orange-500/20 border-2 border-orange-400 px-3 py-1.5 rounded-lg" data-testid="rank-world">
                           <Medal className="w-4 h-4 text-orange-300" />
-                          <span className="text-orange-300 font-bold text-sm">World #{athlete.rank}</span>
+                          <span className="text-orange-300 font-bold text-sm">World #{!isNaN(Number(athlete.rank)) ? Math.floor(Number(athlete.rank)) : athlete.rank}</span>
                         </div>
                       ) : null}
                       {athlete.continentalRank ? (
                         <div className="flex items-center space-x-1 bg-green-500/20 border-2 border-green-400 px-3 py-1.5 rounded-lg" data-testid="rank-continental">
                           <Target className="w-4 h-4 text-green-300" />
-                          <span className="text-green-300 font-bold text-sm">Continental #{athlete.continentalRank}</span>
+                          <span className="text-green-300 font-bold text-sm">Continental #{!isNaN(Number(athlete.continentalRank)) ? Math.floor(Number(athlete.continentalRank)) : athlete.continentalRank}</span>
                         </div>
                       ) : null}
                       {athlete.nationalRank ? (
                         <div className="flex items-center space-x-1 bg-blue-500/20 border-2 border-blue-400 px-3 py-1.5 rounded-lg" data-testid="rank-national">
                           <TrendingUp className="w-4 h-4 text-blue-300" />
-                          <span className="text-blue-300 font-bold text-sm">National #{athlete.nationalRank}</span>
+                          <span className="text-blue-300 font-bold text-sm">National #{!isNaN(Number(athlete.nationalRank)) ? Math.floor(Number(athlete.nationalRank)) : athlete.nationalRank}</span>
                         </div>
                       ) : null}
                       {!athlete.rank && !athlete.olympicRank && !athlete.continentalRank && !athlete.nationalRank ? (
