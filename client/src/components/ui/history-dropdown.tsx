@@ -52,7 +52,7 @@ export function HistoryDropdown() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const { t } = useTranslation(['nav', 'home']);
-  const { language } = useLanguage();
+  const { language, direction } = useLanguage();
   const isArabic = language === 'ar';
 
   // Create service labels with translations
@@ -205,7 +205,7 @@ export function HistoryDropdown() {
                     {t('actions.clear', { ns: 'home' })}
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent>
+                <AlertDialogContent dir={direction}>
                   <AlertDialogHeader>
                     <AlertDialogTitle>{t('dialogs.clearHistory.title', { ns: 'home' })}</AlertDialogTitle>
                     <AlertDialogDescription className="space-y-2">
