@@ -43,26 +43,28 @@
   color: hsl(207, 90%, 54%);
 }
 
-[dir="rtl"] .bio-first-letter {
-  direction: rtl;
+.bio-first-letter[dir="ltr"] {
+  direction: ltr !important;
+  unicode-bidi: embed;
 }
 
-[dir="rtl"] .bio-first-letter::first-letter {
-  float: right;
-  margin-left: 0.25rem;
-  margin-right: 0;
-  margin-top: -0.75rem;
-}
-
-[dir="ltr"] .bio-first-letter {
-  direction: ltr;
-}
-
-[dir="ltr"] .bio-first-letter::first-letter {
-  float: left;
+.bio-first-letter[dir="ltr"]::first-letter {
+  float: left !important;
   margin-right: 0.25rem;
   margin-left: 0;
   margin-top: 0;
+}
+
+.bio-first-letter[dir="rtl"] {
+  direction: rtl !important;
+  unicode-bidi: embed;
+}
+
+.bio-first-letter[dir="rtl"]::first-letter {
+  float: right !important;
+  margin-left: 0.25rem;
+  margin-right: 0;
+  margin-top: -0.75rem;
 }
 
 :root {
