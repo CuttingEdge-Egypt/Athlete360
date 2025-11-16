@@ -28,11 +28,12 @@ interface StrategicCombatData {
 }
 
 interface StrategicCombatDisplayProps {
-  data: StrategicCombatData;
+  data: StrategicCombatData & { language?: string; generationLanguage?: string };
 }
 
 export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
   const { t, i18n } = useTranslation();
+  const isArabic = data?.language === 'ar' || data?.generationLanguage === 'ar';
   if (!data || !data.strategies || !Array.isArray(data.strategies)) {
     return (
       <div className="text-center text-gray-400 py-8">
@@ -131,13 +132,16 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="text-center space-y-2 mb-8">
-        <div className="flex items-center justify-center space-x-2 text-red-400">
+      <div className={`text-center space-y-2 mb-8 ${isArabic ? 'rtl' : ''}`}>
+        <div className={`flex items-center justify-center text-red-400 ${isArabic ? 'flex-row-reverse space-x-reverse space-x-2' : 'space-x-2'}`}>
           <Target size={24} />
-          <h2 className="text-2xl font-bold">{t("analysis.combat.strategiesTitle", "Combat Strategies")}</h2>
+          <h2 className="text-2xl font-bold">{isArabic ? 'استراتيجيات القتال' : 'Combat Strategies'}</h2>
         </div>
         <p className="text-gray-400">
-          {t("analysis.combat.tacticalAnalysis", "Advanced tactical analysis with {{count}} strategic approaches", { count: data.strategies.length })}
+          {isArabic 
+            ? `تحليل تكتيكي متقدم يحتوي على ${data.strategies.length} نهج استراتيجي`
+            : `Advanced tactical analysis with ${data.strategies.length} strategic approaches`
+          }
         </p>
       </div>
 
@@ -150,26 +154,26 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
             data-testid={`strategy-card-${index}`}
           >
             <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
+              <div className={`flex items-start justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
                 <div className="flex-1">
-                  <CardTitle className="text-white text-lg font-semibold mb-2 flex items-center">
-                    <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center mr-3">
+                  <CardTitle className={`text-white text-lg font-semibold mb-2 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                    <div className={`w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center ${isArabic ? 'ml-3' : 'mr-3'}`}>
                       <span className="text-red-400 font-bold text-sm">{index + 1}</span>
                     </div>
-                    {strategy.strategy}
+                    <span className={isArabic ? 'text-right' : ''}>{strategy.strategy}</span>
                   </CardTitle>
                 </div>
-                <div className="flex space-x-2 ml-4">
+                <div className={`flex ${isArabic ? 'mr-4 space-x-reverse space-x-2' : 'ml-4 space-x-2'}`}>
                   <Badge 
                     variant="outline" 
                     className={`${getRiskColor(strategy.risk_level)} border`}
                     data-testid={`risk-badge-${index}`}
                   >
                     {getRiskIcon(strategy.risk_level)}
-                    <span className="ml-1">
-                      {i18n.language === 'ar' 
-                        ? `${t("analysis.combat.risk", "Risk")} ${translateRiskLevel(strategy.risk_level)}`
-                        : `${translateRiskLevel(strategy.risk_level)} ${t("analysis.combat.risk", "Risk")}`
+                    <span className={isArabic ? 'mr-1' : 'ml-1'}>
+                      {isArabic 
+                        ? `${strategy.risk_level} مخاطرة`
+                        : `${strategy.risk_level} Risk`
                       }
                     </span>
                   </Badge>
@@ -180,11 +184,11 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
             <CardContent className="space-y-4">
               {/* Strategy Description */}
               <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-gray-300 flex items-center">
-                  <Brain className="w-4 h-4 mr-2 text-blue-400" />
-                  {t("analysis.combat.strategicOverview", "Strategic Overview")}
+                <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                  <Brain className={`w-4 h-4 text-blue-400 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                  {isArabic ? 'نظرة استراتيجية عامة' : 'Strategic Overview'}
                 </h4>
-                <p className="text-gray-300 leading-relaxed text-sm bg-athlete-gray-900/50 p-3 rounded-md">
+                <p className={`text-gray-300 leading-relaxed text-sm bg-athlete-gray-900/50 p-3 rounded-md ${isArabic ? 'text-right' : ''}`}>
                   {strategy.description}
                 </p>
               </div>
@@ -193,11 +197,11 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
 
               {/* Execution Details */}
               <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-gray-300 flex items-center">
-                  <Zap className="w-4 h-4 mr-2 text-yellow-400" />
-                  {t("analysis.combat.executionPlan", "Execution Plan")}
+                <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                  <Zap className={`w-4 h-4 text-yellow-400 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                  {isArabic ? 'خطة التنفيذ' : 'Execution Plan'}
                 </h4>
-                <p className="text-gray-300 leading-relaxed text-sm bg-athlete-gray-900/50 p-3 rounded-md">
+                <p className={`text-gray-300 leading-relaxed text-sm bg-athlete-gray-900/50 p-3 rounded-md ${isArabic ? 'text-right' : ''}`}>
                   {strategy.execution}
                 </p>
               </div>
@@ -206,16 +210,16 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
 
               {/* Success Probability */}
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-gray-300 flex items-center">
-                    <TrendingUp className="w-4 h-4 mr-2 text-green-400" />
-                    {t("analysis.combat.successProbability", "Success Probability")}
+                <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
+                  <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                    <TrendingUp className={`w-4 h-4 text-green-400 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                    {isArabic ? 'احتمالية النجاح' : 'Success Probability'}
                   </h4>
                   <span 
                     className={`text-sm font-semibold ${getSuccessColor(strategy.success_probability)}`}
                     data-testid={`success-probability-${index}`}
                   >
-                    {translateSuccessProbability(strategy.success_probability)}
+                    {strategy.success_probability}
                   </span>
                 </div>
                 <Progress 
@@ -232,12 +236,15 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
       {/* Summary Footer */}
       <Card className="bg-gradient-to-r from-red-900/20 to-orange-900/20 border-red-500/30 mt-8">
         <CardContent className="p-4">
-          <div className="flex items-center space-x-3">
+          <div className={`flex items-center ${isArabic ? 'flex-row-reverse space-x-reverse space-x-3' : 'space-x-3'}`}>
             <Award className="text-red-400" size={20} />
-            <div>
-              <h3 className="text-white font-semibold">{t("analysis.combat.analysisComplete", "Strategic Analysis Complete")}</h3>
+            <div className={isArabic ? 'text-right' : ''}>
+              <h3 className="text-white font-semibold">{isArabic ? 'اكتمل التحليل الاستراتيجي' : 'Strategic Analysis Complete'}</h3>
               <p className="text-gray-300 text-sm">
-                {t("analysis.combat.tacticalApproaches", "{{count}} tactical approaches identified for optimal performance advantage", { count: data.strategies.length })}
+                {isArabic 
+                  ? `تم تحديد ${data.strategies.length} نهج تكتيكي لتحقيق ميزة الأداء الأمثل`
+                  : `${data.strategies.length} tactical approaches identified for optimal performance advantage`
+                }
               </p>
             </div>
           </div>
