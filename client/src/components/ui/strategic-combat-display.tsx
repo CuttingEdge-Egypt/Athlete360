@@ -12,7 +12,7 @@ import {
   Clock,
   Award,
 } from "lucide-react";
-import { useLanguage } from "@/hooks/useLanguage";
+import { useTranslation } from 'react-i18next';
 
 interface Strategy {
   strategy: string;
@@ -28,33 +28,16 @@ interface StrategicCombatData {
 }
 
 interface StrategicCombatDisplayProps {
-  data: StrategicCombatData & { language?: string; generationLanguage?: string };
+  data: StrategicCombatData;
 }
 
 export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
-  const { language } = useLanguage();
-  
-  // Helper function to detect if text contains Arabic characters
-  const containsArabic = (text: string): boolean => {
-    const arabicPattern = /[\u0600-\u06FF\u0750-\u077F]/;
-    return arabicPattern.test(text);
-  };
-  
-  // Determine if content is Arabic based on:
-  // 1. Data generation language
-  // 2. Data language 
-  // 3. UI language
-  // 4. Actual content detection
-  const isArabic = 
-    data?.generationLanguage === 'ar' || 
-    data?.language === 'ar' ||
-    language === 'ar' ||
-    (data?.strategies?.[0]?.strategy && containsArabic(data.strategies[0].strategy));
+  const { t, i18n } = useTranslation();
   if (!data || !data.strategies || !Array.isArray(data.strategies)) {
     return (
       <div className="text-center text-gray-400 py-8">
         <AlertTriangle className="mx-auto mb-4" size={48} />
-        <p>{isArabic ? 'بيانات تحليل القتال الاستراتيجي غير متوفرة' : 'Strategic combat analysis data is not available'}</p>
+        <p>{t("analysis.combat.noData", "Strategic combat analysis data is not available")}</p>
       </div>
     );
   }
@@ -74,20 +57,11 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
 
   const translateRiskLevel = (risk: string): string => {
     const level = normalizeRiskLevel(risk);
-    if (isArabic) {
-      switch (level) {
-        case 'low': return 'منخفض';
-        case 'medium': return 'متوسط';
-        case 'high': return 'عالي';
-        default: return risk;
-      }
-    } else {
-      switch (level) {
-        case 'low': return 'low';
-        case 'medium': return 'medium';
-        case 'high': return 'high';
-        default: return risk;
-      }
+    switch (level) {
+      case 'low': return t("analysis.combat.riskLow", "low");
+      case 'medium': return t("analysis.combat.riskMedium", "medium");
+      case 'high': return t("analysis.combat.riskHigh", "high");
+      default: return risk;
     }
   };
 
@@ -136,20 +110,11 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
 
   const translateSuccessProbability = (probability: string): string => {
     const level = normalizeSuccessLevel(probability);
-    if (isArabic) {
-      switch (level) {
-        case 'low': return 'منخفض';
-        case 'medium': return 'متوسط';
-        case 'high': return 'عالي';
-        default: return probability;
-      }
-    } else {
-      switch (level) {
-        case 'low': return 'low';
-        case 'medium': return 'medium';
-        case 'high': return 'high';
-        default: return probability;
-      }
+    switch (level) {
+      case 'low': return t("analysis.combat.successLow", "low");
+      case 'medium': return t("analysis.combat.successMedium", "medium");
+      case 'high': return t("analysis.combat.successHigh", "high");
+      default: return probability;
     }
   };
 
@@ -164,18 +129,15 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
   };
 
   return (
-    <div className="space-y-6" dir={isArabic ? 'rtl' : 'ltr'}>
+    <div className="space-y-6">
       {/* Header */}
       <div className="text-center space-y-2 mb-8">
-        <div className={`flex items-center justify-center text-red-400 ${isArabic ? 'flex-row-reverse space-x-reverse space-x-2' : 'space-x-2'}`}>
+        <div className="flex items-center justify-center space-x-2 text-red-400">
           <Target size={24} />
-          <h2 className="text-2xl font-bold">{isArabic ? 'استراتيجيات القتال' : 'Combat Strategies'}</h2>
+          <h2 className="text-2xl font-bold">{t("analysis.combat.strategiesTitle", "Combat Strategies")}</h2>
         </div>
         <p className="text-gray-400">
-          {isArabic 
-            ? `تحليل تكتيكي متقدم يحتوي على ${data.strategies.length} نهج استراتيجي`
-            : `Advanced tactical analysis with ${data.strategies.length} strategic approaches`
-          }
+          {t("analysis.combat.tacticalAnalysis", "Advanced tactical analysis with {{count}} strategic approaches", { count: data.strategies.length })}
         </p>
       </div>
 
@@ -186,29 +148,28 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
             key={index} 
             className="bg-athlete-gray-800 border-gray-700 hover:border-red-500/30 transition-all duration-300"
             data-testid={`strategy-card-${index}`}
-            dir={isArabic ? 'rtl' : 'ltr'}
           >
             <CardHeader className="pb-3">
-              <div className={`flex items-start justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <CardTitle className={`text-white text-lg font-semibold mb-2 flex items-center ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
-                    <div className={`w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center ${isArabic ? 'ml-3' : 'mr-3'}`}>
+                  <CardTitle className="text-white text-lg font-semibold mb-2 flex items-center">
+                    <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center mr-3">
                       <span className="text-red-400 font-bold text-sm">{index + 1}</span>
                     </div>
-                    <span className={isArabic ? 'text-right' : ''}>{strategy.strategy}</span>
+                    {strategy.strategy}
                   </CardTitle>
                 </div>
-                <div className={`flex ${isArabic ? 'mr-4 space-x-reverse space-x-2' : 'ml-4 space-x-2'}`}>
+                <div className="flex space-x-2 ml-4">
                   <Badge 
                     variant="outline" 
                     className={`${getRiskColor(strategy.risk_level)} border`}
                     data-testid={`risk-badge-${index}`}
                   >
                     {getRiskIcon(strategy.risk_level)}
-                    <span className={isArabic ? 'mr-1' : 'ml-1'}>
-                      {isArabic 
-                        ? `مخاطرة ${translateRiskLevel(strategy.risk_level)}`
-                        : `${translateRiskLevel(strategy.risk_level)} Risk`
+                    <span className="ml-1">
+                      {i18n.language === 'ar' 
+                        ? `${t("analysis.combat.risk", "Risk")} ${translateRiskLevel(strategy.risk_level)}`
+                        : `${translateRiskLevel(strategy.risk_level)} ${t("analysis.combat.risk", "Risk")}`
                       }
                     </span>
                   </Badge>
@@ -219,13 +180,11 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
             <CardContent className="space-y-4">
               {/* Strategy Description */}
               <div className="space-y-2">
-                <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'justify-end' : ''}`}>
-                  <Brain className={`w-4 h-4 text-blue-400 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                  <span className={isArabic ? 'text-right' : ''}>
-                    {isArabic ? 'نظرة استراتيجية عامة' : 'Strategic Overview'}
-                  </span>
+                <h4 className="text-sm font-semibold text-gray-300 flex items-center">
+                  <Brain className="w-4 h-4 mr-2 text-blue-400" />
+                  {t("analysis.combat.strategicOverview", "Strategic Overview")}
                 </h4>
-                <p className={`text-gray-300 leading-relaxed text-sm bg-athlete-gray-900/50 p-3 rounded-md ${isArabic ? 'text-right' : 'text-left'}`}>
+                <p className="text-gray-300 leading-relaxed text-sm bg-athlete-gray-900/50 p-3 rounded-md">
                   {strategy.description}
                 </p>
               </div>
@@ -234,13 +193,11 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
 
               {/* Execution Details */}
               <div className="space-y-2">
-                <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'justify-end' : ''}`}>
-                  <Zap className={`w-4 h-4 text-yellow-400 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                  <span className={isArabic ? 'text-right' : ''}>
-                    {isArabic ? 'خطة التنفيذ' : 'Execution Plan'}
-                  </span>
+                <h4 className="text-sm font-semibold text-gray-300 flex items-center">
+                  <Zap className="w-4 h-4 mr-2 text-yellow-400" />
+                  {t("analysis.combat.executionPlan", "Execution Plan")}
                 </h4>
-                <p className={`text-gray-300 leading-relaxed text-sm bg-athlete-gray-900/50 p-3 rounded-md ${isArabic ? 'text-right' : 'text-left'}`}>
+                <p className="text-gray-300 leading-relaxed text-sm bg-athlete-gray-900/50 p-3 rounded-md">
                   {strategy.execution}
                 </p>
               </div>
@@ -249,12 +206,10 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
 
               {/* Success Probability */}
               <div className="space-y-3">
-                <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
-                  <h4 className={`text-sm font-semibold text-gray-300 flex items-center ${isArabic ? 'justify-end' : ''}`}>
-                    <TrendingUp className={`w-4 h-4 text-green-400 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                    <span className={isArabic ? 'text-right' : ''}>
-                      {isArabic ? 'احتمالية النجاح' : 'Success Probability'}
-                    </span>
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-gray-300 flex items-center">
+                    <TrendingUp className="w-4 h-4 mr-2 text-green-400" />
+                    {t("analysis.combat.successProbability", "Success Probability")}
                   </h4>
                   <span 
                     className={`text-sm font-semibold ${getSuccessColor(strategy.success_probability)}`}
@@ -275,17 +230,14 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
       </div>
 
       {/* Summary Footer */}
-      <Card className="bg-gradient-to-r from-red-900/20 to-orange-900/20 border-red-500/30 mt-8" dir={isArabic ? 'rtl' : 'ltr'}>
+      <Card className="bg-gradient-to-r from-red-900/20 to-orange-900/20 border-red-500/30 mt-8">
         <CardContent className="p-4">
-          <div className={`flex items-center ${isArabic ? 'flex-row-reverse space-x-reverse space-x-3' : 'space-x-3'}`}>
+          <div className="flex items-center space-x-3">
             <Award className="text-red-400" size={20} />
-            <div className={isArabic ? 'text-right' : ''}>
-              <h3 className="text-white font-semibold">{isArabic ? 'اكتمل التحليل الاستراتيجي' : 'Strategic Analysis Complete'}</h3>
+            <div>
+              <h3 className="text-white font-semibold">{t("analysis.combat.analysisComplete", "Strategic Analysis Complete")}</h3>
               <p className="text-gray-300 text-sm">
-                {isArabic 
-                  ? `تم تحديد ${data.strategies.length} نهج تكتيكي لتحقيق ميزة الأداء الأمثل`
-                  : `${data.strategies.length} tactical approaches identified for optimal performance advantage`
-                }
+                {t("analysis.combat.tacticalApproaches", "{{count}} tactical approaches identified for optimal performance advantage", { count: data.strategies.length })}
               </p>
             </div>
           </div>
