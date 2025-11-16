@@ -604,6 +604,8 @@ export function AnalysisPopup({
           competitiveAnalysis={parsedData.competitiveAnalysis}
           rankAnalysis={parsedData.rankAnalysis}
           rankHistoryData={parsedData.rankHistoryData}
+          language={parsedData.language}
+          generationLanguage={parsedData.generationLanguage}
           variant="modal"
           defaultTab="competitive"
         />
