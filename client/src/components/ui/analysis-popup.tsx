@@ -169,6 +169,13 @@ export function AnalysisPopup({
     return sections;
   };
 
+  // Determine content language from analysis data (not site language)
+  const parsedData = parseAnalysisData(data);
+  const contentLanguage = parsedData?.language || parsedData?.generationLanguage || 
+    (type === 'beat' && parsedData?.strategies?.[0]?.strategy?.includes('ا') ? 'ar' : undefined) ||
+    (typeof parsedData === 'string' && parsedData.includes('ا') ? 'ar' : undefined);
+  const isContentArabic = contentLanguage === 'ar';
+
   const renderStrengthsAnalysis = (data: any) => {
     console.log('Frontend Strengths Data RECEIVED:', JSON.stringify(data, null, 2));
     
@@ -2687,9 +2694,9 @@ export function AnalysisPopup({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-athlete-gray-900 border-gray-700 text-white">
-        <div className={`border-b border-gray-700 pb-4 ${i18n.language === 'ar' ? 'pl-12' : 'pr-12'}`}>
-          <div className="flex items-start justify-between gap-4" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
-            <div className={`flex-1 ${i18n.language === 'ar' ? 'text-right' : 'text-left'}`}>
+        <div className={`border-b border-gray-700 pb-4 ${isContentArabic ? 'pl-12' : 'pr-12'}`}>
+          <div className="flex items-start justify-between gap-4" dir={isContentArabic ? 'rtl' : 'ltr'}>
+            <div className={`flex-1 ${isContentArabic ? 'text-right' : 'text-left'}`}>
               <DialogTitle className="text-xl font-bold text-white">
                 {getTitle(type)}
               </DialogTitle>
@@ -2709,7 +2716,7 @@ export function AnalysisPopup({
                 className="bg-athlete-success hover:bg-green-600 text-white"
                 disabled={isExporting}
               >
-                <Download className={i18n.language === 'ar' ? 'ml-2' : 'mr-2'} size={16} />
+                <Download className={isContentArabic ? 'ml-2' : 'mr-2'} size={16} />
                 {isExporting ? t("common:analysis.exporting", "Exporting...") : t("common:analysis.exportPdf", "Export PDF")}
               </Button>
             </div>
