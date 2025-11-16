@@ -12,7 +12,6 @@ import {
   Clock,
   Award,
 } from "lucide-react";
-import { useTranslation } from 'react-i18next';
 
 interface Strategy {
   strategy: string;
@@ -32,13 +31,12 @@ interface StrategicCombatDisplayProps {
 }
 
 export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
-  const { t, i18n } = useTranslation();
   const isArabic = data?.language === 'ar' || data?.generationLanguage === 'ar';
   if (!data || !data.strategies || !Array.isArray(data.strategies)) {
     return (
       <div className="text-center text-gray-400 py-8">
         <AlertTriangle className="mx-auto mb-4" size={48} />
-        <p>{t("analysis.combat.noData", "Strategic combat analysis data is not available")}</p>
+        <p>{isArabic ? 'بيانات تحليل القتال الاستراتيجي غير متوفرة' : 'Strategic combat analysis data is not available'}</p>
       </div>
     );
   }
@@ -58,11 +56,20 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
 
   const translateRiskLevel = (risk: string): string => {
     const level = normalizeRiskLevel(risk);
-    switch (level) {
-      case 'low': return t("analysis.combat.riskLow", "low");
-      case 'medium': return t("analysis.combat.riskMedium", "medium");
-      case 'high': return t("analysis.combat.riskHigh", "high");
-      default: return risk;
+    if (isArabic) {
+      switch (level) {
+        case 'low': return 'منخفض';
+        case 'medium': return 'متوسط';
+        case 'high': return 'عالي';
+        default: return risk;
+      }
+    } else {
+      switch (level) {
+        case 'low': return 'low';
+        case 'medium': return 'medium';
+        case 'high': return 'high';
+        default: return risk;
+      }
     }
   };
 
@@ -111,11 +118,20 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
 
   const translateSuccessProbability = (probability: string): string => {
     const level = normalizeSuccessLevel(probability);
-    switch (level) {
-      case 'low': return t("analysis.combat.successLow", "low");
-      case 'medium': return t("analysis.combat.successMedium", "medium");
-      case 'high': return t("analysis.combat.successHigh", "high");
-      default: return probability;
+    if (isArabic) {
+      switch (level) {
+        case 'low': return 'منخفض';
+        case 'medium': return 'متوسط';
+        case 'high': return 'عالي';
+        default: return probability;
+      }
+    } else {
+      switch (level) {
+        case 'low': return 'low';
+        case 'medium': return 'medium';
+        case 'high': return 'high';
+        default: return probability;
+      }
     }
   };
 
@@ -172,8 +188,8 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
                     {getRiskIcon(strategy.risk_level)}
                     <span className={isArabic ? 'mr-1' : 'ml-1'}>
                       {isArabic 
-                        ? `${strategy.risk_level} مخاطرة`
-                        : `${strategy.risk_level} Risk`
+                        ? `مخاطرة ${translateRiskLevel(strategy.risk_level)}`
+                        : `${translateRiskLevel(strategy.risk_level)} Risk`
                       }
                     </span>
                   </Badge>
@@ -219,7 +235,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
                     className={`text-sm font-semibold ${getSuccessColor(strategy.success_probability)}`}
                     data-testid={`success-probability-${index}`}
                   >
-                    {strategy.success_probability}
+                    {translateSuccessProbability(strategy.success_probability)}
                   </span>
                 </div>
                 <Progress 
