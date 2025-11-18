@@ -28,6 +28,8 @@ interface DualAnalysisPanelProps {
     categoryLabel?: string;
     points?: number;
   }> | null;
+  language?: string;
+  generationLanguage?: string;
   variant?: 'full' | 'modal';
   defaultTab?: 'competitive' | 'rank';
   className?: string;
@@ -37,13 +39,16 @@ export function DualAnalysisPanel({
   competitiveAnalysis,
   rankAnalysis,
   rankHistoryData,
+  language,
+  generationLanguage,
   variant = 'full',
   defaultTab = 'competitive',
   className = '',
 }: DualAnalysisPanelProps) {
   const { t, i18n } = useTranslation('home');
+  const contentLanguage = language ?? generationLanguage ?? i18n.language;
+  const isArabic = contentLanguage === 'ar';
   const isSiteArabic = i18n.language === 'ar';
-  const isArabic = isSiteArabic; // For backwards compatibility with existing code
   
   const athlete = competitiveAnalysis?.athlete;
   const rankingProgression = competitiveAnalysis?.rankingProgression || [];
