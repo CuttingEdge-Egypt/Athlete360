@@ -58,18 +58,18 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
   
   const IconComponent = iconMap[service.icon as keyof typeof iconMap] || User;
 
-  // Check if user has history for this service type
+  // Check if user has history for this service type (regardless of athlete)
   const { data: historyCheck } = useQuery({
-    queryKey: ['/api/user-history/latest', athlete.id, service.id],
+    queryKey: ['/api/user-history/latest', service.id],
     queryFn: async () => {
       const response = await fetch(
-        `/api/user-history/latest?athleteId=${athlete.id}&serviceType=${service.id}`,
+        `/api/user-history/latest?serviceType=${service.id}`,
         { credentials: 'include' }
       );
       if (!response.ok) return { hasHistory: false, data: null };
       return response.json();
     },
-    enabled: !!athlete.id && !!user,
+    enabled: !!user,
     staleTime: 30000, // Cache for 30 seconds
   });
 
