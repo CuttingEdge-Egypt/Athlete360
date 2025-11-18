@@ -1461,7 +1461,7 @@ export function AnalysisPopup({
                 <User className="mr-4 text-emerald-400" size={32} />
                 {t("common:analysis.bio.introduction", "Introduction")}
               </h3>
-              <div className="prose prose-invert max-w-none space-y-5">
+              <div className="prose prose-invert max-w-none space-y-5" dir={(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'rtl' : 'ltr'}>
                 {bioSections.introduction.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => {
                   const trimmedPara = paragraph.trim();
                   
@@ -1545,7 +1545,7 @@ export function AnalysisPopup({
                 <Star className="mr-4 text-cyan-400" size={32} />
                 {t("common:analysis.bio.playersStory", "Player's Story")}
               </h3>
-              <div className="prose prose-invert max-w-none space-y-5">
+              <div className="prose prose-invert max-w-none space-y-5" dir={(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'rtl' : 'ltr'}>
                 {(playersStory || bioSections.overallStory).split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => (
                   <p 
                     key={index} 
