@@ -193,7 +193,11 @@
     "rankProgressionTitle": "Rank Progression Over Time",
     "months": "Months",
     "trendsAndOutlook": "Trends & Outlook",
-    "progressionTimeline": "Progression Timeline"
+    "progressionTimeline": "Progression Timeline",
+    "rankHistoryOverview": "Rank History Overview",
+    "rankProgressionOverTime": "Rank Progression Over Time",
+    "rankHistoryAnalysis": "Rank History Analysis",
+    "careerPhases": "Career Phases"
   },
   "interface": {
     "selectSport": "Select Sport",

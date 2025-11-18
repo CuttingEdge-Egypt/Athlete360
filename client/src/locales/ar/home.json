@@ -193,7 +193,11 @@
     "rankProgressionTitle": "تطور الترتيب عبر الزمن",
     "months": "شهرًا",
     "trendsAndOutlook": "الاتجاهات والتوقعات",
-    "progressionTimeline": "الجدول الزمني للتطور"
+    "progressionTimeline": "الجدول الزمني للتطور",
+    "rankHistoryOverview": "نظرة عامة على تاريخ الترتيب",
+    "rankProgressionOverTime": "تطور الترتيب عبر الزمن",
+    "rankHistoryAnalysis": "تحليل تاريخ الترتيب",
+    "careerPhases": "مراحل المسيرة المهنية"
   },
   "interface": {
     "selectSport": "اختر الرياضة",
