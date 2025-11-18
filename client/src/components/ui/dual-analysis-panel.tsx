@@ -236,7 +236,7 @@ export function DualAnalysisPanel({
             <CardHeader>
               <CardTitle className={`text-2xl text-gray-100 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
                 <BarChart className={`${isArabic ? 'ml-3' : 'mr-3'} text-blue-400`} size={24} />
-                Rank History Overview
+                {t('competitiveHistory.rankHistoryOverview', 'Rank History Overview')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -453,7 +453,7 @@ export function DualAnalysisPanel({
           <CardHeader>
             <CardTitle className="text-2xl text-gray-100 flex items-center">
               <TrendingUp className="mr-3 text-orange-400" size={24} />
-              Rank Progression Over Time
+              {t('competitiveHistory.rankProgressionOverTime', 'Rank Progression Over Time')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -468,7 +468,7 @@ export function DualAnalysisPanel({
             <CardHeader>
               <CardTitle className="text-2xl text-gray-100 flex items-center">
                 <BarChart className="mr-3 text-blue-400" size={24} />
-                Rank History Analysis
+                {t('competitiveHistory.rankHistoryAnalysis', 'Rank History Analysis')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -707,7 +707,7 @@ export function DualAnalysisPanel({
             <CardHeader>
               <CardTitle className={`text-2xl text-gray-100 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
                 <Trophy className={`${isArabic ? 'ml-3' : 'mr-3'} text-blue-400`} size={24} />
-                Career Phases
+                {t('competitiveHistory.careerPhases', 'Career Phases')}
               </CardTitle>
               <div className={`text-sm text-gray-400 ${isArabic ? 'text-right' : ''}`}>Professional career progression through different phases</div>
             </CardHeader>
