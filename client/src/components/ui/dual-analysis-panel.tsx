@@ -240,8 +240,8 @@ export function DualAnalysisPanel({
         {rankAnalysis && (
           <Card className="bg-athlete-gray-800 border-gray-600">
             <CardHeader>
-              <CardTitle className={`text-2xl text-gray-100 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
-                <BarChart className={`${isArabic ? 'ml-3' : 'mr-3'} text-blue-400`} size={24} />
+              <CardTitle className={`text-2xl text-gray-100 flex items-center ${isSiteArabic ? 'flex-row-reverse' : ''}`}>
+                <BarChart className={`${isSiteArabic ? 'ml-3' : 'mr-3'} text-blue-400`} size={24} />
                 {t('competitiveHistory.rankHistoryOverview', 'Rank History Overview')}
               </CardTitle>
             </CardHeader>
@@ -255,7 +255,7 @@ export function DualAnalysisPanel({
                   <>
                     {rankAnalysis.trends_and_outlook && (
                       <div className="bg-athlete-gray-700 p-4 rounded-lg">
-                        <h4 className="font-semibold text-white mb-2">{t('competitiveHistory.trendsAndOutlook')}</h4>
+                        <h4 className={`font-semibold text-white mb-2 ${isSiteArabic ? 'text-right' : ''}`}>{t('competitiveHistory.trendsAndOutlook')}</h4>
                         <p className="text-gray-300 text-sm leading-relaxed">{rankAnalysis.trends_and_outlook}</p>
                       </div>
                     )}
@@ -289,7 +289,7 @@ export function DualAnalysisPanel({
                     )}
                     {rankAnalysis.performance_factors && Array.isArray(rankAnalysis.performance_factors) && rankAnalysis.performance_factors.length > 0 && (
                       <div className="bg-athlete-gray-700 p-4 rounded-lg">
-                        <h4 className="font-semibold text-white mb-3">Performance Factors</h4>
+                        <h4 className={`font-semibold text-white mb-3 ${isSiteArabic ? 'text-right' : ''}`}>Performance Factors</h4>
                         <div className="space-y-2">
                           {rankAnalysis.performance_factors.map((factor: any, index: number) => (
                             <div key={index} className={`flex items-start ${isArabic ? 'flex-row-reverse space-x-reverse' : ''} space-x-2`}>
