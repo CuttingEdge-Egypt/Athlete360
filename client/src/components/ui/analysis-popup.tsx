@@ -169,14 +169,6 @@ export function AnalysisPopup({
     return sections;
   };
 
-  // Determine content language from analysis data (not site language)
-  const parsedData = parseAnalysisData(data);
-  const contentLanguage = parsedData?.language || parsedData?.generationLanguage || 
-    (type === 'beat' && parsedData?.strategies?.[0]?.strategy?.includes('ا') ? 'ar' : undefined) ||
-    (typeof parsedData === 'string' && parsedData.includes('ا') ? 'ar' : undefined);
-  const isContentArabic = contentLanguage === 'ar';
-  const isRTL = i18n.language === 'ar' || isContentArabic;
-
   const renderStrengthsAnalysis = (data: any) => {
     console.log('Frontend Strengths Data RECEIVED:', JSON.stringify(data, null, 2));
     
@@ -210,11 +202,9 @@ export function AnalysisPopup({
       strengths = [];
     }
 
-    const isArabic = parsedData?.language === 'ar' || parsedData?.generationLanguage === 'ar';
-
     return (
       <div className="space-y-6">
-        <h3 className={`text-lg font-semibold text-white ${isArabic ? 'text-right' : ''}`}>{isArabic ? 'نقاط القوة للرياضي' : t("common:analysis.strengths.athleteStrengths", "Athlete Strengths")}</h3>
+        <h3 className={`text-lg font-semibold text-white ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t("common:analysis.strengths.athleteStrengths", "Athlete Strengths")}</h3>
         
         {strengths.length > 0 ? strengths.map((strength: any, index: number) => {
           // Only render if we have authentic strength data
@@ -225,15 +215,15 @@ export function AnalysisPopup({
           return (
             <Card key={index} className="bg-athlete-gray-800 border-gray-600 hover:border-athlete-success/50 transition-colors">
               <CardContent className="p-6">
-                <div className={`flex items-start justify-between mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                  <h3 className={`font-bold text-green-400 text-lg mb-2 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
-                    <Star className={`inline-block w-5 h-5 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                <div className="flex items-start justify-between mb-4">
+                  <h3 className="font-bold text-green-400 text-lg mb-2">
+                    <Star className="inline-block w-5 h-5 mr-2" />
                     {strength.title}
                   </h3>
                   {strength.rating && (
                     <div className="flex items-center space-x-2">
                       <Badge variant="secondary" className="bg-athlete-success/20 text-athlete-success border-athlete-success/30" dir="ltr">
-                        {strength.rating}/100
+                        {formatNumber(strength.rating, i18n.language === 'ar')}/{formatNumber(100, i18n.language === 'ar')}
                       </Badge>
                       {strength.impact && (
                         <Badge 
@@ -257,12 +247,12 @@ export function AnalysisPopup({
                 </p>
                 
                 {strength.evidence && (
-                  <div className={`bg-athlete-gray-900 rounded-lg p-4 border-green-400 ${isArabic ? 'border-r-4' : 'border-l-4'}`}>
-                    <h4 className={`font-semibold text-white mb-2 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
-                      <Award className={`w-4 h-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                      {isArabic ? 'دليل' : t("common:analysis.evidence", "Evidence")}
+                  <div className={`bg-athlete-gray-900 rounded-lg p-4 ${i18n.language === 'ar' ? 'border-r-4 border-l-0' : 'border-l-4'} border-green-400`}>
+                    <h4 className={`font-semibold text-white mb-2 flex items-center ${i18n.language === 'ar' ? 'flex-row-reverse justify-end' : ''}`}>
+                      <Award className={`w-4 h-4 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                      {t("common:analysis.evidence", "Evidence")}
                     </h4>
-                    <p className={`text-sm text-gray-200 italic ${isArabic ? 'text-right' : ''}`}>
+                    <p className={`text-sm text-gray-200 italic ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                       {strength.evidence}
                     </p>
                   </div>
@@ -271,9 +261,9 @@ export function AnalysisPopup({
                 {/* Progress bar for rating visualization */}
                 {strength.rating && (
                   <div className="mt-4">
-                    <div className={`flex justify-between text-sm text-gray-400 mb-1 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                      <span>{isArabic ? 'مستوى القوة' : t("common:analysis.strengths.strengthLevel", "Strength Level")}</span>
-                      <span dir="ltr">{strength.rating}%</span>
+                    <div className={`flex justify-between text-sm text-gray-400 mb-1 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                      <span>{t("common:analysis.strengths.strengthLevel", "Strength Level")}</span>
+                      <span dir={i18n.language === 'ar' ? 'ltr' : 'ltr'}>{formatNumber(strength.rating, i18n.language === 'ar')}%</span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
                       <div 
@@ -328,32 +318,30 @@ export function AnalysisPopup({
       weaknesses = [];
     }
 
-    const isArabic = parsedData?.language === 'ar' || parsedData?.generationLanguage === 'ar';
-
     return (
       <div className="space-y-6">
-        <h3 className={`text-lg font-semibold text-white ${isArabic ? 'text-right' : ''}`}>{isArabic ? 'مجالات التحسين' : t("common:analysis.weaknesses.title", "Areas for Improvement")}</h3>
+        <h3 className={`text-lg font-semibold text-white ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t("common:analysis.weaknesses.title", "Areas for Improvement")}</h3>
         
         <div className="space-y-4">
           {weaknesses.length > 0 ? weaknesses.map((weakness: any, index: number) => (
             <Card key={index} className="bg-athlete-gray-800 border-gray-600 hover:border-athlete-danger/50 transition-colors">
-              <CardContent className={`p-6 ${isArabic ? 'text-right' : ''}`}>
-                <h3 className={`font-bold text-red-400 text-lg mb-4 flex items-start ${isArabic ? 'flex-row-reverse text-right' : ''}`}>
-                  <AlertTriangle className={`inline-block w-5 h-5 mt-0.5 flex-shrink-0 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                  <span className={isArabic ? 'text-right' : ''}>{weakness.title}</span>
+              <CardContent className={`p-6 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
+                <h3 className={`font-bold text-red-400 text-lg mb-4 flex items-start ${i18n.language === 'ar' ? 'flex-row-reverse text-right justify-end' : ''}`}>
+                  <AlertTriangle className={`inline-block w-5 h-5 mt-0.5 flex-shrink-0 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                  <span>{weakness.title}</span>
                 </h3>
                 
-                <p className={`text-gray-200 leading-relaxed mb-4 ${isArabic ? 'text-right' : ''}`}>
+                <p className={`text-gray-200 leading-relaxed mb-4 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                   {weakness.description}
                 </p>
                 
                 {weakness.evidence && (
-                  <div className={`bg-athlete-gray-900 rounded-lg p-4 border-red-400 ${isArabic ? 'border-r-4' : 'border-l-4'}`}>
-                    <h4 className={`font-semibold text-white mb-2 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
-                      <Award className={`w-4 h-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                      {isArabic ? 'دليل' : t("common:analysis.evidence", "Evidence")}
+                  <div className={`bg-athlete-gray-900 rounded-lg p-4 ${i18n.language === 'ar' ? 'border-r-4 border-l-0' : 'border-l-4'} border-red-400`}>
+                    <h4 className={`font-semibold text-white mb-2 flex items-center ${i18n.language === 'ar' ? 'flex-row-reverse justify-end' : ''}`}>
+                      <Award className={`w-4 h-4 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                      {t("common:analysis.evidence", "Evidence")}
                     </h4>
-                    <p className={`text-sm text-gray-200 italic ${isArabic ? 'text-right' : ''}`}>
+                    <p className={`text-sm text-gray-200 italic ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                       {weakness.evidence}
                     </p>
                   </div>
@@ -605,8 +593,6 @@ export function AnalysisPopup({
           competitiveAnalysis={parsedData.competitiveAnalysis}
           rankAnalysis={parsedData.rankAnalysis}
           rankHistoryData={parsedData.rankHistoryData}
-          language={parsedData.language}
-          generationLanguage={parsedData.generationLanguage}
           variant="modal"
           defaultTab="competitive"
         />
@@ -1235,11 +1221,9 @@ export function AnalysisPopup({
           {playersStory && (
             <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-cyan-400 border-gray-600 shadow-xl">
               <CardContent className="p-8">
-                <h3 className={`text-3xl font-bold text-cyan-400 mb-6 flex items-center ${isContentArabic ? 'flex-row-reverse w-full' : ''}`}>
-                  <Star className={`text-cyan-400 ${isContentArabic ? 'ml-4' : 'mr-4'}`} size={32} />
-                  <span className={isContentArabic ? 'flex-1 text-right' : ''}>
-                    {isContentArabic ? 'قصة اللاعب' : "Player's Story"}
-                  </span>
+                <h3 className="text-3xl font-bold text-cyan-400 mb-6 flex items-center">
+                  <Star className="mr-4 text-cyan-400" size={32} />
+                  {t("common:analysis.bio.playersStory", "Player's Story")}
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <p className="text-gray-200 leading-relaxed text-lg">{playersStory}</p>
@@ -1252,11 +1236,9 @@ export function AnalysisPopup({
           {achievements.length > 0 && (
             <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-warning border-gray-600 shadow-xl">
               <CardContent className="p-8">
-                <h3 className={`text-3xl font-bold text-athlete-warning mb-6 flex items-center ${isContentArabic ? 'flex-row-reverse w-full' : ''}`}>
-                  <Award className={`text-athlete-warning ${isContentArabic ? 'ml-4' : 'mr-4'}`} size={32} />
-                  <span className={isContentArabic ? 'flex-1 text-right' : ''}>
-                    {isContentArabic ? 'الإنجازات البارزة' : 'Notable Achievements'}
-                  </span>
+                <h3 className="text-3xl font-bold text-athlete-warning mb-6 flex items-center">
+                  <Award className="mr-4 text-athlete-warning" size={32} />
+                  {t("analysis.achievements.title", "Notable Achievements")}
                 </h3>
                 <div className="grid gap-4">
                   {achievements.map((achievementObj: any, index: number) => {
@@ -1475,11 +1457,9 @@ export function AnalysisPopup({
         {bioSections.introduction && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-accent border-gray-600 shadow-xl">
             <CardContent className="p-8">
-              <h3 className={`text-3xl font-bold text-emerald-400 mb-8 flex items-center ${isRTL ? 'flex-row-reverse w-full' : ''}`}>
-                <User className={`text-emerald-400 ${isRTL ? 'ml-4' : 'mr-4'}`} size={32} />
-                <span className={isRTL ? 'flex-1 text-right' : ''}>
-                  {i18n.language === 'ar' ? 'المقدمة' : 'Introduction'}
-                </span>
+              <h3 className="text-3xl font-bold text-emerald-400 mb-8 flex items-center">
+                <User className="mr-4 text-emerald-400" size={32} />
+                {(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'المقدمة' : 'Introduction'}
               </h3>
               <div className="prose prose-invert max-w-none space-y-5">
                 {bioSections.introduction.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => {
@@ -1528,8 +1508,7 @@ export function AnalysisPopup({
                   return (
                     <p 
                       key={index} 
-                      className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''} ${isRTL ? 'text-right' : ''}`}
-                      dir={isRTL ? 'rtl' : 'ltr'}
+                      className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
                     >
                       {trimmedPara}
                     </p>
@@ -1562,18 +1541,15 @@ export function AnalysisPopup({
         {(playersStory || bioSections.overallStory) && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-cyan-400 border-gray-600 shadow-xl">
             <CardContent className="p-8">
-              <h3 className={`text-3xl font-bold text-cyan-400 mb-8 flex items-center ${isRTL ? 'flex-row-reverse w-full' : ''}`}>
-                <Star className={`text-cyan-400 ${isRTL ? 'ml-4' : 'mr-4'}`} size={32} />
-                <span className={isRTL ? 'flex-1 text-right' : ''}>
-                  {i18n.language === 'ar' ? 'قصة اللاعب' : "Player's Story"}
-                </span>
+              <h3 className="text-3xl font-bold text-cyan-400 mb-8 flex items-center">
+                <Star className="mr-4 text-cyan-400" size={32} />
+                {t("common:analysis.bio.playersStory", "Player's Story")}
               </h3>
               <div className="prose prose-invert max-w-none space-y-5">
                 {(playersStory || bioSections.overallStory).split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => (
                   <p 
                     key={index} 
-                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''} ${isRTL ? 'text-right' : ''}`}
-                    dir={isRTL ? 'rtl' : 'ltr'}
+                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
                   >
                     {paragraph.trim()}
                   </p>
@@ -1587,18 +1563,15 @@ export function AnalysisPopup({
         {bioSections.careerRecord && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-orange-400 border-gray-600 shadow-xl">
             <CardContent className="p-8">
-              <h3 className={`text-3xl font-bold text-orange-400 mb-8 flex items-center ${isRTL ? 'flex-row-reverse w-full' : ''}`}>
-                <Trophy className={`text-orange-400 ${isRTL ? 'ml-4' : 'mr-4'}`} size={32} />
-                <span className={isRTL ? 'flex-1 text-right' : ''}>
-                  {i18n.language === 'ar' ? 'السجل المهني والتصنيفات' : 'Career Record and Rankings'}
-                </span>
+              <h3 className="text-3xl font-bold text-orange-400 mb-8 flex items-center">
+                <Trophy className="mr-4 text-orange-400" size={32} />
+                Career Record and Rankings
               </h3>
               <div className="prose prose-invert max-w-none space-y-5">
                 {bioSections.careerRecord.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => (
                   <p 
                     key={index} 
-                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''} ${isRTL ? 'text-right' : ''}`}
-                    dir={isRTL ? 'rtl' : 'ltr'}
+                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
                   >
                     {paragraph.trim()}
                   </p>
@@ -1612,11 +1585,9 @@ export function AnalysisPopup({
         {achievements.length > 0 && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-warning border-gray-600 shadow-xl">
             <CardContent className="p-8">
-              <h3 className={`text-3xl font-bold text-athlete-warning mb-6 flex items-center ${isRTL ? 'flex-row-reverse w-full' : ''}`}>
-                <Award className={`text-athlete-warning ${isRTL ? 'ml-4' : 'mr-4'}`} size={32} />
-                <span className={isRTL ? 'flex-1 text-right' : ''}>
-                  {i18n.language === 'ar' ? 'الإنجازات البارزة' : 'Notable Achievements'}
-                </span>
+              <h3 className="text-3xl font-bold text-athlete-warning mb-6 flex items-center">
+                <Award className="mr-4 text-athlete-warning" size={32} />
+                {t("common:analysis.achievements.title", "Notable Achievements")}
               </h3>
               <div className="grid gap-4">
                 {achievements.map((achievementObj: any, index: number) => {
@@ -1627,13 +1598,12 @@ export function AnalysisPopup({
                   return (
                     <div 
                       key={index}
-                      className={`flex items-start p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20 gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}
-                      dir={isRTL ? 'rtl' : 'ltr'}
+                      className="flex items-start space-x-4 p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20"
                     >
                       <div className="mt-1 flex-shrink-0">
                         {medal ? getMedalIcon(medal) : <div className="w-3 h-3 bg-athlete-warning rounded-full mt-1"></div>}
                       </div>
-                      <p className={`text-gray-200 leading-relaxed text-lg font-medium w-full ${isRTL ? 'text-right' : ''}`}>
+                      <p className="text-gray-200 leading-relaxed text-lg font-medium">
                         {text}
                       </p>
                     </div>
@@ -1648,20 +1618,17 @@ export function AnalysisPopup({
         {recentNews.length > 0 && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-purple-400 border-gray-600 shadow-xl">
             <CardContent className="p-8">
-              <h3 className={`text-3xl font-bold text-purple-400 mb-6 flex items-center ${isRTL ? 'flex-row-reverse w-full' : ''}`}>
-                <Calendar className={`text-purple-400 ${isRTL ? 'ml-4' : 'mr-4'}`} size={32} />
-                <span className={isRTL ? 'flex-1 text-right' : ''}>
-                  {i18n.language === 'ar' ? 'المنافسات الأخيرة: (نتائج 2024-2025)' : 'Recent Competitions: (2024–2025 results)'}
-                </span>
+              <h3 className="text-3xl font-bold text-purple-400 mb-6 flex items-center">
+                <Calendar className="mr-4 text-purple-400" size={32} />
+                Recent Competitions: (2024–2025 results)
               </h3>
               <div className="space-y-4">
                 {recentNews.map((news: string, index: number) => (
                   <div 
                     key={index}
                     className="p-6 bg-athlete-gray-600 rounded-xl border-l-4 border-purple-400 shadow-lg"
-                    dir={isRTL ? 'rtl' : 'ltr'}
                   >
-                    <p className={`text-gray-200 leading-relaxed text-lg font-medium ${isRTL ? 'text-right' : ''}`}>
+                    <p className="text-gray-200 leading-relaxed text-lg font-medium">
                       {typeof news === 'string' ? news : JSON.stringify(news, null, 2)}
                     </p>
                   </div>
@@ -2639,8 +2606,7 @@ export function AnalysisPopup({
 
     // Special handling for strategic combat analysis
     if (type === "beat" || type === "beat-strategies") {
-      const parsedCombatData = parseAnalysisData(data);
-      return <StrategicCombatDisplay data={{ ...parsedCombatData, language: contentLanguage || parsedCombatData?.language, generationLanguage: parsedCombatData?.generationLanguage || contentLanguage }} />;
+      return <StrategicCombatDisplay data={data} />;
     }
 
     // Special handling for strengths analysis
@@ -2717,9 +2683,9 @@ export function AnalysisPopup({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-athlete-gray-900 border-gray-700 text-white">
-        <div className={`border-b border-gray-700 pb-4 ${isContentArabic ? 'pl-12' : 'pr-12'}`}>
-          <div className="flex items-start justify-between gap-4" dir={isContentArabic ? 'rtl' : 'ltr'}>
-            <div className={`flex-1 ${isContentArabic ? 'text-right' : 'text-left'}`}>
+        <div className={`border-b border-gray-700 pb-4 ${i18n.language === 'ar' ? 'pl-12' : 'pr-12'}`}>
+          <div className="flex items-start justify-between gap-4" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+            <div className={`flex-1 ${i18n.language === 'ar' ? 'text-right' : 'text-left'}`}>
               <DialogTitle className="text-xl font-bold text-white">
                 {getTitle(type)}
               </DialogTitle>
@@ -2739,7 +2705,7 @@ export function AnalysisPopup({
                 className="bg-athlete-success hover:bg-green-600 text-white"
                 disabled={isExporting}
               >
-                <Download className={isContentArabic ? 'ml-2' : 'mr-2'} size={16} />
+                <Download className={i18n.language === 'ar' ? 'ml-2' : 'mr-2'} size={16} />
                 {isExporting ? t("common:analysis.exporting", "Exporting...") : t("common:analysis.exportPdf", "Export PDF")}
               </Button>
             </div>

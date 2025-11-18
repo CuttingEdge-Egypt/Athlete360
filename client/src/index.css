@@ -4,17 +4,6 @@
 
 /* RTL Support for Arabic Language - Essential Rules Only */
 
-/* Global RTL text alignment */
-[dir="rtl"] {
-  text-align: right;
-  direction: rtl;
-}
-
-[dir="ltr"] {
-  text-align: left;
-  direction: ltr;
-}
-
 /* Icon rotation for arrows and chevrons */
 [dir="rtl"] .rtl-flip {
   transform: scaleX(-1);
@@ -54,28 +43,16 @@
   color: hsl(207, 90%, 54%);
 }
 
-.bio-first-letter[dir="ltr"] {
-  direction: ltr !important;
-  unicode-bidi: embed;
-}
-
-.bio-first-letter[dir="ltr"]::first-letter {
-  float: left !important;
-  margin-right: 0.25rem;
-  margin-left: 0;
-  margin-top: 0;
-}
-
-.bio-first-letter[dir="rtl"] {
-  direction: rtl !important;
-  unicode-bidi: embed;
-}
-
-.bio-first-letter[dir="rtl"]::first-letter {
-  float: right !important;
-  margin-left: 0.25rem;
-  margin-right: 0;
+[dir="rtl"] .bio-first-letter::first-letter {
+  float: right;
+  margin-inline-start: 0.25rem;
   margin-top: -0.75rem;
+}
+
+[dir="ltr"] .bio-first-letter::first-letter {
+  float: left;
+  margin-inline-end: 0.25rem;
+  margin-top: 0;
 }
 
 :root {
