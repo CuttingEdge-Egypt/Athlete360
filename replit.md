@@ -32,7 +32,7 @@ Preferred communication style: Simple, everyday language.
 -   **AI Response Handling**: Robust JSON parsing and retry mechanisms.
 -   **Payment System**: Integrated with Paymob for token purchases, with dual callback and automatic token crediting.
 -   **Generation Queue System**: Manages multiple AI generations with real-time status, cancellation, and retry.
--   **Error Handling**: Comprehensive system for AI web search failures, preventing token deduction.
+-   **Error Handling**: Comprehensive system for AI web search failures, preventing token deduction. Automatic Gemini 2.5 Pro fallback for beat strategies when OpenAI quota is exceeded.
 -   **Bilingual Search**: Bidirectional Arabic/English name translation for athlete search with English-only display.
 -   **Language-Aware Previews**: Landing page previews automatically show language-specific analysis.
 
@@ -50,8 +50,8 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### AI and Language Models
--   **OpenAI o3**: Advanced reasoning with web search for Bio, Rank History, Statistics, Strengths, Weaknesses, Beat Strategies, and all Athlete Comparison dimensions.
--   **Google Gemini 2.5 Pro**: For competitive history analysis, nutrition/development plan generation, and video analysis.
+-   **OpenAI o3**: Advanced reasoning with web search for Bio, Rank History, Statistics, Strengths, Weaknesses, Beat Strategies, and all Athlete Comparison dimensions. **Automatic Fallback**: If OpenAI quota is exceeded (429 error), beat strategies automatically fall back to Gemini 2.5 Pro with web search.
+-   **Google Gemini 2.5 Pro**: For competitive history analysis, nutrition/development plan generation, video analysis, and as a fallback for beat strategies when OpenAI fails.
 -   **BrowserUse + Gemini Flash Latest**: Autonomous web navigation for ranking and competitive history data extraction.
 -   **OpenAI SDK**: For o3 and GPT integration.
 -   **Google Generative AI SDK**: For Gemini integration.

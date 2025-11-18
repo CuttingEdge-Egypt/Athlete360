@@ -1768,6 +1768,18 @@ CRITICAL ERROR HANDLING:
       throw error; // Re-throw to prevent token deduction
     }
     
+    // FALLBACK: For beat-strategies, try Gemini 2.5 Pro with web search if OpenAI fails
+    if (analysisType === 'beat-strategies' && (error.status === 429 || error.code === 'insufficient_quota')) {
+      console.log(`⚠️ OpenAI quota exceeded for beat-strategies, falling back to Gemini 2.5 Pro with web search...`);
+      try {
+        const { generateBeatStrategiesWithGemini } = await import('./geminiService');
+        return await generateBeatStrategiesWithGemini(athleteName, sport, athleteData, language);
+      } catch (geminiError: any) {
+        console.error(`❌ Gemini fallback also failed:`, geminiError);
+        throw new Error(`Failed to generate beat-strategies with both OpenAI and Gemini: ${geminiError.message || String(geminiError)}`);
+      }
+    }
+    
     // For other errors, also prevent token deduction by throwing
     throw new Error(`Failed to generate authentic ${analysisType} analysis for ${athleteName}: ${error.message || String(error)}`);
   }

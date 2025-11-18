@@ -4092,3 +4092,88 @@ IMPORTANT: For active_period, determine the start_year from the earliest competi
     throw error;
   }
 }
+
+// Generate beat strategies using Gemini 2.5 Pro with web search (fallback for OpenAI)
+export async function generateBeatStrategiesWithGemini(
+  athleteName: string,
+  sport: string,
+  athleteData: any,
+  language: string = 'en'
+): Promise<any> {
+  console.log(`🤖 [GEMINI FALLBACK] Generating beat-strategies for ${athleteName} with web search...`);
+
+  const isArabic = language === 'ar';
+  const languageInstruction = isArabic
+    ? `\n\nIMPORTANT LANGUAGE REQUIREMENT: You MUST respond in Arabic language. All text content in the JSON response including title, description, and execution should be written in Arabic. Write naturally in Arabic with proper grammar and structure. Keep JSON field names in English, but translate all string values to Arabic.`
+    : '';
+
+  const prompt = `As an expert ${sport} coach specializing in tactical analysis, develop specific strategies to defeat athlete "${athleteName}".${languageInstruction}
+
+Athlete Profile for Analysis:
+- Name: ${athleteName}
+- Sport: ${sport}
+- Biography: ${athleteData.bio || 'N/A'}
+- Current Rank: ${athleteData.rank || 'N/A'}
+- Competition Record: ${athleteData.competitionRecord || 'N/A'}
+- Known Achievements: ${athleteData.achievements?.join(', ') || 'N/A'}
+- Age: ${athleteData.age || 'N/A'}
+- Date of Birth: ${athleteData.dateOfBirth || 'N/A'}
+- Height: ${athleteData.height || 'N/A'}
+- Category: ${athleteData.category || 'N/A'}
+- Gender: ${athleteData.gender || 'N/A'}
+
+Search the web for recent matches, fight videos, competition footage, and expert analysis of ${athleteName} to understand their:
+- Fighting style and preferred techniques
+- Common patterns and habits
+- Defensive weaknesses
+- Mental pressure points
+- Physical limitations
+
+Develop 3-4 specific tactical strategies that would be most effective against this particular athlete.
+
+CRITICAL: Return ONLY valid JSON. No markdown, no extra text, no explanations.
+
+Format as JSON:
+{
+  "strategies": [
+    {
+      "title": "Strategy name",
+      "description": "Detailed tactical approach specifically designed to exploit this athlete's weaknesses",
+      "execution": "Step-by-step implementation",
+      "success_probability": "high|medium|low",
+      "risk_level": "high|medium|low",
+      "references": ["Source 1 URL or description", "Source 2 URL or description"]
+    }
+  ]
+}
+
+IMPORTANT - INCLUDE REFERENCES:
+- For each strategy, include a "references" array with 1-3 relevant sources
+- References can be URLs to videos, articles, match analyses, or expert commentary
+- Format references as: ["https://example.com/analysis", "Expert Coach Analysis - Match Review"]
+- Keep references clean and informative to support the strategy recommendations`;
+
+  try {
+    const result = await genAI.models.generateContent({
+      model: 'gemini-2.5-pro',
+      contents: prompt,
+      config: {
+        temperature: 0.3,
+        maxOutputTokens: 8000,
+        responseMimeType: 'application/json',
+        tools: [{ googleSearch: {} }]
+      }
+    });
+
+    const text = result?.text || "{}";
+
+    console.log(`✅ [GEMINI FALLBACK] Beat-strategies generated successfully`);
+
+    // Parse and return the JSON response
+    const parsedData = JSON.parse(text);
+    return parsedData;
+  } catch (error: any) {
+    console.error(`❌ [GEMINI FALLBACK] Error generating beat-strategies:`, error);
+    throw error;
+  }
+}
