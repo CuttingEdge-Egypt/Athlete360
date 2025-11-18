@@ -2234,9 +2234,9 @@ export default function Home() {
                             </TooltipTrigger>
                             <TooltipContent>
                               <div className="text-sm">
-                                <p className="mb-1">{t('athleteSearch.imageUpdate.popup.question', { name: i18n.language === 'ar' && selectedAthlete.nameArabic ? selectedAthlete.nameArabic : selectedAthlete.name })}</p>
-                                <p className="text-gray-300">{t('athleteSearch.imageUpdate.popup.help')}</p>
-                                <p className="text-xs text-green-400 mt-1 font-semibold">(No token deduction)</p>
+                                <p className="mb-1">{t('athleteSearch.imageUpdate.tooltip.question', { name: i18n.language === 'ar' && selectedAthlete.nameArabic ? selectedAthlete.nameArabic : selectedAthlete.name })}</p>
+                                <p className="text-gray-300">{t('athleteSearch.imageUpdate.tooltip.help')}</p>
+                                <p className="text-xs text-green-400 mt-1 font-semibold">{t('athleteSearch.imageUpdate.tooltip.noTokens')}</p>
                               </div>
                             </TooltipContent>
                           </Tooltip>
