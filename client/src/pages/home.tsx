@@ -2285,9 +2285,8 @@ export default function Home() {
                                 </div>
                                 
                                 <div className="text-sm font-medium">
-                                  <p className="mb-1">{t('athleteSearch.imageUpdate.popup.question', { name: i18n.language === 'ar' && selectedAthlete.nameArabic ? selectedAthlete.nameArabic : selectedAthlete.name })}</p>
-                                  <p className="text-blue-100">{t('athleteSearch.imageUpdate.popup.help')}</p>
-                                  <p className="text-xs text-blue-200 mt-1 font-semibold">{t('athleteSearch.imageUpdate.popup.noTokens')}</p>
+                                  <p className="mb-1">{t('athleteSearch.imageUpdate.autoPopup.message')}</p>
+                                  <p className="text-xs text-blue-200 mt-1 font-semibold">{t('athleteSearch.imageUpdate.autoPopup.noTokens')}</p>
                                 </div>
                                 
                                 {/* Close button */}

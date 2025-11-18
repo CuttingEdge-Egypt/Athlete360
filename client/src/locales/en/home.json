@@ -355,8 +355,12 @@
       "findButton": "Find Image",
       "searching": "Searching...",
       "popup": {
-        "question": "If the players' last updated data is too old, help us update our info about the player",
-        "help": "",
+        "question": "Not a picture that suits {name}?",
+        "help": "Help us update the picture.",
+        "noTokens": "(No tokens will be deducted)"
+      },
+      "autoPopup": {
+        "message": "If the players' last updated data is too old, help us update our info about the player",
         "noTokens": "(No tokens will be deducted)"
       }
     },
