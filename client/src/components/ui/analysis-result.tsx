@@ -1053,7 +1053,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-emerald-400 mb-8 flex items-center">
                 <User className="mr-4 text-emerald-400" size={32} />
-                {(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'المقدمة' : 'Introduction'}
+                {t("common:analysis.bio.introduction", "Introduction")}
               </h3>
               <div className="prose prose-invert max-w-none space-y-5">
                 {bioSections.introduction.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => {
