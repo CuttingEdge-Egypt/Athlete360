@@ -42,7 +42,7 @@ export function DualAnalysisPanel({
   className = '',
 }: DualAnalysisPanelProps) {
   const { t, i18n } = useTranslation('home');
-  const isArabic = i18n.language === 'ar';
+  const isArabic = (i18n.resolvedLanguage || i18n.language)?.startsWith('ar');
   
   const athlete = competitiveAnalysis?.athlete;
   const rankingProgression = competitiveAnalysis?.rankingProgression || [];
