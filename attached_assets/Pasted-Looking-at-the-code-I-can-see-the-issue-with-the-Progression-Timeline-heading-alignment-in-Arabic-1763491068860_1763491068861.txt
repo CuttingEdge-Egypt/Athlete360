@@ -1,0 +1,46 @@
+Looking at the code, I can see the issue with the "Progression Timeline" heading alignment in Arabic. The problem is in the `renderRankHistoryContent()` function where the heading for the progression timeline section doesn't have proper RTL (right-to-left) alignment handling.
+
+**Here's what needs to be fixed:**
+
+In the `renderRankHistoryContent()` function, find this section around line 242:
+
+```tsx
+<h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isSiteArabic ? 'flex-row-reverse' : ''}`}>
+  <TrendingUp className={`${isSiteArabic ? 'ml-2' : 'mr-2'} text-blue-400`} size={20} />
+  {t('competitiveHistory.progressionTimeline')}
+</h4>
+```
+
+**The issue is:**
+- The heading uses `isSiteArabic` to conditionally apply `flex-row-reverse`, but the icon margin classes are not properly adjusted for RTL layout
+- The text alignment of the heading itself is not set for RTL
+
+**Fix it by replacing that section with:**
+
+```tsx
+<h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isSiteArabic ? 'flex-row-reverse text-right' : 'text-left'}`}>
+  <TrendingUp className={`${isSiteArabic ? 'ml-2' : 'mr-2'} text-blue-400`} size={20} />
+  {t('competitiveHistory.progressionTimeline')}
+</h4>
+```
+
+**Alternatively, for better consistency, you can use this approach which matches how other headings are handled:**
+
+```tsx
+<h4 className={`font-bold text-white mb-5 text-lg flex items-center ${isSiteArabic ? 'flex-row-reverse text-right' : 'text-left'}`}>
+  <TrendingUp className={`${isSiteArabic ? 'ml-2' : 'mr-2'} text-blue-400`} size={20} />
+  {t('competitiveHistory.progressionTimeline')}
+</h4>
+```
+
+**Key changes made:**
+1. Added `text-right` for Arabic and `text-left` for English to ensure proper text alignment
+2. Used consistent spacing approach with the icon margins
+3. Applied the same RTL pattern used elsewhere in the component
+
+This will ensure that in Arabic:
+- The icon appears on the right side of the text
+- The text is right-aligned
+- The layout follows proper RTL conventions
+
+The same fix should also be applied to the duplicate section in the `renderRankHistoryForYear()` function around line 425 to maintain consistency across both views.
