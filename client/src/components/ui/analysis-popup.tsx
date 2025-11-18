@@ -1627,13 +1627,13 @@ export function AnalysisPopup({
                   return (
                     <div 
                       key={index}
-                      className={`flex items-start p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20 ${isRTL ? 'flex-row-reverse space-x-reverse space-x-4' : 'space-x-4'}`}
+                      className={`flex items-start p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20 gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}
                       dir={isRTL ? 'rtl' : 'ltr'}
                     >
                       <div className="mt-1 flex-shrink-0">
                         {medal ? getMedalIcon(medal) : <div className="w-3 h-3 bg-athlete-warning rounded-full mt-1"></div>}
                       </div>
-                      <p className={`text-gray-200 leading-relaxed text-lg font-medium ${isRTL ? 'text-right' : ''}`}>
+                      <p className={`text-gray-200 leading-relaxed text-lg font-medium w-full ${isRTL ? 'text-right' : ''}`}>
                         {text}
                       </p>
                     </div>
