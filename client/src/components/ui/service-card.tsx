@@ -478,7 +478,11 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
           }}
           type={service.id}
           data={analysisData}
-          athleteName={athlete.name}
+          athleteName={
+            isHistoryMode 
+              ? (historyCheck?.data?.athleteName || athlete.name)
+              : ((analysisData as any)?.name || athlete.name)
+          }
           athleteId={isPreviewMode ? undefined : (athlete.id || "")}
           athlete={athlete}
           onRefresh={() => {
