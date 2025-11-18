@@ -256,7 +256,7 @@ export function DualAnalysisPanel({
                     )}
                     {rankAnalysis.progression_timeline && Array.isArray(rankAnalysis.progression_timeline) && rankAnalysis.progression_timeline.length > 0 && (
                       <div className="bg-athlete-gray-700 p-5 rounded-lg">
-                        <h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isSiteArabic ? 'flex-row-reverse text-right' : ''}`}>
+                        <h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isSiteArabic ? 'flex-row-reverse' : ''}`}>
                           <TrendingUp className={`${isSiteArabic ? 'ml-2' : 'mr-2'} text-blue-400`} size={20} />
                           {t('competitiveHistory.progressionTimeline')}
                         </h4>
@@ -488,7 +488,7 @@ export function DualAnalysisPanel({
                     )}
                     {rankAnalysis.progression_timeline && Array.isArray(rankAnalysis.progression_timeline) && rankAnalysis.progression_timeline.length > 0 && (
                       <div className="bg-athlete-gray-700 p-5 rounded-lg">
-                        <h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isSiteArabic ? 'flex-row-reverse text-right' : ''}`}>
+                        <h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isSiteArabic ? 'flex-row-reverse' : ''}`}>
                           <TrendingUp className={`${isSiteArabic ? 'ml-2' : 'mr-2'} text-blue-400`} size={20} />
                           {t('competitiveHistory.progressionTimeline')}
                         </h4>
