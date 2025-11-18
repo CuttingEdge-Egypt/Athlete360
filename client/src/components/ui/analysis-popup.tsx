@@ -175,6 +175,7 @@ export function AnalysisPopup({
     (type === 'beat' && parsedData?.strategies?.[0]?.strategy?.includes('ا') ? 'ar' : undefined) ||
     (typeof parsedData === 'string' && parsedData.includes('ا') ? 'ar' : undefined);
   const isContentArabic = contentLanguage === 'ar';
+  const isRTL = i18n.language === 'ar' || isContentArabic;
 
   const renderStrengthsAnalysis = (data: any) => {
     console.log('Frontend Strengths Data RECEIVED:', JSON.stringify(data, null, 2));
@@ -1474,10 +1475,10 @@ export function AnalysisPopup({
         {bioSections.introduction && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-accent border-gray-600 shadow-xl">
             <CardContent className="p-8">
-              <h3 className={`text-3xl font-bold text-emerald-400 mb-8 flex items-center ${isContentArabic ? 'flex-row-reverse w-full' : ''}`}>
-                <User className={`text-emerald-400 ${isContentArabic ? 'ml-4' : 'mr-4'}`} size={32} />
-                <span className={isContentArabic ? 'flex-1 text-right' : ''}>
-                  {isContentArabic ? 'المقدمة' : 'Introduction'}
+              <h3 className={`text-3xl font-bold text-emerald-400 mb-8 flex items-center ${isRTL ? 'flex-row-reverse w-full' : ''}`}>
+                <User className={`text-emerald-400 ${isRTL ? 'ml-4' : 'mr-4'}`} size={32} />
+                <span className={isRTL ? 'flex-1 text-right' : ''}>
+                  {i18n.language === 'ar' ? 'المقدمة' : 'Introduction'}
                 </span>
               </h3>
               <div className="prose prose-invert max-w-none space-y-5">
@@ -1527,8 +1528,8 @@ export function AnalysisPopup({
                   return (
                     <p 
                       key={index} 
-                      className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''} ${isContentArabic ? 'text-right' : ''}`}
-                      dir={isContentArabic ? 'rtl' : 'ltr'}
+                      className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''} ${isRTL ? 'text-right' : ''}`}
+                      dir={isRTL ? 'rtl' : 'ltr'}
                     >
                       {trimmedPara}
                     </p>
@@ -1561,18 +1562,18 @@ export function AnalysisPopup({
         {(playersStory || bioSections.overallStory) && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-cyan-400 border-gray-600 shadow-xl">
             <CardContent className="p-8">
-              <h3 className={`text-3xl font-bold text-cyan-400 mb-8 flex items-center ${isContentArabic ? 'flex-row-reverse w-full' : ''}`}>
-                <Star className={`text-cyan-400 ${isContentArabic ? 'ml-4' : 'mr-4'}`} size={32} />
-                <span className={isContentArabic ? 'flex-1 text-right' : ''}>
-                  {isContentArabic ? 'قصة اللاعب' : "Player's Story"}
+              <h3 className={`text-3xl font-bold text-cyan-400 mb-8 flex items-center ${isRTL ? 'flex-row-reverse w-full' : ''}`}>
+                <Star className={`text-cyan-400 ${isRTL ? 'ml-4' : 'mr-4'}`} size={32} />
+                <span className={isRTL ? 'flex-1 text-right' : ''}>
+                  {i18n.language === 'ar' ? 'قصة اللاعب' : "Player's Story"}
                 </span>
               </h3>
               <div className="prose prose-invert max-w-none space-y-5">
                 {(playersStory || bioSections.overallStory).split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => (
                   <p 
                     key={index} 
-                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''} ${isContentArabic ? 'text-right' : ''}`}
-                    dir={isContentArabic ? 'rtl' : 'ltr'}
+                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''} ${isRTL ? 'text-right' : ''}`}
+                    dir={isRTL ? 'rtl' : 'ltr'}
                   >
                     {paragraph.trim()}
                   </p>
@@ -1586,18 +1587,18 @@ export function AnalysisPopup({
         {bioSections.careerRecord && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-orange-400 border-gray-600 shadow-xl">
             <CardContent className="p-8">
-              <h3 className={`text-3xl font-bold text-orange-400 mb-8 flex items-center ${isContentArabic ? 'flex-row-reverse w-full' : ''}`}>
-                <Trophy className={`text-orange-400 ${isContentArabic ? 'ml-4' : 'mr-4'}`} size={32} />
-                <span className={isContentArabic ? 'flex-1 text-right' : ''}>
-                  {isContentArabic ? 'السجل المهني والتصنيفات' : 'Career Record and Rankings'}
+              <h3 className={`text-3xl font-bold text-orange-400 mb-8 flex items-center ${isRTL ? 'flex-row-reverse w-full' : ''}`}>
+                <Trophy className={`text-orange-400 ${isRTL ? 'ml-4' : 'mr-4'}`} size={32} />
+                <span className={isRTL ? 'flex-1 text-right' : ''}>
+                  {i18n.language === 'ar' ? 'السجل المهني والتصنيفات' : 'Career Record and Rankings'}
                 </span>
               </h3>
               <div className="prose prose-invert max-w-none space-y-5">
                 {bioSections.careerRecord.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => (
                   <p 
                     key={index} 
-                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''} ${isContentArabic ? 'text-right' : ''}`}
-                    dir={isContentArabic ? 'rtl' : 'ltr'}
+                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''} ${isRTL ? 'text-right' : ''}`}
+                    dir={isRTL ? 'rtl' : 'ltr'}
                   >
                     {paragraph.trim()}
                   </p>
@@ -1611,10 +1612,10 @@ export function AnalysisPopup({
         {achievements.length > 0 && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-warning border-gray-600 shadow-xl">
             <CardContent className="p-8">
-              <h3 className={`text-3xl font-bold text-athlete-warning mb-6 flex items-center ${isContentArabic ? 'flex-row-reverse w-full' : ''}`}>
-                <Award className={`text-athlete-warning ${isContentArabic ? 'ml-4' : 'mr-4'}`} size={32} />
-                <span className={isContentArabic ? 'flex-1 text-right' : ''}>
-                  {isContentArabic ? 'الإنجازات البارزة' : 'Notable Achievements'}
+              <h3 className={`text-3xl font-bold text-athlete-warning mb-6 flex items-center ${isRTL ? 'flex-row-reverse w-full' : ''}`}>
+                <Award className={`text-athlete-warning ${isRTL ? 'ml-4' : 'mr-4'}`} size={32} />
+                <span className={isRTL ? 'flex-1 text-right' : ''}>
+                  {i18n.language === 'ar' ? 'الإنجازات البارزة' : 'Notable Achievements'}
                 </span>
               </h3>
               <div className="grid gap-4">
@@ -1626,13 +1627,13 @@ export function AnalysisPopup({
                   return (
                     <div 
                       key={index}
-                      className={`flex items-start p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20 ${isContentArabic ? 'flex-row-reverse space-x-reverse space-x-4' : 'space-x-4'}`}
-                      dir={isContentArabic ? 'rtl' : 'ltr'}
+                      className={`flex items-start p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20 ${isRTL ? 'flex-row-reverse space-x-reverse space-x-4' : 'space-x-4'}`}
+                      dir={isRTL ? 'rtl' : 'ltr'}
                     >
                       <div className="mt-1 flex-shrink-0">
                         {medal ? getMedalIcon(medal) : <div className="w-3 h-3 bg-athlete-warning rounded-full mt-1"></div>}
                       </div>
-                      <p className={`text-gray-200 leading-relaxed text-lg font-medium ${isContentArabic ? 'text-right' : ''}`}>
+                      <p className={`text-gray-200 leading-relaxed text-lg font-medium ${isRTL ? 'text-right' : ''}`}>
                         {text}
                       </p>
                     </div>
@@ -1647,10 +1648,10 @@ export function AnalysisPopup({
         {recentNews.length > 0 && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-purple-400 border-gray-600 shadow-xl">
             <CardContent className="p-8">
-              <h3 className={`text-3xl font-bold text-purple-400 mb-6 flex items-center ${isContentArabic ? 'flex-row-reverse w-full' : ''}`}>
-                <Calendar className={`text-purple-400 ${isContentArabic ? 'ml-4' : 'mr-4'}`} size={32} />
-                <span className={isContentArabic ? 'flex-1 text-right' : ''}>
-                  {isContentArabic ? 'المنافسات الأخيرة: (نتائج 2024-2025)' : 'Recent Competitions: (2024–2025 results)'}
+              <h3 className={`text-3xl font-bold text-purple-400 mb-6 flex items-center ${isRTL ? 'flex-row-reverse w-full' : ''}`}>
+                <Calendar className={`text-purple-400 ${isRTL ? 'ml-4' : 'mr-4'}`} size={32} />
+                <span className={isRTL ? 'flex-1 text-right' : ''}>
+                  {i18n.language === 'ar' ? 'المنافسات الأخيرة: (نتائج 2024-2025)' : 'Recent Competitions: (2024–2025 results)'}
                 </span>
               </h3>
               <div className="space-y-4">
@@ -1658,9 +1659,9 @@ export function AnalysisPopup({
                   <div 
                     key={index}
                     className="p-6 bg-athlete-gray-600 rounded-xl border-l-4 border-purple-400 shadow-lg"
-                    dir={isContentArabic ? 'rtl' : 'ltr'}
+                    dir={isRTL ? 'rtl' : 'ltr'}
                   >
-                    <p className={`text-gray-200 leading-relaxed text-lg font-medium ${isContentArabic ? 'text-right' : ''}`}>
+                    <p className={`text-gray-200 leading-relaxed text-lg font-medium ${isRTL ? 'text-right' : ''}`}>
                       {typeof news === 'string' ? news : JSON.stringify(news, null, 2)}
                     </p>
                   </div>
