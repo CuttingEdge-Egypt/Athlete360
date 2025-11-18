@@ -450,17 +450,14 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                   
                   {/* Meal Items */}
                   <div className="space-y-2">
-                    {meal.meal_description.map((item, itemIndex) => (
-                      <div 
-                        key={itemIndex} 
-                        className={`bg-slate-800/50 text-slate-100 p-2.5 rounded-lg border border-slate-600 text-base ${
-                          isArabic ? 'text-right' : 'text-left'
-                        }`}
-                        dir={isArabic ? 'rtl' : 'ltr'}
-                      >
-                        {item}
-                      </div>
-                    ))}
+                    <div 
+                      className={`bg-slate-800/50 text-slate-100 p-2.5 rounded-lg border border-slate-600 text-base ${
+                        isArabic ? 'text-right' : 'text-left'
+                      }`}
+                      dir={isArabic ? 'rtl' : 'ltr'}
+                    >
+                      {meal.meal_description.join(' ')}
+                    </div>
                   </div>
                 </div>
               ))}
