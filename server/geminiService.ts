@@ -4206,15 +4206,18 @@ export async function getAthleteImageGemini(
 ): Promise<AthleteImageResult> {
   console.log(`🖼️ [GEMINI] Starting image search for ${name} (${sport}, ${country})`);
 
-  const prompt = `Find a RECENT picture of the athlete:
+  const prompt = `Find a RECENT, clear headshot or portrait photo of the athlete suitable for a profile picture:
 - Name: ${name}
 - Sport: ${sport}
 - Country: ${country}
 ${details ? `- Additional info: ${details}` : ''}
 
-IMPORTANT: Look for the most RECENT photo available, preferably from the last 1-2 years. Avoid old or outdated images.
-
-Pick a clear picture that suits a profile picture.
+REQUIREMENTS:
+- Must be a RECENT photo (preferably from the last 1-2 years)
+- Should be a clear headshot, portrait, or upper-body shot suitable for a profile picture
+- Minimum size: 200x200 pixels (prefer medium to high resolution)
+- Clear facial features, well-lit, professional or competition photos preferred
+- Avoid full-body action shots or group photos where the athlete is small/unclear
 
 Return a JSON object with this structure:
 {
@@ -4226,7 +4229,7 @@ IMPORTANT:
 - Provide actual direct image URLs that work in browsers
 - Avoid WikiMedia Special:FilePath URLs if possible
 - Look for .jpg, .png, .jpeg, or .webp files
-- Prioritize recent photos over older ones
+- Prioritize recent, clear portraits over older or unclear action shots
 - If no suitable image is found, set imageUrl to null`;
 
   try {
