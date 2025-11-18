@@ -355,8 +355,8 @@
       "findButton": "Find Image",
       "searching": "Searching...",
       "popup": {
-        "question": "Not a picture that suits {name}?",
-        "help": "Help us update the picture.",
+        "question": "If the players' last updated data is too old, help us update our info about the player",
+        "help": "",
         "noTokens": "(No tokens will be deducted)"
       }
     },
