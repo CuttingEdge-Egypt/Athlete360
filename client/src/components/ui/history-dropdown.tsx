@@ -206,16 +206,16 @@ export function HistoryDropdown() {
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{t('dialogs.clearHistory.title', { ns: 'home' })}</AlertDialogTitle>
-                    <AlertDialogDescription className="space-y-2">
+                  <AlertDialogHeader className={isArabic ? "text-right" : ""}>
+                    <AlertDialogTitle className={isArabic ? "text-right" : ""}>{t('dialogs.clearHistory.title', { ns: 'home' })}</AlertDialogTitle>
+                    <AlertDialogDescription className={`space-y-2 ${isArabic ? "text-right" : ""}`}>
                       <p>{t('dialogs.clearHistory.description', { ns: 'home' })}</p>
-                      <ul className="list-disc list-inside space-y-1 text-sm">
+                      <ul className={`list-disc space-y-1 text-sm ${isArabic ? "list-inside text-right" : "list-inside"}`}>
                         <li>{t('dialogs.clearHistory.items.analyses', { ns: 'home' })}</li>
                         <li>{t('dialogs.clearHistory.items.transactions', { ns: 'home' })}</li>
                         <li>{t('dialogs.clearHistory.items.usage', { ns: 'home' })}</li>
                       </ul>
-                      <p className="font-medium text-destructive">
+                      <p className={`font-medium text-destructive ${isArabic ? "text-right" : ""}`}>
                         {t('dialogs.clearHistory.warning', { ns: 'home' })}
                       </p>
                     </AlertDialogDescription>
