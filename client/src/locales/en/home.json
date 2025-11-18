@@ -364,8 +364,7 @@
       "updateButton": "Update Info",
       "updating": "Updating...",
       "tooltip": {
-        "help": "Help us update our data on {name} so we get their most recent data",
-        "noTokens": "(No token deduction)"
+        "help": "If the last updated date is too old, click on this button to update info about the player"
       }
     }
   },
