@@ -1586,9 +1586,11 @@ export function AnalysisPopup({
         {bioSections.careerRecord && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-orange-400 border-gray-600 shadow-xl">
             <CardContent className="p-8">
-              <h3 className="text-3xl font-bold text-orange-400 mb-8 flex items-center">
-                <Trophy className="mr-4 text-orange-400" size={32} />
-                Career Record and Rankings
+              <h3 className={`text-3xl font-bold text-orange-400 mb-8 flex items-center ${isContentArabic ? 'flex-row-reverse w-full' : ''}`}>
+                <Trophy className={`text-orange-400 ${isContentArabic ? 'ml-4' : 'mr-4'}`} size={32} />
+                <span className={isContentArabic ? 'flex-1 text-right' : ''}>
+                  {isContentArabic ? 'السجل المهني والتصنيفات' : 'Career Record and Rankings'}
+                </span>
               </h3>
               <div className="prose prose-invert max-w-none space-y-5">
                 {bioSections.careerRecord.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => (
