@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useLocation } from "wouter";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -270,6 +270,8 @@ export default function Home() {
   
   // Ranking progress states (for in-card loading display)
   const [rankingFetchStatus, setRankingFetchStatus] = useState<Record<string, { isLoading: boolean; currentPhase: string }>>({});
+  const [rankingJobIds, setRankingJobIds] = useState<Record<string, string>>({});
+  const rankingJobIdsRef = useRef<Record<string, string>>({});
 
   // Helper for required number validation that shows proper required messages
   const requiredNumber = (requiredMsg: string, invalidMsg: string, min: number, max: number) => 
@@ -799,6 +801,11 @@ export default function Home() {
     }
   }, [nutritionJobStatus, queryClient, toast, setActiveTab, i18n.language, t, nutritionQueueId]);
 
+  // Keep ref in sync with state for WebSocket closure
+  useEffect(() => {
+    rankingJobIdsRef.current = rankingJobIds;
+  }, [rankingJobIds]);
+
   // Listen for queue notifications
   useEffect(() => {
     const handleQueueNotification = (event: CustomEvent) => {
@@ -827,7 +834,7 @@ export default function Home() {
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        const { type, athleteId, message, isComplete, status, queueId, progress } = data;
+        const { type, athleteId, message, isComplete, status, queueId, progress, jobId, error } = data;
         
         // Handle comparison progress updates
         if (type === 'comparison-progress' && queueId) {
@@ -848,6 +855,63 @@ export default function Home() {
             });
           }
           console.log('✅ Comparison complete');
+        }
+        
+        // Handle job progress updates (for Update Info button)
+        if (type === 'job_progress' && jobId) {
+          // Find which athlete this job belongs to - use ref to access current value
+          const athleteEntry = Object.entries(rankingJobIdsRef.current).find(([_, jId]) => jId === jobId);
+          if (athleteEntry) {
+            const [athleteIdForJob] = athleteEntry;
+            
+            if (status === 'completed') {
+              // Clear loading state
+              setRankingFetchStatus(prev => {
+                const { [athleteIdForJob]: _, ...rest } = prev;
+                return rest;
+              });
+              
+              // Remove job ID
+              setRankingJobIds(prev => {
+                const { [athleteIdForJob]: _, ...rest } = prev;
+                return rest;
+              });
+              
+              // Refetch athlete data
+              queryClient.invalidateQueries({ queryKey: ['/api/athletes', athleteIdForJob] });
+              
+              // Show success toast
+              toast({
+                title: t('common:toast.rankingsUpdated', 'Rankings Updated!'),
+                description: message || t('common:toast.rankingsUpdatedDesc', 'Athlete ranking has been updated successfully.'),
+              });
+            } else if (status === 'failed') {
+              // Clear loading state
+              setRankingFetchStatus(prev => {
+                const { [athleteIdForJob]: _, ...rest } = prev;
+                return rest;
+              });
+              
+              // Remove job ID
+              setRankingJobIds(prev => {
+                const { [athleteIdForJob]: _, ...rest } = prev;
+                return rest;
+              });
+              
+              // Show error toast
+              toast({
+                title: t('common:toast.error', 'Error'),
+                description: error || t('common:toast.rankingsFailed', 'Failed to update rankings'),
+                variant: 'destructive'
+              });
+            } else {
+              // Update progress message
+              setRankingFetchStatus(prev => ({
+                ...prev,
+                [athleteIdForJob]: { isLoading: true, currentPhase: message || `Processing... ${progress}%` }
+              }));
+            }
+          }
         }
         
         // Handle ranking progress updates (existing logic)
@@ -1566,49 +1630,21 @@ export default function Home() {
 
       if (response.ok) {
         const result = await response.json();
+        
+        // Store the job ID for WebSocket tracking
+        if (result.jobId) {
+          setRankingJobIds(prev => ({
+            ...prev,
+            [athleteId]: result.jobId
+          }));
+        }
+        
         toast({
           title: t('common:toast.rankingSearchStarted', 'Ranking Search Started'),
           description: result.message || t('common:toast.rankingSearchStartedDesc', 'Searching for athlete rankings...'),
         });
         
-        // Start polling for updated athlete data (no timeout - waits indefinitely)
-        const rankingPoll = setInterval(async () => {
-          try {
-            const athleteResponse = await fetch(`/api/athletes/${athleteId}`);
-            if (athleteResponse.ok) {
-              const updatedAthlete = await athleteResponse.json();
-              
-              // Check if rankings have been added AND are fresh (after our fetch started)
-              // Compare dates by converting both to date strings (YYYY-MM-DD) to handle cases where fetchedAt is just a date
-              const fetchedDate = updatedAthlete.rankings?.fetchedAt ? new Date(updatedAthlete.rankings.fetchedAt).toISOString().split('T')[0] : null;
-              const startDate = new Date(fetchStartTime).toISOString().split('T')[0];
-              
-              if (updatedAthlete.rankings && 
-                  updatedAthlete.rankings.categories && 
-                  updatedAthlete.rankings.categories.length > 0 &&
-                  fetchedDate &&
-                  fetchedDate >= startDate) {
-                console.log(`✅ Rankings found via polling for athlete ${athleteId}:`, updatedAthlete.rankings);
-                setSelectedAthlete(updatedAthlete);
-                clearInterval(rankingPoll);
-                
-                // Clear loading state
-                setRankingFetchStatus(prev => {
-                  const { [athleteId]: _, ...rest } = prev;
-                  return rest;
-                });
-                
-                // Show success toast
-                toast({
-                  title: t('common:toast.rankingsUpdated', 'Rankings Updated!'),
-                  description: t('common:toast.rankingsUpdatedDesc', `${updatedAthlete.name}'s ranking has been updated successfully.`),
-                });
-              }
-            }
-          } catch (error) {
-            console.error('Error polling for rankings:', error);
-          }
-        }, 5000); // Poll every 5 seconds
+        // WebSocket will handle progress updates - no need for polling
         
       } else {
         const error = await response.json();

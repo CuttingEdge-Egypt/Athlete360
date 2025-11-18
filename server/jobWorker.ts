@@ -1,6 +1,31 @@
 import { storage } from './storage';
-import { generateDevelopmentPlan, generateEnhancedNutritionPlan } from './geminiService';
+import { generateDevelopmentPlan, generateEnhancedNutritionPlan, getAthletePersonalInfoGemini } from './geminiService';
+import { fetchTaekwondoAthleteData, parseTaekwondoCategoryToParameters } from './taekwondoApiService';
+import { extractRanksFromCategorySummary, extractLatestTaekwondoRanks } from './taekwondoUtils';
 import type { Job } from '@shared/schema';
+import WebSocket from 'ws';
+
+// Helper function to broadcast job progress via WebSocket
+function broadcastJobProgress(jobId: string, status: string, progress: number, message?: string, error?: string) {
+  const wss = (global as any).rankingProgressWSS;
+  if (!wss) return;
+  
+  const progressData = {
+    type: 'job_progress',
+    jobId,
+    status,
+    progress,
+    message,
+    error,
+    timestamp: new Date().toISOString()
+  };
+  
+  wss.clients.forEach((client: WebSocket) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(progressData));
+    }
+  });
+}
 
 interface DevelopmentPlanJobParams {
   goal: string;
@@ -24,6 +49,15 @@ interface NutritionPlanJobParams {
   language: string;
   gender?: string;
   name?: string;
+}
+
+interface FetchRankingsJobParams {
+  athleteId: string;
+  athleteName: string;
+  sportId: string;
+  sportName: string;
+  country?: string;
+  category?: string;
 }
 
 export class JobWorker {
@@ -100,6 +134,8 @@ export class JobWorker {
         await this.processDevelopmentPlan(job);
       } else if (job.type === 'nutrition-plan') {
         await this.processNutritionPlan(job);
+      } else if (job.type === 'FETCH_RANKINGS') {
+        await this.processFetchRankings(job);
       } else {
         throw new Error(`Unknown job type: ${job.type}`);
       }
@@ -230,6 +266,230 @@ export class JobWorker {
       });
       
       console.error(`❌ Nutrition plan generation failed for job ${job.id}:`, error);
+      throw error;
+    }
+  }
+
+  private async processFetchRankings(job: Job) {
+    const params = job.parameters as FetchRankingsJobParams;
+    console.log(`🏆 Processing FETCH_RANKINGS for athlete ${params.athleteName}`);
+
+    try {
+      // Get athlete from database
+      const athlete = await storage.getAthleteById(params.athleteId);
+      if (!athlete) {
+        throw new Error(`Athlete ${params.athleteId} not found`);
+      }
+
+      // Update progress - starting
+      await storage.updateJob(job.id, { progress: 10 });
+      broadcastJobProgress(job.id, 'running', 10, `Starting ranking fetch for ${params.athleteName}`);
+
+      let athleteCategory = params.category && params.category !== 'N/A' ? params.category : undefined;
+
+      // For Taekwondo: Try new API scraper first
+      if (params.sportName.toLowerCase() === 'taekwondo') {
+        // Check if we have required fields for API method
+        const hasOfficialName = athlete.personalInfo?.official_name;
+        const hasCategory = athleteCategory;
+
+        // If missing required fields, generate personal info first
+        if (!hasOfficialName || !hasCategory) {
+          console.log(`🔄 Missing required fields for Taekwondo API. Generating personal info...`);
+          await storage.updateJob(job.id, { progress: 20 });
+          broadcastJobProgress(job.id, 'running', 20, 'Generating athlete personal info...');
+
+          const personalInfo = await getAthletePersonalInfoGemini(
+            params.athleteName,
+            params.sportName,
+            params.country || 'Unknown'
+          );
+
+          if (personalInfo) {
+            await storage.updateAthlete(athlete.id, { personalInfo });
+            console.log(`✅ Generated personal info for ${params.athleteName}`);
+            athleteCategory = personalInfo.category && personalInfo.category !== 'N/A' 
+              ? personalInfo.category 
+              : undefined;
+            athlete.personalInfo = personalInfo;
+          } else {
+            throw new Error('Failed to generate personal info');
+          }
+        }
+
+        // Get the official name from personal info, or use the athlete name
+        const nameForApi = athlete.personalInfo?.official_name || params.athleteName;
+        await storage.updateJob(job.id, { progress: 30 });
+        broadcastJobProgress(job.id, 'running', 30, 'Fetching ranking data from World Taekwondo...');
+
+        // Parse category to get weight division, sub-category, and ranking category
+        const categoryParams = athleteCategory ? parseTaekwondoCategoryToParameters(athleteCategory) : null;
+
+        if (!categoryParams || !categoryParams.weightDivision) {
+          throw new Error('No category information available');
+        }
+
+        // Call the Python API scraper
+        const apiResult = await fetchTaekwondoAthleteData({
+          athleteName: nameForApi,
+          country: params.country || undefined,
+          weightDivision: categoryParams.weightDivision,
+          subCategory: categoryParams.subCategory,
+          rankingCategory: categoryParams.rankingCategory,
+          monthsBack: 12,
+          rankHistoryMonths: 10,
+          maxResults: 0
+        });
+
+        if (apiResult.success && apiResult.athlete) {
+          console.log(`✅ Taekwondo API: Successfully found data for ${nameForApi}`);
+          
+          await storage.updateJob(job.id, { progress: 60 });
+          broadcastJobProgress(job.id, 'running', 60, 'Processing ranking and competition data...');
+
+          // Transform API data to match our storage format
+          const updateData: any = {};
+
+          // Import extractRanksFromRankHistory
+          const { extractRanksFromRankHistory } = await import('./taekwondoUtils.js');
+
+          // Extract ranking data
+          let categories = extractRanksFromRankHistory(apiResult.rank_history);
+          let rankSource = 'rank_history';
+
+          if (categories.length === 0) {
+            categories = extractRanksFromCategorySummary(apiResult.category_summary);
+            rankSource = 'category_summary';
+          }
+
+          if (categories.length === 0) {
+            categories = extractLatestTaekwondoRanks(apiResult.competition_history);
+            rankSource = 'competition_history';
+          }
+
+          if (categories.length > 0) {
+            console.log(`📊 Storing ${categories.length} ranks from ${rankSource}`);
+            updateData.rankings = {
+              categories,
+              fetchedAt: new Date().toISOString(),
+              source: 'World Taekwondo API'
+            };
+          }
+
+          // Extract and store World Taekwondo userId
+          const taekwondoUserId = apiResult.athlete.userId || apiResult.athlete.userid;
+          if (taekwondoUserId) {
+            updateData.taekwondoUserId = String(taekwondoUserId);
+          }
+
+          if (apiResult.competition_history && apiResult.competition_history.length > 0) {
+            updateData.competitiveHistory = apiResult.competition_history;
+          }
+
+          // Store rank history if available
+          if (apiResult.rank_history && apiResult.rank_history.length > 0) {
+            await storage.updateJob(job.id, { progress: 80 });
+            broadcastJobProgress(job.id, 'running', 80, 'Storing rank history...');
+
+            const monthMap: { [key: string]: number } = {
+              'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, 'june': 6,
+              'july': 7, 'august': 8, 'september': 9, 'october': 10, 'november': 11, 'december': 12
+            };
+
+            for (const rankEntry of apiResult.rank_history) {
+              if (rankEntry.month && rankEntry.year && rankEntry.ranking) {
+                try {
+                  const monthNum = typeof rankEntry.month === 'string' 
+                    ? (monthMap[rankEntry.month.toLowerCase()] || parseInt(rankEntry.month))
+                    : rankEntry.month;
+
+                  const { normalizeCategoryForDB } = await import('./taekwondoApiService.js');
+                  const { categoryKey, categoryLabel } = normalizeCategoryForDB(rankEntry.category);
+
+                  await storage.createRankHistory({
+                    athleteId: athlete.id,
+                    rank: typeof rankEntry.ranking === 'string' ? parseFloat(rankEntry.ranking) : rankEntry.ranking,
+                    date: new Date(`${rankEntry.year}-${String(monthNum).padStart(2, '0')}-01`),
+                    categoryKey,
+                    categoryLabel,
+                    points: rankEntry.points ? (typeof rankEntry.points === 'string' ? parseFloat(rankEntry.points) : rankEntry.points) : undefined
+                  });
+                } catch (err) {
+                  console.log(`⚠️ Failed to store rank history entry: ${err instanceof Error ? err.message : String(err)}`);
+                }
+              }
+            }
+            console.log(`✅ Stored ${apiResult.rank_history.length} rank history entries`);
+          }
+
+          if (Object.keys(updateData).length > 0) {
+            await storage.updateAthlete(athlete.id, updateData);
+            console.log(`✅ Updated ${params.athleteName} with API data`);
+          }
+
+          // Mark as completed
+          await storage.updateJob(job.id, {
+            status: 'completed',
+            progress: 100,
+            result: { success: true, rankings: updateData.rankings, competitiveHistory: updateData.competitiveHistory }
+          });
+          broadcastJobProgress(job.id, 'completed', 100, `Ranking data updated for ${params.athleteName}`);
+          console.log(`✅ FETCH_RANKINGS job ${job.id} completed successfully`);
+
+        } else {
+          throw new Error(apiResult.error || 'API returned no data');
+        }
+      } else {
+        // For other sports: Fall back to BrowserUse
+        const { fetchGeneralSportRankAndHistory } = await import('./browserUseService.js');
+        
+        await storage.updateJob(job.id, { progress: 30 });
+        broadcastJobProgress(job.id, 'running', 30, 'Fetching ranking data...');
+
+        const result = await fetchGeneralSportRankAndHistory(
+          params.athleteName,
+          params.country || "Unknown",
+          params.sportName,
+          athleteCategory
+        );
+
+        if (result) {
+          await storage.updateJob(job.id, { progress: 80 });
+          broadcastJobProgress(job.id, 'running', 80, 'Processing ranking data...');
+
+          const updateData: any = {};
+          if (result.rankings) {
+            updateData.rankings = result.rankings;
+          }
+          if (result.competitiveHistory) {
+            updateData.competitiveHistory = result.competitiveHistory;
+          }
+
+          if (Object.keys(updateData).length > 0) {
+            await storage.updateAthlete(athlete.id, updateData);
+          }
+
+          // Mark as completed
+          await storage.updateJob(job.id, {
+            status: 'completed',
+            progress: 100,
+            result: { success: true, rankings: updateData.rankings, competitiveHistory: updateData.competitiveHistory }
+          });
+          broadcastJobProgress(job.id, 'completed', 100, `Ranking data updated for ${params.athleteName}`);
+          console.log(`✅ FETCH_RANKINGS job ${job.id} completed successfully`);
+        } else {
+          throw new Error('No ranking data found');
+        }
+      }
+
+    } catch (error) {
+      console.error(`❌ FETCH_RANKINGS job ${job.id} failed:`, error);
+      await storage.updateJob(job.id, {
+        status: 'failed',
+        error: error instanceof Error ? error.message : 'Failed to fetch rankings',
+        progress: 0
+      });
+      broadcastJobProgress(job.id, 'failed', 0, undefined, error instanceof Error ? error.message : 'Failed to fetch rankings');
       throw error;
     }
   }
