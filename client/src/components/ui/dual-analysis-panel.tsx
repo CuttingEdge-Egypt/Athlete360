@@ -255,7 +255,7 @@ export function DualAnalysisPanel({
                     )}
                     {rankAnalysis.progression_timeline && Array.isArray(rankAnalysis.progression_timeline) && rankAnalysis.progression_timeline.length > 0 && (
                       <div className="bg-athlete-gray-700 p-5 rounded-lg">
-                        <h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                        <h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isArabic ? 'flex-row-reverse text-right' : ''}`}>
                           <TrendingUp className="text-blue-400" size={20} />
                           {t('competitiveHistory.progressionTimeline')}
                         </h4>
@@ -487,9 +487,9 @@ export function DualAnalysisPanel({
                     )}
                     {rankAnalysis.progression_timeline && Array.isArray(rankAnalysis.progression_timeline) && rankAnalysis.progression_timeline.length > 0 && (
                       <div className="bg-athlete-gray-700 p-5 rounded-lg">
-                        <h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                        <h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isArabic ? 'flex-row-reverse text-right' : ''}`}>
                           <TrendingUp className="text-blue-400" size={20} />
-                          Progression Timeline
+                          {t('competitiveHistory.progressionTimeline')}
                         </h4>
                         <div className="space-y-4">
                           {rankAnalysis.progression_timeline.map((item: any, index: number) => (
