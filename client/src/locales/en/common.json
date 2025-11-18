@@ -54,7 +54,7 @@
     "rankingUpdate": {
       "updateButton": "Update Info",
       "tooltip": {
-        "help": "Update athlete profile information"
+        "help": "If the athlete's data is too old, please click this button and wait till we update our info about the player"
       }
     }
   },
