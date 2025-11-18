@@ -42,7 +42,8 @@ export function DualAnalysisPanel({
   className = '',
 }: DualAnalysisPanelProps) {
   const { t, i18n } = useTranslation('home');
-  const isArabic = (i18n.resolvedLanguage || i18n.language)?.startsWith('ar');
+  const isSiteArabic = i18n.language === 'ar';
+  const isArabic = isSiteArabic; // For backwards compatibility with existing code
   
   const athlete = competitiveAnalysis?.athlete;
   const rankingProgression = competitiveAnalysis?.rankingProgression || [];
@@ -255,8 +256,8 @@ export function DualAnalysisPanel({
                     )}
                     {rankAnalysis.progression_timeline && Array.isArray(rankAnalysis.progression_timeline) && rankAnalysis.progression_timeline.length > 0 && (
                       <div className="bg-athlete-gray-700 p-5 rounded-lg">
-                        <h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isArabic ? 'flex-row-reverse text-right' : ''}`}>
-                          <TrendingUp className="text-blue-400" size={20} />
+                        <h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isSiteArabic ? 'flex-row-reverse text-right' : ''}`}>
+                          <TrendingUp className={`${isSiteArabic ? 'ml-2' : 'mr-2'} text-blue-400`} size={20} />
                           {t('competitiveHistory.progressionTimeline')}
                         </h4>
                         <div className="space-y-4">
@@ -487,8 +488,8 @@ export function DualAnalysisPanel({
                     )}
                     {rankAnalysis.progression_timeline && Array.isArray(rankAnalysis.progression_timeline) && rankAnalysis.progression_timeline.length > 0 && (
                       <div className="bg-athlete-gray-700 p-5 rounded-lg">
-                        <h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isArabic ? 'flex-row-reverse text-right' : ''}`}>
-                          <TrendingUp className="text-blue-400" size={20} />
+                        <h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isSiteArabic ? 'flex-row-reverse text-right' : ''}`}>
+                          <TrendingUp className={`${isSiteArabic ? 'ml-2' : 'mr-2'} text-blue-400`} size={20} />
                           {t('competitiveHistory.progressionTimeline')}
                         </h4>
                         <div className="space-y-4">

@@ -1,0 +1,29 @@
+Searching for the rank history tab component to inspect the h4 heading alignment.
+Inspecting the rank history component to locate the h4 heading:
+Checking the translation file to understand the heading text:
+The h4 heading uses isArabic, which is based on the content/generation language, but it should use the site language. Updating it to use the site language for alignment:
+Fixing the h4 heading to use the site language for alignment instead of the generation language:
+dual-analysis-panel.tsx
++1
+  const isArabic = contentLanguage === 'ar';  
+  const isArabic = contentLanguage === 'ar';  const isSiteArabic = i18n.language === 'ar';  
+dual-analysis-panel.tsx
++2
+-2
+                      <div className="bg-athlete-gray-700 p-5 rounded-lg">                        <h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>                          <TrendingUp className="text-blue-400" size={20} />                          {t('competitiveHistory.progressionTimeline')}
+                        <h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>                          <TrendingUp className="text-blue-400" size={20} />                      <div className="bg-athlete-gray-700 p-5 rounded-lg">                        <h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isSiteArabic ? 'flex-row-reverse' : ''}`}>                          <TrendingUp className={`${isSiteArabic ? 'ml-2' : 'mr-2'} text-blue-400`} size={20} />                          {t('competitiveHistory.progressionTimeline')}
+Checking for other instances of this h4 heading that need the same fix:
+Checking and fixing the other instance:
+Fixing the other instance:
+dual-analysis-panel.tsx
++3
+-3
+                          <TrendingUp className="text-blue-400" size={20} />                          Progression Timeline                        </h4>
+                        <h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>                          <TrendingUp className="text-blue-400" size={20} />                          Progression Timeline                        <h4 className={`font-bold text-white mb-5 text-lg flex items-center gap-2 ${isSiteArabic ? 'flex-row-reverse' : ''}`}>                          <TrendingUp className={`${isSiteArabic ? 'ml-2' : 'mr-2'} text-blue-400`} size={20} />                          {t('competitiveHistory.progressionTimeline')}                        </h4>
+Fixed the h4 heading alignment issue. The "الجدول الزمني للتطور" (Progression Timeline) heading now uses the site language (i18n.language) instead of the generation language.
+Changes:
+Added isSiteArabic based on the site language (i18n.language === 'ar').
+Updated both h4 instances to use isSiteArabic for alignment.
+Added icon spacing based on site language.
+Replaced the hardcoded "Progression Timeline" text with the translation key for consistency.
+The heading now aligns based on the site language (RTL for Arabic, LTR for English), regardless of the generation language.
