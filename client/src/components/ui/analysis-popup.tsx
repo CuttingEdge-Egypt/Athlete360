@@ -1624,12 +1624,13 @@ export function AnalysisPopup({
                   return (
                     <div 
                       key={index}
-                      className="flex items-start space-x-4 p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20"
+                      className={`flex items-start p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20 ${isContentArabic ? 'flex-row-reverse space-x-reverse space-x-4' : 'space-x-4'}`}
+                      dir={isContentArabic ? 'rtl' : 'ltr'}
                     >
                       <div className="mt-1 flex-shrink-0">
                         {medal ? getMedalIcon(medal) : <div className="w-3 h-3 bg-athlete-warning rounded-full mt-1"></div>}
                       </div>
-                      <p className="text-gray-200 leading-relaxed text-lg font-medium">
+                      <p className={`text-gray-200 leading-relaxed text-lg font-medium ${isContentArabic ? 'text-right' : ''}`}>
                         {text}
                       </p>
                     </div>
@@ -1644,17 +1645,20 @@ export function AnalysisPopup({
         {recentNews.length > 0 && (
           <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-purple-400 border-gray-600 shadow-xl">
             <CardContent className="p-8">
-              <h3 className="text-3xl font-bold text-purple-400 mb-6 flex items-center">
-                <Calendar className="mr-4 text-purple-400" size={32} />
-                Recent Competitions: (2024–2025 results)
+              <h3 className={`text-3xl font-bold text-purple-400 mb-6 flex items-center ${isContentArabic ? 'flex-row-reverse w-full' : ''}`}>
+                <Calendar className={`text-purple-400 ${isContentArabic ? 'ml-4' : 'mr-4'}`} size={32} />
+                <span className={isContentArabic ? 'flex-1 text-right' : ''}>
+                  {isContentArabic ? 'المنافسات الأخيرة: (نتائج 2024-2025)' : 'Recent Competitions: (2024–2025 results)'}
+                </span>
               </h3>
               <div className="space-y-4">
                 {recentNews.map((news: string, index: number) => (
                   <div 
                     key={index}
                     className="p-6 bg-athlete-gray-600 rounded-xl border-l-4 border-purple-400 shadow-lg"
+                    dir={isContentArabic ? 'rtl' : 'ltr'}
                   >
-                    <p className="text-gray-200 leading-relaxed text-lg font-medium">
+                    <p className={`text-gray-200 leading-relaxed text-lg font-medium ${isContentArabic ? 'text-right' : ''}`}>
                       {typeof news === 'string' ? news : JSON.stringify(news, null, 2)}
                     </p>
                   </div>
