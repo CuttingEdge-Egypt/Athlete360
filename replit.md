@@ -50,8 +50,9 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### AI and Language Models
--   **OpenAI o3**: Advanced reasoning with web search for Bio, Rank History, Statistics, Strengths, Weaknesses, Beat Strategies, and all Athlete Comparison dimensions. **Automatic Fallback**: If OpenAI quota is exceeded (429 error), beat strategies automatically fall back to Gemini 2.5 Pro with web search.
--   **Google Gemini 2.5 Pro**: For competitive history analysis, nutrition/development plan generation, video analysis, and as a fallback for beat strategies when OpenAI fails.
+-   **OpenAI o3**: Advanced reasoning with web search for Bio, Rank History, Statistics, Strengths, Weaknesses, Beat Strategies, and all Athlete Comparison dimensions. **Automatic Fallbacks**: If OpenAI quota is exceeded (429 error), the system automatically falls back to Gemini 2.5 Pro with web search for beat strategies and image searches.
+-   **OpenAI GPT-5**: Used for athlete image searches with web search capabilities, prioritizing recent photos. Automatically falls back to Gemini 2.5 Pro when quota is exceeded.
+-   **Google Gemini 2.5 Pro**: For competitive history analysis, nutrition/development plan generation, video analysis, and as a fallback for beat strategies and image searches when OpenAI fails. Image searches specifically request recent photos (last 1-2 years).
 -   **BrowserUse + Gemini Flash Latest**: Autonomous web navigation for ranking and competitive history data extraction.
 -   **OpenAI SDK**: For o3 and GPT integration.
 -   **Google Generative AI SDK**: For Gemini integration.

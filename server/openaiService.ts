@@ -2788,11 +2788,13 @@ export async function getAthleteImage(
 ): Promise<AthleteImageResult> {
   console.log(`🖼️ Starting GPT-5 image search for ${name} (${sport}, ${country})`);
 
-  const prompt = `Find a picture of the athlete:
+  const prompt = `Find a RECENT picture of the athlete:
 - Name: ${name}
 - Sport: ${sport}
 - Country: ${country}
 ${details ? `- Additional info: ${details}` : ''}
+
+IMPORTANT: Look for the most RECENT photo available, preferably from the last 1-2 years. Avoid old or outdated images.
 
 Pick a clear picture that suits a profile picture.
 
@@ -2806,6 +2808,7 @@ IMPORTANT:
 - Provide actual direct image URLs that work in browsers
 - Avoid WikiMedia Special:FilePath URLs if possible
 - Look for .jpg, .png, .jpeg, or .webp files
+- Prioritize recent photos over older ones
 - If no suitable image is found, set imageUrl to null`;
 
   try {
@@ -2894,8 +2897,27 @@ IMPORTANT:
       };
     }
 
-  } catch (error) {
+  } catch (error: any) {
     console.error(`❌ GPT-5 image search error for ${name}:`, error);
+    
+    // Check if it's a quota error (429) and fallback to Gemini
+    if (error?.status === 429 || error?.code === 'insufficient_quota') {
+      console.log(`🔄 OpenAI quota exceeded, falling back to Gemini 2.5 Pro with web search...`);
+      try {
+        const { getAthleteImageGemini } = await import('./geminiService.js');
+        return await getAthleteImageGemini(name, sport, country, details);
+      } catch (geminiError) {
+        console.error(`❌ Gemini fallback failed:`, geminiError);
+        return {
+          downloadUrl: null,
+          embedUrl: null,
+          localFile: null,
+          success: false,
+          error: `Both OpenAI and Gemini failed: ${geminiError instanceof Error ? geminiError.message : String(geminiError)}`
+        };
+      }
+    }
+    
     return {
       downloadUrl: null,
       embedUrl: null,

@@ -4189,3 +4189,143 @@ IMPORTANT - INCLUDE REFERENCES:
     throw error;
   }
 }
+
+export interface AthleteImageResult {
+  downloadUrl: string | null;
+  embedUrl: string | null;
+  localFile: string | null;
+  success: boolean;
+  error?: string;
+}
+
+export async function getAthleteImageGemini(
+  name: string,
+  sport: string,
+  country: string,
+  details: string = ""
+): Promise<AthleteImageResult> {
+  console.log(`🖼️ [GEMINI] Starting image search for ${name} (${sport}, ${country})`);
+
+  const prompt = `Find a RECENT picture of the athlete:
+- Name: ${name}
+- Sport: ${sport}
+- Country: ${country}
+${details ? `- Additional info: ${details}` : ''}
+
+IMPORTANT: Look for the most RECENT photo available, preferably from the last 1-2 years. Avoid old or outdated images.
+
+Pick a clear picture that suits a profile picture.
+
+Return a JSON object with this structure:
+{
+  "imageUrl": "direct image URL here" or null if not found,
+  "source": "where the image is from"
+}
+
+IMPORTANT: 
+- Provide actual direct image URLs that work in browsers
+- Avoid WikiMedia Special:FilePath URLs if possible
+- Look for .jpg, .png, .jpeg, or .webp files
+- Prioritize recent photos over older ones
+- If no suitable image is found, set imageUrl to null`;
+
+  try {
+    const result = await genAI.models.generateContent({
+      model: 'gemini-2.5-pro',
+      contents: prompt,
+      config: {
+        temperature: 0.1,
+        maxOutputTokens: 2000,
+        tools: [{ googleSearch: {} }]
+      }
+    });
+
+    const text = result?.text || "{}";
+    console.log(`🔍 [GEMINI] Raw response for ${name}:`, text);
+
+    // Clean and parse the JSON response
+    let cleanedText = text.trim();
+    cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+
+    // Try to extract JSON from the response
+    let jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleanedText = jsonMatch[0];
+    }
+
+    let imageData;
+    try {
+      imageData = JSON.parse(cleanedText);
+    } catch (parseError) {
+      console.error(`[GEMINI] Failed to parse image search response:`, parseError);
+      console.log(`[GEMINI] Raw response was:`, text);
+      return {
+        downloadUrl: null,
+        embedUrl: null,
+        localFile: null,
+        success: false,
+        error: "Failed to parse image search response"
+      };
+    }
+
+    // Handle the parsed result
+    if (!imageData.imageUrl) {
+      console.log(`❌ [GEMINI] Found no image for ${name}`);
+      return {
+        downloadUrl: null,
+        embedUrl: null,
+        localFile: null,
+        success: false,
+        error: "No image found"
+      };
+    }
+
+    const url = imageData.imageUrl;
+    console.log(`📸 [GEMINI] Found image URL: ${url} from ${imageData.source || 'unknown source'}`);
+
+    // Process WikiMedia URLs if needed
+    let processedUrl = url;
+    if (url.includes('commons.wikimedia.org/wiki/Special:FilePath/')) {
+      const fileName = url.split('/').pop();
+      if (fileName) {
+        processedUrl = `https://upload.wikimedia.org/wikipedia/commons/${fileName}`;
+        console.log(`🔄 [GEMINI] Converted WikiMedia URL to: ${processedUrl}`);
+      }
+    }
+
+    // Determine if it's downloadable
+    const downloadableExts = [".jpg", ".jpeg", ".png", ".webp"];
+    const isDownloadable = downloadableExts.some(ext =>
+      processedUrl.toLowerCase().endsWith(ext)
+    ) || processedUrl.includes('upload.wikimedia.org');
+
+    if (isDownloadable) {
+      console.log(`✅ [GEMINI] Found downloadable image: ${processedUrl}`);
+      return {
+        downloadUrl: processedUrl,
+        embedUrl: null,
+        localFile: null,
+        success: true
+      };
+    } else {
+      console.log(`✅ [GEMINI] Found embeddable image: ${processedUrl}`);
+      return {
+        downloadUrl: null,
+        embedUrl: processedUrl,
+        localFile: null,
+        success: true
+      };
+    }
+
+  } catch (error) {
+    console.error(`❌ [GEMINI] Image search error for ${name}:`, error);
+    return {
+      downloadUrl: null,
+      embedUrl: null,
+      localFile: null,
+      success: false,
+      error: `Gemini API error: ${error instanceof Error ? error.message : String(error)}`
+    };
+  }
+}
