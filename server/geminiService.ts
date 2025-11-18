@@ -4160,7 +4160,7 @@ IMPORTANT - INCLUDE REFERENCES:
       config: {
         temperature: 0.3,
         maxOutputTokens: 8000,
-        responseMimeType: 'application/json',
+        // NOTE: responseMimeType cannot be used with tools
         tools: [{ googleSearch: {} }]
       }
     });
@@ -4168,9 +4168,21 @@ IMPORTANT - INCLUDE REFERENCES:
     const text = result?.text || "{}";
 
     console.log(`✅ [GEMINI FALLBACK] Beat-strategies generated successfully`);
+    console.log(`📄 [GEMINI FALLBACK] Raw response preview: ${text.substring(0, 200)}...`);
 
-    // Parse and return the JSON response
-    const parsedData = JSON.parse(text);
+    // Clean and parse the JSON response (since we can't use responseMimeType with tools)
+    let cleanedText = text.trim();
+    cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+
+    // Try to extract JSON from the response
+    let jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleanedText = jsonMatch[0];
+    }
+
+    const parsedData = JSON.parse(cleanedText);
+    console.log(`✅ [GEMINI FALLBACK] Successfully parsed ${parsedData.strategies?.length || 0} strategies`);
     return parsedData;
   } catch (error: any) {
     console.error(`❌ [GEMINI FALLBACK] Error generating beat-strategies:`, error);
