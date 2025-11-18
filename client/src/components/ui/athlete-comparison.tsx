@@ -900,8 +900,22 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                         </div>
                         <div className="max-h-60 overflow-auto">
                           {filteredAthletes1.length === 0 ? (
-                            <div className="p-3 text-center text-gray-400">
-                              {searchAthlete1 ? t("analysis.comparison.noAthletesFound", "No athletes found") : t("analysis.comparison.noAthletesAvailable", "No athletes available")}
+                            <div className="p-4 text-center">
+                              {searchAthlete1 ? (
+                                <div className="space-y-2">
+                                  <div className="text-gray-300 font-medium flex items-center justify-center gap-2">
+                                    <HelpCircle className="w-4 h-4" />
+                                    {t("analysis.comparison.noAthletesFound", "No athletes found")}
+                                  </div>
+                                  <div className="text-sm text-gray-400">
+                                    {t("analysis.comparison.addAthleteHint", "Search for this athlete in the Athlete Analysis tab first to add them to our database.")}
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="text-gray-400">
+                                  {t("analysis.comparison.noAthletesAvailable", "No athletes available")}
+                                </div>
+                              )}
                             </div>
                           ) : (
                             filteredAthletes1.map((athlete: Athlete) => (
@@ -1073,8 +1087,22 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                         </div>
                         <div className="max-h-60 overflow-auto">
                           {filteredAthletes2.length === 0 ? (
-                            <div className="p-3 text-center text-gray-400">
-                              {searchAthlete2 ? t("analysis.comparison.noAthletesFound", "No athletes found") : t("analysis.comparison.noAthletesAvailable", "No athletes available")}
+                            <div className="p-4 text-center">
+                              {searchAthlete2 ? (
+                                <div className="space-y-2">
+                                  <div className="text-gray-300 font-medium flex items-center justify-center gap-2">
+                                    <HelpCircle className="w-4 h-4" />
+                                    {t("analysis.comparison.noAthletesFound", "No athletes found")}
+                                  </div>
+                                  <div className="text-sm text-gray-400">
+                                    {t("analysis.comparison.addAthleteHint", "Search for this athlete in the Athlete Analysis tab first to add them to our database.")}
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="text-gray-400">
+                                  {t("analysis.comparison.noAthletesAvailable", "No athletes available")}
+                                </div>
+                              )}
                             </div>
                           ) : (
                             filteredAthletes2.map((athlete: Athlete) => (

@@ -433,6 +433,7 @@
       "selectAthlete": "Select Athlete",
       "searchAthletes": "Search athletes...",
       "noAthletesFound": "No athletes found",
+      "addAthleteHint": "Search for this athlete in the Athlete Analysis tab first to add them to our database.",
       "noAthletesAvailable": "No athletes available",
       "selectSportFirst": "Select a sport first",
       "searchSports": "Search sports...",

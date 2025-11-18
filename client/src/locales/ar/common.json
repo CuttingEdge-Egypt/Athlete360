@@ -475,6 +475,7 @@
       "selectAthlete": "اختر اللاعب",
       "searchAthletes": "البحث عن لاعبين...",
       "noAthletesFound": "لم يتم العثور على لاعبين",
+      "addAthleteHint": "ابحث عن هذا اللاعب في تبويب تحليل الرياضيين أولاً لإضافته إلى قاعدة بياناتنا.",
       "noAthletesAvailable": "لا يوجد لاعبون متاحون",
       "selectSportFirst": "اختر رياضة أولاً",
       "searchSports": "البحث عن الرياضات...",
