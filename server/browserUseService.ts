@@ -682,6 +682,207 @@ IMPORTANT:
 }
 
 /**
+ * Fetch rank AND competitive history for World Aquatics sports athletes
+ * (Swimming, Water Polo, Diving, Artistic Swimming)
+ */
+export async function fetchWorldAquaticsRankAndHistory(
+  athleteName: string,
+  country: string,
+  sport: string,
+  category?: string
+): Promise<RankAndHistoryResponse | null> {
+  const apiKey = process.env.BROWSERUSE_API;
+  
+  if (!apiKey) {
+    console.error('❌ BROWSERUSE_API not found in environment');
+    return null;
+  }
+
+  console.log(`🏊 BrowserUse: Fetching World Aquatics data for ${athleteName} (${country}, ${sport}, ${category || 'unknown category'})`);
+
+  const taskPrompt = `
+You are a competitive history and ranking extractor for World Aquatics sports athletes.
+
+Find the competitive history and current rankings for the ${sport} athlete:
+${athleteName} from ${country}${category ? `, who competes in ${category}` : ''}.
+
+IMPORTANT INSTRUCTIONS FOR WORLD AQUATICS:
+You will most likely find the info of the athlete on their World Aquatics site (https://www.worldaquatics.com/athletes).
+
+Instructions:
+1. Visit the World Aquatics website and search for the athlete by name
+2. Navigate to their athlete profile page
+3. Fetch the Competitions they participated in
+4. Get the placement/result in each competition
+5. Note the medals they won
+6. Be sure to thoroughly explore the athlete's World Aquatics profile page for complete data
+
+Extract:
+- Current World Aquatics ranking (if available)
+- Competition results with dates, placements, and medals
+- Event-specific information (swimming events, diving platform/springboard, water polo tournaments, artistic swimming routines)
+- Performance times/scores where available
+
+Return the data in this JSON format with AQUATICS-SPECIFIC FIELDS:
+{
+  "rankings": {
+    "categories": [
+      {
+        "category": "Event name or category (e.g., '100m Freestyle', '10m Platform Diving', 'Water Polo - Senior')",
+        "rank": "current world ranking (if available)",
+        "points": "ranking points (if available)",
+        "totalAthletes": "total athletes in category (if available)"
+      }
+    ],
+    "source": "World Aquatics",
+    "fetchedAt": "current timestamp"
+  },
+  "competitiveHistory": {
+    "career_phases": [
+      {
+        "phase_name": "Phase name (e.g., 'Recent Competitions 2024-2025', 'Olympic Cycle 2020-2024')",
+        "period": "YYYY-YYYY or specific period",
+        "key_achievements": [
+          {
+            "year": 2024,
+            "month": "March",
+            "event_name": "Competition name (e.g., 'World Aquatics Championships', 'Olympic Games')",
+            "event_tier": "Competition tier (e.g., 'World Championship', 'Olympic Games', 'World Cup', 'Diamond League')",
+            "result": "Medal/placement (e.g., 'Gold Medal', 'Silver Medal', '4th place')",
+            "notes": "Additional context",
+            "swimming_event": "Event name (e.g., '100m Freestyle', '200m Butterfly') - ONLY for Swimming",
+            "performance_time": "Time achieved (e.g., '47.58', '1:54.23') - ONLY for Swimming/Diving scores",
+            "diving_apparatus": "Platform/Springboard specification (e.g., '10m Platform', '3m Springboard') - ONLY for Diving",
+            "team_position": "Position in team (e.g., 'Goalkeeper', 'Attacker') - ONLY for Water Polo",
+            "routine_type": "Type of routine (e.g., 'Solo Technical', 'Team Free') - ONLY for Artistic Swimming"
+          }
+        ]
+      }
+    ]
+  }
+}
+
+CRITICAL REQUIREMENTS - PREVENT HALLUCINATION:
+1. ONLY return competitions and results that you ACTUALLY FOUND on the World Aquatics website or other official sources
+2. DO NOT add competitions or results that were NOT shown in your search
+3. DO NOT invent or guess competition names, dates, results, or performance times
+4. If you cannot find competition history, return an empty career_phases array []
+5. Each competition MUST be verified from the actual website content you see
+6. If the World Aquatics website doesn't load or data is unavailable, DO NOT make up data - return what you found or empty arrays
+7. Include aquatics-specific fields (swimming_event, performance_time, diving_apparatus, team_position, routine_type) ONLY when applicable and verified
+
+IMPORTANT: 
+- Prioritize data from the official World Aquatics website
+- List all competitions from most recent to oldest
+- Include sport-specific details when available (event names, times, apparatus, positions)
+- Only include information you actually found on websites - NO HALLUCINATION
+`;
+
+  // Define structured output schema for World Aquatics with sport-specific fields
+  const structuredOutputSchema = {
+    type: "object",
+    properties: {
+      rankings: {
+        type: "object",
+        properties: {
+          categories: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                category: { type: "string" },
+                rank: { type: "string" },
+                points: { type: "string" },
+                totalAthletes: { type: "string" }
+              },
+              required: ["category", "rank"]
+            }
+          },
+          source: { type: "string" },
+          fetchedAt: { type: "string" }
+        },
+        required: ["categories", "source", "fetchedAt"]
+      },
+      competitiveHistory: {
+        type: "object",
+        properties: {
+          career_phases: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                phase_name: { type: "string" },
+                period: { type: "string" },
+                key_achievements: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      year: { type: "number" },
+                      month: { type: "string" },
+                      event_name: { type: "string" },
+                      event_tier: { type: "string" },
+                      result: { type: "string" },
+                      notes: { type: "string" },
+                      swimming_event: { type: "string" },
+                      performance_time: { type: "string" },
+                      diving_apparatus: { type: "string" },
+                      team_position: { type: "string" },
+                      routine_type: { type: "string" }
+                    },
+                    required: ["year", "event_name", "event_tier", "result"]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    required: ["rankings"]
+  };
+
+  try {
+    const response = await fetch('https://api.browser-use.com/api/v1/run-task', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        task: taskPrompt,
+        llm_model: 'o3',
+        structured_output_json: JSON.stringify(structuredOutputSchema)
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ BrowserUse API error: ${response.status} - ${errorText}`);
+      return null;
+    }
+
+    const taskData = await response.json() as any;
+    const taskId = taskData.id;
+    
+    console.log(`✅ BrowserUse task created for ${athleteName}: ${taskId}`);
+    console.log(`🔗 Live preview: ${taskData.live_url || 'N/A'}`);
+    
+    // Poll for completion
+    const result = await pollTaskCompletion(apiKey, taskId, athleteName);
+    
+    if (!result) {
+      return null;
+    }
+
+    return parseRankAndHistoryOutput(result);
+  } catch (error) {
+    console.error(`❌ Error fetching World Aquatics data for ${athleteName}:`, error);
+    return null;
+  }
+}
+
+/**
  * Poll for task completion (no timeout - waits until task finishes)
  */
 async function pollTaskCompletion(
@@ -986,5 +1187,19 @@ export function isIndividualSport(sportName: string): boolean {
   // Check if the sport is in the team sports list (case-insensitive)
   return !teamSports.some(teamSport => 
     sportName.toLowerCase().includes(teamSport.toLowerCase())
+  );
+}
+
+// Helper function to determine if a sport is a World Aquatics sport
+export function isWorldAquaticsSport(sportName: string): boolean {
+  const worldAquaticsSports = [
+    'Swimming',
+    'Water Polo',
+    'Diving',
+    'Artistic Swimming'
+  ];
+  
+  return worldAquaticsSports.some(aquaticSport => 
+    sportName.toLowerCase().includes(aquaticSport.toLowerCase())
   );
 }
