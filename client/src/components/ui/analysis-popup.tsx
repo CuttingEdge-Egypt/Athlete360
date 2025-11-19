@@ -599,6 +599,24 @@ export function AnalysisPopup({
       );
     }
     
+    // Check for Swimming athlete with competitive history data
+    const isSwimmingAthlete = parsedData.sport && 
+      parsedData.sport.toLowerCase().includes('swimming') &&
+      !parsedData.sport.toLowerCase().includes('artistic');
+    
+    if (isSwimmingAthlete && (parsedData.career_phases || parsedData.rankingProgression)) {
+      console.log('✅ Swimming athlete detected! Rendering SwimmingCompetitiveHistory via DualAnalysisPanel');
+      return (
+        <DualAnalysisPanel
+          competitiveAnalysis={parsedData}
+          rankAnalysis={null}
+          rankHistoryData={null}
+          variant="modal"
+          defaultTab="competitive"
+        />
+      );
+    }
+    
     // For single-analysis, extract the data normally
     let actualParsedData = parsedData;
     
