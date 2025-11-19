@@ -750,11 +750,10 @@ Return the data in this JSON format with AQUATICS-SPECIFIC FIELDS:
             "event_tier": "Competition tier (e.g., 'World Championship', 'Olympic Games', 'World Cup', 'Diamond League')",
             "result": "Medal/placement (e.g., 'Gold Medal', 'Silver Medal', '4th place')",
             "notes": "Additional context",
-            "swimming_event": "Event name (e.g., '100m Freestyle', '200m Butterfly') - ONLY for Swimming",
-            "performance_time": "Time achieved (e.g., '47.58', '1:54.23') - ONLY for Swimming/Diving scores",
-            "diving_apparatus": "Platform/Springboard specification (e.g., '10m Platform', '3m Springboard') - ONLY for Diving",
-            "team_position": "Position in team (e.g., 'Goalkeeper', 'Attacker') - ONLY for Water Polo",
-            "routine_type": "Type of routine (e.g., 'Solo Technical', 'Team Free') - ONLY for Artistic Swimming"
+            "event_type": "Event name (e.g., '100m Freestyle', '200m Butterfly', '10m Platform Diving', 'Solo Technical') - Sport-specific event",
+            "distance": "Distance/length for swimming events (e.g., '100m', '200m', '400m') - ONLY for Swimming",
+            "pool_type": "Pool type for swimming (e.g., '50m', '25m', 'Long Course', 'Short Course') - ONLY for Swimming",
+            "time_result": "Time achieved (e.g., '47.58', '1:54.23') - For Swimming or performance score for Diving/Artistic Swimming"
           }
         ]
       }
@@ -769,7 +768,7 @@ CRITICAL REQUIREMENTS - PREVENT HALLUCINATION:
 4. If you cannot find competition history, return an empty career_phases array []
 5. Each competition MUST be verified from the actual website content you see
 6. If the World Aquatics website doesn't load or data is unavailable, DO NOT make up data - return what you found or empty arrays
-7. Include aquatics-specific fields (swimming_event, performance_time, diving_apparatus, team_position, routine_type) ONLY when applicable and verified
+7. Include aquatics-specific fields (event_type, distance, pool_type, time_result) ONLY when applicable and verified
 
 IMPORTANT: 
 - Prioritize data from the official World Aquatics website
@@ -824,11 +823,10 @@ IMPORTANT:
                       event_tier: { type: "string" },
                       result: { type: "string" },
                       notes: { type: "string" },
-                      swimming_event: { type: "string" },
-                      performance_time: { type: "string" },
-                      diving_apparatus: { type: "string" },
-                      team_position: { type: "string" },
-                      routine_type: { type: "string" }
+                      event_type: { type: "string" },
+                      distance: { type: "string" },
+                      pool_type: { type: "string" },
+                      time_result: { type: "string" }
                     },
                     required: ["year", "event_name", "event_tier", "result"]
                   }
