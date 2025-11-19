@@ -716,8 +716,9 @@ Instructions:
 4. Fetch the Competitions they participated in with COMPLETE details
 5. Get the placement/result in each competition
 6. Note the medals they won
-7. Be sure to thoroughly explore the athlete's World Aquatics profile page for complete data
-8. An Athlete Competes in several categories per event, make sure to fetch all categories the athlete competed in.
+7. Be sure to navigate to the Medals tab, expand all competition medal breakdowns, and return accurate info about the medals the player won and the competitions the player won the medals in (including medal type, event, country/location, and date)
+8. Be sure to thoroughly explore the athlete's World Aquatics profile page for complete data
+9. An Athlete Competes in several categories per event, make sure to fetch all categories the athlete competed in.
 
 Extract:
 - Current World Aquatics ranking (if available)
@@ -759,6 +760,14 @@ Return the data in this JSON format with AQUATICS-SPECIFIC FIELDS:
             "time_result": "REQUIRED for Swimming - Time achieved (e.g., '24.66', '47.58', '1:54.23') - For Swimming times or performance score for Diving/Artistic Swimming"
           }
         ]
+      }
+    ],
+    "medals_summary": [
+      {
+        "medal_type": "Medal type (Gold, Silver, or Bronze)",
+        "event": "Event name (e.g., '100m Freestyle', '4x100m Medley Relay')",
+        "country": "Country/location where medal was won (e.g., 'AUS, Melbourne', 'USA, Los Angeles')",
+        "date": "Date when medal was won (YYYY-MM-DD format, e.g., '2024-03-27')"
       }
     ]
   }
@@ -836,6 +845,19 @@ IMPORTANT:
                   }
                 }
               }
+            }
+          },
+          medals_summary: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                medal_type: { type: "string" },
+                event: { type: "string" },
+                country: { type: "string" },
+                date: { type: "string" }
+              },
+              required: ["medal_type", "event", "country", "date"]
             }
           }
         }
