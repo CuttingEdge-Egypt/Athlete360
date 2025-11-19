@@ -81,6 +81,17 @@ export function DualAnalysisPanel({
   const defaultYear = availableYears[0]?.toString() || '2025';
 
   const renderRankHistoryContent = () => {
+    // If swimming athlete, show medals instead of rank history
+    if (isSwimmingAthlete) {
+      return (
+        <SwimmingCompetitiveHistory 
+          competitiveHistory={competitiveAnalysis}
+          athleteName={athlete.name}
+          showMedalsOnly={true}
+        />
+      );
+    }
+
     if (!rankHistoryData || rankHistoryData.length === 0) {
       return (
         <div className="p-6 text-center">
@@ -553,18 +564,19 @@ export function DualAnalysisPanel({
     }
   };
 
-  const renderCompetitiveHistoryContent = () => {
-    // Check if this is a swimming athlete (for custom UI)
-    const isSwimmingAthlete = athlete?.sport && 
-      athlete.sport.toLowerCase().includes('swimming') &&
-      !athlete.sport.toLowerCase().includes('artistic');
+  // Check if this is a swimming athlete (for custom UI)
+  const isSwimmingAthlete = athlete?.sport && 
+    athlete.sport.toLowerCase().includes('swimming') &&
+    !athlete.sport.toLowerCase().includes('artistic');
 
-    // If swimming athlete, render custom swimming UI
+  const renderCompetitiveHistoryContent = () => {
+    // If swimming athlete, render custom swimming UI with timeline only (no medals)
     if (isSwimmingAthlete) {
       return (
         <SwimmingCompetitiveHistory 
           competitiveHistory={competitiveAnalysis}
           athleteName={athlete.name}
+          showTimelineOnly={true}
         />
       );
     }
@@ -946,6 +958,13 @@ export function DualAnalysisPanel({
     );
   };
 
+  // Determine second tab label and icon based on sport
+  const secondTabLabel = isSwimmingAthlete 
+    ? (isArabic ? 'الميداليات' : 'Medal Breakdown')
+    : t('competitiveHistory.tabs.rank');
+  
+  const SecondTabIcon = isSwimmingAthlete ? Trophy : TrendingUp;
+
   return (
     <Tabs defaultValue={defaultTab} className={`w-full ${className}`}>
       <TabsList className="grid w-full grid-cols-2 bg-athlete-gray-700">
@@ -959,11 +978,11 @@ export function DualAnalysisPanel({
         </TabsTrigger>
         <TabsTrigger 
           value="rank"
-          data-testid="tab-rank-history"
+          data-testid={isSwimmingAthlete ? "tab-medal-breakdown" : "tab-rank-history"}
           className="data-[state=active]:bg-athlete-accent"
         >
-          <TrendingUp className={`${isArabic ? 'ml-2' : 'mr-2'} h-4 w-4`} />
-          {t('competitiveHistory.tabs.rank')}
+          <SecondTabIcon className={`${isArabic ? 'ml-2' : 'mr-2'} h-4 w-4`} />
+          {secondTabLabel}
         </TabsTrigger>
       </TabsList>
       

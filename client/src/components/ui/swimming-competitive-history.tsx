@@ -14,18 +14,26 @@ import {
 interface SwimmingCompetitiveHistoryProps {
   competitiveHistory: any;
   athleteName: string;
+  showMedalsOnly?: boolean;  // If true, only show medals table
+  showTimelineOnly?: boolean; // If true, only show LLM analysis + competitions
 }
 
 export function SwimmingCompetitiveHistory({ 
   competitiveHistory, 
-  athleteName 
+  athleteName,
+  showMedalsOnly = false,
+  showTimelineOnly = false
 }: SwimmingCompetitiveHistoryProps) {
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === 'ar';
 
-  // Extract career phases and medals
+  // Extract all data
   const careerPhases = competitiveHistory?.career_phases || [];
   const medalsSummary = competitiveHistory?.medals_summary || [];
+  const careerOverview = competitiveHistory?.career_overview;
+  const peakPerformancePeriods = competitiveHistory?.peak_performance_periods || [];
+  const progressionPatterns = competitiveHistory?.progression_patterns;
+  const recentForm = competitiveHistory?.recent_form;
 
   // Get result badge
   const getResultBadge = (result: string) => {
@@ -59,10 +67,196 @@ export function SwimmingCompetitiveHistory({
     return '🏅';
   };
 
+  // If showing medals only, just render the medals table
+  if (showMedalsOnly) {
+    return (
+      <div className="space-y-8" dir={isArabic ? 'rtl' : 'ltr'}>
+        {medalsSummary && medalsSummary.length > 0 ? (
+          <Card className="bg-gradient-to-r from-yellow-900/30 to-amber-900/30 border-yellow-500/50">
+            <CardHeader>
+              <CardTitle className={`text-2xl text-white flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <Medal className={`${isArabic ? 'ml-3' : 'mr-3'} text-yellow-400`} size={24} />
+                {isArabic ? 'الميداليات' : 'Medals'}
+              </CardTitle>
+              <div className={`text-sm text-gray-300 ${isArabic ? 'text-right' : ''}`}>
+                {isArabic ? 'جميع الميداليات التي فاز بها الرياضي' : 'All medals won by the athlete'}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-yellow-500/30 hover:bg-transparent">
+                      <TableHead className={`text-yellow-400 font-semibold ${isArabic ? 'text-right' : ''}`}>
+                        {isArabic ? 'الميدالية' : 'Medal'}
+                      </TableHead>
+                      <TableHead className={`text-yellow-400 font-semibold ${isArabic ? 'text-right' : ''}`}>
+                        {isArabic ? 'الحدث' : 'Event'}
+                      </TableHead>
+                      <TableHead className={`text-yellow-400 font-semibold ${isArabic ? 'text-right' : ''}`}>
+                        {isArabic ? 'الدولة' : 'Country'}
+                      </TableHead>
+                      <TableHead className={`text-yellow-400 font-semibold ${isArabic ? 'text-right' : ''}`}>
+                        {isArabic ? 'التاريخ' : 'Date'}
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {medalsSummary.map((medal: any, index: number) => {
+                      let displayDate = medal.date;
+                      try {
+                        const dateObj = new Date(medal.date);
+                        if (!isNaN(dateObj.getTime())) {
+                          if (isArabic) {
+                            const monthNamesAr = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+                              'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+                            displayDate = `${dateObj.getDate()} ${monthNamesAr[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+                          } else {
+                            displayDate = dateObj.toLocaleDateString('en-US', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric'
+                            });
+                          }
+                        }
+                      } catch (e) {
+                        // Keep original date if parsing fails
+                      }
+
+                      return (
+                        <TableRow 
+                          key={index} 
+                          className="border-yellow-500/20 hover:bg-yellow-500/10 transition-colors"
+                          data-testid={`medal-row-${index}`}
+                        >
+                          <TableCell className={`font-medium ${isArabic ? 'text-right' : ''}`}>
+                            <span className="text-2xl">{getMedalIcon(medal.medal_type)}</span>
+                            <span className={`${isArabic ? 'mr-2' : 'ml-2'} text-gray-200`}>
+                              {medal.medal_type}
+                            </span>
+                          </TableCell>
+                          <TableCell className={`text-gray-200 ${isArabic ? 'text-right' : ''}`}>
+                            {medal.event}
+                          </TableCell>
+                          <TableCell className={`text-gray-200 ${isArabic ? 'text-right' : ''}`}>
+                            {medal.country}
+                          </TableCell>
+                          <TableCell className={`text-gray-300 ${isArabic ? 'text-right' : ''}`}>
+                            {displayDate}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="p-6 text-center">
+            <p className="text-gray-400">{isArabic ? 'لا توجد بيانات ميداليات متاحة' : 'No medals data available'}</p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8" dir={isArabic ? 'rtl' : 'ltr'}>
-      {/* Medals Summary Table */}
-      {medalsSummary && medalsSummary.length > 0 && (
+      {/* LLM Analysis Section - Only shown when not showMedalsOnly */}
+      {!showMedalsOnly && (careerOverview || peakPerformancePeriods.length > 0) && (
+        <div className="space-y-6">
+          {/* Career Overview */}
+          {careerOverview && (
+            <Card className="bg-athlete-gray-800 border-gray-600">
+              <CardHeader>
+                <CardTitle className={`text-2xl text-white ${isArabic ? 'text-right' : ''}`}>
+                  {isArabic ? 'نظرة عامة على المسيرة' : 'Career Overview'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className={`text-gray-300 leading-relaxed ${isArabic ? 'text-right' : ''}`}>
+                  {careerOverview}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Peak Performance Periods */}
+          {peakPerformancePeriods.length > 0 && (
+            <Card className="bg-athlete-gray-800 border-gray-600">
+              <CardHeader>
+                <CardTitle className={`text-2xl text-white ${isArabic ? 'text-right' : ''}`}>
+                  {isArabic ? 'فترات الأداء القصوى' : 'Peak Performance Periods'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {peakPerformancePeriods.map((period: any, index: number) => (
+                    <div 
+                      key={index} 
+                      className={`p-4 bg-athlete-gray-700 rounded-lg border border-purple-500/30 ${isArabic ? 'text-right' : ''}`}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge className="bg-purple-600 text-white">{period.period}</Badge>
+                      </div>
+                      <p className={`text-gray-300 mb-3 ${isArabic ? 'text-right' : ''}`}>{period.description}</p>
+                      {period.key_results && period.key_results.length > 0 && (
+                        <div className={`space-y-1 ${isArabic ? 'text-right' : ''}`}>
+                          <p className={`text-sm font-semibold text-gray-400 mb-2 ${isArabic ? 'text-right' : ''}`}>
+                            {isArabic ? 'النتائج الرئيسية' : 'Key Results'}
+                          </p>
+                          {period.key_results.map((result: string, idx: number) => (
+                            <div key={idx} className={`flex items-start gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                              <Trophy className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
+                              <span className={`text-sm text-gray-300 ${isArabic ? 'text-right' : ''}`}>{result}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Progression Patterns */}
+          {progressionPatterns && (
+            <Card className="bg-athlete-gray-800 border-gray-600">
+              <CardHeader>
+                <CardTitle className={`text-2xl text-white ${isArabic ? 'text-right' : ''}`}>
+                  {isArabic ? 'أنماط التقدم' : 'Progression Patterns'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className={`text-gray-300 leading-relaxed ${isArabic ? 'text-right' : ''}`}>
+                  {progressionPatterns}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Recent Form */}
+          {recentForm && (
+            <Card className="bg-athlete-gray-800 border-gray-600">
+              <CardHeader>
+                <CardTitle className={`text-2xl text-white ${isArabic ? 'text-right' : ''}`}>
+                  {isArabic ? 'الشكل الحالي' : 'Recent Form'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className={`text-gray-300 leading-relaxed ${isArabic ? 'text-right' : ''}`}>
+                  {recentForm}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* Medals Summary Table - Only show if not in specific modes */}
+      {!showTimelineOnly && medalsSummary && medalsSummary.length > 0 && (
         <Card className="bg-gradient-to-r from-yellow-900/30 to-amber-900/30 border-yellow-500/50">
           <CardHeader>
             <CardTitle className={`text-2xl text-white flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
