@@ -656,20 +656,64 @@ export function DualAnalysisPanel({
 
                     return (
                       <div key={index} className={`p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-blue-500/50 transition-colors ${isArabic ? 'text-right' : ''}`}>
-                        <div className={`flex items-start justify-between mb-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                        <div className={`flex items-start justify-between mb-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                           <div className="flex-1">
-                            <div className={`flex items-start gap-3 mb-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                              <Badge variant="outline" className="border-yellow-400 text-yellow-400 text-xs mt-1">
-                                {displayDate}
-                              </Badge>
-                              <span className="font-bold text-white text-lg leading-tight">{comp.competition || comp.tournament}</span>
+                            {/* Date Badge - More prominent */}
+                            <Badge variant="outline" className="border-yellow-400 text-yellow-400 text-sm mb-2">
+                              {displayDate}
+                            </Badge>
+                            
+                            {/* Competition Name */}
+                            <div className="font-bold text-white text-lg leading-tight mb-2">
+                              {comp.competition || comp.tournament}
                             </div>
+
+                            {/* Event Type - PROMINENT for World Aquatics */}
+                            {comp.event_type && (
+                              <div className={`mb-3 ${isArabic ? 'text-right' : ''}`}>
+                                <div className="inline-flex items-center gap-2 bg-purple-500/20 px-3 py-1.5 rounded-lg border border-purple-500/40">
+                                  <span className="text-xs text-purple-300">{isArabic ? 'الحدث' : 'Event'}</span>
+                                  <span className="text-purple-400 font-bold text-base">{comp.event_type}</span>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Time Result - VERY PROMINENT for Swimming */}
+                            {comp.time_result && (
+                              <div className={`mb-3 ${isArabic ? 'text-right' : ''}`}>
+                                <div className="inline-flex items-center gap-2 bg-yellow-500/20 px-4 py-2 rounded-lg border border-yellow-500/40">
+                                  <span className="text-sm text-yellow-300">{isArabic ? 'الوقت' : 'Time'}</span>
+                                  <span className="text-yellow-400 font-bold text-xl">{comp.time_result}</span>
+                                </div>
+                              </div>
+                            )}
+
                             {comp.location && (
                               <div className={`text-sm text-gray-400 mb-2 ${isArabic ? 'text-right' : ''}`}>
                                 📍 {comp.location}
                               </div>
                             )}
+                            
+                            {/* Additional Details */}
                             <div className={`flex items-center gap-4 text-sm flex-wrap ${isArabic ? 'flex-row-reverse' : ''}`}>
+                              {comp.pool_type && (
+                                <div className="text-gray-400">
+                                  {isArabic ? (
+                                    <><span className="text-teal-400 font-semibold">{comp.pool_type}</span> :{t('competitiveHistory.pool', 'Pool').replace(':', '')}</>
+                                  ) : (
+                                    <>Pool: <span className="text-teal-400 font-semibold">{comp.pool_type}</span></>
+                                  )}
+                                </div>
+                              )}
+                              {comp.distance && (
+                                <div className="text-gray-400">
+                                  {isArabic ? (
+                                    <><span className="text-cyan-400 font-semibold">{comp.distance}</span> :{t('competitiveHistory.distance', 'Distance').replace(':', '')}</>
+                                  ) : (
+                                    <>Distance: <span className="text-cyan-400 font-semibold">{comp.distance}</span></>
+                                  )}
+                                </div>
+                              )}
                               {comp.rankingPoints && (
                                 <div className="text-gray-400">
                                   {t('competitiveHistory.points')} <span className="text-green-400 font-semibold">{comp.rankingPoints}</span>
@@ -690,42 +734,6 @@ export function DualAnalysisPanel({
                                     <><span className="text-gray-300">{comp.ranking}</span> :{t('competitiveHistory.category').replace(':', '')}</>
                                   ) : (
                                     <>{t('competitiveHistory.category')} <span className="text-gray-300">{comp.ranking}</span></>
-                                  )}
-                                </div>
-                              )}
-                              {comp.event_type && (
-                                <div className="text-gray-400">
-                                  {isArabic ? (
-                                    <><span className="text-purple-400 font-semibold">{comp.event_type}</span> :{t('competitiveHistory.event', 'Event').replace(':', '')}</>
-                                  ) : (
-                                    <>Event: <span className="text-purple-400 font-semibold">{comp.event_type}</span></>
-                                  )}
-                                </div>
-                              )}
-                              {comp.distance && (
-                                <div className="text-gray-400">
-                                  {isArabic ? (
-                                    <><span className="text-cyan-400 font-semibold">{comp.distance}</span> :{t('competitiveHistory.distance', 'Distance').replace(':', '')}</>
-                                  ) : (
-                                    <>Distance: <span className="text-cyan-400 font-semibold">{comp.distance}</span></>
-                                  )}
-                                </div>
-                              )}
-                              {comp.pool_type && (
-                                <div className="text-gray-400">
-                                  {isArabic ? (
-                                    <><span className="text-teal-400">{comp.pool_type}</span> :{t('competitiveHistory.pool', 'Pool').replace(':', '')}</>
-                                  ) : (
-                                    <>Pool: <span className="text-teal-400">{comp.pool_type}</span></>
-                                  )}
-                                </div>
-                              )}
-                              {comp.time_result && (
-                                <div className="text-gray-400">
-                                  {isArabic ? (
-                                    <><span className="text-yellow-400 font-semibold">{comp.time_result}</span> :{t('competitiveHistory.time', 'Time').replace(':', '')}</>
-                                  ) : (
-                                    <>Time: <span className="text-yellow-400 font-semibold">{comp.time_result}</span></>
                                   )}
                                 </div>
                               )}
@@ -783,32 +791,76 @@ export function DualAnalysisPanel({
                                   const yearB = parseInt(b.year) || 0;
                                   return yearB - yearA;
                                 })
-                                .map((achievement: any, achievementIndex: number) => (
-                                  <div key={achievementIndex} className={`p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-blue-500/50 transition-colors ${isArabic ? 'text-right' : ''}`}>
-                                    <div className={`flex items-start justify-between mb-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                                      <div className="flex-1">
-                                        <div className={`flex items-center gap-3 mb-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
-                                          <Badge variant="outline" className="border-yellow-400 text-yellow-400 text-xs">
-                                            {achievement.month} {achievement.year}
+                                .map((achievement: any, achievementIndex: number) => {
+                                  // Format date with day if available
+                                  let achievementDate = `${achievement.month} ${achievement.year}`;
+                                  if (achievement.day) {
+                                    achievementDate = `${achievement.day} ${achievement.month} ${achievement.year}`;
+                                  }
+                                  
+                                  return (
+                                    <div key={achievementIndex} className={`p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-blue-500/50 transition-colors ${isArabic ? 'text-right' : ''}`}>
+                                      <div className={`flex items-start justify-between mb-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                                        <div className="flex-1">
+                                          {/* Date Badge */}
+                                          <Badge variant="outline" className="border-yellow-400 text-yellow-400 text-sm mb-2">
+                                            {achievementDate}
                                           </Badge>
-                                          <span className="font-bold text-white">{achievement.event_name}</span>
+                                          
+                                          {/* Event Name */}
+                                          <div className="font-bold text-white text-base mb-2">
+                                            {achievement.event_name}
+                                          </div>
+
+                                          {/* Event Type - PROMINENT for World Aquatics */}
+                                          {achievement.event_type && (
+                                            <div className={`mb-2 ${isArabic ? 'text-right' : ''}`}>
+                                              <div className="inline-flex items-center gap-2 bg-purple-500/20 px-3 py-1.5 rounded-lg border border-purple-500/40">
+                                                <span className="text-xs text-purple-300">{isArabic ? 'الحدث' : 'Event'}</span>
+                                                <span className="text-purple-400 font-bold text-sm">{achievement.event_type}</span>
+                                              </div>
+                                            </div>
+                                          )}
+
+                                          {/* Time Result - VERY PROMINENT for Swimming */}
+                                          {achievement.time_result && (
+                                            <div className={`mb-2 ${isArabic ? 'text-right' : ''}`}>
+                                              <div className="inline-flex items-center gap-2 bg-yellow-500/20 px-3 py-1.5 rounded-lg border border-yellow-500/40">
+                                                <span className="text-sm text-yellow-300">{isArabic ? 'الوقت' : 'Time'}</span>
+                                                <span className="text-yellow-400 font-bold text-lg">{achievement.time_result}</span>
+                                              </div>
+                                            </div>
+                                          )}
+
+                                          <div className={`text-sm text-gray-400 mb-2 ${isArabic ? 'text-right' : ''}`}>
+                                            {achievement.event_tier}
+                                          </div>
+
+                                          {/* Additional aquatics details */}
+                                          {(achievement.pool_type || achievement.distance) && (
+                                            <div className={`flex items-center gap-3 text-xs flex-wrap ${isArabic ? 'flex-row-reverse' : ''}`}>
+                                              {achievement.pool_type && (
+                                                <span className="text-teal-400">Pool: {achievement.pool_type}</span>
+                                              )}
+                                              {achievement.distance && (
+                                                <span className="text-cyan-400">Distance: {achievement.distance}</span>
+                                              )}
+                                            </div>
+                                          )}
                                         </div>
-                                        <div className={`text-sm text-gray-400 mb-2 ${isArabic ? 'text-right' : ''}`}>
-                                          {achievement.event_tier}
+                                        <div className={`${isArabic ? 'mr-3' : 'ml-3'}`}>
+                                          {getResultBadge(achievement.result)}
                                         </div>
                                       </div>
-                                      <div className={`${isArabic ? 'mr-3' : 'ml-3'}`}>
-                                        {getResultBadge(achievement.result)}
-                                      </div>
+                                      
+                                      {achievement.notes && (
+                                        <p className={`text-sm text-gray-300 leading-relaxed ${isArabic ? 'text-right' : ''}`}>
+                                          {achievement.notes}
+                                        </p>
+                                      )}
                                     </div>
-                                    
-                                    {achievement.notes && (
-                                      <p className={`text-sm text-gray-300 leading-relaxed ${isArabic ? 'text-right' : ''}`}>
-                                        {achievement.notes}
-                                      </p>
-                                    )}
-                                  </div>
-                                ))}
+                                  );
+                                })}
                             </div>
                           )}
                         </CardContent>
