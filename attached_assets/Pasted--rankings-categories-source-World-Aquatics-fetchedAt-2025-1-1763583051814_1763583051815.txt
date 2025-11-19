@@ -1,0 +1,218 @@
+{
+  "rankings": {
+    "categories": [],
+    "source": "World Aquatics",
+    "fetchedAt": "2025-11-19"
+  },
+  "competitiveHistory": {
+    "career_phases": [
+      {
+        "phase_name": "Recent Competitions 2025",
+        "period": "2025",
+        "key_achievements": [
+          {
+            "date": "2025-11-09",
+            "event_name": "2025 Swedish Grand Prix/Swim Games (25m)",
+            "event_tier": "National",
+            "result": "Gold Medal",
+            "event_type": "100m Freestyle",
+            "distance": "100m",
+            "pool_type": "25m",
+            "time_result": "53.39"
+          },
+          {
+            "date": "2025-11-08",
+            "event_name": "2025 Swedish Grand Prix/Swim Games (25m)",
+            "event_tier": "National",
+            "result": "Bronze Medal",
+            "event_type": "50m Freestyle",
+            "distance": "50m",
+            "pool_type": "25m",
+            "time_result": "24.88"
+          },
+          {
+            "date": "2025-11-08",
+            "event_name": "2025 Swedish Grand Prix/Swim Games (25m)",
+            "event_tier": "National",
+            "result": "Gold Medal",
+            "event_type": "200m Freestyle",
+            "distance": "200m",
+            "pool_type": "25m",
+            "time_result": "1:55.73"
+          },
+          {
+            "date": "2025-10-19",
+            "event_name": "2025 DM Stockholm (25m)",
+            "event_tier": "Regional",
+            "result": "1st place",
+            "event_type": "100m Freestyle",
+            "distance": "100m",
+            "pool_type": "25m",
+            "time_result": "54.54"
+          },
+          {
+            "date": "2025-10-18",
+            "event_name": "2025 DM Stockholm (25m)",
+            "event_tier": "Regional",
+            "result": "1st place",
+            "event_type": "200m Freestyle",
+            "distance": "200m",
+            "pool_type": "25m",
+            "time_result": "2:00.79"
+          },
+          {
+            "date": "2025-08-03",
+            "event_name": "World Aquatics Championships - Singapore 2025",
+            "event_tier": "World Championship",
+            "result": "11th place",
+            "event_type": "4x100m Medley Relay",
+            "distance": "400m",
+            "pool_type": "50m",
+            "time_result": "4:00.31"
+          },
+          {
+            "date": "2025-08-02",
+            "event_name": "World Aquatics Championships - Singapore 2025",
+            "event_tier": "World Championship",
+            "result": "26th place",
+            "event_type": "50m Freestyle",
+            "distance": "50m",
+            "pool_type": "50m",
+            "time_result": "25.31"
+          },
+          {
+            "date": "2025-08-02",
+            "event_name": "World Aquatics Championships - Singapore 2025",
+            "event_tier": "World Championship",
+            "result": "13th place",
+            "event_type": "Mixed 4x100m Freestyle Relay",
+            "distance": "400m",
+            "pool_type": "50m",
+            "time_result": "3:26.41"
+          },
+          {
+            "date": "2025-07-31",
+            "event_name": "World Aquatics Championships - Singapore 2025",
+            "event_tier": "World Championship",
+            "result": "20th place",
+            "event_type": "100m Freestyle",
+            "distance": "100m",
+            "pool_type": "50m",
+            "time_result": "54.47"
+          },
+          {
+            "date": "2025-07-29",
+            "event_name": "World Aquatics Championships - Singapore 2025",
+            "event_tier": "World Championship",
+            "result": "28th place",
+            "event_type": "200m Freestyle",
+            "distance": "200m",
+            "pool_type": "50m",
+            "time_result": "1:59.82"
+          },
+          {
+            "date": "2025-06-28",
+            "event_name": "European Aquatics Championships U23",
+            "event_tier": "European Championship",
+            "result": "17th place",
+            "event_type": "100m Freestyle",
+            "distance": "100m",
+            "pool_type": "50m",
+            "time_result": "55.47"
+          },
+          {
+            "date": "2025-06-27",
+            "event_name": "European Aquatics Championships U23",
+            "event_tier": "European Championship",
+            "result": "10th place",
+            "event_type": "50m Freestyle",
+            "distance": "50m",
+            "pool_type": "50m",
+            "time_result": "25.28"
+          },
+          {
+            "date": "2025-06-26",
+            "event_name": "European Aquatics Championships U23",
+            "event_tier": "European Championship",
+            "result": "24th place",
+            "event_type": "200m Freestyle",
+            "distance": "200m",
+            "pool_type": "50m",
+            "time_result": "2:02.77"
+          },
+          {
+            "date": "2025-05-25",
+            "event_name": "Mare Nostrum 2025 Canet En Roussillon",
+            "event_tier": "International",
+            "result": "18th place",
+            "event_type": "400m Freestyle",
+            "distance": "400m",
+            "pool_type": "50m",
+            "time_result": "4:26.79"
+          },
+          {
+            "date": "2025-05-25",
+            "event_name": "Mare Nostrum 2025 Canet En Roussillon",
+            "event_tier": "International",
+            "result": "5th place",
+            "event_type": "100m Freestyle",
+            "distance": "100m",
+            "pool_type": "50m",
+            "time_result": "55.17"
+          },
+          {
+            "date": "2025-05-24",
+            "event_name": "Mare Nostrum 2025 Canet En Roussillon",
+            "event_tier": "International",
+            "result": "11th place",
+            "event_type": "50m Freestyle",
+            "distance": "50m",
+            "pool_type": "50m",
+            "time_result": "25.92"
+          },
+          {
+            "date": "2025-05-24",
+            "event_name": "Mare Nostrum 2025 Canet En Roussillon",
+            "event_tier": "International",
+            "result": "6th place",
+            "event_type": "200m Freestyle",
+            "distance": "200m",
+            "pool_type": "50m",
+            "time_result": "2:00.65"
+          },
+          {
+            "date": "2025-05-22",
+            "event_name": "46th Int. Swim Meeting Ciutat De Barcelona",
+            "event_tier": "International",
+            "result": "16th place",
+            "notes": "DNS",
+            "event_type": "50m Freestyle",
+            "distance": "50m",
+            "pool_type": "50m",
+            "time_result": "DNS"
+          },
+          {
+            "date": "2025-05-22",
+            "event_name": "46th Int. Swim Meeting Ciutat De Barcelona",
+            "event_tier": "International",
+            "result": "6th place",
+            "event_type": "200m Freestyle",
+            "distance": "200m",
+            "pool_type": "50m",
+            "time_result": "2:00.50"
+          },
+          {
+            "date": "2025-05-21",
+            "event_name": "46th Int. Swim Meeting Ciutat De Barcelona",
+            "event_tier": "International",
+            "result": "9th place",
+            "event_type": "100m Freestyle",
+            "distance": "100m",
+            "pool_type": "50m",
+            "time_result": "55.33"
+          }
+        ]
+      }
+    ]
+  }
+}
