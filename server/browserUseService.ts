@@ -1227,3 +1227,9 @@ export function isWorldAquaticsSport(sportName: string): boolean {
     sportName.toLowerCase().includes(aquaticSport.toLowerCase())
   );
 }
+
+// Helper function to determine if a sport is Swimming (for custom UI)
+export function isSwimmingSport(sportName: string): boolean {
+  return sportName.toLowerCase().includes('swimming') && 
+         !sportName.toLowerCase().includes('artistic');
+}

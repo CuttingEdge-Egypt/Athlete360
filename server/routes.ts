@@ -52,7 +52,7 @@ import { generateNutritionPlan, generateEnhancedNutritionPlan, generateDevelopme
 import { generateAthleteBiography as generateAthleteBiographyO3, generateRankHistory as generateRankHistoryO3, generateAthleteStatistics as generateAthleteStatisticsO3, generateAthleteStrengths as generateAthleteStrengthsO3, generateAthleteWeaknesses as generateAthleteWeaknessesO3, generateOverviewComparison, generateStrengthsComparison, generateWeaknessesComparison, generateCompetitionHistoryComparison, generateHeadToHeadComparison } from "./o3Service";
 import { analyzeVideoFile, analyzeVideoComprehensive, getSportConfig } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
-import { isIndividualSport, isWorldAquaticsSport, fetchTaekwondoRankAndHistory, fetchGeneralSportRankAndHistory, fetchWorldAquaticsRankAndHistory, fetchTeamSportPlayerInfo } from "./browserUseService";
+import { isIndividualSport, isWorldAquaticsSport, isSwimmingSport, fetchTaekwondoRankAndHistory, fetchGeneralSportRankAndHistory, fetchWorldAquaticsRankAndHistory, fetchTeamSportPlayerInfo } from "./browserUseService";
 import { fetchTaekwondoAthleteData, parseTaekwondoCategoryToParameters } from "./taekwondoApiService";
 import { extractLatestTaekwondoRanks, extractRanksFromCategorySummary } from "./taekwondoUtils";
 import staticDevPlanEn from "./static-data/dev-plan-en.json" with { type: "json" };
