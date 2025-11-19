@@ -55,23 +55,6 @@ export function DualAnalysisPanel({
   const rankingProgression = competitiveAnalysis?.rankingProgression || [];
   const careerSummary = competitiveAnalysis?.careerSummary || {};
 
-  // Check if this is a swimming athlete (for custom UI)
-  const isSwimmingAthlete = athlete?.sport && 
-    athlete.sport.toLowerCase().includes('swimming') &&
-    !athlete.sport.toLowerCase().includes('artistic');
-
-  // If swimming athlete, render custom swimming UI
-  if (isSwimmingAthlete) {
-    return (
-      <div className={className} dir={isArabic ? 'rtl' : 'ltr'}>
-        <SwimmingCompetitiveHistory 
-          competitiveHistory={competitiveAnalysis}
-          athleteName={athlete.name}
-        />
-      </div>
-    );
-  }
-
   // Extract unique years from both datasets
   const getAvailableYears = () => {
     const years = new Set<number>();
@@ -571,6 +554,21 @@ export function DualAnalysisPanel({
   };
 
   const renderCompetitiveHistoryContent = () => {
+    // Check if this is a swimming athlete (for custom UI)
+    const isSwimmingAthlete = athlete?.sport && 
+      athlete.sport.toLowerCase().includes('swimming') &&
+      !athlete.sport.toLowerCase().includes('artistic');
+
+    // If swimming athlete, render custom swimming UI
+    if (isSwimmingAthlete) {
+      return (
+        <SwimmingCompetitiveHistory 
+          competitiveHistory={competitiveAnalysis}
+          athleteName={athlete.name}
+        />
+      );
+    }
+
     // If no years available or no ranking progression, show message
     if (availableYears.length === 0 || !rankingProgression || rankingProgression.length === 0) {
       return (
