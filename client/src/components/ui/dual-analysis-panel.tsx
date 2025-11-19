@@ -5,6 +5,7 @@ import { Calendar, TrendingUp, Trophy, BarChart, Award } from "lucide-react";
 import { Line } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import type { ChartOptions } from 'chart.js';
+import { SwimmingCompetitiveHistory } from './swimming-competitive-history';
 
 interface RankAnalysisDetails {
   trends_and_outlook?: string;
@@ -53,6 +54,23 @@ export function DualAnalysisPanel({
   const athlete = competitiveAnalysis?.athlete;
   const rankingProgression = competitiveAnalysis?.rankingProgression || [];
   const careerSummary = competitiveAnalysis?.careerSummary || {};
+
+  // Check if this is a swimming athlete (for custom UI)
+  const isSwimmingAthlete = athlete?.sport && 
+    athlete.sport.toLowerCase().includes('swimming') &&
+    !athlete.sport.toLowerCase().includes('artistic');
+
+  // If swimming athlete, render custom swimming UI
+  if (isSwimmingAthlete) {
+    return (
+      <div className={className} dir={isArabic ? 'rtl' : 'ltr'}>
+        <SwimmingCompetitiveHistory 
+          competitiveHistory={competitiveAnalysis}
+          athleteName={athlete.name}
+        />
+      </div>
+    );
+  }
 
   // Extract unique years from both datasets
   const getAvailableYears = () => {
