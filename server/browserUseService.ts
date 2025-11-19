@@ -193,7 +193,7 @@ If the player is not found or not ranked, return:
       },
       body: JSON.stringify({
         task: taskPrompt,
-        llm_model: 'o3',
+        llm_model: 'gemini-2.5-flash',
         structured_output_json: JSON.stringify(structuredOutputSchema)
       })
     });
@@ -475,7 +475,7 @@ IMPORTANT: List all competitions from most recent to oldest. Only include compet
       },
       body: JSON.stringify({
         task: taskPrompt,
-        llm_model: 'o3',
+        llm_model: 'gemini-2.5-flash',
         structured_output_json: JSON.stringify(structuredOutputSchema)
       })
     });
@@ -650,7 +650,7 @@ IMPORTANT:
       },
       body: JSON.stringify({
         task: taskPrompt,
-        llm_model: 'o3',
+        llm_model: 'gemini-2.5-flash',
         structured_output_json: JSON.stringify(structuredOutputSchema)
       })
     });
@@ -716,6 +716,7 @@ Instructions:
 4. Get the placement/result in each competition
 5. Note the medals they won
 6. Be sure to thoroughly explore the athlete's World Aquatics profile page for complete data
+7. An Athlete Competes in several categories per event, make sure to fetch all categories the athlete competed in.
 
 Extract:
 - Current World Aquatics ranking (if available)
@@ -849,7 +850,7 @@ IMPORTANT:
       },
       body: JSON.stringify({
         task: taskPrompt,
-        llm_model: 'o3',
+        llm_model: 'gemini-2.5-flash',
         structured_output_json: JSON.stringify(structuredOutputSchema)
       })
     });
@@ -1141,7 +1142,7 @@ IMPORTANT FOR TEAM SPORTS:
       },
       body: JSON.stringify({
         task: taskPrompt,
-        llm_model: 'o3',
+        llm_model: 'gemini-2.5-flash',
         structured_output_json: JSON.stringify(structuredOutputSchema)
       })
     });
