@@ -712,12 +712,12 @@ You will most likely find the info of the athlete on their World Aquatics site (
 Instructions:
 1. Visit the World Aquatics website and search for the athlete by name
 2. Navigate to their athlete profile page
-3. Be sure to look at the "Personal Best Results" and the "Previous Results" sections for the competitions the athlete participated in
+3. Be sure to look at the "Previous Results" sections for the competitions the athlete participated in, Don't look at the "Personal Best Results", you'll have to scroll down the athlete page to find the "Previous Results" section.
 4. Fetch the Competitions they participated in with COMPLETE details
 5. Get the placement/result in each competition
 6. Note the medals they won
 7. Be sure to thoroughly explore the athlete's World Aquatics profile page for complete data
-8. An Athlete Competes in several categories per event, make sure to fetch all categories the athlete competed in
+8. An Athlete Competes in several categories per event, make sure to fetch all categories the athlete competed in.
 
 Extract:
 - Current World Aquatics ranking (if available)

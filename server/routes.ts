@@ -1836,17 +1836,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const normalizedArray = competitiveHistoryData.career_phases.flatMap((phase: any) => 
             (phase.key_achievements || []).map((achievement: any) => ({
               event_name: achievement.event_name || 'Unknown Event',
-              event_date: achievement.month && achievement.year 
-                ? `${achievement.year}-${String(achievement.month).padStart(2, '0')}-01`
-                : (achievement.year ? `${achievement.year}-01-01` : 'Date unknown'),
+              event_date: achievement.day && achievement.month && achievement.year
+                ? `${achievement.year}-${String(achievement.month).padStart(2, '0')}-${String(achievement.day).padStart(2, '0')}`
+                : (achievement.month && achievement.year 
+                  ? `${achievement.year}-${String(achievement.month).padStart(2, '0')}-01`
+                  : (achievement.year ? `${achievement.year}-01-01` : 'Date unknown')),
               place: achievement.result?.match(/(\d+)(?:st|nd|rd|th)/)?.[1] || null,
               location: achievement.notes || 'Location unknown',
               category: achievement.event_tier || 'N/A',
               ranking_points: null,
               g_rank: null,
-              generated_end_date: achievement.month && achievement.year 
-                ? `${achievement.year}-${String(achievement.month).padStart(2, '0')}-01`
-                : (achievement.year ? `${achievement.year}-01-01` : null)
+              generated_end_date: achievement.day && achievement.month && achievement.year
+                ? `${achievement.year}-${String(achievement.month).padStart(2, '0')}-${String(achievement.day).padStart(2, '0')}`
+                : (achievement.month && achievement.year 
+                  ? `${achievement.year}-${String(achievement.month).padStart(2, '0')}-01`
+                  : (achievement.year ? `${achievement.year}-01-01` : null)),
+              // Aquatics-specific fields
+              event_type: achievement.event_type,
+              time_result: achievement.time_result,
+              distance: achievement.distance,
+              pool_type: achievement.pool_type
             }))
           );
           
@@ -1948,7 +1957,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   ranking: comp.category || 'N/A',
                   rank: comp.category || 'N/A',
                   rankingPoints: comp.ranking_points,
-                  gRank: comp.g_rank
+                  gRank: comp.g_rank,
+                  // Aquatics-specific fields (for Swimming, Water Polo, Diving, Artistic Swimming)
+                  event_type: comp.event_type,
+                  time_result: comp.time_result,
+                  distance: comp.distance,
+                  pool_type: comp.pool_type
                 }))
               : [];
             
@@ -2008,7 +2022,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   ranking: comp.category || 'N/A',
                   rank: comp.category || 'N/A',
                   rankingPoints: comp.ranking_points,
-                  gRank: comp.g_rank
+                  gRank: comp.g_rank,
+                  // Aquatics-specific fields (for Swimming, Water Polo, Diving, Artistic Swimming)
+                  event_type: comp.event_type,
+                  time_result: comp.time_result,
+                  distance: comp.distance,
+                  pool_type: comp.pool_type
                 }))
               : [];
             
@@ -2068,10 +2087,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
             throw new Error("No analysis data returned from Gemini");
           }
           
-          // Add career_phases from competitiveHistory to the response
+          // Create rankingProgression from career_phases for frontend year-based display
+          const rankingProgression = competitiveHistoryData?.career_phases
+            ? competitiveHistoryData.career_phases.flatMap((phase: any) =>
+                (phase.key_achievements || []).map((achievement: any) => ({
+                  competition: achievement.event_name || 'Unknown Event',
+                  tournament: achievement.event_name || 'Unknown Event',
+                  date: achievement.day && achievement.month && achievement.year
+                    ? `${achievement.year}-${String(achievement.month).padStart(2, '0')}-${String(achievement.day).padStart(2, '0')}`
+                    : (achievement.month && achievement.year
+                      ? `${achievement.year}-${String(achievement.month).padStart(2, '0')}-01`
+                      : (achievement.year ? `${achievement.year}-01-01` : 'Date unknown')),
+                  result: achievement.result || 'No result',
+                  placement: achievement.result?.match(/(\d+)(?:st|nd|rd|th)/)?.[1] || 'N/A',
+                  location: achievement.notes || 'Location unknown',
+                  ranking: achievement.event_tier || 'N/A',
+                  rank: achievement.event_tier || 'N/A',
+                  rankingPoints: null,
+                  gRank: null,
+                  // Aquatics-specific fields (for Swimming, Water Polo, Diving, Artistic Swimming)
+                  event_type: achievement.event_type,
+                  time_result: achievement.time_result,
+                  distance: achievement.distance,
+                  pool_type: achievement.pool_type
+                }))
+              )
+            : [];
+          
+          // Add career_phases AND rankingProgression to the response
           responseData = {
             ...analysisData,
-            career_phases: competitiveHistoryData?.career_phases || []
+            career_phases: competitiveHistoryData?.career_phases || [],
+            rankingProgression: rankingProgression,
+            athlete: {
+              name: athlete.name,
+              nationality: athlete.country || 'N/A',
+              sport: sportName,
+              isActive: true
+            },
+            careerSummary: {
+              totalCompetitions: rankingProgression.length,
+              notableAchievements: analysisData.peak_performance_periods?.map((p: any) => p.description) || []
+            }
           };
         }
         
