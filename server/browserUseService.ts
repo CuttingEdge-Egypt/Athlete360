@@ -712,11 +712,12 @@ You will most likely find the info of the athlete on their World Aquatics site (
 Instructions:
 1. Visit the World Aquatics website and search for the athlete by name
 2. Navigate to their athlete profile page
-3. Fetch the Competitions they participated in
-4. Get the placement/result in each competition
-5. Note the medals they won
-6. Be sure to thoroughly explore the athlete's World Aquatics profile page for complete data
-7. An Athlete Competes in several categories per event, make sure to fetch all categories the athlete competed in.
+3. Be sure to look at the "Personal Best Results" and the "Previous Results" sections for the competitions the athlete participated in
+4. Fetch the Competitions they participated in with COMPLETE details
+5. Get the placement/result in each competition
+6. Note the medals they won
+7. Be sure to thoroughly explore the athlete's World Aquatics profile page for complete data
+8. An Athlete Competes in several categories per event, make sure to fetch all categories the athlete competed in
 
 Extract:
 - Current World Aquatics ranking (if available)
@@ -747,14 +748,15 @@ Return the data in this JSON format with AQUATICS-SPECIFIC FIELDS:
           {
             "year": 2024,
             "month": "March",
-            "event_name": "Competition name (e.g., 'World Aquatics Championships', 'Olympic Games')",
+            "day": 27,
+            "event_name": "Competition name (e.g., 'World Aquatics Championships', 'Olympic Games', 'SM/JSM competition(25m)')",
             "event_tier": "Competition tier (e.g., 'World Championship', 'Olympic Games', 'World Cup', 'Diamond League')",
             "result": "Medal/placement (e.g., 'Gold Medal', 'Silver Medal', '4th place')",
             "notes": "Additional context",
-            "event_type": "Event name (e.g., '100m Freestyle', '200m Butterfly', '10m Platform Diving', 'Solo Technical') - Sport-specific event",
-            "distance": "Distance/length for swimming events (e.g., '100m', '200m', '400m') - ONLY for Swimming",
+            "event_type": "REQUIRED - Specific event name (e.g., '100m Freestyle', '200m Butterfly', '50m Freestyle', '10m Platform Diving', 'Solo Technical') - Sport-specific event",
+            "distance": "Distance/length for swimming events (e.g., '100m', '200m', '400m', '50m') - ONLY for Swimming",
             "pool_type": "Pool type for swimming (e.g., '50m', '25m', 'Long Course', 'Short Course') - ONLY for Swimming",
-            "time_result": "Time achieved (e.g., '47.58', '1:54.23') - For Swimming or performance score for Diving/Artistic Swimming"
+            "time_result": "REQUIRED for Swimming - Time achieved (e.g., '24.66', '47.58', '1:54.23') - For Swimming times or performance score for Diving/Artistic Swimming"
           }
         ]
       }
@@ -820,6 +822,7 @@ IMPORTANT:
                     properties: {
                       year: { type: "number" },
                       month: { type: "string" },
+                      day: { type: "number" },
                       event_name: { type: "string" },
                       event_tier: { type: "string" },
                       result: { type: "string" },
@@ -829,7 +832,7 @@ IMPORTANT:
                       pool_type: { type: "string" },
                       time_result: { type: "string" }
                     },
-                    required: ["year", "event_name", "event_tier", "result"]
+                    required: ["year", "event_name", "event_tier", "result", "event_type"]
                   }
                 }
               }
