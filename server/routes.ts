@@ -2114,11 +2114,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               )
             : [];
           
-          // Add career_phases AND rankingProgression to the response
+          // Add career_phases, rankingProgression AND medals_summary to the response
           responseData = {
             ...analysisData,
             career_phases: competitiveHistoryData?.career_phases || [],
             rankingProgression: rankingProgression,
+            medals_summary: competitiveHistoryData?.medals_summary || [],
             athlete: {
               name: athlete.name,
               nationality: athlete.country || 'N/A',
