@@ -669,7 +669,7 @@ export function DualAnalysisPanel({
                                 📍 {comp.location}
                               </div>
                             )}
-                            <div className={`flex items-center gap-4 text-sm ${isArabic ? 'flex-row-reverse' : ''}`}>
+                            <div className={`flex items-center gap-4 text-sm flex-wrap ${isArabic ? 'flex-row-reverse' : ''}`}>
                               {comp.rankingPoints && (
                                 <div className="text-gray-400">
                                   {t('competitiveHistory.points')} <span className="text-green-400 font-semibold">{comp.rankingPoints}</span>
@@ -690,6 +690,42 @@ export function DualAnalysisPanel({
                                     <><span className="text-gray-300">{comp.ranking}</span> :{t('competitiveHistory.category').replace(':', '')}</>
                                   ) : (
                                     <>{t('competitiveHistory.category')} <span className="text-gray-300">{comp.ranking}</span></>
+                                  )}
+                                </div>
+                              )}
+                              {comp.event_type && (
+                                <div className="text-gray-400">
+                                  {isArabic ? (
+                                    <><span className="text-purple-400 font-semibold">{comp.event_type}</span> :{t('competitiveHistory.event', 'Event').replace(':', '')}</>
+                                  ) : (
+                                    <>Event: <span className="text-purple-400 font-semibold">{comp.event_type}</span></>
+                                  )}
+                                </div>
+                              )}
+                              {comp.distance && (
+                                <div className="text-gray-400">
+                                  {isArabic ? (
+                                    <><span className="text-cyan-400 font-semibold">{comp.distance}</span> :{t('competitiveHistory.distance', 'Distance').replace(':', '')}</>
+                                  ) : (
+                                    <>Distance: <span className="text-cyan-400 font-semibold">{comp.distance}</span></>
+                                  )}
+                                </div>
+                              )}
+                              {comp.pool_type && (
+                                <div className="text-gray-400">
+                                  {isArabic ? (
+                                    <><span className="text-teal-400">{comp.pool_type}</span> :{t('competitiveHistory.pool', 'Pool').replace(':', '')}</>
+                                  ) : (
+                                    <>Pool: <span className="text-teal-400">{comp.pool_type}</span></>
+                                  )}
+                                </div>
+                              )}
+                              {comp.time_result && (
+                                <div className="text-gray-400">
+                                  {isArabic ? (
+                                    <><span className="text-yellow-400 font-semibold">{comp.time_result}</span> :{t('competitiveHistory.time', 'Time').replace(':', '')}</>
+                                  ) : (
+                                    <>Time: <span className="text-yellow-400 font-semibold">{comp.time_result}</span></>
                                   )}
                                 </div>
                               )}
