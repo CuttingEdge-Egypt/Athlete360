@@ -52,7 +52,7 @@ import { generateNutritionPlan, generateEnhancedNutritionPlan, generateDevelopme
 import { generateAthleteBiography as generateAthleteBiographyO3, generateRankHistory as generateRankHistoryO3, generateAthleteStatistics as generateAthleteStatisticsO3, generateAthleteStrengths as generateAthleteStrengthsO3, generateAthleteWeaknesses as generateAthleteWeaknessesO3, generateOverviewComparison, generateStrengthsComparison, generateWeaknessesComparison, generateCompetitionHistoryComparison, generateHeadToHeadComparison } from "./o3Service";
 import { analyzeVideoFile, analyzeVideoComprehensive, getSportConfig } from "./videoAnalysisService";
 import { paymobService } from "./paymobService";
-import { isIndividualSport, fetchTaekwondoRankAndHistory, fetchGeneralSportRankAndHistory, fetchTeamSportPlayerInfo } from "./browserUseService";
+import { isIndividualSport, isWorldAquaticsSport, fetchTaekwondoRankAndHistory, fetchGeneralSportRankAndHistory, fetchWorldAquaticsRankAndHistory, fetchTeamSportPlayerInfo } from "./browserUseService";
 import { fetchTaekwondoAthleteData, parseTaekwondoCategoryToParameters } from "./taekwondoApiService";
 import { extractLatestTaekwondoRanks, extractRanksFromCategorySummary } from "./taekwondoUtils";
 import staticDevPlanEn from "./static-data/dev-plan-en.json" with { type: "json" };
@@ -933,7 +933,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // For other sports: Use existing BrowserUse flow
         let fetchPromise;
         
-        if (isIndividualSport(sport.name)) {
+        // Check if it's a World Aquatics sport
+        if (isWorldAquaticsSport(sport.name)) {
+          fetchPromise = fetchWorldAquaticsRankAndHistory(englishName, athleteCountry, sport.name, athleteCategory);
+        } else if (isIndividualSport(sport.name)) {
           fetchPromise = fetchGeneralSportRankAndHistory(englishName, athleteCountry, sport.name, athleteCategory);
         } else {
           fetchPromise = fetchTeamSportPlayerInfo(englishName, athleteCountry, sport.name, personalInfo);
@@ -5032,9 +5035,14 @@ Return only valid JSON with the missing fields.`;
 
       console.log(`🧪 Testing BrowserUse fetch for: ${athleteName} (${sport}, ${country})`);
 
-      const result = sport.toLowerCase() === 'taekwondo'
-        ? await fetchTaekwondoRankAndHistory(athleteName, country)
-        : await fetchGeneralSportRankAndHistory(athleteName, country, sport);
+      let result;
+      if (sport.toLowerCase() === 'taekwondo') {
+        result = await fetchTaekwondoRankAndHistory(athleteName, country);
+      } else if (isWorldAquaticsSport(sport)) {
+        result = await fetchWorldAquaticsRankAndHistory(athleteName, country, sport);
+      } else {
+        result = await fetchGeneralSportRankAndHistory(athleteName, country, sport);
+      }
 
       res.json({
         success: true,
