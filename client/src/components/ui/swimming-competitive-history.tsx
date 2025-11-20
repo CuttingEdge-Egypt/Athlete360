@@ -352,7 +352,23 @@ export function SwimmingCompetitiveHistory({
 
                         {/* Content card */}
                         <div className="flex-1 bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-xl border-2 border-slate-600/50 p-5 hover:border-cyan-500/60 hover:shadow-xl hover:shadow-cyan-500/10 transition-all duration-300">
-                          <div className={`flex items-start justify-between gap-4 mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                          <div className={`flex items-start justify-between gap-4 mb-4`}>
+                            {/* Left side (Arabic) / Right side (English): Placement badge + Time */}
+                            {isArabic && (
+                              <div className={`flex flex-col gap-3 flex-shrink-0 items-start`}>
+                                {/* Medal Badge */}
+                                {getResultBadge(achievement.result)}
+                                
+                                {/* Time Result - Below placement, left-aligned for Arabic */}
+                                {achievement.time_result && achievement.time_result !== 'DNS' && (
+                                  <div className={`inline-flex items-center gap-2 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 px-3 py-1.5 rounded-lg border border-yellow-500/50 text-base flex-row-reverse`}>
+                                    <Clock className="w-4 h-4 text-yellow-400" />
+                                    <span className="text-yellow-300 font-bold">{achievement.time_result}</span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
                             <div className="flex-1 space-y-3">
                               {/* Date - Right aligned for Arabic */}
                               <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
@@ -369,17 +385,19 @@ export function SwimmingCompetitiveHistory({
 
                               {/* Event Type */}
                               {achievement.event_type && (
-                                <div className={`inline-flex items-center gap-2 bg-gradient-to-r from-purple-500/20 to-purple-600/20 px-4 py-2 rounded-lg border-2 border-purple-500/50 ${isArabic ? 'text-lg' : 'text-sm'}`}>
+                                <div className={`inline-flex items-center gap-2 bg-gradient-to-r from-purple-500/20 to-purple-600/20 px-4 py-2 rounded-lg border-2 border-purple-500/50 ${isArabic ? 'text-lg float-right' : 'text-sm'}`}>
                                   <Waves className="w-5 h-5 text-purple-400" />
                                   <span className="text-purple-300 font-semibold">{achievement.event_type}</span>
                                 </div>
                               )}
 
-                              {/* Competition Tier */}
-                              <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                              {/* Competition Tier - Translate and align for Arabic */}
+                              <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
                                 <Award className="w-4 h-4 text-gray-400" />
                                 <span className={`text-gray-300 ${isArabic ? 'text-lg' : 'text-sm'}`}>
-                                  {achievement.event_tier}
+                                  {isArabic && achievement.event_tier?.toLowerCase().includes('national') 
+                                    ? 'مسابقة وطنية' 
+                                    : achievement.event_tier}
                                 </span>
                               </div>
 
@@ -404,19 +422,21 @@ export function SwimmingCompetitiveHistory({
                               )}
                             </div>
 
-                            {/* Right side (English) / Left side (Arabic): Placement badge + Time */}
-                            <div className={`flex flex-col gap-3 flex-shrink-0 ${isArabic ? 'items-start' : 'items-end'}`}>
-                              {/* Medal Badge */}
-                              {getResultBadge(achievement.result)}
-                              
-                              {/* Time Result - Below placement, left-aligned for Arabic */}
-                              {achievement.time_result && achievement.time_result !== 'DNS' && (
-                                <div className={`inline-flex items-center gap-2 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 px-3 py-1.5 rounded-lg border border-yellow-500/50 ${isArabic ? 'text-base flex-row-reverse' : 'text-xs'}`}>
-                                  <Clock className="w-4 h-4 text-yellow-400" />
-                                  <span className="text-yellow-300 font-bold">{achievement.time_result}</span>
-                                </div>
-                              )}
-                            </div>
+                            {/* Right side (English): Placement badge + Time */}
+                            {!isArabic && (
+                              <div className={`flex flex-col gap-3 flex-shrink-0 items-end`}>
+                                {/* Medal Badge */}
+                                {getResultBadge(achievement.result)}
+                                
+                                {/* Time Result - Below placement */}
+                                {achievement.time_result && achievement.time_result !== 'DNS' && (
+                                  <div className={`inline-flex items-center gap-2 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 px-3 py-1.5 rounded-lg border border-yellow-500/50 text-xs`}>
+                                    <Clock className="w-4 h-4 text-yellow-400" />
+                                    <span className="text-yellow-300 font-bold">{achievement.time_result}</span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
 
                           {/* Notes */}
