@@ -599,10 +599,11 @@ export function AnalysisPopup({
       );
     }
     
-    // Check for Swimming athlete with competitive history data
+    // Check for Swimming athlete with competitive history data (support English and Arabic)
     const isSwimmingAthlete = parsedData.sport && 
-      parsedData.sport.toLowerCase().includes('swimming') &&
-      !parsedData.sport.toLowerCase().includes('artistic');
+      (parsedData.sport.toLowerCase().includes('swimming') || parsedData.sport.includes('السباحة')) &&
+      !parsedData.sport.toLowerCase().includes('artistic') &&
+      !parsedData.sport.includes('الفني'); // "artistic" in Arabic
     
     if (isSwimmingAthlete && (parsedData.career_phases || parsedData.rankingProgression)) {
       console.log('✅ Swimming athlete detected! Rendering SwimmingCompetitiveHistory via DualAnalysisPanel');

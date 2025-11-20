@@ -564,10 +564,11 @@ export function DualAnalysisPanel({
     }
   };
 
-  // Check if this is a swimming athlete (for custom UI)
+  // Check if this is a swimming athlete (for custom UI) - support English and Arabic
   const isSwimmingAthlete = athlete?.sport && 
-    athlete.sport.toLowerCase().includes('swimming') &&
-    !athlete.sport.toLowerCase().includes('artistic');
+    (athlete.sport.toLowerCase().includes('swimming') || athlete.sport.includes('السباحة')) &&
+    !athlete.sport.toLowerCase().includes('artistic') &&
+    !athlete.sport.includes('الفني'); // "artistic" in Arabic
 
   const renderCompetitiveHistoryContent = () => {
     // If swimming athlete, render custom swimming UI with timeline only (no medals)
