@@ -341,17 +341,9 @@ export function SwimmingCompetitiveHistory({
                                 </div>
                               )}
 
-                              {/* Time Result */}
-                              {achievement.time_result && achievement.time_result !== 'DNS' && (
-                                <div className={`inline-flex items-center gap-3 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 px-5 py-3 rounded-lg border-2 border-yellow-500/60 shadow-lg ${isArabic ? 'text-xl' : 'text-lg'}`}>
-                                  <Clock className="w-6 h-6 text-yellow-400" />
-                                  <span className="text-yellow-300 font-bold text-2xl">{achievement.time_result}</span>
-                                </div>
-                              )}
-
                               {/* Competition Tier */}
                               <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                                <MapPin className="w-4 h-4 text-gray-400" />
+                                <Award className="w-4 h-4 text-gray-400" />
                                 <span className={`text-gray-300 ${isArabic ? 'text-lg' : 'text-base'}`}>
                                   {achievement.event_tier}
                                 </span>
@@ -378,9 +370,18 @@ export function SwimmingCompetitiveHistory({
                               )}
                             </div>
 
-                            {/* Medal Badge */}
-                            <div className="flex-shrink-0">
+                            {/* Right side: Placement badge + Time */}
+                            <div className={`flex flex-col gap-3 items-end flex-shrink-0 ${isArabic ? 'items-start' : 'items-end'}`}>
+                              {/* Medal Badge */}
                               {getResultBadge(achievement.result)}
+                              
+                              {/* Time Result - Below placement */}
+                              {achievement.time_result && achievement.time_result !== 'DNS' && (
+                                <div className={`inline-flex items-center gap-2 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 px-3 py-1.5 rounded-lg border border-yellow-500/50 ${isArabic ? 'text-base' : 'text-sm'}`}>
+                                  <Clock className="w-4 h-4 text-yellow-400" />
+                                  <span className="text-yellow-300 font-bold">{achievement.time_result}</span>
+                                </div>
+                              )}
                             </div>
                           </div>
 
