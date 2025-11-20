@@ -27,6 +27,32 @@ export function SwimmingCompetitiveHistory({
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === 'ar';
 
+  // Helper function to convert numbers to Arabic numerals
+  const toArabicNumerals = (str: string | number): string => {
+    if (!isArabic) return String(str);
+    const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    return String(str).replace(/\d/g, (digit) => arabicNumerals[parseInt(digit)]);
+  };
+
+  // Helper function to format dates in Arabic
+  const formatArabicDate = (day: string | number, month: string, year: string | number): string => {
+    if (!isArabic) {
+      return `${month} ${day ? `${day} ` : ''}${year}`;
+    }
+    
+    const monthNamesAr: { [key: string]: string } = {
+      'January': 'يناير', 'February': 'فبراير', 'March': 'مارس', 'April': 'أبريل',
+      'May': 'مايو', 'June': 'يونيو', 'July': 'يوليو', 'August': 'أغسطس',
+      'September': 'سبتمبر', 'October': 'أكتوبر', 'November': 'نوفمبر', 'December': 'ديسمبر'
+    };
+    
+    const arabicMonth = monthNamesAr[month] || month;
+    const arabicYear = toArabicNumerals(year);
+    const arabicDay = day ? toArabicNumerals(day) : '';
+    
+    return arabicDay ? `${arabicDay} ${arabicMonth} ${arabicYear}` : `${arabicMonth} ${arabicYear}`;
+  };
+
   const careerPhases = competitiveHistory?.career_phases || [];
   const medalsSummary = competitiveHistory?.medals_summary || [];
   const careerOverview = competitiveHistory?.career_overview;
@@ -171,13 +197,13 @@ export function SwimmingCompetitiveHistory({
           {careerOverview && (
             <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-2 border-blue-500/30 shadow-xl">
               <CardHeader>
-                <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl' : 'text-2xl'} text-white`}>
-                  <Award className={`text-blue-400 ${isArabic ? 'ml-0' : ''}`} size={isArabic ? 32 : 28} />
+                <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl text-right' : 'text-lg'} text-white`}>
+                  <Award className={`text-blue-400 ${isArabic ? 'ml-0' : ''}`} size={isArabic ? 32 : 24} />
                   {isArabic ? 'نظرة عامة على المسيرة' : 'Career Overview'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className={`text-gray-200 leading-relaxed ${isArabic ? 'text-right text-xl' : 'text-lg'}`}>
+                <p className={`text-gray-200 leading-relaxed ${isArabic ? 'text-right text-xl' : 'text-base'}`}>
                   {careerOverview}
                 </p>
               </CardContent>
@@ -188,8 +214,8 @@ export function SwimmingCompetitiveHistory({
           {peakPerformancePeriods.length > 0 && (
             <Card className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 border-2 border-purple-500/40 shadow-xl">
               <CardHeader>
-                <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl' : 'text-2xl'} text-white`}>
-                  <Trophy className="text-purple-400" size={isArabic ? 32 : 28} />
+                <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl text-right' : 'text-lg'} text-white`}>
+                  <Trophy className="text-purple-400" size={isArabic ? 32 : 24} />
                   {isArabic ? 'فترات الأداء القصوى' : 'Peak Performance Periods'}
                 </CardTitle>
               </CardHeader>
@@ -200,15 +226,15 @@ export function SwimmingCompetitiveHistory({
                       key={index} 
                       className="p-5 bg-gradient-to-r from-purple-900/40 to-purple-800/30 rounded-xl border-2 border-purple-500/40 shadow-lg hover:border-purple-400/60 transition-all duration-300"
                     >
-                      <Badge className={`bg-gradient-to-r from-purple-500 to-purple-700 text-white mb-3 ${isArabic ? 'text-lg px-4 py-1.5' : 'text-base px-3 py-1'}`}>
+                      <Badge className={`bg-gradient-to-r from-purple-500 to-purple-700 text-white mb-3 ${isArabic ? 'text-lg px-4 py-1.5' : 'text-sm px-3 py-1'}`}>
                         {period.period}
                       </Badge>
-                      <p className={`text-gray-200 mb-4 leading-relaxed ${isArabic ? 'text-right text-xl' : 'text-lg'}`}>
+                      <p className={`text-gray-200 mb-4 leading-relaxed ${isArabic ? 'text-right text-xl' : 'text-base'}`}>
                         {period.description}
                       </p>
                       {period.key_results && period.key_results.length > 0 && (
                         <div className="space-y-2">
-                          <p className={`font-bold ${isArabic ? 'text-right text-xl' : 'text-base'} text-purple-300 mb-3`}>
+                          <p className={`font-bold ${isArabic ? 'text-right text-xl' : 'text-sm'} text-purple-300 mb-3`}>
                             {isArabic ? 'النتائج الرئيسية' : 'Key Results'}
                           </p>
                           {period.key_results.map((result: string, idx: number) => (
@@ -216,7 +242,7 @@ export function SwimmingCompetitiveHistory({
                               <div className="p-1 bg-green-500/20 rounded-md mt-0.5">
                                 <Trophy className="w-5 h-5 text-green-400 flex-shrink-0" />
                               </div>
-                              <span className={`text-gray-200 ${isArabic ? 'text-right text-lg' : 'text-base'}`}>{result}</span>
+                              <span className={`text-gray-200 ${isArabic ? 'text-right text-lg' : 'text-sm'}`}>{result}</span>
                             </div>
                           ))}
                         </div>
@@ -232,13 +258,13 @@ export function SwimmingCompetitiveHistory({
           {progressionPatterns && (
             <Card className="bg-gradient-to-br from-teal-900/30 to-cyan-900/30 border-2 border-teal-500/40 shadow-xl">
               <CardHeader>
-                <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl' : 'text-2xl'} text-white`}>
-                  <Waves className="text-teal-400" size={isArabic ? 32 : 28} />
+                <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl text-right' : 'text-lg'} text-white`}>
+                  <Waves className="text-teal-400" size={isArabic ? 32 : 24} />
                   {isArabic ? 'أنماط التقدم' : 'Progression Patterns'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className={`text-gray-200 leading-relaxed ${isArabic ? 'text-right text-xl' : 'text-lg'}`}>
+                <p className={`text-gray-200 leading-relaxed ${isArabic ? 'text-right text-xl' : 'text-base'}`}>
                   {progressionPatterns}
                 </p>
               </CardContent>
@@ -249,13 +275,13 @@ export function SwimmingCompetitiveHistory({
           {recentForm && (
             <Card className="bg-gradient-to-br from-emerald-900/30 to-green-900/30 border-2 border-emerald-500/40 shadow-xl">
               <CardHeader>
-                <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl' : 'text-2xl'} text-white`}>
-                  <Clock className="text-emerald-400" size={isArabic ? 32 : 28} />
+                <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl text-right' : 'text-lg'} text-white`}>
+                  <Clock className="text-emerald-400" size={isArabic ? 32 : 24} />
                   {isArabic ? 'الشكل الحالي' : 'Recent Form'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className={`text-gray-200 leading-relaxed ${isArabic ? 'text-right text-xl' : 'text-lg'}`}>
+                <p className={`text-gray-200 leading-relaxed ${isArabic ? 'text-right text-xl' : 'text-base'}`}>
                   {recentForm}
                 </p>
               </CardContent>
@@ -265,17 +291,23 @@ export function SwimmingCompetitiveHistory({
       )}
 
       {/* Competition Timeline */}
-      {careerPhases && careerPhases.length > 0 && careerPhases.map((phase: any, phaseIndex: number) => (
+      {careerPhases && careerPhases.length > 0 && careerPhases.map((phase: any, phaseIndex: number) => {
+        // Translate "Recent Competitions" title
+        const translatedPhaseName = isArabic && phase.phase_name.toLowerCase().includes('recent') 
+          ? 'المسابقات الأخيرة' 
+          : phase.phase_name;
+
+        return (
         <Card key={phaseIndex} className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 border-2 border-cyan-500/30 shadow-2xl overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-cyan-900/40 to-blue-900/40 border-b border-cyan-500/30">
             <div className={`flex items-center justify-between gap-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
-              <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl' : 'text-2xl'} text-white font-bold`}>
+              <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl text-right' : 'text-lg'} text-white font-bold`}>
                 <div className="p-2 bg-cyan-500/20 rounded-lg">
-                  <Calendar className="text-cyan-400" size={isArabic ? 32 : 28} />
+                  <Calendar className="text-cyan-400" size={isArabic ? 32 : 24} />
                 </div>
-                {phase.phase_name}
+                {translatedPhaseName}
               </CardTitle>
-              <Badge className={`bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg ${isArabic ? 'text-lg px-5 py-2' : 'text-base px-4 py-1.5'}`}>
+              <Badge className={`bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg ${isArabic ? 'text-lg px-5 py-2' : 'text-sm px-4 py-1.5'}`}>
                 {phase.period}
               </Badge>
             </div>
@@ -294,10 +326,12 @@ export function SwimmingCompetitiveHistory({
                   return dateB - dateA;
                 })
                 .map((achievement: any, achievementIndex: number) => {
-                  let achievementDate = `${achievement.month} ${achievement.year}`;
-                  if (achievement.day) {
-                    achievementDate = `${achievement.day} ${achievement.month} ${achievement.year}`;
-                  }
+                  // Format date with proper Arabic support
+                  const achievementDate = formatArabicDate(
+                    achievement.day, 
+                    achievement.month, 
+                    achievement.year
+                  );
 
                   return (
                     <div 
@@ -320,22 +354,22 @@ export function SwimmingCompetitiveHistory({
                         <div className="flex-1 bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-xl border-2 border-slate-600/50 p-5 hover:border-cyan-500/60 hover:shadow-xl hover:shadow-cyan-500/10 transition-all duration-300">
                           <div className={`flex items-start justify-between gap-4 mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
                             <div className="flex-1 space-y-3">
-                              {/* Date */}
-                              <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                              {/* Date - Right aligned for Arabic */}
+                              <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
                                 <Calendar className="w-4 h-4 text-yellow-400" />
-                                <Badge variant="outline" className={`border-yellow-400/60 text-yellow-400 bg-yellow-400/10 ${isArabic ? 'text-lg px-4 py-1.5' : 'text-sm'}`}>
+                                <Badge variant="outline" className={`border-yellow-400/60 text-yellow-400 bg-yellow-400/10 ${isArabic ? 'text-lg px-4 py-1.5' : 'text-xs'}`}>
                                   {achievementDate}
                                 </Badge>
                               </div>
 
                               {/* Competition Name */}
-                              <h3 className={`font-bold text-white leading-tight ${isArabic ? 'text-2xl' : 'text-xl'}`}>
+                              <h3 className={`font-bold text-white leading-tight ${isArabic ? 'text-2xl text-right' : 'text-base'}`}>
                                 {achievement.event_name}
                               </h3>
 
                               {/* Event Type */}
                               {achievement.event_type && (
-                                <div className={`inline-flex items-center gap-2 bg-gradient-to-r from-purple-500/20 to-purple-600/20 px-4 py-2 rounded-lg border-2 border-purple-500/50 ${isArabic ? 'text-lg' : 'text-base'}`}>
+                                <div className={`inline-flex items-center gap-2 bg-gradient-to-r from-purple-500/20 to-purple-600/20 px-4 py-2 rounded-lg border-2 border-purple-500/50 ${isArabic ? 'text-lg' : 'text-sm'}`}>
                                   <Waves className="w-5 h-5 text-purple-400" />
                                   <span className="text-purple-300 font-semibold">{achievement.event_type}</span>
                                 </div>
@@ -344,25 +378,25 @@ export function SwimmingCompetitiveHistory({
                               {/* Competition Tier */}
                               <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                                 <Award className="w-4 h-4 text-gray-400" />
-                                <span className={`text-gray-300 ${isArabic ? 'text-lg' : 'text-base'}`}>
+                                <span className={`text-gray-300 ${isArabic ? 'text-lg' : 'text-sm'}`}>
                                   {achievement.event_tier}
                                 </span>
                               </div>
 
-                              {/* Additional Details */}
+                              {/* Additional Details - Right aligned for Arabic with Arabic numerals */}
                               {(achievement.pool_type || achievement.distance) && (
-                                <div className={`flex items-center gap-4 flex-wrap ${isArabic ? 'flex-row-reverse text-lg' : 'text-sm'}`}>
+                                <div className={`flex items-center gap-4 flex-wrap ${isArabic ? 'flex-row-reverse justify-end text-lg' : 'text-xs'}`}>
                                   {achievement.pool_type && (
                                     <div className="flex items-center gap-2 bg-teal-500/10 px-3 py-1.5 rounded-lg border border-teal-500/30">
                                       <span className="text-teal-400 font-medium">
-                                        {isArabic ? 'المسبح' : 'Pool'}: {achievement.pool_type}
+                                        {isArabic ? 'المسبح' : 'Pool'}: {isArabic ? toArabicNumerals(achievement.pool_type) : achievement.pool_type}
                                       </span>
                                     </div>
                                   )}
                                   {achievement.distance && (
                                     <div className="flex items-center gap-2 bg-cyan-500/10 px-3 py-1.5 rounded-lg border border-cyan-500/30">
                                       <span className="text-cyan-400 font-medium">
-                                        {isArabic ? 'المسافة' : 'Distance'}: {achievement.distance}
+                                        {isArabic ? 'المسافة' : 'Distance'}: {isArabic ? toArabicNumerals(achievement.distance) : achievement.distance}
                                       </span>
                                     </div>
                                   )}
@@ -370,14 +404,14 @@ export function SwimmingCompetitiveHistory({
                               )}
                             </div>
 
-                            {/* Right side: Placement badge + Time */}
-                            <div className={`flex flex-col gap-3 items-end flex-shrink-0 ${isArabic ? 'items-start' : 'items-end'}`}>
+                            {/* Right side (English) / Left side (Arabic): Placement badge + Time */}
+                            <div className={`flex flex-col gap-3 flex-shrink-0 ${isArabic ? 'items-start' : 'items-end'}`}>
                               {/* Medal Badge */}
                               {getResultBadge(achievement.result)}
                               
-                              {/* Time Result - Below placement */}
+                              {/* Time Result - Below placement, left-aligned for Arabic */}
                               {achievement.time_result && achievement.time_result !== 'DNS' && (
-                                <div className={`inline-flex items-center gap-2 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 px-3 py-1.5 rounded-lg border border-yellow-500/50 ${isArabic ? 'text-base' : 'text-sm'}`}>
+                                <div className={`inline-flex items-center gap-2 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 px-3 py-1.5 rounded-lg border border-yellow-500/50 ${isArabic ? 'text-base flex-row-reverse' : 'text-xs'}`}>
                                   <Clock className="w-4 h-4 text-yellow-400" />
                                   <span className="text-yellow-300 font-bold">{achievement.time_result}</span>
                                 </div>
@@ -401,7 +435,8 @@ export function SwimmingCompetitiveHistory({
             </div>
           </CardContent>
         </Card>
-      ))}
+        );
+      })}
     </div>
   );
 }
