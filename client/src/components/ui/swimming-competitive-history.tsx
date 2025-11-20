@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Trophy, Calendar, Medal } from 'lucide-react';
+import { Trophy, Calendar, Medal, Clock, Award, MapPin, Waves } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
   Table,
@@ -14,8 +14,8 @@ import {
 interface SwimmingCompetitiveHistoryProps {
   competitiveHistory: any;
   athleteName: string;
-  showMedalsOnly?: boolean;  // If true, only show medals table
-  showTimelineOnly?: boolean; // If true, only show LLM analysis + competitions
+  showMedalsOnly?: boolean;
+  showTimelineOnly?: boolean;
 }
 
 export function SwimmingCompetitiveHistory({ 
@@ -27,7 +27,6 @@ export function SwimmingCompetitiveHistory({
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === 'ar';
 
-  // Extract all data
   const careerPhases = competitiveHistory?.career_phases || [];
   const medalsSummary = competitiveHistory?.medals_summary || [];
   const careerOverview = competitiveHistory?.career_overview;
@@ -35,30 +34,28 @@ export function SwimmingCompetitiveHistory({
   const progressionPatterns = competitiveHistory?.progression_patterns;
   const recentForm = competitiveHistory?.recent_form;
 
-  // Get result badge
   const getResultBadge = (result: string) => {
-    if (!result) return <Badge variant="secondary">No result</Badge>;
+    if (!result) return <Badge variant="secondary" className={isArabic ? "text-base px-4 py-1.5" : "text-sm"}>No result</Badge>;
     
     const lowerResult = result.toLowerCase();
     
     if (lowerResult.includes('gold')) {
-      return <Badge className="bg-yellow-500 text-white">🥇 Gold Medal</Badge>;
+      return <Badge className={`bg-gradient-to-r from-yellow-400 to-yellow-600 text-white shadow-lg ${isArabic ? 'text-lg px-5 py-2' : 'text-base px-4 py-1.5'}`}>🥇 {isArabic ? 'ذهبية' : 'Gold'}</Badge>;
     } else if (lowerResult.includes('silver')) {
-      return <Badge className="bg-gray-400 text-white">🥈 Silver Medal</Badge>;
+      return <Badge className={`bg-gradient-to-r from-gray-300 to-gray-500 text-white shadow-lg ${isArabic ? 'text-lg px-5 py-2' : 'text-base px-4 py-1.5'}`}>🥈 {isArabic ? 'فضية' : 'Silver'}</Badge>;
     } else if (lowerResult.includes('bronze')) {
-      return <Badge className="bg-amber-700 text-white">🥉 Bronze Medal</Badge>;
+      return <Badge className={`bg-gradient-to-r from-amber-600 to-amber-800 text-white shadow-lg ${isArabic ? 'text-lg px-5 py-2' : 'text-base px-4 py-1.5'}`}>🥉 {isArabic ? 'برونزية' : 'Bronze'}</Badge>;
     } else if (lowerResult.includes('1st')) {
-      return <Badge className="bg-yellow-500 text-white">🥇 1st</Badge>;
+      return <Badge className={`bg-gradient-to-r from-yellow-400 to-yellow-600 text-white shadow-lg ${isArabic ? 'text-lg px-5 py-2' : 'text-base px-4 py-1.5'}`}>🥇 {isArabic ? 'الأول' : '1st'}</Badge>;
     } else if (lowerResult.includes('2nd')) {
-      return <Badge className="bg-gray-400 text-white">🥈 2nd</Badge>;
+      return <Badge className={`bg-gradient-to-r from-gray-300 to-gray-500 text-white shadow-lg ${isArabic ? 'text-lg px-5 py-2' : 'text-base px-4 py-1.5'}`}>🥈 {isArabic ? 'الثاني' : '2nd'}</Badge>;
     } else if (lowerResult.includes('3rd')) {
-      return <Badge className="bg-amber-700 text-white">🥉 3rd</Badge>;
+      return <Badge className={`bg-gradient-to-r from-amber-600 to-amber-800 text-white shadow-lg ${isArabic ? 'text-lg px-5 py-2' : 'text-base px-4 py-1.5'}`}>🥉 {isArabic ? 'الثالث' : '3rd'}</Badge>;
     } else {
-      return <Badge variant="secondary">✓ {result}</Badge>;
+      return <Badge variant="secondary" className={`${isArabic ? 'text-base px-4 py-1.5' : 'text-sm'}`}>✓ {result}</Badge>;
     }
   };
 
-  // Get medal icon
   const getMedalIcon = (medalType: string) => {
     const lowerType = medalType.toLowerCase();
     if (lowerType.includes('gold')) return '🥇';
@@ -67,36 +64,38 @@ export function SwimmingCompetitiveHistory({
     return '🏅';
   };
 
-  // If showing medals only, just render the medals table
+  // If showing medals only
   if (showMedalsOnly) {
     return (
       <div className="space-y-8" dir={isArabic ? 'rtl' : 'ltr'}>
         {medalsSummary && medalsSummary.length > 0 ? (
-          <Card className="bg-gradient-to-r from-yellow-900/30 to-amber-900/30 border-yellow-500/50">
-            <CardHeader>
-              <CardTitle className={`text-2xl text-white flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
-                <Medal className={`${isArabic ? 'ml-3' : 'mr-3'} text-yellow-400`} size={24} />
-                {isArabic ? 'الميداليات' : 'Medals'}
+          <Card className="bg-gradient-to-br from-yellow-900/40 via-amber-900/30 to-yellow-800/40 border-2 border-yellow-500/60 shadow-2xl">
+            <CardHeader className="pb-4">
+              <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl' : 'text-2xl'}`}>
+                <div className="p-2 bg-yellow-500/20 rounded-lg">
+                  <Medal className="text-yellow-400" size={isArabic ? 32 : 28} />
+                </div>
+                <span className="text-white font-bold">{isArabic ? 'الميداليات' : 'Medal Collection'}</span>
               </CardTitle>
-              <div className={`text-sm text-gray-300 ${isArabic ? 'text-right' : ''}`}>
-                {isArabic ? 'جميع الميداليات التي فاز بها الرياضي' : 'All medals won by the athlete'}
+              <div className={`${isArabic ? 'text-right text-lg mt-2' : 'text-base'} text-gray-300`}>
+                {isArabic ? 'جميع الميداليات التي فاز بها الرياضي في المسابقات الدولية' : 'All medals won in international competitions'}
               </div>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-yellow-500/30 hover:bg-transparent">
-                      <TableHead className={`text-yellow-400 font-semibold ${isArabic ? 'text-right' : ''}`}>
+                    <TableRow className="border-yellow-500/40 hover:bg-transparent">
+                      <TableHead className={`text-yellow-400 font-bold ${isArabic ? 'text-right text-xl' : 'text-base'}`}>
                         {isArabic ? 'الميدالية' : 'Medal'}
                       </TableHead>
-                      <TableHead className={`text-yellow-400 font-semibold ${isArabic ? 'text-right' : ''}`}>
+                      <TableHead className={`text-yellow-400 font-bold ${isArabic ? 'text-right text-xl' : 'text-base'}`}>
                         {isArabic ? 'الحدث' : 'Event'}
                       </TableHead>
-                      <TableHead className={`text-yellow-400 font-semibold ${isArabic ? 'text-right' : ''}`}>
-                        {isArabic ? 'الدولة' : 'Country'}
+                      <TableHead className={`text-yellow-400 font-bold ${isArabic ? 'text-right text-xl' : 'text-base'}`}>
+                        {isArabic ? 'الموقع' : 'Location'}
                       </TableHead>
-                      <TableHead className={`text-yellow-400 font-semibold ${isArabic ? 'text-right' : ''}`}>
+                      <TableHead className={`text-yellow-400 font-bold ${isArabic ? 'text-right text-xl' : 'text-base'}`}>
                         {isArabic ? 'التاريخ' : 'Date'}
                       </TableHead>
                     </TableRow>
@@ -120,28 +119,28 @@ export function SwimmingCompetitiveHistory({
                           }
                         }
                       } catch (e) {
-                        // Keep original date if parsing fails
+                        // Keep original
                       }
 
                       return (
                         <TableRow 
                           key={index} 
-                          className="border-yellow-500/20 hover:bg-yellow-500/10 transition-colors"
+                          className="border-yellow-500/20 hover:bg-yellow-500/10 transition-all duration-200"
                           data-testid={`medal-row-${index}`}
                         >
-                          <TableCell className={`font-medium ${isArabic ? 'text-right' : ''}`}>
-                            <span className="text-2xl">{getMedalIcon(medal.medal_type)}</span>
-                            <span className={`${isArabic ? 'mr-2' : 'ml-2'} text-gray-200`}>
-                              {medal.medal_type}
-                            </span>
+                          <TableCell className={`font-semibold ${isArabic ? 'text-right text-lg' : 'text-base'}`}>
+                            <div className="flex items-center gap-3">
+                              <span className={isArabic ? "text-4xl" : "text-3xl"}>{getMedalIcon(medal.medal_type)}</span>
+                              <span className="text-gray-100">{medal.medal_type}</span>
+                            </div>
                           </TableCell>
-                          <TableCell className={`text-gray-200 ${isArabic ? 'text-right' : ''}`}>
+                          <TableCell className={`text-gray-100 font-medium ${isArabic ? 'text-right text-lg' : 'text-base'}`}>
                             {medal.event}
                           </TableCell>
-                          <TableCell className={`text-gray-200 ${isArabic ? 'text-right' : ''}`}>
+                          <TableCell className={`text-gray-200 ${isArabic ? 'text-right text-lg' : 'text-base'}`}>
                             {medal.country}
                           </TableCell>
-                          <TableCell className={`text-gray-300 ${isArabic ? 'text-right' : ''}`}>
+                          <TableCell className={`text-gray-300 ${isArabic ? 'text-right text-lg' : 'text-base'}`}>
                             {displayDate}
                           </TableCell>
                         </TableRow>
@@ -153,8 +152,10 @@ export function SwimmingCompetitiveHistory({
             </CardContent>
           </Card>
         ) : (
-          <div className="p-6 text-center">
-            <p className="text-gray-400">{isArabic ? 'لا توجد بيانات ميداليات متاحة' : 'No medals data available'}</p>
+          <div className="p-8 text-center">
+            <p className={`text-gray-400 ${isArabic ? 'text-xl' : 'text-lg'}`}>
+              {isArabic ? 'لا توجد بيانات ميداليات متاحة' : 'No medals data available'}
+            </p>
           </div>
         )}
       </div>
@@ -163,19 +164,20 @@ export function SwimmingCompetitiveHistory({
 
   return (
     <div className="space-y-8" dir={isArabic ? 'rtl' : 'ltr'}>
-      {/* LLM Analysis Section - Only shown when not showMedalsOnly */}
+      {/* LLM Analysis Section */}
       {!showMedalsOnly && (careerOverview || peakPerformancePeriods.length > 0) && (
         <div className="space-y-6">
           {/* Career Overview */}
           {careerOverview && (
-            <Card className="bg-athlete-gray-800 border-gray-600">
+            <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-2 border-blue-500/30 shadow-xl">
               <CardHeader>
-                <CardTitle className={`text-2xl text-white ${isArabic ? 'text-right' : ''}`}>
+                <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl' : 'text-2xl'} text-white`}>
+                  <Award className={`text-blue-400 ${isArabic ? 'ml-0' : ''}`} size={isArabic ? 32 : 28} />
                   {isArabic ? 'نظرة عامة على المسيرة' : 'Career Overview'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className={`text-gray-300 leading-relaxed ${isArabic ? 'text-right' : ''}`}>
+                <p className={`text-gray-200 leading-relaxed ${isArabic ? 'text-right text-xl' : 'text-lg'}`}>
                   {careerOverview}
                 </p>
               </CardContent>
@@ -184,32 +186,37 @@ export function SwimmingCompetitiveHistory({
 
           {/* Peak Performance Periods */}
           {peakPerformancePeriods.length > 0 && (
-            <Card className="bg-athlete-gray-800 border-gray-600">
+            <Card className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 border-2 border-purple-500/40 shadow-xl">
               <CardHeader>
-                <CardTitle className={`text-2xl text-white ${isArabic ? 'text-right' : ''}`}>
+                <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl' : 'text-2xl'} text-white`}>
+                  <Trophy className="text-purple-400" size={isArabic ? 32 : 28} />
                   {isArabic ? 'فترات الأداء القصوى' : 'Peak Performance Periods'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-5">
                   {peakPerformancePeriods.map((period: any, index: number) => (
                     <div 
                       key={index} 
-                      className={`p-4 bg-athlete-gray-700 rounded-lg border border-purple-500/30 ${isArabic ? 'text-right' : ''}`}
+                      className="p-5 bg-gradient-to-r from-purple-900/40 to-purple-800/30 rounded-xl border-2 border-purple-500/40 shadow-lg hover:border-purple-400/60 transition-all duration-300"
                     >
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge className="bg-purple-600 text-white">{period.period}</Badge>
-                      </div>
-                      <p className={`text-gray-300 mb-3 ${isArabic ? 'text-right' : ''}`}>{period.description}</p>
+                      <Badge className={`bg-gradient-to-r from-purple-500 to-purple-700 text-white mb-3 ${isArabic ? 'text-lg px-4 py-1.5' : 'text-base px-3 py-1'}`}>
+                        {period.period}
+                      </Badge>
+                      <p className={`text-gray-200 mb-4 leading-relaxed ${isArabic ? 'text-right text-xl' : 'text-lg'}`}>
+                        {period.description}
+                      </p>
                       {period.key_results && period.key_results.length > 0 && (
-                        <div className={`space-y-1 ${isArabic ? 'text-right' : ''}`}>
-                          <p className={`text-sm font-semibold text-gray-400 mb-2 ${isArabic ? 'text-right' : ''}`}>
+                        <div className="space-y-2">
+                          <p className={`font-bold ${isArabic ? 'text-right text-xl' : 'text-base'} text-purple-300 mb-3`}>
                             {isArabic ? 'النتائج الرئيسية' : 'Key Results'}
                           </p>
                           {period.key_results.map((result: string, idx: number) => (
-                            <div key={idx} className={`flex items-start gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                              <Trophy className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                              <span className={`text-sm text-gray-300 ${isArabic ? 'text-right' : ''}`}>{result}</span>
+                            <div key={idx} className={`flex items-start gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                              <div className="p-1 bg-green-500/20 rounded-md mt-0.5">
+                                <Trophy className="w-5 h-5 text-green-400 flex-shrink-0" />
+                              </div>
+                              <span className={`text-gray-200 ${isArabic ? 'text-right text-lg' : 'text-base'}`}>{result}</span>
                             </div>
                           ))}
                         </div>
@@ -223,14 +230,15 @@ export function SwimmingCompetitiveHistory({
 
           {/* Progression Patterns */}
           {progressionPatterns && (
-            <Card className="bg-athlete-gray-800 border-gray-600">
+            <Card className="bg-gradient-to-br from-teal-900/30 to-cyan-900/30 border-2 border-teal-500/40 shadow-xl">
               <CardHeader>
-                <CardTitle className={`text-2xl text-white ${isArabic ? 'text-right' : ''}`}>
+                <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl' : 'text-2xl'} text-white`}>
+                  <Waves className="text-teal-400" size={isArabic ? 32 : 28} />
                   {isArabic ? 'أنماط التقدم' : 'Progression Patterns'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className={`text-gray-300 leading-relaxed ${isArabic ? 'text-right' : ''}`}>
+                <p className={`text-gray-200 leading-relaxed ${isArabic ? 'text-right text-xl' : 'text-lg'}`}>
                   {progressionPatterns}
                 </p>
               </CardContent>
@@ -239,14 +247,15 @@ export function SwimmingCompetitiveHistory({
 
           {/* Recent Form */}
           {recentForm && (
-            <Card className="bg-athlete-gray-800 border-gray-600">
+            <Card className="bg-gradient-to-br from-emerald-900/30 to-green-900/30 border-2 border-emerald-500/40 shadow-xl">
               <CardHeader>
-                <CardTitle className={`text-2xl text-white ${isArabic ? 'text-right' : ''}`}>
+                <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl' : 'text-2xl'} text-white`}>
+                  <Clock className="text-emerald-400" size={isArabic ? 32 : 28} />
                   {isArabic ? 'الشكل الحالي' : 'Recent Form'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className={`text-gray-300 leading-relaxed ${isArabic ? 'text-right' : ''}`}>
+                <p className={`text-gray-200 leading-relaxed ${isArabic ? 'text-right text-xl' : 'text-lg'}`}>
                   {recentForm}
                 </p>
               </CardContent>
@@ -255,109 +264,27 @@ export function SwimmingCompetitiveHistory({
         </div>
       )}
 
-      {/* Medals Summary Table - Only show if not in specific modes */}
-      {!showTimelineOnly && medalsSummary && medalsSummary.length > 0 && (
-        <Card className="bg-gradient-to-r from-yellow-900/30 to-amber-900/30 border-yellow-500/50">
-          <CardHeader>
-            <CardTitle className={`text-2xl text-white flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
-              <Medal className={`${isArabic ? 'ml-3' : 'mr-3'} text-yellow-400`} size={24} />
-              {isArabic ? 'الميداليات' : 'Medals'}
-            </CardTitle>
-            <div className={`text-sm text-gray-300 ${isArabic ? 'text-right' : ''}`}>
-              {isArabic ? 'جميع الميداليات التي فاز بها الرياضي' : 'All medals won by the athlete'}
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-yellow-500/30 hover:bg-transparent">
-                    <TableHead className={`text-yellow-400 font-semibold ${isArabic ? 'text-right' : ''}`}>
-                      {isArabic ? 'الميدالية' : 'Medal'}
-                    </TableHead>
-                    <TableHead className={`text-yellow-400 font-semibold ${isArabic ? 'text-right' : ''}`}>
-                      {isArabic ? 'الحدث' : 'Event'}
-                    </TableHead>
-                    <TableHead className={`text-yellow-400 font-semibold ${isArabic ? 'text-right' : ''}`}>
-                      {isArabic ? 'الدولة' : 'Country'}
-                    </TableHead>
-                    <TableHead className={`text-yellow-400 font-semibold ${isArabic ? 'text-right' : ''}`}>
-                      {isArabic ? 'التاريخ' : 'Date'}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {medalsSummary.map((medal: any, index: number) => {
-                    // Format date
-                    let displayDate = medal.date;
-                    try {
-                      const dateObj = new Date(medal.date);
-                      if (!isNaN(dateObj.getTime())) {
-                        if (isArabic) {
-                          const monthNamesAr = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-                            'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-                          displayDate = `${dateObj.getDate()} ${monthNamesAr[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
-                        } else {
-                          displayDate = dateObj.toLocaleDateString('en-US', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric'
-                          });
-                        }
-                      }
-                    } catch (e) {
-                      // Keep original date if parsing fails
-                    }
-
-                    return (
-                      <TableRow 
-                        key={index} 
-                        className="border-yellow-500/20 hover:bg-yellow-500/10 transition-colors"
-                        data-testid={`medal-row-${index}`}
-                      >
-                        <TableCell className={`font-medium ${isArabic ? 'text-right' : ''}`}>
-                          <span className="text-2xl">{getMedalIcon(medal.medal_type)}</span>
-                          <span className={`${isArabic ? 'mr-2' : 'ml-2'} text-gray-200`}>
-                            {medal.medal_type}
-                          </span>
-                        </TableCell>
-                        <TableCell className={`text-gray-200 ${isArabic ? 'text-right' : ''}`}>
-                          {medal.event}
-                        </TableCell>
-                        <TableCell className={`text-gray-200 ${isArabic ? 'text-right' : ''}`}>
-                          {medal.country}
-                        </TableCell>
-                        <TableCell className={`text-gray-300 ${isArabic ? 'text-right' : ''}`}>
-                          {displayDate}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Career Phases with Competition Results */}
+      {/* Competition Timeline */}
       {careerPhases && careerPhases.length > 0 && careerPhases.map((phase: any, phaseIndex: number) => (
-        <Card key={phaseIndex} className="bg-athlete-gray-800 border-gray-600">
-          <CardHeader>
-            <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
-              <CardTitle className={`text-2xl text-gray-100 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
-                <Calendar className={`${isArabic ? 'ml-3' : 'mr-3'} text-blue-400`} size={24} />
+        <Card key={phaseIndex} className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 border-2 border-cyan-500/30 shadow-2xl overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-cyan-900/40 to-blue-900/40 border-b border-cyan-500/30">
+            <div className={`flex items-center justify-between gap-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl' : 'text-2xl'} text-white font-bold`}>
+                <div className="p-2 bg-cyan-500/20 rounded-lg">
+                  <Calendar className="text-cyan-400" size={isArabic ? 32 : 28} />
+                </div>
                 {phase.phase_name}
               </CardTitle>
-              <Badge className="bg-blue-600 text-white">{phase.period}</Badge>
+              <Badge className={`bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg ${isArabic ? 'text-lg px-5 py-2' : 'text-base px-4 py-1.5'}`}>
+                {phase.period}
+              </Badge>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="pt-6">
+            <div className="space-y-5">
               {phase.key_achievements && phase.key_achievements.length > 0 && phase.key_achievements
                 .slice()
                 .sort((a: any, b: any) => {
-                  // Sort by date (most recent first)
                   const dateA = a.day && a.month && a.year 
                     ? new Date(`${a.year}-${a.month}-${a.day}`).getTime()
                     : (a.year ? new Date(`${a.year}-01-01`).getTime() : 0);
@@ -367,7 +294,6 @@ export function SwimmingCompetitiveHistory({
                   return dateB - dateA;
                 })
                 .map((achievement: any, achievementIndex: number) => {
-                  // Format date with day
                   let achievementDate = `${achievement.month} ${achievement.year}`;
                   if (achievement.day) {
                     achievementDate = `${achievement.day} ${achievement.month} ${achievement.year}`;
@@ -376,71 +302,98 @@ export function SwimmingCompetitiveHistory({
                   return (
                     <div 
                       key={achievementIndex} 
-                      className={`p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-blue-500/50 transition-colors ${isArabic ? 'text-right' : ''}`}
+                      className={`relative group ${isArabic ? 'text-right' : ''}`}
                       data-testid={`competition-${achievementIndex}`}
                     >
-                      <div className={`flex items-start justify-between mb-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                        <div className="flex-1">
-                          {/* Date Badge */}
-                          <Badge variant="outline" className="border-yellow-400 text-yellow-400 text-sm mb-2">
-                            {achievementDate}
-                          </Badge>
-
-                          {/* Competition Name */}
-                          <div className="font-bold text-white text-lg leading-tight mb-2">
-                            {achievement.event_name}
-                          </div>
-
-                          {/* Event Type - PROMINENT */}
-                          {achievement.event_type && (
-                            <div className={`mb-2 ${isArabic ? 'text-right' : ''}`}>
-                              <div className="inline-flex items-center gap-2 bg-purple-500/20 px-3 py-1.5 rounded-lg border border-purple-500/40">
-                                <span className="text-xs text-purple-300">{isArabic ? 'الحدث' : 'Event'}</span>
-                                <span className="text-purple-400 font-bold text-base">{achievement.event_type}</span>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Time Result - VERY PROMINENT */}
-                          {achievement.time_result && achievement.time_result !== 'DNS' && (
-                            <div className={`mb-2 ${isArabic ? 'text-right' : ''}`}>
-                              <div className="inline-flex items-center gap-2 bg-yellow-500/20 px-4 py-2 rounded-lg border border-yellow-500/40">
-                                <span className="text-sm text-yellow-300">{isArabic ? 'الوقت' : 'Time'}</span>
-                                <span className="text-yellow-400 font-bold text-xl">{achievement.time_result}</span>
-                              </div>
-                            </div>
-                          )}
-
-                          <div className={`text-sm text-gray-400 mb-2 ${isArabic ? 'text-right' : ''}`}>
-                            {achievement.event_tier}
-                          </div>
-
-                          {/* Additional swimming details */}
-                          {(achievement.pool_type || achievement.distance) && (
-                            <div className={`flex items-center gap-3 text-xs flex-wrap ${isArabic ? 'flex-row-reverse' : ''}`}>
-                              {achievement.pool_type && (
-                                <span className="text-teal-400">
-                                  {isArabic ? 'المسبح' : 'Pool'}: {achievement.pool_type}
-                                </span>
-                              )}
-                              {achievement.distance && (
-                                <span className="text-cyan-400">
-                                  {isArabic ? 'المسافة' : 'Distance'}: {achievement.distance}
-                                </span>
-                              )}
-                            </div>
-                          )}
+                      {/* Timeline connector */}
+                      {achievementIndex !== phase.key_achievements.length - 1 && (
+                        <div className={`absolute top-full ${isArabic ? 'right-7' : 'left-7'} w-0.5 h-5 bg-gradient-to-b from-cyan-500/50 to-transparent`} />
+                      )}
+                      
+                      <div className={`flex gap-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                        {/* Timeline dot */}
+                        <div className="flex flex-col items-center flex-shrink-0">
+                          <div className="w-4 h-4 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 shadow-lg ring-4 ring-cyan-500/20 group-hover:ring-cyan-400/40 transition-all duration-300" />
                         </div>
-                        <div className={`${isArabic ? 'mr-3' : 'ml-3'}`}>
-                          {getResultBadge(achievement.result)}
+
+                        {/* Content card */}
+                        <div className="flex-1 bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-xl border-2 border-slate-600/50 p-5 hover:border-cyan-500/60 hover:shadow-xl hover:shadow-cyan-500/10 transition-all duration-300">
+                          <div className={`flex items-start justify-between gap-4 mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                            <div className="flex-1 space-y-3">
+                              {/* Date */}
+                              <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                                <Calendar className="w-4 h-4 text-yellow-400" />
+                                <Badge variant="outline" className={`border-yellow-400/60 text-yellow-400 bg-yellow-400/10 ${isArabic ? 'text-lg px-4 py-1.5' : 'text-sm'}`}>
+                                  {achievementDate}
+                                </Badge>
+                              </div>
+
+                              {/* Competition Name */}
+                              <h3 className={`font-bold text-white leading-tight ${isArabic ? 'text-2xl' : 'text-xl'}`}>
+                                {achievement.event_name}
+                              </h3>
+
+                              {/* Event Type */}
+                              {achievement.event_type && (
+                                <div className={`inline-flex items-center gap-2 bg-gradient-to-r from-purple-500/20 to-purple-600/20 px-4 py-2 rounded-lg border-2 border-purple-500/50 ${isArabic ? 'text-lg' : 'text-base'}`}>
+                                  <Waves className="w-5 h-5 text-purple-400" />
+                                  <span className="text-purple-300 font-semibold">{achievement.event_type}</span>
+                                </div>
+                              )}
+
+                              {/* Time Result */}
+                              {achievement.time_result && achievement.time_result !== 'DNS' && (
+                                <div className={`inline-flex items-center gap-3 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 px-5 py-3 rounded-lg border-2 border-yellow-500/60 shadow-lg ${isArabic ? 'text-xl' : 'text-lg'}`}>
+                                  <Clock className="w-6 h-6 text-yellow-400" />
+                                  <span className="text-yellow-300 font-bold text-2xl">{achievement.time_result}</span>
+                                </div>
+                              )}
+
+                              {/* Competition Tier */}
+                              <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                                <MapPin className="w-4 h-4 text-gray-400" />
+                                <span className={`text-gray-300 ${isArabic ? 'text-lg' : 'text-base'}`}>
+                                  {achievement.event_tier}
+                                </span>
+                              </div>
+
+                              {/* Additional Details */}
+                              {(achievement.pool_type || achievement.distance) && (
+                                <div className={`flex items-center gap-4 flex-wrap ${isArabic ? 'flex-row-reverse text-lg' : 'text-sm'}`}>
+                                  {achievement.pool_type && (
+                                    <div className="flex items-center gap-2 bg-teal-500/10 px-3 py-1.5 rounded-lg border border-teal-500/30">
+                                      <span className="text-teal-400 font-medium">
+                                        {isArabic ? 'المسبح' : 'Pool'}: {achievement.pool_type}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {achievement.distance && (
+                                    <div className="flex items-center gap-2 bg-cyan-500/10 px-3 py-1.5 rounded-lg border border-cyan-500/30">
+                                      <span className="text-cyan-400 font-medium">
+                                        {isArabic ? 'المسافة' : 'Distance'}: {achievement.distance}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Medal Badge */}
+                            <div className="flex-shrink-0">
+                              {getResultBadge(achievement.result)}
+                            </div>
+                          </div>
+
+                          {/* Notes */}
+                          {achievement.notes && achievement.notes !== 'DNS' && (
+                            <div className="pt-3 border-t border-slate-600/50">
+                              <p className={`text-gray-300 leading-relaxed ${isArabic ? 'text-right text-lg' : 'text-base'}`}>
+                                {achievement.notes}
+                              </p>
+                            </div>
+                          )}
                         </div>
                       </div>
-
-                      {achievement.notes && achievement.notes !== 'DNS' && (
-                        <p className={`text-sm text-gray-300 leading-relaxed ${isArabic ? 'text-right' : ''}`}>
-                          {achievement.notes}
-                        </p>
-                      )}
                     </div>
                   );
                 })}
