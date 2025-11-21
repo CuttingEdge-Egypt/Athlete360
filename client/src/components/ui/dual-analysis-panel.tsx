@@ -6,6 +6,7 @@ import { Line } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import type { ChartOptions } from 'chart.js';
 import { SwimmingCompetitiveHistory } from './swimming-competitive-history';
+import { SquashCompetitiveHistory } from './squash-competitive-history';
 
 interface RankAnalysisDetails {
   trends_and_outlook?: string;
@@ -570,7 +571,21 @@ export function DualAnalysisPanel({
     !athlete.sport.toLowerCase().includes('artistic') &&
     !athlete.sport.includes('الفني'); // "artistic" in Arabic
 
+  // Check if this is a squash athlete (for custom UI) - support English and Arabic
+  const isSquashAthlete = athlete?.sport && 
+    (athlete.sport.toLowerCase().includes('squash') || athlete.sport.includes('سكواش'));
+
   const renderCompetitiveHistoryContent = () => {
+    // If squash athlete, render custom squash UI
+    if (isSquashAthlete) {
+      return (
+        <SquashCompetitiveHistory 
+          competitiveHistory={competitiveAnalysis}
+          language={generationLanguage || language || 'en'}
+        />
+      );
+    }
+
     // If swimming athlete, render custom swimming UI with timeline only (no medals)
     if (isSwimmingAthlete) {
       return (

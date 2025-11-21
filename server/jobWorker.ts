@@ -440,25 +440,33 @@ export class JobWorker {
           throw new Error(apiResult.error || 'API returned no data');
         }
       } else {
-        // For other sports: Check if World Aquatics sport, otherwise fall back to general BrowserUse
-        const { fetchGeneralSportRankAndHistory, fetchWorldAquaticsRankAndHistory, isWorldAquaticsSport } = await import('./browserUseService.js');
+        // For other sports: Check if World Aquatics sport, Squash, otherwise fall back to general BrowserUse
+        const { fetchGeneralSportRankAndHistory, fetchWorldAquaticsRankAndHistory, fetchSquashRankAndHistory, isWorldAquaticsSport } = await import('./browserUseService.js');
         
         await storage.updateJob(job.id, { progress: 30 });
         broadcastJobProgress(job.id, 'running', 30, 'Fetching ranking data...');
 
-        const result = isWorldAquaticsSport(params.sportName)
-          ? await fetchWorldAquaticsRankAndHistory(
-              params.athleteName,
-              params.country || "Unknown",
-              params.sportName,
-              athleteCategory
-            )
-          : await fetchGeneralSportRankAndHistory(
-              params.athleteName,
-              params.country || "Unknown",
-              params.sportName,
-              athleteCategory
-            );
+        let result;
+        if (params.sportName.toLowerCase() === 'squash') {
+          result = await fetchSquashRankAndHistory(
+            params.athleteName,
+            params.country || "Unknown"
+          );
+        } else if (isWorldAquaticsSport(params.sportName)) {
+          result = await fetchWorldAquaticsRankAndHistory(
+            params.athleteName,
+            params.country || "Unknown",
+            params.sportName,
+            athleteCategory
+          );
+        } else {
+          result = await fetchGeneralSportRankAndHistory(
+            params.athleteName,
+            params.country || "Unknown",
+            params.sportName,
+            athleteCategory
+          );
+        }
 
         if (result) {
           await storage.updateJob(job.id, { progress: 80 });

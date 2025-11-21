@@ -907,6 +907,217 @@ IMPORTANT:
 }
 
 /**
+ * Fetch Squash athlete data from PSA World Tour
+ */
+export async function fetchSquashRankAndHistory(
+  athleteName: string,
+  country: string
+): Promise<RankAndHistoryResponse | null> {
+  const apiKey = process.env.BROWSERUSE_API;
+  
+  if (!apiKey) {
+    console.error('❌ BROWSERUSE_API not found in environment');
+    return null;
+  }
+
+  console.log(`🎾 BrowserUse: Fetching PSA Squash data for ${athleteName} (${country})`);
+
+  const taskPrompt = `
+You are a competitive history and ranking extractor for professional squash athletes.
+
+Find the competitive history and current rankings for the squash athlete:
+${athleteName} from ${country}.
+
+IMPORTANT INSTRUCTIONS FOR PSA SQUASH:
+Go onto the https://www.psasquashtour.com/rankings/ site and search for the player using the player search button in the header, go onto the player's profile, collect all data on the player, be sure to go to the results tab and bio tab.
+
+Instructions:
+1. Visit https://www.psasquashtour.com/rankings/ and search for the athlete
+2. Navigate to their player profile page
+3. Go to the Bio tab and extract career statistics
+4. Go to the Results tab and collect recent match results
+5. Collect ranking points breakdown if available
+
+Extract:
+- Current PSA world ranking
+- Career wins/losses statistics
+- Ranking points breakdown (Tournaments, Results, Expires, Points)
+- Recent match results with opponent, score, competition, date, and time
+- Any additional statistics available
+
+Return the data in this JSON format with SQUASH-SPECIFIC FIELDS:
+{
+  "rankings": {
+    "categories": [
+      {
+        "category": "PSA World Ranking",
+        "rank": "current world ranking",
+        "points": "total ranking points",
+        "totalAthletes": "total ranked players (if available)"
+      }
+    ],
+    "source": "PSA World Tour",
+    "fetchedAt": "current timestamp"
+  },
+  "competitiveHistory": {
+    "career_stats": {
+      "wins": "total career wins",
+      "losses": "total career losses"
+    },
+    "ranking_points": [
+      {
+        "tournament": "Tournament name",
+        "result": "Result in tournament (e.g., 'Winner', 'Runner-up', 'Quarter-finals')",
+        "expires": "Expiry date",
+        "points": "Points earned"
+      }
+    ],
+    "recent_results": [
+      {
+        "year": 2024,
+        "month": "March",
+        "day": 15,
+        "opponent": "Opponent name",
+        "score": "Match score (e.g., '3-1', '3-0')",
+        "competition": "Competition/tournament name",
+        "result": "Win or Loss",
+        "time": "Match time if available",
+        "notes": "Additional context about the match"
+      }
+    ]
+  }
+}
+
+CRITICAL REQUIREMENTS - PREVENT HALLUCINATION:
+1. ONLY return matches and results that you ACTUALLY FOUND on the PSA website
+2. DO NOT add matches or results that were NOT shown in your search
+3. DO NOT invent or guess tournament names, dates, opponents, or scores
+4. If you cannot find match history, return an empty recent_results array []
+5. Each match MUST be verified from the actual website content you see
+6. If the PSA website doesn't load or data is unavailable, DO NOT make up data - return what you found or empty arrays
+7. Include squash-specific fields (opponent, score, competition) ONLY when verified
+
+IMPORTANT: 
+- Prioritize data from the official PSA World Tour website
+- List matches from most recent to oldest
+- Include complete match details when available (opponent, score, competition, date)
+- Only include information you actually found on websites - NO HALLUCINATION
+`;
+
+  // Define structured output schema for Squash with sport-specific fields
+  const structuredOutputSchema = {
+    type: "object",
+    properties: {
+      rankings: {
+        type: "object",
+        properties: {
+          categories: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                category: { type: "string" },
+                rank: { type: "string" },
+                points: { type: "string" },
+                totalAthletes: { type: "string" }
+              },
+              required: ["category", "rank"]
+            }
+          },
+          source: { type: "string" },
+          fetchedAt: { type: "string" }
+        },
+        required: ["categories", "source", "fetchedAt"]
+      },
+      competitiveHistory: {
+        type: "object",
+        properties: {
+          career_stats: {
+            type: "object",
+            properties: {
+              wins: { type: "string" },
+              losses: { type: "string" }
+            },
+            required: ["wins", "losses"]
+          },
+          ranking_points: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                tournament: { type: "string" },
+                result: { type: "string" },
+                expires: { type: "string" },
+                points: { type: "string" }
+              },
+              required: ["tournament", "result", "points"]
+            }
+          },
+          recent_results: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                year: { type: "number" },
+                month: { type: "string" },
+                day: { type: "number" },
+                opponent: { type: "string" },
+                score: { type: "string" },
+                competition: { type: "string" },
+                result: { type: "string" },
+                time: { type: "string" },
+                notes: { type: "string" }
+              },
+              required: ["year", "opponent", "score", "competition", "result"]
+            }
+          }
+        }
+      }
+    },
+    required: ["rankings"]
+  };
+
+  try {
+    const response = await fetch('https://api.browser-use.com/api/v1/run-task', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        task: taskPrompt,
+        llm_model: 'gemini-2.5-flash',
+        structured_output_json: JSON.stringify(structuredOutputSchema)
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ BrowserUse API error: ${response.status} - ${errorText}`);
+      return null;
+    }
+
+    const taskData = await response.json() as any;
+    const taskId = taskData.id;
+    
+    console.log(`✅ BrowserUse task created for ${athleteName}: ${taskId}`);
+    console.log(`🔗 Live preview: ${taskData.live_url || 'N/A'}`);
+    
+    // Poll for completion
+    const result = await pollTaskCompletion(apiKey, taskId, athleteName);
+    
+    if (!result) {
+      return null;
+    }
+
+    return parseRankAndHistoryOutput(result);
+  } catch (error) {
+    console.error(`❌ Error fetching PSA Squash data for ${athleteName}:`, error);
+    return null;
+  }
+}
+
+/**
  * Poll for task completion (no timeout - waits until task finishes)
  */
 async function pollTaskCompletion(
