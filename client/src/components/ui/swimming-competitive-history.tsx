@@ -97,7 +97,7 @@ export function SwimmingCompetitiveHistory({
         {medalsSummary && medalsSummary.length > 0 ? (
           <Card className="bg-gradient-to-br from-yellow-900/40 via-amber-900/30 to-yellow-800/40 border-2 border-yellow-500/60 shadow-2xl">
             <CardHeader className="pb-4">
-              <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl' : 'text-2xl'}`}>
+              <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl text-right justify-end' : 'text-2xl'}`}>
                 <div className="p-2 bg-yellow-500/20 rounded-lg">
                   <Medal className="text-yellow-400" size={isArabic ? 32 : 28} />
                 </div>
@@ -197,7 +197,7 @@ export function SwimmingCompetitiveHistory({
           {careerOverview && (
             <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-2 border-blue-500/30 shadow-xl">
               <CardHeader>
-                <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl text-right' : 'text-lg'} text-white`}>
+                <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl text-right justify-end' : 'text-lg'} text-white`}>
                   <Award className={`text-blue-400 ${isArabic ? 'ml-0' : ''}`} size={isArabic ? 32 : 24} />
                   {isArabic ? 'نظرة عامة على المسيرة' : 'Career Overview'}
                 </CardTitle>
@@ -214,7 +214,7 @@ export function SwimmingCompetitiveHistory({
           {peakPerformancePeriods.length > 0 && (
             <Card className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 border-2 border-purple-500/40 shadow-xl">
               <CardHeader>
-                <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl text-right' : 'text-lg'} text-white`}>
+                <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl text-right justify-end' : 'text-lg'} text-white`}>
                   <Trophy className="text-purple-400" size={isArabic ? 32 : 24} />
                   {isArabic ? 'فترات الأداء القصوى' : 'Peak Performance Periods'}
                 </CardTitle>
@@ -258,7 +258,7 @@ export function SwimmingCompetitiveHistory({
           {progressionPatterns && (
             <Card className="bg-gradient-to-br from-teal-900/30 to-cyan-900/30 border-2 border-teal-500/40 shadow-xl">
               <CardHeader>
-                <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl text-right' : 'text-lg'} text-white`}>
+                <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl text-right justify-end' : 'text-lg'} text-white`}>
                   <Waves className="text-teal-400" size={isArabic ? 32 : 24} />
                   {isArabic ? 'أنماط التقدم' : 'Progression Patterns'}
                 </CardTitle>
@@ -275,7 +275,7 @@ export function SwimmingCompetitiveHistory({
           {recentForm && (
             <Card className="bg-gradient-to-br from-emerald-900/30 to-green-900/30 border-2 border-emerald-500/40 shadow-xl">
               <CardHeader>
-                <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl text-right' : 'text-lg'} text-white`}>
+                <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl text-right justify-end' : 'text-lg'} text-white`}>
                   <Clock className="text-emerald-400" size={isArabic ? 32 : 24} />
                   {isArabic ? 'الشكل الحالي' : 'Recent Form'}
                 </CardTitle>
@@ -301,7 +301,7 @@ export function SwimmingCompetitiveHistory({
         <Card key={phaseIndex} className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 border-2 border-cyan-500/30 shadow-2xl overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-cyan-900/40 to-blue-900/40 border-b border-cyan-500/30">
             <div className={`flex items-center justify-between gap-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
-              <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl text-right' : 'text-lg'} text-white font-bold`}>
+              <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl text-right justify-end' : 'text-lg'} text-white font-bold`}>
                 <div className="p-2 bg-cyan-500/20 rounded-lg">
                   <Calendar className="text-cyan-400" size={isArabic ? 32 : 24} />
                 </div>
@@ -352,7 +352,7 @@ export function SwimmingCompetitiveHistory({
 
                         {/* Content card */}
                         <div className="flex-1 bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-xl border-2 border-slate-600/50 p-5 hover:border-cyan-500/60 hover:shadow-xl hover:shadow-cyan-500/10 transition-all duration-300">
-                          <div className={`flex items-start justify-between gap-4 mb-4`}>
+                          <div className={`flex items-start gap-4 mb-4 ${isArabic ? 'flex-row-reverse' : 'justify-between'}`}>
                             {/* Left side (Arabic) / Right side (English): Placement badge + Time */}
                             {isArabic && (
                               <div className={`flex flex-col gap-3 flex-shrink-0 items-start`}>
@@ -369,7 +369,7 @@ export function SwimmingCompetitiveHistory({
                               </div>
                             )}
 
-                            <div className="flex-1 space-y-3">
+                            <div className={`flex-1 space-y-3 ${isArabic ? 'text-right' : ''}`}>
                               {/* Date - Right aligned for Arabic */}
                               <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
                                 <Calendar className="w-4 h-4 text-yellow-400" />
@@ -385,7 +385,7 @@ export function SwimmingCompetitiveHistory({
 
                               {/* Event Type */}
                               {achievement.event_type && (
-                                <div className={`inline-flex items-center gap-2 bg-gradient-to-r from-purple-500/20 to-purple-600/20 px-4 py-2 rounded-lg border-2 border-purple-500/50 ${isArabic ? 'text-lg float-right' : 'text-sm'}`}>
+                                <div className={`inline-flex items-center gap-2 bg-gradient-to-r from-purple-500/20 to-purple-600/20 px-4 py-2 rounded-lg border-2 border-purple-500/50 ${isArabic ? 'text-lg ml-auto' : 'text-sm'}`}>
                                   <Waves className="w-5 h-5 text-purple-400" />
                                   <span className="text-purple-300 font-semibold">{achievement.event_type}</span>
                                 </div>
@@ -405,14 +405,14 @@ export function SwimmingCompetitiveHistory({
                               {(achievement.pool_type || achievement.distance) && (
                                 <div className={`flex items-center gap-4 flex-wrap ${isArabic ? 'flex-row-reverse justify-end text-lg' : 'text-xs'}`}>
                                   {achievement.pool_type && (
-                                    <div className="flex items-center gap-2 bg-teal-500/10 px-3 py-1.5 rounded-lg border border-teal-500/30">
+                                    <div className={`flex items-center gap-2 bg-teal-500/10 px-3 py-1.5 rounded-lg border border-teal-500/30 ${isArabic ? 'flex-row-reverse' : ''}`}>
                                       <span className="text-teal-400 font-medium">
                                         {isArabic ? 'المسبح' : 'Pool'}: {isArabic ? toArabicNumerals(achievement.pool_type) : achievement.pool_type}
                                       </span>
                                     </div>
                                   )}
                                   {achievement.distance && (
-                                    <div className="flex items-center gap-2 bg-cyan-500/10 px-3 py-1.5 rounded-lg border border-cyan-500/30">
+                                    <div className={`flex items-center gap-2 bg-cyan-500/10 px-3 py-1.5 rounded-lg border border-cyan-500/30 ${isArabic ? 'flex-row-reverse' : ''}`}>
                                       <span className="text-cyan-400 font-medium">
                                         {isArabic ? 'المسافة' : 'Distance'}: {isArabic ? toArabicNumerals(achievement.distance) : achievement.distance}
                                       </span>
