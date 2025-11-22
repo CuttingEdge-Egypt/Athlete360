@@ -1912,6 +1912,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`✅ Using existing competitive history for ${athlete.name}`);
       }
 
+      // Validate that competitive history has actual data (not empty)
+      const hasValidCompetitiveHistory = competitiveHistoryData && 
+        competitiveHistoryData.career_phases && 
+        Array.isArray(competitiveHistoryData.career_phases) &&
+        competitiveHistoryData.career_phases.some((phase: any) => 
+          phase.key_achievements && 
+          Array.isArray(phase.key_achievements) && 
+          phase.key_achievements.length > 0
+        );
+
+      if (!hasValidCompetitiveHistory) {
+        console.error(`❌ Competitive history data is null or empty for ${athlete.name}`);
+        await refundTokensForFailedAnalysis(userId, athleteId, tokenCost, "rank", "Competitive History Analysis");
+        return res.status(404).json({ 
+          message: "No competitive history data found for this athlete. Your tokens have been refunded.",
+          error: "BrowserUse returned empty competitive history data",
+          shouldRetry: false
+        });
+      }
+
       // Generate Gemini analysis from competitive history data
       let analysisData;
       let responseData;
