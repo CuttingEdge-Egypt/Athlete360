@@ -1226,8 +1226,8 @@ export function AnalysisPopup({
                       bioData.personalInfo?.recentNews || bioData.recentNews || [];
     const profileImageUrl = actualData.profileImageUrl || bioData.profileImageUrl;
     
-    // Extract athlete data for rankings display (from data or from prop)
-    const athleteData = actualData.athlete || bioData.athlete || athlete;
+    // Extract athlete data for rankings display (ONLY from bio analysis data, NOT from selected athlete)
+    const athleteData = actualData.athlete || bioData.athlete;
     
     // If bio content is empty or just basic text, display it directly
     if (!bio || bio.length < 50) {
