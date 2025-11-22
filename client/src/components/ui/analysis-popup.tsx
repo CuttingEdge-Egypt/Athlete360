@@ -1434,8 +1434,8 @@ export function AnalysisPopup({
             </div>
           )}
 
-          {/* Only show rankings when we have an athleteId (not in preview mode) */}
-          {athleteId && athleteData?.rankings?.categories && athleteData.rankings.categories.length > 0 && (
+          {/* Show rankings from athlete data (complex structure) OR simple rank from bio analysis */}
+          {athleteId && athleteData?.rankings?.categories && athleteData.rankings.categories.length > 0 ? (
             <div className="mt-4 space-y-2">
               <div className="flex flex-wrap justify-center gap-3">
                 {athleteData.rankings.categories.map((rankingCategory: any, index: number) => {
@@ -1484,6 +1484,23 @@ export function AnalysisPopup({
                     </div>
                   );
                 })}
+              </div>
+            </div>
+          ) : rank && rank !== "N/A" && (
+            <div className="mt-4 space-y-2">
+              <div className="flex flex-wrap justify-center gap-3">
+                <div 
+                  className="flex flex-col items-center px-5 py-3 bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+                  data-testid="badge-rank-simple"
+                >
+                  <div className="flex items-center gap-2">
+                    <Trophy className="w-5 h-5 text-white" />
+                    <span className="font-black text-2xl text-white">#{rank}</span>
+                  </div>
+                  <div className="text-xs font-semibold mt-1 text-center max-w-[200px] line-clamp-2 text-white">
+                    {actualData?.sport || bioData?.sport || actualData?.personalInfo?.sport || bioData?.personalInfo?.sport || "World Ranking"}
+                  </div>
+                </div>
               </div>
             </div>
           )}
