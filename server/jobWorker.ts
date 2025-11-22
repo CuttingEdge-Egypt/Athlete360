@@ -418,7 +418,7 @@ export class JobWorker {
                     date: new Date(`${rankEntry.year}-${String(monthNum).padStart(2, '0')}-01`),
                     categoryKey,
                     categoryLabel,
-                    points: rankEntry.points ? (typeof rankEntry.points === 'string' ? parseFloat(rankEntry.points) : rankEntry.points) : undefined
+                    points: rankEntry.points ? String(typeof rankEntry.points === 'string' ? parseFloat(rankEntry.points) : rankEntry.points) : undefined
                   });
                 } catch (err) {
                   console.log(`⚠️ Failed to store rank history entry: ${err instanceof Error ? err.message : String(err)}`);

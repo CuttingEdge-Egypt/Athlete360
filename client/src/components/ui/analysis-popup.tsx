@@ -618,6 +618,23 @@ export function AnalysisPopup({
       );
     }
     
+    // Check for Squash athlete with competitive history data (support English and Arabic)
+    const isSquashAthlete = parsedData.sport && 
+      (parsedData.sport.toLowerCase().includes('squash') || parsedData.sport.includes('سكواش'));
+    
+    if (isSquashAthlete && (parsedData.career_stats || parsedData.ranking_points || parsedData.recent_results)) {
+      console.log('✅ Squash athlete detected! Rendering SquashCompetitiveHistory via DualAnalysisPanel');
+      return (
+        <DualAnalysisPanel
+          competitiveAnalysis={parsedData}
+          rankAnalysis={null}
+          rankHistoryData={null}
+          variant="modal"
+          defaultTab="competitive"
+        />
+      );
+    }
+    
     // For single-analysis, extract the data normally
     let actualParsedData = parsedData;
     
