@@ -5,6 +5,12 @@ import { extractRanksFromCategorySummary, extractLatestTaekwondoRanks } from './
 import type { Job } from '@shared/schema';
 import WebSocket from 'ws';
 
+// Helper function to detect if sport is Squash (English or Arabic)
+function isSquashSport(sportName: string): boolean {
+  const normalized = sportName.trim().toLowerCase();
+  return normalized === 'squash' || normalized === 'سكواش';
+}
+
 // Helper function to broadcast job progress via WebSocket
 function broadcastJobProgress(jobId: string, status: string, progress: number, message?: string, error?: string) {
   const wss = (global as any).rankingProgressWSS;
@@ -447,7 +453,7 @@ export class JobWorker {
         broadcastJobProgress(job.id, 'running', 30, 'Fetching ranking data...');
 
         let result;
-        if (params.sportName.toLowerCase() === 'squash') {
+        if (isSquashSport(params.sportName)) {
           result = await fetchSquashRankAndHistory(
             params.athleteName,
             params.country || "Unknown"
