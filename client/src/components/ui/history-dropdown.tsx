@@ -263,7 +263,11 @@ export function HistoryDropdown() {
                         <div className="font-medium text-sm truncate">
                           {serviceLabel}
                         </div>
-                        {item.athleteName && (
+                        {item.serviceType === 'comparison' ? (
+                          <div className="text-xs text-muted-foreground truncate">
+                            {item.resultData?.athlete1?.name || 'Athlete 1'} vs {item.resultData?.athlete2?.name || 'Athlete 2'}
+                          </div>
+                        ) : item.athleteName && (
                           <div className="text-xs text-muted-foreground truncate">
                             {item.athleteName} ({item.athleteSport})
                           </div>
