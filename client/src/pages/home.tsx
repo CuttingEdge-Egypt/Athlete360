@@ -2329,8 +2329,8 @@ export default function Home() {
                                                        rankInfo.category.toLowerCase().includes('pan american');
                                   const isNational = rankInfo.category.toLowerCase().includes('national');
                                   
-                                  // Determine if top 3 rank
-                                  const rankNum = parseInt(rankInfo.rank);
+                                  // Determine if top 3 rank - handle both "#13" and "13" formats
+                                  const rankNum = parseInt(String(rankInfo.rank).replace('#', ''));
                                   const isTop3 = rankNum >= 1 && rankNum <= 3;
                                   
                                   // Choose color scheme based on rank type
