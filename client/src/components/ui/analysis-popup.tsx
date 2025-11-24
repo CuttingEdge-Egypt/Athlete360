@@ -1488,19 +1488,83 @@ export function AnalysisPopup({
             </div>
           ) : rank && rank !== "N/A" && (
             <div className="mt-4 space-y-2">
-              <div className="flex flex-wrap justify-center gap-3">
-                <div 
-                  className="flex flex-col items-center px-5 py-3 bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
-                  data-testid="badge-rank-simple"
-                >
-                  <div className="flex items-center gap-2">
-                    <Trophy className="w-5 h-5 text-white" />
-                    <span className="font-black text-2xl text-white">#{rank}</span>
-                  </div>
-                  <div className="text-xs font-semibold mt-1 text-center max-w-[200px] line-clamp-2 text-white">
-                    {actualData?.rankCategory || bioData?.rankCategory || actualData?.personalInfo?.rankCategory || bioData?.personalInfo?.rankCategory || "World Ranking"}
-                  </div>
-                </div>
+              <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+                {(() => {
+                  const rankCategory = actualData?.rankCategory || bioData?.rankCategory || actualData?.personalInfo?.rankCategory || bioData?.personalInfo?.rankCategory || "World Ranking";
+                  
+                  // Parse multiple rankings if they exist (format: "#rank (category) and #rank (category) as of date")
+                  const parseRankings = (text: string) => {
+                    const rankings: Array<{ rank: string; category: string }> = [];
+                    
+                    // Remove "as of" date portion
+                    const cleanText = text.replace(/\s+as of\s+.+$/i, '');
+                    
+                    // Match patterns like "#1 (Men's +80 kg Olympic ranking)" or "1 (Men's -87 kg World ranking)"
+                    const rankingPattern = /#?(\d+)\s*\(([^)]+)\)/g;
+                    let match;
+                    
+                    while ((match = rankingPattern.exec(cleanText)) !== null) {
+                      rankings.push({
+                        rank: match[1],
+                        category: match[2].trim()
+                      });
+                    }
+                    
+                    // If no matches found, try simpler format
+                    if (rankings.length === 0 && rank) {
+                      rankings.push({
+                        rank: rank,
+                        category: cleanText.replace(/^#?\d+\s*/, '').replace(/[()]/g, '').trim() || "World Ranking"
+                      });
+                    }
+                    
+                    return rankings;
+                  };
+                  
+                  const rankings = parseRankings(rankCategory);
+                  
+                  return rankings.map((ranking, index) => {
+                    // Determine color based on category type
+                    const categoryLower = ranking.category.toLowerCase();
+                    const isOlympic = categoryLower.includes('olympic');
+                    const isContinental = categoryLower.includes('continental') || 
+                                         categoryLower.includes('europe') ||
+                                         categoryLower.includes('asia') ||
+                                         categoryLower.includes('africa') ||
+                                         categoryLower.includes('americas');
+                    const isNational = categoryLower.includes('national');
+                    
+                    let bgGradient = 'from-orange-400 via-orange-500 to-orange-600';
+                    let textColor = 'text-white';
+                    
+                    if (isOlympic) {
+                      bgGradient = 'from-yellow-400 via-yellow-500 to-amber-500';
+                      textColor = 'text-gray-900';
+                    } else if (isContinental) {
+                      bgGradient = 'from-green-400 via-green-500 to-green-600';
+                      textColor = 'text-white';
+                    } else if (isNational) {
+                      bgGradient = 'from-blue-400 via-blue-500 to-blue-600';
+                      textColor = 'text-white';
+                    }
+                    
+                    return (
+                      <div 
+                        key={index}
+                        className={`flex flex-col items-center px-4 py-2.5 sm:px-5 sm:py-3 bg-gradient-to-br ${bgGradient} rounded-xl shadow-lg hover:shadow-xl transition-shadow`}
+                        data-testid={`badge-rank-${index}`}
+                      >
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <Trophy className={`w-4 h-4 sm:w-5 sm:h-5 ${textColor}`} />
+                          <span className={`font-black text-xl sm:text-2xl ${textColor}`}>#{ranking.rank}</span>
+                        </div>
+                        <div className={`text-[10px] sm:text-xs font-semibold mt-1 text-center max-w-[160px] sm:max-w-[200px] line-clamp-2 ${textColor}`}>
+                          {ranking.category}
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
               </div>
             </div>
           )}
