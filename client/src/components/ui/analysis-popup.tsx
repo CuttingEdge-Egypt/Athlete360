@@ -1490,19 +1490,16 @@ export function AnalysisPopup({
             <div className="mt-4 space-y-2">
               <div className="flex flex-wrap justify-center gap-3">
                 <div 
-                  className="flex flex-col items-center px-5 py-3 bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+                  className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 rounded-lg shadow-md"
                   data-testid="badge-rank-simple"
                 >
-                  <div className="flex items-center gap-2">
-                    <Trophy className="w-5 h-5 text-white" />
-                    <span className="font-black text-2xl text-white">#{(() => {
+                  <Trophy className="w-3 h-3 text-white mr-1.5" />
+                  <span className="font-bold text-xs text-white">
+                    #{(() => {
                       const match = rank.match(/No\.\s*(\d+)/);
                       return match ? match[1] : rank;
-                    })()}</span>
-                  </div>
-                  <div className="text-xs font-semibold mt-1 text-center max-w-[200px] line-clamp-2 text-white">
-                    {rank}
-                  </div>
+                    })()} | {rank}
+                  </span>
                 </div>
               </div>
             </div>
