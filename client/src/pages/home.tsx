@@ -2176,9 +2176,9 @@ export default function Home() {
                     <Card 
                       className="bg-athlete-gray-700 border-gray-600"
                     >
-                      <CardContent className="p-6">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex flex-col items-start space-y-3">
+                      <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row items-start gap-4">
+                      <div className="flex flex-row sm:flex-col items-center sm:items-start gap-3 sm:gap-3 w-full sm:w-auto">
                         {/* Profile Image */}
                         <div className="relative w-16 h-16 flex-shrink-0">
                           {selectedAthlete.profileImageUrl ? (
@@ -2204,7 +2204,7 @@ export default function Home() {
                         </div>
                         
                         {/* Action Buttons Container */}
-                        <div className="relative flex flex-col gap-1">
+                        <div className="relative flex flex-row sm:flex-col gap-1 flex-1 sm:flex-initial">
                           {/* Image Search Button */}
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -2303,20 +2303,20 @@ export default function Home() {
                         </div>
                       </div>
                       
-                      <div className="flex-1 min-w-0 ml-4">
-                          <div className="flex items-start justify-between gap-4 mb-2">
-                            <div className="flex-1" style={{ minWidth: '200px' }}>
-                              <h3 className="text-xl font-bold text-white whitespace-normal">
+                      <div className="flex-1 min-w-0 sm:ml-4 w-full sm:w-auto">
+                          <div className="flex flex-col sm:flex-row items-start sm:justify-between gap-3 sm:gap-4 mb-2">
+                            <div className="flex-1 w-full sm:w-auto">
+                              <h3 className="text-lg sm:text-xl font-bold text-white break-words">
                                 {selectedAthlete.name}
                               </h3>
-                              <p className="text-gray-400 capitalize flex items-center gap-2">
+                              <p className="text-sm sm:text-base text-gray-400 capitalize flex items-center gap-2">
                                 <Flag country={selectedAthlete.country || "US"} className="w-6 h-4 rounded shadow-sm" />
                                 {selectedAthlete.country || "Unknown Country"}
                               </p>
                             </div>
                             
                             {/* Rankings Display - aligned with name */}
-                            <div className="flex flex-wrap items-start justify-end gap-2">
+                            <div className="flex flex-wrap items-start justify-start sm:justify-end gap-2 w-full sm:w-auto">
                               {selectedAthlete.rankings?.categories && selectedAthlete.rankings.categories.length > 0 ? (
                                 selectedAthlete.rankings.categories.map((rankInfo, index) => {
                                   // Determine rank type and color from the category text
@@ -2445,7 +2445,7 @@ export default function Home() {
                                   return (
                                     <div 
                                       key={index}
-                                      className={`relative ${bgColor} border-2 ${borderColor} rounded-lg px-2 py-1 ${isTop3 ? 'shadow-lg' : 'shadow-md'} hover:scale-105 transition-transform duration-200 w-full max-w-xs`} 
+                                      className={`relative ${bgColor} border-2 ${borderColor} rounded-lg px-2 py-1 ${isTop3 ? 'shadow-lg' : 'shadow-md'} hover:scale-105 transition-transform duration-200 w-auto sm:w-full sm:max-w-xs`} 
                                       data-testid={testId}
                                     >
                                       <div className="flex items-center gap-1.5">
@@ -2499,7 +2499,7 @@ export default function Home() {
                           </div>
                           {/* Personal Information Badges */}
                           {selectedAthlete.personalInfo && (
-                            <div className="flex flex-wrap gap-2 mt-2">
+                            <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-2">
                               {selectedAthlete.personalInfo.age && (
                                 <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-blue-400/60 transition-all duration-200">
                                   <div className="flex items-center justify-center w-4 h-4 bg-blue-500/20 rounded-full">
@@ -2567,12 +2567,12 @@ export default function Home() {
                               )}
                               
                               {selectedAthlete.personalInfo.educationalBackground && selectedAthlete.personalInfo.educationalBackground !== "N/A" && (
-                                <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-indigo-400/60 transition-all duration-200 w-fit max-w-full">
+                                <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-indigo-400/60 transition-all duration-200 max-w-full">
                                   <div className="flex items-center justify-center w-4 h-4 bg-indigo-500/20 rounded-full flex-shrink-0">
                                     <span className="text-[10px] text-indigo-400">🎓</span>
                                   </div>
                                   <span className="text-xs text-slate-400 font-medium flex-shrink-0">Education</span>
-                                  <span className="text-xs font-bold text-white" title={selectedAthlete.personalInfo.educationalBackground}>
+                                  <span className="text-xs font-bold text-white truncate max-w-[200px] sm:max-w-xs" title={selectedAthlete.personalInfo.educationalBackground}>
                                     {selectedAthlete.personalInfo.educationalBackground}
                                   </span>
                                 </div>
