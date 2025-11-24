@@ -1495,10 +1495,13 @@ export function AnalysisPopup({
                 >
                   <div className="flex items-center gap-2">
                     <Trophy className="w-5 h-5 text-white" />
-                    <span className="font-black text-2xl text-white">#{rank}</span>
+                    <span className="font-black text-2xl text-white">#{(() => {
+                      const match = rank.match(/No\.\s*(\d+)/);
+                      return match ? match[1] : rank;
+                    })()}</span>
                   </div>
                   <div className="text-xs font-semibold mt-1 text-center max-w-[200px] line-clamp-2 text-white">
-                    {actualData?.sport || bioData?.sport || actualData?.personalInfo?.sport || bioData?.personalInfo?.sport || "World Ranking"}
+                    {rank}
                   </div>
                 </div>
               </div>
