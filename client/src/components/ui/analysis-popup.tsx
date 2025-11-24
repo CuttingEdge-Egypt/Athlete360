@@ -1498,7 +1498,7 @@ export function AnalysisPopup({
                     <span className="font-black text-2xl text-white">#{rank}</span>
                   </div>
                   <div className="text-xs font-semibold mt-1 text-center max-w-[200px] line-clamp-2 text-white">
-                    {actualData?.sport || bioData?.sport || actualData?.personalInfo?.sport || bioData?.personalInfo?.sport || "World Ranking"}
+                    {actualData?.rankCategory || bioData?.rankCategory || actualData?.personalInfo?.rankCategory || bioData?.personalInfo?.rankCategory || "World Ranking"}
                   </div>
                 </div>
               </div>
