@@ -532,7 +532,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
 
   return (
     <div className={`fixed bottom-2 sm:bottom-4 z-50 w-72 sm:w-auto sm:max-w-md ${isArabic ? 'left-2 sm:left-4' : 'right-2 sm:right-4'}`} dir={isArabic ? 'rtl' : 'ltr'}>
-      <Card className="bg-athlete-gray-800/95 backdrop-blur-sm border-gray-600 shadow-2xl">
+      <Card className="bg-athlete-gray-800 border-gray-600 shadow-2xl">
         <div className="flex items-center justify-between px-3 py-2 sm:p-3 border-b border-gray-600">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
