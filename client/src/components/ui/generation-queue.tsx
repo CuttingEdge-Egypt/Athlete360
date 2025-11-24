@@ -531,22 +531,22 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
   const isArabic = i18n.language === 'ar';
 
   return (
-    <div className={`fixed bottom-2 sm:bottom-4 z-50 w-[calc(100vw-1rem)] sm:w-auto sm:max-w-md ${isArabic ? 'left-2 sm:left-4' : 'right-2 sm:right-4'}`} dir={isArabic ? 'rtl' : 'ltr'}>
+    <div className={`fixed bottom-1 sm:bottom-4 z-50 w-[calc(100vw-0.5rem)] sm:w-auto sm:max-w-md ${isArabic ? 'left-1 sm:left-4' : 'right-1 sm:right-4'}`} dir={isArabic ? 'rtl' : 'ltr'}>
       <Card className="bg-athlete-gray-800 border-gray-600 shadow-2xl">
-        <div className="flex items-center justify-between p-2 sm:p-3 border-b border-gray-600">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-            <span className="text-xs sm:text-sm font-medium text-gray-200">
+        <div className="flex items-center justify-between px-2 py-1.5 sm:p-3 border-b border-gray-600">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            <span className="text-[10px] sm:text-sm font-medium text-gray-200">
               {t('services.queue.title')} ({queue.length})
             </span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5 sm:gap-1">
             <Button
               variant="ghost"
               onClick={() => setIsMinimized(!isMinimized)}
-              className="h-6 w-6 sm:h-6 sm:w-6 p-0 text-gray-400 hover:text-gray-200"
+              className="h-5 w-5 sm:h-6 sm:w-6 p-0 text-gray-400 hover:text-gray-200"
             >
-              {isMinimized ? '▲' : '▼'}
+              <span className="text-[10px] sm:text-xs">{isMinimized ? '▲' : '▼'}</span>
             </Button>
             <Button
               variant="ghost"
@@ -557,50 +557,47 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
                 }
               }}
               disabled={queue.some(item => item.status === 'running' || item.status === 'pending')}
-              className="h-6 w-6 sm:h-6 sm:w-6 p-0 text-gray-400 hover:text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="h-5 w-5 sm:h-6 sm:w-6 p-0 text-gray-400 hover:text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed"
               title={queue.some(item => item.status === 'running' || item.status === 'pending') ? t('services.queue.cannotClose') : t('services.queue.closeQueue')}
             >
-              <X className="w-3 h-3 sm:w-3 sm:h-3" />
+              <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
             </Button>
           </div>
         </div>
 
         {!isMinimized && (
-          <CardContent className="p-0 max-h-48 sm:max-h-64 overflow-y-auto">
-            <div className="space-y-1">
+          <CardContent className="p-0 max-h-32 sm:max-h-64 overflow-y-auto">
+            <div className="space-y-0">
               {queue.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-start sm:items-center justify-between p-2 sm:p-3 hover:bg-athlete-gray-700 transition-colors border-b border-gray-700 last:border-b-0"
+                  className="flex items-center justify-between px-2 py-1.5 sm:p-3 hover:bg-athlete-gray-700 transition-colors border-b border-gray-700 last:border-b-0"
                 >
                   <div className="flex-1 min-w-0 pr-1 sm:pr-2">
-                    <div className="flex items-center gap-1 sm:gap-2 mb-1 flex-wrap">
-                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getStatusColor(item.status)}`}>
+                    <div className="flex items-center gap-1 sm:gap-2 mb-0.5 sm:mb-1">
+                      <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full flex-shrink-0 ${getStatusColor(item.status)}`}>
                         {item.status === 'running' && (
-                          <div className="w-2 h-2 rounded-full animate-ping bg-current opacity-75"></div>
+                          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full animate-ping bg-current opacity-75"></div>
                         )}
                       </div>
-                      <span className="text-xs sm:text-sm font-medium text-gray-200 truncate max-w-[100px] sm:max-w-none">
+                      <span className="text-[10px] sm:text-sm font-medium text-gray-200 truncate max-w-[90px] sm:max-w-none">
                         {item.athleteName}
                       </span>
                       <Badge 
                         variant="outline" 
-                        className="text-[9px] sm:text-xs border-gray-500 text-gray-300 text-center whitespace-nowrap px-1.5 sm:px-2 py-0.5"
+                        className="text-[8px] sm:text-xs border-gray-500 text-gray-300 text-center whitespace-nowrap px-1 sm:px-2 py-0 sm:py-0.5"
                       >
                         {getServiceLabel(item.serviceType)}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-1 sm:gap-2 text-[9px] sm:text-xs text-gray-400 flex-wrap">
-                      {getStatusIcon(item.status)}
-                      <span className="truncate max-w-[120px] sm:max-w-none">
+                    <div className="flex items-center gap-0.5 sm:gap-2 text-[8px] sm:text-xs text-gray-400">
+                      <span className="truncate max-w-[110px] sm:max-w-none">
                         {item.status === 'error' ? item.error : 
                          item.status === 'running' ? (item.progressMessage || t('services.queue.statusRunning')) :
                          item.status === 'pending' ? t('services.queue.statusPending') :
                          item.status === 'completed' ? t('services.queue.statusCompleted') :
                          item.status}
                       </span>
-                      <span className="hidden sm:inline">•</span>
-                      <span className="hidden sm:inline">{item.createdAt.toLocaleTimeString(isArabic ? 'ar-EG' : 'en-US')}</span>
                     </div>
                   </div>
 
@@ -609,29 +606,29 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
                       <Button
                         variant="ghost"
                         onClick={() => handleViewResult(item)}
-                        className="h-7 w-7 sm:h-6 sm:w-6 p-0 text-blue-400 hover:text-blue-300"
+                        className="h-6 w-6 sm:h-6 sm:w-6 p-0 text-blue-400 hover:text-blue-300"
                         title={t('services.queue.view')}
                       >
-                        <Eye className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
+                        <Eye className="w-3 h-3 sm:w-3 sm:h-3" />
                       </Button>
                     )}
                     {item.status === 'error' && (
                       <Button
                         variant="ghost"
                         onClick={() => retryGeneration(item)}
-                        className="h-7 w-7 sm:h-6 sm:w-6 p-0 text-green-400 hover:text-green-300"
+                        className="h-6 w-6 sm:h-6 sm:w-6 p-0 text-green-400 hover:text-green-300"
                         title={t('services.queue.retry')}
                       >
-                        <RotateCcw className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
+                        <RotateCcw className="w-3 h-3 sm:w-3 sm:h-3" />
                       </Button>
                     )}
                     <Button
                       variant="ghost"
                       onClick={() => removeGeneration(item.id, item.status === 'running')}
-                      className="h-7 w-7 sm:h-6 sm:w-6 p-0 text-gray-400 hover:text-red-400"
+                      className="h-6 w-6 sm:h-6 sm:w-6 p-0 text-gray-400 hover:text-red-400"
                       title={item.status === 'running' ? t('services.queue.cancel') : t('services.queue.remove')}
                     >
-                      <X className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
+                      <X className="w-3 h-3 sm:w-3 sm:h-3" />
                     </Button>
                   </div>
                 </div>
