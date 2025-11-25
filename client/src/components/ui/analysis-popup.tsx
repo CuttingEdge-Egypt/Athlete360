@@ -2665,29 +2665,9 @@ export function AnalysisPopup({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] sm:w-[90vw] md:max-w-3xl lg:max-w-5xl max-h-[90vh] overflow-y-auto bg-athlete-gray-900 border-gray-700 text-white">
-        <div className="border-b border-gray-700 pb-3">
-          {/* Top utility bar - close button handled by DialogContent, Export PDF button */}
-          <div className={`flex items-center justify-end pb-2 ${i18n.language === 'ar' ? 'pl-12' : 'pr-12'}`}>
-            <Button 
-              onClick={handleExport}
-              size="sm"
-              variant="ghost"
-              className="text-gray-300 hover:text-white hover:bg-athlete-gray-800 gap-2"
-              disabled={isExporting}
-              data-testid="button-export-pdf"
-            >
-              <Download size={16} />
-              <span className="hidden sm:inline">
-                {isExporting ? t("common:analysis.exporting", "Exporting...") : t("common:analysis.exportPdf", "Export PDF")}
-              </span>
-              <span className="sm:hidden">
-                {isExporting ? t("common:analysis.exporting", "Exporting...") : t("common:analysis.export", "Export")}
-              </span>
-            </Button>
-          </div>
-          
+        <div className={`border-b border-gray-700 pb-4 ${i18n.language === 'ar' ? 'pl-12' : 'pr-12'}`}>
           {/* Title and metadata section */}
-          <div className={`pt-2 ${i18n.language === 'ar' ? 'pl-12 text-right' : 'pr-12 text-left'}`} dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+          <div className={`${i18n.language === 'ar' ? 'text-right' : 'text-left'}`} dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
             <DialogTitle className="text-lg sm:text-xl font-bold text-white">
               {getTitle(type)}
             </DialogTitle>
@@ -2699,6 +2679,20 @@ export function AnalysisPopup({
                 year: 'numeric'
               })}`}
             </DialogDescription>
+            
+            {/* Export PDF button below title */}
+            <div className="mt-3">
+              <Button 
+                onClick={handleExport}
+                size="sm"
+                className="bg-athlete-success hover:bg-green-600 text-white gap-2"
+                disabled={isExporting}
+                data-testid="button-export-pdf"
+              >
+                <Download size={16} />
+                {isExporting ? t("common:analysis.exporting", "Exporting...") : t("common:analysis.exportPdf", "Export PDF")}
+              </Button>
+            </div>
           </div>
         </div>
 
