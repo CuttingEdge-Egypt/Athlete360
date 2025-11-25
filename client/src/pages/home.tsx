@@ -2951,13 +2951,13 @@ export default function Home() {
                         <div className="mb-6 p-6 bg-athlete-gray-750 border border-gray-600 rounded-lg shadow-lg">
                           <div className="space-y-4">
                             {/* Progress message with dynamic animation */}
-                            <div className="flex items-center justify-center space-x-3">
-                              <div className="flex space-x-1">
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
+                              <div className="flex space-x-1 flex-shrink-0">
                                 <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce delay-0"></div>
                                 <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce delay-150"></div>
                                 <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce delay-300"></div>
                               </div>
-                              <p className="text-lg font-medium text-emerald-200 text-center">
+                              <p className="text-sm sm:text-lg font-medium text-emerald-200 text-center">
                                 {nutritionJobProgressMessage || t('common:messages.generatingNutritionPlan', "Generating your personalized nutrition plan...")}
                               </p>
                             </div>
@@ -3291,10 +3291,10 @@ export default function Home() {
                           data-testid="button-generate-development-plan"
                         >
                           {createDevelopmentPlanJobMutation.isPending || !!developmentJobId ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              {developmentProgressMessage || t('developmentPlan.generating')}
-                            </>
+                            <span className="flex items-center justify-center w-full">
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin flex-shrink-0" />
+                              <span className="truncate">{developmentProgressMessage || t('developmentPlan.generating')}</span>
+                            </span>
                           ) : (
                             <>
                               <CalendarDays className="mr-2 h-4 w-4" />
@@ -3336,16 +3336,16 @@ export default function Home() {
                                     )}
                                   </Button>
                                 )}
-                                <div className={`flex items-center gap-3 ${i18n.language === 'ar' ? 'flex-1 justify-end flex-row-reverse' : ''}`}>
-                                  <div className="relative">
+                                <div className={`flex items-center gap-3 flex-1 min-w-0 ${i18n.language === 'ar' ? 'justify-end flex-row-reverse' : ''}`}>
+                                  <div className="relative flex-shrink-0">
                                     <div className="animate-spin rounded-full h-6 w-6 border-2 border-emerald-500/30 border-t-emerald-400"></div>
                                     <div className="absolute inset-0 rounded-full h-6 w-6 bg-emerald-500/10"></div>
                                   </div>
-                                  <div className={i18n.language === 'ar' ? 'text-right' : ''}>
-                                    <p className={`text-emerald-100 font-semibold ${i18n.language === 'ar' ? 'text-lg' : ''}`}>
+                                  <div className={`min-w-0 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
+                                    <p className={`text-emerald-100 font-semibold text-sm sm:text-base truncate ${i18n.language === 'ar' ? 'sm:text-lg' : ''}`}>
                                       {developmentProgressMessage || t('common:messages.generatingDevelopmentPlan', 'Generating your development plan...')}
                                     </p>
-                                    <p className={`text-slate-300 ${i18n.language === 'ar' ? 'text-base' : 'text-sm'}`}>{t('common:messages.thisMayTakeFewMinutes', 'This may take a few minutes')}</p>
+                                    <p className={`text-slate-300 text-xs sm:text-sm ${i18n.language === 'ar' ? 'sm:text-base' : ''}`}>{t('common:messages.thisMayTakeFewMinutes', 'This may take a few minutes')}</p>
                                   </div>
                                 </div>
                                 {i18n.language !== 'ar' && (
