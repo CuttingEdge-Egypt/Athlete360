@@ -1,7 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, TrendingUp, Trophy, BarChart, Award } from "lucide-react";
+import { Calendar, TrendingUp, Trophy, BarChart, Award, Maximize, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Line } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import type { ChartOptions } from 'chart.js';
@@ -91,6 +91,10 @@ export function DualAnalysisPanel({
   } | null>(null);
   const [activeMainTab, setActiveMainTab] = useState<string>(defaultTab);
   const [activeYearTab, setActiveYearTab] = useState<string>(defaultYear);
+  
+  // Fullscreen state (mobile only)
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [fullscreenPointIndex, setFullscreenPointIndex] = useState(0);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -106,6 +110,14 @@ export function DualAnalysisPanel({
   useEffect(() => {
     setSelectedPoint(null);
   }, [rankHistoryData, activeMainTab, activeYearTab, athlete?.id]);
+
+  // Close fullscreen when data changes or tab switches (mobile only)
+  useEffect(() => {
+    if (isMobile) {
+      setIsFullscreen(false);
+      setFullscreenPointIndex(0);
+    }
+  }, [rankHistoryData, activeMainTab, activeYearTab, athlete?.id, isMobile]);
 
   // Initialize and reset activeYearTab when defaultYear or athlete changes
   useEffect(() => {
@@ -276,7 +288,9 @@ export function DualAnalysisPanel({
             font: {
               size: isMobile ? 11 : 12
             },
-            padding: isMobile ? 8 : 10
+            padding: isMobile ? 8 : 10,
+            boxWidth: isMobile ? 12 : 20,
+            boxHeight: isMobile ? 12 : 12
           }
         },
         tooltip: {
@@ -297,14 +311,59 @@ export function DualAnalysisPanel({
     // Calculate unique months for title
     const uniqueMonths = rankHistoryData ? new Set(rankHistoryData.map((entry: any) => `${entry.year}-${entry.month}`)).size : 0;
     
+    // Helper function to collect all data points for navigation
+    const getAllDataPoints = () => {
+      const points: Array<{ category: string; date: string; rank: number }> = [];
+      datasets.forEach(dataset => {
+        const categoryLabel = dataset.label as string;
+        dataset.data.forEach((rankValue, index) => {
+          if (rankValue !== null) {
+            points.push({
+              category: categoryLabel,
+              date: sortedLabels[index],
+              rank: rankValue as number
+            });
+          }
+        });
+      });
+      return points;
+    };
+
+    const allPoints = getAllDataPoints();
+    const currentPoint = allPoints[fullscreenPointIndex];
+
+    const handlePrevPoint = () => {
+      setFullscreenPointIndex(prev => (prev > 0 ? prev - 1 : allPoints.length - 1));
+    };
+
+    const handleNextPoint = () => {
+      setFullscreenPointIndex(prev => (prev < allPoints.length - 1 ? prev + 1 : 0));
+    };
+    
     return (
       <div className="space-y-6">
         <Card className="bg-athlete-gray-800 border-gray-600">
           <CardHeader>
-            <CardTitle className={`text-2xl text-gray-100 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
-              <TrendingUp className={`${isArabic ? 'ml-3' : 'mr-3'} text-orange-400`} size={24} />
-              {t('competitiveHistory.rankProgressionTitle')} ({uniqueMonths} {t('competitiveHistory.months')})
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className={`text-2xl text-gray-100 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <TrendingUp className={`${isArabic ? 'ml-3' : 'mr-3'} text-orange-400`} size={24} />
+                {t('competitiveHistory.rankProgressionTitle')} ({uniqueMonths} {t('competitiveHistory.months')})
+              </CardTitle>
+              {/* Mobile: Fullscreen button */}
+              {isMobile && (
+                <button
+                  onClick={() => {
+                    setIsFullscreen(true);
+                    setFullscreenPointIndex(0);
+                  }}
+                  className="p-2 text-gray-400 hover:text-white hover:bg-athlete-gray-700 rounded-lg transition-colors"
+                  aria-label="Fullscreen"
+                  data-testid="button-chart-fullscreen"
+                >
+                  <Maximize size={20} />
+                </button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <div className={isMobile ? "h-80" : "h-96"}>
@@ -422,6 +481,80 @@ export function DualAnalysisPanel({
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Mobile: Fullscreen Modal */}
+        {isMobile && isFullscreen && currentPoint && (
+          <div 
+            className="fixed inset-0 z-50 bg-athlete-gray-900 flex flex-col"
+            data-testid="fullscreen-chart-modal"
+          >
+            {/* Header with Close Button */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-700">
+              <h3 className="text-xl font-bold text-white flex items-center">
+                <TrendingUp className="mr-2 text-orange-400" size={20} />
+                {t('competitiveHistory.rankProgressionTitle')}
+              </h3>
+              <button
+                onClick={() => setIsFullscreen(false)}
+                className="p-2 text-gray-400 hover:text-white hover:bg-athlete-gray-800 rounded-lg transition-colors"
+                aria-label="Close Fullscreen"
+                data-testid="button-close-fullscreen"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Chart Display */}
+            <div className="flex-1 p-4 overflow-auto">
+              <div className="h-96">
+                <Line data={chartData} options={chartOptions} />
+              </div>
+            </div>
+
+            {/* Point Details Card */}
+            <div className="p-4 bg-athlete-gray-800 border-t border-gray-700">
+              <div className="bg-athlete-gray-700 p-4 rounded-lg border-2 border-blue-500">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <span className="text-sm font-semibold text-blue-400">
+                    {t('competitiveHistory.selectedPoint', 'Selected Point')} ({fullscreenPointIndex + 1}/{allPoints.length})
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-white font-bold text-xl" data-testid="text-fullscreen-rank">
+                    {t('competitiveHistory.rank', 'Rank')}: #{currentPoint.rank}
+                  </div>
+                  <div className="text-gray-300" data-testid="text-fullscreen-category">
+                    {currentPoint.category}
+                  </div>
+                  <div className="text-gray-400 text-sm" data-testid="text-fullscreen-date">
+                    {currentPoint.date}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Navigation Arrows */}
+            <div className="flex items-center justify-between p-4 bg-athlete-gray-800 border-t border-gray-700">
+              <button
+                onClick={handlePrevPoint}
+                className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-semibold"
+                data-testid="button-prev-point"
+              >
+                <ChevronLeft size={24} />
+                {t('competitiveHistory.previous', 'Previous')}
+              </button>
+              <button
+                onClick={handleNextPoint}
+                className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-semibold"
+                data-testid="button-next-point"
+              >
+                {t('competitiveHistory.next', 'Next')}
+                <ChevronRight size={24} />
+              </button>
+            </div>
+          </div>
         )}
       </div>
     );
@@ -584,7 +717,9 @@ export function DualAnalysisPanel({
             font: {
               size: isMobile ? 11 : 12
             },
-            padding: isMobile ? 8 : 10
+            padding: isMobile ? 8 : 10,
+            boxWidth: isMobile ? 12 : 20,
+            boxHeight: isMobile ? 12 : 12
           }
         },
         tooltip: {
@@ -602,14 +737,59 @@ export function DualAnalysisPanel({
       }
     };
 
+    // Helper function to collect all data points for navigation
+    const getAllDataPoints = () => {
+      const points: Array<{ category: string; date: string; rank: number }> = [];
+      datasets.forEach(dataset => {
+        const categoryLabel = dataset.label as string;
+        dataset.data.forEach((rankValue, index) => {
+          if (rankValue !== null) {
+            points.push({
+              category: categoryLabel,
+              date: sortedLabels[index],
+              rank: rankValue as number
+            });
+          }
+        });
+      });
+      return points;
+    };
+
+    const allPoints = getAllDataPoints();
+    const currentPoint = allPoints[fullscreenPointIndex];
+
+    const handlePrevPoint = () => {
+      setFullscreenPointIndex(prev => (prev > 0 ? prev - 1 : allPoints.length - 1));
+    };
+
+    const handleNextPoint = () => {
+      setFullscreenPointIndex(prev => (prev < allPoints.length - 1 ? prev + 1 : 0));
+    };
+
     return (
       <div className="space-y-6">
         <Card className="bg-athlete-gray-800 border-gray-600">
           <CardHeader>
-            <CardTitle className="text-2xl text-gray-100 flex items-center">
-              <TrendingUp className="mr-3 text-orange-400" size={24} />
-              {t('competitiveHistory.rankProgressionOverTime', 'Rank Progression Over Time')}
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-2xl text-gray-100 flex items-center">
+                <TrendingUp className="mr-3 text-orange-400" size={24} />
+                {t('competitiveHistory.rankProgressionOverTime', 'Rank Progression Over Time')}
+              </CardTitle>
+              {/* Mobile: Fullscreen button */}
+              {isMobile && (
+                <button
+                  onClick={() => {
+                    setIsFullscreen(true);
+                    setFullscreenPointIndex(0);
+                  }}
+                  className="p-2 text-gray-400 hover:text-white hover:bg-athlete-gray-700 rounded-lg transition-colors"
+                  aria-label="Fullscreen"
+                  data-testid="button-chart-fullscreen"
+                >
+                  <Maximize size={20} />
+                </button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <div className={isMobile ? "h-80" : "h-96"}>
@@ -714,6 +894,80 @@ export function DualAnalysisPanel({
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Mobile: Fullscreen Modal */}
+        {isMobile && isFullscreen && currentPoint && (
+          <div 
+            className="fixed inset-0 z-50 bg-athlete-gray-900 flex flex-col"
+            data-testid="fullscreen-chart-modal"
+          >
+            {/* Header with Close Button */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-700">
+              <h3 className="text-xl font-bold text-white flex items-center">
+                <TrendingUp className="mr-2 text-orange-400" size={20} />
+                {t('competitiveHistory.rankProgressionOverTime', 'Rank Progression Over Time')}
+              </h3>
+              <button
+                onClick={() => setIsFullscreen(false)}
+                className="p-2 text-gray-400 hover:text-white hover:bg-athlete-gray-800 rounded-lg transition-colors"
+                aria-label="Close Fullscreen"
+                data-testid="button-close-fullscreen"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Chart Display */}
+            <div className="flex-1 p-4 overflow-auto">
+              <div className="h-96">
+                <Line data={chartData} options={chartOptions} />
+              </div>
+            </div>
+
+            {/* Point Details Card */}
+            <div className="p-4 bg-athlete-gray-800 border-t border-gray-700">
+              <div className="bg-athlete-gray-700 p-4 rounded-lg border-2 border-blue-500">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <span className="text-sm font-semibold text-blue-400">
+                    {t('competitiveHistory.selectedPoint', 'Selected Point')} ({fullscreenPointIndex + 1}/{allPoints.length})
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-white font-bold text-xl" data-testid="text-fullscreen-rank">
+                    {t('competitiveHistory.rank', 'Rank')}: #{currentPoint.rank}
+                  </div>
+                  <div className="text-gray-300" data-testid="text-fullscreen-category">
+                    {currentPoint.category}
+                  </div>
+                  <div className="text-gray-400 text-sm" data-testid="text-fullscreen-date">
+                    {currentPoint.date}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Navigation Arrows */}
+            <div className="flex items-center justify-between p-4 bg-athlete-gray-800 border-t border-gray-700">
+              <button
+                onClick={handlePrevPoint}
+                className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-semibold"
+                data-testid="button-prev-point"
+              >
+                <ChevronLeft size={24} />
+                {t('competitiveHistory.previous', 'Previous')}
+              </button>
+              <button
+                onClick={handleNextPoint}
+                className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-semibold"
+                data-testid="button-next-point"
+              >
+                {t('competitiveHistory.next', 'Next')}
+                <ChevronRight size={24} />
+              </button>
+            </div>
+          </div>
         )}
       </div>
     );
