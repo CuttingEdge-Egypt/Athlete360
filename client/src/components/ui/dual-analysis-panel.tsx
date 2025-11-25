@@ -89,6 +89,7 @@ export function DualAnalysisPanel({
     date: string;
     rank: number;
   } | null>(null);
+  const [selectedPointIndex, setSelectedPointIndex] = useState(0); // Track index for navigation
   const [activeMainTab, setActiveMainTab] = useState<string>(defaultTab);
   const [activeYearTab, setActiveYearTab] = useState<string>(defaultYear);
   
@@ -109,6 +110,7 @@ export function DualAnalysisPanel({
   // Clear selected point when data changes or tab switches
   useEffect(() => {
     setSelectedPoint(null);
+    setSelectedPointIndex(0);
   }, [rankHistoryData, activeMainTab, activeYearTab, athlete?.id]);
 
   // Close fullscreen when data changes or tab switches (mobile only)
@@ -274,21 +276,24 @@ export function DualAnalysisPanel({
           const date = chart.data.labels[index];
           
           if (value !== null) {
-            // In fullscreen mode, update the fullscreen point index
-            if (isFullscreen) {
-              const clickedPointIndex = allPoints.findIndex(
-                p => p.datasetIndex === datasetIndex && p.pointIndex === index
-              );
-              if (clickedPointIndex !== -1) {
+            // Find the clicked point index in the sorted allPoints array
+            const clickedPointIndex = allPoints.findIndex(
+              p => p.datasetIndex === datasetIndex && p.pointIndex === index
+            );
+            
+            if (clickedPointIndex !== -1) {
+              if (isFullscreen) {
+                // In fullscreen mode, update the fullscreen point index
                 setFullscreenPointIndex(clickedPointIndex);
+              } else {
+                // In normal mode, set selected point and index
+                setSelectedPoint({
+                  category: category as string,
+                  date: date as string,
+                  rank: value as number
+                });
+                setSelectedPointIndex(clickedPointIndex);
               }
-            } else {
-              // In normal mode, set selected point
-              setSelectedPoint({
-                category: category as string,
-                date: date as string,
-                rank: value as number
-              });
             }
           }
         }
@@ -358,6 +363,7 @@ export function DualAnalysisPanel({
     const uniqueMonths = rankHistoryData ? new Set(rankHistoryData.map((entry: any) => `${entry.year}-${entry.month}`)).size : 0;
     
     const currentPoint = allPoints[fullscreenPointIndex];
+    const currentMobilePoint = selectedPoint ? allPoints[selectedPointIndex] : null;
 
     const handlePrevPoint = () => {
       setFullscreenPointIndex(prev => (prev > 0 ? prev - 1 : allPoints.length - 1));
@@ -367,15 +373,41 @@ export function DualAnalysisPanel({
       setFullscreenPointIndex(prev => (prev < allPoints.length - 1 ? prev + 1 : 0));
     };
 
-    // Custom plugin to highlight selected point in fullscreen mode
+    const handlePrevMobilePoint = () => {
+      const newIndex = selectedPointIndex > 0 ? selectedPointIndex - 1 : allPoints.length - 1;
+      setSelectedPointIndex(newIndex);
+      const point = allPoints[newIndex];
+      setSelectedPoint({
+        category: point.category,
+        date: point.date,
+        rank: point.rank
+      });
+    };
+
+    const handleNextMobilePoint = () => {
+      const newIndex = selectedPointIndex < allPoints.length - 1 ? selectedPointIndex + 1 : 0;
+      setSelectedPointIndex(newIndex);
+      const point = allPoints[newIndex];
+      setSelectedPoint({
+        category: point.category,
+        date: point.date,
+        rank: point.rank
+      });
+    };
+
+    // Custom plugin to highlight selected point in mobile and fullscreen mode
     const highlightPlugin = {
       id: 'highlightSelectedPoint',
       afterDatasetsDraw: (chart: any) => {
-        if (!isMobile || !isFullscreen || !currentPoint) return;
+        if (!isMobile) return;
+        
+        // Determine which point to highlight
+        const pointToHighlight = isFullscreen ? currentPoint : currentMobilePoint;
+        if (!pointToHighlight) return;
 
         const ctx = chart.ctx;
-        const meta = chart.getDatasetMeta(currentPoint.datasetIndex);
-        const point = meta.data[currentPoint.pointIndex];
+        const meta = chart.getDatasetMeta(pointToHighlight.datasetIndex);
+        const point = meta.data[pointToHighlight.pointIndex];
 
         if (point) {
           ctx.save();
@@ -396,7 +428,7 @@ export function DualAnalysisPanel({
           // Draw colored center
           ctx.beginPath();
           ctx.arc(point.x, point.y, 8, 0, 2 * Math.PI);
-          ctx.fillStyle = currentPoint.color;
+          ctx.fillStyle = pointToHighlight.color;
           ctx.fill();
           
           ctx.restore();
@@ -431,41 +463,56 @@ export function DualAnalysisPanel({
           </CardHeader>
           <CardContent>
             <div className={isMobile ? "h-80" : "h-96"}>
-              <Line data={chartData} options={chartOptions} />
+              <Line data={chartData} options={chartOptions} plugins={[highlightPlugin]} />
             </div>
             
             {/* Mobile: Display selected point data */}
-            {isMobile && selectedPoint && (
-              <div 
-                className="mt-4 p-4 bg-athlete-gray-700 rounded-lg border-2 border-blue-500"
-                data-testid="mobile-selected-point-card"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <span className="text-sm font-semibold text-blue-400">{t('competitiveHistory.selectedPoint', 'Selected Point')}</span>
+            {isMobile && selectedPoint && currentMobilePoint && (
+              <>
+                <div 
+                  className="mt-4 p-4 bg-athlete-gray-700 rounded-lg border-2"
+                  style={{ borderColor: currentMobilePoint.color }}
+                  data-testid="mobile-selected-point-card"
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: currentMobilePoint.color }}></div>
+                    <span className="text-sm font-semibold" style={{ color: currentMobilePoint.color }}>
+                      {t('competitiveHistory.selectedPoint', 'Selected Point')} ({selectedPointIndex + 1}/{allPoints.length})
+                    </span>
                   </div>
+                  <div className="space-y-2">
+                    <div className="text-white font-bold text-xl" data-testid="text-selected-rank">
+                      {t('competitiveHistory.rank', 'Rank')}: #{selectedPoint.rank}
+                    </div>
+                    <div className="text-gray-300" data-testid="text-selected-category">
+                      {selectedPoint.category}
+                    </div>
+                    <div className="text-gray-400 text-sm" data-testid="text-selected-date">
+                      {selectedPoint.date}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Navigation Arrows for Mobile */}
+                <div className="flex items-center justify-between mt-3 gap-2">
                   <button
-                    onClick={() => setSelectedPoint(null)}
-                    className="text-gray-400 hover:text-white transition-colors text-xl px-2"
-                    aria-label="Close"
-                    data-testid="button-close-selected-point"
+                    onClick={handlePrevMobilePoint}
+                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-semibold flex-1"
+                    data-testid="button-prev-mobile-point"
                   >
-                    ×
+                    <ChevronLeft size={20} />
+                    {t('competitiveHistory.previous', 'Previous')}
+                  </button>
+                  <button
+                    onClick={handleNextMobilePoint}
+                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-semibold flex-1"
+                    data-testid="button-next-mobile-point"
+                  >
+                    {t('competitiveHistory.next', 'Next')}
+                    <ChevronRight size={20} />
                   </button>
                 </div>
-                <div className="space-y-1">
-                  <div className="text-white font-bold text-lg" data-testid="text-selected-rank">
-                    {t('competitiveHistory.rank', 'Rank')}: #{selectedPoint.rank}
-                  </div>
-                  <div className="text-gray-300 text-sm" data-testid="text-selected-category">
-                    {selectedPoint.category}
-                  </div>
-                  <div className="text-gray-400 text-xs" data-testid="text-selected-date">
-                    {selectedPoint.date}
-                  </div>
-                </div>
-              </div>
+              </>
             )}
 
             {/* Mobile: Instruction hint */}
@@ -767,21 +814,24 @@ export function DualAnalysisPanel({
           const date = chart.data.labels[index];
           
           if (value !== null) {
-            // In fullscreen mode, update the fullscreen point index
-            if (isFullscreen) {
-              const clickedPointIndex = allPoints.findIndex(
-                p => p.datasetIndex === datasetIndex && p.pointIndex === index
-              );
-              if (clickedPointIndex !== -1) {
+            // Find the clicked point index in the sorted allPoints array
+            const clickedPointIndex = allPoints.findIndex(
+              p => p.datasetIndex === datasetIndex && p.pointIndex === index
+            );
+            
+            if (clickedPointIndex !== -1) {
+              if (isFullscreen) {
+                // In fullscreen mode, update the fullscreen point index
                 setFullscreenPointIndex(clickedPointIndex);
+              } else {
+                // In normal mode, set selected point and index
+                setSelectedPoint({
+                  category: category as string,
+                  date: date as string,
+                  rank: value as number
+                });
+                setSelectedPointIndex(clickedPointIndex);
               }
-            } else {
-              // In normal mode, set selected point
-              setSelectedPoint({
-                category: category as string,
-                date: date as string,
-                rank: value as number
-              });
             }
           }
         }
@@ -848,6 +898,7 @@ export function DualAnalysisPanel({
     };
 
     const currentPoint = allPoints[fullscreenPointIndex];
+    const currentMobilePoint = selectedPoint ? allPoints[selectedPointIndex] : null;
 
     const handlePrevPoint = () => {
       setFullscreenPointIndex(prev => (prev > 0 ? prev - 1 : allPoints.length - 1));
@@ -857,15 +908,41 @@ export function DualAnalysisPanel({
       setFullscreenPointIndex(prev => (prev < allPoints.length - 1 ? prev + 1 : 0));
     };
 
-    // Custom plugin to highlight selected point in fullscreen mode
+    const handlePrevMobilePoint = () => {
+      const newIndex = selectedPointIndex > 0 ? selectedPointIndex - 1 : allPoints.length - 1;
+      setSelectedPointIndex(newIndex);
+      const point = allPoints[newIndex];
+      setSelectedPoint({
+        category: point.category,
+        date: point.date,
+        rank: point.rank
+      });
+    };
+
+    const handleNextMobilePoint = () => {
+      const newIndex = selectedPointIndex < allPoints.length - 1 ? selectedPointIndex + 1 : 0;
+      setSelectedPointIndex(newIndex);
+      const point = allPoints[newIndex];
+      setSelectedPoint({
+        category: point.category,
+        date: point.date,
+        rank: point.rank
+      });
+    };
+
+    // Custom plugin to highlight selected point in mobile and fullscreen mode
     const highlightPlugin = {
       id: 'highlightSelectedPoint',
       afterDatasetsDraw: (chart: any) => {
-        if (!isMobile || !isFullscreen || !currentPoint) return;
+        if (!isMobile) return;
+        
+        // Determine which point to highlight
+        const pointToHighlight = isFullscreen ? currentPoint : currentMobilePoint;
+        if (!pointToHighlight) return;
 
         const ctx = chart.ctx;
-        const meta = chart.getDatasetMeta(currentPoint.datasetIndex);
-        const point = meta.data[currentPoint.pointIndex];
+        const meta = chart.getDatasetMeta(pointToHighlight.datasetIndex);
+        const point = meta.data[pointToHighlight.pointIndex];
 
         if (point) {
           ctx.save();
@@ -886,7 +963,7 @@ export function DualAnalysisPanel({
           // Draw colored center
           ctx.beginPath();
           ctx.arc(point.x, point.y, 8, 0, 2 * Math.PI);
-          ctx.fillStyle = currentPoint.color;
+          ctx.fillStyle = pointToHighlight.color;
           ctx.fill();
           
           ctx.restore();
@@ -921,41 +998,56 @@ export function DualAnalysisPanel({
           </CardHeader>
           <CardContent>
             <div className={isMobile ? "h-80" : "h-96"}>
-              <Line data={chartData} options={chartOptions} />
+              <Line data={chartData} options={chartOptions} plugins={[highlightPlugin]} />
             </div>
             
             {/* Mobile: Display selected point data */}
-            {isMobile && selectedPoint && (
-              <div 
-                className="mt-4 p-4 bg-athlete-gray-700 rounded-lg border-2 border-blue-500"
-                data-testid="mobile-selected-point-card"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <span className="text-sm font-semibold text-blue-400">{t('competitiveHistory.selectedPoint', 'Selected Point')}</span>
+            {isMobile && selectedPoint && currentMobilePoint && (
+              <>
+                <div 
+                  className="mt-4 p-4 bg-athlete-gray-700 rounded-lg border-2"
+                  style={{ borderColor: currentMobilePoint.color }}
+                  data-testid="mobile-selected-point-card"
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: currentMobilePoint.color }}></div>
+                    <span className="text-sm font-semibold" style={{ color: currentMobilePoint.color }}>
+                      {t('competitiveHistory.selectedPoint', 'Selected Point')} ({selectedPointIndex + 1}/{allPoints.length})
+                    </span>
                   </div>
+                  <div className="space-y-2">
+                    <div className="text-white font-bold text-xl" data-testid="text-selected-rank">
+                      {t('competitiveHistory.rank', 'Rank')}: #{selectedPoint.rank}
+                    </div>
+                    <div className="text-gray-300" data-testid="text-selected-category">
+                      {selectedPoint.category}
+                    </div>
+                    <div className="text-gray-400 text-sm" data-testid="text-selected-date">
+                      {selectedPoint.date}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Navigation Arrows for Mobile */}
+                <div className="flex items-center justify-between mt-3 gap-2">
                   <button
-                    onClick={() => setSelectedPoint(null)}
-                    className="text-gray-400 hover:text-white transition-colors text-xl px-2"
-                    aria-label="Close"
-                    data-testid="button-close-selected-point"
+                    onClick={handlePrevMobilePoint}
+                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-semibold flex-1"
+                    data-testid="button-prev-mobile-point"
                   >
-                    ×
+                    <ChevronLeft size={20} />
+                    {t('competitiveHistory.previous', 'Previous')}
+                  </button>
+                  <button
+                    onClick={handleNextMobilePoint}
+                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-semibold flex-1"
+                    data-testid="button-next-mobile-point"
+                  >
+                    {t('competitiveHistory.next', 'Next')}
+                    <ChevronRight size={20} />
                   </button>
                 </div>
-                <div className="space-y-1">
-                  <div className="text-white font-bold text-lg" data-testid="text-selected-rank">
-                    {t('competitiveHistory.rank', 'Rank')}: #{selectedPoint.rank}
-                  </div>
-                  <div className="text-gray-300 text-sm" data-testid="text-selected-category">
-                    {selectedPoint.category}
-                  </div>
-                  <div className="text-gray-400 text-xs" data-testid="text-selected-date">
-                    {selectedPoint.date}
-                  </div>
-                </div>
-              </div>
+              </>
             )}
 
             {/* Mobile: Instruction hint */}
