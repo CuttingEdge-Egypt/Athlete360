@@ -313,15 +313,19 @@ export function DualAnalysisPanel({
     
     // Helper function to collect all data points for navigation
     const getAllDataPoints = () => {
-      const points: Array<{ category: string; date: string; rank: number }> = [];
-      datasets.forEach(dataset => {
+      const points: Array<{ category: string; date: string; rank: number; color: string; datasetIndex: number; pointIndex: number }> = [];
+      datasets.forEach((dataset, datasetIndex) => {
         const categoryLabel = dataset.label as string;
+        const categoryColor = dataset.borderColor as string;
         dataset.data.forEach((rankValue, index) => {
           if (rankValue !== null) {
             points.push({
               category: categoryLabel,
               date: sortedLabels[index],
-              rank: rankValue as number
+              rank: rankValue as number,
+              color: categoryColor,
+              datasetIndex,
+              pointIndex: index
             });
           }
         });
@@ -338,6 +342,43 @@ export function DualAnalysisPanel({
 
     const handleNextPoint = () => {
       setFullscreenPointIndex(prev => (prev < allPoints.length - 1 ? prev + 1 : 0));
+    };
+
+    // Custom plugin to highlight selected point in fullscreen mode
+    const highlightPlugin = {
+      id: 'highlightSelectedPoint',
+      afterDatasetsDraw: (chart: any) => {
+        if (!isMobile || !isFullscreen || !currentPoint) return;
+
+        const ctx = chart.ctx;
+        const meta = chart.getDatasetMeta(currentPoint.datasetIndex);
+        const point = meta.data[currentPoint.pointIndex];
+
+        if (point) {
+          ctx.save();
+          
+          // Draw larger outer circle
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, 14, 0, 2 * Math.PI);
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+          ctx.fill();
+          
+          // Draw white ring
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, 10, 0, 2 * Math.PI);
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          
+          // Draw colored center
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, 8, 0, 2 * Math.PI);
+          ctx.fillStyle = currentPoint.color;
+          ctx.fill();
+          
+          ctx.restore();
+        }
+      }
     };
     
     return (
@@ -508,16 +549,16 @@ export function DualAnalysisPanel({
             {/* Chart Display */}
             <div className="flex-1 p-4 overflow-auto">
               <div className="h-96">
-                <Line data={chartData} options={chartOptions} />
+                <Line data={chartData} options={chartOptions} plugins={[highlightPlugin]} />
               </div>
             </div>
 
             {/* Point Details Card */}
             <div className="p-4 bg-athlete-gray-800 border-t border-gray-700">
-              <div className="bg-athlete-gray-700 p-4 rounded-lg border-2 border-blue-500">
+              <div className="bg-athlete-gray-700 p-4 rounded-lg border-2" style={{ borderColor: currentPoint.color }}>
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <span className="text-sm font-semibold text-blue-400">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: currentPoint.color }}></div>
+                  <span className="text-sm font-semibold" style={{ color: currentPoint.color }}>
                     {t('competitiveHistory.selectedPoint', 'Selected Point')} ({fullscreenPointIndex + 1}/{allPoints.length})
                   </span>
                 </div>
@@ -739,15 +780,19 @@ export function DualAnalysisPanel({
 
     // Helper function to collect all data points for navigation
     const getAllDataPoints = () => {
-      const points: Array<{ category: string; date: string; rank: number }> = [];
-      datasets.forEach(dataset => {
+      const points: Array<{ category: string; date: string; rank: number; color: string; datasetIndex: number; pointIndex: number }> = [];
+      datasets.forEach((dataset, datasetIndex) => {
         const categoryLabel = dataset.label as string;
+        const categoryColor = dataset.borderColor as string;
         dataset.data.forEach((rankValue, index) => {
           if (rankValue !== null) {
             points.push({
               category: categoryLabel,
               date: sortedLabels[index],
-              rank: rankValue as number
+              rank: rankValue as number,
+              color: categoryColor,
+              datasetIndex,
+              pointIndex: index
             });
           }
         });
@@ -921,16 +966,16 @@ export function DualAnalysisPanel({
             {/* Chart Display */}
             <div className="flex-1 p-4 overflow-auto">
               <div className="h-96">
-                <Line data={chartData} options={chartOptions} />
+                <Line data={chartData} options={chartOptions} plugins={[highlightPlugin]} />
               </div>
             </div>
 
             {/* Point Details Card */}
             <div className="p-4 bg-athlete-gray-800 border-t border-gray-700">
-              <div className="bg-athlete-gray-700 p-4 rounded-lg border-2 border-blue-500">
+              <div className="bg-athlete-gray-700 p-4 rounded-lg border-2" style={{ borderColor: currentPoint.color }}>
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <span className="text-sm font-semibold text-blue-400">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: currentPoint.color }}></div>
+                  <span className="text-sm font-semibold" style={{ color: currentPoint.color }}>
                     {t('competitiveHistory.selectedPoint', 'Selected Point')} ({fullscreenPointIndex + 1}/{allPoints.length})
                   </span>
                 </div>
