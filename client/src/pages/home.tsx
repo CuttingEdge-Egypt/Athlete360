@@ -2177,8 +2177,8 @@ export default function Home() {
                       className="bg-athlete-gray-700 border-gray-600"
                     >
                       <CardContent className="p-4 sm:p-6">
-                    <div className="flex flex-col sm:flex-row items-start gap-4">
-                      <div className="flex flex-row sm:flex-col items-center sm:items-start gap-3 sm:gap-3 w-full sm:w-auto">
+                    <div className="flex flex-col md:flex-row items-start gap-4">
+                      <div className="flex flex-row md:flex-col items-center md:items-start gap-3 md:gap-3 w-full md:w-auto">
                         {/* Profile Image */}
                         <div className="relative w-16 h-16 flex-shrink-0">
                           {selectedAthlete.profileImageUrl ? (
@@ -2204,7 +2204,7 @@ export default function Home() {
                         </div>
                         
                         {/* Action Buttons Container */}
-                        <div className="relative flex flex-row sm:flex-col gap-1 flex-1 sm:flex-initial">
+                        <div className="relative flex flex-row md:flex-col gap-1 flex-1 md:flex-initial">
                           {/* Image Search Button */}
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -2216,7 +2216,7 @@ export default function Home() {
                                 }}
                                 size="sm"
                                 variant="outline"
-                                className="bg-athlete-gray-600 border-gray-500 text-gray-300 hover:bg-athlete-gray-500 hover:text-white text-xs px-2 py-1 h-6 relative w-full"
+                                className="bg-athlete-gray-600 border-gray-500 text-gray-300 hover:bg-athlete-gray-500 hover:text-white text-xs px-2 py-1 h-6 relative w-full md:w-auto md:min-w-[100px]"
                                 disabled={isSearchingImage}
                               >
                                 {isSearchingImage ? (
@@ -2250,7 +2250,7 @@ export default function Home() {
                                   onClick={() => handleSearchAthleteRankings(selectedAthlete.id)}
                                   size="sm"
                                   variant="outline"
-                                  className="bg-amber-600/20 border-amber-500/50 text-amber-300 hover:bg-amber-600/30 hover:text-amber-200 text-xs px-2 py-1 h-6 w-full"
+                                  className="bg-amber-600/20 border-amber-500/50 text-amber-300 hover:bg-amber-600/30 hover:text-amber-200 text-xs px-2 py-1 h-6 w-full md:w-auto md:min-w-[100px]"
                                   disabled={rankingFetchStatus[selectedAthlete.id]?.isLoading}
                                 >
                                   {rankingFetchStatus[selectedAthlete.id]?.isLoading ? (
@@ -2303,20 +2303,20 @@ export default function Home() {
                         </div>
                       </div>
                       
-                      <div className="flex-1 min-w-0 sm:ml-4 w-full sm:w-auto">
-                          <div className="flex flex-col sm:flex-row items-start sm:justify-between gap-3 sm:gap-4 mb-2">
-                            <div className="flex-1 w-full sm:w-auto">
-                              <h3 className="text-lg sm:text-xl font-bold text-white break-words">
+                      <div className="flex-1 min-w-0 md:ml-4 w-full md:w-auto">
+                          <div className="flex flex-col md:flex-row items-start md:justify-between gap-3 md:gap-4 mb-2">
+                            <div className="flex-1 w-full md:w-auto md:min-w-0 md:max-w-md">
+                              <h3 className="text-lg md:text-xl font-bold text-white break-words">
                                 {selectedAthlete.name}
                               </h3>
-                              <p className="text-sm sm:text-base text-gray-400 capitalize flex items-center gap-2">
+                              <p className="text-sm md:text-base text-gray-400 capitalize flex items-center gap-2">
                                 <Flag country={selectedAthlete.country || "US"} className="w-6 h-4 rounded shadow-sm" />
                                 {selectedAthlete.country || "Unknown Country"}
                               </p>
                             </div>
                             
                             {/* Rankings Display - aligned with name */}
-                            <div className="flex flex-wrap items-start justify-start sm:justify-end gap-2 w-full sm:w-auto">
+                            <div className="flex flex-wrap items-start justify-start md:justify-end gap-2 w-full md:w-auto md:flex-shrink-0">
                               {selectedAthlete.rankings?.categories && selectedAthlete.rankings.categories.length > 0 ? (
                                 selectedAthlete.rankings.categories.map((rankInfo, index) => {
                                   // Determine rank type and color from the category text
@@ -2445,7 +2445,7 @@ export default function Home() {
                                   return (
                                     <div 
                                       key={index}
-                                      className={`relative ${bgColor} border-2 ${borderColor} rounded-lg px-2 py-1 ${isTop3 ? 'shadow-lg' : 'shadow-md'} hover:scale-105 transition-transform duration-200 w-auto sm:w-full sm:max-w-xs`} 
+                                      className={`relative ${bgColor} border-2 ${borderColor} rounded-lg px-2 py-1 ${isTop3 ? 'shadow-lg' : 'shadow-md'} hover:scale-105 transition-transform duration-200 w-auto max-w-xs`} 
                                       data-testid={testId}
                                     >
                                       <div className="flex items-center gap-1.5">
