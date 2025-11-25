@@ -1909,9 +1909,11 @@ export default function Home() {
                           className="bg-athlete-gray-700 border-gray-600 text-white flex-1 justify-between hover:bg-athlete-gray-600"
                           data-testid="select-sport"
                         >
-                          {selectedSport
-                            ? sports.find(s => s.id === selectedSport)?.name
-                            : t('interface.chooseASport')}
+                          <span className="truncate">
+                            {selectedSport
+                              ? sports.find(s => s.id === selectedSport)?.name
+                              : t('interface.chooseASport')}
+                          </span>
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
@@ -2693,9 +2695,11 @@ export default function Home() {
                                         className="bg-athlete-gray-700 border-gray-600 text-white flex-1 justify-between hover:bg-athlete-gray-600"
                                         data-testid="select-nutrition-sport"
                                       >
-                                        {(selectedSport || field.value)
-                                          ? sports.find(s => s.id === (selectedSport || field.value))?.name
-                                          : t('interface.chooseASport')}
+                                        <span className="truncate">
+                                          {(selectedSport || field.value)
+                                            ? sports.find(s => s.id === (selectedSport || field.value))?.name
+                                            : t('interface.chooseASport')}
+                                        </span>
                                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                       </Button>
                                     </PopoverTrigger>
@@ -3205,9 +3209,11 @@ export default function Home() {
                                       className="bg-athlete-gray-700 border-gray-600 text-white w-full justify-between hover:bg-athlete-gray-600"
                                       data-testid="select-development-sport"
                                     >
-                                      {field.value
-                                        ? sports.find(s => s.name === field.value)?.name
-                                        : t('developmentPlan.sportPlaceholder')}
+                                      <span className="truncate">
+                                        {field.value
+                                          ? sports.find(s => s.name === field.value)?.name
+                                          : t('developmentPlan.sportPlaceholder')}
+                                      </span>
                                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                     </Button>
                                   </PopoverTrigger>
