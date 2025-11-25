@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import type { ChartOptions } from 'chart.js';
 import { SwimmingCompetitiveHistory } from './swimming-competitive-history';
 import { SquashCompetitiveHistory } from './squash-competitive-history';
+import { useState, useEffect } from 'react';
 
 interface RankAnalysisDetails {
   trends_and_outlook?: string;
@@ -56,7 +57,7 @@ export function DualAnalysisPanel({
   const rankingProgression = competitiveAnalysis?.rankingProgression || [];
   const careerSummary = competitiveAnalysis?.careerSummary || {};
 
-  // Extract unique years from both datasets
+  // Extract unique years from both datasets (needs to be before useState)
   const getAvailableYears = () => {
     const years = new Set<number>();
     
@@ -80,6 +81,36 @@ export function DualAnalysisPanel({
 
   const availableYears = getAvailableYears();
   const defaultYear = availableYears[0]?.toString() || '2025';
+
+  // Mobile detection and selected point state for mobile interactions
+  const [isMobile, setIsMobile] = useState(false);
+  const [selectedPoint, setSelectedPoint] = useState<{
+    category: string;
+    date: string;
+    rank: number;
+  } | null>(null);
+  const [activeMainTab, setActiveMainTab] = useState<string>(defaultTab);
+  const [activeYearTab, setActiveYearTab] = useState<string>(defaultYear);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // sm breakpoint
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Clear selected point when data changes or tab switches
+  useEffect(() => {
+    setSelectedPoint(null);
+  }, [rankHistoryData, activeMainTab, activeYearTab, athlete?.id]);
+
+  // Initialize and reset activeYearTab when defaultYear or athlete changes
+  useEffect(() => {
+    setActiveYearTab(defaultYear);
+  }, [defaultYear, athlete?.id]);
 
   const renderRankHistoryContent = () => {
     // If swimming athlete, show medals instead of rank history
@@ -170,8 +201,9 @@ export function DualAnalysisPanel({
         backgroundColor: colors.bg,
         fill: true,
         tension: 0.3,
-        pointRadius: 5,
-        pointHoverRadius: 7,
+        pointRadius: isMobile ? 8 : 5,
+        pointHoverRadius: isMobile ? 10 : 7,
+        pointHitRadius: isMobile ? 20 : 10,
         spanGaps: false,
       };
     });
@@ -184,6 +216,25 @@ export function DualAnalysisPanel({
     const chartOptions: ChartOptions<'line'> = {
       responsive: true,
       maintainAspectRatio: false,
+      onClick: isMobile ? (event: any, elements: any, chart: any) => {
+        if (elements && elements.length > 0) {
+          const element = elements[0];
+          const datasetIndex = element.datasetIndex;
+          const index = element.index;
+          const dataset = chart.data.datasets[datasetIndex];
+          const value = dataset.data[index];
+          const category = dataset.label;
+          const date = chart.data.labels[index];
+          
+          if (value !== null) {
+            setSelectedPoint({
+              category: category as string,
+              date: date as string,
+              rank: value as number
+            });
+          }
+        }
+      } : undefined,
       scales: {
         y: {
           reverse: true,
@@ -191,6 +242,9 @@ export function DualAnalysisPanel({
           min: 1,
           ticks: {
             color: 'rgb(156, 163, 175)',
+            font: {
+              size: isMobile ? 14 : 12
+            },
             callback: function(value: any) {
               return '#' + value;
             }
@@ -202,11 +256,11 @@ export function DualAnalysisPanel({
         x: {
           ticks: {
             color: 'rgb(156, 163, 175)',
-            maxRotation: 45,
-            minRotation: 45,
+            maxRotation: isMobile ? 60 : 45,
+            minRotation: isMobile ? 60 : 45,
             font: {
               weight: isArabic ? 'bold' as const : 'normal' as const,
-              size: isArabic ? 14 : 12
+              size: isMobile ? 10 : (isArabic ? 14 : 12)
             }
           },
           grid: {
@@ -218,16 +272,25 @@ export function DualAnalysisPanel({
         legend: {
           display: true,
           labels: {
-            color: 'rgb(209, 213, 219)'
+            color: 'rgb(209, 213, 219)',
+            font: {
+              size: isMobile ? 11 : 12
+            },
+            padding: isMobile ? 8 : 10
           }
         },
         tooltip: {
+          enabled: !isMobile,
           callbacks: {
             label: function(context: any) {
               return 'Rank: #' + context.parsed.y;
             }
           }
         }
+      },
+      interaction: {
+        mode: isMobile ? 'point' : 'nearest',
+        intersect: true
       }
     };
 
@@ -244,9 +307,50 @@ export function DualAnalysisPanel({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-96">
+            <div className={isMobile ? "h-80" : "h-96"}>
               <Line data={chartData} options={chartOptions} />
             </div>
+            
+            {/* Mobile: Display selected point data */}
+            {isMobile && selectedPoint && (
+              <div 
+                className="mt-4 p-4 bg-athlete-gray-700 rounded-lg border-2 border-blue-500"
+                data-testid="mobile-selected-point-card"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <span className="text-sm font-semibold text-blue-400">{t('competitiveHistory.selectedPoint', 'Selected Point')}</span>
+                  </div>
+                  <button
+                    onClick={() => setSelectedPoint(null)}
+                    className="text-gray-400 hover:text-white transition-colors text-xl px-2"
+                    aria-label="Close"
+                    data-testid="button-close-selected-point"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-white font-bold text-lg" data-testid="text-selected-rank">
+                    {t('competitiveHistory.rank', 'Rank')}: #{selectedPoint.rank}
+                  </div>
+                  <div className="text-gray-300 text-sm" data-testid="text-selected-category">
+                    {selectedPoint.category}
+                  </div>
+                  <div className="text-gray-400 text-xs" data-testid="text-selected-date">
+                    {selectedPoint.date}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Mobile: Instruction hint */}
+            {isMobile && !selectedPoint && (
+              <div className="mt-3 text-center text-gray-400 text-xs" data-testid="text-tap-instruction">
+                {t('competitiveHistory.tapToView', 'Tap on any point to view details')}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -405,8 +509,9 @@ export function DualAnalysisPanel({
         backgroundColor: colors.bg,
         fill: true,
         tension: 0.3,
-        pointRadius: 5,
-        pointHoverRadius: 7,
+        pointRadius: isMobile ? 8 : 5,
+        pointHoverRadius: isMobile ? 10 : 7,
+        pointHitRadius: isMobile ? 20 : 10,
         spanGaps: false, // Don't connect points across missing data
       };
     });
@@ -419,6 +524,25 @@ export function DualAnalysisPanel({
     const chartOptions: ChartOptions<'line'> = {
       responsive: true,
       maintainAspectRatio: false,
+      onClick: isMobile ? (event: any, elements: any, chart: any) => {
+        if (elements && elements.length > 0) {
+          const element = elements[0];
+          const datasetIndex = element.datasetIndex;
+          const index = element.index;
+          const dataset = chart.data.datasets[datasetIndex];
+          const value = dataset.data[index];
+          const category = dataset.label;
+          const date = chart.data.labels[index];
+          
+          if (value !== null) {
+            setSelectedPoint({
+              category: category as string,
+              date: date as string,
+              rank: value as number
+            });
+          }
+        }
+      } : undefined,
       scales: {
         y: {
           reverse: true,
@@ -426,6 +550,9 @@ export function DualAnalysisPanel({
           min: 1,
           ticks: {
             color: 'rgb(156, 163, 175)',
+            font: {
+              size: isMobile ? 14 : 12
+            },
             callback: function(value: any) {
               return '#' + value;
             }
@@ -437,11 +564,11 @@ export function DualAnalysisPanel({
         x: {
           ticks: {
             color: 'rgb(156, 163, 175)',
-            maxRotation: 45,
-            minRotation: 45,
+            maxRotation: isMobile ? 60 : 45,
+            minRotation: isMobile ? 60 : 45,
             font: {
               weight: isArabic ? 'bold' as const : 'normal' as const,
-              size: isArabic ? 14 : 12
+              size: isMobile ? 10 : (isArabic ? 14 : 12)
             }
           },
           grid: {
@@ -453,16 +580,25 @@ export function DualAnalysisPanel({
         legend: {
           display: true,
           labels: {
-            color: 'rgb(209, 213, 219)'
+            color: 'rgb(209, 213, 219)',
+            font: {
+              size: isMobile ? 11 : 12
+            },
+            padding: isMobile ? 8 : 10
           }
         },
         tooltip: {
+          enabled: !isMobile,
           callbacks: {
             label: function(context: any) {
               return 'Rank: #' + context.parsed.y;
             }
           }
         }
+      },
+      interaction: {
+        mode: isMobile ? 'point' : 'nearest',
+        intersect: true
       }
     };
 
@@ -476,9 +612,50 @@ export function DualAnalysisPanel({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-96">
+            <div className={isMobile ? "h-80" : "h-96"}>
               <Line data={chartData} options={chartOptions} />
             </div>
+            
+            {/* Mobile: Display selected point data */}
+            {isMobile && selectedPoint && (
+              <div 
+                className="mt-4 p-4 bg-athlete-gray-700 rounded-lg border-2 border-blue-500"
+                data-testid="mobile-selected-point-card"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <span className="text-sm font-semibold text-blue-400">{t('competitiveHistory.selectedPoint', 'Selected Point')}</span>
+                  </div>
+                  <button
+                    onClick={() => setSelectedPoint(null)}
+                    className="text-gray-400 hover:text-white transition-colors text-xl px-2"
+                    aria-label="Close"
+                    data-testid="button-close-selected-point"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-white font-bold text-lg" data-testid="text-selected-rank">
+                    {t('competitiveHistory.rank', 'Rank')}: #{selectedPoint.rank}
+                  </div>
+                  <div className="text-gray-300 text-sm" data-testid="text-selected-category">
+                    {selectedPoint.category}
+                  </div>
+                  <div className="text-gray-400 text-xs" data-testid="text-selected-date">
+                    {selectedPoint.date}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Mobile: Instruction hint */}
+            {isMobile && !selectedPoint && (
+              <div className="mt-3 text-center text-gray-400 text-xs" data-testid="text-tap-instruction">
+                {t('competitiveHistory.tapToView', 'Tap on any point to view details')}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -608,7 +785,11 @@ export function DualAnalysisPanel({
 
     // Render year tabs
     return (
-      <Tabs defaultValue={defaultYear} className="w-full">
+      <Tabs 
+        value={activeYearTab}
+        onValueChange={(value) => setActiveYearTab(value)}
+        className="w-full"
+      >
         <TabsList className="bg-athlete-gray-700 mb-6">
           {availableYears.map(year => (
             <TabsTrigger
@@ -982,7 +1163,11 @@ export function DualAnalysisPanel({
   const SecondTabIcon = isSwimmingAthlete ? Trophy : TrendingUp;
 
   return (
-    <Tabs defaultValue={defaultTab} className={`w-full ${className}`}>
+    <Tabs 
+      defaultValue={defaultTab} 
+      className={`w-full ${className}`}
+      onValueChange={(value) => setActiveMainTab(value)}
+    >
       <TabsList className="grid w-full grid-cols-2 bg-athlete-gray-700">
         <TabsTrigger 
           value="competitive"
