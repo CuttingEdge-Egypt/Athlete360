@@ -2664,7 +2664,7 @@ export function AnalysisPopup({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-athlete-gray-900 border-gray-700 text-white">
+      <DialogContent className="w-[95vw] sm:w-[90vw] md:max-w-3xl lg:max-w-5xl max-h-[90vh] overflow-y-auto bg-athlete-gray-900 border-gray-700 text-white">
         <div className="border-b border-gray-700 pb-3">
           {/* Top utility bar - close button handled by DialogContent, Export PDF button */}
           <div className={`flex items-center justify-end pb-2 ${i18n.language === 'ar' ? 'pl-12' : 'pr-12'}`}>
