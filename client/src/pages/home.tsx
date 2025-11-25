@@ -2305,7 +2305,7 @@ export default function Home() {
                       
                       <div className="flex-1 min-w-0 md:ml-4 w-full md:w-auto">
                           <div className="flex flex-col md:flex-row items-start md:justify-between gap-3 md:gap-4 mb-2">
-                            <div className="flex-1 w-full md:w-auto md:min-w-0 md:max-w-md">
+                            <div className="flex-1 min-w-0">
                               <h3 className="text-lg md:text-xl font-bold text-white break-words">
                                 {selectedAthlete.name}
                               </h3>
