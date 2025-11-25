@@ -37,7 +37,9 @@ import {
   Sparkles,
   Eye,
   Loader2,
-  HelpCircle
+  HelpCircle,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 
 type Sport = {
@@ -79,6 +81,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
   const [openAthletePopover1, setOpenAthletePopover1] = useState(false);
   const [openAthletePopover2, setOpenAthletePopover2] = useState(false);
   const [showForm, setShowForm] = useState(true);
+  const [activeTab, setActiveTab] = useState("overview");
   const isComparisonArabic = selectedLanguage === 'arabic';
   const isArabic = i18n.language === 'ar';
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -1579,13 +1582,55 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                   </div>
 
                   {/* Tabbed Analysis */}
-                  <Tabs defaultValue="overview" className="w-full mt-8">
-                    <TabsList className="flex md:grid w-full md:grid-cols-5 bg-athlete-gray-700 overflow-x-auto md:overflow-x-visible">
-                      <TabsTrigger value="overview" data-testid="tab-overview" className="whitespace-nowrap flex-shrink-0">{t('analysis.comparison.tabOverview', 'Overview')}</TabsTrigger>
-                      <TabsTrigger value="strengths" data-testid="tab-strengths" className="whitespace-nowrap flex-shrink-0">{t('analysis.comparison.tabStrengths', 'Strengths')}</TabsTrigger>
-                      <TabsTrigger value="weaknesses" data-testid="tab-weaknesses" className="whitespace-nowrap flex-shrink-0">{t('analysis.comparison.tabWeaknesses', 'Weaknesses')}</TabsTrigger>
-                      <TabsTrigger value="ranking" data-testid="tab-ranking" className="whitespace-nowrap flex-shrink-0">{t('analysis.comparison.tabCompetitionHistory', 'Competition History')}</TabsTrigger>
-                      <TabsTrigger value="head-to-head" data-testid="tab-head-to-head" className="whitespace-nowrap flex-shrink-0">{t('analysis.comparison.tabHeadToHead', 'Head-to-Head')}</TabsTrigger>
+                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-8">
+                    {/* Mobile: Slider with arrows */}
+                    <div className="md:hidden flex items-center gap-2 bg-athlete-gray-700 rounded-lg p-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const tabs = ["overview", "strengths", "weaknesses", "ranking", "head-to-head"];
+                          const currentIndex = tabs.indexOf(activeTab);
+                          if (currentIndex > 0) setActiveTab(tabs[currentIndex - 1]);
+                        }}
+                        disabled={activeTab === "overview"}
+                        className="h-9 w-9 p-0 text-white disabled:opacity-30"
+                        data-testid="button-tab-previous"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </Button>
+                      <div className="flex-1 text-center">
+                        <TabsTrigger value={activeTab} className="w-full" data-testid={`tab-${activeTab}`}>
+                          {activeTab === "overview" && t('analysis.comparison.tabOverview', 'Overview')}
+                          {activeTab === "strengths" && t('analysis.comparison.tabStrengths', 'Strengths')}
+                          {activeTab === "weaknesses" && t('analysis.comparison.tabWeaknesses', 'Weaknesses')}
+                          {activeTab === "ranking" && t('analysis.comparison.tabCompetitionHistory', 'Competition History')}
+                          {activeTab === "head-to-head" && t('analysis.comparison.tabHeadToHead', 'Head-to-Head')}
+                        </TabsTrigger>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const tabs = ["overview", "strengths", "weaknesses", "ranking", "head-to-head"];
+                          const currentIndex = tabs.indexOf(activeTab);
+                          if (currentIndex < tabs.length - 1) setActiveTab(tabs[currentIndex + 1]);
+                        }}
+                        disabled={activeTab === "head-to-head"}
+                        className="h-9 w-9 p-0 text-white disabled:opacity-30"
+                        data-testid="button-tab-next"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </Button>
+                    </div>
+
+                    {/* Desktop: Grid layout */}
+                    <TabsList className="hidden md:grid w-full grid-cols-5 bg-athlete-gray-700">
+                      <TabsTrigger value="overview" data-testid="tab-overview">{t('analysis.comparison.tabOverview', 'Overview')}</TabsTrigger>
+                      <TabsTrigger value="strengths" data-testid="tab-strengths">{t('analysis.comparison.tabStrengths', 'Strengths')}</TabsTrigger>
+                      <TabsTrigger value="weaknesses" data-testid="tab-weaknesses">{t('analysis.comparison.tabWeaknesses', 'Weaknesses')}</TabsTrigger>
+                      <TabsTrigger value="ranking" data-testid="tab-ranking">{t('analysis.comparison.tabCompetitionHistory', 'Competition History')}</TabsTrigger>
+                      <TabsTrigger value="head-to-head" data-testid="tab-head-to-head">{t('analysis.comparison.tabHeadToHead', 'Head-to-Head')}</TabsTrigger>
                     </TabsList>
 
                     {/* Overview Tab */}
