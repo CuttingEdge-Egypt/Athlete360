@@ -488,9 +488,6 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
                 className="bg-athlete-gray-700 border-gray-600 text-white placeholder-gray-400 min-h-[100px]"
                 data-testid="textarea-what-to-analyze"
               />
-              <p className="text-gray-400 text-sm">
-                {t('upload.describeAspect')}
-              </p>
             </div>
           )}
           
