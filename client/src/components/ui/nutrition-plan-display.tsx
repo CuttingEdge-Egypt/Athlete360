@@ -398,7 +398,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                   </Button>
                   
                   {/* Day buttons - wrap to multiple lines on mobile */}
-                  <div className="flex flex-wrap gap-2 justify-center max-w-[200px] md:max-w-none">
+                  <div className="flex flex-wrap gap-2 justify-center max-w-[240px] md:max-w-none">
                     {currentWeekData.days.map((day, dayIndex) => (
                       <button
                         key={dayIndex}
