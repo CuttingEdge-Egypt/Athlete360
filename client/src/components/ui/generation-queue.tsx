@@ -544,18 +544,18 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
     <div 
       className="fixed z-50"
       style={{
-        bottom: isMobile ? '8px' : '16px',
-        [isArabic ? 'left' : 'right']: isMobile ? '8px' : '16px',
-        width: isMobile ? 'calc(100vw - 16px)' : 'auto',
+        bottom: isMobile ? '4px' : '16px',
+        [isArabic ? 'left' : 'right']: isMobile ? '4px' : '16px',
+        width: isMobile ? 'calc(100vw - 8px)' : 'auto',
         maxWidth: isMobile ? 'none' : '448px'
       }}
       dir={isArabic ? 'rtl' : 'ltr'}
     >
       <Card className="bg-athlete-gray-800 border-gray-600 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-gray-600" style={{ padding: isMobile ? '6px' : '12px' }}>
-          <div className="flex items-center" style={{ gap: isMobile ? '6px' : '8px' }}>
-            <div className="bg-blue-500 rounded-full animate-pulse" style={{ width: isMobile ? '6px' : '8px', height: isMobile ? '6px' : '8px' }}></div>
-            <span className="font-medium text-gray-200" style={{ fontSize: isMobile ? '10px' : '14px' }}>
+        <div className="flex items-center justify-between border-b border-gray-600" style={{ padding: isMobile ? '4px 6px' : '12px' }}>
+          <div className="flex items-center" style={{ gap: isMobile ? '4px' : '8px' }}>
+            <div className="bg-blue-500 rounded-full animate-pulse" style={{ width: isMobile ? '4px' : '8px', height: isMobile ? '4px' : '8px' }}></div>
+            <span className="font-medium text-gray-200" style={{ fontSize: isMobile ? '9px' : '14px' }}>
               {t('services.queue.title')} ({queue.length})
             </span>
           </div>
@@ -564,7 +564,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
               variant="ghost"
               onClick={() => setIsMinimized(!isMinimized)}
               className="p-0 text-gray-400 hover:text-gray-200"
-              style={{ height: isMobile ? '20px' : '24px', width: isMobile ? '20px' : '24px', fontSize: isMobile ? '10px' : '12px' }}
+              style={{ height: isMobile ? '16px' : '24px', width: isMobile ? '16px' : '24px', fontSize: isMobile ? '8px' : '12px' }}
             >
               {isMinimized ? '▲' : '▼'}
             </Button>
@@ -578,44 +578,44 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
               }}
               disabled={queue.some(item => item.status === 'running' || item.status === 'pending')}
               className="p-0 text-gray-400 hover:text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{ height: isMobile ? '20px' : '24px', width: isMobile ? '20px' : '24px' }}
+              style={{ height: isMobile ? '16px' : '24px', width: isMobile ? '16px' : '24px' }}
               title={queue.some(item => item.status === 'running' || item.status === 'pending') ? t('services.queue.cannotClose') : t('services.queue.closeQueue')}
             >
-              <X style={{ width: isMobile ? '12px' : '14px', height: isMobile ? '12px' : '14px' }} />
+              <X style={{ width: isMobile ? '10px' : '14px', height: isMobile ? '10px' : '14px' }} />
             </Button>
           </div>
         </div>
 
         {!isMinimized && (
-          <CardContent className="p-0 overflow-y-auto" style={{ maxHeight: isMobile ? '128px' : '256px' }}>
-            <div style={{ padding: 0, gap: isMobile ? '2px' : '4px', display: 'flex', flexDirection: 'column' }}>
+          <CardContent className="p-0 overflow-y-auto" style={{ maxHeight: isMobile ? '90px' : '256px' }}>
+            <div style={{ padding: 0, gap: isMobile ? '1px' : '4px', display: 'flex', flexDirection: 'column' }}>
               {queue.map((item) => (
                 <div
                   key={item.id}
                   className="flex items-start justify-between hover:bg-athlete-gray-700 transition-colors border-b border-gray-700 last:border-b-0"
-                  style={{ padding: isMobile ? '6px' : '12px', alignItems: isMobile ? 'flex-start' : 'center' }}
+                  style={{ padding: isMobile ? '4px' : '12px', alignItems: isMobile ? 'flex-start' : 'center' }}
                 >
-                  <div className="flex-1 min-w-0" style={{ paddingRight: isMobile ? '6px' : '8px' }}>
-                    <div className="flex items-center flex-wrap" style={{ gap: isMobile ? '4px' : '8px', marginBottom: isMobile ? '2px' : '4px' }}>
-                      <div className={`rounded-full flex-shrink-0 ${getStatusColor(item.status)}`} style={{ width: isMobile ? '6px' : '8px', height: isMobile ? '6px' : '8px' }}>
+                  <div className="flex-1 min-w-0" style={{ paddingRight: isMobile ? '4px' : '8px' }}>
+                    <div className="flex items-center flex-wrap" style={{ gap: isMobile ? '3px' : '8px', marginBottom: isMobile ? '1px' : '4px' }}>
+                      <div className={`rounded-full flex-shrink-0 ${getStatusColor(item.status)}`} style={{ width: isMobile ? '4px' : '8px', height: isMobile ? '4px' : '8px' }}>
                         {item.status === 'running' && (
-                          <div className="rounded-full animate-ping bg-current opacity-75" style={{ width: isMobile ? '6px' : '8px', height: isMobile ? '6px' : '8px' }}></div>
+                          <div className="rounded-full animate-ping bg-current opacity-75" style={{ width: isMobile ? '4px' : '8px', height: isMobile ? '4px' : '8px' }}></div>
                         )}
                       </div>
-                      <span className="font-medium text-gray-200 truncate" style={{ fontSize: isMobile ? '10px' : '14px', maxWidth: isMobile ? '100px' : 'none' }}>
+                      <span className="font-medium text-gray-200 truncate" style={{ fontSize: isMobile ? '8px' : '14px', maxWidth: isMobile ? '80px' : 'none' }}>
                         {item.athleteName}
                       </span>
                       <Badge 
                         variant="outline" 
                         className="border-gray-500 text-gray-300 text-center whitespace-nowrap"
-                        style={{ fontSize: isMobile ? '9px' : '12px', padding: isMobile ? '0 4px' : '0 8px' }}
+                        style={{ fontSize: isMobile ? '7px' : '12px', padding: isMobile ? '0 3px' : '0 8px', height: isMobile ? '12px' : 'auto', lineHeight: isMobile ? '12px' : 'normal' }}
                       >
                         {getServiceLabel(item.serviceType)}
                       </Badge>
                     </div>
-                    <div className="flex items-center flex-wrap text-gray-400" style={{ gap: isMobile ? '4px' : '8px', fontSize: isMobile ? '9px' : '12px' }}>
+                    <div className="flex items-center flex-wrap text-gray-400" style={{ gap: isMobile ? '3px' : '8px', fontSize: isMobile ? '7px' : '12px' }}>
                       {getStatusIcon(item.status)}
-                      <span className="truncate" style={{ maxWidth: isMobile ? '150px' : 'none' }}>
+                      <span className="truncate" style={{ maxWidth: isMobile ? '120px' : 'none' }}>
                         {item.status === 'error' ? item.error : 
                          item.status === 'running' ? (item.progressMessage || t('services.queue.statusRunning')) :
                          item.status === 'pending' ? t('services.queue.statusPending') :
@@ -633,10 +633,10 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
                         variant="ghost"
                         onClick={() => handleViewResult(item)}
                         className="p-0 text-blue-400 hover:text-blue-300"
-                        style={{ height: isMobile ? '20px' : '24px', width: isMobile ? '20px' : '24px' }}
+                        style={{ height: isMobile ? '16px' : '24px', width: isMobile ? '16px' : '24px' }}
                         title={t('services.queue.view')}
                       >
-                        <Eye style={{ width: isMobile ? '12px' : '14px', height: isMobile ? '12px' : '14px' }} />
+                        <Eye style={{ width: isMobile ? '10px' : '14px', height: isMobile ? '10px' : '14px' }} />
                       </Button>
                     )}
                     {item.status === 'error' && (
@@ -644,20 +644,20 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
                         variant="ghost"
                         onClick={() => retryGeneration(item)}
                         className="p-0 text-green-400 hover:text-green-300"
-                        style={{ height: isMobile ? '20px' : '24px', width: isMobile ? '20px' : '24px' }}
+                        style={{ height: isMobile ? '16px' : '24px', width: isMobile ? '16px' : '24px' }}
                         title={t('services.queue.retry')}
                       >
-                        <RotateCcw style={{ width: isMobile ? '12px' : '14px', height: isMobile ? '12px' : '14px' }} />
+                        <RotateCcw style={{ width: isMobile ? '10px' : '14px', height: isMobile ? '10px' : '14px' }} />
                       </Button>
                     )}
                     <Button
                       variant="ghost"
                       onClick={() => removeGeneration(item.id, item.status === 'running')}
                       className="p-0 text-gray-400 hover:text-red-400"
-                      style={{ height: isMobile ? '20px' : '24px', width: isMobile ? '20px' : '24px' }}
+                      style={{ height: isMobile ? '16px' : '24px', width: isMobile ? '16px' : '24px' }}
                       title={item.status === 'running' ? t('services.queue.cancel') : t('services.queue.remove')}
                     >
-                      <X style={{ width: isMobile ? '12px' : '14px', height: isMobile ? '12px' : '14px' }} />
+                      <X style={{ width: isMobile ? '10px' : '14px', height: isMobile ? '10px' : '14px' }} />
                     </Button>
                   </div>
                 </div>
