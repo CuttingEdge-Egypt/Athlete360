@@ -820,7 +820,43 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
     return { entity1Name, entity2Name, entity1Country, entity2Country, isTeamSport, scoreFormat, isTaekwondo: false };
   };
 
-  const { entity1Name, entity2Name, entity1Country, entity2Country, isTeamSport, scoreFormat, isTaekwondo } = getScoreboardData();
+  // Helper function to replace generic names with visual descriptors
+  const getVisualDescriptor = (name: string, side: 'blue' | 'red', sport: string): string => {
+    const genericNames = [
+      'not identified', 'player 1', 'player 2', 'unknown', 
+      'blue', 'red', 'player1', 'player2'
+    ];
+    
+    const lowerName = name.toLowerCase().trim();
+    
+    // If it's a generic name, replace with visual descriptor
+    if (genericNames.includes(lowerName) || lowerName.startsWith('not ') || lowerName === '') {
+      const sportLower = sport.toLowerCase();
+      
+      // Martial arts / Combat sports
+      if (['taekwondo', 'karate', 'judo', 'mma', 'boxing', 'wrestling', 'kickboxing'].some(s => sportLower.includes(s))) {
+        if (sportLower.includes('taekwondo')) {
+          return side === 'blue' ? 'Blue Hogu' : 'Red Hogu';
+        }
+        if (sportLower.includes('karate') || sportLower.includes('judo')) {
+          return side === 'blue' ? 'Blue Belt' : 'Red Belt';
+        }
+        return side === 'blue' ? 'Blue Corner' : 'Red Corner';
+      }
+      
+      // Team sports or other sports - use jersey color
+      return side === 'blue' ? 'Blue Jersey' : 'Red Jersey';
+    }
+    
+    return name;
+  };
+  
+  const rawScoreboardData = getScoreboardData();
+  const { entity1Country, entity2Country, isTeamSport, scoreFormat, isTaekwondo } = rawScoreboardData;
+  
+  // Apply visual descriptors to entity names
+  const entity1Name = getVisualDescriptor(rawScoreboardData.entity1Name, 'blue', sport);
+  const entity2Name = getVisualDescriptor(rawScoreboardData.entity2Name, 'red', sport);
   
   // Parse dynamic metrics for non-taekwondo sports with standardized format
   const parseDynamicMetrics = () => {

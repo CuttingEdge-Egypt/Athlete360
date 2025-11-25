@@ -305,7 +305,11 @@ Be conservative in your predictions and calculations only include scores you're 
 
 🎯 PLAYER NAMES - IMPORTANT:
 - TRY to get actual player names from scoreboard, announcer commentary, or on-screen graphics
-- If you CANNOT determine actual names, use "Blue" for the blue corner player and "Red" for the red corner player
+- If you CANNOT determine actual names, use VISUAL DESCRIPTORS based on what you see:
+  * For martial arts: Use "Blue Belt" / "Red Belt" or "Blue Hogu" / "Red Hogu" (based on their protective gear color)
+  * For combat sports: Use the corner color like "Blue Corner" / "Red Corner"
+  * For any sport: Use jersey/uniform color like "Blue Jersey" / "Red Jersey"
+- NEVER use "Not identified", "Player 1", "Player 2", or "Unknown" - always describe what you SEE
 - ALWAYS identify the correct "side" field (blue or red) for each player based on their corner
 
 CRITICAL: All timestamps MUST be in MM:SS format (Minutes:Seconds). Never use HH:MM:SS format.
@@ -351,7 +355,13 @@ Return JSON format:`}
   ]
 }
 
-NOTE: Use actual player names if visible/audible (e.g., "John Smith"), otherwise use "Blue" or "Red" based on their corner.`;
+🎯 PLAYER NAMES - IMPORTANT:
+- Use actual player names if visible/audible (e.g., "John Smith")
+- If names are NOT available, use VISUAL DESCRIPTORS based on what you see:
+  * Jersey/uniform color: "Blue Jersey" / "Red Jersey" / "White Jersey" / "Black Jersey"
+  * Equipment color: "Blue Belt" / "Red Belt" / "Blue Hogu" / "Red Hogu"
+  * Corner position: "Blue Corner" / "Red Corner"
+- NEVER use "Not identified", "Player 1", "Player 2", or "Unknown" - always describe what you SEE`;
 
   const promptActions = `Watch ${roundText} only. Watch this ${sportConfig.name.toLowerCase()} match and tell me when a player performed a ${sportConfig.analysisTerms.action === 'kicks' ? 'punch' : 'secondary action'}, ${sportConfig.analysisTerms.action === 'kicks' ? 'a punch is when a player clenches their fist and tries to hit another player' : 'an action that complements their primary technique'}. If there are no ${sportConfig.analysisTerms.action === 'kicks' ? 'punches' : 'secondary actions'} found let the JSON be NONE.${timeRangeInstruction}
 
@@ -869,7 +879,9 @@ MANDATORY JSON RETURN RULES:
 - NEVER return empty text, null, or undefined
 - If you cannot detect ANY events for this metric, return: {"players": []}
 ${playerInclusionRule}
-- If player names are unclear, use visible identifiers (jersey colors, team names) but NEVER use generic "Player 1" or "Player 2"
+- If player names are unclear, use visible identifiers (jersey colors, team names) but NEVER use generic "Player 1", "Player 2", "Not identified", or "Unknown"
+- For martial arts: Use "Blue Hogu" / "Red Hogu" or "Blue Belt" / "Red Belt"
+- For other sports: Use jersey/uniform color like "Blue Jersey" / "Red Jersey"
 - The response MUST be parseable JSON - no explanatory text before or after the JSON
 - If this metric is difficult to track accurately (like Assists which require complex judgment), return {"players": []}`;
   
