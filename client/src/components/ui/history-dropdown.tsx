@@ -45,7 +45,7 @@ const serviceIcons = {
 // Moved to component to access t function
 
 interface HistoryDropdownProps {
-  customTrigger?: React.ReactNode;
+  customTrigger?: (count: number) => React.ReactNode;
 }
 
 export function HistoryDropdown({ customTrigger }: HistoryDropdownProps = {}) {
@@ -169,7 +169,7 @@ export function HistoryDropdown({ customTrigger }: HistoryDropdownProps = {}) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          {customTrigger || (
+          {customTrigger ? customTrigger(historyItems.length) : (
             <Button 
               variant="ghost" 
               data-testid="button-history"

@@ -209,14 +209,24 @@ export function Navigation() {
                     
                     <div className="bg-athlete-gray-800 rounded-lg p-1 space-y-0.5">
                       <HistoryDropdown 
-                        customTrigger={
-                          <button className="w-full flex items-center gap-3 px-3 py-2.5 text-gray-300 hover:bg-athlete-gray-700 rounded transition-colors">
-                            <div className="w-8 h-8 rounded-lg bg-athlete-gray-700 flex items-center justify-center">
-                              <Clock size={16} className="text-blue-400" />
+                        customTrigger={(count) => (
+                          <button className="w-full flex items-center justify-between px-3 py-2.5 text-gray-300 hover:bg-athlete-gray-700 rounded transition-colors">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-athlete-gray-700 flex items-center justify-center">
+                                <Clock size={16} className="text-blue-400" />
+                              </div>
+                              <span className="text-sm font-medium">{t('menu.history', { defaultValue: 'History' })}</span>
                             </div>
-                            <span className="text-sm font-medium">{t('menu.history', { defaultValue: 'History' })}</span>
+                            {count > 0 && (
+                              <Badge 
+                                variant="secondary" 
+                                className="bg-blue-600/20 text-blue-400 border-blue-600/30 h-5 px-2 text-xs font-semibold"
+                              >
+                                {count > 99 ? formatNumber('99+', isArabic) : formatNumber(count, isArabic)}
+                              </Badge>
+                            )}
                           </button>
-                        }
+                        )}
                       />
                       
                       <ProfileDropdown
