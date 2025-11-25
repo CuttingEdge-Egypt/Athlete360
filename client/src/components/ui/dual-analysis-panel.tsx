@@ -225,6 +225,41 @@ export function DualAnalysisPanel({
       datasets
     };
 
+    // Helper function to collect all data points for navigation
+    // Sorted by category first, then by date within each category
+    const getAllDataPoints = () => {
+      const points: Array<{ category: string; date: string; rank: number; color: string; datasetIndex: number; pointIndex: number }> = [];
+      datasets.forEach((dataset, datasetIndex) => {
+        const categoryLabel = dataset.label as string;
+        const categoryColor = dataset.borderColor as string;
+        dataset.data.forEach((rankValue, index) => {
+          if (rankValue !== null) {
+            points.push({
+              category: categoryLabel,
+              date: sortedLabels[index],
+              rank: rankValue as number,
+              color: categoryColor,
+              datasetIndex,
+              pointIndex: index
+            });
+          }
+        });
+      });
+      
+      // Sort by category first (datasetIndex), then by date within each category
+      points.sort((a, b) => {
+        if (a.datasetIndex !== b.datasetIndex) {
+          return a.datasetIndex - b.datasetIndex;
+        }
+        // Within same category, sort by pointIndex (which corresponds to date order)
+        return a.pointIndex - b.pointIndex;
+      });
+      
+      return points;
+    };
+
+    const allPoints = getAllDataPoints();
+
     const chartOptions: ChartOptions<'line'> = {
       responsive: true,
       maintainAspectRatio: false,
@@ -239,11 +274,22 @@ export function DualAnalysisPanel({
           const date = chart.data.labels[index];
           
           if (value !== null) {
-            setSelectedPoint({
-              category: category as string,
-              date: date as string,
-              rank: value as number
-            });
+            // In fullscreen mode, update the fullscreen point index
+            if (isFullscreen) {
+              const clickedPointIndex = allPoints.findIndex(
+                p => p.datasetIndex === datasetIndex && p.pointIndex === index
+              );
+              if (clickedPointIndex !== -1) {
+                setFullscreenPointIndex(clickedPointIndex);
+              }
+            } else {
+              // In normal mode, set selected point
+              setSelectedPoint({
+                category: category as string,
+                date: date as string,
+                rank: value as number
+              });
+            }
           }
         }
       } : undefined,
@@ -311,29 +357,6 @@ export function DualAnalysisPanel({
     // Calculate unique months for title
     const uniqueMonths = rankHistoryData ? new Set(rankHistoryData.map((entry: any) => `${entry.year}-${entry.month}`)).size : 0;
     
-    // Helper function to collect all data points for navigation
-    const getAllDataPoints = () => {
-      const points: Array<{ category: string; date: string; rank: number; color: string; datasetIndex: number; pointIndex: number }> = [];
-      datasets.forEach((dataset, datasetIndex) => {
-        const categoryLabel = dataset.label as string;
-        const categoryColor = dataset.borderColor as string;
-        dataset.data.forEach((rankValue, index) => {
-          if (rankValue !== null) {
-            points.push({
-              category: categoryLabel,
-              date: sortedLabels[index],
-              rank: rankValue as number,
-              color: categoryColor,
-              datasetIndex,
-              pointIndex: index
-            });
-          }
-        });
-      });
-      return points;
-    };
-
-    const allPoints = getAllDataPoints();
     const currentPoint = allPoints[fullscreenPointIndex];
 
     const handlePrevPoint = () => {
@@ -695,6 +718,41 @@ export function DualAnalysisPanel({
       datasets
     };
 
+    // Helper function to collect all data points for navigation
+    // Sorted by category first, then by date within each category
+    const getAllDataPoints = () => {
+      const points: Array<{ category: string; date: string; rank: number; color: string; datasetIndex: number; pointIndex: number }> = [];
+      datasets.forEach((dataset, datasetIndex) => {
+        const categoryLabel = dataset.label as string;
+        const categoryColor = dataset.borderColor as string;
+        dataset.data.forEach((rankValue, index) => {
+          if (rankValue !== null) {
+            points.push({
+              category: categoryLabel,
+              date: sortedLabels[index],
+              rank: rankValue as number,
+              color: categoryColor,
+              datasetIndex,
+              pointIndex: index
+            });
+          }
+        });
+      });
+      
+      // Sort by category first (datasetIndex), then by date within each category
+      points.sort((a, b) => {
+        if (a.datasetIndex !== b.datasetIndex) {
+          return a.datasetIndex - b.datasetIndex;
+        }
+        // Within same category, sort by pointIndex (which corresponds to date order)
+        return a.pointIndex - b.pointIndex;
+      });
+      
+      return points;
+    };
+
+    const allPoints = getAllDataPoints();
+
     const chartOptions: ChartOptions<'line'> = {
       responsive: true,
       maintainAspectRatio: false,
@@ -709,11 +767,22 @@ export function DualAnalysisPanel({
           const date = chart.data.labels[index];
           
           if (value !== null) {
-            setSelectedPoint({
-              category: category as string,
-              date: date as string,
-              rank: value as number
-            });
+            // In fullscreen mode, update the fullscreen point index
+            if (isFullscreen) {
+              const clickedPointIndex = allPoints.findIndex(
+                p => p.datasetIndex === datasetIndex && p.pointIndex === index
+              );
+              if (clickedPointIndex !== -1) {
+                setFullscreenPointIndex(clickedPointIndex);
+              }
+            } else {
+              // In normal mode, set selected point
+              setSelectedPoint({
+                category: category as string,
+                date: date as string,
+                rank: value as number
+              });
+            }
           }
         }
       } : undefined,
@@ -778,29 +847,6 @@ export function DualAnalysisPanel({
       }
     };
 
-    // Helper function to collect all data points for navigation
-    const getAllDataPoints = () => {
-      const points: Array<{ category: string; date: string; rank: number; color: string; datasetIndex: number; pointIndex: number }> = [];
-      datasets.forEach((dataset, datasetIndex) => {
-        const categoryLabel = dataset.label as string;
-        const categoryColor = dataset.borderColor as string;
-        dataset.data.forEach((rankValue, index) => {
-          if (rankValue !== null) {
-            points.push({
-              category: categoryLabel,
-              date: sortedLabels[index],
-              rank: rankValue as number,
-              color: categoryColor,
-              datasetIndex,
-              pointIndex: index
-            });
-          }
-        });
-      });
-      return points;
-    };
-
-    const allPoints = getAllDataPoints();
     const currentPoint = allPoints[fullscreenPointIndex];
 
     const handlePrevPoint = () => {
