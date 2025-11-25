@@ -159,68 +159,113 @@ export function Navigation() {
               </SheetTrigger>
               <SheetContent 
                 side={isArabic ? "left" : "right"} 
-                className="bg-athlete-primary border-gray-800 w-[280px] sm:w-[320px]"
+                className="bg-athlete-gray-900 border-gray-800 w-[300px] sm:w-[340px]"
               >
-                <SheetHeader>
-                  <SheetTitle className="text-white text-left">{t('menu.menu', { defaultValue: 'Menu' })}</SheetTitle>
+                <SheetHeader className="border-b border-gray-800 pb-4">
+                  <div className="flex items-center justify-between">
+                    <SheetTitle className="text-white text-lg font-bold">{t('menu.menu', { defaultValue: 'Menu' })}</SheetTitle>
+                    {/* Token Balance Display */}
+                    <div className="bg-athlete-gray-800 rounded-lg px-3 py-1.5 flex items-center gap-2">
+                      <Coins className="text-athlete-warning" size={16} />
+                      <div className="flex flex-col">
+                        <span className="text-xs font-semibold text-white" dir="ltr">{formatNumber(user?.tokens || 0, isArabic)}</span>
+                        {user?.totalTokensPurchased && (
+                          <span className="text-[10px] text-gray-500" dir="ltr">
+                            /{formatNumber(user.totalTokensPurchased, isArabic)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </SheetHeader>
-                <div className="flex flex-col gap-4 mt-6">
-                  <Button 
-                    data-testid="mobile-button-video-analysis"
-                    variant="ghost"
-                    className="bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 text-white font-semibold justify-start h-12"
-                    style={{
-                      backgroundSize: '200% 200%',
-                      animation: 'gradientShift 3s ease infinite'
-                    }}
-                    onClick={handleVideoAnalysis}
-                  >
-                    <Video className={isArabic ? 'ml-2' : 'mr-2'} size={20} />
-                    {t('menu.videoAnalysis')}
-                  </Button>
-                  
-                  <Button 
-                    data-testid="mobile-button-payment-center"
-                    className="bg-athlete-accent hover:bg-blue-600 text-white justify-start h-12"
-                    onClick={handleBuyTokens}
-                  >
-                    <Plus className={isArabic ? 'ml-2' : 'mr-2'} size={20} />
-                    {t('menu.buyTokens')}
-                  </Button>
+                
+                <div className="flex flex-col gap-3 mt-5">
+                  {/* Primary Actions */}
+                  <div className="space-y-2">
+                    <Button 
+                      data-testid="mobile-button-video-analysis"
+                      className="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-700 hover:via-pink-700 hover:to-purple-700 text-white font-semibold justify-start h-11 shadow-lg"
+                      onClick={handleVideoAnalysis}
+                    >
+                      <Video className={isArabic ? 'ml-2' : 'mr-2'} size={18} />
+                      {t('menu.videoAnalysis')}
+                    </Button>
+                    
+                    <Button 
+                      data-testid="mobile-button-payment-center"
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold justify-start h-11 shadow-lg"
+                      onClick={handleBuyTokens}
+                    >
+                      <Plus className={isArabic ? 'ml-2' : 'mr-2'} size={18} />
+                      {t('menu.buyTokens')}
+                    </Button>
+                  </div>
 
-                  <div className="border-t border-gray-700 my-2"></div>
-
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-300 text-sm">{t('menu.history', { defaultValue: 'History' })}</span>
-                      <HistoryDropdown />
+                  {/* Menu Items */}
+                  <div className="mt-4 space-y-1">
+                    <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      {t('menu.account', { defaultValue: 'Account' })}
                     </div>
                     
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-300 text-sm">{t('menu.profile', { defaultValue: 'Profile' })}</span>
-                      <ProfileDropdown />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-300 text-sm">{t('menu.language', { defaultValue: 'Language' })}</span>
-                      <LanguageSwitcher />
+                    <div className="bg-athlete-gray-800 rounded-lg p-1">
+                      <button className="w-full flex items-center justify-between px-3 py-2.5 text-gray-300 hover:bg-athlete-gray-700 rounded transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-athlete-gray-700 flex items-center justify-center">
+                            <Trophy size={16} className="text-blue-400" />
+                          </div>
+                          <span className="text-sm font-medium">{t('menu.history', { defaultValue: 'History' })}</span>
+                        </div>
+                        <HistoryDropdown />
+                      </button>
+                      
+                      <button className="w-full flex items-center justify-between px-3 py-2.5 text-gray-300 hover:bg-athlete-gray-700 rounded transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-athlete-gray-700 flex items-center justify-center">
+                            <UserIcon size={16} className="text-green-400" />
+                          </div>
+                          <span className="text-sm font-medium">{t('menu.profile', { defaultValue: 'Profile' })}</span>
+                        </div>
+                        <ProfileDropdown />
+                      </button>
                     </div>
                   </div>
 
-                  <div className="border-t border-gray-700 my-2"></div>
+                  {/* Settings */}
+                  <div className="mt-3 space-y-1">
+                    <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      {t('menu.settings', { defaultValue: 'Settings' })}
+                    </div>
+                    
+                    <div className="bg-athlete-gray-800 rounded-lg p-1">
+                      <button className="w-full flex items-center justify-between px-3 py-2.5 text-gray-300 hover:bg-athlete-gray-700 rounded transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-athlete-gray-700 flex items-center justify-center">
+                            <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                            </svg>
+                          </div>
+                          <span className="text-sm font-medium">{t('menu.language', { defaultValue: 'Language' })}</span>
+                        </div>
+                        <LanguageSwitcher />
+                      </button>
+                    </div>
+                  </div>
 
-                  <Button 
-                    onClick={() => {
-                      handleLogout();
-                      setMobileMenuOpen(false);
-                    }}
-                    data-testid="mobile-button-logout"
-                    variant="ghost" 
-                    className="text-gray-300 hover:text-white justify-start h-12"
-                  >
-                    <LogOut className={isArabic ? 'ml-2' : 'mr-2'} size={20} />
-                    {t('menu.logout')}
-                  </Button>
+                  {/* Logout */}
+                  <div className="mt-6">
+                    <Button 
+                      onClick={() => {
+                        handleLogout();
+                        setMobileMenuOpen(false);
+                      }}
+                      data-testid="mobile-button-logout"
+                      variant="ghost" 
+                      className="w-full text-red-400 hover:text-red-300 hover:bg-red-950/30 justify-start h-11 font-medium"
+                    >
+                      <LogOut className={isArabic ? 'ml-2' : 'mr-2'} size={18} />
+                      {t('menu.logout')}
+                    </Button>
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>
