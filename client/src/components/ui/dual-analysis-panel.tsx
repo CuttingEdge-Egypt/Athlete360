@@ -811,13 +811,50 @@ export function DualAnalysisPanel({
       setFullscreenPointIndex(prev => (prev < allPoints.length - 1 ? prev + 1 : 0));
     };
 
+    // Custom plugin to highlight selected point in fullscreen mode
+    const highlightPlugin = {
+      id: 'highlightSelectedPoint',
+      afterDatasetsDraw: (chart: any) => {
+        if (!isMobile || !isFullscreen || !currentPoint) return;
+
+        const ctx = chart.ctx;
+        const meta = chart.getDatasetMeta(currentPoint.datasetIndex);
+        const point = meta.data[currentPoint.pointIndex];
+
+        if (point) {
+          ctx.save();
+          
+          // Draw larger outer circle
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, 14, 0, 2 * Math.PI);
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+          ctx.fill();
+          
+          // Draw white ring
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, 10, 0, 2 * Math.PI);
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          
+          // Draw colored center
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, 8, 0, 2 * Math.PI);
+          ctx.fillStyle = currentPoint.color;
+          ctx.fill();
+          
+          ctx.restore();
+        }
+      }
+    };
+
     return (
       <div className="space-y-6">
         <Card className="bg-athlete-gray-800 border-gray-600">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-2xl text-gray-100 flex items-center">
-                <TrendingUp className="mr-3 text-orange-400" size={24} />
+                <TrendingUp className="mr-3 text-orange-400" size={20} />
                 {t('competitiveHistory.rankProgressionOverTime', 'Rank Progression Over Time')}
               </CardTitle>
               {/* Mobile: Fullscreen button */}
