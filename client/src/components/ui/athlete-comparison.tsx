@@ -1584,7 +1584,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                   {/* Tabbed Analysis */}
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-8">
                     {/* Mobile: Slider with arrows */}
-                    <div className="md:hidden flex items-center gap-2 bg-athlete-gray-700 rounded-lg p-1">
+                    <div className="md:hidden flex items-center justify-between gap-2 bg-athlete-gray-700 rounded-lg p-2">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -1594,19 +1594,19 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           if (currentIndex > 0) setActiveTab(tabs[currentIndex - 1]);
                         }}
                         disabled={activeTab === "overview"}
-                        className="h-9 w-9 p-0 text-white disabled:opacity-30"
+                        className="h-9 w-9 p-0 text-white hover:bg-athlete-gray-600 disabled:opacity-30"
                         data-testid="button-tab-previous"
                       >
                         <ChevronLeft className="h-5 w-5" />
                       </Button>
-                      <div className="flex-1 text-center">
-                        <TabsTrigger value={activeTab} className="w-full" data-testid={`tab-${activeTab}`}>
+                      <div className="flex-1 text-center px-2">
+                        <span className="text-white font-medium text-sm" data-testid={`text-tab-${activeTab}`}>
                           {activeTab === "overview" && t('analysis.comparison.tabOverview', 'Overview')}
                           {activeTab === "strengths" && t('analysis.comparison.tabStrengths', 'Strengths')}
                           {activeTab === "weaknesses" && t('analysis.comparison.tabWeaknesses', 'Weaknesses')}
                           {activeTab === "ranking" && t('analysis.comparison.tabCompetitionHistory', 'Competition History')}
                           {activeTab === "head-to-head" && t('analysis.comparison.tabHeadToHead', 'Head-to-Head')}
-                        </TabsTrigger>
+                        </span>
                       </div>
                       <Button
                         variant="ghost"
@@ -1617,7 +1617,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           if (currentIndex < tabs.length - 1) setActiveTab(tabs[currentIndex + 1]);
                         }}
                         disabled={activeTab === "head-to-head"}
-                        className="h-9 w-9 p-0 text-white disabled:opacity-30"
+                        className="h-9 w-9 p-0 text-white hover:bg-athlete-gray-600 disabled:opacity-30"
                         data-testid="button-tab-next"
                       >
                         <ChevronRight className="h-5 w-5" />
