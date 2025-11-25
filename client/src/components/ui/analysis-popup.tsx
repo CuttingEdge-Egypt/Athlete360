@@ -2666,7 +2666,7 @@ export function AnalysisPopup({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-athlete-gray-900 border-gray-700 text-white">
         <div className={`border-b border-gray-700 pb-4 ${i18n.language === 'ar' ? 'pl-12' : 'pr-12'}`}>
-          <div className="flex items-start justify-between gap-4" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+          <div className="flex flex-col sm:flex-row items-start sm:justify-between gap-3 sm:gap-4" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
             <div className={`flex-1 ${i18n.language === 'ar' ? 'text-right' : 'text-left'}`}>
               <DialogTitle className="text-xl font-bold text-white">
                 {getTitle(type)}
@@ -2680,12 +2680,13 @@ export function AnalysisPopup({
                 })}`}
               </DialogDescription>
             </div>
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 w-full sm:w-auto">
               <Button 
                 onClick={handleExport}
                 size="sm"
-                className="bg-athlete-success hover:bg-green-600 text-white"
+                className="bg-athlete-success hover:bg-green-600 text-white w-full sm:w-auto"
                 disabled={isExporting}
+                data-testid="button-export-pdf"
               >
                 <Download className={i18n.language === 'ar' ? 'ml-2' : 'mr-2'} size={16} />
                 {isExporting ? t("common:analysis.exporting", "Exporting...") : t("common:analysis.exportPdf", "Export PDF")}
