@@ -2696,7 +2696,7 @@ export function AnalysisPopup({
           </div>
         </div>
 
-        <div className="p-6" data-testid={`popup-analysis-content-${type}`}>
+        <div className="w-full" data-testid={`popup-analysis-content-${type}`}>
           {renderAnalysisContent()}
         </div>
       </DialogContent>

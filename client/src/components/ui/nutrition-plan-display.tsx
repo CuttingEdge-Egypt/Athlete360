@@ -258,7 +258,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
     <div className="w-full space-y-6">
 
       {/* Consolidated Navigation Header */}
-      <Card className="bg-gradient-to-r from-card to-slate-700 border-border">
+      <Card className="w-full bg-gradient-to-r from-card to-slate-700 border-border">
         <CardHeader dir={isArabic ? 'rtl' : 'ltr'}>
           <CardTitle className={`flex items-center justify-between text-foreground ${isArabic ? 'flex-row-reverse' : ''}`}>
             {/* For Arabic: days info on left, title on right. For English: title on left, days info on right */}
@@ -311,7 +311,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
 
       {/* Current Day Display */}
       {currentDayData && (
-        <Card className="bg-card border-border">
+        <Card className="w-full bg-card border-border">
           <CardHeader>
             {/* Week Slider - Inline above day/date */}
             <div className="mb-4 text-center" dir={isArabic ? 'rtl' : 'ltr'}>
@@ -508,7 +508,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
       )}
 
       {/* Overall Plan Summary */}
-      <Card className="bg-card border-border">
+      <Card className="w-full bg-card border-border">
         <CardHeader dir={isArabic ? 'rtl' : 'ltr'}>
           <CardTitle className={`flex items-center gap-2 text-foreground ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
             <Target className="h-5 w-5 text-purple-400" />
