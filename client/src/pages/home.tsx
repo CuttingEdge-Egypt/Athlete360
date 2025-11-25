@@ -2665,7 +2665,7 @@ export default function Home() {
                                 {...field}
                                 data-testid="input-nutrition-goal"
                                 placeholder={t('nutritionPlan.goalPlaceholder')}
-                                className="bg-athlete-gray-700 border-gray-600 text-white min-h-[120px] resize-y overflow-y-auto"
+                                className="bg-athlete-gray-700 border-gray-600 text-white min-h-[150px] resize-y overflow-y-auto"
                                 maxLength={1000}
                               />
                             </FormControl>
