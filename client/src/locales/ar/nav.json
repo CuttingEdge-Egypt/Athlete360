@@ -1,6 +1,9 @@
 {
   "brand": "أثليت360",
   "menu": {
+    "menu": "القائمة",
+    "account": "الحساب",
+    "language": "اللغة",
     "home": "الرئيسية",
     "dashboard": "لوحة التحكم",
     "analysis": "التحليل",

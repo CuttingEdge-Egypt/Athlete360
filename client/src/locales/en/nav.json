@@ -1,6 +1,9 @@
 {
   "brand": "Athlete360",
   "menu": {
+    "menu": "Menu",
+    "account": "Account",
+    "language": "Language",
     "home": "Home",
     "dashboard": "Dashboard",
     "analysis": "Analysis",
