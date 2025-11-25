@@ -688,33 +688,35 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
     <>
     <Card className="bg-athlete-gray-800 border-gray-700">
       <CardHeader>
-        <div className={`flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+        <div className={`flex flex-col md:flex-row md:justify-between md:items-center gap-3 ${isArabic ? 'md:flex-row-reverse' : ''}`}>
           <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
             <CardTitle className={`flex items-center gap-2 text-white ${isArabic ? 'flex-row-reverse' : ''}`}>
               <Users2 className="h-5 w-5" />
               {t("analysis.comparison.title", "Athlete Comparison")}
             </CardTitle>
-            <Badge variant="secondary" className="bg-blue-600/20 text-blue-300 border-blue-500/30 text-xs font-medium">
+          </div>
+          <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
+            <Badge variant="secondary" className="bg-blue-600/20 text-blue-300 border-blue-500/30 text-xs font-medium md:mx-0 mx-auto">
               {t('home:services.athleteComparison.tokenCost')}
             </Badge>
+            {showForm && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPreviewModal({ open: true, serviceType: 'comparison' })}
+                disabled={previewLoading && previewModal.serviceType === 'comparison'}
+                className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
+                data-testid="button-preview-comparison"
+              >
+                {previewLoading && previewModal.serviceType === 'comparison' ? (
+                  <Loader2 className={`h-4 w-4 animate-spin ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                ) : (
+                  <HelpCircle className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                )}
+                {t('common:buttons.preview')}
+              </Button>
+            )}
           </div>
-          {showForm && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPreviewModal({ open: true, serviceType: 'comparison' })}
-              disabled={previewLoading && previewModal.serviceType === 'comparison'}
-              className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
-              data-testid="button-preview-comparison"
-            >
-              {previewLoading && previewModal.serviceType === 'comparison' ? (
-                <Loader2 className={`h-4 w-4 animate-spin ${isArabic ? 'ml-2' : 'mr-2'}`} />
-              ) : (
-                <HelpCircle className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-              )}
-              {t('common:buttons.preview')}
-            </Button>
-          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
