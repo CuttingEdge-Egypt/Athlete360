@@ -2625,28 +2625,30 @@ export default function Home() {
                 /* Nutrition Plan Form */
                 <Card className="bg-athlete-gray-800 border-gray-700">
                   <CardContent className="p-8">
-                    <div className={`flex justify-between items-center mb-6 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                    <div className={`flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-6 ${isArabic ? 'md:flex-row-reverse' : ''}`}>
                       <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                         <h2 className="text-2xl font-bold text-white">{t('nutritionPlan.title')}</h2>
-                        <Badge variant="secondary" className="bg-green-600/20 text-green-300 border-green-500/30 text-xs font-medium">
+                      </div>
+                      <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                        <Badge variant="secondary" className="bg-green-600/20 text-green-300 border-green-500/30 text-xs font-medium md:mx-0 mx-auto">
                           {t('nutritionPlan.tokenCost')}
                         </Badge>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPreviewModal({ open: true, serviceType: 'nutrition-plan' })}
+                          disabled={previewLoading && previewModal.serviceType === 'nutrition-plan'}
+                          className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
+                          data-testid="button-preview-nutrition-form"
+                        >
+                          {previewLoading && previewModal.serviceType === 'nutrition-plan' ? (
+                            <Loader2 className={`h-4 w-4 animate-spin ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                          ) : (
+                            <HelpCircle className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                          )}
+                          {t('common:buttons.preview')}
+                        </Button>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPreviewModal({ open: true, serviceType: 'nutrition-plan' })}
-                        disabled={previewLoading && previewModal.serviceType === 'nutrition-plan'}
-                        className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
-                        data-testid="button-preview-nutrition-form"
-                      >
-                        {previewLoading && previewModal.serviceType === 'nutrition-plan' ? (
-                          <Loader2 className={`h-4 w-4 animate-spin ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                        ) : (
-                          <HelpCircle className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                        )}
-                        {t('common:buttons.preview')}
-                      </Button>
                     </div>
                   
                   <Form {...nutritionForm}>
@@ -3046,28 +3048,30 @@ export default function Home() {
                 /* Development Plan Form */
                 <Card className="bg-athlete-gray-800 border-gray-700">
                   <CardContent className="p-8">
-                    <div className={`flex justify-between items-center mb-6 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                    <div className={`flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-6 ${isArabic ? 'md:flex-row-reverse' : ''}`}>
                       <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                         <h2 className="text-2xl font-bold text-white">{t('developmentPlan.title')}</h2>
-                        <Badge variant="secondary" className="bg-purple-600/20 text-purple-300 border-purple-500/30 text-xs font-medium">
+                      </div>
+                      <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                        <Badge variant="secondary" className="bg-purple-600/20 text-purple-300 border-purple-500/30 text-xs font-medium md:mx-0 mx-auto">
                           {t('developmentPlan.tokenCost')}
                         </Badge>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPreviewModal({ open: true, serviceType: 'development-plan' })}
+                          disabled={previewLoading && previewModal.serviceType === 'development-plan'}
+                          className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
+                          data-testid="button-preview-development-form"
+                        >
+                          {previewLoading && previewModal.serviceType === 'development-plan' ? (
+                            <Loader2 className={`h-4 w-4 animate-spin ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                          ) : (
+                            <HelpCircle className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                          )}
+                          {t('common:buttons.preview')}
+                        </Button>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPreviewModal({ open: true, serviceType: 'development-plan' })}
-                        disabled={previewLoading && previewModal.serviceType === 'development-plan'}
-                        className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
-                        data-testid="button-preview-development-form"
-                      >
-                        {previewLoading && previewModal.serviceType === 'development-plan' ? (
-                          <Loader2 className={`h-4 w-4 animate-spin ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                        ) : (
-                          <HelpCircle className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
-                        )}
-                        {t('common:buttons.preview')}
-                      </Button>
                     </div>
                     
                     <Form {...developmentForm}>
