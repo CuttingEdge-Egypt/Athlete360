@@ -44,7 +44,11 @@ const serviceIcons = {
 
 // Moved to component to access t function
 
-export function HistoryDropdown() {
+interface HistoryDropdownProps {
+  customTrigger?: React.ReactNode;
+}
+
+export function HistoryDropdown({ customTrigger }: HistoryDropdownProps = {}) {
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<HistoryItem | null>(null);
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
   const [athleteForPopup, setAthleteForPopup] = useState<any>(null);
@@ -165,22 +169,24 @@ export function HistoryDropdown() {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button 
-            variant="ghost" 
-            data-testid="button-history"
-            className="relative flex items-center gap-2 px-3"
-          >
-            <History className="h-4 w-4" />
-            <span className="text-sm">{t('menu.history')}</span>
-            {historyItems.length > 0 && (
-              <Badge 
-                variant="secondary" 
-                className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
-              >
-                {historyItems.length > 99 ? formatNumber('99+', isArabic) : formatNumber(historyItems.length, isArabic)}
-              </Badge>
-            )}
-          </Button>
+          {customTrigger || (
+            <Button 
+              variant="ghost" 
+              data-testid="button-history"
+              className="relative flex items-center gap-2 px-3"
+            >
+              <History className="h-4 w-4" />
+              <span className="text-sm">{t('menu.history')}</span>
+              {historyItems.length > 0 && (
+                <Badge 
+                  variant="secondary" 
+                  className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
+                >
+                  {historyItems.length > 99 ? formatNumber('99+', isArabic) : formatNumber(historyItems.length, isArabic)}
+                </Badge>
+              )}
+            </Button>
+          )}
         </DropdownMenuTrigger>
         <DropdownMenuContent 
           align="end" 

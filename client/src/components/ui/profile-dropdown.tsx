@@ -18,7 +18,11 @@ import type { User } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 
-export function ProfileDropdown() {
+interface ProfileDropdownProps {
+  customTrigger?: React.ReactNode;
+}
+
+export function ProfileDropdown({ customTrigger }: ProfileDropdownProps = {}) {
   const { user: authUser } = useAuth();
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
@@ -77,21 +81,23 @@ export function ProfileDropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          className="relative h-8 w-8 rounded-full p-0 hover:ring-2 hover:ring-blue-400 transition-all"
-          data-testid="profile-dropdown-trigger"
-        >
-          {user?.profileImageUrl ? (
-            <img 
-              src={user.profileImageUrl} 
-              alt="Profile" 
-              className="h-8 w-8 rounded-full object-cover"
-            />
-          ) : (
-            <UserIcon className="h-4 w-4 text-gray-300" />
-          )}
-        </Button>
+        {customTrigger || (
+          <Button 
+            variant="ghost" 
+            className="relative h-8 w-8 rounded-full p-0 hover:ring-2 hover:ring-blue-400 transition-all"
+            data-testid="profile-dropdown-trigger"
+          >
+            {user?.profileImageUrl ? (
+              <img 
+                src={user.profileImageUrl} 
+                alt="Profile" 
+                className="h-8 w-8 rounded-full object-cover"
+              />
+            ) : (
+              <UserIcon className="h-4 w-4 text-gray-300" />
+            )}
+          </Button>
+        )}
       </DropdownMenuTrigger>
       
       <DropdownMenuContent className="w-80 mr-4" align="end" forceMount>

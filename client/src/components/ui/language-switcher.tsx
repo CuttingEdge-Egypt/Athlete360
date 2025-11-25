@@ -9,22 +9,28 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 
-export const LanguageSwitcher = () => {
+interface LanguageSwitcherProps {
+  customTrigger?: React.ReactNode;
+}
+
+export const LanguageSwitcher = ({ customTrigger }: LanguageSwitcherProps = {}) => {
   const { language, changeLanguage, availableLanguages } = useLanguage();
   const { t } = useTranslation('common');
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 px-0"
-          data-testid="button-language-switcher"
-        >
-          <Globe className="h-4 w-4" />
-          <span className="sr-only">Switch language</span>
-        </Button>
+        {customTrigger || (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 px-0"
+            data-testid="button-language-switcher"
+          >
+            <Globe className="h-4 w-4" />
+            <span className="sr-only">Switch language</span>
+          </Button>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         {availableLanguages.map((lang) => (
