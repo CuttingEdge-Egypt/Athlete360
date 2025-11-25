@@ -165,12 +165,12 @@ export function Navigation() {
                   <div className="flex items-center justify-between">
                     <SheetTitle className="text-white text-lg font-bold">{t('menu.menu', { defaultValue: 'Menu' })}</SheetTitle>
                     {/* Token Balance Display */}
-                    <div className="bg-athlete-gray-800 rounded-lg px-3 py-1.5 flex items-center gap-2">
-                      <Coins className="text-athlete-warning" size={16} />
+                    <div className="bg-athlete-gray-800 rounded-lg px-4 py-2 flex items-center gap-2.5 mr-10">
+                      <Coins className="text-athlete-warning" size={18} />
                       <div className="flex flex-col">
-                        <span className="text-xs font-semibold text-white" dir="ltr">{formatNumber(user?.tokens || 0, isArabic)}</span>
+                        <span className="text-sm font-bold text-white" dir="ltr">{formatNumber(user?.tokens || 0, isArabic)}</span>
                         {user?.totalTokensPurchased && (
-                          <span className="text-[10px] text-gray-500" dir="ltr">
+                          <span className="text-xs text-gray-500" dir="ltr">
                             /{formatNumber(user.totalTokensPurchased, isArabic)}
                           </span>
                         )}
