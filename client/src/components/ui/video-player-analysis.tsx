@@ -820,43 +820,87 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
     return { entity1Name, entity2Name, entity1Country, entity2Country, isTeamSport, scoreFormat, isTaekwondo: false };
   };
 
-  // Helper function to replace generic names with visual descriptors
-  const getVisualDescriptor = (name: string, side: 'blue' | 'red', sport: string): string => {
-    const genericNames = [
-      'not identified', 'player 1', 'player 2', 'unknown', 
-      'blue', 'red', 'player1', 'player2'
-    ];
-    
+  // Helper function to check if a name is generic/unavailable
+  const isGenericName = (name: string | null | undefined): boolean => {
+    if (!name) return true;
     const lowerName = name.toLowerCase().trim();
-    
-    // If it's a generic name, replace with visual descriptor
-    if (genericNames.includes(lowerName) || lowerName.startsWith('not ') || lowerName === '') {
-      const sportLower = sport.toLowerCase();
-      
-      // Martial arts / Combat sports
-      if (['taekwondo', 'karate', 'judo', 'mma', 'boxing', 'wrestling', 'kickboxing'].some(s => sportLower.includes(s))) {
-        if (sportLower.includes('taekwondo')) {
-          return side === 'blue' ? 'Blue Hogu' : 'Red Hogu';
-        }
-        if (sportLower.includes('karate') || sportLower.includes('judo')) {
-          return side === 'blue' ? 'Blue Belt' : 'Red Belt';
-        }
-        return side === 'blue' ? 'Blue Corner' : 'Red Corner';
-      }
-      
-      // Team sports or other sports - use jersey color
-      return side === 'blue' ? 'Blue Jersey' : 'Red Jersey';
+    const genericPatterns = [
+      'not identified', 'player 1', 'player 2', 'unknown', 
+      'blue', 'red', 'player1', 'player2', 'not available',
+      'n/a', 'null', 'undefined', ''
+    ];
+    return genericPatterns.includes(lowerName) || 
+           lowerName.startsWith('not ') || 
+           lowerName.includes('not available') ||
+           lowerName.includes('not identified') ||
+           lowerName === '';
+  };
+  
+  // Extract player names from dynamic metrics (these often have better visual descriptors)
+  const getPlayerNamesFromDynamicMetrics = (): { player1Name: string | null, player2Name: string | null } => {
+    if (!analysisData.dynamic_metrics || !Array.isArray(analysisData.dynamic_metrics)) {
+      return { player1Name: null, player2Name: null };
     }
     
-    return name;
+    // Look through metrics to find player names
+    for (const metric of analysisData.dynamic_metrics) {
+      const metricData = metric.data;
+      if (metricData && Array.isArray(metricData.players) && metricData.players.length >= 2) {
+        const player1 = metricData.players[0];
+        const player2 = metricData.players[1];
+        
+        // Check if these names are better than generic ones
+        const name1 = player1?.name;
+        const name2 = player2?.name;
+        
+        // Return the first good pair of names found
+        if (name1 || name2) {
+          return {
+            player1Name: !isGenericName(name1) ? name1 : null,
+            player2Name: !isGenericName(name2) ? name2 : null
+          };
+        }
+      }
+    }
+    
+    return { player1Name: null, player2Name: null };
   };
   
   const rawScoreboardData = getScoreboardData();
   const { entity1Country, entity2Country, isTeamSport, scoreFormat, isTaekwondo } = rawScoreboardData;
   
-  // Apply visual descriptors to entity names
-  const entity1Name = getVisualDescriptor(rawScoreboardData.entity1Name, 'blue', sport);
-  const entity2Name = getVisualDescriptor(rawScoreboardData.entity2Name, 'red', sport);
+  // Get fallback names from dynamic metrics
+  const metricPlayerNames = getPlayerNamesFromDynamicMetrics();
+  
+  // Apply fallback logic: use metric names if scoreboard names are generic
+  const getFinalEntityName = (scoreboardName: string, metricFallbackName: string | null, side: 'blue' | 'red'): string => {
+    // First check if scoreboard name is good
+    if (!isGenericName(scoreboardName)) {
+      return scoreboardName;
+    }
+    
+    // Try to use metric fallback name
+    if (metricFallbackName && !isGenericName(metricFallbackName)) {
+      return metricFallbackName;
+    }
+    
+    // Final fallback: sport-specific visual descriptor
+    const sportLower = sport.toLowerCase();
+    if (['taekwondo', 'karate', 'judo', 'mma', 'boxing', 'wrestling', 'kickboxing'].some(s => sportLower.includes(s))) {
+      if (sportLower.includes('taekwondo')) {
+        return side === 'blue' ? 'Blue Hogu' : 'Red Hogu';
+      }
+      if (sportLower.includes('karate') || sportLower.includes('judo')) {
+        return side === 'blue' ? 'Blue Belt' : 'Red Belt';
+      }
+      return side === 'blue' ? 'Blue Corner' : 'Red Corner';
+    }
+    return side === 'blue' ? 'Blue Jersey' : 'Red Jersey';
+  };
+  
+  // Apply fallback logic to entity names
+  const entity1Name = getFinalEntityName(rawScoreboardData.entity1Name, metricPlayerNames.player1Name, 'blue');
+  const entity2Name = getFinalEntityName(rawScoreboardData.entity2Name, metricPlayerNames.player2Name, 'red');
   
   // Parse dynamic metrics for non-taekwondo sports with standardized format
   const parseDynamicMetrics = () => {
