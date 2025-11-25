@@ -113,17 +113,17 @@ export function Navigation() {
             <div className="lg:hidden">
               <Badge 
                 variant="secondary" 
-                className="bg-athlete-gray-800 text-athlete-warning flex flex-col py-1.5 px-2"
+                className="bg-athlete-gray-800 text-athlete-warning flex items-center gap-2 py-2 px-3 sm:px-4"
               >
-                <div className="flex items-center">
-                  <Coins className={isArabic ? 'ml-1' : 'mr-1'} size={12} />
-                  <span className="text-xs">{formatNumber(user?.tokens || 0, isArabic)}</span>
+                <Coins size={18} />
+                <div className="flex flex-col">
+                  <span className="text-sm sm:text-base font-bold">{formatNumber(user?.tokens || 0, isArabic)}</span>
+                  {user?.totalTokensPurchased && (
+                    <span className="text-xs text-gray-400">
+                      /{formatNumber(user.totalTokensPurchased, isArabic)}
+                    </span>
+                  )}
                 </div>
-                {user?.totalTokensPurchased && (
-                  <span className="text-[10px] text-gray-400">
-                    /{formatNumber(user.totalTokensPurchased, isArabic)}
-                  </span>
-                )}
               </Badge>
             </div>
 
