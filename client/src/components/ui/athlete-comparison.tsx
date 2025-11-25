@@ -1580,12 +1580,12 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
                   {/* Tabbed Analysis */}
                   <Tabs defaultValue="overview" className="w-full mt-8">
-                    <TabsList className="grid w-full grid-cols-5 bg-athlete-gray-700">
-                      <TabsTrigger value="overview" data-testid="tab-overview">{t('analysis.comparison.tabOverview', 'Overview')}</TabsTrigger>
-                      <TabsTrigger value="strengths" data-testid="tab-strengths">{t('analysis.comparison.tabStrengths', 'Strengths')}</TabsTrigger>
-                      <TabsTrigger value="weaknesses" data-testid="tab-weaknesses">{t('analysis.comparison.tabWeaknesses', 'Weaknesses')}</TabsTrigger>
-                      <TabsTrigger value="ranking" data-testid="tab-ranking">{t('analysis.comparison.tabCompetitionHistory', 'Competition History')}</TabsTrigger>
-                      <TabsTrigger value="head-to-head" data-testid="tab-head-to-head">{t('analysis.comparison.tabHeadToHead', 'Head-to-Head')}</TabsTrigger>
+                    <TabsList className="flex md:grid w-full md:grid-cols-5 bg-athlete-gray-700 overflow-x-auto md:overflow-x-visible">
+                      <TabsTrigger value="overview" data-testid="tab-overview" className="whitespace-nowrap flex-shrink-0">{t('analysis.comparison.tabOverview', 'Overview')}</TabsTrigger>
+                      <TabsTrigger value="strengths" data-testid="tab-strengths" className="whitespace-nowrap flex-shrink-0">{t('analysis.comparison.tabStrengths', 'Strengths')}</TabsTrigger>
+                      <TabsTrigger value="weaknesses" data-testid="tab-weaknesses" className="whitespace-nowrap flex-shrink-0">{t('analysis.comparison.tabWeaknesses', 'Weaknesses')}</TabsTrigger>
+                      <TabsTrigger value="ranking" data-testid="tab-ranking" className="whitespace-nowrap flex-shrink-0">{t('analysis.comparison.tabCompetitionHistory', 'Competition History')}</TabsTrigger>
+                      <TabsTrigger value="head-to-head" data-testid="tab-head-to-head" className="whitespace-nowrap flex-shrink-0">{t('analysis.comparison.tabHeadToHead', 'Head-to-Head')}</TabsTrigger>
                     </TabsList>
 
                     {/* Overview Tab */}
