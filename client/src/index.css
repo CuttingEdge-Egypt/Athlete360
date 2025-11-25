@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -56,60 +58,60 @@
 }
 
 :root {
-  --background: hsl(222, 47%, 11%);
-  --foreground: hsl(213, 31%, 91%);
-  --muted: hsl(223, 47%, 11%);
-  --muted-foreground: hsl(215, 20%, 65%);
-  --popover: hsl(224, 71%, 4%);
-  --popover-foreground: hsl(213, 31%, 91%);
-  --card: hsl(224, 71%, 4%);
-  --card-foreground: hsl(213, 31%, 91%);
-  --border: hsl(216, 34%, 17%);
-  --input: hsl(216, 34%, 17%);
+  --background: hsl(220, 25%, 12%);
+  --foreground: hsl(210, 20%, 92%);
+  --muted: hsl(220, 20%, 16%);
+  --muted-foreground: hsl(215, 15%, 60%);
+  --popover: hsl(220, 28%, 10%);
+  --popover-foreground: hsl(210, 20%, 92%);
+  --card: hsl(220, 28%, 10%);
+  --card-foreground: hsl(210, 20%, 92%);
+  --border: hsl(220, 18%, 22%);
+  --input: hsl(220, 18%, 22%);
   --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(222, 47%, 11%);
-  --secondary: hsl(222, 47%, 11%);
-  --secondary-foreground: hsl(213, 31%, 91%);
+  --primary-foreground: hsl(220, 25%, 12%);
+  --secondary: hsl(220, 25%, 12%);
+  --secondary-foreground: hsl(210, 20%, 92%);
   --accent: hsl(207, 90%, 54%);
-  --accent-foreground: hsl(222, 47%, 11%);
+  --accent-foreground: hsl(220, 25%, 12%);
   --destructive: hsl(0, 63%, 31%);
-  --destructive-foreground: hsl(213, 31%, 91%);
-  --ring: hsl(216, 34%, 17%);
+  --destructive-foreground: hsl(210, 20%, 92%);
+  --ring: hsl(220, 18%, 22%);
   --radius: 0.75rem;
 
   /* Custom Athlete360 colors */
-  --athlete-primary: hsl(222, 47%, 11%);
+  --athlete-primary: hsl(220, 25%, 12%);
   --athlete-accent: hsl(207, 90%, 54%);
   --athlete-success: hsl(142, 71%, 45%);
   --athlete-warning: hsl(45, 93%, 47%);
   --athlete-danger: hsl(0, 84%, 60%);
   --athlete-purple: hsl(262, 83%, 58%);
-  --athlete-gray-900: hsl(215, 32%, 8%);
-  --athlete-gray-800: hsl(215, 28%, 17%);
-  --athlete-gray-700: hsl(215, 25%, 27%);
-  --athlete-gray-600: hsl(215, 20%, 45%);
+  --athlete-gray-900: hsl(220, 28%, 8%);
+  --athlete-gray-800: hsl(220, 24%, 14%);
+  --athlete-gray-700: hsl(220, 20%, 22%);
+  --athlete-gray-600: hsl(215, 16%, 42%);
 }
 
 .dark {
-  --background: hsl(222, 47%, 11%);
-  --foreground: hsl(213, 31%, 91%);
-  --muted: hsl(223, 47%, 11%);
-  --muted-foreground: hsl(215, 20%, 65%);
-  --popover: hsl(224, 71%, 4%);
-  --popover-foreground: hsl(213, 31%, 91%);
-  --card: hsl(224, 71%, 4%);
-  --card-foreground: hsl(213, 31%, 91%);
-  --border: hsl(216, 34%, 17%);
-  --input: hsl(216, 34%, 17%);
+  --background: hsl(220, 25%, 12%);
+  --foreground: hsl(210, 20%, 92%);
+  --muted: hsl(220, 20%, 16%);
+  --muted-foreground: hsl(215, 15%, 60%);
+  --popover: hsl(220, 28%, 10%);
+  --popover-foreground: hsl(210, 20%, 92%);
+  --card: hsl(220, 28%, 10%);
+  --card-foreground: hsl(210, 20%, 92%);
+  --border: hsl(220, 18%, 22%);
+  --input: hsl(220, 18%, 22%);
   --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(222, 47%, 11%);
-  --secondary: hsl(222, 47%, 11%);
-  --secondary-foreground: hsl(213, 31%, 91%);
+  --primary-foreground: hsl(220, 25%, 12%);
+  --secondary: hsl(220, 25%, 12%);
+  --secondary-foreground: hsl(210, 20%, 92%);
   --accent: hsl(207, 90%, 54%);
-  --accent-foreground: hsl(222, 47%, 11%);
+  --accent-foreground: hsl(220, 25%, 12%);
   --destructive: hsl(0, 63%, 31%);
-  --destructive-foreground: hsl(213, 31%, 91%);
-  --ring: hsl(216, 34%, 17%);
+  --destructive-foreground: hsl(210, 20%, 92%);
+  --ring: hsl(220, 18%, 22%);
   --radius: 0.75rem;
 }
 
@@ -121,6 +123,23 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+  }
+
+  h1 {
+    font-weight: 700;
+  }
+
+  h2 {
+    font-weight: 700;
+  }
+
+  h3 {
+    font-weight: 600;
   }
 }
 
@@ -157,7 +176,7 @@
 
 @layer utilities {
   .gradient-bg {
-    background: linear-gradient(135deg, hsl(222, 47%, 11%) 0%, hsl(215, 28%, 17%) 100%);
+    background: linear-gradient(135deg, hsl(220, 25%, 12%) 0%, hsl(220, 24%, 14%) 100%);
   }
   
   .service-card {
@@ -211,15 +230,19 @@
   }
 
   .bg-athlete-gray-900 {
-    background-color: hsl(215, 32%, 8%);
+    background-color: hsl(220, 28%, 8%);
   }
 
   .bg-athlete-gray-800 {
-    background-color: hsl(215, 28%, 17%);
+    background-color: hsl(220, 24%, 14%);
   }
 
   .bg-athlete-gray-700 {
-    background-color: hsl(215, 25%, 27%);
+    background-color: hsl(220, 20%, 22%);
+  }
+
+  .bg-athlete-gray-600 {
+    background-color: hsl(215, 16%, 42%);
   }
 
   .border-athlete-accent {
