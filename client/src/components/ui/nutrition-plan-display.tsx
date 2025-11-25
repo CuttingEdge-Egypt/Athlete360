@@ -255,7 +255,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
   const canGoNext = currentWeek < totalWeeks - 1 || currentDay < maxDayInWeek;
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-6">
+    <div className="w-full max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto space-y-6 px-2 md:px-0">
 
       {/* Consolidated Navigation Header */}
       <Card className="bg-gradient-to-r from-card to-slate-700 border-border">
@@ -468,7 +468,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
 
             {/* Daily Explanation */}
             {currentDayData.explanation && (
-              <div className={`p-6 bg-gradient-to-r from-blue-900/30 to-blue-800/20 rounded-xl border-blue-400 ${isArabic ? 'border-r-4' : 'border-l-4'}`} dir={isArabic ? 'rtl' : 'ltr'}>
+              <div className={`p-4 md:p-6 bg-gradient-to-r from-blue-900/30 to-blue-800/20 rounded-xl border-blue-400 ${isArabic ? 'border-r-4' : 'border-l-4'}`} dir={isArabic ? 'rtl' : 'ltr'}>
                 <div className={`flex items-start gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                   <Target className="h-6 w-6 text-blue-400 mt-1 flex-shrink-0" />
                   <div className={isArabic ? 'text-right' : ''}>
@@ -485,7 +485,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
 
             {/* Personalized Instructions - Moved after Daily Focus */}
             {nutritionData.instructions && (
-              <div className={`mt-6 p-6 bg-gradient-to-r from-purple-900/30 to-purple-800/20 rounded-xl border-purple-400 ${isArabic ? 'border-r-4' : 'border-l-4'}`} dir={isArabic ? 'rtl' : 'ltr'}>
+              <div className={`mt-6 p-4 md:p-6 bg-gradient-to-r from-purple-900/30 to-purple-800/20 rounded-xl border-purple-400 ${isArabic ? 'border-r-4' : 'border-l-4'}`} dir={isArabic ? 'rtl' : 'ltr'}>
                 <div className={`flex items-start gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                   <Target className="h-6 w-6 text-purple-400 mt-1 flex-shrink-0" />
                   <div className={isArabic ? 'text-right' : ''}>
@@ -513,25 +513,25 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
         </CardHeader>
         <CardContent dir={isArabic ? 'rtl' : 'ltr'}>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className={`p-6 bg-gradient-to-br from-purple-900/30 to-purple-800/20 rounded-xl border border-purple-700 ${isArabic ? 'text-right' : 'text-center'}`}>
+            <div className={`p-4 md:p-6 bg-gradient-to-br from-purple-900/30 to-purple-800/20 rounded-xl border border-purple-700 ${isArabic ? 'text-right' : 'text-center'}`}>
               <div className="text-3xl font-bold text-purple-400 mb-1">
                 {toArabicNumerals(totalWeeks)}
               </div>
               <div className="text-sm text-muted-foreground">{t('analysis.nutrition.weeksPlanned', 'Weeks Planned')}</div>
             </div>
-            <div className={`p-6 bg-gradient-to-br from-blue-900/30 to-blue-800/20 rounded-xl border border-blue-700 ${isArabic ? 'text-right' : 'text-center'}`}>
+            <div className={`p-4 md:p-6 bg-gradient-to-br from-blue-900/30 to-blue-800/20 rounded-xl border border-blue-700 ${isArabic ? 'text-right' : 'text-center'}`}>
               <div className="text-3xl font-bold text-blue-400 mb-1">
                 {toArabicNumerals(totalDays)}
               </div>
               <div className="text-sm text-muted-foreground">{t('analysis.nutrition.totalDays', 'Total Days')}</div>
             </div>
-            <div className={`p-6 bg-gradient-to-br from-orange-900/30 to-orange-800/20 rounded-xl border border-orange-700 ${isArabic ? 'text-right' : 'text-center'}`}>
+            <div className={`p-4 md:p-6 bg-gradient-to-br from-orange-900/30 to-orange-800/20 rounded-xl border border-orange-700 ${isArabic ? 'text-right' : 'text-center'}`}>
               <div className="text-3xl font-bold text-orange-400 mb-1">
                 {toArabicNumerals(totalMeals)}
               </div>
               <div className="text-sm text-muted-foreground">{t('analysis.nutrition.totalMeals', 'Total Meals')}</div>
             </div>
-            <div className={`p-6 bg-gradient-to-br from-green-900/30 to-green-800/20 rounded-xl border border-green-700 ${isArabic ? 'text-right' : 'text-center'}`}>
+            <div className={`p-4 md:p-6 bg-gradient-to-br from-green-900/30 to-green-800/20 rounded-xl border border-green-700 ${isArabic ? 'text-right' : 'text-center'}`}>
               <div className="text-3xl font-bold text-green-400 mb-1">
                 {toArabicNumerals(avgCaloriesPerDay)}
               </div>
