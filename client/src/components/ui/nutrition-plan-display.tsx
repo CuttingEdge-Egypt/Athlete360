@@ -255,7 +255,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
   const canGoNext = currentWeek < totalWeeks - 1 || currentDay < maxDayInWeek;
 
   return (
-    <div className="w-full max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto space-y-6 px-2 md:px-0">
+    <div className="w-full mx-auto space-y-6">
 
       {/* Consolidated Navigation Header */}
       <Card className="bg-gradient-to-r from-card to-slate-700 border-border">
