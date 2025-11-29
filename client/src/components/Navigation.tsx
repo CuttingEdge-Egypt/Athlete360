@@ -63,7 +63,7 @@ export function Navigation() {
       <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
         <div className="flex justify-between items-center">
           <Link href="/" className={`flex items-center cursor-pointer ${isArabic ? 'space-x-reverse space-x-2' : 'space-x-2'} flex-shrink-0`}>
-            <img src={logoImage} alt="Athlete360" className="h-8 sm:h-10 w-auto" />
+            <img src={logoImage} alt="Athlete360" className="h-12 sm:h-14 w-auto" />
           </Link>
           
           {/* Desktop Menu */}
