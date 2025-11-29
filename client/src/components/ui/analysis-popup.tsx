@@ -1356,12 +1356,12 @@ export function AnalysisPopup({
             <div className="flex flex-wrap justify-center gap-4 mb-6">
               {((actualData?.personalInfo?.age && actualData.personalInfo.age !== "N/A") || 
                 (bioData?.personalInfo?.age && bioData.personalInfo.age !== "N/A")) && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-blue-400/60 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/20">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-blue-400/50 hover:border-blue-500 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/20 shadow-sm">
                   <div className="flex items-center justify-center w-6 h-6 bg-blue-500/20 rounded-full">
-                    <Calendar className="w-3 h-3 text-blue-400" />
+                    <Calendar className="w-3 h-3 text-blue-500" />
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-slate-400 font-medium">Age</span>
+                    <span className="text-xs text-blue-600 font-medium">Age</span>
                     <span className="text-sm font-bold text-foreground" data-testid="text-age">{actualData?.personalInfo?.age || bioData?.personalInfo?.age}</span>
                   </div>
                 </div>
@@ -1369,12 +1369,12 @@ export function AnalysisPopup({
               
               {((actualData?.personalInfo?.dateOfBirth && actualData.personalInfo.dateOfBirth !== "N/A") || 
                 (bioData?.personalInfo?.dateOfBirth && bioData.personalInfo.dateOfBirth !== "N/A")) && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-green-400/60 transition-all duration-200 hover:shadow-lg hover:shadow-green-500/20">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-green-400/50 hover:border-green-500 transition-all duration-200 hover:shadow-lg hover:shadow-green-500/20 shadow-sm">
                   <div className="flex items-center justify-center w-6 h-6 bg-green-500/20 rounded-full">
-                    <Calendar className="w-3 h-3 text-green-400" />
+                    <Calendar className="w-3 h-3 text-green-500" />
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-slate-400 font-medium">Born</span>
+                    <span className="text-xs text-green-600 font-medium">Born</span>
                     <span className="text-sm font-bold text-foreground" data-testid="text-dateofbirth">{actualData?.personalInfo?.dateOfBirth || bioData?.personalInfo?.dateOfBirth}</span>
                   </div>
                 </div>
@@ -1382,12 +1382,12 @@ export function AnalysisPopup({
               
               {((actualData?.personalInfo?.height && actualData.personalInfo.height !== "N/A") || 
                 (bioData?.personalInfo?.height && bioData.personalInfo.height !== "N/A")) && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-yellow-400/60 transition-all duration-200 hover:shadow-lg hover:shadow-yellow-500/20">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-yellow-400/50 hover:border-yellow-500 transition-all duration-200 hover:shadow-lg hover:shadow-yellow-500/20 shadow-sm">
                   <div className="flex items-center justify-center w-6 h-6 bg-yellow-500/20 rounded-full">
-                    <User className="w-3 h-3 text-yellow-400" />
+                    <User className="w-3 h-3 text-yellow-500" />
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-slate-400 font-medium">Height</span>
+                    <span className="text-xs text-yellow-600 font-medium">Height</span>
                     <span className="text-sm font-bold text-foreground" data-testid="text-height">{actualData?.personalInfo?.height || bioData?.personalInfo?.height}</span>
                   </div>
                 </div>
@@ -1395,12 +1395,12 @@ export function AnalysisPopup({
               
               {((actualData?.personalInfo?.weight && actualData.personalInfo.weight !== "N/A") || 
                 (bioData?.personalInfo?.weight && bioData.personalInfo.weight !== "N/A")) && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-orange-400/60 transition-all duration-200 hover:shadow-lg hover:shadow-orange-500/20">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-orange-400/50 hover:border-orange-500 transition-all duration-200 hover:shadow-lg hover:shadow-orange-500/20 shadow-sm">
                   <div className="flex items-center justify-center w-6 h-6 bg-orange-500/20 rounded-full">
-                    <BarChart className="w-3 h-3 text-orange-400" />
+                    <BarChart className="w-3 h-3 text-orange-500" />
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-slate-400 font-medium">Weight</span>
+                    <span className="text-xs text-orange-600 font-medium">Weight</span>
                     <span className="text-sm font-bold text-foreground" data-testid="text-weight">{actualData?.personalInfo?.weight || bioData?.personalInfo?.weight}</span>
                   </div>
                 </div>
@@ -1408,12 +1408,12 @@ export function AnalysisPopup({
               
               {((actualData?.personalInfo?.position && actualData.personalInfo.position !== "N/A") || 
                 (bioData?.personalInfo?.position && bioData.personalInfo.position !== "N/A")) && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-purple-400/60 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/20">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-purple-400/50 hover:border-purple-500 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/20 shadow-sm">
                   <div className="flex items-center justify-center w-6 h-6 bg-purple-500/20 rounded-full">
-                    <Trophy className="w-3 h-3 text-purple-400" />
+                    <Trophy className="w-3 h-3 text-purple-500" />
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-slate-400 font-medium">Position</span>
+                    <span className="text-xs text-purple-600 font-medium">Position</span>
                     <span className="text-sm font-bold text-foreground" data-testid="text-position">{actualData?.personalInfo?.position || bioData?.personalInfo?.position}</span>
                   </div>
                 </div>
@@ -1421,12 +1421,12 @@ export function AnalysisPopup({
               
               {((actualData?.personalInfo?.educationalBackground && actualData.personalInfo.educationalBackground !== "N/A") || 
                 (bioData?.personalInfo?.educationalBackground && bioData.personalInfo.educationalBackground !== "N/A")) && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-emerald-400/60 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/20">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-emerald-400/50 hover:border-emerald-500 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/20 shadow-sm">
                   <div className="flex items-center justify-center w-6 h-6 bg-emerald-500/20 rounded-full">
-                    <Award className="w-3 h-3 text-emerald-400" />
+                    <Award className="w-3 h-3 text-emerald-500" />
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-slate-400 font-medium">Education</span>
+                    <span className="text-xs text-emerald-600 font-medium">Education</span>
                     <span className="text-sm font-bold text-foreground" data-testid="text-education">{actualData?.personalInfo?.educationalBackground || bioData?.personalInfo?.educationalBackground}</span>
                   </div>
                 </div>
