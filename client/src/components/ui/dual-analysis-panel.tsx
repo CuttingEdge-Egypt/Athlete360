@@ -1452,35 +1452,35 @@ export function DualAnalysisPanel({
 
         {/* Career Phases Timeline */}
         {careerPhases && careerPhases.length > 0 && (
-          <Card className="bg-card border">
-            <CardHeader>
-              <CardTitle className={`text-2xl text-foreground flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
-                <Trophy className={`${isArabic ? 'ml-3' : 'mr-3'} text-blue-400`} size={24} />
+          <div className="bg-white/60 backdrop-blur-md rounded-2xl shadow-lg shadow-black/5 border border-white/40 p-6">
+            <div className="mb-6">
+              <h3 className={`text-2xl font-bold text-foreground flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <Trophy className={`${isArabic ? 'ml-3' : 'mr-3'} text-primary`} size={24} />
                 {t('competitiveHistory.careerPhases', 'Career Phases')}
-              </CardTitle>
-              <div className={`text-sm text-muted-foreground ${isArabic ? 'text-right' : ''}`}>Professional career progression through different phases</div>
-            </CardHeader>
-            <CardContent>
+              </h3>
+              <div className={`text-sm text-muted-foreground mt-1 ${isArabic ? 'text-right' : ''}`}>Professional career progression through different phases</div>
+            </div>
+            <div>
               <div className="relative">
-                <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 to-purple-500 opacity-30"></div>
+                <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary to-primary/30 opacity-50"></div>
                 
                 <div className="space-y-8">
                   {careerPhases.map((phase: any, phaseIndex: number) => (
                     <div key={phaseIndex} className="relative ml-8">
-                      <div className="absolute -left-12 top-6 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm font-bold text-white ring-4 ring-blue-600/30">
+                      <div className="absolute -left-12 top-6 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold text-white ring-4 ring-primary/20 shadow-md">
                         {phaseIndex + 1}
                       </div>
 
-                      <Card className="bg-gradient-to-br from-slate-50 to-white border-slate-200">
-                        <CardHeader>
+                      <div className="bg-white/40 backdrop-blur-sm rounded-2xl shadow-md shadow-black/5 border border-white/50 overflow-hidden">
+                        <div className="p-5 border-b border-slate-100">
                           <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
-                            <CardTitle className={`text-xl text-white ${isArabic ? 'text-right' : ''}`}>
+                            <h4 className={`text-xl font-semibold text-foreground ${isArabic ? 'text-right' : ''}`}>
                               {phase.phase_name}
-                            </CardTitle>
-                            <Badge className="bg-blue-600 text-white">{phase.period}</Badge>
+                            </h4>
+                            <Badge className="bg-primary/90 text-white shadow-sm">{phase.period}</Badge>
                           </div>
-                        </CardHeader>
-                        <CardContent className={`space-y-4 ${isArabic ? 'text-right' : ''}`}>
+                        </div>
+                        <div className={`p-5 space-y-3 ${isArabic ? 'text-right' : ''}`}>
                           {phase.key_achievements && phase.key_achievements.length > 0 && (
                             <div className="space-y-3">
                               {phase.key_achievements
@@ -1498,25 +1498,25 @@ export function DualAnalysisPanel({
                                   }
                                   
                                   return (
-                                    <div key={achievementIndex} className={`p-4 bg-muted rounded-lg border border hover:border-slate-200 transition-colors ${isArabic ? 'text-right' : ''}`}>
+                                    <div key={achievementIndex} className={`p-4 bg-white/50 backdrop-blur-sm rounded-xl border border-white/60 hover:border-primary/20 hover:shadow-sm transition-all duration-200 ${isArabic ? 'text-right' : ''}`}>
                                       <div className={`flex items-start justify-between mb-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                                         <div className="flex-1">
                                           {/* Date Badge */}
-                                          <Badge variant="outline" className="border-yellow-400 text-yellow-400 text-sm mb-2">
+                                          <Badge variant="outline" className="bg-amber-50 border-amber-300 text-amber-700 text-sm mb-2 shadow-sm">
                                             {achievementDate}
                                           </Badge>
                                           
                                           {/* Event Name */}
-                                          <div className="font-bold text-white text-base mb-2">
+                                          <div className="font-semibold text-foreground text-base mb-2">
                                             {achievement.event_name}
                                           </div>
 
                                           {/* Event Type - PROMINENT for World Aquatics */}
                                           {achievement.event_type && (
                                             <div className={`mb-2 ${isArabic ? 'text-right' : ''}`}>
-                                              <div className="inline-flex items-center gap-2 bg-purple-500/20 px-3 py-1.5 rounded-lg border border-purple-300">
-                                                <span className="text-xs text-purple-300">{isArabic ? 'الحدث' : 'Event'}</span>
-                                                <span className="text-purple-400 font-bold text-sm">{achievement.event_type}</span>
+                                              <div className="inline-flex items-center gap-2 bg-purple-50 px-3 py-1.5 rounded-lg border border-purple-200">
+                                                <span className="text-xs text-purple-500">{isArabic ? 'الحدث' : 'Event'}</span>
+                                                <span className="text-purple-700 font-bold text-sm">{achievement.event_type}</span>
                                               </div>
                                             </div>
                                           )}
@@ -1524,9 +1524,9 @@ export function DualAnalysisPanel({
                                           {/* Time Result - VERY PROMINENT for Swimming */}
                                           {achievement.time_result && (
                                             <div className={`mb-2 ${isArabic ? 'text-right' : ''}`}>
-                                              <div className="inline-flex items-center gap-2 bg-yellow-500/20 px-3 py-1.5 rounded-lg border border-yellow-500/40">
-                                                <span className="text-sm text-yellow-300">{isArabic ? 'الوقت' : 'Time'}</span>
-                                                <span className="text-yellow-400 font-bold text-lg">{achievement.time_result}</span>
+                                              <div className="inline-flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-300">
+                                                <span className="text-sm text-amber-600">{isArabic ? 'الوقت' : 'Time'}</span>
+                                                <span className="text-amber-700 font-bold text-lg">{achievement.time_result}</span>
                                               </div>
                                             </div>
                                           )}
@@ -1539,10 +1539,10 @@ export function DualAnalysisPanel({
                                           {(achievement.pool_type || achievement.distance) && (
                                             <div className={`flex items-center gap-3 text-xs flex-wrap ${isArabic ? 'flex-row-reverse' : ''}`}>
                                               {achievement.pool_type && (
-                                                <span className="text-teal-400">Pool: {achievement.pool_type}</span>
+                                                <span className="text-teal-600">Pool: {achievement.pool_type}</span>
                                               )}
                                               {achievement.distance && (
-                                                <span className="text-cyan-400">Distance: {achievement.distance}</span>
+                                                <span className="text-cyan-600">Distance: {achievement.distance}</span>
                                               )}
                                             </div>
                                           )}
@@ -1562,14 +1562,14 @@ export function DualAnalysisPanel({
                                 })}
                             </div>
                           )}
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
         {/* Competitive History Analysis - Overall insights for now */}

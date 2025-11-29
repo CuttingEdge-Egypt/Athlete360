@@ -791,47 +791,47 @@ export function AnalysisPopup({
 
         {/* Career Phases Timeline */}
         {careerPhases && careerPhases.length > 0 && (
-          <Card className="bg-card border">
-            <CardHeader>
-              <CardTitle className="text-2xl text-foreground flex items-center">
-                <Trophy className="mr-3 text-blue-400" size={24} />
+          <div className="bg-white/60 backdrop-blur-md rounded-2xl shadow-lg shadow-black/5 border border-white/40 p-6">
+            <div className="mb-6">
+              <h3 className="text-2xl font-bold text-foreground flex items-center">
+                <Trophy className="mr-3 text-primary" size={24} />
                 {t("common:analysis.careerPhases.title", "Career Phases")}
-              </CardTitle>
-              <div className="text-sm text-muted-foreground">{t("common:analysis.careerPhases.subtitle", "Professional career progression through different phases")}</div>
-            </CardHeader>
-            <CardContent>
+              </h3>
+              <div className="text-sm text-muted-foreground mt-1">{t("common:analysis.careerPhases.subtitle", "Professional career progression through different phases")}</div>
+            </div>
+            <div>
               <div className="relative">
-                <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 to-purple-500 opacity-30"></div>
+                <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary to-primary/30 opacity-50"></div>
                 
                 <div className="space-y-8">
                   {careerPhases.map((phase: any, phaseIndex: number) => (
                     <div key={phaseIndex} className="relative ml-8">
                       {/* Phase Number Indicator */}
-                      <div className="absolute -left-12 top-6 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm font-bold text-white ring-4 ring-blue-600/30">
+                      <div className="absolute -left-12 top-6 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold text-white ring-4 ring-primary/20 shadow-md">
                         {phaseIndex + 1}
                       </div>
 
-                      <Card className="bg-gradient-to-br from-slate-50 to-white border-slate-200">
-                        <CardHeader>
+                      <div className="bg-white/40 backdrop-blur-sm rounded-2xl shadow-md shadow-black/5 border border-white/50 overflow-hidden">
+                        <div className="p-5 border-b border-slate-100">
                           {i18n.language === 'ar' ? (
                             <div dir="rtl" className="flex items-center justify-between">
-                              <CardTitle className="text-xl text-foreground">
+                              <h4 className="text-xl font-semibold text-foreground">
                                 {phase.phase_name?.toLowerCase().includes('international competitive history') 
                                   ? 'المسيرة المهنية الدولية'
                                   : phase.phase_name}
-                              </CardTitle>
-                              <Badge className="bg-blue-600 text-white">{phase.period}</Badge>
+                              </h4>
+                              <Badge className="bg-primary/90 text-white shadow-sm">{phase.period}</Badge>
                             </div>
                           ) : (
                             <div className="flex items-center justify-between">
-                              <CardTitle className="text-xl text-foreground">
+                              <h4 className="text-xl font-semibold text-foreground">
                                 {phase.phase_name}
-                              </CardTitle>
-                              <Badge className="bg-blue-600 text-white">{phase.period}</Badge>
+                              </h4>
+                              <Badge className="bg-primary/90 text-white shadow-sm">{phase.period}</Badge>
                             </div>
                           )}
-                        </CardHeader>
-                        <CardContent className={`space-y-4 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
+                        </div>
+                        <div className={`p-5 space-y-3 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                           {/* Key Achievements */}
                           {phase.key_achievements && phase.key_achievements.length > 0 && (
                             <div className="space-y-3">
@@ -900,14 +900,14 @@ export function AnalysisPopup({
                                   };
                                   
                                   return (
-                                    <div key={achievementIndex} className="p-4 bg-muted rounded-lg border hover:border-slate-200 transition-colors">
+                                    <div key={achievementIndex} className="p-4 bg-white/50 backdrop-blur-sm rounded-xl border border-white/60 hover:border-primary/20 hover:shadow-sm transition-all duration-200">
                                       <div className={`flex items-start justify-between mb-2 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
                                         <div className="flex-1">
                                           <div className={`flex ${i18n.language === 'ar' ? 'flex-row-reverse justify-end gap-2' : 'flex-row gap-3'} items-center mb-2`}>
-                                            <Badge variant="outline" className="border-yellow-400 text-yellow-400 text-xs text-center">
+                                            <Badge variant="outline" className="bg-amber-50 border-amber-300 text-amber-700 text-xs text-center shadow-sm">
                                               {translateMonth(achievement.month, achievement.year)}
                                             </Badge>
-                                            <span className={`font-bold text-foreground ${i18n.language === 'ar' ? 'text-right' : ''}`}>{achievement.event_name}</span>
+                                            <span className={`font-semibold text-foreground ${i18n.language === 'ar' ? 'text-right' : ''}`}>{achievement.event_name}</span>
                                           </div>
                                           <div className={`text-sm text-muted-foreground mb-2 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                                             {achievement.event_tier}
@@ -929,14 +929,14 @@ export function AnalysisPopup({
                                 })}
                             </div>
                           )}
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
         {/* Gemini Professional Analysis */}
