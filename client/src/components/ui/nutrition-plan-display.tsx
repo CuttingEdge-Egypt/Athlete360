@@ -489,7 +489,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
 
             {/* Personalized Instructions - Moved after Daily Focus */}
             {nutritionData.instructions && (
-              <div className={`mt-6 p-4 md:p-6 bg-gradient-to-r from-purple-900/30 to-purple-800/20 rounded-xl border-purple-400 ${isArabic ? 'border-r-4' : 'border-l-4'}`} dir={isArabic ? 'rtl' : 'ltr'}>
+              <div className={`mt-6 p-4 md:p-6 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl border-purple-400 ${isArabic ? 'border-r-4' : 'border-l-4'}`} dir={isArabic ? 'rtl' : 'ltr'}>
                 <div className={`flex items-start gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                   <Target className="h-6 w-6 text-purple-400 mt-1 flex-shrink-0" />
                   <div className={isArabic ? 'text-right' : ''}>
@@ -517,7 +517,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
         </CardHeader>
         <CardContent dir={isArabic ? 'rtl' : 'ltr'}>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className={`p-4 md:p-6 bg-gradient-to-br from-purple-900/30 to-purple-800/20 rounded-xl border border-purple-700 ${isArabic ? 'text-right' : 'text-center'}`}>
+            <div className={`p-4 md:p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-300 ${isArabic ? 'text-right' : 'text-center'}`}>
               <div className="text-3xl font-bold text-purple-400 mb-1">
                 {toArabicNumerals(totalWeeks)}
               </div>

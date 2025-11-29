@@ -811,7 +811,7 @@ export function AnalysisPopup({
                         {phaseIndex + 1}
                       </div>
 
-                      <Card className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 border-blue-500/50">
+                      <Card className="bg-gradient-to-br from-slate-50 to-white border-slate-200">
                         <CardHeader>
                           {i18n.language === 'ar' ? (
                             <div dir="rtl" className="flex items-center justify-between">
@@ -900,7 +900,7 @@ export function AnalysisPopup({
                                   };
                                   
                                   return (
-                                    <div key={achievementIndex} className="p-4 bg-muted rounded-lg border hover:border-blue-500/50 transition-colors">
+                                    <div key={achievementIndex} className="p-4 bg-muted rounded-lg border hover:border-slate-200 transition-colors">
                                       <div className={`flex items-start justify-between mb-2 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
                                         <div className="flex-1">
                                           <div className={`flex ${i18n.language === 'ar' ? 'flex-row-reverse justify-end gap-2' : 'flex-row gap-3'} items-center mb-2`}>
@@ -2302,7 +2302,7 @@ export function AnalysisPopup({
             <div className="grid grid-cols-2 gap-6">
               {/* Athlete 1 */}
               <div className="text-center">
-                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-3 overflow-hidden border-2 border-blue-500/50">
+                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-3 overflow-hidden border-2 border-slate-200">
                   {normalizedComparison.athlete1.profileImageUrl ? (
                     <img 
                       src={normalizedComparison.athlete1.profileImageUrl} 

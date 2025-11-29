@@ -1354,7 +1354,7 @@ export function DualAnalysisPanel({
                     }
 
                     return (
-                      <div key={index} className={`p-4 bg-muted rounded-lg border border hover:border-blue-500/50 transition-colors ${isArabic ? 'text-right' : ''}`}>
+                      <div key={index} className={`p-4 bg-muted rounded-lg border border hover:border-slate-200 transition-colors ${isArabic ? 'text-right' : ''}`}>
                         <div className={`flex items-start justify-between mb-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                           <div className="flex-1">
                             {/* Date Badge - More prominent */}
@@ -1471,7 +1471,7 @@ export function DualAnalysisPanel({
                         {phaseIndex + 1}
                       </div>
 
-                      <Card className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 border-blue-500/50">
+                      <Card className="bg-gradient-to-br from-slate-50 to-white border-slate-200">
                         <CardHeader>
                           <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
                             <CardTitle className={`text-xl text-white ${isArabic ? 'text-right' : ''}`}>
@@ -1498,7 +1498,7 @@ export function DualAnalysisPanel({
                                   }
                                   
                                   return (
-                                    <div key={achievementIndex} className={`p-4 bg-muted rounded-lg border border hover:border-blue-500/50 transition-colors ${isArabic ? 'text-right' : ''}`}>
+                                    <div key={achievementIndex} className={`p-4 bg-muted rounded-lg border border hover:border-slate-200 transition-colors ${isArabic ? 'text-right' : ''}`}>
                                       <div className={`flex items-start justify-between mb-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                                         <div className="flex-1">
                                           {/* Date Badge */}
