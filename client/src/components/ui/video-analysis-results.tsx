@@ -92,7 +92,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
         if (currentParagraph.length > 0) {
           const paragraphText = currentParagraph.join(' ');
           elements.push(
-            <p key={`p-${index}`} className="text-gray-200 mb-4 leading-relaxed">
+            <p key={`p-${index}`} className="text-foreground mb-4 leading-relaxed">
               {renderInlineFormatting(paragraphText)}
             </p>
           );
@@ -103,7 +103,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
       const flushList = (index: number) => {
         if (listItems.length > 0) {
           elements.push(
-            <ul key={`ul-${index}`} className="list-disc list-inside mb-4 space-y-2 text-gray-200">
+            <ul key={`ul-${index}`} className="list-disc list-inside mb-4 space-y-2 text-foreground">
               {listItems.map((item, i) => (
                 <li key={i} className="ml-4">{renderInlineFormatting(item)}</li>
               ))}
@@ -170,7 +170,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
         if (trimmedLine === '---') {
           flushParagraph(index);
           flushList(index);
-          elements.push(<hr key={`hr-${index}`} className="my-6 border-gray-600" />);
+          elements.push(<hr key={`hr-${index}`} className="my-6 border-slate-200" />);
           return;
         }
         
@@ -206,7 +206,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
     return (
       <div className="space-y-6">
         {/* User Request Card */}
-        <Card className="bg-athlete-gray-800 border-gray-700">
+        <Card className="bg-slate-50 border-slate-200">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <User className="text-indigo-400" size={20} />
@@ -214,9 +214,9 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="bg-athlete-gray-700 p-4 rounded-lg">
-              <p className="text-gray-200 italic">"{analysisData.userRequest}"</p>
-              <div className="flex gap-4 mt-3 text-sm text-gray-400">
+            <div className="bg-slate-100 p-4 rounded-lg">
+              <p className="text-foreground italic">"{analysisData.userRequest}"</p>
+              <div className="flex gap-4 mt-3 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Trophy size={14} />
                   {analysisData.sport}
@@ -231,7 +231,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
         </Card>
 
         {/* Analysis Results */}
-        <Card className="bg-athlete-gray-800 border-gray-700">
+        <Card className="bg-slate-50 border-slate-200">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <MessageSquare className="text-indigo-400" size={20} />
@@ -246,8 +246,8 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
             </div>
             
             {/* Analysis Metadata */}
-            <div className="mt-6 pt-4 border-t border-gray-700">
-              <div className="flex items-center gap-2 text-sm text-gray-400">
+            <div className="mt-6 pt-4 border-t border-slate-200">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar size={14} />
                 <span>{t('analysis.videoAnalysis.analyzedOn', 'Analyzed on')} {new Date(analysisData.processedAt).toLocaleString()}</span>
               </div>
@@ -712,21 +712,21 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
   return (
     <div className="space-y-6">
       {/* Header with Round Info */}
-      <div className="bg-athlete-gray-800 border-gray-700 rounded-lg p-6">
+      <div className="bg-slate-50 border-slate-200 rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-2xl font-bold text-white">{t('analysis.videoAnalysis.videoAnalysisResults', 'Video Analysis Results')}</h2>
-            <p className="text-gray-300">{t('analysis.videoAnalysis.round', 'Round')} {analysisData.roundAnalyzed || 1} {t('analysis.videoAnalysis.analysis', 'Analysis')}</p>
+            <p className="text-gray-600">{t('analysis.videoAnalysis.round', 'Round')} {analysisData.roundAnalyzed || 1} {t('analysis.videoAnalysis.analysis', 'Analysis')}</p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-gray-400">{t('analysis.videoAnalysis.analyzedOn', 'Analyzed on')}</p>
+            <p className="text-sm text-muted-foreground">{t('analysis.videoAnalysis.analyzedOn', 'Analyzed on')}</p>
             <p className="text-white">{new Date(analysisData.processedAt || Date.now()).toLocaleDateString()}</p>
           </div>
         </div>
       </div>
 
       {/* Match Analysis */}
-      <Card className="bg-athlete-gray-800 border-gray-700">
+      <Card className="bg-slate-50 border-slate-200">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-athlete-accent">
             <Users className="h-5 w-5" />
@@ -734,7 +734,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-gray-300 whitespace-pre-wrap leading-relaxed">
+          <div className="text-gray-600 whitespace-pre-wrap leading-relaxed">
             {renderFormattedText(analysisData.match_analysis) || 'No match analysis available'}
           </div>
         </CardContent>
@@ -743,7 +743,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
       {/* Score Summary - Only show for Taekwondo */}
       {isTaekwondo && (
         <div className="grid md:grid-cols-2 gap-6">
-          <Card className="bg-athlete-gray-800 border-gray-700">
+          <Card className="bg-slate-50 border-slate-200">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-blue-400">
                 <Trophy className="h-5 w-5" />
@@ -768,7 +768,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
             </CardContent>
           </Card>
 
-          <Card className="bg-athlete-gray-800 border-gray-700">
+          <Card className="bg-slate-50 border-slate-200">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-yellow-400">
                 <AlertTriangle className="h-5 w-5" />
@@ -797,7 +797,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
 
       {/* Kick Counts - Only show for Taekwondo */}
       {isTaekwondo && (
-        <Card className="bg-athlete-gray-800 border-gray-700">
+        <Card className="bg-slate-50 border-slate-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-athlete-accent">
               <Target className="h-5 w-5" />
@@ -825,7 +825,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
       
       {/* Tennis Score Timeline - Show tennis scores when available */}
       {tennisScoreData && (
-        <Card className="bg-athlete-gray-800 border-gray-700 mb-6">
+        <Card className="bg-slate-50 border-slate-200 mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-athlete-accent">
               <Trophy className="h-5 w-5" />
@@ -856,7 +856,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
                         {event.playerName}
                       </span>
                       {event.description && (
-                        <span className="text-gray-400 text-sm">{event.description}</span>
+                        <span className="text-muted-foreground text-sm">{event.description}</span>
                       )}
                     </div>
                     <div className="text-white font-mono text-lg">
@@ -890,7 +890,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
               }
               
               return (
-                <Card key={index} className="bg-athlete-gray-800 border-gray-700">
+                <Card key={index} className="bg-slate-50 border-slate-200">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-athlete-accent">
                       {isScore ? <Trophy className="h-5 w-5" /> : <Target className="h-5 w-5" />}
@@ -930,7 +930,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
                   {/* Show events timeline if available */}
                   {players.some((p: any) => p.events && p.events.length > 0) && (
                     <div className="mt-4 space-y-2 max-h-40 overflow-y-auto">
-                      <h4 className="text-sm font-semibold text-gray-400 mb-2">
+                      <h4 className="text-sm font-semibold text-muted-foreground mb-2">
                         {isScore ? 'Scoring Timeline' : 'Event Timeline'}
                       </h4>
                       {players.map((player: any) => 
@@ -971,7 +971,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
                                   </Badge>
                                 )}
                                 {event.description && (
-                                  <span className="text-gray-400 text-sm">{event.description}</span>
+                                  <span className="text-muted-foreground text-sm">{event.description}</span>
                                 )}
                               </div>
                             </div>
@@ -993,7 +993,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
         console.log('⭐ RENDERING SCORE TIMELINE - Total events:', events.scoreEvents.length);
         console.log('⭐ First event full object:', JSON.stringify(events.scoreEvents[0], null, 2));
         return (
-        <Card className="bg-athlete-gray-800 border-gray-700">
+        <Card className="bg-slate-50 border-slate-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-athlete-accent">
               <Clock className="h-5 w-5" />
@@ -1039,7 +1039,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
                           {displayText}
                         </span>
                         {event.description && (
-                          <span className="text-xs text-gray-400">· {event.description}</span>
+                          <span className="text-xs text-muted-foreground">· {event.description}</span>
                         )}
                       </div>
                     </div>
@@ -1057,7 +1057,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
 
       {/* Yellow Card Timeline */}
       {events.yellowCardEvents.length > 0 && (
-        <Card className="bg-athlete-gray-800 border-gray-700">
+        <Card className="bg-slate-50 border-slate-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-yellow-400">
               <AlertTriangle className="h-5 w-5" />

@@ -170,7 +170,7 @@ export function SquashCompetitiveHistory({ competitiveHistory, language }: Props
                       className="border-b border-slate-700/50 hover:bg-purple-500/10 transition-colors"
                       data-testid={`ranking-point-${index}`}
                     >
-                      <td className={`py-4 ${isArabic ? 'text-lg pr-4' : 'text-base pl-4'} text-gray-200`}>
+                      <td className={`py-4 ${isArabic ? 'text-lg pr-4' : 'text-base pl-4'} text-foreground`}>
                         {rp.tournament}
                       </td>
                       <td className={`py-4 ${isArabic ? 'pr-4' : 'pl-4'}`}>
@@ -178,7 +178,7 @@ export function SquashCompetitiveHistory({ competitiveHistory, language }: Props
                           {rp.result}
                         </Badge>
                       </td>
-                      <td className={`py-4 ${isArabic ? 'text-lg pr-4' : 'text-sm pl-4'} text-gray-400`}>
+                      <td className={`py-4 ${isArabic ? 'text-lg pr-4' : 'text-sm pl-4'} text-muted-foreground`}>
                         {isArabic ? toArabicNumerals(rp.expires) : rp.expires}
                       </td>
                       <td className={`py-4 ${isArabic ? 'pr-4' : 'pl-4'}`}>
@@ -273,8 +273,8 @@ export function SquashCompetitiveHistory({ competitiveHistory, language }: Props
 
                             {/* Competition */}
                             <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
-                              <Trophy className="w-4 h-4 text-gray-400" />
-                              <span className={`text-gray-300 ${isArabic ? 'text-lg' : 'text-sm'}`}>
+                              <Trophy className="w-4 h-4 text-muted-foreground" />
+                              <span className={`text-gray-600 ${isArabic ? 'text-lg' : 'text-sm'}`}>
                                 {match.competition}
                               </span>
                             </div>
@@ -299,7 +299,7 @@ export function SquashCompetitiveHistory({ competitiveHistory, language }: Props
                         {/* Notes */}
                         {match.notes && (
                           <div className="pt-3 border-t border-slate-600/50">
-                            <p className={`text-gray-300 leading-relaxed ${isArabic ? 'text-right text-lg' : 'text-base'}`}>
+                            <p className={`text-gray-600 leading-relaxed ${isArabic ? 'text-right text-lg' : 'text-base'}`}>
                               {match.notes}
                             </p>
                           </div>

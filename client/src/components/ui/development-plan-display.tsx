@@ -179,7 +179,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                   {getLocalizedText(title, language)}
                 </span>
               </CardTitle>
-              <div className={`flex flex-wrap items-center gap-6 ${contentIsArabic ? 'text-base' : 'text-sm'} text-gray-300 ${contentIsArabic ? 'flex-row-reverse justify-end' : ''}`}>
+              <div className={`flex flex-wrap items-center gap-6 ${contentIsArabic ? 'text-base' : 'text-sm'} text-gray-600 ${contentIsArabic ? 'flex-row-reverse justify-end' : ''}`}>
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded-full bg-emerald-500/20">
                     <Zap className="h-4 w-4 text-emerald-400 flex-shrink-0" />
@@ -383,7 +383,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
           {allExercisesWithVideos.length > 0 ? (
             <div className="grid gap-4">
               {allExercisesWithVideos.map((exercise, index) => (
-                <Card key={index} className="bg-athlete-gray-800/30 border-athlete-gray-700">
+                <Card key={index} className="bg-slate-50/30 border-athlete-gray-700">
                   <CardContent className="p-4">
                     <div className={`flex items-center justify-between ${contentIsArabic ? 'flex-row-reverse' : 'flex-row'}`}>
                       <div className="flex-1" dir={contentIsArabic ? 'rtl' : 'ltr'}>
@@ -398,7 +398,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                             </Badge>
                           </div>
                         )}
-                        <p className={`${contentIsArabic ? 'text-base' : 'text-sm'} text-gray-300 mt-1 ${contentIsArabic ? 'text-right' : ''}`}>{exercise.description}</p>
+                        <p className={`${contentIsArabic ? 'text-base' : 'text-sm'} text-gray-600 mt-1 ${contentIsArabic ? 'text-right' : ''}`}>{exercise.description}</p>
                       </div>
                       {exercise.videoUrl && (
                         <Button
@@ -419,11 +419,11 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
               ))}
             </div>
           ) : (
-            <Card className="bg-athlete-gray-800/30 border-athlete-gray-700">
+            <Card className="bg-slate-50/30 border-athlete-gray-700">
               <CardContent className="p-6 text-center">
-                <Play className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className={`${contentIsArabic ? 'text-xl' : 'text-lg'} font-semibold text-gray-300 mb-2`}>{getPlanTranslation('noVideos', language)}</h3>
-                <p className={`${contentIsArabic ? 'text-base' : 'text-sm'} text-gray-400`}>{getPlanTranslation('noVideosMessage', language)}</p>
+                <Play className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className={`${contentIsArabic ? 'text-xl' : 'text-lg'} font-semibold text-gray-600 mb-2`}>{getPlanTranslation('noVideos', language)}</h3>
+                <p className={`${contentIsArabic ? 'text-base' : 'text-sm'} text-muted-foreground`}>{getPlanTranslation('noVideosMessage', language)}</p>
               </CardContent>
             </Card>
           )}
@@ -431,7 +431,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
       </Tabs>
 
       {/* Summary Card */}
-      <Card className="bg-athlete-gray-800/30 border-athlete-gray-700">
+      <Card className="bg-slate-50/30 border-athlete-gray-700">
         <CardContent className="p-6" dir={contentIsArabic ? 'rtl' : 'ltr'}>
           <div className={`flex items-center gap-3 mb-4 ${contentIsArabic ? 'flex-row-reverse justify-end' : ''}`}>
             <CheckCircle className="h-5 w-5 text-green-400" />
@@ -440,15 +440,15 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
             <div className="space-y-1">
               <div className="text-2xl font-bold text-athlete-accent">{goalAnalysis.length}</div>
-              <div className={`${contentIsArabic ? 'text-base' : 'text-sm'} text-gray-300`}>{getPlanTranslation('goalAreas', language)}</div>
+              <div className={`${contentIsArabic ? 'text-base' : 'text-sm'} text-gray-600`}>{getPlanTranslation('goalAreas', language)}</div>
             </div>
             <div className="space-y-1">
               <div className="text-2xl font-bold text-athlete-accent">{counts?.exercises || 0}</div>
-              <div className={`${contentIsArabic ? 'text-base' : 'text-sm'} text-gray-300`}>{getPlanTranslation('totalExercises', language)}</div>
+              <div className={`${contentIsArabic ? 'text-base' : 'text-sm'} text-gray-600`}>{getPlanTranslation('totalExercises', language)}</div>
             </div>
             <div className="space-y-1">
               <div className="text-2xl font-bold text-athlete-accent">{allExercisesWithVideos.length}</div>
-              <div className={`${contentIsArabic ? 'text-base' : 'text-sm'} text-gray-300`}>{getPlanTranslation('videoTutorials', language)}</div>
+              <div className={`${contentIsArabic ? 'text-base' : 'text-sm'} text-gray-600`}>{getPlanTranslation('videoTutorials', language)}</div>
             </div>
           </div>
         </CardContent>

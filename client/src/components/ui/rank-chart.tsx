@@ -172,10 +172,10 @@ export function RankChart({ data }: RankChartProps) {
 
   if (!data.length) {
     return (
-      <div className="flex items-center justify-center h-full bg-athlete-gray-700 rounded-lg">
+      <div className="flex items-center justify-center h-full bg-slate-100 rounded-lg">
         <div className="text-center">
           <div className="text-4xl mb-2">📊</div>
-          <p className="text-gray-400">No ranking data available</p>
+          <p className="text-muted-foreground">No ranking data available</p>
         </div>
       </div>
     );

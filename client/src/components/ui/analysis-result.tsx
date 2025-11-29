@@ -832,7 +832,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
     if (medal === 'Gold') {
       return <Medal className="w-5 h-5 text-yellow-500" />;
     } else if (medal === 'Silver') {
-      return <Medal className="w-5 h-5 text-gray-300" />;
+      return <Medal className="w-5 h-5 text-gray-600" />;
     } else if (medal === 'Bronze') {
       return <Medal className="w-5 h-5 text-amber-600" />;
     } else {
@@ -912,7 +912,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                 className="w-40 h-40 rounded-full object-cover border-4 border-athlete-accent shadow-lg"
               />
             ) : (
-              <div className="w-40 h-40 bg-athlete-gray-600 rounded-full flex items-center justify-center border-4 border-athlete-accent shadow-lg">
+              <div className="w-40 h-40 bg-slate-100 rounded-full flex items-center justify-center border-4 border-athlete-accent shadow-lg">
                 <User className="w-20 h-20 text-athlete-accent" />
               </div>
             )}
@@ -984,60 +984,60 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
             <CardContent className="pb-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {age && (
-                  <div className="flex items-center gap-3 p-4 bg-gray-800/60 rounded-lg border border-gray-600/50 hover:border-blue-400/50 transition-colors">
+                  <div className="flex items-center gap-3 p-4 bg-gray-800/60 rounded-lg border border-slate-200/50 hover:border-blue-400/50 transition-colors">
                     <div className="flex items-center justify-center w-10 h-10 bg-blue-500/20 rounded-full">
                       <Calendar className="w-5 h-5 text-blue-400" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-400 font-medium">Age</p>
+                      <p className="text-sm text-muted-foreground font-medium">Age</p>
                       <p className="text-lg font-bold text-white" data-testid="text-age">{age}</p>
                     </div>
                   </div>
                 )}
                 
                 {dateOfBirth && (
-                  <div className="flex items-center gap-3 p-4 bg-gray-800/60 rounded-lg border border-gray-600/50 hover:border-green-400/50 transition-colors">
+                  <div className="flex items-center gap-3 p-4 bg-gray-800/60 rounded-lg border border-slate-200/50 hover:border-green-400/50 transition-colors">
                     <div className="flex items-center justify-center w-10 h-10 bg-green-500/20 rounded-full">
                       <Calendar className="w-5 h-5 text-green-400" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-400 font-medium">Born</p>
+                      <p className="text-sm text-muted-foreground font-medium">Born</p>
                       <p className="text-lg font-bold text-white" data-testid="text-dateofbirth">{dateOfBirth}</p>
                     </div>
                   </div>
                 )}
                 
                 {height && (
-                  <div className="flex items-center gap-3 p-4 bg-gray-800/60 rounded-lg border border-gray-600/50 hover:border-yellow-400/50 transition-colors">
+                  <div className="flex items-center gap-3 p-4 bg-gray-800/60 rounded-lg border border-slate-200/50 hover:border-yellow-400/50 transition-colors">
                     <div className="flex items-center justify-center w-10 h-10 bg-yellow-500/20 rounded-full">
                       <User className="w-5 h-5 text-yellow-400" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-400 font-medium">Height</p>
+                      <p className="text-sm text-muted-foreground font-medium">Height</p>
                       <p className="text-lg font-bold text-white" data-testid="text-height">{height}</p>
                     </div>
                   </div>
                 )}
                 
                 {position && (
-                  <div className="flex items-center gap-3 p-4 bg-gray-800/60 rounded-lg border border-gray-600/50 hover:border-purple-400/50 transition-colors">
+                  <div className="flex items-center gap-3 p-4 bg-gray-800/60 rounded-lg border border-slate-200/50 hover:border-purple-400/50 transition-colors">
                     <div className="flex items-center justify-center w-10 h-10 bg-purple-500/20 rounded-full">
                       <Trophy className="w-5 h-5 text-purple-400" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-400 font-medium">Position</p>
+                      <p className="text-sm text-muted-foreground font-medium">Position</p>
                       <p className="text-lg font-bold text-white" data-testid="text-position">{position}</p>
                     </div>
                   </div>
                 )}
                 
                 {educationalBackground && (
-                  <div className="flex items-center gap-3 p-4 bg-gray-800/60 rounded-lg border border-gray-600/50 hover:border-emerald-400/50 transition-colors">
+                  <div className="flex items-center gap-3 p-4 bg-gray-800/60 rounded-lg border border-slate-200/50 hover:border-emerald-400/50 transition-colors">
                     <div className="flex items-center justify-center w-10 h-10 bg-emerald-500/20 rounded-full">
                       <Award className="w-5 h-5 text-emerald-400" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-400 font-medium">Education</p>
+                      <p className="text-sm text-muted-foreground font-medium">Education</p>
                       <p className="text-lg font-bold text-white" data-testid="text-education">{educationalBackground}</p>
                     </div>
                   </div>
@@ -1049,7 +1049,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
 
         {/* Introduction Section */}
         {bioSections.introduction && (
-          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-accent border-gray-600 shadow-xl">
+          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-accent border-slate-200 shadow-xl">
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-emerald-400 mb-8 flex items-center">
                 <User className="mr-4 text-emerald-400" size={32} />
@@ -1094,7 +1094,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                     return (
                       <p key={index} className="text-lg">
                         <span className="font-bold text-cyan-400 text-xl">{matchedTitle}</span>
-                        <span className="text-gray-200 leading-loose"> {trimmedPara.substring(matchedTitle.length)}</span>
+                        <span className="text-foreground leading-loose"> {trimmedPara.substring(matchedTitle.length)}</span>
                       </p>
                     );
                   }
@@ -1102,7 +1102,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                   return (
                     <p 
                       key={index} 
-                      className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
+                      className={`text-foreground leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
                     >
                       {trimmedPara}
                     </p>
@@ -1115,7 +1115,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
 
         {/* Players' Overall Story Section */}
         {(playersStory && playersStory.trim()) && (
-          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-cyan-400 border-gray-600 shadow-xl">
+          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-cyan-400 border-slate-200 shadow-xl">
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-cyan-400 mb-8 flex items-center">
                 <Star className="mr-4 text-cyan-400" size={32} />
@@ -1125,7 +1125,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                 {playersStory.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => (
                   <p 
                     key={index} 
-                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
+                    className={`text-foreground leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
                   >
                     {paragraph.trim()}
                   </p>
@@ -1137,7 +1137,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
         
         {/* Fallback: Show bioSections.overallStory if playersStory is not available */}
         {(!playersStory || !playersStory.trim()) && bioSections.overallStory && (
-          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-cyan-400 border-gray-600 shadow-xl">
+          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-cyan-400 border-slate-200 shadow-xl">
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-cyan-400 mb-8 flex items-center">
                 <Star className="mr-4 text-cyan-400" size={32} />
@@ -1147,7 +1147,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                 {bioSections.overallStory.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => (
                   <p 
                     key={index} 
-                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
+                    className={`text-foreground leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
                   >
                     {paragraph.trim()}
                   </p>
@@ -1160,7 +1160,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
 
         {/* Career Record and Rankings */}
         {bioSections.careerRecord && (
-          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-orange-400 border-gray-600 shadow-xl">
+          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-orange-400 border-slate-200 shadow-xl">
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-orange-400 mb-8 flex items-center">
                 <Trophy className="mr-4 text-orange-400" size={32} />
@@ -1170,7 +1170,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                 {bioSections.careerRecord.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => (
                   <p 
                     key={index} 
-                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
+                    className={`text-foreground leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
                   >
                     {paragraph.trim()}
                   </p>
@@ -1182,7 +1182,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
 
         {/* Notable Achievements Section - Completely Rewritten */}
         {achievements && achievements.length > 0 && (
-          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-warning border-gray-600 shadow-xl">
+          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-warning border-slate-200 shadow-xl">
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-athlete-warning mb-6 flex items-center">
                 <Award className="mr-4 text-athlete-warning" size={32} />
@@ -1197,13 +1197,13 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                   return (
                     <div 
                       key={index}
-                      className="flex items-start space-x-4 p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20"
+                      className="flex items-start space-x-4 p-4 bg-slate-100 rounded-xl border border-athlete-warning/20"
                       data-testid={`achievement-item-${index}`}
                     >
                       <div className="mt-1 flex-shrink-0">
                         {getMedalIcon(medal)}
                       </div>
-                      <p className="text-gray-200 leading-relaxed text-lg font-medium">
+                      <p className="text-foreground leading-relaxed text-lg font-medium">
                         {text}
                       </p>
                     </div>
@@ -1216,7 +1216,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
 
         {/* Recent Competitions Section */}
         {recentNews.length > 0 && (
-          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-purple-400 border-gray-600 shadow-xl">
+          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-purple-400 border-slate-200 shadow-xl">
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-purple-400 mb-6 flex items-center">
                 <Calendar className="mr-4 text-purple-400" size={32} />
@@ -1226,9 +1226,9 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                 {recentNews.map((newsItem: string, index: number) => (
                   <div 
                     key={index}
-                    className="p-6 bg-athlete-gray-600 rounded-xl border-l-4 border-purple-400 shadow-lg"
+                    className="p-6 bg-slate-100 rounded-xl border-l-4 border-purple-400 shadow-lg"
                   >
-                    <p className="text-gray-200 leading-relaxed text-lg font-medium">
+                    <p className="text-foreground leading-relaxed text-lg font-medium">
                       {newsItem}
                     </p>
                   </div>
@@ -1252,10 +1252,10 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
       return (
         <div className="p-6 text-center">
           <div className="text-red-400 mb-4">⚠ Rank Analysis Unavailable</div>
-          <p className="text-gray-300 mb-4">
+          <p className="text-gray-600 mb-4">
             {parsedData.message || 'Unable to generate authentic rank history at this time.'}
           </p>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Please try again later or contact support if the issue persists.
           </p>
         </div>
@@ -1313,12 +1313,12 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
       return (
         <div className="p-6">
           <div className="text-yellow-400 mb-4 text-center">⚠ Unrecognized Rank Data Format</div>
-          <p className="text-gray-300 mb-4 text-center">
+          <p className="text-gray-600 mb-4 text-center">
             The ranking data structure is not recognized. Please check the backend response format.
           </p>
           <div className="bg-gray-800 p-4 rounded-lg">
-            <h4 className="text-sm font-semibold text-gray-400 mb-2">Raw Data Structure:</h4>
-            <pre className="text-xs text-gray-300 overflow-auto max-h-40 whitespace-pre-wrap">
+            <h4 className="text-sm font-semibold text-muted-foreground mb-2">Raw Data Structure:</h4>
+            <pre className="text-xs text-gray-600 overflow-auto max-h-40 whitespace-pre-wrap">
               {JSON.stringify(parsedData, null, 2)}
             </pre>
           </div>
@@ -1331,7 +1331,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
       if (!rankHistoryData || rankHistoryData.length === 0) {
         return (
           <div className="p-6 text-center">
-            <p className="text-gray-400">No rank history data available</p>
+            <p className="text-muted-foreground">No rank history data available</p>
           </div>
         );
       }
@@ -1405,9 +1405,9 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
       return (
         <div className="space-y-6">
           {/* Rank Progression Chart */}
-          <Card className="bg-athlete-gray-800 border-gray-600">
+          <Card className="bg-slate-50 border-slate-200">
             <CardHeader>
-              <CardTitle className="text-2xl text-gray-100 flex items-center">
+              <CardTitle className="text-2xl text-foreground flex items-center">
                 <TrendingUp className="mr-3 text-orange-400" size={24} />
                 Rank Progression Over Time
               </CardTitle>
@@ -1421,9 +1421,9 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
 
           {/* Rank Analysis */}
           {rankAnalysis && (
-            <Card className="bg-athlete-gray-800 border-gray-600">
+            <Card className="bg-slate-50 border-slate-200">
               <CardHeader>
-                <CardTitle className="text-2xl text-gray-100 flex items-center">
+                <CardTitle className="text-2xl text-foreground flex items-center">
                   <BarChart className="mr-3 text-blue-400" size={24} />
                   Rank History Analysis
                 </CardTitle>
@@ -1431,7 +1431,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
               <CardContent>
                 <div className="prose prose-invert max-w-none">
                   <div 
-                    className="text-gray-300 leading-relaxed whitespace-pre-wrap"
+                    className="text-gray-600 leading-relaxed whitespace-pre-wrap"
                     dangerouslySetInnerHTML={{ 
                       __html: rankAnalysis.replace(/\n/g, '<br/>') 
                     }}
@@ -1448,7 +1448,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
     const renderCompetitiveHistoryContent = () => (
       <div className="space-y-6">
         {/* Career Overview Stats */}
-        <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-blue-400 border-gray-600">
+        <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-blue-400 border-slate-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-3xl font-bold text-blue-400 flex items-center">
@@ -1463,19 +1463,19 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
             </div>
             
             <div className="grid md:grid-cols-4 gap-4">
-              <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-blue-500/20">
+              <div className="text-center p-4 bg-slate-100 rounded-lg border border-blue-500/20">
                 <div className="text-2xl font-bold text-white">{athlete.currentRanking || 'N/A'}</div>
                 <div className="text-sm text-blue-300">Current Rank</div>
               </div>
-              <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-green-500/20">
+              <div className="text-center p-4 bg-slate-100 rounded-lg border border-green-500/20">
                 <div className="text-2xl font-bold text-green-400">{athlete.peakRanking || 'N/A'}</div>
                 <div className="text-sm text-green-300">Peak Rank</div>
               </div>
-              <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-yellow-500/20">
+              <div className="text-center p-4 bg-slate-100 rounded-lg border border-yellow-500/20">
                 <div className="text-2xl font-bold text-yellow-400">{athlete.officialRecord || 'N/A'}</div>
                 <div className="text-sm text-yellow-300">Record</div>
               </div>
-              <div className="text-center p-4 bg-athlete-gray-600 rounded-lg border border-purple-500/20">
+              <div className="text-center p-4 bg-slate-100 rounded-lg border border-purple-500/20">
                 <div className="text-2xl font-bold text-purple-400">{careerSummary.totalCompetitions || 'N/A'}</div>
                 <div className="text-sm text-purple-300">Competitions</div>
               </div>
@@ -1485,9 +1485,9 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
 
         {/* Ranking Progression Timeline */}
         {rankingProgression && rankingProgression.length > 0 && (
-          <Card className="bg-athlete-gray-800 border-gray-600">
+          <Card className="bg-slate-50 border-slate-200">
             <CardHeader>
-              <CardTitle className="text-2xl text-gray-100 flex items-center">
+              <CardTitle className="text-2xl text-foreground flex items-center">
                 <TrendingUp className="mr-3 text-blue-400" size={24} />
                 Ranking Progression
               </CardTitle>
@@ -1495,19 +1495,19 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
             <CardContent>
               <div className="space-y-3 max-h-64 overflow-y-auto">
                 {rankingProgression.map((entry: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-gray-500 transition-colors">
+                  <div key={index} className="flex items-center justify-between p-4 bg-slate-100 rounded-lg border border-slate-200 hover:border-gray-500 transition-colors">
                     <div className="flex-1">
-                      <div className="font-semibold text-gray-100">
+                      <div className="font-semibold text-foreground">
                         {entry.competition || entry.tournament || `Event ${index + 1}`}
                       </div>
-                      <div className="text-sm text-gray-400">
+                      <div className="text-sm text-muted-foreground">
                         {entry.date || entry.month || 'Date unknown'} • {entry.result || entry.placement || 'Result unknown'}
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="text-xl font-bold text-white">#{entry.ranking || entry.rank || 'N/A'}</div>
                       {entry.rankingChange && (
-                        <div className={`text-sm font-medium ${entry.rankingChange > 0 ? 'text-green-400' : entry.rankingChange < 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                        <div className={`text-sm font-medium ${entry.rankingChange > 0 ? 'text-green-400' : entry.rankingChange < 0 ? 'text-red-400' : 'text-muted-foreground'}`}>
                           {entry.rankingChange > 0 ? '↑' : entry.rankingChange < 0 ? '↓' : '→'} {Math.abs(entry.rankingChange)}
                         </div>
                       )}
@@ -1521,32 +1521,32 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
 
         {/* Career Summary and Achievements */}
         <div className="grid md:grid-cols-2 gap-6">
-          <Card className="bg-athlete-gray-800 border-gray-600">
+          <Card className="bg-slate-50 border-slate-200">
             <CardHeader>
-              <CardTitle className="text-xl text-gray-100 flex items-center">
+              <CardTitle className="text-xl text-foreground flex items-center">
                 <Award className="mr-3 text-yellow-400" size={24} />
                 Career Summary
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex justify-between items-center py-2 border-b border-gray-600">
-                <span className="text-gray-300">Major Titles:</span>
+              <div className="flex justify-between items-center py-2 border-b border-slate-200">
+                <span className="text-gray-600">Major Titles:</span>
                 <span className="text-yellow-400 font-semibold">{careerSummary.majorTitles || 'N/A'}</span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-gray-600">
-                <span className="text-gray-300">Ranking Trend:</span>
+              <div className="flex justify-between items-center py-2 border-b border-slate-200">
+                <span className="text-gray-600">Ranking Trend:</span>
                 <span className="text-blue-400 font-semibold">{careerSummary.rankingTrend || 'N/A'}</span>
               </div>
               <div className="flex justify-between items-center py-2">
-                <span className="text-gray-300">Current Form:</span>
+                <span className="text-gray-600">Current Form:</span>
                 <span className="text-green-400 font-semibold">{careerSummary.currentForm || 'Data not available'}</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-athlete-gray-800 border-gray-600">
+          <Card className="bg-slate-50 border-slate-200">
             <CardHeader>
-              <CardTitle className="text-xl text-gray-100 flex items-center">
+              <CardTitle className="text-xl text-foreground flex items-center">
                 <Star className="mr-3 text-purple-400" size={24} />
                 Notable Achievements
               </CardTitle>
@@ -1555,14 +1555,14 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
               {careerSummary.notableAchievements && careerSummary.notableAchievements.length > 0 ? (
                 <ul className="space-y-3">
                   {careerSummary.notableAchievements.map((achievement: string, index: number) => (
-                    <li key={index} className="flex items-start text-gray-300">
+                    <li key={index} className="flex items-start text-gray-600">
                       <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                       <span className="text-sm">{achievement}</span>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-gray-400 text-sm">No specific achievements data available</p>
+                <p className="text-muted-foreground text-sm">No specific achievements data available</p>
               )}
             </CardContent>
           </Card>
@@ -1574,7 +1574,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
     if (isDualAnalysis) {
       return (
         <Tabs defaultValue="competitive" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-athlete-gray-700">
+          <TabsList className="grid w-full grid-cols-2 bg-slate-100">
             <TabsTrigger 
               value="competitive"
               data-testid="tab-competitive-history"
@@ -1618,10 +1618,10 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
       return (
         <div className="p-6 text-center">
           <div className="text-red-400 mb-4">⚠ Analysis Unavailable</div>
-          <p className="text-gray-300 mb-4">
+          <p className="text-gray-600 mb-4">
             {parsedData.message || 'Unable to generate authentic strengths analysis at this time.'}
           </p>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Please try again later or contact support if the issue persists.
           </p>
         </div>
@@ -1646,7 +1646,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
           }
           
           return (
-            <Card key={index} className="bg-athlete-gray-700 border-gray-600 hover:border-athlete-success/50 transition-colors">
+            <Card key={index} className="bg-slate-100 border-slate-200 hover:border-athlete-success/50 transition-colors">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <h3 className="font-bold text-athlete-success text-lg mb-2">
@@ -1675,17 +1675,17 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                   )}
                 </div>
                 
-                <p className="text-gray-300 leading-relaxed mb-4">
+                <p className="text-gray-600 leading-relaxed mb-4">
                   {strength.description}
                 </p>
                 
                 {strength.evidence && (
-                  <div className="bg-athlete-gray-800 rounded-lg p-4 border-l-4 border-athlete-success">
+                  <div className="bg-slate-50 rounded-lg p-4 border-l-4 border-athlete-success">
                     <h4 className="font-semibold text-white mb-2 flex items-center">
                       <Award className="w-4 h-4 mr-2" />
                       Evidence
                     </h4>
-                    <p className="text-sm text-gray-300 italic">
+                    <p className="text-sm text-gray-600 italic">
                       {strength.evidence}
                     </p>
                   </div>
@@ -1694,7 +1694,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                 {/* Progress bar for rating visualization */}
                 {strength.rating && (
                   <div className="mt-4">
-                    <div className="flex justify-between text-sm text-gray-400 mb-1">
+                    <div className="flex justify-between text-sm text-muted-foreground mb-1">
                       <span>Strength Level</span>
                       <span>{strength.rating}%</span>
                     </div>
@@ -1713,8 +1713,8 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
             </Card>
           );
         }).filter(Boolean) : (
-          <div className="text-gray-400 text-center py-8">
-            <Star className="w-12 h-12 mx-auto mb-4 text-gray-500" />
+          <div className="text-muted-foreground text-center py-8">
+            <Star className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
             <p>No strengths analysis data available</p>
             <p className="text-sm mt-2">Generate a new analysis to see detailed insights.</p>
           </div>
@@ -1726,10 +1726,10 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
   const renderWeaknessesAnalysis = (data: any) => (
     <div className="space-y-4">
       {data.weaknesses?.map((weakness: any, index: number) => (
-        <Card key={index} className="bg-athlete-gray-700 border-gray-600">
+        <Card key={index} className="bg-slate-100 border-slate-200">
           <CardContent className="p-4">
             <h5 className="font-semibold text-athlete-danger mb-2">{weakness.title}</h5>
-            <p className="text-sm text-gray-300">{weakness.description}</p>
+            <p className="text-sm text-gray-600">{weakness.description}</p>
           </CardContent>
         </Card>
       ))}
@@ -1744,10 +1744,10 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
       return (
         <div className="p-6 text-center">
           <div className="text-red-400 mb-4">⚠ Analysis Unavailable</div>
-          <p className="text-gray-300 mb-4">
+          <p className="text-gray-600 mb-4">
             {data.message || 'Unable to generate authentic development plan at this time.'}
           </p>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Please try again later or contact support if the issue persists.
           </p>
         </div>
@@ -1802,14 +1802,14 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                     className={`relative ml-8 ${
                       isCurrentPhase 
                         ? 'bg-gradient-to-br from-purple-900/50 to-blue-900/50 border-purple-500' 
-                        : 'bg-athlete-gray-700 border-gray-600'
+                        : 'bg-slate-100 border-slate-200'
                     } hover:border-purple-400 transition-colors`}
                   >
                     {/* Phase Number Indicator */}
                     <div className={`absolute -left-12 top-6 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
                       isCurrentPhase 
                         ? 'bg-purple-600 text-white ring-4 ring-purple-600/30' 
-                        : 'bg-gray-600 text-gray-300'
+                        : 'bg-gray-600 text-gray-600'
                     }`}>
                       {phaseNumber}
                     </div>
@@ -1846,7 +1846,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                             {(item.activities || item.details || item.exercises || []).map((activity: string, idx: number) => (
                               <div key={idx} className="flex items-start gap-3 p-2 bg-gray-800/50 rounded-lg">
                                 <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
-                                <span className="text-sm text-gray-300 leading-relaxed">{activity}</span>
+                                <span className="text-sm text-gray-600 leading-relaxed">{activity}</span>
                               </div>
                             ))}
                           </div>
@@ -1901,8 +1901,8 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
 
                       {/* Duration for individual phases */}
                       {item.duration && (
-                        <div className="pt-2 border-t border-gray-600">
-                          <div className="flex items-center gap-2 text-xs text-gray-400">
+                        <div className="pt-2 border-t border-slate-200">
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <Clock className="w-3 h-3" />
                             Duration: {item.duration}
                           </div>
@@ -1917,8 +1917,8 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
         )}
 
         {planItems.length === 0 && (
-          <div className="text-gray-400 text-center py-12">
-            <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-500" />
+          <div className="text-muted-foreground text-center py-12">
+            <Calendar className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
             <p className="text-lg font-medium mb-2">No development plan data available</p>
             <p className="text-sm">Generate a new analysis to see your personalized development program.</p>
           </div>
@@ -1936,10 +1936,10 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
       return (
         <div className="p-6 text-center">
           <div className="text-red-400 mb-4">⚠ Analysis Unavailable</div>
-          <p className="text-gray-300 mb-4">
+          <p className="text-gray-600 mb-4">
             {data.message || 'Unable to generate authentic strategic analysis at this time.'}
           </p>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Please try again later or contact support if the issue persists.
           </p>
         </div>
@@ -1965,18 +1965,18 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
             }
             
             return (
-              <Card key={index} className="bg-athlete-gray-700 border-gray-600">
+              <Card key={index} className="bg-slate-100 border-slate-200">
                 <CardContent className="p-4">
                   <h5 className="font-semibold text-red-400 mb-2">
                     {strategy.strategy || strategy.title || strategy.name}
                   </h5>
                   {strategy.description && (
-                    <p className="text-sm text-gray-300">
+                    <p className="text-sm text-gray-600">
                       {strategy.description}
                     </p>
                   )}
                   {strategy.details && (
-                    <p className="text-sm text-gray-300 mt-2">
+                    <p className="text-sm text-gray-600 mt-2">
                       {strategy.details}
                     </p>
                   )}
@@ -1984,16 +1984,16 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
               </Card>
             );
           }).filter(Boolean) : (
-            <div className="text-gray-400 text-center py-8">
+            <div className="text-muted-foreground text-center py-8">
               No strategic analysis data available
             </div>
           )}
         </div>
         {data.keyWeaknesses && Array.isArray(data.keyWeaknesses) && data.keyWeaknesses.length > 0 && (
-          <Card className="bg-athlete-gray-700 border-gray-600">
+          <Card className="bg-slate-100 border-slate-200">
             <CardContent className="p-4">
               <h5 className="font-semibold text-athlete-warning mb-2">Key Weaknesses to Exploit</h5>
-              <ul className="text-sm text-gray-300 space-y-1">
+              <ul className="text-sm text-gray-600 space-y-1">
                 {data.keyWeaknesses.map((weakness: string, index: number) => (
                   <li key={index}>• {weakness}</li>
                 ))}
@@ -2013,10 +2013,10 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
       return (
         <div className="p-6 text-center">
           <div className="text-red-400 mb-4">⚠ Analysis Unavailable</div>
-          <p className="text-gray-300 mb-4">
+          <p className="text-gray-600 mb-4">
             {data.message || 'Unable to generate authentic video analysis at this time.'}
           </p>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Please try again later or contact support if the issue persists.
           </p>
         </div>
@@ -2030,7 +2030,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
 
   const renderAnalysisContent = () => {
     if (!data) {
-      return <div className="text-gray-400 text-center py-8">Analysis data not available</div>;
+      return <div className="text-muted-foreground text-center py-8">Analysis data not available</div>;
     }
 
     // Parse the data to handle JSON strings consistently
@@ -2049,7 +2049,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
       default: 
         console.log('UNSUPPORTED TYPE - showing raw data:', type);
         return (
-          <div className="text-gray-400 text-center py-8">
+          <div className="text-muted-foreground text-center py-8">
             <p>Unsupported analysis type: {type}</p>
             <pre className="text-xs mt-4 text-left">{JSON.stringify(data, null, 2)}</pre>
           </div>
@@ -2058,7 +2058,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
   };
 
   return (
-    <Card className="bg-athlete-gray-800 border-gray-700">
+    <Card className="bg-slate-50 border-slate-200">
       <CardHeader>
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-3">
@@ -2066,7 +2066,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
             <div>
               <CardTitle className="text-white">{getTitle(type)}</CardTitle>
               {createdAt && (
-                <p className="text-sm text-gray-400 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   Generated on {new Date(createdAt).toLocaleDateString()}
                 </p>
               )}

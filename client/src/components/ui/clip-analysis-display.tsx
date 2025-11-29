@@ -34,7 +34,7 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
           <p key={`p-${index}`} className={`mb-7 leading-[2] ${
             isArabic 
               ? 'text-slate-200 text-[18px] font-light tracking-wide' 
-              : 'text-gray-200 text-base leading-relaxed'
+              : 'text-foreground text-base leading-relaxed'
           }`}>
             {renderInlineFormatting(paragraphText)}
           </p>
@@ -49,7 +49,7 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
           <ul key={`ul-${index}`} className={`mb-8 space-y-5 ${
             isArabic 
               ? 'list-none text-slate-200 text-[17px] font-light' 
-              : 'list-disc list-inside text-gray-200'
+              : 'list-disc list-inside text-foreground'
           }`}>
             {listItems.map((item, i) => (
               <li key={i} className={`leading-[1.9] ${
@@ -85,7 +85,7 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
           <h3 key={`h3-${index}`} className={`font-bold mb-5 mt-10 pb-3 ${
             isArabic 
               ? 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 text-[21px] border-b border-cyan-500/30' 
-              : 'text-white text-xl border-b border-gray-700'
+              : 'text-white text-xl border-b border-slate-200'
           }`}>
             {trimmedLine.replace(/^###\s*/, '').replace(/\*\*/g, '')}
           </h3>
@@ -131,7 +131,7 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
       if (trimmedLine === '---') {
         flushParagraph(index);
         flushList(index);
-        elements.push(<hr key={`hr-${index}`} className="my-6 border-gray-600" />);
+        elements.push(<hr key={`hr-${index}`} className="my-6 border-slate-200" />);
         return;
       }
       
@@ -171,7 +171,7 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
     <div className="space-y-6">
       {/* Video Preview */}
       {videoFile && (
-        <Card className="bg-athlete-gray-800 border-gray-700">
+        <Card className="bg-slate-50 border-slate-200">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Trophy className="text-indigo-400" size={20} />
@@ -192,7 +192,7 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
       )}
 
       {/* User Request Card */}
-      <Card className="bg-athlete-gray-800 border-gray-700">
+      <Card className="bg-slate-50 border-slate-200">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <User className="text-indigo-400" size={20} />
@@ -200,9 +200,9 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="bg-athlete-gray-700 p-4 rounded-lg">
-            <p className="text-gray-200 italic">"{analysisData.userRequest}"</p>
-            <div className="flex gap-4 mt-3 text-sm text-gray-400">
+          <div className="bg-slate-100 p-4 rounded-lg">
+            <p className="text-foreground italic">"{analysisData.userRequest}"</p>
+            <div className="flex gap-4 mt-3 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Trophy size={14} />
                 {analysisData.sport}
@@ -220,7 +220,7 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
       <Card className={`border ${
         isArabic 
           ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700/50' 
-          : 'bg-athlete-gray-800 border-gray-700'
+          : 'bg-slate-50 border-slate-200'
       }`}>
         <CardHeader>
           <CardTitle className={`flex items-center gap-2 ${
@@ -243,10 +243,10 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
           
           {/* Analysis Metadata */}
           <div className={`mt-6 pt-4 border-t ${
-            isArabic ? 'border-slate-700/50 text-right' : 'border-gray-700'
+            isArabic ? 'border-slate-700/50 text-right' : 'border-slate-200'
           }`}>
             <div className={`flex items-center gap-2 text-sm ${
-              isArabic ? 'text-slate-400 flex-row-reverse' : 'text-gray-400'
+              isArabic ? 'text-slate-400 flex-row-reverse' : 'text-muted-foreground'
             }`}>
               <Calendar size={14} />
               <span>{t('results.analyzedOn')} {new Date(analysisData.processedAt).toLocaleString()}</span>

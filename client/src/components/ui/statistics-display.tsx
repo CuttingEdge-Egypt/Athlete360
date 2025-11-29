@@ -239,7 +239,7 @@ const getDataQualityColor = (quality: string) => {
     case "high": return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200";
     case "medium": return "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200";
     case "low": return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
-    default: return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+    default: return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-foreground";
   }
 };
 
@@ -272,11 +272,11 @@ const renderMetricCard = (metric: AthleteStatistics['recent_season']['statistics
   const colorClass = getMetricColor(index);
   
   return (
-    <Card key={metric.name} className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-gray-600 transition-all duration-300 transform hover:scale-105">
+    <Card key={metric.name} className="bg-gradient-to-br from-gray-800 to-gray-900 border-slate-200 hover:border-slate-200 transition-all duration-300 transform hover:scale-105">
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
-            <h4 className="text-sm font-medium text-gray-300 mb-1 leading-tight">
+            <h4 className="text-sm font-medium text-gray-600 mb-1 leading-tight">
               {metric.name}
             </h4>
           </div>
@@ -324,13 +324,13 @@ const renderCommonStats = (common: AthleteStatistics['recent_season']['statistic
       {stats.map((stat, index) => {
         const IconComponent = stat.icon;
         return (
-          <Card key={stat.label} className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700">
+          <Card key={stat.label} className="bg-gradient-to-br from-gray-800 to-gray-900 border-slate-200">
             <CardContent className="p-4 text-center">
               <div className={`w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-r ${stat.color} flex items-center justify-center`}>
                 <IconComponent className="w-6 h-6 text-white" />
               </div>
               <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
-              <div className="text-sm text-gray-400">{stat.label}</div>
+              <div className="text-sm text-muted-foreground">{stat.label}</div>
             </CardContent>
           </Card>
         );
@@ -353,7 +353,7 @@ export function StatisticsDisplay({ statistics, language = "en" }: StatisticsDis
           <h2 className="text-3xl font-bold text-white" data-testid="text-player-name">
             {normalizedStats.player.name} Statistics
           </h2>
-          <div className="flex items-center justify-center space-x-4 text-gray-400">
+          <div className="flex items-center justify-center space-x-4 text-muted-foreground">
             <div className="flex items-center space-x-2">
               <Activity className="w-4 h-4" />
               <span>{normalizedStats.player.sport}</span>
@@ -372,14 +372,14 @@ export function StatisticsDisplay({ statistics, language = "en" }: StatisticsDis
         </div>
         
         {normalizedStats.player.team && (
-          <Badge variant="outline" className="bg-gray-800 border-gray-600 text-gray-300">
+          <Badge variant="outline" className="bg-gray-800 border-slate-200 text-gray-600">
             <Users className="w-3 h-3 mr-1" />
             {normalizedStats.player.team}
           </Badge>
         )}
         
         {normalizedStats.player.position && (
-          <Badge variant="outline" className="bg-gray-800 border-gray-600 text-gray-300">
+          <Badge variant="outline" className="bg-gray-800 border-slate-200 text-gray-600">
             <MapPin className="w-3 h-3 mr-1" />
             {normalizedStats.player.position}
           </Badge>
@@ -392,10 +392,10 @@ export function StatisticsDisplay({ statistics, language = "en" }: StatisticsDis
 
       {/* Tabbed Statistics */}
       <Tabs defaultValue="recent" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-gray-800 border border-gray-700">
+        <TabsList className="grid w-full grid-cols-2 bg-gray-800 border border-slate-200">
           <TabsTrigger 
             value="recent" 
-            className="text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white"
+            className="text-gray-600 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white"
             data-testid="tab-recent-season"
           >
             <Calendar className="w-4 h-4 mr-2" />
@@ -403,7 +403,7 @@ export function StatisticsDisplay({ statistics, language = "en" }: StatisticsDis
           </TabsTrigger>
           <TabsTrigger 
             value="alltime" 
-            className="text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-teal-600 data-[state=active]:text-white"
+            className="text-gray-600 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-teal-600 data-[state=active]:text-white"
             data-testid="tab-all-time"
           >
             <Trophy className="w-4 h-4 mr-2" />
@@ -485,7 +485,7 @@ export function StatisticsDisplay({ statistics, language = "en" }: StatisticsDis
               const colorClass = getMetricColor(index);
               
               return (
-                <Card key={highlight.title} className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-gray-600 transition-all duration-300">
+                <Card key={highlight.title} className="bg-gradient-to-br from-gray-800 to-gray-900 border-slate-200 hover:border-slate-200 transition-all duration-300">
                   <CardContent className="p-4">
                     <div className="flex items-start space-x-3">
                       <div className={`w-10 h-10 rounded-full bg-gradient-to-r ${colorClass} flex items-center justify-center flex-shrink-0`}>
@@ -494,7 +494,7 @@ export function StatisticsDisplay({ statistics, language = "en" }: StatisticsDis
                       <div className="flex-1">
                         <h4 className="font-semibold text-white mb-1">{highlight.title}</h4>
                         <p className="text-lg font-bold text-white mb-2">{highlight.value}</p>
-                        <p className="text-sm text-gray-400">{highlight.description}</p>
+                        <p className="text-sm text-muted-foreground">{highlight.description}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -507,7 +507,7 @@ export function StatisticsDisplay({ statistics, language = "en" }: StatisticsDis
 
       {/* Summary Section */}
       {normalizedStats.summary && (
-        <Card className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700">
+        <Card className="bg-gradient-to-br from-gray-800 to-gray-900 border-slate-200">
           <CardHeader>
             <CardTitle className="text-white flex items-center">
               <Award className="w-5 h-5 mr-2 text-yellow-400" />
@@ -531,7 +531,7 @@ export function StatisticsDisplay({ statistics, language = "en" }: StatisticsDis
                   {normalizedStats.summary.key_strengths.map((strength, index) => (
                     <li key={index} className="flex items-start space-x-2">
                       <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
-                      <span className="text-gray-300">{strength}</span>
+                      <span className="text-gray-600">{strength}</span>
                     </li>
                   ))}
                 </ul>
@@ -546,7 +546,7 @@ export function StatisticsDisplay({ statistics, language = "en" }: StatisticsDis
                   {normalizedStats.summary.notable_achievements.map((achievement, index) => (
                     <li key={index} className="flex items-start space-x-2">
                       <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
-                      <span className="text-gray-300">{achievement}</span>
+                      <span className="text-gray-600">{achievement}</span>
                     </li>
                   ))}
                 </ul>
@@ -557,7 +557,7 @@ export function StatisticsDisplay({ statistics, language = "en" }: StatisticsDis
       )}
 
       {/* Footer */}
-      <div className="text-center text-sm text-gray-500">
+      <div className="text-center text-sm text-muted-foreground">
         <Clock className="w-3 h-3 inline mr-1" />
         Last updated: {new Date(normalizedStats.last_updated).toLocaleDateString()}
       </div>

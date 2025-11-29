@@ -35,7 +35,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
   const { t, i18n } = useTranslation();
   if (!data || !data.strategies || !Array.isArray(data.strategies)) {
     return (
-      <div className="text-center text-gray-400 py-8">
+      <div className="text-center text-muted-foreground py-8">
         <AlertTriangle className="mx-auto mb-4" size={48} />
         <p>{t("analysis.combat.noData", "Strategic combat analysis data is not available")}</p>
       </div>
@@ -71,7 +71,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
       case 'low': return 'bg-green-500/20 text-green-400 border-green-500/30';
       case 'medium': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
       case 'high': return 'bg-red-500/20 text-red-400 border-red-500/30';
-      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+      default: return 'bg-gray-500/20 text-muted-foreground border-gray-500/30';
     }
   };
 
@@ -94,7 +94,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
       case 'high': return 'text-green-400';
       case 'medium': return 'text-yellow-400';
       case 'low': return 'text-red-400';
-      default: return 'text-gray-400';
+      default: return 'text-muted-foreground';
     }
   };
 
@@ -136,7 +136,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
           <Target size={24} />
           <h2 className="text-2xl font-bold">{t("analysis.combat.strategiesTitle", "Combat Strategies")}</h2>
         </div>
-        <p className="text-gray-400">
+        <p className="text-muted-foreground">
           {t("analysis.combat.tacticalAnalysis", "Advanced tactical analysis with {{count}} strategic approaches", { count: data.strategies.length })}
         </p>
       </div>
@@ -146,7 +146,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
         {data.strategies.map((strategy, index) => (
           <Card 
             key={index} 
-            className="bg-athlete-gray-800 border-gray-700 hover:border-red-500/30 transition-all duration-300"
+            className="bg-slate-50 border-slate-200 hover:border-red-500/30 transition-all duration-300"
             data-testid={`strategy-card-${index}`}
           >
             <CardHeader className="pb-3">
@@ -180,34 +180,34 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
             <CardContent className="space-y-4">
               {/* Strategy Description */}
               <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-gray-300 flex items-center">
+                <h4 className="text-sm font-semibold text-gray-600 flex items-center">
                   <Brain className="w-4 h-4 mr-2 text-blue-400" />
                   {t("analysis.combat.strategicOverview", "Strategic Overview")}
                 </h4>
-                <p className="text-gray-300 leading-relaxed text-sm bg-athlete-gray-900/50 p-3 rounded-md">
+                <p className="text-gray-600 leading-relaxed text-sm bg-athlete-gray-900/50 p-3 rounded-md">
                   {strategy.description}
                 </p>
               </div>
 
-              <div className="border-t border-gray-600 my-4"></div>
+              <div className="border-t border-slate-200 my-4"></div>
 
               {/* Execution Details */}
               <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-gray-300 flex items-center">
+                <h4 className="text-sm font-semibold text-gray-600 flex items-center">
                   <Zap className="w-4 h-4 mr-2 text-yellow-400" />
                   {t("analysis.combat.executionPlan", "Execution Plan")}
                 </h4>
-                <p className="text-gray-300 leading-relaxed text-sm bg-athlete-gray-900/50 p-3 rounded-md">
+                <p className="text-gray-600 leading-relaxed text-sm bg-athlete-gray-900/50 p-3 rounded-md">
                   {strategy.execution}
                 </p>
               </div>
 
-              <div className="border-t border-gray-600 my-4"></div>
+              <div className="border-t border-slate-200 my-4"></div>
 
               {/* Success Probability */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-gray-300 flex items-center">
+                  <h4 className="text-sm font-semibold text-gray-600 flex items-center">
                     <TrendingUp className="w-4 h-4 mr-2 text-green-400" />
                     {t("analysis.combat.successProbability", "Success Probability")}
                   </h4>
@@ -236,7 +236,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
             <Award className="text-red-400" size={20} />
             <div>
               <h3 className="text-white font-semibold">{t("analysis.combat.analysisComplete", "Strategic Analysis Complete")}</h3>
-              <p className="text-gray-300 text-sm">
+              <p className="text-gray-600 text-sm">
                 {t("analysis.combat.tacticalApproaches", "{{count}} tactical approaches identified for optimal performance advantage", { count: data.strategies.length })}
               </p>
             </div>

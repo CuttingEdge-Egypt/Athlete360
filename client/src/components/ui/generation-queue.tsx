@@ -602,12 +602,12 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
                           <div className="rounded-full animate-ping bg-current opacity-75" style={{ width: isMobile ? '6px' : '8px', height: isMobile ? '6px' : '8px' }}></div>
                         )}
                       </div>
-                      <span className="font-medium text-gray-200 truncate" style={{ fontSize: isMobile ? '12px' : '14px', maxWidth: isMobile ? '100px' : 'none' }}>
+                      <span className="font-medium text-foreground truncate" style={{ fontSize: isMobile ? '12px' : '14px', maxWidth: isMobile ? '100px' : 'none' }}>
                         {item.athleteName}
                       </span>
                       <Badge 
                         variant="outline" 
-                        className="border-gray-500 text-gray-300 text-center whitespace-nowrap"
+                        className="border text-muted-foreground text-center whitespace-nowrap"
                         style={{ fontSize: isMobile ? '10px' : '12px', padding: isMobile ? '1px 4px' : '0 8px', height: isMobile ? 'auto' : 'auto', lineHeight: isMobile ? '1.2' : 'normal' }}
                       >
                         {getServiceLabel(item.serviceType)}

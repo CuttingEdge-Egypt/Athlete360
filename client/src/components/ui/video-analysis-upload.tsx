@@ -424,14 +424,14 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <Card className="bg-athlete-gray-800 border-gray-700">
+      <Card className="bg-slate-50 border-slate-200">
         <CardHeader>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <Video className="text-indigo-400" size={28} />
               <div className={isArabic ? 'text-right' : ''}>
                 <CardTitle className="text-white">{t('upload.title')}</CardTitle>
-                <p className="text-gray-400 text-sm mt-1">
+                <p className="text-muted-foreground text-sm mt-1">
                   {t('description')}
                 </p>
               </div>
@@ -451,23 +451,23 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
               onValueChange={setAnalysisType}
               className="flex flex-col space-y-2"
             >
-              <div className="flex items-center space-x-3 bg-athlete-gray-700 p-3 rounded-lg">
+              <div className="flex items-center space-x-3 bg-slate-100 p-3 rounded-lg">
                 <RadioGroupItem value="match" id="match" />
                 <Label htmlFor="match" className="flex items-center cursor-pointer flex-1">
                   <Trophy className="text-indigo-400 mr-2" size={18} />
                   <div>
                     <span className="text-white font-medium">{t('upload.matchAnalysis')}</span>
-                    <p className="text-gray-400 text-sm">{t('upload.matchAnalysisDesc')}</p>
+                    <p className="text-muted-foreground text-sm">{t('upload.matchAnalysisDesc')}</p>
                   </div>
                 </Label>
               </div>
-              <div className="flex items-center space-x-3 bg-athlete-gray-700 p-3 rounded-lg">
+              <div className="flex items-center space-x-3 bg-slate-100 p-3 rounded-lg">
                 <RadioGroupItem value="clip" id="clip" />
                 <Label htmlFor="clip" className="flex items-center cursor-pointer flex-1">
                   <Film className="text-indigo-400 mr-2" size={18} />
                   <div>
                     <span className="text-white font-medium">{t('upload.clipAnalysis')}</span>
-                    <p className="text-gray-400 text-sm">{t('upload.clipAnalysisDesc')}</p>
+                    <p className="text-muted-foreground text-sm">{t('upload.clipAnalysisDesc')}</p>
                   </div>
                 </Label>
               </div>
@@ -485,7 +485,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
                 value={whatToAnalyze}
                 onChange={(e) => setWhatToAnalyze(e.target.value)}
                 placeholder={t('upload.whatToAnalyzePlaceholder')}
-                className="bg-athlete-gray-700 border-gray-600 text-white placeholder-gray-400 min-h-[100px]"
+                className="bg-slate-100 border-slate-200 text-white placeholder-gray-400 min-h-[100px]"
                 data-testid="textarea-what-to-analyze"
               />
             </div>
@@ -498,7 +498,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
               className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                 dragOver 
                   ? 'border-indigo-400 bg-indigo-400/10' 
-                  : 'border-gray-600 hover:border-gray-500'
+                  : 'border-slate-200 hover:border-gray-500'
               }`}
               onDrop={handleDrop}
               onDragOver={(e) => {
@@ -512,7 +512,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
                   <FileVideo className="mx-auto text-indigo-400" size={48} />
                   <div>
                     <p className="text-white font-medium">{uploadedFile.name}</p>
-                    <p className="text-gray-400 text-sm">
+                    <p className="text-muted-foreground text-sm">
                       {(uploadedFile.size / (1024 * 1024)).toFixed(1)} MB
                     </p>
                   </div>
@@ -522,12 +522,12 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
                 </div>
               ) : (
                 <div className="space-y-3 pointer-events-none">
-                  <Upload className="mx-auto text-gray-400" size={48} />
+                  <Upload className="mx-auto text-muted-foreground" size={48} />
                   <div>
                     <p className="text-white">{t('upload.dragDrop')}</p>
-                    <p className="text-gray-400 text-sm">{t('upload.clickBrowse')}</p>
+                    <p className="text-muted-foreground text-sm">{t('upload.clickBrowse')}</p>
                   </div>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     {t('upload.supportedFormats')}
                   </p>
                 </div>
@@ -553,7 +553,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
                   variant="outline"
                   role="combobox"
                   aria-expanded={sportDropdownOpen}
-                  className="w-full max-w-xs justify-between bg-athlete-gray-700 border-gray-600 text-white hover:bg-athlete-gray-600"
+                  className="w-full max-w-xs justify-between bg-slate-100 border-slate-200 text-white hover:bg-slate-100"
                   data-testid="button-sport-select"
                 >
                   {sport
@@ -563,35 +563,35 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
                 </Button>
               </PopoverTrigger>
               <PopoverContent 
-                className="w-[300px] h-[280px] p-0 bg-athlete-gray-700 border-gray-600" 
+                className="w-[300px] h-[280px] p-0 bg-slate-100 border-slate-200" 
                 side="bottom" 
                 sideOffset={4} 
                 align="start"
                 avoidCollisions={false}
                 collisionPadding={0}
               >
-                <div className="p-3 border-b border-gray-600">
+                <div className="p-3 border-b border-slate-200">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                     <Input
                       placeholder={t('upload.searchSport')}
                       value={sportSearchTerm}
                       onChange={(e) => setSportSearchTerm(e.target.value)}
-                      className="pl-9 bg-athlete-gray-800 border-athlete-gray-600 text-white placeholder-gray-500 focus:bg-athlete-gray-700 focus:border-gray-500"
+                      className="pl-9 bg-slate-50 border-athlete-gray-600 text-white placeholder-gray-500 focus:bg-slate-100 focus:border-gray-500"
                       data-testid="input-sport-search"
                     />
                   </div>
                 </div>
                 <div className="h-[200px] overflow-auto">
                   {filteredSports.length === 0 ? (
-                    <div className="p-3 text-center text-gray-400">
+                    <div className="p-3 text-center text-muted-foreground">
                       {t('upload.noSportsFound')}
                     </div>
                   ) : (
                     filteredSports.map((sportItem) => (
                       <div
                         key={sportItem.id}
-                        className="flex items-center px-3 py-2 cursor-pointer hover:bg-athlete-gray-600 text-white"
+                        className="flex items-center px-3 py-2 cursor-pointer hover:bg-slate-100 text-white"
                         onClick={() => {
                           setSport(sportItem.id);
                           setSportDropdownOpen(false);
@@ -646,10 +646,10 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
                       setRoundToAnalyze('1');
                     }
                   }}
-                  className="w-20 bg-athlete-gray-700 border-gray-600 text-white text-center"
+                  className="w-20 bg-slate-100 border-slate-200 text-white text-center"
                   data-testid="input-round-number"
                 />
-                <span className="text-gray-400 text-sm">{t('upload.enterRoundNumber')}</span>
+                <span className="text-muted-foreground text-sm">{t('upload.enterRoundNumber')}</span>
               </div>
             </div>
           )}
@@ -664,14 +664,14 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
               onValueChange={setLanguage}
               data-testid="select-language"
             >
-              <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white w-full max-w-xs">
+              <SelectTrigger className="bg-slate-100 border-slate-200 text-white w-full max-w-xs">
                 <SelectValue placeholder={t('upload.selectLanguage')} />
               </SelectTrigger>
-              <SelectContent className="bg-athlete-gray-700 border-gray-600">
-                <SelectItem value="english" className="text-white hover:bg-athlete-gray-600">
+              <SelectContent className="bg-slate-100 border-slate-200">
+                <SelectItem value="english" className="text-white hover:bg-slate-100">
                   {t('upload.english')}
                 </SelectItem>
-                <SelectItem value="arabic" className="text-white hover:bg-athlete-gray-600">
+                <SelectItem value="arabic" className="text-white hover:bg-slate-100">
                   {t('upload.arabic')}
                 </SelectItem>
               </SelectContent>
@@ -680,9 +680,9 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
 
           {/* Analysis Button / Progress Bar */}
           {isAnalyzing ? (
-            <div className="space-y-4 bg-athlete-gray-700 rounded-lg p-6 border-2 border-indigo-500/30">
+            <div className="space-y-4 bg-slate-100 rounded-lg p-6 border-2 border-indigo-500/30">
               {/* Main loading message at the top */}
-              <p className="text-gray-300 text-lg leading-relaxed text-center font-medium">{loadingMessage}</p>
+              <p className="text-gray-600 text-lg leading-relaxed text-center font-medium">{loadingMessage}</p>
               
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-3">
@@ -696,13 +696,13 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
               
               <Progress 
                 value={loadingProgress} 
-                className="h-3 bg-athlete-gray-600"
+                className="h-3 bg-slate-100"
                 data-testid="progress-bar"
               />
               
               <div className="flex items-start justify-center space-x-2 text-sm mb-4">
                 <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 animate-pulse"></div>
-                <p className="text-gray-400 text-sm">
+                <p className="text-muted-foreground text-sm">
                   {t('upload.pleaseWait')}
                 </p>
               </div>
@@ -733,13 +733,13 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
           )}
 
           {/* Analysis Info */}
-          <div className="bg-athlete-gray-700 rounded-lg p-4">
+          <div className="bg-slate-100 rounded-lg p-4">
             <h4 className="text-white font-medium mb-3">{t('whatWeAnalyze.title')}</h4>
             
             {/* Match Analysis Section */}
             <div className="mb-4">
               <p className="text-indigo-400 font-medium text-sm mb-2">{t('whatWeAnalyze.matchType')}</p>
-              <ul className="text-sm text-gray-300 space-y-1">
+              <ul className="text-sm text-gray-600 space-y-1">
                 <li>{t('whatWeAnalyze.actionCounts')}</li>
                 <li>{t('whatWeAnalyze.scoringPatterns')}</li>
                 <li>{t('whatWeAnalyze.violations')}</li>
@@ -751,7 +751,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
             {/* Clip Analysis Section */}
             <div>
               <p className="text-indigo-400 font-medium text-sm mb-2">{t('whatWeAnalyze.clipType')}</p>
-              <ul className="text-sm text-gray-300 space-y-1">
+              <ul className="text-sm text-gray-600 space-y-1">
                 <li>{t('whatWeAnalyze.customAnalysis')}</li>
                 <li>{t('whatWeAnalyze.techniqueEvaluation')}</li>
                 <li>{t('whatWeAnalyze.professionalComparison')}</li>

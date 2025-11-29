@@ -443,7 +443,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                   <div className={`mb-3 ${isArabic ? 'text-right' : 'text-left'}`}>
                     <div className={`flex items-center gap-2 mb-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                       <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse flex-shrink-0"></div>
-                      <span className="text-xs text-gray-300 font-semibold uppercase">
+                      <span className="text-xs text-gray-600 font-semibold uppercase">
                         {t('analysis.nutrition.meal', 'MEAL')} {toArabicNumerals(mealIndex + 1)}
                       </span>
                     </div>

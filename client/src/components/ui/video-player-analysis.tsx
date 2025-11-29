@@ -1334,7 +1334,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
 
         {/* Video Player - Center on Desktop, First on Mobile */}
         <div className="order-1 lg:order-2 lg:col-span-8 w-full">
-          <Card className="bg-athlete-gray-800 border-gray-700">
+          <Card className="bg-slate-50 border-slate-200">
             <CardContent className="p-0">
               {/* Unified Score Display Above Video - Works for all sports */}
               {(() => {
@@ -1372,7 +1372,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                 }
                 
                 return (
-                  <div className="bg-gradient-to-r from-blue-900/40 via-athlete-gray-800 to-red-900/40 border-b border-gray-700 px-3 sm:px-6 py-3 sm:py-4">
+                  <div className="bg-gradient-to-r from-blue-900/40 via-athlete-gray-800 to-red-900/40 border-b border-slate-200 px-3 sm:px-6 py-3 sm:py-4">
                     <div className="flex items-center justify-between max-w-4xl mx-auto">
                       {/* Entity 1 (Blue/Team 1) */}
                       <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
@@ -1390,7 +1390,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                             </div>
                           )}
                           {entity1Country && !isTeamSport && (
-                            <div className="text-[10px] sm:text-xs text-gray-400 truncate">{entity1Country}</div>
+                            <div className="text-[10px] sm:text-xs text-muted-foreground truncate">{entity1Country}</div>
                           )}
                         </div>
                       </div>
@@ -1400,7 +1400,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                         <div className="text-2xl sm:text-4xl font-bold text-blue-400" data-testid="entity1-score">
                           {entity1Score}
                         </div>
-                        <div className="text-lg sm:text-2xl font-bold text-gray-500">-</div>
+                        <div className="text-lg sm:text-2xl font-bold text-muted-foreground">-</div>
                         <div className="text-2xl sm:text-4xl font-bold text-red-400" data-testid="entity2-score">
                           {entity2Score}
                         </div>
@@ -1416,7 +1416,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                             </div>
                           )}
                           {entity2Country && !isTeamSport && (
-                            <div className="text-[10px] sm:text-xs text-gray-400 truncate">{entity2Country}</div>
+                            <div className="text-[10px] sm:text-xs text-muted-foreground truncate">{entity2Country}</div>
                           )}
                         </div>
                         {entity2Country && (
@@ -1447,7 +1447,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
                   {/* Progress Bar */}
                   <div className="mb-3">
-                    <div className="relative bg-gray-700 h-1 rounded cursor-pointer"
+                    <div className="relative bg-muted h-1 rounded cursor-pointer"
                          onClick={(e) => {
                            const rect = e.currentTarget.getBoundingClientRect();
                            const clickX = e.clientX - rect.left;
@@ -1656,7 +1656,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
       </div>
 
       {/* Match Analysis - Bottom */}
-      <Card className="bg-athlete-gray-800 border-gray-700">
+      <Card className="bg-slate-50 border-slate-200">
         <CardHeader>
           <CardTitle className="text-white flex items-center">
             <Trophy className="mr-2 text-yellow-400" size={20} />
@@ -1664,10 +1664,10 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-gray-300 leading-relaxed" data-testid="match-analysis">
+          <div className="text-gray-600 leading-relaxed" data-testid="match-analysis">
             {(() => {
               if (!matchAnalysis) {
-                return <p className="text-gray-400">No match analysis available</p>;
+                return <p className="text-muted-foreground">No match analysis available</p>;
               }
               
               const rawText = typeof matchAnalysis === 'string' 
@@ -1796,7 +1796,7 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
   }, [adviceData]);
 
   return (
-    <Card className="bg-athlete-gray-800 border-gray-700">
+    <Card className="bg-slate-50 border-slate-200">
       <CardHeader>
         <CardTitle className="text-white flex items-center">
           <Brain className="mr-2 text-purple-400" size={20} />
@@ -1805,7 +1805,7 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
       </CardHeader>
       <CardContent>
         {!adviceData && (
-          <div className="text-gray-400 text-center py-8" data-testid="advice-empty-state">
+          <div className="text-muted-foreground text-center py-8" data-testid="advice-empty-state">
             <Brain className="mx-auto mb-4 text-purple-400" size={48} />
             <p className="text-lg mb-2">No Player Advice Available</p>
             <p className="text-sm">Advice will appear automatically after video analysis</p>
@@ -1813,7 +1813,7 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
         )}
 
         {hasParsingError && (
-          <div className="text-gray-400 text-center py-8" data-testid="advice-error">
+          <div className="text-muted-foreground text-center py-8" data-testid="advice-error">
             <MessageSquare className="mx-auto mb-4 text-red-400" size={48} />
             <p className="text-lg mb-2">Unable to Display Advice</p>
             <p className="text-sm">There was an issue processing the player advice data</p>
@@ -1824,7 +1824,7 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
           <div className="space-y-6" data-testid="advice-results">
             {/* General Observations */}
             {parsedAdviceData.general_observations && (
-              <Card className="bg-gray-900/50 border-gray-600">
+              <Card className="bg-card border-slate-200">
                 <CardHeader>
                   <CardTitle className="text-white text-lg flex items-center">
                     <MessageSquare className="mr-2 text-blue-400" size={18} />
@@ -1832,7 +1832,7 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-300 leading-relaxed" data-testid="general-observations">
+                  <p className="text-gray-600 leading-relaxed" data-testid="general-observations">
                     {parsedAdviceData.general_observations}
                   </p>
                 </CardContent>
@@ -1849,7 +1849,7 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
                       ? 'bg-blue-900/20 border-blue-500/50' 
                       : player.color?.toLowerCase() === 'red'
                       ? 'bg-red-900/20 border-red-500/50'
-                      : 'bg-gray-900/50 border-gray-600'
+                      : 'bg-card border-slate-200'
                   }`}
                   data-testid={`player-advice-${index}`}
                 >
@@ -1876,7 +1876,7 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
                       {player.tactical_advice?.issues?.length > 0 && (
                         <div>
                           <p className="text-red-300 text-xs font-medium">{getTitle('Issues:')}</p>
-                          <ul className="text-gray-300 text-sm space-y-1 ml-4">
+                          <ul className="text-gray-600 text-sm space-y-1 ml-4">
                             {player.tactical_advice.issues.map((issue, i) => (
                               <li key={i} className="list-disc" data-testid={`tactical-issue-${index}-${i}`}>
                                 {issue}
@@ -1888,7 +1888,7 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
                       {player.tactical_advice?.improvements?.length > 0 && (
                         <div>
                           <p className="text-green-300 text-xs font-medium">{getTitle('Improvements:')}</p>
-                          <ul className="text-gray-300 text-sm space-y-1 ml-4">
+                          <ul className="text-gray-600 text-sm space-y-1 ml-4">
                             {player.tactical_advice.improvements.map((improvement, i) => (
                               <li key={i} className="list-disc" data-testid={`tactical-improvement-${index}-${i}`}>
                                 {improvement}
@@ -1908,7 +1908,7 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
                       {player.technical_advice?.issues?.length > 0 && (
                         <div>
                           <p className="text-red-300 text-xs font-medium">{getTitle('Issues:')}</p>
-                          <ul className="text-gray-300 text-sm space-y-1 ml-4">
+                          <ul className="text-gray-600 text-sm space-y-1 ml-4">
                             {player.technical_advice.issues.map((issue, i) => (
                               <li key={i} className="list-disc" data-testid={`technical-issue-${index}-${i}`}>
                                 {issue}
@@ -1920,7 +1920,7 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
                       {player.technical_advice?.improvements?.length > 0 && (
                         <div>
                           <p className="text-green-300 text-xs font-medium">{getTitle('Improvements:')}</p>
-                          <ul className="text-gray-300 text-sm space-y-1 ml-4">
+                          <ul className="text-gray-600 text-sm space-y-1 ml-4">
                             {player.technical_advice.improvements.map((improvement, i) => (
                               <li key={i} className="list-disc" data-testid={`technical-improvement-${index}-${i}`}>
                                 {improvement}
@@ -1940,7 +1940,7 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
                       {player.mental_advice?.issues?.length > 0 && (
                         <div>
                           <p className="text-red-300 text-xs font-medium">{getTitle('Issues:')}</p>
-                          <ul className="text-gray-300 text-sm space-y-1 ml-4">
+                          <ul className="text-gray-600 text-sm space-y-1 ml-4">
                             {player.mental_advice.issues.map((issue, i) => (
                               <li key={i} className="list-disc" data-testid={`mental-issue-${index}-${i}`}>
                                 {issue}
@@ -1952,7 +1952,7 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
                       {player.mental_advice?.improvements?.length > 0 && (
                         <div>
                           <p className="text-green-300 text-xs font-medium">{getTitle('Improvements:')}</p>
-                          <ul className="text-gray-300 text-sm space-y-1 ml-4">
+                          <ul className="text-gray-600 text-sm space-y-1 ml-4">
                             {player.mental_advice.improvements.map((improvement, i) => (
                               <li key={i} className="list-disc" data-testid={`mental-improvement-${index}-${i}`}>
                                 {improvement}

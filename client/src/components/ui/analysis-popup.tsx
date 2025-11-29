@@ -281,7 +281,7 @@ export function AnalysisPopup({
           );
         }).filter(Boolean) : (
           <div className="text-muted-foreground text-center py-8">
-            <Star className="w-12 h-12 mx-auto mb-4 text-gray-500" />
+            <Star className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
             <p>{t("analysis.strengths.noData", "No strengths analysis data available")}</p>
             <p className="text-sm mt-2">{t("analysis.strengths.generateNew", "Generate a new analysis to see detailed insights.")}</p>
           </div>
@@ -564,7 +564,7 @@ export function AnalysisPopup({
 
         {planItems.length === 0 && (
           <div className="text-muted-foreground text-center py-12">
-            <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-500" />
+            <Calendar className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
             <p className="text-lg font-medium mb-2">{t("analysis.development.noData", "No development plan data available")}</p>
             <p className="text-sm">{t("analysis.development.generateNew", "Generate a new analysis to see your personalized development program.")}</p>
           </div>
@@ -1239,14 +1239,14 @@ export function AnalysisPopup({
             <h2 className="text-2xl font-bold text-athlete-accent">{t("analysis.bio.header", "Biography Analysis")}</h2>
           </div>
 
-          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-accent border-gray-600 shadow-xl">
+          <Card className="bg-gradient-to-r from-slate-50 to-slate-100 border-l-4 border-l-athlete-accent border-slate-200 shadow-xl">
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-emerald-400 mb-6 flex items-center">
                 <User className="mr-4 text-emerald-400" size={32} />
                 Biography
               </h3>
               <div className="prose prose-invert max-w-none">
-                <p className="text-gray-200 leading-relaxed text-lg">
+                <p className="text-foreground leading-relaxed text-lg">
                   {bio || t("analysis.bio.noData", "No biography data available.")}
                 </p>
               </div>
@@ -1255,14 +1255,14 @@ export function AnalysisPopup({
 
           {/* Player's Story Section */}
           {playersStory && (
-            <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-cyan-400 border-gray-600 shadow-xl">
+            <Card className="bg-gradient-to-r from-slate-50 to-slate-100 border-l-4 border-l-cyan-400 border-slate-200 shadow-xl">
               <CardContent className="p-8">
                 <h3 className="text-3xl font-bold text-cyan-400 mb-6 flex items-center">
                   <Star className="mr-4 text-cyan-400" size={32} />
                   {t("common:analysis.bio.playersStory", "Player's Story")}
                 </h3>
                 <div className="prose prose-invert max-w-none">
-                  <p className="text-gray-200 leading-relaxed text-lg">{playersStory}</p>
+                  <p className="text-foreground leading-relaxed text-lg">{playersStory}</p>
                 </div>
               </CardContent>
             </Card>
@@ -1270,7 +1270,7 @@ export function AnalysisPopup({
 
           {/* Achievements Section */}
           {achievements.length > 0 && (
-            <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-warning border-gray-600 shadow-xl">
+            <Card className="bg-gradient-to-r from-slate-50 to-slate-100 border-l-4 border-l-athlete-warning border-slate-200 shadow-xl">
               <CardContent className="p-8">
                 <h3 className="text-3xl font-bold text-athlete-warning mb-6 flex items-center">
                   <Award className="mr-4 text-athlete-warning" size={32} />
@@ -1303,7 +1303,7 @@ export function AnalysisPopup({
 
           {/* Recent News Section */}
           {recentNews.length > 0 && (
-            <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-purple-400 border-gray-600 shadow-xl">
+            <Card className="bg-gradient-to-r from-slate-50 to-slate-100 border-l-4 border-l-purple-400 border-slate-200 shadow-xl">
               <CardContent className="p-8">
                 <h3 className="text-3xl font-bold text-purple-400 mb-6 flex items-center">
                   <Calendar className="mr-4 text-purple-400" size={32} />
@@ -1437,7 +1437,7 @@ export function AnalysisPopup({
 
         {/* Introduction Section */}
         {bioSections.introduction && (
-          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-accent border-gray-600 shadow-xl">
+          <Card className="bg-gradient-to-r from-slate-50 to-slate-100 border-l-4 border-l-athlete-accent border-slate-200 shadow-xl">
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-emerald-400 mb-8 flex items-center">
                 <User className="mr-4 text-emerald-400" size={32} />
@@ -1482,7 +1482,7 @@ export function AnalysisPopup({
                     return (
                       <p key={index} className="text-lg">
                         <span className="font-bold text-cyan-400 text-xl">{matchedTitle}</span>
-                        <span className="text-gray-200 leading-loose"> {trimmedPara.substring(matchedTitle.length)}</span>
+                        <span className="text-foreground leading-loose"> {trimmedPara.substring(matchedTitle.length)}</span>
                       </p>
                     );
                   }
@@ -1490,7 +1490,7 @@ export function AnalysisPopup({
                   return (
                     <p 
                       key={index} 
-                      className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
+                      className={`text-foreground leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
                     >
                       {trimmedPara}
                     </p>
@@ -1499,7 +1499,7 @@ export function AnalysisPopup({
                 
                 {/* Previous Sports and Years in Current Sport Info */}
                 {actualData.personalInfo && (
-                  <div className="mt-8 pt-6 border-t border-gray-600/50">
+                  <div className="mt-8 pt-6 border-t border-slate-200/50">
                     {actualData.personalInfo.previousSports && actualData.personalInfo.previousSports.length > 0 && (
                       <div className="mb-4 p-4 bg-emerald-900/20 rounded-lg border border-emerald-500/20">
                         <span className="text-emerald-400 font-semibold text-base">Previous Sports: </span>
@@ -1521,7 +1521,7 @@ export function AnalysisPopup({
 
         {/* Player's Story Section */}
         {(playersStory || bioSections.overallStory) && (
-          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-cyan-400 border-gray-600 shadow-xl">
+          <Card className="bg-gradient-to-r from-slate-50 to-slate-100 border-l-4 border-l-cyan-400 border-slate-200 shadow-xl">
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-cyan-400 mb-8 flex items-center">
                 <Star className="mr-4 text-cyan-400" size={32} />
@@ -1531,7 +1531,7 @@ export function AnalysisPopup({
                 {(playersStory || bioSections.overallStory).split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => (
                   <p 
                     key={index} 
-                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
+                    className={`text-foreground leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
                   >
                     {paragraph.trim()}
                   </p>
@@ -1543,7 +1543,7 @@ export function AnalysisPopup({
 
         {/* Career Record and Rankings */}
         {bioSections.careerRecord && (
-          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-orange-400 border-gray-600 shadow-xl">
+          <Card className="bg-gradient-to-r from-slate-50 to-slate-100 border-l-4 border-l-orange-400 border-slate-200 shadow-xl">
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-orange-400 mb-8 flex items-center">
                 <Trophy className="mr-4 text-orange-400" size={32} />
@@ -1553,7 +1553,7 @@ export function AnalysisPopup({
                 {bioSections.careerRecord.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => (
                   <p 
                     key={index} 
-                    className={`text-gray-200 leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
+                    className={`text-foreground leading-loose text-lg ${index === 0 ? 'bio-first-letter' : ''}`}
                   >
                     {paragraph.trim()}
                   </p>
@@ -1565,7 +1565,7 @@ export function AnalysisPopup({
 
         {/* Notable Achievements Section */}
         {achievements.length > 0 && (
-          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-athlete-warning border-gray-600 shadow-xl">
+          <Card className="bg-gradient-to-r from-slate-50 to-slate-100 border-l-4 border-l-athlete-warning border-slate-200 shadow-xl">
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-athlete-warning mb-6 flex items-center">
                 <Award className="mr-4 text-athlete-warning" size={32} />
@@ -1580,7 +1580,7 @@ export function AnalysisPopup({
                   return (
                     <div 
                       key={index}
-                      className="flex items-start space-x-4 p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20"
+                      className="flex items-start space-x-4 p-4 bg-slate-100 rounded-xl border border-athlete-warning/20"
                     >
                       <div className="mt-1 flex-shrink-0">
                         {medal ? getMedalIcon(medal) : <div className="w-3 h-3 bg-athlete-warning rounded-full mt-1"></div>}
@@ -1598,7 +1598,7 @@ export function AnalysisPopup({
 
         {/* Recent Competitions Section */}
         {recentNews.length > 0 && (
-          <Card className="bg-gradient-to-r from-athlete-gray-800 to-athlete-gray-700 border-l-4 border-l-purple-400 border-gray-600 shadow-xl">
+          <Card className="bg-gradient-to-r from-slate-50 to-slate-100 border-l-4 border-l-purple-400 border-slate-200 shadow-xl">
             <CardContent className="p-8">
               <h3 className="text-3xl font-bold text-purple-400 mb-6 flex items-center">
                 <Calendar className="mr-4 text-purple-400" size={32} />
@@ -1608,9 +1608,9 @@ export function AnalysisPopup({
                 {recentNews.map((news: string, index: number) => (
                   <div 
                     key={index}
-                    className="p-6 bg-athlete-gray-600 rounded-xl border-l-4 border-purple-400 shadow-lg"
+                    className="p-6 bg-slate-100 rounded-xl border-l-4 border-purple-400 shadow-lg"
                   >
-                    <p className="text-gray-200 leading-relaxed text-lg font-medium">
+                    <p className="text-foreground leading-relaxed text-lg font-medium">
                       {typeof news === 'string' ? news : JSON.stringify(news, null, 2)}
                     </p>
                   </div>
@@ -2540,7 +2540,7 @@ export function AnalysisPopup({
             <div className="text-center py-8">
               <User className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-muted-foreground">Comparison data could not be processed.</p>
-              <p className="text-gray-500 text-sm mt-2">Please try generating a new comparison analysis.</p>
+              <p className="text-muted-foreground text-sm mt-2">Please try generating a new comparison analysis.</p>
             </div>
           </CardContent>
         </Card>
@@ -2577,7 +2577,7 @@ export function AnalysisPopup({
                 <div className="text-center py-8">
                   <Apple className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                   <p className="text-muted-foreground">Nutrition plan data could not be processed.</p>
-                  <p className="text-gray-500 text-sm mt-2">Please try generating a new nutrition plan.</p>
+                  <p className="text-muted-foreground text-sm mt-2">Please try generating a new nutrition plan.</p>
                 </div>
               </CardContent>
             </Card>
@@ -2620,7 +2620,7 @@ export function AnalysisPopup({
                 <div className="text-center py-8">
                   <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                   <p className="text-muted-foreground">Development plan data could not be processed.</p>
-                  <p className="text-gray-500 text-sm mt-2">Please try generating a new development plan.</p>
+                  <p className="text-muted-foreground text-sm mt-2">Please try generating a new development plan.</p>
                 </div>
               </CardContent>
             </Card>

@@ -689,7 +689,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
   return (
     <>
-    <Card className="bg-athlete-gray-800 border-gray-700">
+    <Card className="bg-slate-50 border-slate-200">
       <CardHeader>
         <div className={`flex flex-col md:flex-row md:justify-between md:items-center gap-3 ${isArabic ? 'md:flex-row-reverse' : ''}`}>
           <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
@@ -744,7 +744,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
             {/* Sport and Language Selection Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className={`text-sm font-medium text-gray-300 ${isArabic ? 'text-right block' : ''}`}>
+                <label className={`text-sm font-medium text-gray-600 ${isArabic ? 'text-right block' : ''}`}>
                   {t("analysis.comparison.sport", "Sport")}
                 </label>
                 <Popover open={openSportPopover} onOpenChange={setOpenSportPopover}>
@@ -753,31 +753,31 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       variant="outline"
                       role="combobox"
                       aria-expanded={openSportPopover}
-                      className={`w-full justify-between bg-athlete-gray-700 border-gray-600 hover:bg-athlete-gray-600 text-white ${isArabic ? 'flex-row-reverse' : ''}`}
+                      className={`w-full justify-between bg-slate-100 border-slate-200 hover:bg-slate-100 text-white ${isArabic ? 'flex-row-reverse' : ''}`}
                       data-testid="select-sport"
                     >
-                      <span className={`${!selectedSport && 'text-gray-400'}`}>
+                      <span className={`${!selectedSport && 'text-muted-foreground'}`}>
                         {selectedSportObject?.name || t("analysis.comparison.selectSport", "Select sport...")}
                       </span>
                       <ChevronDown className={`h-4 w-4 shrink-0 opacity-50 ${isArabic ? 'mr-2' : 'ml-2'}`} />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[400px] p-0 bg-athlete-gray-700 border-gray-600" align={isArabic ? "end" : "start"}>
+                  <PopoverContent className="w-[400px] p-0 bg-slate-100 border-slate-200" align={isArabic ? "end" : "start"}>
                     <div className="p-2">
                       <div className="relative">
-                        <Search className={`absolute top-2.5 h-4 w-4 text-gray-400 ${isArabic ? 'right-2' : 'left-2'}`} />
+                        <Search className={`absolute top-2.5 h-4 w-4 text-muted-foreground ${isArabic ? 'right-2' : 'left-2'}`} />
                         <Input
                           placeholder={t("analysis.comparison.searchSports", "Search sports...")}
                           value={searchSport}
                           onChange={(e) => setSearchSport(e.target.value)}
-                          className={`!bg-athlete-gray-600 border-gray-500 !text-white placeholder:text-gray-400 ${isArabic ? 'pr-8 text-right' : 'pl-8'}`}
+                          className={`!bg-slate-100 border-gray-500 !text-white placeholder:text-muted-foreground ${isArabic ? 'pr-8 text-right' : 'pl-8'}`}
                           dir={isArabic ? 'rtl' : 'ltr'}
                         />
                       </div>
                     </div>
                     <div className="max-h-64 overflow-y-auto">
                       {filteredSports.length === 0 ? (
-                        <div className={`p-4 text-center text-gray-400 ${isArabic ? 'text-right' : ''}`}>
+                        <div className={`p-4 text-center text-muted-foreground ${isArabic ? 'text-right' : ''}`}>
                           {t("analysis.comparison.noSportsFound", "No sports found")}
                         </div>
                       ) : (
@@ -793,8 +793,8 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               setOpenSportPopover(false);
                               setSearchSport("");
                             }}
-                            className={`w-full px-4 py-2 text-left hover:bg-athlete-gray-600 text-white transition-colors ${
-                              selectedSport === sport.id ? 'bg-athlete-gray-600' : ''
+                            className={`w-full px-4 py-2 text-left hover:bg-slate-100 text-white transition-colors ${
+                              selectedSport === sport.id ? 'bg-slate-100' : ''
                             } ${isArabic ? 'text-right' : ''}`}
                           >
                             {sport.name}
@@ -807,7 +807,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
               </div>
 
               <div className="space-y-2">
-                <label className={`text-sm font-medium text-gray-300 ${isArabic ? 'text-right block' : ''}`}>
+                <label className={`text-sm font-medium text-gray-600 ${isArabic ? 'text-right block' : ''}`}>
                   {t("analysis.comparison.language", "Language")}
                 </label>
                 <Select
@@ -815,7 +815,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                   onValueChange={setSelectedLanguage}
                   data-testid="select-language"
                 >
-                  <SelectTrigger className="bg-athlete-gray-700 border-gray-600" dir={isArabic ? 'rtl' : 'ltr'}>
+                  <SelectTrigger className="bg-slate-100 border-slate-200" dir={isArabic ? 'rtl' : 'ltr'}>
                     <SelectValue placeholder={t("analysis.comparison.selectLanguage", "Select language...")} />
                   </SelectTrigger>
                   <SelectContent>
@@ -839,7 +839,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
             {/* Two-Column Athlete Selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
               {/* Athlete 1 Column */}
-              <Card className="bg-athlete-gray-700/50 border-gray-600">
+              <Card className="bg-slate-100/50 border-slate-200">
                 <CardHeader>
                   <CardTitle className={`text-lg text-white flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                     <User className="h-5 w-5 text-blue-400" />
@@ -849,7 +849,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                 <CardContent className="space-y-4">
                   {/* Country Select for Athlete 1 */}
                   <div className="space-y-2">
-                    <label className={`text-sm font-medium text-gray-300 ${isArabic ? 'text-right block' : ''}`}>
+                    <label className={`text-sm font-medium text-gray-600 ${isArabic ? 'text-right block' : ''}`}>
                       {t("analysis.comparison.country", "Country")}
                     </label>
                     <CountrySelect
@@ -866,7 +866,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
                   {/* Searchable Athlete Dropdown for Athlete 1 */}
                   <div className="space-y-2">
-                    <label className={`text-sm font-medium text-gray-300 ${isArabic ? 'text-right block' : ''}`}>
+                    <label className={`text-sm font-medium text-gray-600 ${isArabic ? 'text-right block' : ''}`}>
                       {t("analysis.comparison.selectAthlete", "Select Athlete")}
                     </label>
                     <Popover open={openAthletePopover1} onOpenChange={setOpenAthletePopover1}>
@@ -875,29 +875,29 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           variant="outline"
                           role="combobox"
                           aria-expanded={openAthletePopover1}
-                          className={`w-full justify-between bg-athlete-gray-700 border-gray-600 text-white hover:bg-athlete-gray-600 ${isArabic ? 'flex-row-reverse' : ''}`}
+                          className={`w-full justify-between bg-slate-100 border-slate-200 text-white hover:bg-slate-100 ${isArabic ? 'flex-row-reverse' : ''}`}
                           disabled={!selectedSport}
                           data-testid="select-athlete1"
                         >
                           {selectedAthleteObject1 ? (
                             <span className="truncate">{selectedAthleteObject1.name}</span>
                           ) : (
-                            <span className="text-gray-400">
+                            <span className="text-muted-foreground">
                               {selectedSport ? t("analysis.comparison.selectFirstAthlete", "Select first athlete...") : t("analysis.comparison.selectSportFirst", "Select a sport first")}
                             </span>
                           )}
                           <ChevronsUpDown className={`h-4 w-4 shrink-0 opacity-50 ${isArabic ? 'mr-2' : 'ml-2'}`} />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-[400px] p-0 bg-athlete-gray-700 border-gray-600" align="start">
-                        <div className="p-3 border-b border-gray-600">
+                      <PopoverContent className="w-[400px] p-0 bg-slate-100 border-slate-200" align="start">
+                        <div className="p-3 border-b border-slate-200">
                           <div className="relative">
-                            <Search className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 ${isArabic ? 'right-3' : 'left-3'}`} />
+                            <Search className={`absolute top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 ${isArabic ? 'right-3' : 'left-3'}`} />
                             <Input
                               placeholder={t("analysis.comparison.searchAthletes", "Search athletes...")}
                               value={searchAthlete1}
                               onChange={(e) => setSearchAthlete1(e.target.value)}
-                              className={`!bg-athlete-gray-700 border-athlete-gray-600 !text-white placeholder:text-gray-400 focus:!bg-athlete-gray-700 focus:border-athlete-gray-500 ${isArabic ? 'pr-9' : 'pl-9'}`}
+                              className={`!bg-slate-100 border-athlete-gray-600 !text-white placeholder:text-muted-foreground focus:!bg-slate-100 focus:border-athlete-gray-500 ${isArabic ? 'pr-9' : 'pl-9'}`}
                               data-testid="input-athlete1-search"
                               dir={isArabic ? 'rtl' : 'ltr'}
                             />
@@ -908,16 +908,16 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                             <div className="p-4 text-center">
                               {searchAthlete1 ? (
                                 <div className="space-y-2">
-                                  <div className="text-gray-300 font-medium flex items-center justify-center gap-2">
+                                  <div className="text-gray-600 font-medium flex items-center justify-center gap-2">
                                     <HelpCircle className="w-4 h-4" />
                                     {t("analysis.comparison.noAthletesFound", "No athletes found")}
                                   </div>
-                                  <div className="text-sm text-gray-400">
+                                  <div className="text-sm text-muted-foreground">
                                     {t("analysis.comparison.addAthleteHint", "Search for this athlete in the Athlete Analysis tab first to add them to our database.")}
                                   </div>
                                 </div>
                               ) : (
-                                <div className="text-gray-400">
+                                <div className="text-muted-foreground">
                                   {t("analysis.comparison.noAthletesAvailable", "No athletes available")}
                                 </div>
                               )}
@@ -927,7 +927,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               <Button
                                 key={athlete.id}
                                 variant="ghost"
-                                className={`w-full justify-start text-left hover:bg-athlete-gray-600 h-auto py-3 px-3 ${isArabic ? 'flex-row-reverse' : ''}`}
+                                className={`w-full justify-start text-left hover:bg-slate-100 h-auto py-3 px-3 ${isArabic ? 'flex-row-reverse' : ''}`}
                                 onClick={() => {
                                   setSelectedAthlete1(athlete.id);
                                   setOpenAthletePopover1(false);
@@ -938,9 +938,9 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                 <div className="flex-1 min-w-0 space-y-1">
                                   <div className="text-white font-medium truncate">{athlete.name}</div>
                                   {athlete.nameArabic && (
-                                    <div className="text-gray-400 text-sm truncate">{athlete.nameArabic}</div>
+                                    <div className="text-muted-foreground text-sm truncate">{athlete.nameArabic}</div>
                                   )}
-                                  <div className="text-xs text-gray-500 truncate">
+                                  <div className="text-xs text-muted-foreground truncate">
                                     {athlete.country && `${athlete.country}`}
                                     {athlete.rank && ` • #${athlete.rank}`}
                                   </div>
@@ -959,7 +959,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       <div className="mt-4">
                         {/* Last Update */}
                         {selectedAthleteObject1.updatedAt && (
-                          <div className={`flex items-center ${isArabic ? 'gap-2 flex-row-reverse' : 'gap-2'} mb-2 ${isArabic ? 'text-base font-medium' : 'text-sm'} text-gray-300`}>
+                          <div className={`flex items-center ${isArabic ? 'gap-2 flex-row-reverse' : 'gap-2'} mb-2 ${isArabic ? 'text-base font-medium' : 'text-sm'} text-gray-600`}>
                             <CalendarDays className={`${isArabic ? 'w-5 h-5' : 'w-4 h-4'}`} />
                             <span>{t('interface.lastUpdate', 'Last Update')}: {new Date(selectedAthleteObject1.updatedAt).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                           </div>
@@ -983,9 +983,9 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               />
                             ) : null}
                             <div 
-                              className={`w-16 h-16 rounded-full bg-athlete-gray-600 flex items-center justify-center ${selectedAthleteObject1.profileImageUrl ? 'hidden' : 'flex'}`}
+                              className={`w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center ${selectedAthleteObject1.profileImageUrl ? 'hidden' : 'flex'}`}
                             >
-                              <User className="text-gray-400" size={24} />
+                              <User className="text-muted-foreground" size={24} />
                             </div>
                           </div>
 
@@ -993,11 +993,11 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           <div className="flex-1 min-w-0">
                             <h4 className="text-white font-semibold truncate">{selectedAthleteObject1.name}</h4>
                             {selectedAthleteObject1.nameArabic && (
-                              <p className="text-gray-400 text-sm truncate">{selectedAthleteObject1.nameArabic}</p>
+                              <p className="text-muted-foreground text-sm truncate">{selectedAthleteObject1.nameArabic}</p>
                             )}
                             <div className={`flex items-center gap-2 mt-1 ${isArabic ? 'flex-row-reverse' : ''}`}>
                               <Flag country={selectedAthleteObject1.country || "US"} className="w-6 h-4 rounded shadow-sm" />
-                              <span className="text-sm text-gray-400">{selectedAthleteObject1.country || "Unknown"}</span>
+                              <span className="text-sm text-muted-foreground">{selectedAthleteObject1.country || "Unknown"}</span>
                             </div>
                             
                             {/* Update Info Button */}
@@ -1026,7 +1026,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
               </Card>
 
               {/* Athlete 2 Column */}
-              <Card className="bg-athlete-gray-700/50 border-gray-600">
+              <Card className="bg-slate-100/50 border-slate-200">
                 <CardHeader>
                   <CardTitle className={`text-lg text-white flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                     <User className="h-5 w-5 text-purple-400" />
@@ -1036,7 +1036,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                 <CardContent className="space-y-4">
                   {/* Country Select for Athlete 2 */}
                   <div className="space-y-2">
-                    <label className={`text-sm font-medium text-gray-300 ${isArabic ? 'text-right block' : ''}`}>
+                    <label className={`text-sm font-medium text-gray-600 ${isArabic ? 'text-right block' : ''}`}>
                       {t("analysis.comparison.country", "Country")}
                     </label>
                     <CountrySelect
@@ -1053,7 +1053,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
                   {/* Searchable Athlete Dropdown for Athlete 2 */}
                   <div className="space-y-2">
-                    <label className={`text-sm font-medium text-gray-300 ${isArabic ? 'text-right block' : ''}`}>
+                    <label className={`text-sm font-medium text-gray-600 ${isArabic ? 'text-right block' : ''}`}>
                       {t("analysis.comparison.selectAthlete", "Select Athlete")}
                     </label>
                     <Popover open={openAthletePopover2} onOpenChange={setOpenAthletePopover2}>
@@ -1062,29 +1062,29 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           variant="outline"
                           role="combobox"
                           aria-expanded={openAthletePopover2}
-                          className={`w-full justify-between bg-athlete-gray-700 border-gray-600 text-white hover:bg-athlete-gray-600 ${isArabic ? 'flex-row-reverse' : ''}`}
+                          className={`w-full justify-between bg-slate-100 border-slate-200 text-white hover:bg-slate-100 ${isArabic ? 'flex-row-reverse' : ''}`}
                           disabled={!selectedSport}
                           data-testid="select-athlete2"
                         >
                           {selectedAthleteObject2 ? (
                             <span className="truncate">{selectedAthleteObject2.name}</span>
                           ) : (
-                            <span className="text-gray-400">
+                            <span className="text-muted-foreground">
                               {selectedSport ? t("analysis.comparison.selectSecondAthlete", "Select second athlete...") : t("analysis.comparison.selectSportFirst", "Select a sport first")}
                             </span>
                           )}
                           <ChevronsUpDown className={`h-4 w-4 shrink-0 opacity-50 ${isArabic ? 'mr-2' : 'ml-2'}`} />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-[400px] p-0 bg-athlete-gray-700 border-gray-600" align="start">
-                        <div className="p-3 border-b border-gray-600">
+                      <PopoverContent className="w-[400px] p-0 bg-slate-100 border-slate-200" align="start">
+                        <div className="p-3 border-b border-slate-200">
                           <div className="relative">
-                            <Search className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 ${isArabic ? 'right-3' : 'left-3'}`} />
+                            <Search className={`absolute top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 ${isArabic ? 'right-3' : 'left-3'}`} />
                             <Input
                               placeholder={t("analysis.comparison.searchAthletes", "Search athletes...")}
                               value={searchAthlete2}
                               onChange={(e) => setSearchAthlete2(e.target.value)}
-                              className={`!bg-athlete-gray-700 border-athlete-gray-600 !text-white placeholder:text-gray-400 focus:!bg-athlete-gray-700 focus:border-athlete-gray-500 ${isArabic ? 'pr-9' : 'pl-9'}`}
+                              className={`!bg-slate-100 border-athlete-gray-600 !text-white placeholder:text-muted-foreground focus:!bg-slate-100 focus:border-athlete-gray-500 ${isArabic ? 'pr-9' : 'pl-9'}`}
                               data-testid="input-athlete2-search"
                               dir={isArabic ? 'rtl' : 'ltr'}
                             />
@@ -1095,16 +1095,16 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                             <div className="p-4 text-center">
                               {searchAthlete2 ? (
                                 <div className="space-y-2">
-                                  <div className="text-gray-300 font-medium flex items-center justify-center gap-2">
+                                  <div className="text-gray-600 font-medium flex items-center justify-center gap-2">
                                     <HelpCircle className="w-4 h-4" />
                                     {t("analysis.comparison.noAthletesFound", "No athletes found")}
                                   </div>
-                                  <div className="text-sm text-gray-400">
+                                  <div className="text-sm text-muted-foreground">
                                     {t("analysis.comparison.addAthleteHint", "Search for this athlete in the Athlete Analysis tab first to add them to our database.")}
                                   </div>
                                 </div>
                               ) : (
-                                <div className="text-gray-400">
+                                <div className="text-muted-foreground">
                                   {t("analysis.comparison.noAthletesAvailable", "No athletes available")}
                                 </div>
                               )}
@@ -1114,7 +1114,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               <Button
                                 key={athlete.id}
                                 variant="ghost"
-                                className={`w-full justify-start text-left hover:bg-athlete-gray-600 h-auto py-3 px-3 ${isArabic ? 'flex-row-reverse' : ''}`}
+                                className={`w-full justify-start text-left hover:bg-slate-100 h-auto py-3 px-3 ${isArabic ? 'flex-row-reverse' : ''}`}
                                 onClick={() => {
                                   setSelectedAthlete2(athlete.id);
                                   setOpenAthletePopover2(false);
@@ -1125,9 +1125,9 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                 <div className="flex-1 min-w-0 space-y-1">
                                   <div className="text-white font-medium truncate">{athlete.name}</div>
                                   {athlete.nameArabic && (
-                                    <div className="text-gray-400 text-sm truncate">{athlete.nameArabic}</div>
+                                    <div className="text-muted-foreground text-sm truncate">{athlete.nameArabic}</div>
                                   )}
-                                  <div className="text-xs text-gray-500 truncate">
+                                  <div className="text-xs text-muted-foreground truncate">
                                     {athlete.country && `${athlete.country}`}
                                     {athlete.rank && ` • #${athlete.rank}`}
                                   </div>
@@ -1146,7 +1146,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       <div className="mt-4">
                         {/* Last Update */}
                         {selectedAthleteObject2.updatedAt && (
-                          <div className={`flex items-center ${isArabic ? 'gap-2 flex-row-reverse' : 'gap-2'} mb-2 ${isArabic ? 'text-base font-medium' : 'text-sm'} text-gray-300`}>
+                          <div className={`flex items-center ${isArabic ? 'gap-2 flex-row-reverse' : 'gap-2'} mb-2 ${isArabic ? 'text-base font-medium' : 'text-sm'} text-gray-600`}>
                             <CalendarDays className={`${isArabic ? 'w-5 h-5' : 'w-4 h-4'}`} />
                             <span>{t('interface.lastUpdate', 'Last Update')}: {new Date(selectedAthleteObject2.updatedAt).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                           </div>
@@ -1170,9 +1170,9 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               />
                             ) : null}
                             <div 
-                              className={`w-16 h-16 rounded-full bg-athlete-gray-600 flex items-center justify-center ${selectedAthleteObject2.profileImageUrl ? 'hidden' : 'flex'}`}
+                              className={`w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center ${selectedAthleteObject2.profileImageUrl ? 'hidden' : 'flex'}`}
                             >
-                              <User className="text-gray-400" size={24} />
+                              <User className="text-muted-foreground" size={24} />
                             </div>
                           </div>
 
@@ -1180,11 +1180,11 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           <div className="flex-1 min-w-0">
                             <h4 className="text-white font-semibold truncate">{selectedAthleteObject2.name}</h4>
                             {selectedAthleteObject2.nameArabic && (
-                              <p className="text-gray-400 text-sm truncate">{selectedAthleteObject2.nameArabic}</p>
+                              <p className="text-muted-foreground text-sm truncate">{selectedAthleteObject2.nameArabic}</p>
                             )}
                             <div className={`flex items-center gap-2 mt-1 ${isArabic ? 'flex-row-reverse' : ''}`}>
                               <Flag country={selectedAthleteObject2.country || "US"} className="w-6 h-4 rounded shadow-sm" />
-                              <span className="text-sm text-gray-400">{selectedAthleteObject2.country || "Unknown"}</span>
+                              <span className="text-sm text-muted-foreground">{selectedAthleteObject2.country || "Unknown"}</span>
                             </div>
                             
                             {/* Update Info Button */}
@@ -1457,7 +1457,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                   {/* Athlete Headers */}
                   <div className="grid grid-cols-2 gap-6">
                     <div className="text-center">
-                      <div className="w-20 h-20 rounded-full bg-athlete-gray-600 flex items-center justify-center mx-auto mb-3 overflow-hidden border-2 border-blue-500/50">
+                      <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3 overflow-hidden border-2 border-blue-500/50">
                         {parsedData.athlete1?.profileImageUrl ? (
                           <img 
                             src={parsedData.athlete1.profileImageUrl} 
@@ -1465,11 +1465,11 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                             className="w-full h-full object-cover"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
-                              e.currentTarget.parentElement!.innerHTML = '<svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>';
+                              e.currentTarget.parentElement!.innerHTML = '<svg class="w-10 h-10 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>';
                             }}
                           />
                         ) : (
-                          <User className="w-10 h-10 text-gray-400" />
+                          <User className="w-10 h-10 text-muted-foreground" />
                         )}
                       </div>
                       <h3 className="text-xl font-bold text-white break-words leading-tight px-2">{parsedData.athlete1?.name || "Athlete 1"}</h3>
@@ -1519,7 +1519,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                     </div>
 
                     <div className="text-center">
-                      <div className="w-20 h-20 rounded-full bg-athlete-gray-600 flex items-center justify-center mx-auto mb-3 overflow-hidden border-2 border-purple-500/50">
+                      <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3 overflow-hidden border-2 border-purple-500/50">
                         {parsedData.athlete2?.profileImageUrl ? (
                           <img 
                             src={parsedData.athlete2.profileImageUrl} 
@@ -1527,11 +1527,11 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                             className="w-full h-full object-cover"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
-                              e.currentTarget.parentElement!.innerHTML = '<svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>';
+                              e.currentTarget.parentElement!.innerHTML = '<svg class="w-10 h-10 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>';
                             }}
                           />
                         ) : (
-                          <User className="w-10 h-10 text-gray-400" />
+                          <User className="w-10 h-10 text-muted-foreground" />
                         )}
                       </div>
                       <h3 className="text-xl font-bold text-white break-words leading-tight px-2">{parsedData.athlete2?.name || "Athlete 2"}</h3>
@@ -1584,7 +1584,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                   {/* Tabbed Analysis */}
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-8">
                     {/* Mobile: Slider with arrows */}
-                    <div className="md:hidden flex items-center justify-between gap-2 bg-athlete-gray-700 rounded-lg p-2">
+                    <div className="md:hidden flex items-center justify-between gap-2 bg-slate-100 rounded-lg p-2">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -1594,7 +1594,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           if (currentIndex > 0) setActiveTab(tabs[currentIndex - 1]);
                         }}
                         disabled={activeTab === "overview"}
-                        className="h-9 w-9 p-0 text-white hover:bg-athlete-gray-600 disabled:opacity-30"
+                        className="h-9 w-9 p-0 text-white hover:bg-slate-100 disabled:opacity-30"
                         data-testid="button-tab-previous"
                       >
                         <ChevronLeft className="h-5 w-5" />
@@ -1617,7 +1617,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           if (currentIndex < tabs.length - 1) setActiveTab(tabs[currentIndex + 1]);
                         }}
                         disabled={activeTab === "head-to-head"}
-                        className="h-9 w-9 p-0 text-white hover:bg-athlete-gray-600 disabled:opacity-30"
+                        className="h-9 w-9 p-0 text-white hover:bg-slate-100 disabled:opacity-30"
                         data-testid="button-tab-next"
                       >
                         <ChevronRight className="h-5 w-5" />
@@ -1625,7 +1625,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                     </div>
 
                     {/* Desktop: Grid layout */}
-                    <TabsList className="hidden md:grid w-full grid-cols-5 bg-athlete-gray-700">
+                    <TabsList className="hidden md:grid w-full grid-cols-5 bg-slate-100">
                       <TabsTrigger value="overview" data-testid="tab-overview">{t('analysis.comparison.tabOverview', 'Overview')}</TabsTrigger>
                       <TabsTrigger value="strengths" data-testid="tab-strengths">{t('analysis.comparison.tabStrengths', 'Strengths')}</TabsTrigger>
                       <TabsTrigger value="weaknesses" data-testid="tab-weaknesses">{t('analysis.comparison.tabWeaknesses', 'Weaknesses')}</TabsTrigger>
@@ -1635,14 +1635,14 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
                     {/* Overview Tab */}
                     <TabsContent value="overview" className="space-y-4">
-                      <Card className="bg-athlete-gray-900 border-gray-600">
+                      <Card className="bg-athlete-gray-900 border-slate-200">
                         <CardContent className="p-4">
                           <div className={`flex items-center gap-2 mb-3 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                             <Brain className="h-5 w-5 text-blue-400" />
                             <h4 className="font-semibold text-white">{t('analysis.comparison.overallAnalysis', 'Overall Analysis')}</h4>
                           </div>
                           {parsedData.overallAnalysis?.summary ? (
-                            <p className={`text-gray-300 leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>
+                            <p className={`text-gray-600 leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>
                               {parsedData.overallAnalysis.summary}
                             </p>
                           ) : (
@@ -1657,7 +1657,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       <Card className="bg-gradient-to-r from-indigo-900/30 to-purple-900/30 border-purple-600">
                         <CardContent className="p-6 text-center">
                           <Target className="h-12 w-12 text-purple-400 mx-auto mb-3" />
-                          <div className="text-sm text-gray-400 mb-2">{t('analysis.comparison.finalPredictedWinner', 'Final Predicted Winner')}</div>
+                          <div className="text-sm text-muted-foreground mb-2">{t('analysis.comparison.finalPredictedWinner', 'Final Predicted Winner')}</div>
                           <div className="text-2xl font-bold text-white mb-2">
                             {parsedData.headToHead?.prediction === 'athlete1' ? parsedData.athlete1?.name :
                              parsedData.headToHead?.prediction === 'athlete2' ? parsedData.athlete2?.name : t('analysis.comparison.evenMatch', 'Even Match')}
@@ -1674,7 +1674,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                     {/* Strengths Tab */}
                     <TabsContent value="strengths" className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Card className="bg-athlete-gray-900 border-gray-600">
+                        <Card className="bg-athlete-gray-900 border-slate-200">
                           <CardHeader>
                             <CardTitle className={`text-lg text-white ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.athlete1?.name || "Athlete 1"} {t('analysis.comparison.strengths', 'Strengths')}</CardTitle>
                           </CardHeader>
@@ -1687,7 +1687,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                       {typeof strength === 'string' ? strength : strength.title}
                                     </div>
                                     {typeof strength === 'object' && strength.description && (
-                                      <div className={`text-sm text-gray-400 mt-1 ${isComparisonArabic ? 'text-right' : ''}`}>
+                                      <div className={`text-sm text-muted-foreground mt-1 ${isComparisonArabic ? 'text-right' : ''}`}>
                                         {strength.description}
                                       </div>
                                     )}
@@ -1706,12 +1706,12 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               </div>
                             ))}
                             {(!parsedData.strengths?.athlete1 || parsedData.strengths.athlete1.length === 0) && (
-                              <div className="text-gray-400 text-center py-4">{t('analysis.comparison.noStrengthsData', 'No strengths data available')}</div>
+                              <div className="text-muted-foreground text-center py-4">{t('analysis.comparison.noStrengthsData', 'No strengths data available')}</div>
                             )}
                           </CardContent>
                         </Card>
 
-                        <Card className="bg-athlete-gray-900 border-gray-600">
+                        <Card className="bg-athlete-gray-900 border-slate-200">
                           <CardHeader>
                             <CardTitle className={`text-lg text-white ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.athlete2?.name || "Athlete 2"} {t('analysis.comparison.strengths', 'Strengths')}</CardTitle>
                           </CardHeader>
@@ -1724,7 +1724,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                       {typeof strength === 'string' ? strength : strength.title}
                                     </div>
                                     {typeof strength === 'object' && strength.description && (
-                                      <div className={`text-sm text-gray-400 mt-1 ${isComparisonArabic ? 'text-right' : ''}`}>
+                                      <div className={`text-sm text-muted-foreground mt-1 ${isComparisonArabic ? 'text-right' : ''}`}>
                                         {strength.description}
                                       </div>
                                     )}
@@ -1743,7 +1743,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               </div>
                             ))}
                             {(!parsedData.strengths?.athlete2 || parsedData.strengths.athlete2.length === 0) && (
-                              <div className="text-gray-400 text-center py-4">{t('analysis.comparison.noStrengthsData', 'No strengths data available')}</div>
+                              <div className="text-muted-foreground text-center py-4">{t('analysis.comparison.noStrengthsData', 'No strengths data available')}</div>
                             )}
                           </CardContent>
                         </Card>
@@ -1753,7 +1753,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                     {/* Weaknesses Tab */}
                     <TabsContent value="weaknesses" className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Card className="bg-athlete-gray-900 border-gray-600">
+                        <Card className="bg-athlete-gray-900 border-slate-200">
                           <CardHeader>
                             <CardTitle className={`text-lg text-white ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.athlete1?.name || "Athlete 1"} {t('analysis.comparison.areasToImprove', 'Areas to Improve')}</CardTitle>
                           </CardHeader>
@@ -1766,7 +1766,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                       {typeof weakness === 'string' ? weakness : weakness.title}
                                     </div>
                                     {typeof weakness === 'object' && weakness.description && (
-                                      <div className={`text-sm text-gray-400 mt-1 ${isComparisonArabic ? 'text-right' : ''}`}>
+                                      <div className={`text-sm text-muted-foreground mt-1 ${isComparisonArabic ? 'text-right' : ''}`}>
                                         {weakness.description}
                                       </div>
                                     )}
@@ -1785,12 +1785,12 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               </div>
                             ))}
                             {(!parsedData.weaknesses?.athlete1 || parsedData.weaknesses.athlete1.length === 0) && (
-                              <div className="text-gray-400 text-center py-4">{t('analysis.comparison.noWeaknessesData', 'No weaknesses data available')}</div>
+                              <div className="text-muted-foreground text-center py-4">{t('analysis.comparison.noWeaknessesData', 'No weaknesses data available')}</div>
                             )}
                           </CardContent>
                         </Card>
 
-                        <Card className="bg-athlete-gray-900 border-gray-600">
+                        <Card className="bg-athlete-gray-900 border-slate-200">
                           <CardHeader>
                             <CardTitle className={`text-lg text-white ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.athlete2?.name || "Athlete 2"} {t('analysis.comparison.areasToImprove', 'Areas to Improve')}</CardTitle>
                           </CardHeader>
@@ -1803,7 +1803,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                       {typeof weakness === 'string' ? weakness : weakness.title}
                                     </div>
                                     {typeof weakness === 'object' && weakness.description && (
-                                      <div className={`text-sm text-gray-400 mt-1 ${isComparisonArabic ? 'text-right' : ''}`}>
+                                      <div className={`text-sm text-muted-foreground mt-1 ${isComparisonArabic ? 'text-right' : ''}`}>
                                         {weakness.description}
                                       </div>
                                     )}
@@ -1822,7 +1822,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               </div>
                             ))}
                             {(!parsedData.weaknesses?.athlete2 || parsedData.weaknesses.athlete2.length === 0) && (
-                              <div className="text-gray-400 text-center py-4">{t('analysis.comparison.noWeaknessesData', 'No weaknesses data available')}</div>
+                              <div className="text-muted-foreground text-center py-4">{t('analysis.comparison.noWeaknessesData', 'No weaknesses data available')}</div>
                             )}
                           </CardContent>
                         </Card>
@@ -1831,7 +1831,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
                     {/* Competition History Tab */}
                     <TabsContent value="ranking" className="space-y-6">
-                      <Card className="bg-athlete-gray-900 border-gray-600">
+                      <Card className="bg-athlete-gray-900 border-slate-200">
                         <CardContent className="p-6">
                           <div className={`flex items-center gap-2 mb-6 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                             <Trophy className="h-5 w-5 text-yellow-400" />
@@ -1845,7 +1845,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                   <h5 className={`font-semibold text-blue-300 mb-4 text-lg ${isComparisonArabic ? 'text-right' : ''}`}>
                                     {t('analysis.comparison.currentRankingComparison', 'Current Ranking Comparison')}
                                   </h5>
-                                  <p className={`text-gray-200 text-base leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>
+                                  <p className={`text-foreground text-base leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>
                                     {parsedData.ranking.comparison}
                                   </p>
                                 </div>
@@ -1858,7 +1858,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                     <h5 className={`font-semibold text-green-300 mb-4 text-base ${isComparisonArabic ? 'text-right' : ''}`}>
                                       {parsedData.athlete1?.name} {t('analysis.comparison.trajectory', 'Trajectory')}
                                     </h5>
-                                    <p className={`text-gray-200 text-sm leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>
+                                    <p className={`text-foreground text-sm leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>
                                       {parsedData.ranking.athlete1Trajectory}
                                     </p>
                                   </div>
@@ -1869,7 +1869,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                     <h5 className={`font-semibold text-green-300 mb-4 text-base ${isComparisonArabic ? 'text-right' : ''}`}>
                                       {parsedData.athlete2?.name} {t('analysis.comparison.trajectory', 'Trajectory')}
                                     </h5>
-                                    <p className={`text-gray-200 text-sm leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>
+                                    <p className={`text-foreground text-sm leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>
                                       {parsedData.ranking.athlete2Trajectory}
                                     </p>
                                   </div>
@@ -1903,8 +1903,8 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                     const competitions = history.filter((comp: any) => comp.event_date || comp.date);
                                     if (competitions.length === 0) {
                                       return (
-                                        <div className="bg-gradient-to-br from-athlete-gray-800/90 via-athlete-gray-800 to-athlete-gray-900 border border-gray-700/50 rounded-2xl p-8">
-                                          <p className="text-gray-400 text-center">{t('analysis.comparison.noCompetitiveHistory', 'No competitive history available')}</p>
+                                        <div className="bg-gradient-to-br from-athlete-gray-800/90 via-athlete-gray-800 to-athlete-gray-900 border border-slate-200/50 rounded-2xl p-8">
+                                          <p className="text-muted-foreground text-center">{t('analysis.comparison.noCompetitiveHistory', 'No competitive history available')}</p>
                                         </div>
                                       );
                                     }
@@ -1921,7 +1921,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                     const defaultYear = sortedYears[0] || new Date().getFullYear().toString();
 
                                     return (
-                                      <div className="bg-gradient-to-br from-athlete-gray-800/90 via-athlete-gray-800 to-athlete-gray-900 border border-gray-700/50 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
+                                      <div className="bg-gradient-to-br from-athlete-gray-800/90 via-athlete-gray-800 to-athlete-gray-900 border border-slate-200/50 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
                                         <div className={`bg-gradient-to-r ${colorClasses.gradient} px-5 py-4 border-b ${colorClasses.border}`}>
                                           <div className={`flex items-center gap-2 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                                             <div className={`w-1.5 h-6 ${colorClasses.accent} rounded-full shadow-lg ${colorClasses.shadow}`}></div>
@@ -1929,7 +1929,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                           </div>
                                         </div>
                                         <Tabs defaultValue={defaultYear} className="w-full">
-                                          <TabsList className="bg-athlete-gray-700 m-4 flex-wrap h-auto">
+                                          <TabsList className="bg-slate-100 m-4 flex-wrap h-auto">
                                             {sortedYears.map(year => (
                                               <TabsTrigger
                                                 key={year}
@@ -1958,7 +1958,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                                     const formattedDate = `${monthNames[eventDate.getMonth()]} ${eventDate.getFullYear()}`;
 
                                                     return (
-                                                      <div key={idx} className={`relative bg-athlete-gray-600/40 backdrop-blur-sm border border-gray-500/30 rounded-lg p-3 ${colorClasses.hoverBorder} transition-all duration-200`}>
+                                                      <div key={idx} className={`relative bg-slate-100/40 backdrop-blur-sm border border-gray-500/30 rounded-lg p-3 ${colorClasses.hoverBorder} transition-all duration-200`}>
                                                         <div className={`flex items-start gap-3 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                                                           <div className="flex-shrink-0 w-16 text-center">
                                                             <div className="inline-flex items-center justify-center bg-gradient-to-br from-yellow-400 to-amber-500 text-gray-900 font-bold text-xs px-2 py-1.5 rounded-lg shadow-md">
@@ -1968,12 +1968,12 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                                           <div className={`flex-1 min-w-0 ${isComparisonArabic ? 'text-right' : ''}`}>
                                                             <div className="font-semibold text-white text-sm mb-1 leading-snug">{comp.event_name}</div>
                                                             {comp.place && (
-                                                              <div className="text-gray-300 text-sm mb-1">
+                                                              <div className="text-gray-600 text-sm mb-1">
                                                                 {isComparisonArabic ? `المركز: ${comp.place}` : `Place: ${comp.place}`}
                                                               </div>
                                                             )}
                                                             {comp.location && (
-                                                              <div className="text-gray-400 text-xs mb-1">
+                                                              <div className="text-muted-foreground text-xs mb-1">
                                                                 {isComparisonArabic ? `الموقع: ${comp.location}` : `Location: ${comp.location}`}
                                                               </div>
                                                             )}
@@ -1997,7 +1997,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
                                   if (hasCareerPhases) {
                                     return (
-                                      <div className="bg-gradient-to-br from-athlete-gray-800/90 via-athlete-gray-800 to-athlete-gray-900 border border-gray-700/50 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
+                                      <div className="bg-gradient-to-br from-athlete-gray-800/90 via-athlete-gray-800 to-athlete-gray-900 border border-slate-200/50 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
                                         <div className={`bg-gradient-to-r ${colorClasses.gradient} px-5 py-4 border-b ${colorClasses.border}`}>
                                           <div className={`flex items-center gap-2 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                                             <div className={`w-1.5 h-6 ${colorClasses.accent} rounded-full shadow-lg ${colorClasses.shadow}`}></div>
@@ -2006,7 +2006,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                         </div>
                                         <div className="max-h-96 overflow-y-auto custom-scrollbar p-5 space-y-5">
                                           {history.career_phases.map((phase: any, index: number) => (
-                                            <div key={index} className={`relative bg-gradient-to-br from-athlete-gray-700/60 to-athlete-gray-800/60 border border-gray-600/40 rounded-xl p-4 shadow-lg ${colorClasses.hoverShadow} transition-all duration-300`}>
+                                            <div key={index} className={`relative bg-gradient-to-br from-athlete-gray-700/60 to-athlete-gray-800/60 border border-slate-200/40 rounded-xl p-4 shadow-lg ${colorClasses.hoverShadow} transition-all duration-300`}>
                                               <div className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${colorClasses.barGradient} rounded-l-xl`}></div>
                                               <div className={`font-bold ${colorClasses.text} mb-3 text-base tracking-wide flex items-center gap-2 ${isComparisonArabic ? 'flex-row-reverse text-right' : ''}`}>
                                                 <CalendarDays className={`h-4 w-4 ${colorClasses.iconColor}`} />
@@ -2016,7 +2016,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                               {phase.key_achievements && phase.key_achievements.length > 0 && (
                                                 <div className="space-y-3 ml-6">
                                                   {phase.key_achievements.map((achievement: any, achIndex: number) => (
-                                                    <div key={achIndex} className={`relative bg-athlete-gray-600/40 backdrop-blur-sm border border-gray-500/30 rounded-lg p-3 hover:bg-athlete-gray-600/60 ${colorClasses.hoverBorder} transition-all duration-200`}>
+                                                    <div key={achIndex} className={`relative bg-slate-100/40 backdrop-blur-sm border border-gray-500/30 rounded-lg p-3 hover:bg-slate-100/60 ${colorClasses.hoverBorder} transition-all duration-200`}>
                                                       <div className={`flex items-start gap-3 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                                                         <div className="flex-shrink-0 w-14 text-center">
                                                           <div className="inline-flex items-center justify-center bg-gradient-to-br from-yellow-400 to-amber-500 text-gray-900 font-bold text-sm px-3 py-1.5 rounded-lg shadow-md">
@@ -2025,7 +2025,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                                         </div>
                                                         <div className={`flex-1 min-w-0 ${isComparisonArabic ? 'text-right' : ''}`}>
                                                           <div className="font-semibold text-white text-sm mb-1 leading-snug">{achievement.result}</div>
-                                                          <div className="text-gray-300 text-sm mb-2 leading-relaxed">{achievement.event_name}</div>
+                                                          <div className="text-gray-600 text-sm mb-2 leading-relaxed">{achievement.event_name}</div>
                                                           {achievement.event_tier && (
                                                             <span className="inline-flex items-center px-2.5 py-1 bg-gradient-to-r from-purple-600/50 to-pink-600/50 border border-purple-400/30 text-purple-200 rounded-full text-xs font-medium shadow-sm">
                                                               {achievement.event_tier}
@@ -2045,8 +2045,8 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                   }
 
                                   return (
-                                    <div className="bg-gradient-to-br from-athlete-gray-800/90 via-athlete-gray-800 to-athlete-gray-900 border border-gray-700/50 rounded-2xl p-8">
-                                      <p className="text-gray-400 text-center">{t('analysis.comparison.noCompetitiveHistory', 'No competitive history available')}</p>
+                                    <div className="bg-gradient-to-br from-athlete-gray-800/90 via-athlete-gray-800 to-athlete-gray-900 border border-slate-200/50 rounded-2xl p-8">
+                                      <p className="text-muted-foreground text-center">{t('analysis.comparison.noCompetitiveHistory', 'No competitive history available')}</p>
                                     </div>
                                   );
                                 };
@@ -2097,7 +2097,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
                     {/* Head-to-Head Tab */}
                     <TabsContent value="head-to-head" className="space-y-4">
-                      <Card className="bg-athlete-gray-900 border-gray-600">
+                      <Card className="bg-athlete-gray-900 border-slate-200">
                         <CardContent className="p-6">
                           <div className="space-y-6">
                             {/* Prediction Section */}
@@ -2116,9 +2116,9 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                   )}
                                 </div>
                               ) : (
-                                <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 mb-4">
-                                  <div className="text-xl font-bold text-gray-300 mb-2">{t('analysis.comparison.evenMatch', 'Even Match')}</div>
-                                  <div className="text-gray-400">{t('analysis.comparison.tooCloseToCall', 'Too close to call')}</div>
+                                <div className="bg-gray-700/50 border border-slate-200 rounded-lg p-4 mb-4">
+                                  <div className="text-xl font-bold text-gray-600 mb-2">{t('analysis.comparison.evenMatch', 'Even Match')}</div>
+                                  <div className="text-muted-foreground">{t('analysis.comparison.tooCloseToCall', 'Too close to call')}</div>
                                 </div>
                               )}
                             </div>
@@ -2127,7 +2127,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                             {parsedData.headToHead?.reasoning && (
                               <div>
                                 <h4 className={`font-semibold text-blue-400 mb-2 ${isComparisonArabic ? 'text-right' : ''}`}>{t('analysis.comparison.analysis', 'Analysis')}</h4>
-                                <p className={`text-gray-300 leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.headToHead.reasoning}</p>
+                                <p className={`text-gray-600 leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.headToHead.reasoning}</p>
                               </div>
                             )}
 
@@ -2139,7 +2139,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                   {parsedData.headToHead.keyFactors.map((factor: string, index: number) => (
                                     <div key={index} className={`flex items-start gap-2 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                                       <Star className="h-4 w-4 text-green-400 mt-1" />
-                                      <span className={`text-gray-300 ${isComparisonArabic ? 'text-right' : ''}`}>{factor}</span>
+                                      <span className={`text-gray-600 ${isComparisonArabic ? 'text-right' : ''}`}>{factor}</span>
                                     </div>
                                   ))}
                                 </div>
@@ -2150,7 +2150,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                             {parsedData.headToHead?.scenario && (
                               <div>
                                 <h4 className={`font-semibold text-purple-400 mb-2 ${isComparisonArabic ? 'text-right' : ''}`}>{t('analysis.comparison.matchScenario', 'Match Scenario')}</h4>
-                                <p className={`text-gray-300 leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.headToHead.scenario}</p>
+                                <p className={`text-gray-600 leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.headToHead.scenario}</p>
                               </div>
                             )}
 
@@ -2158,7 +2158,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                             {parsedData.headToHead?.tacticalAdvice && (
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {parsedData.headToHead.tacticalAdvice.forAthlete1 && (
-                                  <Card className="bg-athlete-gray-800 border-gray-600">
+                                  <Card className="bg-slate-50 border-slate-200">
                                     <CardHeader>
                                       <CardTitle className={`text-sm text-blue-400 ${isComparisonArabic ? 'text-right' : ''}`}>
                                         {isComparisonArabic ? (
@@ -2168,13 +2168,13 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                         )}
                                       </CardTitle>
                                     </CardHeader>
-                                    <CardContent className={`text-sm text-gray-300 ${isComparisonArabic ? 'text-right' : ''}`}>
+                                    <CardContent className={`text-sm text-gray-600 ${isComparisonArabic ? 'text-right' : ''}`}>
                                       {parsedData.headToHead.tacticalAdvice.forAthlete1}
                                     </CardContent>
                                   </Card>
                                 )}
                                 {parsedData.headToHead.tacticalAdvice.forAthlete2 && (
-                                  <Card className="bg-athlete-gray-800 border-gray-600">
+                                  <Card className="bg-slate-50 border-slate-200">
                                     <CardHeader>
                                       <CardTitle className={`text-sm text-blue-400 ${isComparisonArabic ? 'text-right' : ''}`}>
                                         {isComparisonArabic ? (
@@ -2184,7 +2184,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                         )}
                                       </CardTitle>
                                     </CardHeader>
-                                    <CardContent className={`text-sm text-gray-300 ${isComparisonArabic ? 'text-right' : ''}`}>
+                                    <CardContent className={`text-sm text-gray-600 ${isComparisonArabic ? 'text-right' : ''}`}>
                                       {parsedData.headToHead.tacticalAdvice.forAthlete2}
                                     </CardContent>
                                   </Card>
@@ -2198,7 +2198,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                 {parsedData.headToHead.historicalContext && (
                                   <div>
                                     <h5 className={`font-medium text-yellow-400 mb-2 ${isComparisonArabic ? 'text-right' : ''}`}>{t('analysis.comparison.historicalContext', 'Historical Context')}</h5>
-                                    <p className={`text-gray-300 text-sm bg-athlete-gray-800 p-3 rounded-lg ${isComparisonArabic ? 'text-right' : ''}`}>
+                                    <p className={`text-gray-600 text-sm bg-slate-50 p-3 rounded-lg ${isComparisonArabic ? 'text-right' : ''}`}>
                                       {parsedData.headToHead.historicalContext}
                                     </p>
                                   </div>
@@ -2208,7 +2208,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                  !parsedData.headToHead.expertPredictions.includes("No predictions found") && (
                                   <div>
                                     <h5 className={`font-medium text-green-400 mb-2 ${isComparisonArabic ? 'text-right' : ''}`}>{t('analysis.comparison.expertPredictions', 'Expert Predictions')}</h5>
-                                    <p className={`text-gray-300 text-sm bg-athlete-gray-800 p-3 rounded-lg ${isComparisonArabic ? 'text-right' : ''}`}>
+                                    <p className={`text-gray-600 text-sm bg-slate-50 p-3 rounded-lg ${isComparisonArabic ? 'text-right' : ''}`}>
                                       {parsedData.headToHead.expertPredictions}
                                     </p>
                                   </div>
@@ -2226,7 +2226,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                             {(parsedData.headToHead?.reasoning || parsedData.overallAnalysis?.recommendation) && (
                               <div className="p-4 bg-gradient-to-r from-indigo-900/30 to-purple-900/30 border border-indigo-600/50 rounded-lg">
                                 <h4 className={`font-medium text-indigo-300 mb-3 ${isComparisonArabic ? 'text-right' : ''}`}>{t('analysis.comparison.strategicMatchupAnalysis', 'Strategic Matchup Analysis')}</h4>
-                                <p className={`text-gray-300 text-sm leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>
+                                <p className={`text-gray-600 text-sm leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>
                                   {parsedData.overallAnalysis?.recommendation || parsedData.headToHead?.reasoning || t('analysis.comparison.strategicAnalysisDescription', 'Strategic analysis considers technical skill matchups, recent form, and competitive experience to determine the most likely outcome.')}
                                 </p>
                               </div>

@@ -103,7 +103,7 @@ export function SwimmingCompetitiveHistory({
                 </div>
                 <span className="text-white font-bold">{isArabic ? 'الميداليات' : 'Medal Collection'}</span>
               </CardTitle>
-              <div className={`${isArabic ? 'text-right text-lg mt-2' : 'text-base'} text-gray-300`}>
+              <div className={`${isArabic ? 'text-right text-lg mt-2' : 'text-base'} text-gray-600`}>
                 {isArabic ? 'جميع الميداليات التي فاز بها الرياضي في المسابقات الدولية' : 'All medals won in international competitions'}
               </div>
             </CardHeader>
@@ -157,16 +157,16 @@ export function SwimmingCompetitiveHistory({
                           <TableCell className={`font-semibold ${isArabic ? 'text-right text-lg' : 'text-base'}`}>
                             <div className="flex items-center gap-3">
                               <span className={isArabic ? "text-4xl" : "text-3xl"}>{getMedalIcon(medal.medal_type)}</span>
-                              <span className="text-gray-100">{medal.medal_type}</span>
+                              <span className="text-foreground">{medal.medal_type}</span>
                             </div>
                           </TableCell>
-                          <TableCell className={`text-gray-100 font-medium ${isArabic ? 'text-right text-lg' : 'text-base'}`}>
+                          <TableCell className={`text-foreground font-medium ${isArabic ? 'text-right text-lg' : 'text-base'}`}>
                             {medal.event}
                           </TableCell>
-                          <TableCell className={`text-gray-200 ${isArabic ? 'text-right text-lg' : 'text-base'}`}>
+                          <TableCell className={`text-foreground ${isArabic ? 'text-right text-lg' : 'text-base'}`}>
                             {medal.country}
                           </TableCell>
-                          <TableCell className={`text-gray-300 ${isArabic ? 'text-right text-lg' : 'text-base'}`}>
+                          <TableCell className={`text-gray-600 ${isArabic ? 'text-right text-lg' : 'text-base'}`}>
                             {displayDate}
                           </TableCell>
                         </TableRow>
@@ -179,7 +179,7 @@ export function SwimmingCompetitiveHistory({
           </Card>
         ) : (
           <div className="p-8 text-center">
-            <p className={`text-gray-400 ${isArabic ? 'text-xl' : 'text-lg'}`}>
+            <p className={`text-muted-foreground ${isArabic ? 'text-xl' : 'text-lg'}`}>
               {isArabic ? 'لا توجد بيانات ميداليات متاحة' : 'No medals data available'}
             </p>
           </div>
@@ -203,7 +203,7 @@ export function SwimmingCompetitiveHistory({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className={`text-gray-200 leading-relaxed ${isArabic ? 'text-right text-xl' : 'text-base'}`}>
+                <p className={`text-foreground leading-relaxed ${isArabic ? 'text-right text-xl' : 'text-base'}`}>
                   {careerOverview}
                 </p>
               </CardContent>
@@ -229,7 +229,7 @@ export function SwimmingCompetitiveHistory({
                       <Badge className={`bg-gradient-to-r from-purple-500 to-purple-700 text-white mb-3 ${isArabic ? 'text-lg px-4 py-1.5' : 'text-sm px-3 py-1'}`}>
                         {period.period}
                       </Badge>
-                      <p className={`text-gray-200 mb-4 leading-relaxed ${isArabic ? 'text-right text-xl' : 'text-base'}`}>
+                      <p className={`text-foreground mb-4 leading-relaxed ${isArabic ? 'text-right text-xl' : 'text-base'}`}>
                         {period.description}
                       </p>
                       {period.key_results && period.key_results.length > 0 && (
@@ -242,7 +242,7 @@ export function SwimmingCompetitiveHistory({
                               <div className="p-1 bg-green-500/20 rounded-md mt-0.5">
                                 <Trophy className="w-5 h-5 text-green-400 flex-shrink-0" />
                               </div>
-                              <span className={`text-gray-200 ${isArabic ? 'text-right text-lg' : 'text-sm'}`}>{result}</span>
+                              <span className={`text-foreground ${isArabic ? 'text-right text-lg' : 'text-sm'}`}>{result}</span>
                             </div>
                           ))}
                         </div>
@@ -264,7 +264,7 @@ export function SwimmingCompetitiveHistory({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className={`text-gray-200 leading-relaxed ${isArabic ? 'text-right text-xl' : 'text-base'}`}>
+                <p className={`text-foreground leading-relaxed ${isArabic ? 'text-right text-xl' : 'text-base'}`}>
                   {progressionPatterns}
                 </p>
               </CardContent>
@@ -281,7 +281,7 @@ export function SwimmingCompetitiveHistory({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className={`text-gray-200 leading-relaxed ${isArabic ? 'text-right text-xl' : 'text-base'}`}>
+                <p className={`text-foreground leading-relaxed ${isArabic ? 'text-right text-xl' : 'text-base'}`}>
                   {recentForm}
                 </p>
               </CardContent>
@@ -393,8 +393,8 @@ export function SwimmingCompetitiveHistory({
 
                               {/* Competition Tier - Translate and align for Arabic */}
                               <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
-                                <Award className="w-4 h-4 text-gray-400" />
-                                <span className={`text-gray-300 ${isArabic ? 'text-lg' : 'text-sm'}`}>
+                                <Award className="w-4 h-4 text-muted-foreground" />
+                                <span className={`text-gray-600 ${isArabic ? 'text-lg' : 'text-sm'}`}>
                                   {isArabic && achievement.event_tier?.toLowerCase().includes('national') 
                                     ? 'مسابقة وطنية' 
                                     : achievement.event_tier}
@@ -442,7 +442,7 @@ export function SwimmingCompetitiveHistory({
                           {/* Notes */}
                           {achievement.notes && achievement.notes !== 'DNS' && (
                             <div className="pt-3 border-t border-slate-600/50">
-                              <p className={`text-gray-300 leading-relaxed ${isArabic ? 'text-right text-lg' : 'text-base'}`}>
+                              <p className={`text-gray-600 leading-relaxed ${isArabic ? 'text-right text-lg' : 'text-base'}`}>
                                 {achievement.notes}
                               </p>
                             </div>

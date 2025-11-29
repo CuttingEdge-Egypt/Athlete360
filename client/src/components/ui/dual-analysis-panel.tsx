@@ -1264,7 +1264,7 @@ export function DualAnalysisPanel({
         onValueChange={(value) => setActiveYearTab(value)}
         className="w-full"
       >
-        <TabsList className="bg-athlete-gray-700 mb-6">
+        <TabsList className="bg-muted mb-6">
           {availableYears.map(year => (
             <TabsTrigger
               key={year}
@@ -1308,9 +1308,9 @@ export function DualAnalysisPanel({
       <div className="space-y-6">
         {/* Competition Results from API Data for this year */}
         {yearCompetitions && yearCompetitions.length > 0 && (
-          <Card className="bg-athlete-gray-800 border-gray-600">
+          <Card className="bg-card border">
             <CardHeader>
-              <CardTitle className={`text-2xl text-gray-100 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <CardTitle className={`text-2xl text-foreground flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
                 <Calendar className={`${isArabic ? 'ml-3' : 'mr-3'} text-blue-400`} size={24} />
                 {isArabic ? `${t('competitiveHistory.yearTitle')} ${year}` : `${year} ${t('competitiveHistory.yearTitle')}`}
               </CardTitle>
@@ -1354,7 +1354,7 @@ export function DualAnalysisPanel({
                     }
 
                     return (
-                      <div key={index} className={`p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-blue-500/50 transition-colors ${isArabic ? 'text-right' : ''}`}>
+                      <div key={index} className={`p-4 bg-muted rounded-lg border border hover:border-blue-500/50 transition-colors ${isArabic ? 'text-right' : ''}`}>
                         <div className={`flex items-start justify-between mb-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                           <div className="flex-1">
                             {/* Date Badge - More prominent */}
@@ -1430,9 +1430,9 @@ export function DualAnalysisPanel({
                               {comp.ranking && comp.ranking !== 'N/A' && (
                                 <div className="text-gray-400">
                                   {isArabic ? (
-                                    <><span className="text-gray-300">{comp.ranking}</span> :{t('competitiveHistory.category').replace(':', '')}</>
+                                    <><span className="text-muted-foreground">{comp.ranking}</span> :{t('competitiveHistory.category').replace(':', '')}</>
                                   ) : (
-                                    <>{t('competitiveHistory.category')} <span className="text-gray-300">{comp.ranking}</span></>
+                                    <>{t('competitiveHistory.category')} <span className="text-muted-foreground">{comp.ranking}</span></>
                                   )}
                                 </div>
                               )}
@@ -1452,9 +1452,9 @@ export function DualAnalysisPanel({
 
         {/* Career Phases Timeline */}
         {careerPhases && careerPhases.length > 0 && (
-          <Card className="bg-athlete-gray-800 border-gray-600">
+          <Card className="bg-card border">
             <CardHeader>
-              <CardTitle className={`text-2xl text-gray-100 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <CardTitle className={`text-2xl text-foreground flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
                 <Trophy className={`${isArabic ? 'ml-3' : 'mr-3'} text-blue-400`} size={24} />
                 {t('competitiveHistory.careerPhases', 'Career Phases')}
               </CardTitle>
@@ -1498,7 +1498,7 @@ export function DualAnalysisPanel({
                                   }
                                   
                                   return (
-                                    <div key={achievementIndex} className={`p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-blue-500/50 transition-colors ${isArabic ? 'text-right' : ''}`}>
+                                    <div key={achievementIndex} className={`p-4 bg-muted rounded-lg border border hover:border-blue-500/50 transition-colors ${isArabic ? 'text-right' : ''}`}>
                                       <div className={`flex items-start justify-between mb-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                                         <div className="flex-1">
                                           {/* Date Badge */}
@@ -1553,7 +1553,7 @@ export function DualAnalysisPanel({
                                       </div>
                                       
                                       {achievement.notes && (
-                                        <p className={`text-sm text-gray-300 leading-relaxed ${isArabic ? 'text-right' : ''}`}>
+                                        <p className={`text-sm text-muted-foreground leading-relaxed ${isArabic ? 'text-right' : ''}`}>
                                           {achievement.notes}
                                         </p>
                                       )}
@@ -1589,7 +1589,7 @@ export function DualAnalysisPanel({
                     <Trophy className={`${isArabic ? 'ml-2' : 'mr-2'} text-yellow-400`} size={20} />
                     {t('competitiveHistory.careerOverview')}
                   </h3>
-                  <p className={`text-gray-300 leading-relaxed ${isArabic ? 'text-right' : ''}`}>{careerOverview}</p>
+                  <p className={`text-muted-foreground leading-relaxed ${isArabic ? 'text-right' : ''}`}>{careerOverview}</p>
                 </div>
               )}
               
@@ -1601,18 +1601,18 @@ export function DualAnalysisPanel({
                   </h3>
                   <div className="space-y-4">
                     {peakPerformancePeriods.map((period: any, index: number) => (
-                      <div key={index} className={`p-4 bg-athlete-gray-700 rounded-lg border border-purple-500/30 ${isArabic ? 'text-right' : ''}`}>
+                      <div key={index} className={`p-4 bg-muted rounded-lg border border-purple-500/30 ${isArabic ? 'text-right' : ''}`}>
                         <div className="flex items-center gap-2 mb-2 w-full">
                           <Badge className={`bg-purple-600 text-white ${isArabic ? 'ml-auto' : ''}`}>{period.period}</Badge>
                         </div>
-                        <p className={`text-gray-300 mb-3 ${isArabic ? 'text-right' : ''}`}>{period.description}</p>
+                        <p className={`text-muted-foreground mb-3 ${isArabic ? 'text-right' : ''}`}>{period.description}</p>
                         {period.key_results && period.key_results.length > 0 && (
                           <div className={`space-y-1 ${isArabic ? 'text-right' : ''}`}>
                             <p className={`text-sm font-semibold text-gray-400 mb-2 ${isArabic ? 'text-right' : ''}`}>{t('competitiveHistory.keyResults')}</p>
                             {period.key_results.map((result: string, idx: number) => (
                               <div key={idx} className="flex items-start gap-2">
                                 <Award className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                                <span className={`text-sm text-gray-300 ${isArabic ? 'text-right' : ''}`}>{result}</span>
+                                <span className={`text-sm text-muted-foreground ${isArabic ? 'text-right' : ''}`}>{result}</span>
                               </div>
                             ))}
                           </div>
@@ -1642,7 +1642,7 @@ export function DualAnalysisPanel({
       className={`w-full ${className}`}
       onValueChange={(value) => setActiveMainTab(value)}
     >
-      <TabsList className="grid w-full grid-cols-2 bg-athlete-gray-700">
+      <TabsList className="grid w-full grid-cols-2 bg-muted">
         <TabsTrigger 
           value="competitive"
           data-testid="tab-competitive-history"
