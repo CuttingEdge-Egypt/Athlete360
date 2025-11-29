@@ -1480,9 +1480,9 @@ export function DualAnalysisPanel({
                             <Badge className="bg-primary/90 text-white shadow-sm">{phase.period}</Badge>
                           </div>
                         </div>
-                        <div className={`p-5 space-y-3 ${isArabic ? 'text-right' : ''}`}>
+                        <div className={`p-5 ${isArabic ? 'text-right' : ''}`}>
                           {phase.key_achievements && phase.key_achievements.length > 0 && (
-                            <div className="space-y-3">
+                            <div className="divide-y divide-slate-200/80">
                               {phase.key_achievements
                                 .slice()
                                 .sort((a: any, b: any) => {
@@ -1498,22 +1498,22 @@ export function DualAnalysisPanel({
                                   }
                                   
                                   return (
-                                    <div key={achievementIndex} className={`p-4 bg-white/50 backdrop-blur-sm rounded-xl border border-white/60 hover:border-primary/20 hover:shadow-sm transition-all duration-200 ${isArabic ? 'text-right' : ''}`}>
-                                      <div className={`flex items-start justify-between mb-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                                    <div key={achievementIndex} className={`py-4 first:pt-0 last:pb-0 hover:bg-slate-50/50 transition-colors duration-150 ${isArabic ? 'text-right' : ''}`}>
+                                      <div className={`flex items-start justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
                                         <div className="flex-1">
                                           {/* Date Badge */}
-                                          <Badge variant="outline" className="bg-amber-50 border-amber-300 text-amber-700 text-sm mb-2 shadow-sm">
+                                          <Badge variant="outline" className="bg-amber-50 border-amber-300 text-amber-700 text-sm mb-1.5 shadow-sm">
                                             {achievementDate}
                                           </Badge>
                                           
                                           {/* Event Name */}
-                                          <div className="font-semibold text-foreground text-base mb-2">
+                                          <div className="font-semibold text-foreground text-base mb-1">
                                             {achievement.event_name}
                                           </div>
 
                                           {/* Event Type - PROMINENT for World Aquatics */}
                                           {achievement.event_type && (
-                                            <div className={`mb-2 ${isArabic ? 'text-right' : ''}`}>
+                                            <div className={`mb-1.5 ${isArabic ? 'text-right' : ''}`}>
                                               <div className="inline-flex items-center gap-2 bg-purple-50 px-3 py-1.5 rounded-lg border border-purple-200">
                                                 <span className="text-xs text-purple-500">{isArabic ? 'الحدث' : 'Event'}</span>
                                                 <span className="text-purple-700 font-bold text-sm">{achievement.event_type}</span>
@@ -1523,7 +1523,7 @@ export function DualAnalysisPanel({
 
                                           {/* Time Result - VERY PROMINENT for Swimming */}
                                           {achievement.time_result && (
-                                            <div className={`mb-2 ${isArabic ? 'text-right' : ''}`}>
+                                            <div className={`mb-1.5 ${isArabic ? 'text-right' : ''}`}>
                                               <div className="inline-flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-300">
                                                 <span className="text-sm text-amber-600">{isArabic ? 'الوقت' : 'Time'}</span>
                                                 <span className="text-amber-700 font-bold text-lg">{achievement.time_result}</span>
@@ -1531,13 +1531,13 @@ export function DualAnalysisPanel({
                                             </div>
                                           )}
 
-                                          <div className={`text-sm text-muted-foreground mb-2 ${isArabic ? 'text-right' : ''}`}>
+                                          <div className={`text-sm text-muted-foreground ${isArabic ? 'text-right' : ''}`}>
                                             {achievement.event_tier}
                                           </div>
 
                                           {/* Additional aquatics details */}
                                           {(achievement.pool_type || achievement.distance) && (
-                                            <div className={`flex items-center gap-3 text-xs flex-wrap ${isArabic ? 'flex-row-reverse' : ''}`}>
+                                            <div className={`flex items-center gap-3 text-xs flex-wrap mt-1.5 ${isArabic ? 'flex-row-reverse' : ''}`}>
                                               {achievement.pool_type && (
                                                 <span className="text-teal-600">Pool: {achievement.pool_type}</span>
                                               )}
@@ -1553,7 +1553,7 @@ export function DualAnalysisPanel({
                                       </div>
                                       
                                       {achievement.notes && (
-                                        <p className={`text-sm text-muted-foreground leading-relaxed ${isArabic ? 'text-right' : ''}`}>
+                                        <p className={`text-sm text-muted-foreground leading-relaxed mt-2 ${isArabic ? 'text-right' : ''}`}>
                                           {achievement.notes}
                                         </p>
                                       )}

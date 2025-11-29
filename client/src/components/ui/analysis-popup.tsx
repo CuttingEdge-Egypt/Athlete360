@@ -831,10 +831,10 @@ export function AnalysisPopup({
                             </div>
                           )}
                         </div>
-                        <div className={`p-5 space-y-3 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
+                        <div className={`p-5 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                           {/* Key Achievements */}
                           {phase.key_achievements && phase.key_achievements.length > 0 && (
-                            <div className="space-y-3">
+                            <div className="divide-y divide-slate-200/80">
                               {phase.key_achievements
                                 .slice()
                                 .sort((a: any, b: any) => {
@@ -900,16 +900,16 @@ export function AnalysisPopup({
                                   };
                                   
                                   return (
-                                    <div key={achievementIndex} className="p-4 bg-white/50 backdrop-blur-sm rounded-xl border border-white/60 hover:border-primary/20 hover:shadow-sm transition-all duration-200">
-                                      <div className={`flex items-start justify-between mb-2 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                                    <div key={achievementIndex} className="py-4 first:pt-0 last:pb-0 hover:bg-slate-50/50 transition-colors duration-150">
+                                      <div className={`flex items-start justify-between ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
                                         <div className="flex-1">
-                                          <div className={`flex ${i18n.language === 'ar' ? 'flex-row-reverse justify-end gap-2' : 'flex-row gap-3'} items-center mb-2`}>
+                                          <div className={`flex ${i18n.language === 'ar' ? 'flex-row-reverse justify-end gap-2' : 'flex-row gap-3'} items-center mb-1.5`}>
                                             <Badge variant="outline" className="bg-amber-50 border-amber-300 text-amber-700 text-xs text-center shadow-sm">
                                               {translateMonth(achievement.month, achievement.year)}
                                             </Badge>
                                             <span className={`font-semibold text-foreground ${i18n.language === 'ar' ? 'text-right' : ''}`}>{achievement.event_name}</span>
                                           </div>
-                                          <div className={`text-sm text-muted-foreground mb-2 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
+                                          <div className={`text-sm text-muted-foreground ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                                             {achievement.event_tier}
                                           </div>
                                         </div>
@@ -920,7 +920,7 @@ export function AnalysisPopup({
                                       
                                       {achievement.notes && 
                                        !["simply compete result", "taekwondodata", "taekwondodata result"].includes(achievement.notes.toLowerCase().trim()) && (
-                                        <p className={`text-sm text-muted-foreground leading-relaxed ${i18n.language === 'ar' ? 'text-right' : ''}`}>
+                                        <p className={`text-sm text-muted-foreground leading-relaxed mt-2 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                                           {achievement.notes}
                                         </p>
                                       )}
