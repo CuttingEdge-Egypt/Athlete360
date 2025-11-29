@@ -156,7 +156,7 @@ export default function Landing() {
                     data-testid="button-preview-bio"
                     variant="outline" 
                     size="sm" 
-                    className="w-full border-blue-400/50 text-blue-400 hover:bg-blue-400/10 mt-auto"
+                    className="w-full border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white hover:border-blue-500 mt-auto transition-colors"
                   >
                     <HelpCircle className="mr-2" size={14} />
                     {t('actions.preview')}
@@ -177,7 +177,7 @@ export default function Landing() {
                     data-testid="button-preview-rank"
                     variant="outline" 
                     size="sm" 
-                    className="w-full border-yellow-400/50 text-yellow-400 hover:bg-yellow-400/10 mt-auto"
+                    className="w-full border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white hover:border-amber-500 mt-auto transition-colors"
                   >
                     <HelpCircle className="mr-2" size={14} />
                     {t('actions.preview')}
@@ -198,7 +198,7 @@ export default function Landing() {
                     data-testid="button-preview-strengths"
                     variant="outline" 
                     size="sm" 
-                    className="w-full border-green-400/50 text-green-400 hover:bg-green-400/10 mt-auto"
+                    className="w-full border-green-500 text-green-600 hover:bg-green-500 hover:text-white hover:border-green-500 mt-auto transition-colors"
                   >
                     <HelpCircle className="mr-2" size={14} />
                     {t('actions.preview')}
@@ -219,7 +219,7 @@ export default function Landing() {
                     data-testid="button-preview-weaknesses"
                     variant="outline" 
                     size="sm" 
-                    className="w-full border-red-400/50 text-red-400 hover:bg-red-400/10 mt-auto"
+                    className="w-full border-red-500 text-red-600 hover:bg-red-500 hover:text-white hover:border-red-500 mt-auto transition-colors"
                   >
                     <HelpCircle className="mr-2" size={14} />
                     {t('actions.preview')}
@@ -242,7 +242,7 @@ export default function Landing() {
                     data-testid="button-preview-beat"
                     variant="outline" 
                     size="sm" 
-                    className="w-full border-purple-400/50 text-purple-400 hover:bg-purple-400/10 mt-auto"
+                    className="w-full border-purple-500 text-purple-600 hover:bg-purple-500 hover:text-white hover:border-purple-500 mt-auto transition-colors"
                   >
                     <HelpCircle className="mr-2" size={14} />
                     {t('actions.preview')}
@@ -263,7 +263,7 @@ export default function Landing() {
                     data-testid="button-preview-development"
                     variant="outline" 
                     size="sm" 
-                    className="w-full border-blue-400/50 text-blue-400 hover:bg-blue-400/10 mt-auto"
+                    className="w-full border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white hover:border-blue-500 mt-auto transition-colors"
                   >
                     <HelpCircle className="mr-2" size={14} />
                     {t('actions.preview')}
@@ -284,7 +284,7 @@ export default function Landing() {
                     data-testid="button-preview-nutrition"
                     variant="outline" 
                     size="sm" 
-                    className="w-full border-green-400/50 text-green-400 hover:bg-green-400/10 mt-auto"
+                    className="w-full border-green-500 text-green-600 hover:bg-green-500 hover:text-white hover:border-green-500 mt-auto transition-colors"
                   >
                     <HelpCircle className="mr-2" size={14} />
                     {t('actions.preview')}
@@ -310,7 +310,7 @@ export default function Landing() {
                         data-testid="button-preview-video"
                         variant="outline" 
                         size="sm" 
-                        className="border-orange-400/50 text-orange-400 hover:bg-orange-400/10 h-9 px-4"
+                        className="border-orange-500 text-orange-600 hover:bg-orange-500 hover:text-white hover:border-orange-500 h-9 px-4 transition-colors"
                       >
                         <HelpCircle className="mr-2" size={14} />
                         {t('actions.preview')}
@@ -333,7 +333,7 @@ export default function Landing() {
                         data-testid="button-preview-comparison"
                         variant="outline" 
                         size="sm" 
-                        className="border-purple-400/50 text-purple-400 hover:bg-purple-400/10 h-9 px-4"
+                        className="border-purple-500 text-purple-600 hover:bg-purple-500 hover:text-white hover:border-purple-500 h-9 px-4 transition-colors"
                       >
                         <HelpCircle className="mr-2" size={14} />
                         {t('actions.preview')}
