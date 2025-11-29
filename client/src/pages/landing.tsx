@@ -302,7 +302,7 @@ export default function Landing() {
                       <Video className="text-4xl text-orange-400" size={48} />
                     </div>
                     <h3 className="text-2xl font-semibold mb-3 text-foreground">{t('services.videoAnalysis.title', 'Video Analysis')}</h3>
-                    <p className="text-gray-300 mb-4 flex-grow">{t('services.videoAnalysis.description', 'Frame-by-frame performance breakdown with AI-powered insights')}</p>
+                    <p className="text-gray-600 mb-4 flex-grow">{t('services.videoAnalysis.description', 'Frame-by-frame performance breakdown with AI-powered insights')}</p>
                     <div className="flex items-center justify-center gap-4 mb-4 mt-auto">
                       <span className="bg-orange-500 text-white text-sm px-4 rounded-full font-semibold inline-flex items-center justify-center h-9">120 {t('units.tokens', { ns: 'common' })}</span>
                       <Button 
@@ -325,7 +325,7 @@ export default function Landing() {
                       <Users className="text-4xl text-purple-400" size={48} />
                     </div>
                     <h3 className="text-2xl font-semibold mb-3 text-foreground">{t('services.athleteComparison.title', 'Compare Athletes')}</h3>
-                    <p className="text-gray-300 mb-4 flex-grow">{t('services.athleteComparison.description', 'Head-to-head analysis comparing any two athletes across all performance metrics')}</p>
+                    <p className="text-gray-600 mb-4 flex-grow">{t('services.athleteComparison.description', 'Head-to-head analysis comparing any two athletes across all performance metrics')}</p>
                     <div className="flex items-center justify-center gap-4 mb-4 mt-auto">
                       <span className="bg-purple-500 text-white text-sm px-4 rounded-full font-semibold inline-flex items-center justify-center h-9">150 {t('units.tokens', { ns: 'common' })}</span>
                       <Button 
