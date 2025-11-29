@@ -699,7 +699,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
             </CardTitle>
           </div>
           <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
-            <Badge variant="secondary" className="bg-blue-600/20 text-blue-300 border-blue-500/30 text-xs font-medium md:mx-0 mx-auto">
+            <Badge variant="secondary" className="bg-blue-600/20 text-blue-300 border-blue-300 text-xs font-medium md:mx-0 mx-auto">
               {t('home:services.athleteComparison.tokenCost')}
             </Badge>
             {showForm && (
@@ -1519,7 +1519,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                     </div>
 
                     <div className="text-center">
-                      <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3 overflow-hidden border-2 border-purple-500/50">
+                      <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3 overflow-hidden border-2 border-purple-300">
                         {parsedData.athlete2?.profileImageUrl ? (
                           <img 
                             src={parsedData.athlete2.profileImageUrl} 
@@ -1654,7 +1654,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       </Card>
 
                       {/* Final Predicted Winner */}
-                      <Card className="bg-gradient-to-r from-indigo-900/30 to-purple-900/30 border-purple-600">
+                      <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-purple-600">
                         <CardContent className="p-6 text-center">
                           <Target className="h-12 w-12 text-purple-400 mx-auto mb-3" />
                           <div className="text-sm text-muted-foreground mb-2">{t('analysis.comparison.finalPredictedWinner', 'Final Predicted Winner')}</div>
@@ -1890,7 +1890,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                     shadow: isBlue ? 'shadow-blue-500/50' : 'shadow-green-500/50',
                                     text: isBlue ? 'text-blue-200' : 'text-green-200',
                                     barGradient: isBlue ? 'from-blue-400 via-blue-500 to-blue-600' : 'from-green-400 via-green-500 to-green-600',
-                                    hoverShadow: isBlue ? 'hover:shadow-blue-500/10 hover:border-blue-500/30' : 'hover:shadow-green-500/10 hover:border-green-500/30',
+                                    hoverShadow: isBlue ? 'hover:shadow-blue-500/10 hover:border-blue-300' : 'hover:shadow-green-500/10 hover:border-green-500/30',
                                     hoverBorder: isBlue ? 'hover:border-blue-400/40' : 'hover:border-green-400/40',
                                     iconColor: isBlue ? 'text-blue-400' : 'text-green-400',
                                     textLight: isBlue ? 'text-blue-400/70' : 'text-green-400/70'
@@ -1978,7 +1978,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                                               </div>
                                                             )}
                                                             {comp.category && (
-                                                              <span className="inline-flex items-center px-2.5 py-1 bg-gradient-to-r from-purple-600/50 to-pink-600/50 border border-purple-400/30 text-purple-200 rounded-full text-xs font-medium shadow-sm">
+                                                              <span className="inline-flex items-center px-2.5 py-1 bg-gradient-to-r from-purple-100 to-pink-100 border border-purple-300 text-purple-700 rounded-full text-xs font-medium shadow-sm">
                                                                 {comp.category}
                                                               </span>
                                                             )}
@@ -2027,7 +2027,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                                           <div className="font-semibold text-white text-sm mb-1 leading-snug">{achievement.result}</div>
                                                           <div className="text-gray-600 text-sm mb-2 leading-relaxed">{achievement.event_name}</div>
                                                           {achievement.event_tier && (
-                                                            <span className="inline-flex items-center px-2.5 py-1 bg-gradient-to-r from-purple-600/50 to-pink-600/50 border border-purple-400/30 text-purple-200 rounded-full text-xs font-medium shadow-sm">
+                                                            <span className="inline-flex items-center px-2.5 py-1 bg-gradient-to-r from-purple-100 to-pink-100 border border-purple-300 text-purple-700 rounded-full text-xs font-medium shadow-sm">
                                                               {achievement.event_tier}
                                                             </span>
                                                           )}
@@ -2070,12 +2070,12 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
                               {/* Competitive Edge Summary */}
                               {parsedData.ranking.competitiveEdge && (
-                                <div className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 border border-purple-600/30 rounded-xl p-5">
+                                <div className="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-300 rounded-xl p-5">
                                   <h5 className={`font-semibold text-purple-300 mb-4 ${isComparisonArabic ? 'text-right' : ''}`}>
                                     {t('analysis.comparison.competitiveEdge', 'Competitive Edge')}
                                   </h5>
                                   <div className="text-center">
-                                    <div className="text-xl font-bold text-purple-200">
+                                    <div className="text-xl font-bold text-purple-700">
                                       {parsedData.ranking.competitiveEdge === 'athlete1' ? parsedData.athlete1?.name :
                                        parsedData.ranking.competitiveEdge === 'athlete2' ? parsedData.athlete2?.name : t('analysis.comparison.evenCompetition', 'Even Competition')}
                                     </div>
@@ -2104,7 +2104,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                             <div className="text-center">
                               <h3 className="text-xl font-bold text-white mb-2">{t('analysis.comparison.headToHeadPrediction', 'Head-to-Head Prediction')}</h3>
                               {parsedData.headToHead?.prediction && parsedData.headToHead.prediction !== 'even' ? (
-                                <div className="bg-purple-900/30 border border-purple-600/50 rounded-lg p-4 mb-4">
+                                <div className="bg-purple-100 border border-purple-300 rounded-lg p-4 mb-4">
                                   <div className="text-2xl font-bold text-purple-300 mb-2">
                                     {t('analysis.comparison.predictedWinner', 'Predicted Winner')}: {parsedData.headToHead.prediction === 'athlete1' ? 
                                       parsedData.athlete1?.name : parsedData.athlete2?.name}
@@ -2224,7 +2224,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
                             {/* Strategic Analysis */}
                             {(parsedData.headToHead?.reasoning || parsedData.overallAnalysis?.recommendation) && (
-                              <div className="p-4 bg-gradient-to-r from-indigo-900/30 to-purple-900/30 border border-indigo-600/50 rounded-lg">
+                              <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-300 rounded-lg">
                                 <h4 className={`font-medium text-indigo-300 mb-3 ${isComparisonArabic ? 'text-right' : ''}`}>{t('analysis.comparison.strategicMatchupAnalysis', 'Strategic Matchup Analysis')}</h4>
                                 <p className={`text-gray-600 text-sm leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>
                                   {parsedData.overallAnalysis?.recommendation || parsedData.headToHead?.reasoning || t('analysis.comparison.strategicAnalysisDescription', 'Strategic analysis considers technical skill matchups, recent form, and competitive experience to determine the most likely outcome.')}

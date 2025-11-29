@@ -397,7 +397,7 @@ export function AnalysisPopup({
       <div className="space-y-6">
         {/* Header Section with Duration and Overview */}
         {parsedData.duration && (
-          <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-lg p-4 border border-purple-500/30">
+          <div className="bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg p-4 border border-purple-300">
             <div className="flex items-center gap-3 mb-2">
               <Calendar className="w-5 h-5 text-purple-400" />
               <h3 className="text-lg font-semibold text-foreground">{t("analysis.development.program", "Development Program")}</h3>
@@ -433,7 +433,7 @@ export function AnalysisPopup({
                     key={index} 
                     className={`relative ml-8 ${
                       isCurrentPhase 
-                        ? 'bg-gradient-to-br from-purple-900/50 to-blue-900/50 border-purple-500' 
+                        ? 'bg-gradient-to-br from-purple-50 to-blue-50 border-purple-500' 
                         : 'bg-muted border'
                     } hover:border-purple-400 transition-colors`}
                   >
@@ -460,7 +460,7 @@ export function AnalysisPopup({
                         )}
                       </div>
                       {item.description && (
-                        <p className="text-purple-200 bg-purple-900/30 p-3 rounded-lg italic border-l-4 border-purple-500">
+                        <p className="text-purple-700 bg-purple-100 p-3 rounded-lg italic border-l-4 border-purple-500">
                           {typeof item.description === 'string' ? item.description : JSON.stringify(item.description)}
                         </p>
                       )}
@@ -750,7 +750,7 @@ export function AnalysisPopup({
     return (
       <div className="space-y-8">
         {/* Athlete Header */}
-        <Card className="bg-gradient-to-r from-blue-900/50 to-purple-900/50 border-blue-500">
+        <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-500">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -772,7 +772,7 @@ export function AnalysisPopup({
 
         {/* Analysis Narrative */}
         {analysisNarrative && (
-          <Card className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 border-purple-500">
+          <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-500">
             <CardHeader>
               <CardTitle className="text-xl text-foreground flex items-center">
                 <Brain className="mr-3 text-purple-400" size={24} />
@@ -941,7 +941,7 @@ export function AnalysisPopup({
 
         {/* Gemini Professional Analysis */}
         {(careerOverview || peakPerformancePeriods?.length > 0 || notableAchievements?.length > 0 || recentForm) && (
-          <Card className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 border-purple-500">
+          <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-500">
             <CardHeader>
               <CardTitle className="text-2xl text-foreground flex items-center">
                 <Brain className="mr-3 text-purple-400" size={24} />
@@ -970,7 +970,7 @@ export function AnalysisPopup({
                   </h3>
                   <div className="space-y-4">
                     {peakPerformancePeriods.map((period: any, index: number) => (
-                      <div key={index} className="p-4 bg-muted rounded-lg border border-purple-500/30">
+                      <div key={index} className="p-4 bg-muted rounded-lg border border-purple-300">
                         <div className="flex items-center gap-2 mb-2">
                           <Badge className="bg-purple-600 text-white">{period.period}</Badge>
                         </div>
@@ -2345,7 +2345,7 @@ export function AnalysisPopup({
                           className={
                             isOlympic ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" :
                             isContinental ? "bg-green-500/20 text-green-400 border-green-500/30" :
-                            isNational ? "bg-blue-500/20 text-blue-400 border-blue-500/30" :
+                            isNational ? "bg-blue-500/20 text-blue-400 border-blue-300" :
                             isWorld ? "bg-orange-500/20 text-orange-400 border-orange-500/30" :
                             "bg-muted text-muted-foreground border"
                           }
@@ -2360,7 +2360,7 @@ export function AnalysisPopup({
               
               {/* Athlete 2 */}
               <div className="text-center">
-                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-3 overflow-hidden border-2 border-purple-500/50">
+                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-3 overflow-hidden border-2 border-purple-300">
                   {normalizedComparison.athlete2.profileImageUrl ? (
                     <img 
                       src={normalizedComparison.athlete2.profileImageUrl} 
@@ -2403,7 +2403,7 @@ export function AnalysisPopup({
                           className={
                             isOlympic ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" :
                             isContinental ? "bg-green-500/20 text-green-400 border-green-500/30" :
-                            isNational ? "bg-blue-500/20 text-blue-400 border-blue-500/30" :
+                            isNational ? "bg-blue-500/20 text-blue-400 border-blue-300" :
                             isWorld ? "bg-orange-500/20 text-orange-400 border-orange-500/30" :
                             "bg-muted text-muted-foreground border"
                           }

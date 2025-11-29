@@ -99,7 +99,7 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
         elements.push(
           <h2 key={`h2-${index}`} className={`font-extrabold mb-6 mt-12 pb-4 ${
             isArabic 
-              ? 'text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 text-[24px] border-b-2 border-purple-500/50' 
+              ? 'text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 text-[24px] border-b-2 border-purple-300' 
               : 'text-white text-2xl border-b-2 border-indigo-500'
           }`}>
             {trimmedLine.replace(/^##\s*/, '').replace(/\*\*/g, '')}
@@ -219,7 +219,7 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
       {/* Analysis Results */}
       <Card className={`border ${
         isArabic 
-          ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700/50' 
+          ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-200' 
           : 'bg-slate-50 border-slate-200'
       }`}>
         <CardHeader>
@@ -243,7 +243,7 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
           
           {/* Analysis Metadata */}
           <div className={`mt-6 pt-4 border-t ${
-            isArabic ? 'border-slate-700/50 text-right' : 'border-slate-200'
+            isArabic ? 'border-slate-200 text-right' : 'border-slate-200'
           }`}>
             <div className={`flex items-center gap-2 text-sm ${
               isArabic ? 'text-slate-400 flex-row-reverse' : 'text-muted-foreground'

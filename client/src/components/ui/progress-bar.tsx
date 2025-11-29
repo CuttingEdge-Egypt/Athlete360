@@ -54,7 +54,7 @@ export function ProgressBar({ isActive, currentPhase, onCancel, className = "" }
   if (!isActive) return null;
 
   return (
-    <div className={`bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-lg border border-purple-500/30 p-6 ${className}`} dir={isArabic ? 'rtl' : 'ltr'}>
+    <div className={`bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-300 p-6 ${className}`} dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="space-y-4">
         {/* Header with cancel button */}
         <div className="flex items-center justify-between">

@@ -92,7 +92,7 @@ export function SquashCompetitiveHistory({ competitiveHistory, language }: Props
     <div className="space-y-6">
       {/* Career Stats Card */}
       {career_stats && (
-        <Card className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 border-2 border-cyan-500/30 shadow-2xl">
+        <Card className="bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-cyan-500/30 shadow-2xl">
           <CardHeader>
             <CardTitle className={`flex items-center gap-3 ${isArabic ? 'text-3xl flex-row-reverse' : 'text-xl'}`}>
               <Trophy className="w-8 h-8 text-yellow-400" />
@@ -135,7 +135,7 @@ export function SquashCompetitiveHistory({ competitiveHistory, language }: Props
 
       {/* Ranking Points Table */}
       {ranking_points && ranking_points.length > 0 && (
-        <Card className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 border-2 border-purple-500/30 shadow-2xl">
+        <Card className="bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-purple-300 shadow-2xl">
           <CardHeader>
             <CardTitle className={`flex items-center gap-3 ${isArabic ? 'text-3xl flex-row-reverse' : 'text-xl'}`}>
               <Trophy className="w-8 h-8 text-purple-400" />
@@ -148,7 +148,7 @@ export function SquashCompetitiveHistory({ competitiveHistory, language }: Props
             <div className="overflow-x-auto">
               <table className={`w-full ${isArabic ? 'text-right' : 'text-left'}`}>
                 <thead>
-                  <tr className="border-b-2 border-purple-500/50">
+                  <tr className="border-b-2 border-purple-300">
                     <th className={`pb-3 ${isArabic ? 'text-xl pr-4' : 'text-sm font-semibold pl-4'} text-purple-300`}>
                       {isArabic ? 'البطولة' : 'Tournament'}
                     </th>
@@ -167,7 +167,7 @@ export function SquashCompetitiveHistory({ competitiveHistory, language }: Props
                   {ranking_points.map((rp, index) => (
                     <tr 
                       key={index} 
-                      className="border-b border-slate-700/50 hover:bg-purple-500/10 transition-colors"
+                      className="border-b border-slate-200 hover:bg-purple-100 transition-colors"
                       data-testid={`ranking-point-${index}`}
                     >
                       <td className={`py-4 ${isArabic ? 'text-lg pr-4' : 'text-base pl-4'} text-foreground`}>
@@ -197,7 +197,7 @@ export function SquashCompetitiveHistory({ competitiveHistory, language }: Props
 
       {/* Recent Results Timeline */}
       {recent_results && recent_results.length > 0 && (
-        <Card className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 border-2 border-cyan-500/30 shadow-2xl">
+        <Card className="bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-cyan-500/30 shadow-2xl">
           <CardHeader>
             <CardTitle className={`flex items-center gap-3 ${isArabic ? 'text-3xl flex-row-reverse' : 'text-xl'}`}>
               <Calendar className="w-8 h-8 text-cyan-400" />

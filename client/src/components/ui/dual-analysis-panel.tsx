@@ -1370,7 +1370,7 @@ export function DualAnalysisPanel({
                             {/* Event Type - PROMINENT for World Aquatics */}
                             {comp.event_type && (
                               <div className={`mb-3 ${isArabic ? 'text-right' : ''}`}>
-                                <div className="inline-flex items-center gap-2 bg-purple-500/20 px-3 py-1.5 rounded-lg border border-purple-500/40">
+                                <div className="inline-flex items-center gap-2 bg-purple-500/20 px-3 py-1.5 rounded-lg border border-purple-300">
                                   <span className="text-xs text-purple-300">{isArabic ? 'الحدث' : 'Event'}</span>
                                   <span className="text-purple-400 font-bold text-base">{comp.event_type}</span>
                                 </div>
@@ -1514,7 +1514,7 @@ export function DualAnalysisPanel({
                                           {/* Event Type - PROMINENT for World Aquatics */}
                                           {achievement.event_type && (
                                             <div className={`mb-2 ${isArabic ? 'text-right' : ''}`}>
-                                              <div className="inline-flex items-center gap-2 bg-purple-500/20 px-3 py-1.5 rounded-lg border border-purple-500/40">
+                                              <div className="inline-flex items-center gap-2 bg-purple-500/20 px-3 py-1.5 rounded-lg border border-purple-300">
                                                 <span className="text-xs text-purple-300">{isArabic ? 'الحدث' : 'Event'}</span>
                                                 <span className="text-purple-400 font-bold text-sm">{achievement.event_type}</span>
                                               </div>
@@ -1574,7 +1574,7 @@ export function DualAnalysisPanel({
 
         {/* Competitive History Analysis - Overall insights for now */}
         {(careerOverview || peakPerformancePeriods?.length > 0 || notableAchievements?.length > 0 || recentForm) && (
-          <Card className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 border-purple-500">
+          <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-500">
             <CardHeader>
               <CardTitle className={`text-2xl text-white flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
                 <Calendar className={`${isArabic ? 'ml-3' : 'mr-3'} text-purple-400`} size={24} />
@@ -1601,7 +1601,7 @@ export function DualAnalysisPanel({
                   </h3>
                   <div className="space-y-4">
                     {peakPerformancePeriods.map((period: any, index: number) => (
-                      <div key={index} className={`p-4 bg-muted rounded-lg border border-purple-500/30 ${isArabic ? 'text-right' : ''}`}>
+                      <div key={index} className={`p-4 bg-muted rounded-lg border border-purple-300 ${isArabic ? 'text-right' : ''}`}>
                         <div className="flex items-center gap-2 mb-2 w-full">
                           <Badge className={`bg-purple-600 text-white ${isArabic ? 'ml-auto' : ''}`}>{period.period}</Badge>
                         </div>

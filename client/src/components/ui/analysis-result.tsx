@@ -974,7 +974,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
 
         {/* Personal Information Section */}
         {(age || dateOfBirth || height || position || educationalBackground) && (
-          <Card className="bg-gradient-to-r from-blue-900/40 to-purple-900/40 border border-blue-500/30 shadow-2xl">
+          <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-300 shadow-2xl">
             <CardHeader className="pb-4">
               <CardTitle className="text-2xl text-blue-300 flex items-center gap-3">
                 <User className="w-6 h-6" />
@@ -1767,7 +1767,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
       <div className="space-y-6">
         {/* Header Section with Duration and Overview */}
         {data.duration && (
-          <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-lg p-4 border border-purple-500/30">
+          <div className="bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg p-4 border border-purple-300">
             <div className="flex items-center gap-3 mb-2">
               <Calendar className="w-5 h-5 text-purple-400" />
               <h3 className="text-lg font-semibold text-white">Development Program</h3>
@@ -1801,7 +1801,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                     key={index} 
                     className={`relative ml-8 ${
                       isCurrentPhase 
-                        ? 'bg-gradient-to-br from-purple-900/50 to-blue-900/50 border-purple-500' 
+                        ? 'bg-gradient-to-br from-purple-50 to-blue-50 border-purple-500' 
                         : 'bg-slate-100 border-slate-200'
                     } hover:border-purple-400 transition-colors`}
                   >
@@ -1828,7 +1828,7 @@ export function AnalysisResult({ type, data, createdAt, shared, shareUrl, athlet
                         )}
                       </div>
                       {item.description && (
-                        <p className="text-purple-200 bg-purple-900/30 p-3 rounded-lg italic border-l-4 border-purple-500">
+                        <p className="text-purple-700 bg-purple-100 p-3 rounded-lg italic border-l-4 border-purple-500">
                           {item.description}
                         </p>
                       )}

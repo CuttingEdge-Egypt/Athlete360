@@ -195,7 +195,7 @@ export function SwimmingCompetitiveHistory({
         <div className="space-y-6">
           {/* Career Overview */}
           {careerOverview && (
-            <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-2 border-blue-500/30 shadow-xl">
+            <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-2 border-blue-300 shadow-xl">
               <CardHeader>
                 <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl text-right justify-end' : 'text-lg'} text-white`}>
                   <Award className={`text-blue-400 ${isArabic ? 'ml-0' : ''}`} size={isArabic ? 32 : 24} />
@@ -212,7 +212,7 @@ export function SwimmingCompetitiveHistory({
 
           {/* Peak Performance Periods */}
           {peakPerformancePeriods.length > 0 && (
-            <Card className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 border-2 border-purple-500/40 shadow-xl">
+            <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-300 shadow-xl">
               <CardHeader>
                 <CardTitle className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-3xl text-right justify-end' : 'text-lg'} text-white`}>
                   <Trophy className="text-purple-400" size={isArabic ? 32 : 24} />
@@ -224,7 +224,7 @@ export function SwimmingCompetitiveHistory({
                   {peakPerformancePeriods.map((period: any, index: number) => (
                     <div 
                       key={index} 
-                      className="p-5 bg-gradient-to-r from-purple-900/40 to-purple-800/30 rounded-xl border-2 border-purple-500/40 shadow-lg hover:border-purple-400/60 transition-all duration-300"
+                      className="p-5 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl border-2 border-purple-300 shadow-lg hover:border-purple-400/60 transition-all duration-300"
                     >
                       <Badge className={`bg-gradient-to-r from-purple-500 to-purple-700 text-white mb-3 ${isArabic ? 'text-lg px-4 py-1.5' : 'text-sm px-3 py-1'}`}>
                         {period.period}
@@ -385,7 +385,7 @@ export function SwimmingCompetitiveHistory({
 
                               {/* Event Type */}
                               {achievement.event_type && (
-                                <div className={`inline-flex items-center gap-2 bg-gradient-to-r from-purple-500/20 to-purple-600/20 px-4 py-2 rounded-lg border-2 border-purple-500/50 ${isArabic ? 'text-lg ml-auto' : 'text-sm'}`}>
+                                <div className={`inline-flex items-center gap-2 bg-gradient-to-r from-purple-100 to-purple-200 px-4 py-2 rounded-lg border-2 border-purple-300 ${isArabic ? 'text-lg ml-auto' : 'text-sm'}`}>
                                   <Waves className="w-5 h-5 text-purple-400" />
                                   <span className="text-purple-300 font-semibold">{achievement.event_type}</span>
                                 </div>
