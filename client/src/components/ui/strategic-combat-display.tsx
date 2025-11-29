@@ -68,10 +68,10 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
   const getRiskColor = (risk: string) => {
     const level = normalizeRiskLevel(risk);
     switch (level) {
-      case 'low': return 'bg-green-500/20 text-green-400 border-green-500/30';
-      case 'medium': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-      case 'high': return 'bg-red-500/20 text-red-400 border-red-500/30';
-      default: return 'bg-gray-500/20 text-muted-foreground border-gray-500/30';
+      case 'low': return 'bg-green-100 text-green-700 border-green-300';
+      case 'medium': return 'bg-amber-100 text-amber-700 border-amber-300';
+      case 'high': return 'bg-red-100 text-red-700 border-red-300';
+      default: return 'bg-slate-100 text-slate-600 border-slate-300';
     }
   };
 
@@ -91,10 +91,10 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
   const getSuccessColor = (probability: string) => {
     const level = normalizeSuccessLevel(probability);
     switch (level) {
-      case 'high': return 'text-green-400';
-      case 'medium': return 'text-yellow-400';
-      case 'low': return 'text-red-400';
-      default: return 'text-muted-foreground';
+      case 'high': return 'text-green-600 font-bold';
+      case 'medium': return 'text-amber-600 font-bold';
+      case 'low': return 'text-red-600 font-bold';
+      default: return 'text-slate-600';
     }
   };
 
@@ -132,9 +132,9 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center space-y-2 mb-8">
-        <div className="flex items-center justify-center space-x-2 text-red-400">
+        <div className="flex items-center justify-center space-x-2 text-primary">
           <Target size={24} />
-          <h2 className="text-2xl font-bold">{t("analysis.combat.strategiesTitle", "Combat Strategies")}</h2>
+          <h2 className="text-2xl font-bold text-foreground">{t("analysis.combat.strategiesTitle", "Combat Strategies")}</h2>
         </div>
         <p className="text-muted-foreground">
           {t("analysis.combat.tacticalAnalysis", "Advanced tactical analysis with {{count}} strategic approaches", { count: data.strategies.length })}
@@ -146,15 +146,15 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
         {data.strategies.map((strategy, index) => (
           <Card 
             key={index} 
-            className="bg-slate-50 border-slate-200 hover:border-red-500/30 transition-all duration-300"
+            className="bg-white/60 backdrop-blur-sm border-slate-200 hover:border-primary/30 hover:shadow-md transition-all duration-300"
             data-testid={`strategy-card-${index}`}
           >
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <CardTitle className="text-white text-lg font-semibold mb-2 flex items-center">
-                    <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center mr-3">
-                      <span className="text-red-400 font-bold text-sm">{index + 1}</span>
+                  <CardTitle className="text-foreground text-lg font-semibold mb-2 flex items-center">
+                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mr-3 shadow-sm">
+                      <span className="text-primary font-bold text-sm">{index + 1}</span>
                     </div>
                     {strategy.strategy}
                   </CardTitle>
@@ -180,11 +180,11 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
             <CardContent className="space-y-4">
               {/* Strategy Description */}
               <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-gray-600 flex items-center">
-                  <Brain className="w-4 h-4 mr-2 text-blue-400" />
+                <h4 className="text-sm font-semibold text-slate-700 flex items-center">
+                  <Brain className="w-4 h-4 mr-2 text-blue-500" />
                   {t("analysis.combat.strategicOverview", "Strategic Overview")}
                 </h4>
-                <p className="text-gray-600 leading-relaxed text-sm bg-background/50 p-3 rounded-md">
+                <p className="text-slate-600 leading-relaxed text-sm bg-slate-50 p-4 rounded-lg border border-slate-100">
                   {strategy.description}
                 </p>
               </div>
@@ -193,11 +193,11 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
 
               {/* Execution Details */}
               <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-gray-600 flex items-center">
-                  <Zap className="w-4 h-4 mr-2 text-yellow-400" />
+                <h4 className="text-sm font-semibold text-slate-700 flex items-center">
+                  <Zap className="w-4 h-4 mr-2 text-amber-500" />
                   {t("analysis.combat.executionPlan", "Execution Plan")}
                 </h4>
-                <p className="text-gray-600 leading-relaxed text-sm bg-background/50 p-3 rounded-md">
+                <p className="text-slate-600 leading-relaxed text-sm bg-slate-50 p-4 rounded-lg border border-slate-100">
                   {strategy.execution}
                 </p>
               </div>
@@ -207,12 +207,12 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
               {/* Success Probability */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-gray-600 flex items-center">
-                    <TrendingUp className="w-4 h-4 mr-2 text-green-400" />
+                  <h4 className="text-sm font-semibold text-slate-700 flex items-center">
+                    <TrendingUp className="w-4 h-4 mr-2 text-green-500" />
                     {t("analysis.combat.successProbability", "Success Probability")}
                   </h4>
                   <span 
-                    className={`text-sm font-semibold ${getSuccessColor(strategy.success_probability)}`}
+                    className={`text-sm ${getSuccessColor(strategy.success_probability)}`}
                     data-testid={`success-probability-${index}`}
                   >
                     {translateSuccessProbability(strategy.success_probability)}
@@ -220,7 +220,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
                 </div>
                 <Progress 
                   value={getSuccessProgress(strategy.success_probability)} 
-                  className="h-2 bg-gray-700"
+                  className="h-2 bg-slate-200"
                   data-testid={`success-progress-${index}`}
                 />
               </div>
@@ -230,13 +230,13 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
       </div>
 
       {/* Summary Footer */}
-      <Card className="bg-gradient-to-r from-red-900/20 to-orange-900/20 border-red-500/30 mt-8">
+      <Card className="bg-gradient-to-r from-primary/10 to-teal-100 border-primary/30 mt-8 shadow-sm">
         <CardContent className="p-4">
           <div className="flex items-center space-x-3">
-            <Award className="text-red-400" size={20} />
+            <Award className="text-primary" size={20} />
             <div>
-              <h3 className="text-white font-semibold">{t("analysis.combat.analysisComplete", "Strategic Analysis Complete")}</h3>
-              <p className="text-gray-600 text-sm">
+              <h3 className="text-foreground font-semibold">{t("analysis.combat.analysisComplete", "Strategic Analysis Complete")}</h3>
+              <p className="text-muted-foreground text-sm">
                 {t("analysis.combat.tacticalApproaches", "{{count}} tactical approaches identified for optimal performance advantage", { count: data.strategies.length })}
               </p>
             </div>
