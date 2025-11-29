@@ -264,7 +264,7 @@ export default function TestAuthPage() {
       <div className="container mx-auto max-w-4xl">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold text-white mb-2">Authentication Testing</h1>
-          <p className="text-gray-300">Test email/password login, signup, and referral functionality</p>
+          <p className="text-foreground">Test email/password login, signup, and referral functionality</p>
         </div>
 
         {user && (
@@ -278,38 +278,38 @@ export default function TestAuthPage() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="bg-gray-900 border-gray-700">
+          <Card className="bg-background border">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <LogIn className="h-5 w-5" />
                 Login Test
               </CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardDescription className="text-muted-foreground">
                 Test email/password login functionality
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="login-email" className="text-gray-300">Email</Label>
+                <Label htmlFor="login-email" className="text-foreground">Email</Label>
                 <Input
                   id="login-email"
                   type="email"
                   placeholder="test@example.com"
                   value={loginData.email}
                   onChange={(e) => setLoginData({...loginData, email: e.target.value})}
-                  className="bg-gray-800 border-gray-600 text-white"
+                  className="bg-card border text-white"
                   data-testid="input-login-email"
                 />
               </div>
               <div>
-                <Label htmlFor="login-password" className="text-gray-300">Password</Label>
+                <Label htmlFor="login-password" className="text-foreground">Password</Label>
                 <Input
                   id="login-password"
                   type="password"
                   placeholder="Password"
                   value={loginData.password}
                   onChange={(e) => setLoginData({...loginData, password: e.target.value})}
-                  className="bg-gray-800 border-gray-600 text-white"
+                  className="bg-card border text-white"
                   data-testid="input-login-password"
                 />
               </div>
@@ -324,13 +324,13 @@ export default function TestAuthPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-700">
+          <Card className="bg-background border">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <UserPlus className="h-5 w-5" />
                 Signup Test {currentStep === "payment" && "- Payment Info"}
               </CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardDescription className="text-muted-foreground">
                 {currentStep === "personal" 
                   ? "Test user registration with referral code" 
                   : "Add payment card to complete signup"
@@ -341,7 +341,7 @@ export default function TestAuthPage() {
               {currentStep === "payment" && (
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold text-white mb-2">Complete Your Signup</h2>
-                  <p className="text-gray-300">Secure your account with a payment method and start with 1000 free tokens</p>
+                  <p className="text-foreground">Secure your account with a payment method and start with 1000 free tokens</p>
                   
                   <div className="mt-4 p-4 bg-green-900 border border-green-600 rounded-lg">
                     <div className="flex items-center gap-2 text-green-100">
@@ -376,42 +376,42 @@ export default function TestAuthPage() {
                 <>
                   <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="signup-firstname" className="text-gray-300">First Name</Label>
+                    <Label htmlFor="signup-firstname" className="text-foreground">First Name</Label>
                     <Input
                       id="signup-firstname"
                       placeholder="John"
                       value={signupData.firstName}
                       onChange={(e) => setSignupData({...signupData, firstName: e.target.value})}
-                      className="bg-gray-800 border-gray-600 text-white"
+                      className="bg-card border text-white"
                       data-testid="input-signup-firstname"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="signup-lastname" className="text-gray-300">Last Name</Label>
+                    <Label htmlFor="signup-lastname" className="text-foreground">Last Name</Label>
                     <Input
                       id="signup-lastname"
                       placeholder="Doe"
                       value={signupData.lastName}
                       onChange={(e) => setSignupData({...signupData, lastName: e.target.value})}
-                      className="bg-gray-800 border-gray-600 text-white"
+                      className="bg-card border text-white"
                       data-testid="input-signup-lastname"
                     />
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="signup-email" className="text-gray-300">Email</Label>
+                  <Label htmlFor="signup-email" className="text-foreground">Email</Label>
                   <Input
                     id="signup-email"
                     type="email"
                     placeholder="john@example.com"
                     value={signupData.email}
                     onChange={(e) => setSignupData({...signupData, email: e.target.value})}
-                    className="bg-gray-800 border-gray-600 text-white"
+                    className="bg-card border text-white"
                     data-testid="input-signup-email"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="signup-password" className="text-gray-300">Password</Label>
+                  <Label htmlFor="signup-password" className="text-foreground">Password</Label>
                   <div className="relative">
                     <Input
                       id="signup-password"
@@ -419,14 +419,14 @@ export default function TestAuthPage() {
                       placeholder="Create a strong password (min 8 chars with uppercase, lowercase, number, special char)"
                       value={signupData.password}
                       onChange={(e) => setSignupData({...signupData, password: e.target.value})}
-                      className="bg-gray-800 border-gray-600 text-white pr-10"
+                      className="bg-card border text-white pr-10"
                       data-testid="input-signup-password"
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-gray-400"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-muted-foreground"
                       onClick={() => setShowPassword(!showPassword)}
                       data-testid="button-toggle-signup-password"
                     >
@@ -470,7 +470,7 @@ export default function TestAuthPage() {
                 </div>
                 
                 <div>
-                  <Label htmlFor="signup-confirm-password" className="text-gray-300">Confirm Password</Label>
+                  <Label htmlFor="signup-confirm-password" className="text-foreground">Confirm Password</Label>
                   <div className="relative">
                     <Input
                       id="signup-confirm-password"
@@ -478,14 +478,14 @@ export default function TestAuthPage() {
                       placeholder="Confirm your password"
                       value={signupData.confirmPassword}
                       onChange={(e) => setSignupData({...signupData, confirmPassword: e.target.value})}
-                      className="bg-gray-800 border-gray-600 text-white pr-10"
+                      className="bg-card border text-white pr-10"
                       data-testid="input-signup-confirm-password"
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-gray-400"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-muted-foreground"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       data-testid="button-toggle-signup-confirm-password"
                     >
@@ -506,7 +506,7 @@ export default function TestAuthPage() {
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="signup-referral" className="text-gray-300 flex items-center gap-2">
+                  <Label htmlFor="signup-referral" className="text-foreground flex items-center gap-2">
                     <Gift className="h-4 w-4" />
                     Referral Code (Optional)
                   </Label>
@@ -515,7 +515,7 @@ export default function TestAuthPage() {
                     placeholder="REF123"
                     value={signupData.referralCode}
                     onChange={(e) => setSignupData({...signupData, referralCode: e.target.value})}
-                    className="bg-gray-800 border-gray-600 text-white"
+                    className="bg-card border text-white"
                     data-testid="input-signup-referral"
                   />
                 </div>
@@ -539,7 +539,7 @@ export default function TestAuthPage() {
               ) : (
                 <>
                   <div>
-                    <Label htmlFor="card-number" className="text-gray-300">Card Number</Label>
+                    <Label htmlFor="card-number" className="text-foreground">Card Number</Label>
                     <div className="relative">
                       <Input
                         id="card-number"
@@ -549,7 +549,7 @@ export default function TestAuthPage() {
                           const formatted = formatCardNumber(e.target.value);
                           setSignupData({...signupData, cardNumber: formatted});
                         }}
-                        className="bg-gray-800 border-gray-600 text-white pr-12"
+                        className="bg-card border text-white pr-12"
                         data-testid="input-card-number"
                         maxLength={19}
                       />
@@ -571,19 +571,19 @@ export default function TestAuthPage() {
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="cardholder-name" className="text-gray-300">Cardholder Name</Label>
+                    <Label htmlFor="cardholder-name" className="text-foreground">Cardholder Name</Label>
                     <Input
                       id="cardholder-name"
                       placeholder="John Doe"
                       value={signupData.cardholderName}
                       onChange={(e) => setSignupData({...signupData, cardholderName: e.target.value})}
-                      className="bg-gray-800 border-gray-600 text-white"
+                      className="bg-card border text-white"
                       data-testid="input-cardholder-name"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="expiry" className="text-gray-300">Expiry Date</Label>
+                      <Label htmlFor="expiry" className="text-foreground">Expiry Date</Label>
                       <Input
                         id="expiry"
                         placeholder="MM/YY"
@@ -603,12 +603,12 @@ export default function TestAuthPage() {
                             expiryYear: year ? `20${year}` : ''
                           });
                         }}
-                        className="bg-gray-800 border-gray-600 text-white"
+                        className="bg-card border text-white"
                         data-testid="input-expiry"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="cvv" className="text-gray-300">CVV</Label>
+                      <Label htmlFor="cvv" className="text-foreground">CVV</Label>
                       <Input
                         id="cvv"
                         placeholder="123"
@@ -618,7 +618,7 @@ export default function TestAuthPage() {
                           const value = e.target.value.replace(/\D/g, '');
                           setSignupData({...signupData, cvv: value});
                         }}
-                        className="bg-gray-800 border-gray-600 text-white"
+                        className="bg-card border text-white"
                         data-testid="input-cvv"
                       />
                     </div>
@@ -676,7 +676,7 @@ export default function TestAuthPage() {
                     <Button 
                       onClick={() => setCurrentStep("personal")}
                       variant="outline"
-                      className="bg-gray-800 border-gray-600 text-white hover:bg-gray-700"
+                      className="bg-card border text-white hover:bg-muted"
                       data-testid="button-back-to-personal"
                     >
                       Back
@@ -712,7 +712,7 @@ export default function TestAuthPage() {
           <Button 
             onClick={fetchCurrentUser}
             variant="outline"
-            className="bg-gray-800 border-gray-600 text-white hover:bg-gray-700"
+            className="bg-card border text-white hover:bg-muted"
             data-testid="button-check-session"
           >
             <Mail className="h-4 w-4 mr-2" />
@@ -730,7 +730,7 @@ export default function TestAuthPage() {
           )}
         </div>
 
-        <div className="mt-8 text-center text-gray-400 text-sm">
+        <div className="mt-8 text-center text-muted-foreground text-sm">
           <p>🔒 This page tests local email/password authentication</p>
           <p>No Replit popups - perfect for testing login flows!</p>
         </div>

@@ -184,7 +184,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
                   <Brain className="w-4 h-4 mr-2 text-blue-400" />
                   {t("analysis.combat.strategicOverview", "Strategic Overview")}
                 </h4>
-                <p className="text-gray-600 leading-relaxed text-sm bg-athlete-gray-900/50 p-3 rounded-md">
+                <p className="text-gray-600 leading-relaxed text-sm bg-background/50 p-3 rounded-md">
                   {strategy.description}
                 </p>
               </div>
@@ -197,7 +197,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
                   <Zap className="w-4 h-4 mr-2 text-yellow-400" />
                   {t("analysis.combat.executionPlan", "Execution Plan")}
                 </h4>
-                <p className="text-gray-600 leading-relaxed text-sm bg-athlete-gray-900/50 p-3 rounded-md">
+                <p className="text-gray-600 leading-relaxed text-sm bg-background/50 p-3 rounded-md">
                   {strategy.execution}
                 </p>
               </div>

@@ -124,7 +124,7 @@ export default function PaymentRedirectHandler() {
           message: "We're checking your payment status.",
           tokenMessage: "",
           bgColor: "bg-gray-50 dark:bg-gray-950",
-          textColor: "text-gray-800 dark:text-gray-200",
+          textColor: "text-gray-800 dark:text-foreground",
           icon: "❓"
         };
     }

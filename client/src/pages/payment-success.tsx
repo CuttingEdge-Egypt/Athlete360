@@ -54,7 +54,7 @@ export default function PaymentSuccess() {
           title: 'Payment Status Unknown',
           message: 'Unable to determine payment status. Please check your account.',
           color: 'text-gray-600',
-          bgColor: 'bg-gray-50 dark:bg-gray-900/20'
+          bgColor: 'bg-gray-50 dark:bg-background/20'
         };
     }
   };
@@ -76,12 +76,12 @@ export default function PaymentSuccess() {
             </CardTitle>
           </CardHeader>
           <CardContent className="text-center space-y-4">
-            <p className="text-gray-700 dark:text-gray-300">
+            <p className="text-gray-700 dark:text-foreground">
               {config.message}
             </p>
             
             {transactionId && (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Transaction ID: {transactionId}
               </p>
             )}

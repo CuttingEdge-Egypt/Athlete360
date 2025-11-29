@@ -43,7 +43,7 @@ export function CountrySelect({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full justify-between bg-athlete-gray-700 border-gray-600 text-white hover:bg-athlete-gray-600",
+            "w-full justify-between bg-muted border text-white hover:bg-slate-100",
             className
           )}
           data-testid={testId}
@@ -54,14 +54,14 @@ export function CountrySelect({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0 bg-athlete-gray-700 border-gray-600">
-        <Command className="bg-athlete-gray-700">
+      <PopoverContent className="w-full p-0 bg-muted border">
+        <Command className="bg-muted">
           <CommandInput
             placeholder="Search countries..."
-            className="h-9 text-white placeholder:text-gray-400"
+            className="h-9 text-white placeholder:text-muted-foreground"
           />
           <CommandList>
-            <CommandEmpty className="text-gray-300 py-2 text-center text-sm">
+            <CommandEmpty className="text-foreground py-2 text-center text-sm">
               No country found.
             </CommandEmpty>
             <CommandGroup>
@@ -71,7 +71,7 @@ export function CountrySelect({
                   onValueChange("all");
                   setOpen(false);
                 }}
-                className="text-white hover:bg-athlete-gray-600"
+                className="text-white hover:bg-slate-100"
               >
                 <Check
                   className={cn(
@@ -89,7 +89,7 @@ export function CountrySelect({
                     onValueChange(currentValue === value ? "" : currentValue);
                     setOpen(false);
                   }}
-                  className="text-white hover:bg-athlete-gray-600"
+                  className="text-white hover:bg-slate-100"
                 >
                   <Check
                     className={cn(

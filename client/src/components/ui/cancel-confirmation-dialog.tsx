@@ -29,10 +29,10 @@ export function CancelConfirmationDialog({
   
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
-      <DialogContent className="bg-athlete-gray-800 border-gray-700 text-white">
+      <DialogContent className="bg-card border text-white">
         <DialogHeader>
           <DialogTitle className="text-white">{title || t('services.queue.cancelDialog.title')}</DialogTitle>
-          <DialogDescription className="text-gray-300">
+          <DialogDescription className="text-foreground">
             {description || t('services.queue.cancelDialog.description')}
           </DialogDescription>
         </DialogHeader>
@@ -40,7 +40,7 @@ export function CancelConfirmationDialog({
           <Button
             variant="outline"
             onClick={onCancel}
-            className="border-gray-600 text-gray-300 hover:bg-gray-700"
+            className="border text-foreground hover:bg-muted"
             data-testid="button-cancel-dialog-cancel"
           >
             {t('services.queue.cancelDialog.keepRunning')}

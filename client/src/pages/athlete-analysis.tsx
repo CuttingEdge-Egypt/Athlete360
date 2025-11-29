@@ -118,7 +118,7 @@ export default function AthleteAnalysis() {
         <div className="text-center">
           <div className="text-6xl mb-4">🔍</div>
           <h2 className="text-2xl font-bold mb-4">Athlete Not Found</h2>
-          <p className="text-gray-400 mb-6">The athlete you're looking for doesn't exist.</p>
+          <p className="text-muted-foreground mb-6">The athlete you're looking for doesn't exist.</p>
           <Button 
             onClick={() => window.history.back()}
             data-testid="button-go-back"
@@ -140,13 +140,13 @@ export default function AthleteAnalysis() {
               onClick={() => window.history.back()}
               data-testid="button-back"
               variant="ghost" 
-              className="text-gray-400 hover:text-white mb-4"
+              className="text-muted-foreground hover:text-white mb-4"
             >
               <ArrowLeft className="mr-2" size={16} />
               Back to Dashboard
             </Button>
             
-            <Card className="bg-athlete-gray-800 border-gray-700">
+            <Card className="bg-card border">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-6">
@@ -157,14 +157,14 @@ export default function AthleteAnalysis() {
                         className="w-24 h-24 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="w-24 h-24 rounded-full bg-athlete-gray-600 flex items-center justify-center">
-                        <User className="w-12 h-12 text-gray-400" />
+                      <div className="w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center">
+                        <User className="w-12 h-12 text-muted-foreground" />
                       </div>
                     )}
                     <div>
                       <h1 className="text-3xl font-bold text-white mb-2">{athlete.name}</h1>
-                      <p className="text-gray-400 mb-2">{athlete.bio}</p>
-                      <span className="text-sm text-gray-400">Updated: {new Date(athlete.updatedAt || '').toLocaleDateString()}</span>
+                      <p className="text-muted-foreground mb-2">{athlete.bio}</p>
+                      <span className="text-sm text-muted-foreground">Updated: {new Date(athlete.updatedAt || '').toLocaleDateString()}</span>
                     </div>
                   </div>
                   
@@ -206,7 +206,7 @@ export default function AthleteAnalysis() {
                         </div>
                       ) : null}
                       {!athlete.rank && !athlete.olympicRank && !athlete.continentalRank && !athlete.nationalRank ? (
-                        <span className="text-gray-400 text-sm italic bg-gray-700/30 px-3 py-1 rounded" data-testid="rank-tbd">Rankings not available</span>
+                        <span className="text-muted-foreground text-sm italic bg-muted px-3 py-1 rounded" data-testid="rank-tbd">Rankings not available</span>
                       ) : null}
                     </div>
                     
@@ -237,7 +237,7 @@ export default function AthleteAnalysis() {
 
           {/* Personal Information Card */}
           {(athlete.country || athlete.age || athlete.personalInfo) && (
-            <Card className="bg-athlete-gray-800 border-gray-700">
+            <Card className="bg-card border">
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold mb-4 text-white flex items-center">
                   <User className="mr-2 h-5 w-5 text-athlete-accent" />
@@ -246,61 +246,61 @@ export default function AthleteAnalysis() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {athlete.country && (
                     <div data-testid="info-nationality">
-                      <label className="text-sm text-gray-400 block mb-1">Nationality</label>
+                      <label className="text-sm text-muted-foreground block mb-1">Nationality</label>
                       <p className="text-white font-medium">{athlete.country}</p>
                     </div>
                   )}
                   {(athlete.age || athlete.personalInfo?.age) && (
                     <div data-testid="info-age">
-                      <label className="text-sm text-gray-400 block mb-1">Age</label>
+                      <label className="text-sm text-muted-foreground block mb-1">Age</label>
                       <p className="text-white font-medium">{athlete.personalInfo?.age || athlete.age}</p>
                     </div>
                   )}
                   {athlete.personalInfo?.dateOfBirth && (
                     <div data-testid="info-dob">
-                      <label className="text-sm text-gray-400 block mb-1">Date of Birth</label>
+                      <label className="text-sm text-muted-foreground block mb-1">Date of Birth</label>
                       <p className="text-white font-medium">{athlete.personalInfo.dateOfBirth}</p>
                     </div>
                   )}
                   {athlete.personalInfo?.height && (
                     <div data-testid="info-height">
-                      <label className="text-sm text-gray-400 block mb-1">Height</label>
+                      <label className="text-sm text-muted-foreground block mb-1">Height</label>
                       <p className="text-white font-medium">{athlete.personalInfo.height}</p>
                     </div>
                   )}
                   {athlete.personalInfo?.weight && (
                     <div data-testid="info-weight">
-                      <label className="text-sm text-gray-400 block mb-1">Weight</label>
+                      <label className="text-sm text-muted-foreground block mb-1">Weight</label>
                       <p className="text-white font-medium">{athlete.personalInfo.weight}</p>
                     </div>
                   )}
                   {athlete.personalInfo?.club && (
                     <div data-testid="info-club">
-                      <label className="text-sm text-gray-400 block mb-1">Club</label>
+                      <label className="text-sm text-muted-foreground block mb-1">Club</label>
                       <p className="text-white font-medium">{athlete.personalInfo.club}</p>
                     </div>
                   )}
                   {athlete.personalInfo?.position && (
                     <div data-testid="info-position">
-                      <label className="text-sm text-gray-400 block mb-1">Position</label>
+                      <label className="text-sm text-muted-foreground block mb-1">Position</label>
                       <p className="text-white font-medium">{athlete.personalInfo.position}</p>
                     </div>
                   )}
                   {athlete.personalInfo?.yearsInCurrentSport && (
                     <div data-testid="info-years-in-sport">
-                      <label className="text-sm text-gray-400 block mb-1">Years in Sport</label>
+                      <label className="text-sm text-muted-foreground block mb-1">Years in Sport</label>
                       <p className="text-white font-medium">{athlete.personalInfo.yearsInCurrentSport}</p>
                     </div>
                   )}
                   {athlete.personalInfo?.educationalBackground && (
                     <div data-testid="info-education" className="md:col-span-2 lg:col-span-3">
-                      <label className="text-sm text-gray-400 block mb-1">Educational Background</label>
+                      <label className="text-sm text-muted-foreground block mb-1">Educational Background</label>
                       <p className="text-white font-medium">{athlete.personalInfo.educationalBackground}</p>
                     </div>
                   )}
                   {athlete.personalInfo?.previousSports && athlete.personalInfo.previousSports.length > 0 && (
                     <div data-testid="info-previous-sports" className="md:col-span-2 lg:col-span-3">
-                      <label className="text-sm text-gray-400 block mb-1">Previous Sports</label>
+                      <label className="text-sm text-muted-foreground block mb-1">Previous Sports</label>
                       <p className="text-white font-medium">{athlete.personalInfo.previousSports.join(', ')}</p>
                     </div>
                   )}
@@ -311,7 +311,7 @@ export default function AthleteAnalysis() {
 
           {/* Analysis Tabs */}
           <Tabs defaultValue="results" className="space-y-6">
-            <TabsList className="bg-athlete-gray-800 border-gray-700">
+            <TabsList className="bg-card border">
               <TabsTrigger 
                 value="results" 
                 data-testid="tab-results"
@@ -355,11 +355,11 @@ export default function AthleteAnalysis() {
                   ))}
                 </div>
               ) : (
-                <Card className="bg-athlete-gray-800 border-gray-700">
+                <Card className="bg-card border">
                   <CardContent className="p-12 text-center">
                     <div className="text-6xl mb-4">📊</div>
                     <h3 className="text-xl font-bold mb-4 text-white">No Analysis Yet</h3>
-                    <p className="text-gray-400 mb-6">
+                    <p className="text-muted-foreground mb-6">
                       This athlete hasn't been analyzed yet. Go back to the dashboard to run some analysis services.
                     </p>
                     <Button 
@@ -377,7 +377,7 @@ export default function AthleteAnalysis() {
             {/* Rankings Tab Content - only for individual sports */}
             {athlete?.sport && isIndividualSport(athlete.sport.name) && (
               <TabsContent value="rankings">
-                <Card className="bg-athlete-gray-800 border-gray-700">
+                <Card className="bg-card border">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="text-xl font-bold text-white flex items-center">
@@ -390,7 +390,7 @@ export default function AthleteAnalysis() {
                         data-testid="button-refresh-rankings"
                         variant="outline"
                         size="sm"
-                        className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                        className="border text-foreground hover:bg-muted"
                       >
                         {updateAthleteDataMutation.isPending ? (
                           <>
@@ -409,15 +409,15 @@ export default function AthleteAnalysis() {
                     {/* Current Ranking Display */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                       {/* Current World Ranking */}
-                      <div className="bg-athlete-gray-700 p-6 rounded-lg border border-gray-600">
+                      <div className="bg-muted p-6 rounded-lg border border">
                         <div className="flex items-center justify-between mb-4">
-                          <h4 className="text-lg font-medium text-gray-300">Current World Ranking</h4>
+                          <h4 className="text-lg font-medium text-foreground">Current World Ranking</h4>
                           <Target className="h-6 w-6 text-athlete-warning" />
                         </div>
                         <div className="text-4xl font-bold text-white mb-2">
                           {athlete?.rank ? `#${athlete.rank}` : 'Unranked'}
                         </div>
-                        <p className="text-sm text-gray-400">International Federation Ranking</p>
+                        <p className="text-sm text-muted-foreground">International Federation Ranking</p>
                         {athlete?.rank && (
                           <div className="mt-3 flex items-center text-sm text-green-400">
                             <TrendingUp className="h-4 w-4 mr-1" />
@@ -427,16 +427,16 @@ export default function AthleteAnalysis() {
                       </div>
 
                       {/* Ranking Status */}
-                      <div className="bg-athlete-gray-700 p-6 rounded-lg border border-gray-600">
+                      <div className="bg-muted p-6 rounded-lg border border">
                         <div className="flex items-center justify-between mb-4">
-                          <h4 className="text-lg font-medium text-gray-300">Ranking Status</h4>
+                          <h4 className="text-lg font-medium text-foreground">Ranking Status</h4>
                           <Medal className="h-6 w-6 text-yellow-400" />
                         </div>
                         <div className="space-y-3">
                           {athlete?.rank ? (
                             <>
                               <div className="flex items-center justify-between">
-                                <span className="text-gray-400">Qualification Status:</span>
+                                <span className="text-muted-foreground">Qualification Status:</span>
                                 <span className="text-green-400 font-medium">
                                   {athlete.rank <= 50 ? 'Elite Level' : 
                                    athlete.rank <= 200 ? 'International Level' : 
@@ -444,7 +444,7 @@ export default function AthleteAnalysis() {
                                 </span>
                               </div>
                               <div className="flex items-center justify-between">
-                                <span className="text-gray-400">Competition Tier:</span>
+                                <span className="text-muted-foreground">Competition Tier:</span>
                                 <span className="text-blue-400 font-medium">
                                   {athlete.rank <= 10 ? 'Olympic Contender' :
                                    athlete.rank <= 100 ? 'World Championship Level' :
@@ -453,7 +453,7 @@ export default function AthleteAnalysis() {
                               </div>
                             </>
                           ) : (
-                            <div className="text-gray-400">
+                            <div className="text-muted-foreground">
                               <p>No official ranking available</p>
                               <p className="text-sm mt-2">Generate a ranking analysis to discover current standings</p>
                             </div>
@@ -483,9 +483,9 @@ export default function AthleteAnalysis() {
                         </div>
                       ) : (
                         <div className="text-center py-8">
-                          <Trophy className="mx-auto h-12 w-12 text-gray-500 mb-4" />
-                          <p className="text-gray-400 mb-4">No ranking analysis available yet</p>
-                          <p className="text-sm text-gray-500">
+                          <Trophy className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                          <p className="text-muted-foreground mb-4">No ranking analysis available yet</p>
+                          <p className="text-sm text-muted-foreground">
                             Generate a ranking analysis from the Analysis Results tab to see detailed ranking progression and history
                           </p>
                         </div>
@@ -497,24 +497,24 @@ export default function AthleteAnalysis() {
             )}
 
             <TabsContent value="history">
-              <Card className="bg-athlete-gray-800 border-gray-700">
+              <Card className="bg-card border">
                 <CardContent className="p-6">
                   <h3 className="text-xl font-bold mb-6 text-white">Transaction History</h3>
                   {athleteTransactions.length > 0 ? (
                     <div className="overflow-x-auto">
                       <table className="w-full text-left">
-                        <thead className="border-b border-gray-700">
+                        <thead className="border-b border">
                           <tr>
-                            <th className="py-3 text-gray-300">Date</th>
-                            <th className="py-3 text-gray-300">Service</th>
-                            <th className="py-3 text-gray-300">Tokens</th>
-                            <th className="py-3 text-gray-300">Status</th>
+                            <th className="py-3 text-foreground">Date</th>
+                            <th className="py-3 text-foreground">Service</th>
+                            <th className="py-3 text-foreground">Tokens</th>
+                            <th className="py-3 text-foreground">Status</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-700">
                           {athleteTransactions.map((transaction) => (
                             <tr key={transaction.id}>
-                              <td className="py-4 text-gray-300">
+                              <td className="py-4 text-foreground">
                                 {new Date(transaction.createdAt || '').toLocaleDateString()}
                               </td>
                               <td className="py-4 text-white">{transaction.action}</td>
@@ -532,7 +532,7 @@ export default function AthleteAnalysis() {
                   ) : (
                     <div className="text-center py-8">
                       <div className="text-4xl mb-4">📝</div>
-                      <p className="text-gray-400">No transactions for this athlete yet.</p>
+                      <p className="text-muted-foreground">No transactions for this athlete yet.</p>
                     </div>
                   )}
                 </CardContent>

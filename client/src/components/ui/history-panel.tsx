@@ -163,7 +163,7 @@ export function HistoryPanel({ showHeader = true, className = "", onComparisonSe
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto mb-4"></div>
-            <p className="text-gray-400">Loading your analysis history...</p>
+            <p className="text-muted-foreground">Loading your analysis history...</p>
           </div>
         </div>
       ) : historyItems.length === 0 ? (

@@ -166,7 +166,7 @@ export default function VideoAnalysis() {
   const isArabic = i18n.language === 'ar';
 
   return (
-    <div className="min-h-screen bg-athlete-gray-900 p-3 sm:p-6">
+    <div className="min-h-screen bg-background p-3 sm:p-6">
       <div className="max-w-6xl mx-auto">
         <div className="mb-6 sm:mb-8">
           <h1 className={`${isArabic ? 'text-2xl sm:text-4xl text-right' : 'text-xl sm:text-3xl'} font-bold text-white`}>{t('title')}</h1>

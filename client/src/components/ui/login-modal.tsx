@@ -123,7 +123,7 @@ export function LoginModal({ isOpen, onClose, onComplete }: LoginModalProps) {
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-gray-400"
+                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-muted-foreground"
                 onClick={() => setShowPassword(!showPassword)}
                 data-testid="button-toggle-login-password"
               >
@@ -151,7 +151,7 @@ export function LoginModal({ isOpen, onClose, onComplete }: LoginModalProps) {
             )}
           </Button>
 
-          <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+          <div className="text-center text-sm text-gray-600 dark:text-muted-foreground">
             Don't have an account?{" "}
             <button 
               onClick={onClose}

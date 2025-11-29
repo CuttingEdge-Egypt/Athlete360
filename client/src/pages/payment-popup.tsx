@@ -10,7 +10,7 @@ interface PaymentPopupProps {
 
 export function PaymentPopup({ selectedPackage, paymentIntent, onBack }: PaymentPopupProps) {
   return (
-    <div className="min-h-screen bg-athlete-gray-900 text-white">
+    <div className="min-h-screen bg-background text-white">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-4 mb-8">
@@ -18,7 +18,7 @@ export function PaymentPopup({ selectedPackage, paymentIntent, onBack }: Payment
               variant="outline"
               size="sm"
               onClick={onBack}
-              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+              className="border text-foreground hover:bg-muted"
               data-testid="button-back-packages"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -28,7 +28,7 @@ export function PaymentPopup({ selectedPackage, paymentIntent, onBack }: Payment
               <h1 className="text-2xl font-bold text-white" data-testid="text-payment-title">
                 Secure Checkout
               </h1>
-              <p className="text-gray-400" data-testid="text-payment-subtitle">
+              <p className="text-muted-foreground" data-testid="text-payment-subtitle">
                 {selectedPackage?.name} - {selectedPackage?.tokens} tokens for {selectedPackage?.price} EGP
               </p>
             </div>
@@ -36,32 +36,32 @@ export function PaymentPopup({ selectedPackage, paymentIntent, onBack }: Payment
 
           <div className="grid md:grid-cols-2 gap-6">
             {/* Order Summary */}
-            <Card className="bg-athlete-gray-800 border-gray-700">
+            <Card className="bg-card border">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-400" />
                   Order Summary
                 </CardTitle>
-                <CardDescription className="text-gray-400">
+                <CardDescription className="text-muted-foreground">
                   Review your purchase details
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="bg-athlete-gray-700 p-4 rounded-lg">
+                  <div className="bg-muted p-4 rounded-lg">
                     <div className="flex justify-between items-center mb-3">
-                      <span className="text-gray-300">Package:</span>
+                      <span className="text-foreground">Package:</span>
                       <span className="text-white font-semibold" data-testid="text-package-name">
                         {selectedPackage?.name}
                       </span>
                     </div>
                     <div className="flex justify-between items-center mb-3">
-                      <span className="text-gray-300">Tokens:</span>
+                      <span className="text-foreground">Tokens:</span>
                       <span className="text-athlete-accent font-bold" data-testid="text-tokens-amount">
                         {selectedPackage?.tokens.toLocaleString()}
                       </span>
                     </div>
-                    <div className="border-t border-gray-600 pt-3">
+                    <div className="border-t border pt-3">
                       <div className="flex justify-between items-center">
                         <span className="text-white font-semibold">Total:</span>
                         <span className="text-white font-bold text-xl" data-testid="text-total-amount">
@@ -75,13 +75,13 @@ export function PaymentPopup({ selectedPackage, paymentIntent, onBack }: Payment
             </Card>
 
             {/* Payment Gateway */}
-            <Card className="bg-athlete-gray-800 border-gray-700">
+            <Card className="bg-card border">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <CreditCard className="w-5 h-5 text-athlete-accent" />
                   Secure Checkout
                 </CardTitle>
-                <CardDescription className="text-gray-400">
+                <CardDescription className="text-muted-foreground">
                   Complete your payment through Paymob's hosted checkout
                 </CardDescription>
               </CardHeader>
@@ -95,7 +95,7 @@ export function PaymentPopup({ selectedPackage, paymentIntent, onBack }: Payment
                         </div>
                       </div>
                       <h3 className="text-lg font-bold text-white mb-2">Secure Checkout</h3>
-                      <p className="text-gray-300 text-sm mb-6">
+                      <p className="text-foreground text-sm mb-6">
                         Proceed to Paymob's secure checkout to complete your purchase.
                       </p>
                       <Button
@@ -115,12 +115,12 @@ export function PaymentPopup({ selectedPackage, paymentIntent, onBack }: Payment
                   </div>
 
                   {/* Payment Instructions */}
-                  <div className="bg-gray-800/50 border border-gray-600/30 rounded-lg p-4">
+                  <div className="bg-muted border border/30 rounded-lg p-4">
                     <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
                       <AlertCircle className="w-4 h-4 text-blue-400" />
                       Payment Instructions
                     </h4>
-                    <div className="text-xs text-gray-300 space-y-2">
+                    <div className="text-xs text-foreground space-y-2">
                       <p>1. Click "Proceed to Checkout"</p>
                       <p>2. Choose your payment method (cards, wallets, Valu, etc.)</p>
                       <p>3. Enter your payment details & complete OTP if required</p>

@@ -397,7 +397,7 @@ export default function Landing() {
                 </DialogTitle>
               </DialogHeader>
               <div className="text-center py-8">
-                <p className="text-gray-400 mb-4">
+                <p className="text-muted-foreground mb-4">
                   {t('common:messages.previewNotAvailableDesc')}
                 </p>
                 <Button 

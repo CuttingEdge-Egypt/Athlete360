@@ -33,7 +33,7 @@ export default function PaymentSuccessSimple() {
           <h1 className="text-3xl font-bold text-green-600 mb-4">Payment Successful!</h1>
           <p className="text-lg text-muted-foreground mb-8">Your payment has been processed successfully.</p>
           
-          <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6 mb-6">
+          <div className="bg-gray-50 dark:bg-background rounded-lg p-6 mb-6">
             <div className="space-y-2 text-left">
               <div className="flex justify-between">
                 <span>Status:</span>

@@ -169,7 +169,7 @@ export default function PaymentCenter() {
 
   if (showIframe && paymentIntent && selectedPackage) {
     return (
-      <div className="min-h-screen bg-athlete-gray-900 text-white" dir={isArabic ? 'rtl' : 'ltr'}>
+      <div className="min-h-screen bg-background text-white" dir={isArabic ? 'rtl' : 'ltr'}>
         <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
@@ -177,7 +177,7 @@ export default function PaymentCenter() {
                 <h1 className={`${isArabic ? 'text-3xl' : 'text-2xl'} font-bold text-white`} data-testid="text-payment-title">
                   {t('checkout.title')}
                 </h1>
-                <p className={`text-gray-400 ${isArabic ? 'text-lg' : 'text-base'}`} data-testid="text-payment-subtitle">
+                <p className={`text-muted-foreground ${isArabic ? 'text-lg' : 'text-base'}`} data-testid="text-payment-subtitle">
                   {t('checkout.subtitle', { 
                     name: selectedPackage?.name, 
                     tokens: selectedPackage?.tokens.toLocaleString(isArabic ? 'ar-EG' : 'en-US'), 
@@ -188,7 +188,7 @@ export default function PaymentCenter() {
               <Button
                 variant="outline"
                 onClick={handleBackToPackages}
-                className={`border-gray-600 text-gray-300 hover:bg-gray-700 h-11 ${isArabic ? 'flex-row-reverse' : ''}`}
+                className={`border text-foreground hover:bg-muted h-11 ${isArabic ? 'flex-row-reverse' : ''}`}
                 data-testid="button-back-packages"
               >
                 <ArrowLeft className={`w-4 h-4 ${isArabic ? 'ml-2 rotate-180' : 'mr-2'}`} />
@@ -198,32 +198,32 @@ export default function PaymentCenter() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               {/* Order Summary */}
-              <Card className="bg-athlete-gray-800 border-gray-700">
+              <Card className="bg-card border">
                 <CardHeader>
                   <CardTitle className={`text-white flex items-center gap-2 ${isArabic ? 'text-xl flex-row-reverse' : 'text-lg'}`}>
                     <CheckCircle className="w-5 h-5 text-green-400" />
                     {t('checkout.orderSummary.title')}
                   </CardTitle>
-                  <CardDescription className={`text-gray-400 ${isArabic ? 'text-base text-right' : 'text-sm'}`}>
+                  <CardDescription className={`text-muted-foreground ${isArabic ? 'text-base text-right' : 'text-sm'}`}>
                     {t('checkout.orderSummary.subtitle')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="bg-athlete-gray-700 p-4 rounded-lg">
+                    <div className="bg-muted p-4 rounded-lg">
                       <div className={`flex justify-between items-center mb-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                        <span className={`text-gray-300 ${isArabic ? 'text-base' : 'text-sm'}`}>{t('checkout.orderSummary.package')}</span>
+                        <span className={`text-foreground ${isArabic ? 'text-base' : 'text-sm'}`}>{t('checkout.orderSummary.package')}</span>
                         <span className={`text-white font-semibold ${isArabic ? 'text-lg' : 'text-base'}`} data-testid="text-package-name">
                           {selectedPackage?.name}
                         </span>
                       </div>
                       <div className={`flex justify-between items-center mb-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                        <span className={`text-gray-300 ${isArabic ? 'text-base' : 'text-sm'}`}>{t('checkout.orderSummary.tokens')}</span>
+                        <span className={`text-foreground ${isArabic ? 'text-base' : 'text-sm'}`}>{t('checkout.orderSummary.tokens')}</span>
                         <span className={`text-athlete-accent font-bold ${isArabic ? 'text-lg' : 'text-base'}`} data-testid="text-tokens-amount">
                           {selectedPackage?.tokens.toLocaleString(isArabic ? 'ar-EG' : 'en-US')}
                         </span>
                       </div>
-                      <div className="border-t border-gray-600 pt-3">
+                      <div className="border-t border pt-3">
                         <div className={`flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
                           <span className={`text-white font-semibold ${isArabic ? 'text-lg' : 'text-base'}`}>{t('checkout.orderSummary.total')}</span>
                           <span className={`text-white font-bold ${isArabic ? 'text-2xl' : 'text-xl'}`} data-testid="text-total-amount">
@@ -237,13 +237,13 @@ export default function PaymentCenter() {
               </Card>
 
               {/* Payment Gateway */}
-              <Card className="bg-athlete-gray-800 border-gray-700">
+              <Card className="bg-card border">
                 <CardHeader>
                   <CardTitle className={`text-white flex items-center gap-2 ${isArabic ? 'text-xl flex-row-reverse' : 'text-lg'}`}>
                     <CreditCard className="w-5 h-5 text-athlete-accent" />
                     {t('checkout.gateway.title')}
                   </CardTitle>
-                  <CardDescription className={`text-gray-400 ${isArabic ? 'text-base text-right' : 'text-sm'}`}>
+                  <CardDescription className={`text-muted-foreground ${isArabic ? 'text-base text-right' : 'text-sm'}`}>
                     {t('checkout.gateway.subtitle')}
                   </CardDescription>
                 </CardHeader>
@@ -258,7 +258,7 @@ export default function PaymentCenter() {
                           </div>
                         </div>
                         <h3 className={`${isArabic ? 'text-xl' : 'text-lg'} font-bold text-white mb-2`}>{t('checkout.gateway.checkoutTitle')}</h3>
-                        <p className={`text-gray-300 ${isArabic ? 'text-base' : 'text-sm'} mb-6`}>
+                        <p className={`text-foreground ${isArabic ? 'text-base' : 'text-sm'} mb-6`}>
                           {t('checkout.gateway.checkoutDescription')}
                         </p>
                         <Button 
@@ -292,12 +292,12 @@ export default function PaymentCenter() {
                     </div>
 
                     {/* Payment Instructions */}
-                    <div className="bg-gray-800/50 border border-gray-600/30 rounded-lg p-4">
+                    <div className="bg-muted border border/30 rounded-lg p-4">
                       <h4 className={`font-semibold text-white mb-3 flex items-center gap-2 ${isArabic ? 'flex-row-reverse text-lg' : 'text-base'}`}>
                         <AlertCircle className="w-4 h-4 text-blue-400" />
                         {t('checkout.instructions.title')}
                       </h4>
-                      <div className={`${isArabic ? 'text-sm text-right' : 'text-xs'} text-gray-300 space-y-2`}>
+                      <div className={`${isArabic ? 'text-sm text-right' : 'text-xs'} text-foreground space-y-2`}>
                         <div className={`flex items-start gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                           <span className="text-blue-400 font-bold">1.</span>
                           <span>{t('checkout.instructions.step1')}</span>
@@ -338,7 +338,7 @@ export default function PaymentCenter() {
   }
 
   return (
-    <div className="min-h-screen bg-athlete-gray-900 text-white" dir={isArabic ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-background text-white" dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-4 mb-8">
@@ -346,7 +346,7 @@ export default function PaymentCenter() {
               <h1 className={`${isArabic ? 'text-4xl' : 'text-3xl'} font-bold text-white`} data-testid="text-payment-center-title">
                 {t('header.title')}
               </h1>
-              <p className={`text-gray-400 ${isArabic ? 'text-xl' : 'text-base'}`} data-testid="text-payment-center-subtitle">
+              <p className={`text-muted-foreground ${isArabic ? 'text-xl' : 'text-base'}`} data-testid="text-payment-center-subtitle">
                 {t('header.subtitle')}
               </p>
             </div>
@@ -354,7 +354,7 @@ export default function PaymentCenter() {
               variant="outline"
               size="sm"
               onClick={handleGoBack}
-              className={`border-gray-600 text-gray-300 hover:bg-gray-700 ${isArabic ? 'flex-row-reverse' : ''}`}
+              className={`border text-foreground hover:bg-muted ${isArabic ? 'flex-row-reverse' : ''}`}
               data-testid="button-back-home"
             >
               <ArrowLeft className={`w-4 h-4 ${isArabic ? 'ml-2 rotate-180' : 'mr-2'}`} />
@@ -363,19 +363,19 @@ export default function PaymentCenter() {
           </div>
 
           {user && (
-            <div className="bg-athlete-gray-800 border border-gray-700 rounded-lg p-6 mb-8">
+            <div className="bg-card border border rounded-lg p-6 mb-8">
               <div className="flex items-center justify-between">
                 <div className={isArabic ? 'text-left' : 'text-left'}>
                   <h3 className={`${isArabic ? 'text-xl' : 'text-lg'} font-semibold text-white mb-1`} data-testid="text-current-balance">
                     {t('balance.title')}
                   </h3>
-                  <p className={`text-gray-400 ${isArabic ? 'text-base' : 'text-sm'}`}>{t('balance.subtitle')}</p>
+                  <p className={`text-muted-foreground ${isArabic ? 'text-base' : 'text-sm'}`}>{t('balance.subtitle')}</p>
                 </div>
                 <div className={isArabic ? 'text-right' : 'text-right'}>
                   <div className="text-2xl font-bold text-athlete-accent" data-testid="text-token-balance">
                     {(user.tokens || 0).toLocaleString(isArabic ? 'ar-EG' : 'en-US')}
                   </div>
-                  <p className={`${isArabic ? 'text-base' : 'text-sm'} text-gray-400`}>{t('balance.tokens')}</p>
+                  <p className={`${isArabic ? 'text-base' : 'text-sm'} text-muted-foreground`}>{t('balance.tokens')}</p>
                 </div>
               </div>
             </div>
@@ -388,7 +388,7 @@ export default function PaymentCenter() {
               return (
                 <Card
                   key={pkg.id}
-                  className={`bg-athlete-gray-800 border-gray-700 relative cursor-pointer transition-all duration-200 hover:scale-105 ${
+                  className={`bg-card border relative cursor-pointer transition-all duration-200 hover:scale-105 ${
                     pkg.popular ? 'border-athlete-accent border-2' : ''
                   }`}
                   onClick={() => handleSelectPackage(pkg)}
@@ -403,7 +403,7 @@ export default function PaymentCenter() {
                   )}
 
                   <CardHeader className="text-center">
-                    <div className="mx-auto mb-4 p-3 bg-athlete-gray-700 rounded-full w-fit">
+                    <div className="mx-auto mb-4 p-3 bg-muted rounded-full w-fit">
                       <IconComponent className="text-athlete-accent" size={32} />
                     </div>
                     <CardTitle className={`${isArabic ? 'text-2xl' : 'text-xl'} text-white`} data-testid={`text-package-title-${pkg.id}`}>
@@ -422,7 +422,7 @@ export default function PaymentCenter() {
                       {pkg.features.map((feature, index) => (
                         <li key={index} className={`flex items-center ${isArabic ? 'space-x-reverse space-x-2 flex-row-reverse' : 'space-x-2'}`}>
                           <CheckCircle className="text-athlete-success" size={16} />
-                          <span className={`text-gray-300 ${isArabic ? 'text-base text-right' : 'text-sm'}`}>{feature}</span>
+                          <span className={`text-foreground ${isArabic ? 'text-base text-right' : 'text-sm'}`}>{feature}</span>
                         </li>
                       ))}
                     </ul>
@@ -450,7 +450,7 @@ export default function PaymentCenter() {
             })}
           </div>
 
-          <div className={`text-center text-gray-400 ${isArabic ? 'text-base' : 'text-sm'}`}>
+          <div className={`text-center text-muted-foreground ${isArabic ? 'text-base' : 'text-sm'}`}>
             <p className="mb-2">{t('footer.secure')}</p>
             <p className={isArabic ? 'text-base' : 'text-sm'}>{t('footer.encrypted')}</p>
           </div>

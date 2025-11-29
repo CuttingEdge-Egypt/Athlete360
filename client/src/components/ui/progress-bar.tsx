@@ -80,7 +80,7 @@ export function ProgressBar({ isActive, currentPhase, onCancel, className = "" }
 
         {/* Progress bar */}
         <div className="space-y-3">
-          <div className="relative h-3 bg-gray-700 border border-gray-600 rounded-full overflow-hidden">
+          <div className="relative h-3 bg-gray-700 border border rounded-full overflow-hidden">
             <div 
               className="absolute top-0 h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300"
               style={isArabic ? { 
@@ -94,7 +94,7 @@ export function ProgressBar({ isActive, currentPhase, onCancel, className = "" }
             />
           </div>
           <div className="flex items-center justify-between text-sm">
-            <p className="text-gray-200 font-medium">
+            <p className="text-foreground font-medium">
               {currentPhase?.message || t('analysis.comparison.initializing')}
             </p>
             <p className="text-purple-300 font-bold text-base">
@@ -104,7 +104,7 @@ export function ProgressBar({ isActive, currentPhase, onCancel, className = "" }
         </div>
 
         {/* Helpful info */}
-        <p className={`text-xs text-gray-500 ${isArabic ? 'text-right' : ''}`}>
+        <p className={`text-xs text-muted-foreground ${isArabic ? 'text-right' : ''}`}>
           {t('analysis.comparison.mayTakeTime')}
         </p>
       </div>

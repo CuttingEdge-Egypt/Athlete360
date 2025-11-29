@@ -1635,7 +1635,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
                     {/* Overview Tab */}
                     <TabsContent value="overview" className="space-y-4">
-                      <Card className="bg-athlete-gray-900 border-slate-200">
+                      <Card className="bg-background border-slate-200">
                         <CardContent className="p-4">
                           <div className={`flex items-center gap-2 mb-3 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                             <Brain className="h-5 w-5 text-blue-400" />
@@ -1674,13 +1674,13 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                     {/* Strengths Tab */}
                     <TabsContent value="strengths" className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Card className="bg-athlete-gray-900 border-slate-200">
+                        <Card className="bg-background border-slate-200">
                           <CardHeader>
                             <CardTitle className={`text-lg text-white ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.athlete1?.name || "Athlete 1"} {t('analysis.comparison.strengths', 'Strengths')}</CardTitle>
                           </CardHeader>
                           <CardContent className="space-y-3">
                             {(parsedData.strengths?.athlete1 || []).map((strength: any, index: number) => (
-                              <div key={index} className={`${isComparisonArabic ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-green-500 py-2 bg-gray-800/50`}>
+                              <div key={index} className={`${isComparisonArabic ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-green-500 py-2 bg-muted`}>
                                 <div className={`flex items-start justify-between ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                                   <div className="flex-1">
                                     <div className={`font-medium text-white ${isComparisonArabic ? 'text-right' : ''}`}>
@@ -1711,13 +1711,13 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           </CardContent>
                         </Card>
 
-                        <Card className="bg-athlete-gray-900 border-slate-200">
+                        <Card className="bg-background border-slate-200">
                           <CardHeader>
                             <CardTitle className={`text-lg text-white ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.athlete2?.name || "Athlete 2"} {t('analysis.comparison.strengths', 'Strengths')}</CardTitle>
                           </CardHeader>
                           <CardContent className="space-y-3">
                             {(parsedData.strengths?.athlete2 || []).map((strength: any, index: number) => (
-                              <div key={index} className={`${isComparisonArabic ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-green-500 py-2 bg-gray-800/50`}>
+                              <div key={index} className={`${isComparisonArabic ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-green-500 py-2 bg-muted`}>
                                 <div className={`flex items-start justify-between ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                                   <div className="flex-1">
                                     <div className={`font-medium text-white ${isComparisonArabic ? 'text-right' : ''}`}>
@@ -1753,13 +1753,13 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                     {/* Weaknesses Tab */}
                     <TabsContent value="weaknesses" className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Card className="bg-athlete-gray-900 border-slate-200">
+                        <Card className="bg-background border-slate-200">
                           <CardHeader>
                             <CardTitle className={`text-lg text-white ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.athlete1?.name || "Athlete 1"} {t('analysis.comparison.areasToImprove', 'Areas to Improve')}</CardTitle>
                           </CardHeader>
                           <CardContent className="space-y-3">
                             {(parsedData.weaknesses?.athlete1 || []).map((weakness: any, index: number) => (
-                              <div key={index} className={`${isComparisonArabic ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-orange-500 py-2 bg-gray-800/50`}>
+                              <div key={index} className={`${isComparisonArabic ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-orange-500 py-2 bg-muted`}>
                                 <div className={`flex items-start justify-between ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                                   <div className="flex-1">
                                     <div className={`font-medium text-white ${isComparisonArabic ? 'text-right' : ''}`}>
@@ -1790,13 +1790,13 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           </CardContent>
                         </Card>
 
-                        <Card className="bg-athlete-gray-900 border-slate-200">
+                        <Card className="bg-background border-slate-200">
                           <CardHeader>
                             <CardTitle className={`text-lg text-white ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.athlete2?.name || "Athlete 2"} {t('analysis.comparison.areasToImprove', 'Areas to Improve')}</CardTitle>
                           </CardHeader>
                           <CardContent className="space-y-3">
                             {(parsedData.weaknesses?.athlete2 || []).map((weakness: any, index: number) => (
-                              <div key={index} className={`${isComparisonArabic ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-orange-500 py-2 bg-gray-800/50`}>
+                              <div key={index} className={`${isComparisonArabic ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-orange-500 py-2 bg-muted`}>
                                 <div className={`flex items-start justify-between ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                                   <div className="flex-1">
                                     <div className={`font-medium text-white ${isComparisonArabic ? 'text-right' : ''}`}>
@@ -1831,7 +1831,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
                     {/* Competition History Tab */}
                     <TabsContent value="ranking" className="space-y-6">
-                      <Card className="bg-athlete-gray-900 border-slate-200">
+                      <Card className="bg-background border-slate-200">
                         <CardContent className="p-6">
                           <div className={`flex items-center gap-2 mb-6 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                             <Trophy className="h-5 w-5 text-yellow-400" />
@@ -2097,7 +2097,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
                     {/* Head-to-Head Tab */}
                     <TabsContent value="head-to-head" className="space-y-4">
-                      <Card className="bg-athlete-gray-900 border-slate-200">
+                      <Card className="bg-background border-slate-200">
                         <CardContent className="p-6">
                           <div className="space-y-6">
                             {/* Prediction Section */}
@@ -2116,7 +2116,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                   )}
                                 </div>
                               ) : (
-                                <div className="bg-gray-700/50 border border-slate-200 rounded-lg p-4 mb-4">
+                                <div className="bg-muted border border-slate-200 rounded-lg p-4 mb-4">
                                   <div className="text-xl font-bold text-gray-600 mb-2">{t('analysis.comparison.evenMatch', 'Even Match')}</div>
                                   <div className="text-muted-foreground">{t('analysis.comparison.tooCloseToCall', 'Too close to call')}</div>
                                 </div>

@@ -31,7 +31,7 @@ export default function Subscribe() {
             <h1 className="text-2xl sm:text-4xl font-bold mb-3 sm:mb-4 text-white">
               Choose Your Plan
             </h1>
-            <p className="text-base sm:text-xl text-gray-300 max-w-2xl mx-auto">
+            <p className="text-base sm:text-xl text-foreground max-w-2xl mx-auto">
               Get tokens to unlock powerful athlete analysis features. 
               Each token gives you access to premium AI-powered insights.
             </p>
@@ -40,38 +40,38 @@ export default function Subscribe() {
           {/* Pricing Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto mb-8 sm:mb-16">
             {/* Starter Pack */}
-            <Card className="bg-athlete-gray-800 border-gray-700 relative">
+            <Card className="bg-card border relative">
               <CardHeader className="text-center">
-                <div className="mx-auto mb-4 p-3 bg-athlete-gray-700 rounded-full w-fit">
+                <div className="mx-auto mb-4 p-3 bg-muted rounded-full w-fit">
                   <Coins className="text-athlete-warning" size={32} />
                 </div>
                 <CardTitle className="text-xl text-white">Starter Pack</CardTitle>
                 <div className="text-3xl font-bold text-white">$15</div>
-                <p className="text-gray-400">500 Tokens</p>
+                <p className="text-muted-foreground">500 Tokens</p>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-center space-x-2">
                     <Check className="text-athlete-success" size={16} />
-                    <span className="text-gray-300">500 analysis tokens</span>
+                    <span className="text-foreground">500 analysis tokens</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <Check className="text-athlete-success" size={16} />
-                    <span className="text-gray-300">Basic athlete profiles</span>
+                    <span className="text-foreground">Basic athlete profiles</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <Check className="text-athlete-success" size={16} />
-                    <span className="text-gray-300">Export to PDF</span>
+                    <span className="text-foreground">Export to PDF</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <Check className="text-athlete-success" size={16} />
-                    <span className="text-gray-300">30-day validity</span>
+                    <span className="text-foreground">30-day validity</span>
                   </li>
                 </ul>
                 <Button 
                   onClick={() => handlePurchase(15)}
                   data-testid="button-purchase-starter"
-                  className="w-full bg-athlete-gray-700 hover:bg-athlete-gray-600 text-white"
+                  className="w-full bg-muted hover:bg-slate-100 text-white"
                 >
                   Get Started
                 </Button>
@@ -79,7 +79,7 @@ export default function Subscribe() {
             </Card>
 
             {/* Professional Pack */}
-            <Card className="bg-athlete-gray-800 border-athlete-accent relative">
+            <Card className="bg-card border-athlete-accent relative">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <span className="bg-athlete-accent text-white px-4 py-1 rounded-full text-sm font-semibold">
                   Most Popular
@@ -91,29 +91,29 @@ export default function Subscribe() {
                 </div>
                 <CardTitle className="text-xl text-white">Professional</CardTitle>
                 <div className="text-3xl font-bold text-white">$25</div>
-                <p className="text-gray-400">1,000 Tokens</p>
+                <p className="text-muted-foreground">1,000 Tokens</p>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-center space-x-2">
                     <Check className="text-athlete-success" size={16} />
-                    <span className="text-gray-300">1,000 analysis tokens</span>
+                    <span className="text-foreground">1,000 analysis tokens</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <Check className="text-athlete-success" size={16} />
-                    <span className="text-gray-300">All analysis features</span>
+                    <span className="text-foreground">All analysis features</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <Check className="text-athlete-success" size={16} />
-                    <span className="text-gray-300">Advanced insights</span>
+                    <span className="text-foreground">Advanced insights</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <Check className="text-athlete-success" size={16} />
-                    <span className="text-gray-300">Priority support</span>
+                    <span className="text-foreground">Priority support</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <Check className="text-athlete-success" size={16} />
-                    <span className="text-gray-300">Share & collaborate</span>
+                    <span className="text-foreground">Share & collaborate</span>
                   </li>
                 </ul>
                 <Button 
@@ -127,42 +127,42 @@ export default function Subscribe() {
             </Card>
 
             {/* Enterprise Pack */}
-            <Card className="bg-athlete-gray-800 border-gray-700 relative">
+            <Card className="bg-card border relative">
               <CardHeader className="text-center">
-                <div className="mx-auto mb-4 p-3 bg-athlete-gray-700 rounded-full w-fit">
+                <div className="mx-auto mb-4 p-3 bg-muted rounded-full w-fit">
                   <Zap className="text-yellow-400" size={32} />
                 </div>
                 <CardTitle className="text-xl text-white">Enterprise</CardTitle>
                 <div className="text-3xl font-bold text-white">$50</div>
-                <p className="text-gray-400">2,500 Tokens</p>
+                <p className="text-muted-foreground">2,500 Tokens</p>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-center space-x-2">
                     <Check className="text-athlete-success" size={16} />
-                    <span className="text-gray-300">2,500 analysis tokens</span>
+                    <span className="text-foreground">2,500 analysis tokens</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <Check className="text-athlete-success" size={16} />
-                    <span className="text-gray-300">Bulk athlete analysis</span>
+                    <span className="text-foreground">Bulk athlete analysis</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <Check className="text-athlete-success" size={16} />
-                    <span className="text-gray-300">Team insights</span>
+                    <span className="text-foreground">Team insights</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <Check className="text-athlete-success" size={16} />
-                    <span className="text-gray-300">Custom reports</span>
+                    <span className="text-foreground">Custom reports</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <Check className="text-athlete-success" size={16} />
-                    <span className="text-gray-300">API access</span>
+                    <span className="text-foreground">API access</span>
                   </li>
                 </ul>
                 <Button 
                   onClick={() => handlePurchase(50)}
                   data-testid="button-purchase-enterprise"
-                  className="w-full bg-athlete-gray-700 hover:bg-athlete-gray-600 text-white"
+                  className="w-full bg-muted hover:bg-slate-100 text-white"
                 >
                   Get Enterprise
                 </Button>
@@ -176,32 +176,32 @@ export default function Subscribe() {
               What You Get With Tokens
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="bg-athlete-gray-800 border-gray-700">
+              <Card className="bg-card border">
                 <CardContent className="p-6 text-center">
                   <div className="text-3xl mb-4">📊</div>
                   <h3 className="font-semibold mb-2 text-white">Bio Analysis</h3>
-                  <p className="text-sm text-gray-400">50 tokens</p>
+                  <p className="text-sm text-muted-foreground">50 tokens</p>
                 </CardContent>
               </Card>
-              <Card className="bg-athlete-gray-800 border-gray-700">
+              <Card className="bg-card border">
                 <CardContent className="p-6 text-center">
                   <div className="text-3xl mb-4">🏆</div>
                   <h3 className="font-semibold mb-2 text-white">Rank History</h3>
-                  <p className="text-sm text-gray-400">70 tokens</p>
+                  <p className="text-sm text-muted-foreground">70 tokens</p>
                 </CardContent>
               </Card>
-              <Card className="bg-athlete-gray-800 border-gray-700">
+              <Card className="bg-card border">
                 <CardContent className="p-6 text-center">
                   <div className="text-3xl mb-4">💪</div>
                   <h3 className="font-semibold mb-2 text-white">Strengths/Weaknesses</h3>
-                  <p className="text-sm text-gray-400">50 tokens each</p>
+                  <p className="text-sm text-muted-foreground">50 tokens each</p>
                 </CardContent>
               </Card>
-              <Card className="bg-athlete-gray-800 border-gray-700">
+              <Card className="bg-card border">
                 <CardContent className="p-6 text-center">
                   <div className="text-3xl mb-4">🎥</div>
                   <h3 className="font-semibold mb-2 text-white">Video Analysis</h3>
-                  <p className="text-sm text-gray-400">120 tokens</p>
+                  <p className="text-sm text-muted-foreground">120 tokens</p>
                 </CardContent>
               </Card>
             </div>

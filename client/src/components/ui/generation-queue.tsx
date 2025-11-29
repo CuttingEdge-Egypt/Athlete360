@@ -613,7 +613,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
                         {getServiceLabel(item.serviceType)}
                       </Badge>
                     </div>
-                    <div className="flex items-center flex-wrap text-gray-400" style={{ gap: isMobile ? '4px' : '8px', fontSize: isMobile ? '11px' : '12px' }}>
+                    <div className="flex items-center flex-wrap text-muted-foreground" style={{ gap: isMobile ? '4px' : '8px', fontSize: isMobile ? '11px' : '12px' }}>
                       {getStatusIcon(item.status)}
                       <span className="truncate" style={{ maxWidth: isMobile ? '140px' : 'none' }}>
                         {item.status === 'error' ? item.error : 
@@ -653,7 +653,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
                     <Button
                       variant="ghost"
                       onClick={() => removeGeneration(item.id, item.status === 'running')}
-                      className="p-0 text-gray-400 hover:text-red-400"
+                      className="p-0 text-muted-foreground hover:text-red-400"
                       style={{ height: isMobile ? '32px' : '24px', width: isMobile ? '32px' : '24px' }}
                       title={item.status === 'running' ? t('services.queue.cancel') : t('services.queue.remove')}
                     >
@@ -667,7 +667,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
         )}
 
         {queue.length === 0 && !isMinimized && (
-          <CardContent className="p-3 md:p-4 text-center text-gray-400 text-xs md:text-sm">
+          <CardContent className="p-3 md:p-4 text-center text-muted-foreground text-xs md:text-sm">
             {t('services.queue.emptyQueue')}
           </CardContent>
         )}

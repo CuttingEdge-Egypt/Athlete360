@@ -150,7 +150,7 @@ export function ProfileDropdown({ customTrigger }: ProfileDropdownProps = {}) {
                     <Input
                       value={user.referralCode}
                       readOnly
-                      className="text-xs h-7 font-mono bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      className="text-xs h-7 font-mono bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-foreground"
                       data-testid="input-referral-code"
                     />
                     <Button

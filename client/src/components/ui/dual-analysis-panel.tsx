@@ -1252,7 +1252,7 @@ export function DualAnalysisPanel({
     if (availableYears.length === 0 || !rankingProgression || rankingProgression.length === 0) {
       return (
         <div className="p-6 text-center">
-          <p className="text-gray-400">No competitive history data available</p>
+          <p className="text-muted-foreground">No competitive history data available</p>
         </div>
       );
     }
@@ -1388,7 +1388,7 @@ export function DualAnalysisPanel({
                             )}
 
                             {comp.location && (
-                              <div className={`text-sm text-gray-400 mb-2 ${isArabic ? 'text-right' : ''}`}>
+                              <div className={`text-sm text-muted-foreground mb-2 ${isArabic ? 'text-right' : ''}`}>
                                 📍 {comp.location}
                               </div>
                             )}
@@ -1396,7 +1396,7 @@ export function DualAnalysisPanel({
                             {/* Additional Details */}
                             <div className={`flex items-center gap-4 text-sm flex-wrap ${isArabic ? 'flex-row-reverse' : ''}`}>
                               {comp.pool_type && (
-                                <div className="text-gray-400">
+                                <div className="text-muted-foreground">
                                   {isArabic ? (
                                     <><span className="text-teal-400 font-semibold">{comp.pool_type}</span> :{t('competitiveHistory.pool', 'Pool').replace(':', '')}</>
                                   ) : (
@@ -1405,7 +1405,7 @@ export function DualAnalysisPanel({
                                 </div>
                               )}
                               {comp.distance && (
-                                <div className="text-gray-400">
+                                <div className="text-muted-foreground">
                                   {isArabic ? (
                                     <><span className="text-cyan-400 font-semibold">{comp.distance}</span> :{t('competitiveHistory.distance', 'Distance').replace(':', '')}</>
                                   ) : (
@@ -1414,12 +1414,12 @@ export function DualAnalysisPanel({
                                 </div>
                               )}
                               {comp.rankingPoints && (
-                                <div className="text-gray-400">
+                                <div className="text-muted-foreground">
                                   {t('competitiveHistory.points')} <span className="text-green-400 font-semibold">{comp.rankingPoints}</span>
                                 </div>
                               )}
                               {comp.gRank && (
-                                <div className="text-gray-400">
+                                <div className="text-muted-foreground">
                                   {isArabic ? (
                                     <><span className="text-blue-400 font-semibold">{comp.gRank}</span> :{t('competitiveHistory.gRank').replace(':', '')}</>
                                   ) : (
@@ -1428,7 +1428,7 @@ export function DualAnalysisPanel({
                                 </div>
                               )}
                               {comp.ranking && comp.ranking !== 'N/A' && (
-                                <div className="text-gray-400">
+                                <div className="text-muted-foreground">
                                   {isArabic ? (
                                     <><span className="text-muted-foreground">{comp.ranking}</span> :{t('competitiveHistory.category').replace(':', '')}</>
                                   ) : (
@@ -1458,7 +1458,7 @@ export function DualAnalysisPanel({
                 <Trophy className={`${isArabic ? 'ml-3' : 'mr-3'} text-blue-400`} size={24} />
                 {t('competitiveHistory.careerPhases', 'Career Phases')}
               </CardTitle>
-              <div className={`text-sm text-gray-400 ${isArabic ? 'text-right' : ''}`}>Professional career progression through different phases</div>
+              <div className={`text-sm text-muted-foreground ${isArabic ? 'text-right' : ''}`}>Professional career progression through different phases</div>
             </CardHeader>
             <CardContent>
               <div className="relative">
@@ -1531,7 +1531,7 @@ export function DualAnalysisPanel({
                                             </div>
                                           )}
 
-                                          <div className={`text-sm text-gray-400 mb-2 ${isArabic ? 'text-right' : ''}`}>
+                                          <div className={`text-sm text-muted-foreground mb-2 ${isArabic ? 'text-right' : ''}`}>
                                             {achievement.event_tier}
                                           </div>
 
@@ -1580,7 +1580,7 @@ export function DualAnalysisPanel({
                 <Calendar className={`${isArabic ? 'ml-3' : 'mr-3'} text-purple-400`} size={24} />
                 {t('competitiveHistory.title')}
               </CardTitle>
-              <div className={`text-sm text-gray-400 ${isArabic ? 'text-right' : ''}`}>{t('competitiveHistory.subtitle')}</div>
+              <div className={`text-sm text-muted-foreground ${isArabic ? 'text-right' : ''}`}>{t('competitiveHistory.subtitle')}</div>
             </CardHeader>
             <CardContent className={`space-y-6 ${isArabic ? 'text-right' : ''}`} dir={isArabic ? 'rtl' : 'ltr'}>
               {careerOverview && (
@@ -1608,7 +1608,7 @@ export function DualAnalysisPanel({
                         <p className={`text-muted-foreground mb-3 ${isArabic ? 'text-right' : ''}`}>{period.description}</p>
                         {period.key_results && period.key_results.length > 0 && (
                           <div className={`space-y-1 ${isArabic ? 'text-right' : ''}`}>
-                            <p className={`text-sm font-semibold text-gray-400 mb-2 ${isArabic ? 'text-right' : ''}`}>{t('competitiveHistory.keyResults')}</p>
+                            <p className={`text-sm font-semibold text-muted-foreground mb-2 ${isArabic ? 'text-right' : ''}`}>{t('competitiveHistory.keyResults')}</p>
                             {period.key_results.map((result: string, idx: number) => (
                               <div key={idx} className="flex items-start gap-2">
                                 <Award className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
