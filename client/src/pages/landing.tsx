@@ -9,6 +9,7 @@ import { AnalysisPopup } from "@/components/ui/analysis-popup";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/useLanguage";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import logoImage from "@assets/Athlete360Logo-removebg-preview_1764434600616.png";
 
 interface PreviewAnalysisItem {
   serviceType: string;
@@ -66,8 +67,7 @@ export default function Landing() {
       <nav className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-lg border-b border-gray-200 shadow-sm">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2 flex-shrink-0">
-            <Trophy className="text-primary text-xl sm:text-2xl" />
-            <span className="text-lg sm:text-xl font-bold text-foreground">{t('landing.navigation.brand')}</span>
+            <img src={logoImage} alt="Athlete360" className="h-8 sm:h-10 w-auto" />
           </div>
           <div className="flex items-center gap-1.5 sm:gap-3">
             <Button 
@@ -436,8 +436,7 @@ export default function Landing() {
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <Trophy className="text-primary text-xl" />
-                <span className="text-lg font-bold text-foreground">Athlete360</span>
+                <img src={logoImage} alt="Athlete360" className="h-8 w-auto" />
               </div>
               <p className="text-muted-foreground text-sm">AI-powered athlete analytics for the next generation of sports analysis.</p>
             </div>

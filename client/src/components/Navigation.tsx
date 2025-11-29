@@ -6,8 +6,9 @@ import { HistoryDropdown } from "@/components/ui/history-dropdown";
 import { ProfileDropdown } from "@/components/ui/profile-dropdown";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Trophy, Clock, Coins, Plus, LogOut, User as UserIcon, Video, Menu, Globe } from "lucide-react";
+import { Clock, Coins, Plus, LogOut, User as UserIcon, Video, Menu, Globe } from "lucide-react";
 import { Link } from "wouter";
+import logoImage from "@assets/Athlete360Logo-removebg-preview_1764434600616.png";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -62,8 +63,7 @@ export function Navigation() {
       <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
         <div className="flex justify-between items-center">
           <Link href="/" className={`flex items-center cursor-pointer ${isArabic ? 'space-x-reverse space-x-2' : 'space-x-2'} flex-shrink-0`}>
-            <Trophy className="text-primary text-xl sm:text-2xl" />
-            <span className="text-lg sm:text-xl font-bold text-foreground">{t('brand')}</span>
+            <img src={logoImage} alt="Athlete360" className="h-8 sm:h-10 w-auto" />
           </Link>
           
           {/* Desktop Menu */}
