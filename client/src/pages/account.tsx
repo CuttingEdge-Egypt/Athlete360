@@ -190,25 +190,25 @@ export default function Account() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center" dir={isArabic ? 'rtl' : 'ltr'}>
-        <div className={`text-white ${isArabic ? 'text-xl' : 'text-base'}`}>{t('loading')}</div>
+      <div className="min-h-screen bg-background flex items-center justify-center" dir={isArabic ? 'rtl' : 'ltr'}>
+        <div className={`text-foreground ${isArabic ? 'text-xl' : 'text-base'}`}>{t('loading')}</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900" dir={isArabic ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-background" dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="container mx-auto p-3 sm:p-6 max-w-4xl">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-6 sm:mb-8">
           <div>
-            <h1 className={`${isArabic ? 'text-2xl sm:text-4xl' : 'text-xl sm:text-3xl'} font-bold text-white`}>{t('header.title')}</h1>
-            <p className={`text-gray-400 mt-1 ${isArabic ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>{t('header.subtitle')}</p>
+            <h1 className={`${isArabic ? 'text-2xl sm:text-4xl' : 'text-xl sm:text-3xl'} font-bold text-foreground`}>{t('header.title')}</h1>
+            <p className={`text-muted-foreground mt-1 ${isArabic ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>{t('header.subtitle')}</p>
           </div>
           <Button 
             variant="outline" 
             onClick={() => setLocation('/')}
-            className={`border-gray-600 text-gray-300 hover:bg-gray-700 h-11 w-full sm:w-auto ${isArabic ? 'flex-row-reverse' : ''}`}
+            className={`h-11 w-full sm:w-auto ${isArabic ? 'flex-row-reverse' : ''}`}
             data-testid="button-back-home"
           >
             <ArrowLeft className={`${isArabic ? 'ml-2 rotate-180' : 'mr-2'} h-4 w-4`} />
@@ -218,14 +218,14 @@ export default function Account() {
 
         <div className="grid gap-4 sm:gap-6">
           {/* Profile Information */}
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="bg-card border shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle className={`${isArabic ? 'text-2xl flex-row-reverse' : 'text-xl'} text-white flex items-center gap-2`}>
-                  <User className="h-5 w-5 text-blue-400" />
+                <CardTitle className={`${isArabic ? 'text-2xl flex-row-reverse' : 'text-xl'} text-foreground flex items-center gap-2`}>
+                  <User className="h-5 w-5 text-primary" />
                   {t('profile.title')}
                 </CardTitle>
-                <CardDescription className={`text-gray-400 ${isArabic ? 'text-base' : 'text-sm'}`}>
+                <CardDescription className={`text-muted-foreground ${isArabic ? 'text-base' : 'text-sm'}`}>
                   {t('profile.subtitle')}
                 </CardDescription>
               </div>
@@ -246,7 +246,7 @@ export default function Account() {
                     setEditingProfile(true);
                   }
                 }}
-                className={`border-gray-600 h-11 ${isArabic ? 'flex-row-reverse' : ''}`}
+                className={`h-11 ${isArabic ? 'flex-row-reverse' : ''}`}
                 data-testid={editingProfile ? "button-cancel-edit" : "button-edit-profile"}
               >
                 {editingProfile ? <X className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} /> : <Edit3 className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />}
@@ -255,25 +255,25 @@ export default function Account() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Token Balance */}
-              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-lg border border-green-500/20">
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/10 to-teal-500/10 rounded-lg border border-primary/20">
                 <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                  <Coins className="h-6 w-6 text-green-400" />
+                  <Coins className="h-6 w-6 text-primary" />
                   <div>
-                    <p className={`font-medium text-green-400 ${isArabic ? 'text-lg' : 'text-base'}`}>{t('tokens.title')}</p>
-                    <p className={`${isArabic ? 'text-base' : 'text-sm'} text-gray-400`}>{t('tokens.current')}</p>
+                    <p className={`font-medium text-primary ${isArabic ? 'text-lg' : 'text-base'}`}>{t('tokens.title')}</p>
+                    <p className={`${isArabic ? 'text-base' : 'text-sm'} text-muted-foreground`}>{t('tokens.current')}</p>
                   </div>
                 </div>
                 <div className={`${isArabic ? 'text-left' : 'text-right'}`}>
-                  <div className="text-2xl font-bold text-green-400">
+                  <div className="text-2xl font-bold text-primary">
                     {profile?.currentTokens ?? 0}
                   </div>
-                  <div className={`${isArabic ? 'text-base' : 'text-sm'} text-gray-400`}>
+                  <div className={`${isArabic ? 'text-base' : 'text-sm'} text-muted-foreground`}>
                     {t('tokens.totalPurchased')}: {profile?.totalTokensPurchased ?? 0}
                   </div>
                 </div>
               </div>
 
-              <Separator className="bg-gray-700" />
+              <Separator />
 
               {/* Profile Fields */}
               <div className="space-y-4">
@@ -285,7 +285,7 @@ export default function Account() {
                       value={profileData.firstName}
                       onChange={(e) => setProfileData(prev => ({ ...prev, firstName: e.target.value }))}
                       disabled={!editingProfile}
-                      className={`bg-gray-900/50 border-gray-600 h-11 ${isArabic ? 'text-lg' : 'text-base'}`}
+                      className={`h-11 ${isArabic ? 'text-lg' : 'text-base'}`}
                       data-testid="input-first-name"
                     />
                   </div>
@@ -296,7 +296,7 @@ export default function Account() {
                       value={profileData.lastName}
                       onChange={(e) => setProfileData(prev => ({ ...prev, lastName: e.target.value }))}
                       disabled={!editingProfile}
-                      className={`bg-gray-900/50 border-gray-600 h-11 ${isArabic ? 'text-lg' : 'text-base'}`}
+                      className={`h-11 ${isArabic ? 'text-lg' : 'text-base'}`}
                       data-testid="input-last-name"
                     />
                   </div>
@@ -310,7 +310,7 @@ export default function Account() {
                     value={profileData.email}
                     onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
                     disabled={!editingProfile}
-                    className={`bg-gray-900/50 border-gray-600 h-11 ${isArabic ? 'text-lg' : 'text-base'}`}
+                    className={`h-11 ${isArabic ? 'text-lg' : 'text-base'}`}
                     data-testid="input-email"
                   />
                 </div>
@@ -319,7 +319,7 @@ export default function Account() {
                   <Button 
                     onClick={handleSaveProfile}
                     disabled={updateProfileMutation.isPending}
-                    className={`bg-blue-600 hover:bg-blue-700 h-11 ${isArabic ? 'flex-row-reverse' : ''}`}
+                    className={`bg-primary hover:bg-teal-600 h-11 ${isArabic ? 'flex-row-reverse' : ''}`}
                     data-testid="button-save-profile"
                   >
                     <Save className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
@@ -328,13 +328,13 @@ export default function Account() {
                 )}
               </div>
 
-              <Separator className="bg-gray-700" />
+              <Separator />
 
               {/* Account Info */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div>
-                  <Label className={`text-gray-400 ${isArabic ? 'text-base' : 'text-sm'}`}>{t('profile.memberSince')}</Label>
-                  <div className={`text-white font-medium ${isArabic ? 'text-lg' : 'text-base'}`}>
+                  <Label className={`text-muted-foreground ${isArabic ? 'text-base' : 'text-sm'}`}>{t('profile.memberSince')}</Label>
+                  <div className={`text-foreground font-medium ${isArabic ? 'text-lg' : 'text-base'}`}>
                     {profile?.memberSince ? new Date(profile.memberSince).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US') : 'N/A'}
                   </div>
                 </div>
@@ -343,13 +343,13 @@ export default function Account() {
           </Card>
 
           {/* Analysis History */}
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="bg-card border shadow-sm">
             <CardHeader>
-              <CardTitle className={`${isArabic ? 'text-2xl flex-row-reverse' : 'text-xl'} text-white flex items-center gap-2`}>
-                <History className="h-5 w-5 text-blue-400" />
+              <CardTitle className={`${isArabic ? 'text-2xl flex-row-reverse' : 'text-xl'} text-foreground flex items-center gap-2`}>
+                <History className="h-5 w-5 text-primary" />
                 {t('history.title')}
               </CardTitle>
-              <CardDescription className={`text-gray-400 ${isArabic ? 'text-base' : 'text-sm'}`}>
+              <CardDescription className={`text-muted-foreground ${isArabic ? 'text-base' : 'text-sm'}`}>
                 {t('history.subtitle')}
               </CardDescription>
             </CardHeader>
@@ -364,25 +364,25 @@ export default function Account() {
                       <button
                         key={item.id}
                         onClick={() => handleHistoryItemClick(item)}
-                        className="w-full flex items-center justify-between p-3 bg-gray-900/50 rounded-lg border border-gray-700 hover:border-blue-500/50 hover:bg-gray-900/80 transition-all cursor-pointer text-left min-h-[56px]"
+                        className="w-full flex items-center justify-between p-3 bg-muted/50 rounded-lg border hover:border-primary/50 hover:bg-muted transition-all cursor-pointer text-left min-h-[56px]"
                         data-testid={`button-history-item-${item.id}`}
                       >
                         <div className={`flex items-center gap-3 flex-1 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                          <div className="p-2 rounded-lg bg-blue-500/10">
-                            <ServiceIcon className="h-4 w-4 text-blue-400" />
+                          <div className="p-2 rounded-lg bg-primary/10">
+                            <ServiceIcon className="h-4 w-4 text-primary" />
                           </div>
                           <div className={`flex-1 ${isArabic ? 'text-right' : 'text-left'}`}>
-                            <div className={`font-medium text-white ${isArabic ? 'text-lg' : 'text-base'}`}>
+                            <div className={`font-medium text-foreground ${isArabic ? 'text-lg' : 'text-base'}`}>
                               {serviceLabel}
                             </div>
-                            <div className={`${isArabic ? 'text-base' : 'text-sm'} text-gray-400`}>
+                            <div className={`${isArabic ? 'text-base' : 'text-sm'} text-muted-foreground`}>
                               {item.athleteName && `${item.athleteName} • `}
                               {item.athleteSport && `${item.athleteSport} • `}
                               {new Date(item.createdAt).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US')}
                             </div>
                           </div>
                         </div>
-                        <Badge variant="outline" className="text-xs border-blue-500 text-blue-400">
+                        <Badge variant="outline" className="text-xs border-primary text-primary">
                           -{item.tokensDeducted} {t('tokens.tokens')}
                         </Badge>
                       </button>
@@ -390,7 +390,7 @@ export default function Account() {
                   })}
                 </div>
               ) : (
-                <div className={`text-center py-8 text-gray-400 ${isArabic ? 'text-lg' : 'text-base'}`}>
+                <div className={`text-center py-8 text-muted-foreground ${isArabic ? 'text-lg' : 'text-base'}`}>
                   <History className="h-8 w-8 mx-auto mb-3 opacity-50" />
                   <p>{t('history.emptyState')}</p>
                 </div>

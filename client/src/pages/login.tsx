@@ -91,15 +91,15 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-3 sm:p-4" dir={isArabic ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-white flex items-center justify-center p-3 sm:p-4" dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
           <div className={`flex items-center justify-center gap-2 mb-3 sm:mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
-            <LogIn className={`h-6 w-6 sm:h-8 sm:w-8 text-blue-500 ${isArabic ? 'scale-x-[-1]' : ''}`} />
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">{t('login.welcomeBack')}</h1>
+            <LogIn className={`h-6 w-6 sm:h-8 sm:w-8 text-primary ${isArabic ? 'scale-x-[-1]' : ''}`} />
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t('login.welcomeBack')}</h1>
           </div>
-          <p className="text-gray-300 text-base sm:text-lg px-2">
+          <p className="text-muted-foreground text-base sm:text-lg px-2">
             {t('login.signInToAccount')}
           </p>
           
@@ -107,7 +107,7 @@ export function LoginPage() {
           <Button 
             variant="ghost" 
             onClick={() => setLocation('/')}
-            className="mt-3 sm:mt-4 text-gray-400 hover:text-white h-11"
+            className="mt-3 sm:mt-4 text-muted-foreground hover:text-foreground h-11"
             data-testid="button-back-home"
           >
             {isArabic ? (
@@ -125,13 +125,13 @@ export function LoginPage() {
         </div>
 
         {/* Main Content */}
-        <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
+        <Card className="bg-card/80 border shadow-lg backdrop-blur-sm">
           <CardHeader className="text-center pb-4 sm:pb-6 px-4 sm:px-6">
-            <CardTitle className={`flex items-center justify-center gap-2 text-xl sm:text-2xl text-white ${isArabic ? 'flex-row-reverse' : ''}`}>
-              <User className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
+            <CardTitle className={`flex items-center justify-center gap-2 text-xl sm:text-2xl text-foreground ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <User className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
               {t('login.signIn')}
             </CardTitle>
-            <CardDescription className="text-gray-300 text-sm sm:text-base px-2">
+            <CardDescription className="text-muted-foreground text-sm sm:text-base px-2">
               {t('login.enterCredentials')}
             </CardDescription>
           </CardHeader>
@@ -139,7 +139,7 @@ export function LoginPage() {
           <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
             <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
               <div className="space-y-2 sm:space-y-4">
-                <Label htmlFor="email" className={`text-sm font-medium text-gray-200 ${isArabic ? 'text-right block' : ''}`}>
+                <Label htmlFor="email" className={`text-sm font-medium text-foreground ${isArabic ? 'text-right block' : ''}`}>
                   {t('login.emailAddress')}
                 </Label>
                 <Input
@@ -148,14 +148,14 @@ export function LoginPage() {
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   placeholder={t('login.emailPlaceholder')}
-                  className={`h-12 text-base bg-gray-700 border-gray-600 text-white ${isArabic ? 'text-right' : ''}`}
+                  className={`h-12 text-base bg-background border text-foreground ${isArabic ? 'text-right' : ''}`}
                   data-testid="input-login-email"
                   required
                 />
               </div>
               
               <div className="space-y-2 sm:space-y-4">
-                <Label htmlFor="password" className={`text-sm font-medium text-gray-200 ${isArabic ? 'text-right block' : ''}`}>
+                <Label htmlFor="password" className={`text-sm font-medium text-foreground ${isArabic ? 'text-right block' : ''}`}>
                   {t('login.password')}
                 </Label>
                 <Input
@@ -164,7 +164,7 @@ export function LoginPage() {
                   value={formData.password}
                   onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                   placeholder={t('login.passwordPlaceholder')}
-                  className={`h-12 text-base bg-gray-700 border-gray-600 text-white ${isArabic ? 'text-right' : ''}`}
+                  className={`h-12 text-base bg-background border text-foreground ${isArabic ? 'text-right' : ''}`}
                   data-testid="input-login-password"
                   required
                 />
@@ -173,7 +173,7 @@ export function LoginPage() {
               <Button 
                 type="submit"
                 disabled={isProcessing}
-                className={`w-full bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white font-medium h-12 text-base ${isArabic ? 'flex-row-reverse' : ''}`}
+                className={`w-full bg-primary hover:bg-teal-600 text-white font-medium h-12 text-base ${isArabic ? 'flex-row-reverse' : ''}`}
                 data-testid="button-login-submit"
               >
                 {isProcessing ? (
@@ -191,11 +191,11 @@ export function LoginPage() {
             </form>
             
             {/* Security Notice */}
-            <div className={`flex items-start gap-3 p-4 bg-blue-50/10 rounded-lg border border-blue-500/30 mt-6 ${isArabic ? 'flex-row-reverse text-right' : ''}`}>
-              <Lock className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
+            <div className={`flex items-start gap-3 p-4 bg-primary/10 rounded-lg border border-primary/30 mt-6 ${isArabic ? 'flex-row-reverse text-right' : ''}`}>
+              <Lock className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
               <div>
-                <h4 className="font-medium text-blue-300 text-sm mb-1">{t('login.secureLogin')}</h4>
-                <p className="text-sm text-blue-200">
+                <h4 className="font-medium text-primary text-sm mb-1">{t('login.secureLogin')}</h4>
+                <p className="text-sm text-muted-foreground">
                   {t('login.secureLoginDesc')}
                 </p>
               </div>
@@ -205,12 +205,12 @@ export function LoginPage() {
         
         {/* Footer */}
         <div className="text-center mt-8">
-          <p className="text-gray-400">
+          <p className="text-muted-foreground">
             {t('login.noAccount')}{' '}
             <Button 
               variant="link" 
               onClick={() => setLocation('/signup')}
-              className="text-blue-400 hover:text-blue-300 p-0 h-auto"
+              className="text-primary hover:text-teal-600 p-0 h-auto"
               data-testid="link-signup"
             >
               {t('login.signUpHere')}

@@ -366,20 +366,20 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
   return (
     <>
       <Card 
-        className={`service-card h-full bg-gradient-to-br from-athlete-gray-800 to-athlete-gray-700 border-gray-700 hover:border-athlete-accent transition-all duration-300 hover:shadow-lg hover:shadow-athlete-accent/20 ${
+        className={`service-card h-full bg-gradient-to-br from-white to-gray-50 border hover:border-athlete-accent transition-all duration-300 hover:shadow-lg hover:shadow-athlete-accent/20 ${
           (analysisMutation.isPending || isProcessing) ? 'opacity-75' : ''
         } relative overflow-hidden`}
       >
       {service.id === 'statistics' && (
         <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-10 flex items-center justify-center">
           <div className="text-center space-y-3">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-athlete-accent/20 mb-2">
-              <svg className="w-8 h-8 text-athlete-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 mb-2">
+              <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
             <div className="space-y-1">
-              <h3 className="text-xl font-bold text-white">Coming Soon</h3>
+              <h3 className="text-xl font-bold text-foreground">Coming Soon</h3>
             </div>
           </div>
         </div>
@@ -403,19 +403,19 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
           {/* Bottom row: icon and token badge horizontally aligned */}
           <div className="flex justify-between items-center">
             <IconComponent className={`text-2xl ${service.color}`} size={32} />
-            <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">
+            <span className="bg-amber-400 text-black text-xs px-2 py-1 rounded-full font-semibold">
               {service.cost} {t('units.tokens', { ns: 'common' })}
             </span>
           </div>
         </div>
         
-        <h3 className="text-lg font-semibold mb-2 text-white">{service.title}</h3>
-        <p className="text-gray-400 text-sm mb-4 flex-grow">{service.description}</p>
+        <h3 className="text-lg font-semibold mb-2 text-foreground">{service.title}</h3>
+        <p className="text-muted-foreground text-sm mb-4 flex-grow">{service.description}</p>
         
         <div className="mt-auto space-y-2">
           <Button 
             data-testid={`button-${service.id}`}
-            className="w-full bg-athlete-accent hover:bg-blue-600 text-white transition-colors min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-primary hover:bg-teal-600 text-white transition-colors min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={analysisMutation.isPending || isProcessing || service.id === 'statistics'}
             onClick={(e) => {
               e.stopPropagation();
@@ -454,7 +454,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
             <Button
               data-testid={`button-preview-history-${service.id}`}
               variant="outline"
-              className="w-full border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white min-h-[44px]"
+              className="w-full border text-muted-foreground hover:bg-muted hover:text-foreground min-h-[44px]"
               onClick={handleHistoryPreview}
             >
               <Eye className="mr-2" size={16} />

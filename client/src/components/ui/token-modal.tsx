@@ -58,20 +58,20 @@ export function TokenModal({ open, onOpenChange }: TokenModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-athlete-gray-800 border-gray-700 text-white w-[95vw] max-w-md sm:max-w-lg max-h-[95vh] overflow-y-auto" dir={isArabic ? 'rtl' : 'ltr'}>
+      <DialogContent className="bg-card border text-foreground w-[95vw] max-w-md sm:max-w-lg max-h-[95vh] overflow-y-auto" dir={isArabic ? 'rtl' : 'ltr'}>
         <DialogHeader className="text-center">
           <div className="text-5xl mb-3">🪙</div>
           <DialogTitle className={`${isArabic ? 'text-2xl' : 'text-xl'} font-bold text-athlete-warning mb-2`}>
             {t('modal.title')}
           </DialogTitle>
-          <DialogDescription className={`text-gray-300 ${isArabic ? 'text-base' : 'text-sm'}`}>
+          <DialogDescription className={`text-muted-foreground ${isArabic ? 'text-base' : 'text-sm'}`}>
             {t('modal.description')}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 mt-4">
           {/* Professional Pack - Most Popular */}
-          <Card className="bg-athlete-gray-700 border-athlete-accent border-2 relative">
+          <Card className="bg-white border-athlete-accent border-2 relative">
             <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
               <span className={`bg-athlete-accent text-white px-3 py-1 rounded-full ${isArabic ? 'text-sm' : 'text-xs'} font-semibold`}>
                 {t('packs.professional.badge')}
@@ -82,12 +82,12 @@ export function TokenModal({ open, onOpenChange }: TokenModalProps) {
                 <div className={`flex items-center ${isArabic ? 'space-x-reverse space-x-3 flex-row-reverse' : 'space-x-3'}`}>
                   <Trophy className="text-athlete-accent" size={24} />
                   <div className={isArabic ? 'text-right' : 'text-left'}>
-                    <h4 className={`font-semibold text-white ${isArabic ? 'text-lg' : 'text-base'}`}>{t('packs.professional.name')}</h4>
-                    <p className={`${isArabic ? 'text-base' : 'text-sm'} text-gray-400`}>{t('packs.professional.tokens')}</p>
+                    <h4 className={`font-semibold text-foreground ${isArabic ? 'text-lg' : 'text-base'}`}>{t('packs.professional.name')}</h4>
+                    <p className={`${isArabic ? 'text-base' : 'text-sm'} text-muted-foreground`}>{t('packs.professional.tokens')}</p>
                   </div>
                 </div>
                 <div className={isArabic ? 'text-left' : 'text-right'}>
-                  <div className={`font-bold text-white ${isArabic ? 'text-lg' : 'text-base'}`}>{t('packs.professional.price')}</div>
+                  <div className={`font-bold text-foreground ${isArabic ? 'text-lg' : 'text-base'}`}>{t('packs.professional.price')}</div>
                   <div className={`${isArabic ? 'text-sm' : 'text-xs'} text-athlete-accent`}>{t('packs.professional.value')}</div>
                 </div>
               </div>
@@ -110,18 +110,18 @@ export function TokenModal({ open, onOpenChange }: TokenModalProps) {
           </Card>
 
           {/* Starter Pack */}
-          <Card className="bg-athlete-gray-700 border-gray-600">
+          <Card className="bg-white border">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className={`flex items-center ${isArabic ? 'space-x-reverse space-x-3 flex-row-reverse' : 'space-x-3'}`}>
                   <Coins className="text-athlete-warning" size={24} />
                   <div className={isArabic ? 'text-right' : 'text-left'}>
-                    <h4 className={`font-semibold text-white ${isArabic ? 'text-lg' : 'text-base'}`}>{t('packs.starter.name')}</h4>
-                    <p className={`${isArabic ? 'text-base' : 'text-sm'} text-gray-400`}>{t('packs.starter.tokens')}</p>
+                    <h4 className={`font-semibold text-foreground ${isArabic ? 'text-lg' : 'text-base'}`}>{t('packs.starter.name')}</h4>
+                    <p className={`${isArabic ? 'text-base' : 'text-sm'} text-muted-foreground`}>{t('packs.starter.tokens')}</p>
                   </div>
                 </div>
                 <div className={isArabic ? 'text-left' : 'text-right'}>
-                  <div className={`font-bold text-white ${isArabic ? 'text-lg' : 'text-base'}`}>{t('packs.starter.price')}</div>
+                  <div className={`font-bold text-foreground ${isArabic ? 'text-lg' : 'text-base'}`}>{t('packs.starter.price')}</div>
                 </div>
               </div>
               <Button 
@@ -129,7 +129,7 @@ export function TokenModal({ open, onOpenChange }: TokenModalProps) {
                 data-testid="button-purchase-500"
                 disabled={purchaseMutation.isPending}
                 variant="outline"
-                className={`w-full border-gray-600 text-white hover:bg-athlete-gray-600 ${isArabic ? 'text-base flex-row-reverse' : 'text-sm'}`}
+                className={`w-full border text-foreground hover:bg-muted ${isArabic ? 'text-base flex-row-reverse' : 'text-sm'}`}
               >
                 {purchaseMutation.isPending ? (
                   <>
@@ -144,19 +144,19 @@ export function TokenModal({ open, onOpenChange }: TokenModalProps) {
           </Card>
 
           {/* Enterprise Pack */}
-          <Card className="bg-athlete-gray-700 border-gray-600">
+          <Card className="bg-white border">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className={`flex items-center ${isArabic ? 'space-x-reverse space-x-3 flex-row-reverse' : 'space-x-3'}`}>
                   <Zap className="text-yellow-400" size={24} />
                   <div className={isArabic ? 'text-right' : 'text-left'}>
-                    <h4 className={`font-semibold text-white ${isArabic ? 'text-lg' : 'text-base'}`}>{t('packs.enterprise.name')}</h4>
-                    <p className={`${isArabic ? 'text-base' : 'text-sm'} text-gray-400`}>{t('packs.enterprise.tokens')}</p>
+                    <h4 className={`font-semibold text-foreground ${isArabic ? 'text-lg' : 'text-base'}`}>{t('packs.enterprise.name')}</h4>
+                    <p className={`${isArabic ? 'text-base' : 'text-sm'} text-muted-foreground`}>{t('packs.enterprise.tokens')}</p>
                   </div>
                 </div>
                 <div className={isArabic ? 'text-left' : 'text-right'}>
-                  <div className={`font-bold text-white ${isArabic ? 'text-lg' : 'text-base'}`}>{t('packs.enterprise.price')}</div>
-                  <div className={`${isArabic ? 'text-sm' : 'text-xs'} text-gray-400`}>{t('packs.enterprise.value')}</div>
+                  <div className={`font-bold text-foreground ${isArabic ? 'text-lg' : 'text-base'}`}>{t('packs.enterprise.price')}</div>
+                  <div className={`${isArabic ? 'text-sm' : 'text-xs'} text-muted-foreground`}>{t('packs.enterprise.value')}</div>
                 </div>
               </div>
               <Button 
@@ -164,7 +164,7 @@ export function TokenModal({ open, onOpenChange }: TokenModalProps) {
                 data-testid="button-purchase-2500"
                 disabled={purchaseMutation.isPending}
                 variant="outline"
-                className={`w-full border-gray-600 text-white hover:bg-athlete-gray-600 ${isArabic ? 'text-base flex-row-reverse' : 'text-sm'}`}
+                className={`w-full border text-foreground hover:bg-muted ${isArabic ? 'text-base flex-row-reverse' : 'text-sm'}`}
               >
                 {purchaseMutation.isPending ? (
                   <>

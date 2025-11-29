@@ -169,8 +169,8 @@ export function HistoryPanel({ showHeader = true, className = "", onComparisonSe
       ) : historyItems.length === 0 ? (
         <div className="text-center py-12">
           <div className="text-6xl mb-4">📝</div>
-          <h3 className="text-lg font-medium mb-2">No Analysis History Yet</h3>
-          <p className="text-gray-400 max-w-md mx-auto">
+          <h3 className="text-lg font-medium mb-2 text-foreground">No Analysis History Yet</h3>
+          <p className="text-muted-foreground max-w-md mx-auto">
             Start analyzing athletes to see your history appear here. Every analysis you perform will be saved for easy reference.
           </p>
         </div>
@@ -183,7 +183,7 @@ export function HistoryPanel({ showHeader = true, className = "", onComparisonSe
             return (
               <Card 
                 key={item.id}
-                className="bg-gray-800/50 border-gray-700 hover:border-blue-500/50 transition-colors cursor-pointer"
+                className="bg-white/80 border hover:border-blue-500/50 transition-colors cursor-pointer"
                 onClick={() => handleHistoryItemClick(item)}
                 data-testid={`history-item-card-${item.id}`}
               >
@@ -194,18 +194,18 @@ export function HistoryPanel({ showHeader = true, className = "", onComparisonSe
                         <ServiceIcon className="h-4 w-4 text-blue-400" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-white truncate">
+                        <h4 className="font-medium text-foreground truncate">
                           {serviceLabel}
                         </h4>
                         {item.athleteName && (
-                          <p className="text-sm text-gray-400 truncate">
+                          <p className="text-sm text-muted-foreground truncate">
                             {item.athleteName}
                             {item.athleteSport && (
-                              <span className="ml-2 text-gray-500">• {item.athleteSport}</span>
+                              <span className="ml-2 text-muted-foreground/70">• {item.athleteSport}</span>
                             )}
                           </p>
                         )}
-                        <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
                             {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}
@@ -217,7 +217,7 @@ export function HistoryPanel({ showHeader = true, className = "", onComparisonSe
                         </div>
                       </div>
                     </div>
-                    <div className="ml-3 text-gray-400">
+                    <div className="ml-3 text-muted-foreground">
                       →
                     </div>
                   </div>

@@ -94,7 +94,7 @@ export function ProfileDropdown({ customTrigger }: ProfileDropdownProps = {}) {
                 className="h-8 w-8 rounded-full object-cover"
               />
             ) : (
-              <UserIcon className="h-4 w-4 text-gray-300" />
+              <UserIcon className="h-4 w-4 text-muted-foreground" />
             )}
           </Button>
         )}
@@ -209,7 +209,7 @@ export function ProfileDropdown({ customTrigger }: ProfileDropdownProps = {}) {
             <Button
               size="sm"
               onClick={shareReferralLink}
-              className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white text-xs h-8"
+              className="w-full bg-primary hover:bg-teal-600 text-white text-xs h-8"
               data-testid="button-share-referral"
             >
               <ExternalLink className="mr-2 h-3 w-3" />

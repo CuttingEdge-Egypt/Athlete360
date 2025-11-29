@@ -183,10 +183,10 @@ export function AnalysisPopup({
       return (
         <div className="p-6 text-center">
           <div className="text-red-400 mb-4">{t("analysis.unavailable", "⚠ Analysis Unavailable")}</div>
-          <p className="text-gray-300 mb-4">
+          <p className="text-muted-foreground mb-4">
             {parsedData.message || t("analysis.strengths.unableToGenerate", "Unable to generate authentic strengths analysis at this time.")}
           </p>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-muted-foreground">
             {t("analysis.tryAgainLater", "Please try again later or contact support if the issue persists.")}
           </p>
         </div>
@@ -204,7 +204,7 @@ export function AnalysisPopup({
 
     return (
       <div className="space-y-6">
-        <h3 className={`text-lg font-semibold text-white ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t("common:analysis.strengths.athleteStrengths", "Athlete Strengths")}</h3>
+        <h3 className={`text-lg font-semibold text-foreground ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t("common:analysis.strengths.athleteStrengths", "Athlete Strengths")}</h3>
         
         {strengths.length > 0 ? strengths.map((strength: any, index: number) => {
           // Only render if we have authentic strength data
@@ -213,7 +213,7 @@ export function AnalysisPopup({
           }
           
           return (
-            <Card key={index} className="bg-athlete-gray-800 border-gray-600 hover:border-athlete-success/50 transition-colors">
+            <Card key={index} className="bg-card border hover:border-athlete-success/50 transition-colors">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <h3 className="font-bold text-green-400 text-lg mb-2">
@@ -242,17 +242,17 @@ export function AnalysisPopup({
                   )}
                 </div>
                 
-                <p className="text-gray-200 leading-relaxed mb-4">
+                <p className="text-foreground leading-relaxed mb-4">
                   {strength.description}
                 </p>
                 
                 {strength.evidence && (
-                  <div className={`bg-athlete-gray-900 rounded-lg p-4 ${i18n.language === 'ar' ? 'border-r-4 border-l-0' : 'border-l-4'} border-green-400`}>
-                    <h4 className={`font-semibold text-white mb-2 flex items-center ${i18n.language === 'ar' ? 'flex-row-reverse justify-end' : ''}`}>
+                  <div className={`bg-muted rounded-lg p-4 ${i18n.language === 'ar' ? 'border-r-4 border-l-0' : 'border-l-4'} border-green-400`}>
+                    <h4 className={`font-semibold text-foreground mb-2 flex items-center ${i18n.language === 'ar' ? 'flex-row-reverse justify-end' : ''}`}>
                       <Award className={`w-4 h-4 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
                       {t("common:analysis.evidence", "Evidence")}
                     </h4>
-                    <p className={`text-sm text-gray-200 italic ${i18n.language === 'ar' ? 'text-right' : ''}`}>
+                    <p className={`text-sm text-foreground italic ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                       {strength.evidence}
                     </p>
                   </div>
@@ -261,11 +261,11 @@ export function AnalysisPopup({
                 {/* Progress bar for rating visualization */}
                 {strength.rating && (
                   <div className="mt-4">
-                    <div className={`flex justify-between text-sm text-gray-400 mb-1 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                    <div className={`flex justify-between text-sm text-muted-foreground mb-1 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
                       <span>{t("common:analysis.strengths.strengthLevel", "Strength Level")}</span>
                       <span dir={i18n.language === 'ar' ? 'ltr' : 'ltr'}>{formatNumber(strength.rating, i18n.language === 'ar')}%</span>
                     </div>
-                    <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+                    <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
                       <div 
                         className="h-3 rounded-full transition-all duration-700 ease-out"
                         style={{ 
@@ -280,7 +280,7 @@ export function AnalysisPopup({
             </Card>
           );
         }).filter(Boolean) : (
-          <div className="text-gray-400 text-center py-8">
+          <div className="text-muted-foreground text-center py-8">
             <Star className="w-12 h-12 mx-auto mb-4 text-gray-500" />
             <p>{t("analysis.strengths.noData", "No strengths analysis data available")}</p>
             <p className="text-sm mt-2">{t("analysis.strengths.generateNew", "Generate a new analysis to see detailed insights.")}</p>
@@ -300,10 +300,10 @@ export function AnalysisPopup({
       return (
         <div className="p-6 text-center">
           <div className="text-red-400 mb-4">{t("analysis.unavailable", "⚠ Analysis Unavailable")}</div>
-          <p className="text-gray-300 mb-4">
+          <p className="text-muted-foreground mb-4">
             {parsedData.message || t("analysis.weaknesses.unableToGenerate", "Unable to generate authentic weaknesses analysis at this time.")}
           </p>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-muted-foreground">
             {t("analysis.tryAgainLater", "Please try again later or contact support if the issue persists.")}
           </p>
         </div>
@@ -320,28 +320,28 @@ export function AnalysisPopup({
 
     return (
       <div className="space-y-6">
-        <h3 className={`text-lg font-semibold text-white ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t("common:analysis.weaknesses.title", "Areas for Improvement")}</h3>
+        <h3 className={`text-lg font-semibold text-foreground ${i18n.language === 'ar' ? 'text-right' : ''}`}>{t("common:analysis.weaknesses.title", "Areas for Improvement")}</h3>
         
         <div className="space-y-4">
           {weaknesses.length > 0 ? weaknesses.map((weakness: any, index: number) => (
-            <Card key={index} className="bg-athlete-gray-800 border-gray-600 hover:border-athlete-danger/50 transition-colors">
+            <Card key={index} className="bg-card border hover:border-athlete-danger/50 transition-colors">
               <CardContent className={`p-6 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                 <h3 className={`font-bold text-red-400 text-lg mb-4 flex items-start ${i18n.language === 'ar' ? 'flex-row-reverse text-right justify-end' : ''}`}>
                   <AlertTriangle className={`inline-block w-5 h-5 mt-0.5 flex-shrink-0 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
                   <span>{weakness.title}</span>
                 </h3>
                 
-                <p className={`text-gray-200 leading-relaxed mb-4 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
+                <p className={`text-foreground leading-relaxed mb-4 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                   {weakness.description}
                 </p>
                 
                 {weakness.evidence && (
-                  <div className={`bg-athlete-gray-900 rounded-lg p-4 ${i18n.language === 'ar' ? 'border-r-4 border-l-0' : 'border-l-4'} border-red-400`}>
-                    <h4 className={`font-semibold text-white mb-2 flex items-center ${i18n.language === 'ar' ? 'flex-row-reverse justify-end' : ''}`}>
+                  <div className={`bg-muted rounded-lg p-4 ${i18n.language === 'ar' ? 'border-r-4 border-l-0' : 'border-l-4'} border-red-400`}>
+                    <h4 className={`font-semibold text-foreground mb-2 flex items-center ${i18n.language === 'ar' ? 'flex-row-reverse justify-end' : ''}`}>
                       <Award className={`w-4 h-4 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
                       {t("common:analysis.evidence", "Evidence")}
                     </h4>
-                    <p className={`text-sm text-gray-200 italic ${i18n.language === 'ar' ? 'text-right' : ''}`}>
+                    <p className={`text-sm text-foreground italic ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                       {weakness.evidence}
                     </p>
                   </div>
@@ -349,8 +349,8 @@ export function AnalysisPopup({
               </CardContent>
             </Card>
           )) : (
-            <div className="text-gray-400 text-center py-8">
-              <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-gray-500" />
+            <div className="text-muted-foreground text-center py-8">
+              <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
               <p>{t("analysis.weaknesses.noData", "No weaknesses analysis data available")}</p>
             </div>
           )}
@@ -366,10 +366,10 @@ export function AnalysisPopup({
       return (
         <div className="p-6 text-center">
           <div className="text-red-400 mb-4">{t("analysis.unavailable", "⚠ Analysis Unavailable")}</div>
-          <p className="text-gray-300 mb-4">
+          <p className="text-muted-foreground mb-4">
             {parsedData.message || t("analysis.development.unableToGenerate", "Unable to generate authentic development plan at this time.")}
           </p>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-muted-foreground">
             {t("analysis.tryAgainLater", "Please try again later or contact support if the issue persists.")}
           </p>
         </div>
@@ -400,7 +400,7 @@ export function AnalysisPopup({
           <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-lg p-4 border border-purple-500/30">
             <div className="flex items-center gap-3 mb-2">
               <Calendar className="w-5 h-5 text-purple-400" />
-              <h3 className="text-lg font-semibold text-white">{t("analysis.development.program", "Development Program")}</h3>
+              <h3 className="text-lg font-semibold text-foreground">{t("analysis.development.program", "Development Program")}</h3>
             </div>
             <div className="flex items-center gap-4">
               <Badge variant="secondary" className="bg-purple-600 text-white px-3 py-1">
@@ -434,21 +434,21 @@ export function AnalysisPopup({
                     className={`relative ml-8 ${
                       isCurrentPhase 
                         ? 'bg-gradient-to-br from-purple-900/50 to-blue-900/50 border-purple-500' 
-                        : 'bg-athlete-gray-700 border-gray-600'
+                        : 'bg-muted border'
                     } hover:border-purple-400 transition-colors`}
                   >
                     {/* Phase Number Indicator */}
                     <div className={`absolute -left-12 top-6 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
                       isCurrentPhase 
                         ? 'bg-purple-600 text-white ring-4 ring-purple-600/30' 
-                        : 'bg-gray-600 text-gray-300'
+                        : 'bg-muted-foreground text-foreground'
                     }`}>
                       {phaseNumber}
                     </div>
 
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg text-white flex items-center gap-2">
+                        <CardTitle className="text-lg text-foreground flex items-center gap-2">
                           <Target className="w-5 h-5 text-purple-400" />
                           {item.area || item.title || item.focus || item.phase || item.name || `Goal Area ${phaseNumber}`}
                         </CardTitle>
@@ -476,12 +476,12 @@ export function AnalysisPopup({
                           </h4>
                           <div className="grid gap-2">
                             {(item.exercises || []).map((exercise: any, idx: number) => (
-                              <div key={idx} className="flex items-start gap-3 p-2 bg-gray-800/50 rounded-lg">
+                              <div key={idx} className="flex items-start gap-3 p-2 bg-muted rounded-lg">
                                 <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
                                 <div className="flex-1">
-                                  <div className="text-sm font-medium text-white">{exercise.name || exercise.title || `Exercise ${idx + 1}`}</div>
+                                  <div className="text-sm font-medium text-foreground">{exercise.name || exercise.title || `Exercise ${idx + 1}`}</div>
                                   {exercise.description && (
-                                    <div className="text-sm text-gray-300 mt-1">{typeof exercise.description === 'string' ? exercise.description : JSON.stringify(exercise.description)}</div>
+                                    <div className="text-sm text-muted-foreground mt-1">{typeof exercise.description === 'string' ? exercise.description : JSON.stringify(exercise.description)}</div>
                                   )}
                                   {exercise.videoUrl && (
                                     <div className="mt-2">
@@ -545,8 +545,8 @@ export function AnalysisPopup({
 
                       {/* Duration for individual phases */}
                       {item.duration && (
-                        <div className="pt-2 border-t border-gray-600">
-                          <div className="flex items-center gap-2 text-xs text-gray-400">
+                        <div className="pt-2 border-t">
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <Clock className="w-3 h-3" />
                             Duration: {typeof item.duration === 'string' ? item.duration : 
                                      typeof item.duration === 'object' ? (item.duration.description || item.duration.type || 'Duration info') : 
@@ -563,7 +563,7 @@ export function AnalysisPopup({
         )}
 
         {planItems.length === 0 && (
-          <div className="text-gray-400 text-center py-12">
+          <div className="text-muted-foreground text-center py-12">
             <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-500" />
             <p className="text-lg font-medium mb-2">{t("analysis.development.noData", "No development plan data available")}</p>
             <p className="text-sm">{t("analysis.development.generateNew", "Generate a new analysis to see your personalized development program.")}</p>
@@ -647,10 +647,10 @@ export function AnalysisPopup({
       return (
         <div className="p-6 text-center">
           <div className="text-red-400 mb-4">{t("analysis.rank.unavailable", "⚠ Rank Analysis Unavailable")}</div>
-          <p className="text-gray-300 mb-4">
+          <p className="text-muted-foreground mb-4">
             {actualParsedData.message || t("analysis.rank.unableToGenerate", "Unable to generate authentic rank history at this time.")}
           </p>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-muted-foreground">
             {t("analysis.tryAgainLater", "Please try again later or contact support if the issue persists.")}
           </p>
         </div>
@@ -734,12 +734,12 @@ export function AnalysisPopup({
       return (
         <div className="p-6">
           <div className="text-yellow-400 mb-4 text-center">⚠ Unrecognized Rank Data Format</div>
-          <p className="text-gray-300 mb-4 text-center">
+          <p className="text-muted-foreground mb-4 text-center">
             The ranking data structure is not recognized. Please check the backend response format.
           </p>
-          <div className="bg-gray-800 p-4 rounded-lg">
-            <h4 className="text-sm font-semibold text-gray-400 mb-2">Raw Data Structure:</h4>
-            <pre className="text-xs text-gray-300 overflow-auto max-h-40 whitespace-pre-wrap">
+          <div className="bg-muted p-4 rounded-lg">
+            <h4 className="text-sm font-semibold text-muted-foreground mb-2">Raw Data Structure:</h4>
+            <pre className="text-xs text-muted-foreground overflow-auto max-h-40 whitespace-pre-wrap">
               {JSON.stringify(actualParsedData, null, 2)}
             </pre>
           </div>
@@ -754,12 +754,12 @@ export function AnalysisPopup({
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-3xl font-bold text-white">{athleteName}</h2>
+                <h2 className="text-3xl font-bold text-foreground">{athleteName}</h2>
                 <p className="text-lg text-blue-300">{sport} • {nationality}</p>
               </div>
               <div className="text-right">
-                <div className="text-sm text-gray-400">{t("common:analysis.careerPhases.careerSpan", "Career Span")}</div>
-                <div className="text-xl font-bold text-white">
+                <div className="text-sm text-muted-foreground">{t("common:analysis.careerPhases.careerSpan", "Career Span")}</div>
+                <div className="text-xl font-bold text-foreground">
                   {activePeriod.start_year} - {activePeriod.end_year === "current" || activePeriod.end_year?.toString().includes("2025") ? t("common:analysis.careerPhases.present", "Present") : activePeriod.end_year}
                 </div>
                 {(activePeriod.end_year === "current" || activePeriod.end_year?.toString().includes("2025")) && (
@@ -774,14 +774,14 @@ export function AnalysisPopup({
         {analysisNarrative && (
           <Card className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 border-purple-500">
             <CardHeader>
-              <CardTitle className="text-xl text-white flex items-center">
+              <CardTitle className="text-xl text-foreground flex items-center">
                 <Brain className="mr-3 text-purple-400" size={24} />
                 Professional Analysis
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="prose prose-invert max-w-none">
-                <p className="text-gray-300 leading-relaxed whitespace-pre-line">
+                <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
                   {analysisNarrative}
                 </p>
               </div>
@@ -791,13 +791,13 @@ export function AnalysisPopup({
 
         {/* Career Phases Timeline */}
         {careerPhases && careerPhases.length > 0 && (
-          <Card className="bg-athlete-gray-800 border-gray-600">
+          <Card className="bg-card border">
             <CardHeader>
-              <CardTitle className="text-2xl text-gray-100 flex items-center">
+              <CardTitle className="text-2xl text-foreground flex items-center">
                 <Trophy className="mr-3 text-blue-400" size={24} />
                 {t("common:analysis.careerPhases.title", "Career Phases")}
               </CardTitle>
-              <div className="text-sm text-gray-400">{t("common:analysis.careerPhases.subtitle", "Professional career progression through different phases")}</div>
+              <div className="text-sm text-muted-foreground">{t("common:analysis.careerPhases.subtitle", "Professional career progression through different phases")}</div>
             </CardHeader>
             <CardContent>
               <div className="relative">
@@ -815,7 +815,7 @@ export function AnalysisPopup({
                         <CardHeader>
                           {i18n.language === 'ar' ? (
                             <div dir="rtl" className="flex items-center justify-between">
-                              <CardTitle className="text-xl text-white">
+                              <CardTitle className="text-xl text-foreground">
                                 {phase.phase_name?.toLowerCase().includes('international competitive history') 
                                   ? 'المسيرة المهنية الدولية'
                                   : phase.phase_name}
@@ -824,7 +824,7 @@ export function AnalysisPopup({
                             </div>
                           ) : (
                             <div className="flex items-center justify-between">
-                              <CardTitle className="text-xl text-white">
+                              <CardTitle className="text-xl text-foreground">
                                 {phase.phase_name}
                               </CardTitle>
                               <Badge className="bg-blue-600 text-white">{phase.period}</Badge>
@@ -900,16 +900,16 @@ export function AnalysisPopup({
                                   };
                                   
                                   return (
-                                    <div key={achievementIndex} className="p-4 bg-athlete-gray-700 rounded-lg border border-gray-600 hover:border-blue-500/50 transition-colors">
+                                    <div key={achievementIndex} className="p-4 bg-muted rounded-lg border hover:border-blue-500/50 transition-colors">
                                       <div className={`flex items-start justify-between mb-2 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
                                         <div className="flex-1">
                                           <div className={`flex ${i18n.language === 'ar' ? 'flex-row-reverse justify-end gap-2' : 'flex-row gap-3'} items-center mb-2`}>
                                             <Badge variant="outline" className="border-yellow-400 text-yellow-400 text-xs text-center">
                                               {translateMonth(achievement.month, achievement.year)}
                                             </Badge>
-                                            <span className={`font-bold text-white ${i18n.language === 'ar' ? 'text-right' : ''}`}>{achievement.event_name}</span>
+                                            <span className={`font-bold text-foreground ${i18n.language === 'ar' ? 'text-right' : ''}`}>{achievement.event_name}</span>
                                           </div>
-                                          <div className={`text-sm text-gray-400 mb-2 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
+                                          <div className={`text-sm text-muted-foreground mb-2 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                                             {achievement.event_tier}
                                           </div>
                                         </div>
@@ -920,7 +920,7 @@ export function AnalysisPopup({
                                       
                                       {achievement.notes && 
                                        !["simply compete result", "taekwondodata", "taekwondodata result"].includes(achievement.notes.toLowerCase().trim()) && (
-                                        <p className={`text-sm text-gray-300 leading-relaxed ${i18n.language === 'ar' ? 'text-right' : ''}`}>
+                                        <p className={`text-sm text-muted-foreground leading-relaxed ${i18n.language === 'ar' ? 'text-right' : ''}`}>
                                           {achievement.notes}
                                         </p>
                                       )}
@@ -943,45 +943,45 @@ export function AnalysisPopup({
         {(careerOverview || peakPerformancePeriods?.length > 0 || notableAchievements?.length > 0 || recentForm) && (
           <Card className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 border-purple-500">
             <CardHeader>
-              <CardTitle className="text-2xl text-white flex items-center">
+              <CardTitle className="text-2xl text-foreground flex items-center">
                 <Brain className="mr-3 text-purple-400" size={24} />
                 {t('home:competitiveHistory.title')}
               </CardTitle>
-              <div className="text-sm text-gray-400">{t('home:competitiveHistory.subtitle')}</div>
+              <div className="text-sm text-muted-foreground">{t('home:competitiveHistory.subtitle')}</div>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Career Overview */}
               {careerOverview && (
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
+                  <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center">
                     <Trophy className="mr-2 text-yellow-400" size={20} />
                     {t('home:competitiveHistory.careerOverview')}
                   </h3>
-                  <p className="text-gray-300 leading-relaxed">{careerOverview}</p>
+                  <p className="text-muted-foreground leading-relaxed">{careerOverview}</p>
                 </div>
               )}
               
               {/* Peak Performance Periods */}
               {peakPerformancePeriods && peakPerformancePeriods.length > 0 && (
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
+                  <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center">
                     <TrendingUp className="mr-2 text-green-400" size={20} />
                     {t('home:competitiveHistory.peakPerformance')}
                   </h3>
                   <div className="space-y-4">
                     {peakPerformancePeriods.map((period: any, index: number) => (
-                      <div key={index} className="p-4 bg-athlete-gray-700 rounded-lg border border-purple-500/30">
+                      <div key={index} className="p-4 bg-muted rounded-lg border border-purple-500/30">
                         <div className="flex items-center gap-2 mb-2">
                           <Badge className="bg-purple-600 text-white">{period.period}</Badge>
                         </div>
-                        <p className="text-gray-300 mb-3">{period.description}</p>
+                        <p className="text-muted-foreground mb-3">{period.description}</p>
                         {period.key_results && period.key_results.length > 0 && (
                           <div className="space-y-1">
-                            <p className="text-sm font-semibold text-gray-400 mb-2">{t('home:competitiveHistory.keyResults')}</p>
+                            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('home:competitiveHistory.keyResults')}</p>
                             {period.key_results.map((result: string, idx: number) => (
                               <div key={idx} className="flex items-start gap-2">
                                 <CheckCircle className="w-4 h-4 text-green-400 mt-0.5" />
-                                <span className="text-sm text-gray-300">{result}</span>
+                                <span className="text-sm text-muted-foreground">{result}</span>
                               </div>
                             ))}
                           </div>
@@ -995,33 +995,33 @@ export function AnalysisPopup({
               {/* Competition Analysis */}
               {competitionAnalysis && Object.keys(competitionAnalysis).length > 0 && (
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
+                  <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center">
                     <Medal className="mr-2 text-yellow-400" size={20} />
                     {t('home:competitiveHistory.competitionAnalysis')}
                   </h3>
                   <div className="grid gap-3">
                     {competitionAnalysis.grand_prix && (
-                      <div className="p-3 bg-athlete-gray-700 rounded-lg">
+                      <div className="p-3 bg-muted rounded-lg">
                         <p className="text-sm font-semibold text-blue-400 mb-1">{t('home:competitiveHistory.grandPrix')}</p>
-                        <p className="text-sm text-gray-300">{competitionAnalysis.grand_prix}</p>
+                        <p className="text-sm text-muted-foreground">{competitionAnalysis.grand_prix}</p>
                       </div>
                     )}
                     {competitionAnalysis.world_championships && (
-                      <div className="p-3 bg-athlete-gray-700 rounded-lg">
+                      <div className="p-3 bg-muted rounded-lg">
                         <p className="text-sm font-semibold text-yellow-400 mb-1">{t('home:competitiveHistory.worldChampionships')}</p>
-                        <p className="text-sm text-gray-300">{competitionAnalysis.world_championships}</p>
+                        <p className="text-sm text-muted-foreground">{competitionAnalysis.world_championships}</p>
                       </div>
                     )}
                     {competitionAnalysis.olympic_games && (
-                      <div className="p-3 bg-athlete-gray-700 rounded-lg">
+                      <div className="p-3 bg-muted rounded-lg">
                         <p className="text-sm font-semibold text-gold-400 mb-1">{t('home:competitiveHistory.olympicGames')}</p>
-                        <p className="text-sm text-gray-300">{competitionAnalysis.olympic_games}</p>
+                        <p className="text-sm text-muted-foreground">{competitionAnalysis.olympic_games}</p>
                       </div>
                     )}
                     {competitionAnalysis.continental_events && (
-                      <div className="p-3 bg-athlete-gray-700 rounded-lg">
+                      <div className="p-3 bg-muted rounded-lg">
                         <p className="text-sm font-semibold text-green-400 mb-1">{t('home:competitiveHistory.continentalEvents')}</p>
-                        <p className="text-sm text-gray-300">{competitionAnalysis.continental_events}</p>
+                        <p className="text-sm text-muted-foreground">{competitionAnalysis.continental_events}</p>
                       </div>
                     )}
                   </div>
@@ -1031,26 +1031,26 @@ export function AnalysisPopup({
               {/* Progression Patterns */}
               {progressionPatterns && (
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
+                  <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center">
                     <BarChart className="mr-2 text-blue-400" size={20} />
                     {t('home:competitiveHistory.progressionPatterns')}
                   </h3>
-                  <p className="text-gray-300 leading-relaxed">{progressionPatterns}</p>
+                  <p className="text-muted-foreground leading-relaxed">{progressionPatterns}</p>
                 </div>
               )}
               
               {/* Notable Achievements */}
               {notableAchievements && notableAchievements.length > 0 && (
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
+                  <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center">
                     <Star className="mr-2 text-yellow-400" size={20} />
                     {t('home:competitiveHistory.notableAchievements')}
                   </h3>
                   <div className="space-y-3">
                     {notableAchievements.map((achievement: any, index: number) => (
-                      <div key={index} className="p-4 bg-athlete-gray-700 rounded-lg border border-yellow-500/30">
-                        <p className="font-semibold text-white mb-2">{achievement.achievement}</p>
-                        <p className="text-sm text-gray-300">{achievement.significance}</p>
+                      <div key={index} className="p-4 bg-muted rounded-lg border border-yellow-500/30">
+                        <p className="font-semibold text-foreground mb-2">{achievement.achievement}</p>
+                        <p className="text-sm text-muted-foreground">{achievement.significance}</p>
                       </div>
                     ))}
                   </div>
@@ -1060,18 +1060,18 @@ export function AnalysisPopup({
               {/* Recent Form */}
               {recentForm && (
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
+                  <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center">
                     <TrendingUp className="mr-2 text-emerald-400" size={20} />
                     {t('home:competitiveHistory.recentForm')}
                   </h3>
-                  <p className="text-gray-300 leading-relaxed">{recentForm}</p>
+                  <p className="text-muted-foreground leading-relaxed">{recentForm}</p>
                 </div>
               )}
               
               {/* Key Insights */}
               {insights && insights.length > 0 && (
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
+                  <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center">
                     <Brain className="mr-2 text-purple-400" size={20} />
                     {t('home:competitiveHistory.keyInsights')}
                   </h3>
@@ -1081,7 +1081,7 @@ export function AnalysisPopup({
                         <div className="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0 mt-0.5">
                           <span className="text-white text-xs font-bold">{index + 1}</span>
                         </div>
-                        <p className="text-gray-300">{insight}</p>
+                        <p className="text-muted-foreground">{insight}</p>
                       </div>
                     ))}
                   </div>
@@ -1093,15 +1093,15 @@ export function AnalysisPopup({
 
         {/* Ranking System Overview */}
         {rankingSystemOverview && (
-          <Card className="bg-athlete-gray-800 border-gray-600">
+          <Card className="bg-card border">
             <CardHeader>
-              <CardTitle className="text-xl text-white flex items-center">
+              <CardTitle className="text-xl text-foreground flex items-center">
                 <BarChart className="mr-3 text-yellow-400" size={24} />
                 {t("analysis.rankingSystem.title", "Ranking System Overview")}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-300 leading-relaxed">{rankingSystemOverview}</p>
+              <p className="text-muted-foreground leading-relaxed">{rankingSystemOverview}</p>
             </CardContent>
           </Card>
         )}
@@ -1114,7 +1114,7 @@ export function AnalysisPopup({
     if (medal === 'Gold') {
       return <Medal className="w-5 h-5 text-yellow-500" />;
     } else if (medal === 'Silver') {
-      return <Medal className="w-5 h-5 text-gray-300" />;
+      return <Medal className="w-5 h-5 text-muted-foreground" />;
     } else if (medal === 'Bronze') {
       return <Medal className="w-5 h-5 text-amber-600" />;
     } else {
@@ -1285,12 +1285,12 @@ export function AnalysisPopup({
                     return (
                       <div 
                         key={index}
-                        className="flex items-start space-x-4 p-4 bg-athlete-gray-600 rounded-xl border border-athlete-warning/20"
+                        className="flex items-start space-x-4 p-4 bg-muted rounded-xl border border-athlete-warning/20"
                       >
                         <div className="mt-1 flex-shrink-0">
                           {medal ? getMedalIcon(medal) : <div className="w-3 h-3 bg-athlete-warning rounded-full mt-1"></div>}
                         </div>
-                        <p className="text-gray-200 leading-relaxed text-lg font-medium">
+                        <p className="text-foreground leading-relaxed text-lg font-medium">
                           {text}
                         </p>
                       </div>
@@ -1313,9 +1313,9 @@ export function AnalysisPopup({
                   {recentNews.map((news: string, index: number) => (
                     <div 
                       key={index}
-                      className="p-6 bg-athlete-gray-600 rounded-xl border-l-4 border-purple-400 shadow-lg"
+                      className="p-6 bg-muted rounded-xl border-l-4 border-purple-400 shadow-lg"
                     >
-                      <p className="text-gray-200 leading-relaxed text-lg font-medium">
+                      <p className="text-foreground leading-relaxed text-lg font-medium">
                         {typeof news === 'string' ? news : JSON.stringify(news, null, 2)}
                       </p>
                     </div>
@@ -1344,7 +1344,7 @@ export function AnalysisPopup({
                 className="w-40 h-40 rounded-full object-cover border-4 border-athlete-accent shadow-lg"
               />
             ) : (
-              <div className="w-40 h-40 bg-athlete-gray-600 rounded-full flex items-center justify-center border-4 border-athlete-accent shadow-lg">
+              <div className="w-40 h-40 bg-muted rounded-full flex items-center justify-center border-4 border-athlete-accent shadow-lg">
                 <User className="w-20 h-20 text-athlete-accent" />
               </div>
             )}
@@ -1362,7 +1362,7 @@ export function AnalysisPopup({
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs text-slate-400 font-medium">Age</span>
-                    <span className="text-sm font-bold text-white" data-testid="text-age">{actualData?.personalInfo?.age || bioData?.personalInfo?.age}</span>
+                    <span className="text-sm font-bold text-foreground" data-testid="text-age">{actualData?.personalInfo?.age || bioData?.personalInfo?.age}</span>
                   </div>
                 </div>
               )}
@@ -1375,7 +1375,7 @@ export function AnalysisPopup({
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs text-slate-400 font-medium">Born</span>
-                    <span className="text-sm font-bold text-white" data-testid="text-dateofbirth">{actualData?.personalInfo?.dateOfBirth || bioData?.personalInfo?.dateOfBirth}</span>
+                    <span className="text-sm font-bold text-foreground" data-testid="text-dateofbirth">{actualData?.personalInfo?.dateOfBirth || bioData?.personalInfo?.dateOfBirth}</span>
                   </div>
                 </div>
               )}
@@ -1388,7 +1388,7 @@ export function AnalysisPopup({
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs text-slate-400 font-medium">Height</span>
-                    <span className="text-sm font-bold text-white" data-testid="text-height">{actualData?.personalInfo?.height || bioData?.personalInfo?.height}</span>
+                    <span className="text-sm font-bold text-foreground" data-testid="text-height">{actualData?.personalInfo?.height || bioData?.personalInfo?.height}</span>
                   </div>
                 </div>
               )}
@@ -1401,7 +1401,7 @@ export function AnalysisPopup({
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs text-slate-400 font-medium">Weight</span>
-                    <span className="text-sm font-bold text-white" data-testid="text-weight">{actualData?.personalInfo?.weight || bioData?.personalInfo?.weight}</span>
+                    <span className="text-sm font-bold text-foreground" data-testid="text-weight">{actualData?.personalInfo?.weight || bioData?.personalInfo?.weight}</span>
                   </div>
                 </div>
               )}
@@ -1414,7 +1414,7 @@ export function AnalysisPopup({
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs text-slate-400 font-medium">Position</span>
-                    <span className="text-sm font-bold text-white" data-testid="text-position">{actualData?.personalInfo?.position || bioData?.personalInfo?.position}</span>
+                    <span className="text-sm font-bold text-foreground" data-testid="text-position">{actualData?.personalInfo?.position || bioData?.personalInfo?.position}</span>
                   </div>
                 </div>
               )}
@@ -1427,7 +1427,7 @@ export function AnalysisPopup({
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs text-slate-400 font-medium">Education</span>
-                    <span className="text-sm font-bold text-white" data-testid="text-education">{actualData?.personalInfo?.educationalBackground || bioData?.personalInfo?.educationalBackground}</span>
+                    <span className="text-sm font-bold text-foreground" data-testid="text-education">{actualData?.personalInfo?.educationalBackground || bioData?.personalInfo?.educationalBackground}</span>
                   </div>
                 </div>
               )}
@@ -1503,13 +1503,13 @@ export function AnalysisPopup({
                     {actualData.personalInfo.previousSports && actualData.personalInfo.previousSports.length > 0 && (
                       <div className="mb-4 p-4 bg-emerald-900/20 rounded-lg border border-emerald-500/20">
                         <span className="text-emerald-400 font-semibold text-base">Previous Sports: </span>
-                        <span className="text-gray-300 text-base">{actualData.personalInfo.previousSports.join(', ')}</span>
+                        <span className="text-muted-foreground text-base">{actualData.personalInfo.previousSports.join(', ')}</span>
                       </div>
                     )}
                     {actualData.personalInfo.yearsInCurrentSport && actualData.personalInfo.yearsInCurrentSport !== "N/A" && (
                       <div className="p-4 bg-emerald-900/20 rounded-lg border border-emerald-500/20">
                         <span className="text-emerald-400 font-semibold text-base">Years in {actualData.sport || 'current sport'}: </span>
-                        <span className="text-gray-300 text-base">{actualData.personalInfo.yearsInCurrentSport}</span>
+                        <span className="text-muted-foreground text-base">{actualData.personalInfo.yearsInCurrentSport}</span>
                       </div>
                     )}
                   </div>
@@ -1585,7 +1585,7 @@ export function AnalysisPopup({
                       <div className="mt-1 flex-shrink-0">
                         {medal ? getMedalIcon(medal) : <div className="w-3 h-3 bg-athlete-warning rounded-full mt-1"></div>}
                       </div>
-                      <p className="text-gray-200 leading-relaxed text-lg font-medium">
+                      <p className="text-foreground leading-relaxed text-lg font-medium">
                         {text}
                       </p>
                     </div>
@@ -2212,7 +2212,7 @@ export function AnalysisPopup({
   // Video analysis renderer
   const renderVideoAnalysis = (data: any) => {
     if (!data) {
-      return <div className="text-gray-400 text-center py-8">Video analysis data not available</div>;
+      return <div className="text-muted-foreground text-center py-8">Video analysis data not available</div>;
     }
 
     // Check if it's an error result
@@ -2220,7 +2220,7 @@ export function AnalysisPopup({
       return (
         <div className="text-center py-8">
           <div className="text-red-400 mb-4">Video Analysis Error</div>
-          <p className="text-gray-400">{data.errorMessage || "Unable to analyze video"}</p>
+          <p className="text-muted-foreground">{data.errorMessage || "Unable to analyze video"}</p>
         </div>
       );
     }
@@ -2278,7 +2278,7 @@ export function AnalysisPopup({
   // Comparison analysis renderer
   const renderComparisonAnalysis = (data: any) => {
     if (!data) {
-      return <div className="text-gray-400 text-center py-8">Comparison analysis data not available</div>;
+      return <div className="text-muted-foreground text-center py-8">Comparison analysis data not available</div>;
     }
 
     const normalizedComparison = normalizeComparison(data);
@@ -2302,7 +2302,7 @@ export function AnalysisPopup({
             <div className="grid grid-cols-2 gap-6">
               {/* Athlete 1 */}
               <div className="text-center">
-                <div className="w-20 h-20 rounded-full bg-athlete-gray-600 flex items-center justify-center mx-auto mb-3 overflow-hidden border-2 border-blue-500/50">
+                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-3 overflow-hidden border-2 border-blue-500/50">
                   {normalizedComparison.athlete1.profileImageUrl ? (
                     <img 
                       src={normalizedComparison.athlete1.profileImageUrl} 
@@ -2314,10 +2314,10 @@ export function AnalysisPopup({
                       }}
                     />
                   ) : (
-                    <User className="w-10 h-10 text-gray-400" />
+                    <User className="w-10 h-10 text-muted-foreground" />
                   )}
                 </div>
-                <h3 className="text-white font-semibold text-lg">{normalizedComparison.athlete1.name}</h3>
+                <h3 className="text-foreground font-semibold text-lg">{normalizedComparison.athlete1.name}</h3>
                 <Badge variant="outline" className="mt-2">
                   {normalizedComparison.athlete1.country || "Unknown"}
                 </Badge>
@@ -2347,7 +2347,7 @@ export function AnalysisPopup({
                             isContinental ? "bg-green-500/20 text-green-400 border-green-500/30" :
                             isNational ? "bg-blue-500/20 text-blue-400 border-blue-500/30" :
                             isWorld ? "bg-orange-500/20 text-orange-400 border-orange-500/30" :
-                            "bg-gray-500/20 text-gray-400 border-gray-500/30"
+                            "bg-muted text-muted-foreground border"
                           }
                         >
                           {rankingCategory.category}: #{!isNaN(Number(rankingCategory.rank)) ? Math.floor(Number(rankingCategory.rank)) : rankingCategory.rank}
@@ -2360,7 +2360,7 @@ export function AnalysisPopup({
               
               {/* Athlete 2 */}
               <div className="text-center">
-                <div className="w-20 h-20 rounded-full bg-athlete-gray-600 flex items-center justify-center mx-auto mb-3 overflow-hidden border-2 border-purple-500/50">
+                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-3 overflow-hidden border-2 border-purple-500/50">
                   {normalizedComparison.athlete2.profileImageUrl ? (
                     <img 
                       src={normalizedComparison.athlete2.profileImageUrl} 
@@ -2372,10 +2372,10 @@ export function AnalysisPopup({
                       }}
                     />
                   ) : (
-                    <User className="w-10 h-10 text-gray-400" />
+                    <User className="w-10 h-10 text-muted-foreground" />
                   )}
                 </div>
-                <h3 className="text-white font-semibold text-lg">{normalizedComparison.athlete2.name}</h3>
+                <h3 className="text-foreground font-semibold text-lg">{normalizedComparison.athlete2.name}</h3>
                 <Badge variant="outline" className="mt-2">
                   {normalizedComparison.athlete2.country || "Unknown"}
                 </Badge>
@@ -2405,7 +2405,7 @@ export function AnalysisPopup({
                             isContinental ? "bg-green-500/20 text-green-400 border-green-500/30" :
                             isNational ? "bg-blue-500/20 text-blue-400 border-blue-500/30" :
                             isWorld ? "bg-orange-500/20 text-orange-400 border-orange-500/30" :
-                            "bg-gray-500/20 text-gray-400 border-gray-500/30"
+                            "bg-muted text-muted-foreground border"
                           }
                         >
                           {rankingCategory.category}: #{!isNaN(Number(rankingCategory.rank)) ? Math.floor(Number(rankingCategory.rank)) : rankingCategory.rank}
@@ -2418,15 +2418,15 @@ export function AnalysisPopup({
             </div>
           ) : normalizedComparison.athleteNames && normalizedComparison.athleteNames.length > 0 && (
             // Fallback header for historical data with only athlete names
-            <Card className="bg-athlete-gray-800 border-gray-700">
+            <Card className="bg-card border">
               <CardContent className="p-4">
                 <div className="flex items-center justify-center space-x-4">
                   {normalizedComparison.athleteNames.map((name, index) => (
                     <div key={index} className="flex items-center">
                       <User className="mr-2" size={20} />
-                      <span className="text-white font-medium">{name}</span>
+                      <span className="text-foreground font-medium">{name}</span>
                       {index < normalizedComparison.athleteNames!.length - 1 && (
-                        <span className="mx-4 text-gray-400">vs</span>
+                        <span className="mx-4 text-muted-foreground">vs</span>
                       )}
                     </div>
                   ))}
@@ -2437,7 +2437,7 @@ export function AnalysisPopup({
 
           {/* Overview Tab */}
           {normalizedComparison.tabs.overview && (
-            <Card className="bg-athlete-gray-800 border-gray-700">
+            <Card className="bg-card border">
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center">
                   <User className="mr-3" size={24} />
@@ -2445,7 +2445,7 @@ export function AnalysisPopup({
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <div 
-                    className="whitespace-pre-wrap text-gray-300 leading-relaxed"
+                    className="whitespace-pre-wrap text-muted-foreground leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: normalizedComparison.tabs.overview }}
                   />
                 </div>
@@ -2455,7 +2455,7 @@ export function AnalysisPopup({
 
           {/* Strengths Analysis */}
           {normalizedComparison.tabs.strengths && (
-            <Card className="bg-athlete-gray-800 border-gray-700">
+            <Card className="bg-card border">
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-green-400 mb-4 flex items-center">
                   <Star className="mr-3" size={24} />
@@ -2463,7 +2463,7 @@ export function AnalysisPopup({
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <div 
-                    className="whitespace-pre-wrap text-gray-300 leading-relaxed"
+                    className="whitespace-pre-wrap text-muted-foreground leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: normalizedComparison.tabs.strengths }}
                   />
                 </div>
@@ -2473,7 +2473,7 @@ export function AnalysisPopup({
 
           {/* Weaknesses Analysis */}
           {normalizedComparison.tabs.weaknesses && (
-            <Card className="bg-athlete-gray-800 border-gray-700">
+            <Card className="bg-card border">
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-red-400 mb-4 flex items-center">
                   <AlertTriangle className="mr-3" size={24} />
@@ -2481,7 +2481,7 @@ export function AnalysisPopup({
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <div 
-                    className="whitespace-pre-wrap text-gray-300 leading-relaxed"
+                    className="whitespace-pre-wrap text-muted-foreground leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: normalizedComparison.tabs.weaknesses }}
                   />
                 </div>
@@ -2491,7 +2491,7 @@ export function AnalysisPopup({
 
           {/* Technical Details */}
           {normalizedComparison.tabs.details && (
-            <Card className="bg-athlete-gray-800 border-gray-700">
+            <Card className="bg-card border">
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center">
                   <Brain className="mr-3" size={24} />
@@ -2499,7 +2499,7 @@ export function AnalysisPopup({
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <div 
-                    className="whitespace-pre-wrap text-gray-300 leading-relaxed"
+                    className="whitespace-pre-wrap text-muted-foreground leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: normalizedComparison.tabs.details }}
                   />
                 </div>
@@ -2509,7 +2509,7 @@ export function AnalysisPopup({
 
           {/* Head-to-Head */}
           {normalizedComparison.tabs.headToHead && (
-            <Card className="bg-athlete-gray-800 border-gray-700">
+            <Card className="bg-card border">
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-purple-400 mb-4 flex items-center">
                   <Target className="mr-3" size={24} />
@@ -2517,7 +2517,7 @@ export function AnalysisPopup({
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <div 
-                    className="whitespace-pre-wrap text-gray-300 leading-relaxed"
+                    className="whitespace-pre-wrap text-muted-foreground leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: normalizedComparison.tabs.headToHead }}
                   />
                 </div>
@@ -2531,15 +2531,15 @@ export function AnalysisPopup({
     // Fallback for other comparison formats
     return (
       <div className="space-y-6">
-        <Card className="bg-athlete-gray-800 border-gray-700">
+        <Card className="bg-card border">
           <CardContent className="p-6">
             <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center">
               <User className="mr-3" size={24} />
               Athlete Comparison Analysis
             </h3>
             <div className="text-center py-8">
-              <User className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <p className="text-gray-400">Comparison data could not be processed.</p>
+              <User className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">Comparison data could not be processed.</p>
               <p className="text-gray-500 text-sm mt-2">Please try generating a new comparison analysis.</p>
             </div>
           </CardContent>
@@ -2550,7 +2550,7 @@ export function AnalysisPopup({
 
   const renderAnalysisContent = () => {
     if (!data) {
-      return <div className="text-gray-400 text-center py-8">Analysis data not available</div>;
+      return <div className="text-muted-foreground text-center py-8">Analysis data not available</div>;
     }
 
     // Special handling for bio analysis
@@ -2568,15 +2568,15 @@ export function AnalysisPopup({
         // Fallback to user-friendly empty state
         return (
           <div className="space-y-6">
-            <Card className="bg-athlete-gray-800 border-gray-700">
+            <Card className="bg-card border">
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-green-400 mb-4 flex items-center">
                   <Apple className="mr-3" size={24} />
                   Nutrition Plan Analysis
                 </h3>
                 <div className="text-center py-8">
-                  <Apple className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <p className="text-gray-400">Nutrition plan data could not be processed.</p>
+                  <Apple className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">Nutrition plan data could not be processed.</p>
                   <p className="text-gray-500 text-sm mt-2">Please try generating a new nutrition plan.</p>
                 </div>
               </CardContent>
@@ -2611,15 +2611,15 @@ export function AnalysisPopup({
         // Fallback to user-friendly empty state
         return (
           <div className="space-y-6">
-            <Card className="bg-athlete-gray-800 border-gray-700">
+            <Card className="bg-card border">
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center">
                   <Calendar className="mr-3" size={24} />
                   {t("analysis.development.analysisTitle", "Development Plan Analysis")}
                 </h3>
                 <div className="text-center py-8">
-                  <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <p className="text-gray-400">Development plan data could not be processed.</p>
+                  <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">Development plan data could not be processed.</p>
                   <p className="text-gray-500 text-sm mt-2">Please try generating a new development plan.</p>
                 </div>
               </CardContent>
@@ -2655,7 +2655,7 @@ export function AnalysisPopup({
     // For other analysis types, show structured display
     return (
       <div className="space-y-6">
-        <div className="text-gray-300 max-w-none">
+        <div className="text-muted-foreground max-w-none">
           {JSON.stringify(parsedData, null, 2)}
         </div>
       </div>
@@ -2664,14 +2664,14 @@ export function AnalysisPopup({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] sm:w-[90vw] md:max-w-3xl lg:max-w-5xl max-h-[90vh] overflow-y-auto bg-athlete-gray-900 border-gray-700 text-white">
-        <div className={`border-b border-gray-700 pb-4 ${i18n.language === 'ar' ? 'pl-12' : 'pr-12'}`}>
+      <DialogContent className="w-[95vw] sm:w-[90vw] md:max-w-3xl lg:max-w-5xl max-h-[90vh] overflow-y-auto bg-background border text-foreground">
+        <div className={`border-b pb-4 ${i18n.language === 'ar' ? 'pl-12' : 'pr-12'}`}>
           {/* Title and metadata section */}
           <div className={`${i18n.language === 'ar' ? 'text-right' : 'text-left'}`} dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
-            <DialogTitle className="text-lg sm:text-xl font-bold text-white">
+            <DialogTitle className="text-lg sm:text-xl font-bold text-foreground">
               {getTitle(type)}
             </DialogTitle>
-            <DialogDescription className="text-gray-400 text-sm mt-1">
+            <DialogDescription className="text-muted-foreground text-sm mt-1">
               {athleteName && `${t("common:analysis.analysisFor", "Analysis for")} ${athleteName}`}
               {createdAt && ` • ${t("common:analysis.generatedOn", "Generated on")} ${new Date(createdAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { 
                 month: 'short', 

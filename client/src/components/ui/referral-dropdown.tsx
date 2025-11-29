@@ -88,7 +88,7 @@ export function ReferralDropdown() {
         <Button
           variant="ghost"
           size="sm"
-          className="text-gray-300 hover:text-white relative"
+          className="text-muted-foreground hover:text-foreground relative"
           data-testid="referral-dropdown-trigger"
         >
           <Users size={16} />

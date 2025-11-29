@@ -58,25 +58,25 @@ export function Navigation() {
   };
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-athlete-primary/90 backdrop-blur-lg border-b border-gray-800">
+    <nav className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-lg border-b border-gray-200 shadow-sm">
       <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
         <div className="flex justify-between items-center">
           <Link href="/" className={`flex items-center cursor-pointer ${isArabic ? 'space-x-reverse space-x-2' : 'space-x-2'} flex-shrink-0`}>
-            <Trophy className="text-athlete-accent text-xl sm:text-2xl" />
-            <span className="text-lg sm:text-xl font-bold text-white">{t('brand')}</span>
+            <Trophy className="text-primary text-xl sm:text-2xl" />
+            <span className="text-lg sm:text-xl font-bold text-foreground">{t('brand')}</span>
           </Link>
           
           {/* Desktop Menu */}
           <div className={`hidden lg:flex items-center ${isArabic ? 'space-x-reverse space-x-4 xl:space-x-6' : 'space-x-4 xl:space-x-6'}`}>
             <div 
               data-testid="token-balance"
-              className={`flex items-center bg-athlete-gray-800 px-3 xl:px-4 py-2 rounded-full ${isArabic ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
+              className={`flex items-center bg-muted px-3 xl:px-4 py-2 rounded-full ${isArabic ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
             >
-              <Coins className="text-athlete-warning" size={18} />
+              <Coins className="text-amber-500" size={18} />
               <div className="flex flex-col items-center">
-                <span className="font-semibold text-white text-sm">{formatNumber(user?.tokens || 0, isArabic)}</span>
+                <span className="font-semibold text-foreground text-sm">{formatNumber(user?.tokens || 0, isArabic)}</span>
                 {user?.totalTokensPurchased && (
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-muted-foreground">
                     /{formatNumber(user.totalTokensPurchased, isArabic)} {t('units.tokens', { ns: 'common' })}
                   </span>
                 )}
@@ -100,7 +100,7 @@ export function Navigation() {
             <Link href="/payment-center">
               <Button 
                 data-testid="button-payment-center"
-                className="bg-athlete-accent hover:bg-blue-600 text-white whitespace-nowrap h-11"
+                className="bg-primary hover:bg-teal-600 text-white whitespace-nowrap h-11"
               >
                 <Plus className={isArabic ? 'ml-2' : 'mr-2'} size={16} />
                 {t('menu.buyTokens')}
@@ -113,13 +113,13 @@ export function Navigation() {
             <div className="lg:hidden">
               <Badge 
                 variant="secondary" 
-                className="bg-athlete-gray-800 text-athlete-warning flex items-center gap-2 py-2 px-3 sm:px-4"
+                className="bg-muted text-amber-500 flex items-center gap-2 py-2 px-3 sm:px-4"
               >
                 <Coins size={18} />
                 <div className="flex flex-col">
                   <span className="text-sm sm:text-base font-bold">{formatNumber(user?.tokens || 0, isArabic)}</span>
                   {user?.totalTokensPurchased && (
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-muted-foreground">
                       /{formatNumber(user.totalTokensPurchased, isArabic)}
                     </span>
                   )}
@@ -137,7 +137,7 @@ export function Navigation() {
                 data-testid="button-logout"
                 variant="ghost" 
                 size="sm"
-                className="text-gray-300 hover:text-white"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <LogOut size={16} />
                 <span className={`hidden lg:inline ${isArabic ? 'mr-2' : 'ml-2'}`}>{t('menu.logout')}</span>
@@ -151,7 +151,7 @@ export function Navigation() {
               <SheetTrigger asChild className="md:hidden">
                 <Button 
                   variant="ghost" 
-                  className="text-white h-11 w-11 p-0"
+                  className="text-foreground h-11 w-11 p-0"
                   data-testid="button-mobile-menu"
                 >
                   <Menu size={24} />
@@ -159,18 +159,18 @@ export function Navigation() {
               </SheetTrigger>
               <SheetContent 
                 side={isArabic ? "left" : "right"} 
-                className="bg-athlete-gray-900 border-gray-800 w-[300px] sm:w-[340px]"
+                className="bg-background border-border w-[300px] sm:w-[340px]"
               >
-                <SheetHeader className="border-b border-gray-800 pb-4">
+                <SheetHeader className="border-b pb-4">
                   <div className="flex items-center justify-between">
-                    <SheetTitle className="text-white text-lg font-bold">{t('menu.menu', { defaultValue: 'Menu' })}</SheetTitle>
+                    <SheetTitle className="text-foreground text-lg font-bold">{t('menu.menu', { defaultValue: 'Menu' })}</SheetTitle>
                     {/* Token Balance Display */}
-                    <div className="bg-athlete-gray-800 rounded-lg px-4 py-2 flex items-center gap-2.5 mr-10">
-                      <Coins className="text-athlete-warning" size={18} />
+                    <div className="bg-muted rounded-lg px-4 py-2 flex items-center gap-2.5 mr-10">
+                      <Coins className="text-amber-500" size={18} />
                       <div className="flex flex-col">
-                        <span className="text-sm font-bold text-white" dir="ltr">{formatNumber(user?.tokens || 0, isArabic)}</span>
+                        <span className="text-sm font-bold text-foreground" dir="ltr">{formatNumber(user?.tokens || 0, isArabic)}</span>
                         {user?.totalTokensPurchased && (
-                          <span className="text-xs text-gray-500" dir="ltr">
+                          <span className="text-xs text-muted-foreground" dir="ltr">
                             /{formatNumber(user.totalTokensPurchased, isArabic)}
                           </span>
                         )}
@@ -193,7 +193,7 @@ export function Navigation() {
                     
                     <Button 
                       data-testid="mobile-button-payment-center"
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold justify-start h-11 shadow-lg"
+                      className="w-full bg-primary hover:bg-teal-600 text-white font-semibold justify-start h-11 shadow-lg"
                       onClick={handleBuyTokens}
                     >
                       <Plus className={isArabic ? 'ml-2' : 'mr-2'} size={18} />
@@ -203,24 +203,24 @@ export function Navigation() {
 
                   {/* Menu Items */}
                   <div className="mt-4 space-y-1">
-                    <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       {t('menu.account', { defaultValue: 'Account' })}
                     </div>
                     
-                    <div className="bg-athlete-gray-800 rounded-lg p-1 space-y-0.5">
+                    <div className="bg-muted rounded-lg p-1 space-y-0.5">
                       <HistoryDropdown 
                         customTrigger={(count) => (
-                          <button className="w-full flex items-center justify-between px-3 py-2.5 text-gray-300 hover:bg-athlete-gray-700 rounded transition-colors">
+                          <button className="w-full flex items-center justify-between px-3 py-2.5 text-foreground hover:bg-accent rounded transition-colors">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-athlete-gray-700 flex items-center justify-center">
-                                <Clock size={16} className="text-blue-400" />
+                              <div className="w-8 h-8 rounded-lg bg-background flex items-center justify-center">
+                                <Clock size={16} className="text-primary" />
                               </div>
                               <span className="text-sm font-medium">{t('menu.history', { defaultValue: 'History' })}</span>
                             </div>
                             {count > 0 && (
                               <Badge 
                                 variant="secondary" 
-                                className="bg-blue-600/20 text-blue-400 border-blue-600/30 h-5 px-2 text-xs font-semibold"
+                                className="bg-primary/20 text-primary border-primary/30 h-5 px-2 text-xs font-semibold"
                               >
                                 {count > 99 ? formatNumber('99+', isArabic) : formatNumber(count, isArabic)}
                               </Badge>
@@ -231,9 +231,9 @@ export function Navigation() {
                       
                       <ProfileDropdown
                         customTrigger={
-                          <button className="w-full flex items-center gap-3 px-3 py-2.5 text-gray-300 hover:bg-athlete-gray-700 rounded transition-colors">
-                            <div className="w-8 h-8 rounded-lg bg-athlete-gray-700 flex items-center justify-center">
-                              <UserIcon size={16} className="text-green-400" />
+                          <button className="w-full flex items-center gap-3 px-3 py-2.5 text-foreground hover:bg-accent rounded transition-colors">
+                            <div className="w-8 h-8 rounded-lg bg-background flex items-center justify-center">
+                              <UserIcon size={16} className="text-green-500" />
                             </div>
                             <span className="text-sm font-medium">{t('menu.profile', { defaultValue: 'Profile' })}</span>
                           </button>
@@ -244,16 +244,16 @@ export function Navigation() {
 
                   {/* Settings */}
                   <div className="mt-3 space-y-1">
-                    <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       {t('menu.settings', { defaultValue: 'Settings' })}
                     </div>
                     
-                    <div className="bg-athlete-gray-800 rounded-lg p-1">
+                    <div className="bg-muted rounded-lg p-1">
                       <LanguageSwitcher
                         customTrigger={
-                          <button className="w-full flex items-center gap-3 px-3 py-2.5 text-gray-300 hover:bg-athlete-gray-700 rounded transition-colors">
-                            <div className="w-8 h-8 rounded-lg bg-athlete-gray-700 flex items-center justify-center">
-                              <Globe size={16} className="text-purple-400" />
+                          <button className="w-full flex items-center gap-3 px-3 py-2.5 text-foreground hover:bg-accent rounded transition-colors">
+                            <div className="w-8 h-8 rounded-lg bg-background flex items-center justify-center">
+                              <Globe size={16} className="text-purple-500" />
                             </div>
                             <span className="text-sm font-medium">{t('menu.language', { defaultValue: 'Language' })}</span>
                           </button>
@@ -271,7 +271,7 @@ export function Navigation() {
                       }}
                       data-testid="mobile-button-logout"
                       variant="ghost" 
-                      className="w-full text-red-400 hover:text-red-300 hover:bg-red-950/30 justify-start h-11 font-medium"
+                      className="w-full text-red-500 hover:text-red-600 hover:bg-red-50 justify-start h-11 font-medium"
                     >
                       <LogOut className={isArabic ? 'ml-2' : 'mr-2'} size={18} />
                       {t('menu.logout')}

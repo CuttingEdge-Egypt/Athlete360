@@ -551,11 +551,11 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
       }}
       dir={isArabic ? 'rtl' : 'ltr'}
     >
-      <Card className="bg-athlete-gray-800 border-gray-600 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-gray-600" style={{ padding: isMobile ? '8px 10px' : '12px' }}>
+      <Card className="bg-card border shadow-2xl">
+        <div className="flex items-center justify-between border-b" style={{ padding: isMobile ? '8px 10px' : '12px' }}>
           <div className="flex items-center" style={{ gap: isMobile ? '6px' : '8px' }}>
             <div className="bg-blue-500 rounded-full animate-pulse" style={{ width: isMobile ? '6px' : '8px', height: isMobile ? '6px' : '8px' }}></div>
-            <span className="font-medium text-gray-200" style={{ fontSize: isMobile ? '13px' : '14px' }}>
+            <span className="font-medium text-foreground" style={{ fontSize: isMobile ? '13px' : '14px' }}>
               {t('services.queue.title')} ({queue.length})
             </span>
           </div>
@@ -563,7 +563,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
             <Button
               variant="ghost"
               onClick={() => setIsMinimized(!isMinimized)}
-              className="p-0 text-gray-400 hover:text-gray-200"
+              className="p-0 text-muted-foreground hover:text-foreground"
               style={{ height: isMobile ? '32px' : '24px', width: isMobile ? '32px' : '24px', fontSize: isMobile ? '10px' : '12px' }}
             >
               {isMinimized ? '▲' : '▼'}
@@ -577,7 +577,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
                 }
               }}
               disabled={queue.some(item => item.status === 'running' || item.status === 'pending')}
-              className="p-0 text-gray-400 hover:text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="p-0 text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ height: isMobile ? '32px' : '24px', width: isMobile ? '32px' : '24px' }}
               title={queue.some(item => item.status === 'running' || item.status === 'pending') ? t('services.queue.cannotClose') : t('services.queue.closeQueue')}
             >
@@ -592,7 +592,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
               {queue.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-start justify-between hover:bg-athlete-gray-700 transition-colors border-b border-gray-700 last:border-b-0"
+                  className="flex items-start justify-between hover:bg-muted transition-colors border-b last:border-b-0"
                   style={{ padding: isMobile ? '8px' : '12px', alignItems: isMobile ? 'flex-start' : 'center' }}
                 >
                   <div className="flex-1 min-w-0" style={{ paddingRight: isMobile ? '6px' : '8px' }}>

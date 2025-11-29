@@ -1843,10 +1843,10 @@ export default function Home() {
     <div className="container mx-auto px-3 sm:px-4 pt-16 sm:pt-20">
           {/* Welcome Section */}
           <div className="text-center mb-8 sm:mb-12 px-2">
-            <h1 className="text-2xl sm:text-4xl font-bold mb-3 sm:mb-4 text-white">
+            <h1 className="text-2xl sm:text-4xl font-bold mb-3 sm:mb-4 text-foreground">
 {t('interface.welcome')}
             </h1>
-            <p className="text-base sm:text-xl text-gray-300 mb-6 sm:mb-8">
+            <p className="text-base sm:text-xl text-muted-foreground mb-6 sm:mb-8">
 {t('interface.tagline')}
             </p>
           </div>
@@ -1854,11 +1854,11 @@ export default function Home() {
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-6xl mx-auto">
             <div className="mb-6 sm:mb-8 overflow-x-auto sm:overflow-x-visible">
-              <TabsList className="inline-flex w-full sm:grid sm:grid-cols-4 bg-athlete-gray-800 min-w-max sm:min-w-0 h-11 p-0">
+              <TabsList className="inline-flex w-full sm:grid sm:grid-cols-4 bg-card min-w-max sm:min-w-0 h-11 p-0">
                 <TabsTrigger 
                   value="analysis" 
                   data-testid="tab-analysis"
-                  className="data-[state=active]:bg-athlete-accent flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm h-11"
+                  className="data-[state=active]:bg-primary flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm h-11"
                 >
                   <BarChart3 size={14} className="sm:w-4 sm:h-4" />
                   {t('interface.athleteAnalysis')}
@@ -1866,7 +1866,7 @@ export default function Home() {
                 <TabsTrigger 
                   value="comparison" 
                   data-testid="tab-comparison"
-                  className="data-[state=active]:bg-athlete-accent flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm h-11"
+                  className="data-[state=active]:bg-primary flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm h-11"
                 >
                   <Users size={14} className="sm:w-4 sm:h-4" />
                   {t('interface.compareAthletes')}
@@ -1874,7 +1874,7 @@ export default function Home() {
                 <TabsTrigger 
                   value="nutrition" 
                   data-testid="tab-nutrition"
-                  className="data-[state=active]:bg-athlete-accent flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm h-11"
+                  className="data-[state=active]:bg-primary flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm h-11"
                 >
                   <Apple size={14} className="sm:w-4 sm:h-4" />
                   {t('interface.nutritionPlan')}
@@ -1882,7 +1882,7 @@ export default function Home() {
                 <TabsTrigger 
                   value="development" 
                   data-testid="tab-development"
-                  className="data-[state=active]:bg-athlete-accent flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm h-11"
+                  className="data-[state=active]:bg-primary flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm h-11"
                 >
                   <CalendarDays size={14} className="sm:w-4 sm:h-4" />
                   {t('interface.developmentPlan')}
@@ -1892,13 +1892,13 @@ export default function Home() {
 
             <TabsContent value="analysis" className="space-y-8">
               {/* Sport & Athlete Selection */}
-              <Card className="bg-athlete-gray-800 border-gray-700">
+              <Card className="bg-card border">
                 <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold mb-6 text-center text-white">{t('interface.selectSportAthlete')}</h2>
+                  <h2 className="text-2xl font-bold mb-6 text-center text-foreground">{t('interface.selectSportAthlete')}</h2>
               
               <div className="grid md:grid-cols-3 gap-6 mb-6">
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-300">{t('interface.sport')}</label>
+                  <label className="block text-sm font-medium mb-2 text-muted-foreground">{t('interface.sport')}</label>
                   <div className="flex gap-2">
                     <Popover open={sportDropdownOpen} onOpenChange={setSportDropdownOpen}>
                       <PopoverTrigger asChild>
@@ -1906,7 +1906,7 @@ export default function Home() {
                           variant="outline"
                           role="combobox"
                           aria-expanded={sportDropdownOpen}
-                          className="bg-athlete-gray-700 border-gray-600 text-white flex-1 justify-between hover:bg-athlete-gray-600"
+                          className="bg-muted border text-foreground flex-1 justify-between hover:bg-accent"
                           data-testid="select-sport"
                         >
                           <span className="truncate">
@@ -1917,29 +1917,29 @@ export default function Home() {
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-[300px] p-0 bg-athlete-gray-700 border-gray-600" align="start">
-                        <div className="p-3 border-b border-gray-600">
+                      <PopoverContent className="w-[300px] p-0 bg-muted border" align="start">
+                        <div className="p-3 border-b border">
                           <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                             <Input
                               placeholder="Search sports..."
                               value={sportSearchTerm}
                               onChange={(e) => setSportSearchTerm(e.target.value)}
-                              className="pl-9 bg-athlete-gray-700 border-athlete-gray-600 text-white placeholder:text-gray-400 focus:bg-athlete-gray-700 focus:border-athlete-gray-500"
+                              className="pl-9 bg-muted border text-foreground placeholder:text-muted-foreground focus:bg-muted focus:border-primary"
                               data-testid="input-sport-search"
                             />
                           </div>
                         </div>
                         <div className="max-h-60 overflow-auto">
                           {filteredSports.length === 0 ? (
-                            <div className="p-3 text-center text-gray-400">
+                            <div className="p-3 text-center text-muted-foreground">
                               No sports found.
                             </div>
                           ) : (
                             filteredSports.map((sportItem) => (
                               <div
                                 key={sportItem.id}
-                                className="flex items-center px-3 py-2 cursor-pointer hover:bg-athlete-gray-600 text-white"
+                                className="flex items-center px-3 py-2 cursor-pointer hover:bg-accent text-foreground"
                                 onClick={() => {
                                   handleSportChange(sportItem.id);
                                   setSportDropdownOpen(false);
@@ -1961,7 +1961,7 @@ export default function Home() {
                         variant="outline"
                         size="sm"
                         onClick={handleClearSport}
-                        className="bg-athlete-gray-700 border-gray-600 text-red-400 hover:text-red-300 hover:bg-red-900/20 p-2"
+                        className="bg-muted border text-red-400 hover:text-red-300 hover:bg-red-900/20 p-2"
                         data-testid="clear-sport-button"
                       >
                         <X size={16} />
@@ -1971,7 +1971,7 @@ export default function Home() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-300">{t('interface.country')}</label>
+                  <label className="block text-sm font-medium mb-2 text-muted-foreground">{t('interface.country')}</label>
                   <CountrySelect
                     value={selectedCountry || "all"}
                     onValueChange={handleCountryChange}
@@ -1982,16 +1982,16 @@ export default function Home() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-300">{t('interface.athleteName')}</label>
+                  <label className="block text-sm font-medium mb-2 text-muted-foreground">{t('interface.athleteName')}</label>
                   <div className="relative">
                     <Input
                       data-testid="search-athlete-name"
                       placeholder={t('interface.searchAthlete')}
                       value={searchName}
                       onChange={(e) => setSearchName(e.target.value)}
-                      className="bg-athlete-gray-700 border-gray-600 text-white pl-10"
+                      className="bg-muted border text-foreground pl-10"
                     />
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
                     {isSearchLoading && (
                       <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                         <div className="animate-spin w-4 h-4 border-2 border-athlete-accent border-t-transparent rounded-full"></div>
@@ -2001,7 +2001,7 @@ export default function Home() {
                   
                   {/* Dropdown for search results */}
                   {searchName.trim() && availableAthletes.length > 0 && (
-                    <div className="mt-2 bg-athlete-gray-700 border border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                    <div className="mt-2 bg-muted border border rounded-md shadow-lg max-h-60 overflow-y-auto">
                       {availableAthletes.map((athlete) => (
                         <button
                           key={athlete.id}
@@ -2011,13 +2011,13 @@ export default function Home() {
                             setIsAthleteNewlyCreated(false);
                             setSearchName("");
                           }}
-                          className="w-full text-left px-4 py-2 hover:bg-athlete-gray-600 text-white border-b border-gray-600 last:border-b-0"
+                          className="w-full text-left px-4 py-2 hover:bg-accent text-foreground border-b border last:border-b-0"
                         >
                           <div className="font-medium">
                             {athlete.name}
                           </div>
                           {athlete.country && (
-                            <div className="text-sm text-gray-400">{athlete.country}</div>
+                            <div className="text-sm text-muted-foreground">{athlete.country}</div>
                           )}
                         </button>
                       ))}
@@ -2034,7 +2034,7 @@ export default function Home() {
                           <div className="flex flex-col items-center space-y-6">
                             <div className="relative">
                               {/* Outer glow ring */}
-                              <div className="absolute inset-0 bg-athlete-accent/20 rounded-full blur-md animate-pulse" style={{ width: '80px', height: '80px' }} />
+                              <div className="absolute inset-0 bg-primary/20 rounded-full blur-md animate-pulse" style={{ width: '80px', height: '80px' }} />
                               
                               {/* Main progress circle */}
                               <div className="relative w-20 h-20 flex items-center justify-center">
@@ -2074,7 +2074,7 @@ export default function Home() {
                                 
                                 {/* Progress percentage */}
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                  <span className="text-lg font-bold text-white bg-athlete-gray-800/80 rounded-full w-12 h-12 flex items-center justify-center text-xs backdrop-blur-sm">
+                                  <span className="text-lg font-bold text-foreground bg-card/80 rounded-full w-12 h-12 flex items-center justify-center text-xs backdrop-blur-sm">
                                     {Math.round(searchProgress || 0)}%
                                   </span>
                                 </div>
@@ -2084,8 +2084,8 @@ export default function Home() {
                             {/* Status message with icon */}
                             <div className="space-y-2">
                               <div className="flex items-center justify-center space-x-2">
-                                <div className="w-2 h-2 bg-athlete-accent rounded-full animate-ping" />
-                                <span className="text-lg font-semibold text-white">
+                                <div className="w-2 h-2 bg-primary rounded-full animate-ping" />
+                                <span className="text-lg font-semibold text-foreground">
                                   {t('athleteSearch.aiSearching.title')}
                                 </span>
                               </div>
@@ -2105,27 +2105,27 @@ export default function Home() {
                             </div>
                             
                             {/* Subtle animated background elements */}
-                            <div className="absolute top-4 right-4 w-16 h-16 bg-athlete-accent/5 rounded-full animate-pulse" />
+                            <div className="absolute top-4 right-4 w-16 h-16 bg-primary/5 rounded-full animate-pulse" />
                             <div className="absolute bottom-4 left-4 w-12 h-12 bg-blue-400/5 rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
                           </div>
                         </div>
                       ) : (
                         /* Enhanced Not Found State */
-                        <div className="bg-gradient-to-br from-athlete-gray-700 to-athlete-gray-800 border border-gray-500/30 rounded-xl p-6 text-center shadow-xl hover:shadow-2xl transition-all duration-300">
+                        <div className="bg-gradient-to-br from-muted to-card border border-muted-foreground/30 rounded-xl p-6 text-center shadow-xl hover:shadow-2xl transition-all duration-300">
                           {/* Icon */}
                           <div className="flex justify-center mb-4">
-                            <div className="w-16 h-16 bg-athlete-gray-600/50 rounded-full flex items-center justify-center border border-gray-500/20">
-                              <Search className="w-8 h-8 text-gray-400" />
+                            <div className="w-16 h-16 bg-accent/50 rounded-full flex items-center justify-center border border-muted-foreground/20">
+                              <Search className="w-8 h-8 text-muted-foreground" />
                             </div>
                           </div>
                           
                           {/* Title */}
-                          <h3 className="text-lg font-semibold text-white mb-2">
+                          <h3 className="text-lg font-semibold text-foreground mb-2">
                             {t('athleteSearch.notFound.title')}
                           </h3>
                           
                           {/* Description */}
-                          <p className="text-gray-300 mb-6 text-sm leading-relaxed max-w-sm mx-auto">
+                          <p className="text-muted-foreground mb-6 text-sm leading-relaxed max-w-sm mx-auto">
                             {t('athleteSearch.notFound.description', { name: searchName.trim() })}
                           </p>
                           
@@ -2133,7 +2133,7 @@ export default function Home() {
                           <Button
                             data-testid="create-athlete-ai"
                             onClick={() => handleCreateAthleteWithAI(searchName.trim())}
-                            className="bg-gradient-to-r from-athlete-accent to-green-500 hover:from-athlete-accent/90 hover:to-green-500/90 text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                            className="bg-gradient-to-r from-primary to-green-500 hover:from-primary/90 hover:to-green-500/90 text-foreground font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                             disabled={!selectedSport || isSearching}
                           >
                             <div className="flex items-center space-x-2">
@@ -2161,7 +2161,7 @@ export default function Home() {
                       <div className="flex justify-end mb-2">
                         <div className={`flex items-center ${i18n.language === 'ar' ? 'gap-3 flex-row-reverse px-4 py-2' : 'gap-2 px-3 py-1.5'} bg-slate-800/60 backdrop-blur-sm rounded-lg border border-slate-600/40`}>
                           <CalendarDays className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                          <p className={`font-medium text-gray-300 whitespace-nowrap ${i18n.language === 'ar' ? 'text-base' : 'text-sm'}`}>
+                          <p className={`font-medium text-muted-foreground whitespace-nowrap ${i18n.language === 'ar' ? 'text-base' : 'text-sm'}`}>
                             <span>{t('interface.lastUpdate')}: </span>
                             <span className="text-blue-400">{new Date(selectedAthlete.updatedAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { 
                               month: 'short', 
@@ -2176,7 +2176,7 @@ export default function Home() {
                     )}
                     
                     <Card 
-                      className="bg-athlete-gray-700 border-gray-600"
+                      className="bg-muted border"
                     >
                       <CardContent className="p-4 sm:p-6">
                     <div className="flex flex-col sm:flex-row items-start gap-4">
@@ -2199,9 +2199,9 @@ export default function Home() {
                             />
                           ) : null}
                           <div 
-                            className={`profile-fallback w-16 h-16 rounded-full bg-athlete-gray-600 flex items-center justify-center absolute top-0 left-0 ${selectedAthlete.profileImageUrl ? 'hidden' : 'flex'}`}
+                            className={`profile-fallback w-16 h-16 rounded-full bg-accent flex items-center justify-center absolute top-0 left-0 ${selectedAthlete.profileImageUrl ? 'hidden' : 'flex'}`}
                           >
-                            <User className="text-gray-400" size={24} />
+                            <User className="text-muted-foreground" size={24} />
                           </div>
                         </div>
                         
@@ -2218,12 +2218,12 @@ export default function Home() {
                                 }}
                                 size="sm"
                                 variant="outline"
-                                className="bg-athlete-gray-600 border-gray-500 text-gray-300 hover:bg-athlete-gray-500 hover:text-white text-xs px-2 py-1 h-6 relative w-full"
+                                className="bg-accent border-muted-foreground text-muted-foreground hover:bg-accent hover:text-foreground text-xs px-2 py-1 h-6 relative w-full"
                                 disabled={isSearchingImage}
                               >
                                 {isSearchingImage ? (
                                   <div className="flex items-center space-x-1">
-                                    <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
+                                    <div className="w-3 h-3 border border-muted-foreground border-t-transparent rounded-full animate-spin" />
                                     <span>{t('athleteSearch.imageUpdate.searching')}</span>
                                   </div>
                                 ) : (
@@ -2237,7 +2237,7 @@ export default function Home() {
                             <TooltipContent>
                               <div className="text-sm">
                                 <p className="mb-1">{t('athleteSearch.imageUpdate.tooltip.question', { name: i18n.language === 'ar' && selectedAthlete.nameArabic ? selectedAthlete.nameArabic : selectedAthlete.name })}</p>
-                                <p className="text-gray-300">{t('athleteSearch.imageUpdate.tooltip.help')}</p>
+                                <p className="text-muted-foreground">{t('athleteSearch.imageUpdate.tooltip.help')}</p>
                                 <p className="text-xs text-green-400 mt-1 font-semibold">{t('athleteSearch.imageUpdate.tooltip.noTokens')}</p>
                               </div>
                             </TooltipContent>
@@ -2280,7 +2280,7 @@ export default function Home() {
                           {/* Image Update Tip Popup */}
                           {showImageUpdateTip && (
                             <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 z-50 w-max max-w-[280px]">
-                              <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-4 py-2 rounded-lg shadow-xl border border-blue-400 relative animate-in slide-in-from-top-2 duration-300">
+                              <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-foreground px-4 py-2 rounded-lg shadow-xl border border-blue-400 relative animate-in slide-in-from-top-2 duration-300">
                                 {/* Arrow pointing up to button */}
                                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full">
                                   <div className="w-0 h-0 border-l-4 border-r-4 border-b-8 border-l-transparent border-r-transparent border-b-blue-600"></div>
@@ -2308,10 +2308,10 @@ export default function Home() {
                       <div className="flex-1 min-w-0 sm:ml-4 w-full sm:w-auto">
                           <div className="flex flex-col sm:flex-row items-start sm:justify-between gap-3 sm:gap-4 mb-2">
                             <div className="flex-1 w-full sm:min-w-[280px] sm:max-w-md">
-                              <h3 className="text-lg sm:text-xl font-bold text-white break-words">
+                              <h3 className="text-lg sm:text-xl font-bold text-foreground break-words">
                                 {selectedAthlete.name}
                               </h3>
-                              <p className="text-sm sm:text-base text-gray-400 capitalize flex items-center gap-2">
+                              <p className="text-sm sm:text-base text-muted-foreground capitalize flex items-center gap-2">
                                 <Flag country={selectedAthlete.country || "US"} className="w-6 h-4 rounded shadow-sm" />
                                 {selectedAthlete.country || "Unknown Country"}
                               </p>
@@ -2348,9 +2348,9 @@ export default function Home() {
                                       medalEmoji = '🥇';
                                     } else if (rankNum === 2) {
                                       bgColor = 'bg-gradient-to-br from-gray-300/30 via-slate-400/30 to-gray-500/30';
-                                      borderColor = 'border-gray-300';
-                                      textColor = 'text-gray-200';
-                                      categoryTextColor = 'text-gray-300/90';
+                                      borderColor = 'border-muted-foreground';
+                                      textColor = 'text-foreground';
+                                      categoryTextColor = 'text-muted-foreground/90';
                                       medalEmoji = '🥈';
                                     } else if (rankNum === 3) {
                                       bgColor = 'bg-gradient-to-br from-orange-400/30 via-amber-600/30 to-orange-700/30';
@@ -2374,9 +2374,9 @@ export default function Home() {
                                       medalEmoji = '🥇';
                                     } else if (rankNum === 2) {
                                       bgColor = 'bg-gradient-to-br from-gray-300/30 via-slate-400/30 to-gray-500/30';
-                                      borderColor = 'border-gray-300';
-                                      textColor = 'text-gray-200';
-                                      categoryTextColor = 'text-gray-300/90';
+                                      borderColor = 'border-muted-foreground';
+                                      textColor = 'text-foreground';
+                                      categoryTextColor = 'text-muted-foreground/90';
                                       medalEmoji = '🥈';
                                     } else if (rankNum === 3) {
                                       bgColor = 'bg-gradient-to-br from-orange-400/30 via-amber-600/30 to-orange-700/30';
@@ -2400,9 +2400,9 @@ export default function Home() {
                                       medalEmoji = '🥇';
                                     } else if (rankNum === 2) {
                                       bgColor = 'bg-gradient-to-br from-gray-300/30 via-slate-400/30 to-gray-500/30';
-                                      borderColor = 'border-gray-300';
-                                      textColor = 'text-gray-200';
-                                      categoryTextColor = 'text-gray-300/90';
+                                      borderColor = 'border-muted-foreground';
+                                      textColor = 'text-foreground';
+                                      categoryTextColor = 'text-muted-foreground/90';
                                       medalEmoji = '🥈';
                                     } else if (rankNum === 3) {
                                       bgColor = 'bg-gradient-to-br from-orange-400/30 via-amber-600/30 to-orange-700/30';
@@ -2426,9 +2426,9 @@ export default function Home() {
                                       medalEmoji = '🥇';
                                     } else if (rankNum === 2) {
                                       bgColor = 'bg-gradient-to-br from-gray-300/30 via-slate-400/30 to-gray-500/30';
-                                      borderColor = 'border-gray-300';
-                                      textColor = 'text-gray-200';
-                                      categoryTextColor = 'text-gray-300/90';
+                                      borderColor = 'border-muted-foreground';
+                                      textColor = 'text-foreground';
+                                      categoryTextColor = 'text-muted-foreground/90';
                                       medalEmoji = '🥈';
                                     } else if (rankNum === 3) {
                                       bgColor = 'bg-gradient-to-br from-orange-400/30 via-amber-600/30 to-orange-700/30';
@@ -2508,7 +2508,7 @@ export default function Home() {
                                     <span className="text-[10px] text-blue-400">📅</span>
                                   </div>
                                   <span className="text-xs text-slate-400 font-medium">Age</span>
-                                  <span className="text-xs font-bold text-white">{selectedAthlete.personalInfo.age}</span>
+                                  <span className="text-xs font-bold text-foreground">{selectedAthlete.personalInfo.age}</span>
                                 </div>
                               )}
                               
@@ -2518,7 +2518,7 @@ export default function Home() {
                                     <Ruler className="text-yellow-400" size={10} />
                                   </div>
                                   <span className="text-xs text-slate-400 font-medium">Height</span>
-                                  <span className="text-xs font-bold text-white">{selectedAthlete.personalInfo.height}</span>
+                                  <span className="text-xs font-bold text-foreground">{selectedAthlete.personalInfo.height}</span>
                                 </div>
                               )}
                               
@@ -2534,7 +2534,7 @@ export default function Home() {
                                       sports.find(s => s.id === selectedSport)?.name.toLowerCase().includes(sport)
                                     ) ? 'Weight Category' : 'Position'}
                                   </span>
-                                  <span className="text-xs font-bold text-white">{selectedAthlete.personalInfo.position}</span>
+                                  <span className="text-xs font-bold text-foreground">{selectedAthlete.personalInfo.position}</span>
                                 </div>
                               )}
                               
@@ -2544,7 +2544,7 @@ export default function Home() {
                                     <Shield className="text-green-400" size={10} />
                                   </div>
                                   <span className="text-xs text-slate-400 font-medium">Club</span>
-                                  <span className="text-xs font-bold text-white">{selectedAthlete.personalInfo.club}</span>
+                                  <span className="text-xs font-bold text-foreground">{selectedAthlete.personalInfo.club}</span>
                                 </div>
                               )}
                               
@@ -2554,7 +2554,7 @@ export default function Home() {
                                     <span className="text-[10px] text-orange-400">⚖️</span>
                                   </div>
                                   <span className="text-xs text-slate-400 font-medium">Category</span>
-                                  <span className="text-xs font-bold text-white">{selectedAthlete.personalInfo.category}</span>
+                                  <span className="text-xs font-bold text-foreground">{selectedAthlete.personalInfo.category}</span>
                                 </div>
                               )}
                               
@@ -2564,7 +2564,7 @@ export default function Home() {
                                     <span className="text-[10px] text-pink-400">🎂</span>
                                   </div>
                                   <span className="text-xs text-slate-400 font-medium">Birth</span>
-                                  <span className="text-xs font-bold text-white">{selectedAthlete.personalInfo.dateOfBirth}</span>
+                                  <span className="text-xs font-bold text-foreground">{selectedAthlete.personalInfo.dateOfBirth}</span>
                                 </div>
                               )}
                               
@@ -2574,7 +2574,7 @@ export default function Home() {
                                     <span className="text-[10px] text-indigo-400">🎓</span>
                                   </div>
                                   <span className="text-xs text-slate-400 font-medium flex-shrink-0">Education</span>
-                                  <span className="text-xs font-bold text-white truncate max-w-[200px] sm:max-w-xs" title={selectedAthlete.personalInfo.educationalBackground}>
+                                  <span className="text-xs font-bold text-foreground truncate max-w-[200px] sm:max-w-xs" title={selectedAthlete.personalInfo.educationalBackground}>
                                     {selectedAthlete.personalInfo.educationalBackground}
                                   </span>
                                 </div>
@@ -2592,7 +2592,7 @@ export default function Home() {
               {/* Service Boxes Grid */}
               {selectedAthlete && (
                 <div>
-                  <h2 className="text-3xl font-bold text-center mb-8 text-white">{t('interface.analysisServices')}</h2>
+                  <h2 className="text-3xl font-bold text-center mb-8 text-foreground">{t('interface.analysisServices')}</h2>
                   <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {services.map((service) => (
                       <ServiceCard
@@ -2610,8 +2610,8 @@ export default function Home() {
               {!selectedAthlete && (
                 <div className="text-center py-20">
                   <div className="text-6xl mb-4">🏆</div>
-                  <h3 className="text-2xl font-bold mb-4 text-white">{t('interface.readyToAnalyze.title')}</h3>
-                  <p className="text-gray-400 max-w-md mx-auto">
+                  <h3 className="text-2xl font-bold mb-4 text-foreground">{t('interface.readyToAnalyze.title')}</h3>
+                  <p className="text-muted-foreground max-w-md mx-auto">
                     {t('interface.readyToAnalyze.description')}
                   </p>
                 </div>
@@ -2625,11 +2625,11 @@ export default function Home() {
             <TabsContent value="nutrition" className="space-y-8">
               {showNutritionForm ? (
                 /* Nutrition Plan Form */
-                <Card className="bg-athlete-gray-800 border-gray-700">
+                <Card className="bg-card border">
                   <CardContent className="p-8">
                     <div className={`flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-6 ${isArabic ? 'md:flex-row-reverse' : ''}`}>
                       <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                        <h2 className="text-2xl font-bold text-white">{t('nutritionPlan.title')}</h2>
+                        <h2 className="text-2xl font-bold text-foreground">{t('nutritionPlan.title')}</h2>
                       </div>
                       <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                         <Badge variant="secondary" className="bg-green-600/20 text-green-300 border-green-500/30 text-xs font-medium md:mx-0 mx-auto">
@@ -2661,13 +2661,13 @@ export default function Home() {
                         name="goal"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className={`text-gray-300 ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('nutritionPlan.goal')} *</FormLabel>
+                            <FormLabel className={`text-muted-foreground ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('nutritionPlan.goal')} *</FormLabel>
                             <FormControl>
                               <Textarea
                                 {...field}
                                 data-testid="input-nutrition-goal"
                                 placeholder={t('nutritionPlan.goalPlaceholder')}
-                                className="bg-athlete-gray-700 border-gray-600 text-white min-h-[150px] resize-y overflow-y-auto"
+                                className="bg-muted border text-foreground min-h-[150px] resize-y overflow-y-auto"
                                 maxLength={1000}
                               />
                             </FormControl>
@@ -2683,7 +2683,7 @@ export default function Home() {
                           name="sport"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className={`text-gray-300 ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('nutritionPlan.sport')}</FormLabel>
+                              <FormLabel className={`text-muted-foreground ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('nutritionPlan.sport')}</FormLabel>
                               <FormControl>
                                 <div className="flex gap-2">
                                   <Popover open={nutritionSportDropdownOpen} onOpenChange={setNutritionSportDropdownOpen}>
@@ -2692,7 +2692,7 @@ export default function Home() {
                                         variant="outline"
                                         role="combobox"
                                         aria-expanded={nutritionSportDropdownOpen}
-                                        className="bg-athlete-gray-700 border-gray-600 text-white flex-1 justify-between hover:bg-athlete-gray-600"
+                                        className="bg-muted border text-foreground flex-1 justify-between hover:bg-accent"
                                         data-testid="select-nutrition-sport"
                                       >
                                         <span className="truncate">
@@ -2703,29 +2703,29 @@ export default function Home() {
                                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                       </Button>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-[300px] p-0 bg-athlete-gray-700 border-gray-600" align="start">
-                                      <div className="p-3 border-b border-gray-600">
+                                    <PopoverContent className="w-[300px] p-0 bg-muted border" align="start">
+                                      <div className="p-3 border-b border">
                                         <div className="relative">
-                                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                                           <Input
                                             placeholder="Search sports..."
                                             value={nutritionSportSearchTerm}
                                             onChange={(e) => setNutritionSportSearchTerm(e.target.value)}
-                                            className="pl-9 bg-athlete-gray-700 border-athlete-gray-600 text-white placeholder:text-gray-400 focus:bg-athlete-gray-700 focus:border-athlete-gray-500"
+                                            className="pl-9 bg-muted border text-foreground placeholder:text-muted-foreground focus:bg-muted focus:border-primary"
                                             data-testid="input-nutrition-sport-search"
                                           />
                                         </div>
                                       </div>
                                       <div className="max-h-60 overflow-auto">
                                         {filteredNutritionSports.length === 0 ? (
-                                          <div className="p-3 text-center text-gray-400">
+                                          <div className="p-3 text-center text-muted-foreground">
                                             No sports found.
                                           </div>
                                         ) : (
                                           filteredNutritionSports.map((sportItem) => (
                                             <div
                                               key={sportItem.id}
-                                              className="flex items-center px-3 py-2 cursor-pointer hover:bg-athlete-gray-600 text-white"
+                                              className="flex items-center px-3 py-2 cursor-pointer hover:bg-accent text-foreground"
                                               onClick={() => {
                                                 field.onChange(sportItem.id);
                                                 setSelectedSport(sportItem.id);
@@ -2758,7 +2758,7 @@ export default function Home() {
                                         setSelectedAthlete(null);
                                         setSearchName('');
                                       }}
-                                      className="bg-athlete-gray-700 border-gray-600 text-red-400 hover:text-red-300 hover:bg-red-900/20 p-2"
+                                      className="bg-muted border text-red-400 hover:text-red-300 hover:bg-red-900/20 p-2"
                                       data-testid="clear-nutrition-sport-button"
                                     >
                                       <X size={16} />
@@ -2777,13 +2777,13 @@ export default function Home() {
                           name="age"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className={`text-gray-300 ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('nutritionPlan.age')} *</FormLabel>
+                              <FormLabel className={`text-muted-foreground ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('nutritionPlan.age')} *</FormLabel>
                               <FormControl>
                                 <Input
                                   {...field}
                                   data-testid="input-nutrition-age"
                                   type="number"
-                                  className="bg-athlete-gray-700 border-gray-600 text-white"
+                                  className="bg-muted border text-foreground"
                                 />
                               </FormControl>
                               <FormMessage className="text-red-400" />
@@ -2797,13 +2797,13 @@ export default function Home() {
                           name="height"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className={`text-gray-300 ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('nutritionPlan.height')} *</FormLabel>
+                              <FormLabel className={`text-muted-foreground ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('nutritionPlan.height')} *</FormLabel>
                               <FormControl>
                                 <Input
                                   {...field}
                                   data-testid="input-nutrition-height"
                                   type="number"
-                                  className="bg-athlete-gray-700 border-gray-600 text-white"
+                                  className="bg-muted border text-foreground"
                                 />
                               </FormControl>
                               <FormMessage className="text-red-400" />
@@ -2817,13 +2817,13 @@ export default function Home() {
                           name="currentWeight"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className={`text-gray-300 ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('nutritionPlan.currentWeight')} *</FormLabel>
+                              <FormLabel className={`text-muted-foreground ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('nutritionPlan.currentWeight')} *</FormLabel>
                               <FormControl>
                                 <Input
                                   {...field}
                                   data-testid="input-current-weight"
                                   type="number"
-                                  className="bg-athlete-gray-700 border-gray-600 text-white"
+                                  className="bg-muted border text-foreground"
                                 />
                               </FormControl>
                               <FormMessage className="text-red-400" />
@@ -2837,13 +2837,13 @@ export default function Home() {
                           name="targetWeight"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className={`text-gray-300 ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('nutritionPlan.targetWeight')} *</FormLabel>
+                              <FormLabel className={`text-muted-foreground ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('nutritionPlan.targetWeight')} *</FormLabel>
                               <FormControl>
                                 <Input
                                   {...field}
                                   data-testid="input-target-weight"
                                   type="number"
-                                  className="bg-athlete-gray-700 border-gray-600 text-white"
+                                  className="bg-muted border text-foreground"
                                 />
                               </FormControl>
                               <FormMessage className="text-red-400" />
@@ -2857,7 +2857,7 @@ export default function Home() {
                           name="country"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className={`text-gray-300 ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('nutritionPlan.country')} *</FormLabel>
+                              <FormLabel className={`text-muted-foreground ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('nutritionPlan.country')} *</FormLabel>
                               <FormControl>
                                 <CountrySelect
                                   value={field.value || ""}
@@ -2881,14 +2881,14 @@ export default function Home() {
                           name="period"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className={`text-gray-300 ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('nutritionPlan.period')}</FormLabel>
+                              <FormLabel className={`text-muted-foreground ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('nutritionPlan.period')}</FormLabel>
                               <FormControl>
                                 <Input
                                   {...field}
                                   data-testid="input-nutrition-period"
                                   type="number"
                                   placeholder=""
-                                  className="bg-athlete-gray-700 border-gray-600 text-white"
+                                  className="bg-muted border text-foreground"
                                 />
                               </FormControl>
                               <FormMessage className="text-red-400" />
@@ -2904,13 +2904,13 @@ export default function Home() {
                           name="inbodyReport"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className={`text-gray-300 ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('nutritionPlan.inbodyReport')}</FormLabel>
+                              <FormLabel className={`text-muted-foreground ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('nutritionPlan.inbodyReport')}</FormLabel>
                               <FormControl>
                                 <Input
                                   data-testid="input-inbody-report"
                                   type="file"
                                   accept=".pdf,.jpg,.jpeg,.png"
-                                  className="bg-athlete-gray-700 border-gray-600 text-white"
+                                  className="bg-muted border text-foreground"
                                   onChange={(e) => field.onChange(e.target.files?.[0])}
                                 />
                               </FormControl>
@@ -2925,16 +2925,16 @@ export default function Home() {
                           name="language"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className={`text-gray-300 ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('nutritionPlan.language')}</FormLabel>
+                              <FormLabel className={`text-muted-foreground ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('nutritionPlan.language')}</FormLabel>
                               <FormControl>
                                 <Select value={field.value} onValueChange={field.onChange}>
                                   <SelectTrigger 
                                     data-testid="select-nutrition-language"
-                                    className="bg-athlete-gray-700 border-gray-600 text-white"
+                                    className="bg-muted border text-foreground"
                                   >
                                     <SelectValue />
                                   </SelectTrigger>
-                                  <SelectContent className="bg-athlete-gray-700 border-gray-600">
+                                  <SelectContent className="bg-muted border">
                                     <SelectItem value="en">English</SelectItem>
                                     <SelectItem value="ar">العربية</SelectItem>
                                   </SelectContent>
@@ -2948,7 +2948,7 @@ export default function Home() {
 
                       {/* Progress tracking for nutrition plan generation */}
                       {nutritionJobId && (
-                        <div className="mb-6 p-6 bg-athlete-gray-750 border border-gray-600 rounded-lg shadow-lg">
+                        <div className="mb-6 p-6 bg-muted border border rounded-lg shadow-lg">
                           <div className="space-y-4">
                             {/* Progress message with dynamic animation */}
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
@@ -3007,7 +3007,7 @@ export default function Home() {
                           type="submit"
                           data-testid="button-generate-nutrition-plan"
                           disabled={nutritionJobId !== null || createNutritionPlanJobMutation.isPending}
-                          className="bg-athlete-accent hover:bg-blue-600 text-white px-8 py-3 text-lg"
+                          className="bg-primary hover:bg-blue-600 text-foreground px-8 py-3 text-lg"
                         >
                           {(nutritionJobId || createNutritionPlanJobMutation.isPending) ? (
                             <Loader2 className="mr-2 animate-spin" size={20} />
@@ -3025,7 +3025,7 @@ export default function Home() {
                 /* Nutrition Plan Results with New Plan Button */
                 <div className="space-y-6">
                   <div className={`flex justify-between items-center mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                    <h2 className="text-2xl font-bold text-white">{t('nutritionPlan.yourPlan')}</h2>
+                    <h2 className="text-2xl font-bold text-foreground">{t('nutritionPlan.yourPlan')}</h2>
                     <Button 
                       onClick={() => {
                         setShowNutritionForm(true);
@@ -3033,7 +3033,7 @@ export default function Home() {
                         nutritionForm.reset();
                       }}
                       data-testid="button-new-nutrition-plan"
-                      className={`bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold shadow-lg ${isArabic ? 'flex-row-reverse' : ''}`}
+                      className={`bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-foreground font-semibold shadow-lg ${isArabic ? 'flex-row-reverse' : ''}`}
                     >
                       <Apple className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                       {t('nutritionPlan.generateNew')}
@@ -3050,11 +3050,11 @@ export default function Home() {
             <TabsContent value="development" className="space-y-8">
               {showDevelopmentForm ? (
                 /* Development Plan Form */
-                <Card className="bg-athlete-gray-800 border-gray-700">
+                <Card className="bg-card border">
                   <CardContent className="p-8">
                     <div className={`flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-6 ${isArabic ? 'md:flex-row-reverse' : ''}`}>
                       <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                        <h2 className="text-2xl font-bold text-white">{t('developmentPlan.title')}</h2>
+                        <h2 className="text-2xl font-bold text-foreground">{t('developmentPlan.title')}</h2>
                       </div>
                       <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                         <Badge variant="secondary" className="bg-purple-600/20 text-purple-300 border-purple-500/30 text-xs font-medium md:mx-0 mx-auto">
@@ -3086,12 +3086,12 @@ export default function Home() {
                           name="goal"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className={`text-gray-200 ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('developmentPlan.goal')}</FormLabel>
+                              <FormLabel className={`text-foreground ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('developmentPlan.goal')}</FormLabel>
                               <FormControl>
                                 <Textarea 
                                   {...field}
                                   placeholder={t('developmentPlan.goalPlaceholder')}
-                                  className="bg-athlete-gray-700 border-gray-600 text-white min-h-[100px]"
+                                  className="bg-muted border text-foreground min-h-[100px]"
                                   data-testid="input-development-goal"
                                 />
                               </FormControl>
@@ -3107,13 +3107,13 @@ export default function Home() {
                             name="age"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className={`text-gray-200 ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('developmentPlan.age')}</FormLabel>
+                                <FormLabel className={`text-foreground ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('developmentPlan.age')}</FormLabel>
                                 <FormControl>
                                   <Input 
                                     {...field}
                                     type="number" 
                                     placeholder={t('developmentPlan.agePlaceholder')}
-                                    className="bg-athlete-gray-700 border-gray-600 text-white"
+                                    className="bg-muted border text-foreground"
                                     data-testid="input-development-age"
                                   />
                                 </FormControl>
@@ -3128,13 +3128,13 @@ export default function Home() {
                             name="height"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className={`text-gray-200 ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('developmentPlan.height')}</FormLabel>
+                                <FormLabel className={`text-foreground ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('developmentPlan.height')}</FormLabel>
                                 <FormControl>
                                   <Input 
                                     {...field}
                                     type="number" 
                                     placeholder={t('developmentPlan.heightPlaceholder')}
-                                    className="bg-athlete-gray-700 border-gray-600 text-white"
+                                    className="bg-muted border text-foreground"
                                     data-testid="input-development-height"
                                   />
                                 </FormControl>
@@ -3149,13 +3149,13 @@ export default function Home() {
                             name="weight"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className={`text-gray-200 ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('developmentPlan.weight')}</FormLabel>
+                                <FormLabel className={`text-foreground ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('developmentPlan.weight')}</FormLabel>
                                 <FormControl>
                                   <Input 
                                     {...field}
                                     type="number" 
                                     placeholder={t('developmentPlan.weightPlaceholder')}
-                                    className="bg-athlete-gray-700 border-gray-600 text-white"
+                                    className="bg-muted border text-foreground"
                                     data-testid="input-development-weight"
                                   />
                                 </FormControl>
@@ -3170,18 +3170,18 @@ export default function Home() {
                             name="gender"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className={`text-gray-200 ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('developmentPlan.gender')}</FormLabel>
+                                <FormLabel className={`text-foreground ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('developmentPlan.gender')}</FormLabel>
                                 <Select onValueChange={field.onChange} value={field.value}>
                                   <FormControl>
-                                    <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white" data-testid="select-development-gender">
+                                    <SelectTrigger className="bg-muted border text-foreground" data-testid="select-development-gender">
                                       <SelectValue placeholder={t('developmentPlan.genderPlaceholder')} />
                                     </SelectTrigger>
                                   </FormControl>
-                                  <SelectContent className="bg-athlete-gray-700 border-gray-600">
-                                    <SelectItem value="male" className="text-white hover:bg-athlete-gray-600">
+                                  <SelectContent className="bg-muted border">
+                                    <SelectItem value="male" className="text-foreground hover:bg-accent">
                                       {t('developmentPlan.male')}
                                     </SelectItem>
-                                    <SelectItem value="female" className="text-white hover:bg-athlete-gray-600">
+                                    <SelectItem value="female" className="text-foreground hover:bg-accent">
                                       {t('developmentPlan.female')}
                                     </SelectItem>
                                   </SelectContent>
@@ -3198,7 +3198,7 @@ export default function Home() {
                           name="sport"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className={`text-gray-200 ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('developmentPlan.sport')}</FormLabel>
+                              <FormLabel className={`text-foreground ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('developmentPlan.sport')}</FormLabel>
                               <FormControl>
                                 <Popover open={developmentSportDropdownOpen} onOpenChange={setDevelopmentSportDropdownOpen}>
                                   <PopoverTrigger asChild>
@@ -3206,7 +3206,7 @@ export default function Home() {
                                       variant="outline"
                                       role="combobox"
                                       aria-expanded={developmentSportDropdownOpen}
-                                      className="bg-athlete-gray-700 border-gray-600 text-white w-full justify-between hover:bg-athlete-gray-600"
+                                      className="bg-muted border text-foreground w-full justify-between hover:bg-accent"
                                       data-testid="select-development-sport"
                                     >
                                       <span className="truncate">
@@ -3217,29 +3217,29 @@ export default function Home() {
                                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                     </Button>
                                   </PopoverTrigger>
-                                  <PopoverContent className="w-[300px] p-0 bg-athlete-gray-700 border-gray-600" align="start">
-                                    <div className="p-3 border-b border-gray-600">
+                                  <PopoverContent className="w-[300px] p-0 bg-muted border" align="start">
+                                    <div className="p-3 border-b border">
                                       <div className="relative">
-                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                                         <Input
                                           placeholder={i18n.language === 'ar' ? 'ابحث عن رياضة...' : 'Search sports...'}
                                           value={developmentSportSearchTerm}
                                           onChange={(e) => setDevelopmentSportSearchTerm(e.target.value)}
-                                          className="pl-9 bg-athlete-gray-700 border-athlete-gray-600 text-white placeholder:text-gray-400 focus:bg-athlete-gray-700 focus:border-athlete-gray-500"
+                                          className="pl-9 bg-muted border text-foreground placeholder:text-muted-foreground focus:bg-muted focus:border-primary"
                                           data-testid="input-development-sport-search"
                                         />
                                       </div>
                                     </div>
                                     <div className="max-h-60 overflow-auto">
                                       {filteredDevelopmentSports.length === 0 ? (
-                                        <div className="p-3 text-center text-gray-400">
+                                        <div className="p-3 text-center text-muted-foreground">
                                           {i18n.language === 'ar' ? 'لم يتم العثور على رياضات.' : 'No sports found.'}
                                         </div>
                                       ) : (
                                         filteredDevelopmentSports.map((sportItem) => (
                                           <div
                                             key={sportItem.id}
-                                            className="flex items-center px-3 py-2 cursor-pointer hover:bg-athlete-gray-600 text-white"
+                                            className="flex items-center px-3 py-2 cursor-pointer hover:bg-accent text-foreground"
                                             onClick={() => {
                                               field.onChange(sportItem.name);
                                               setDevelopmentSportDropdownOpen(false);
@@ -3267,16 +3267,16 @@ export default function Home() {
                           name="language"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className={`text-gray-200 ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('developmentPlan.language')}</FormLabel>
+                              <FormLabel className={`text-foreground ${i18n.language === 'ar' ? 'block w-full text-right' : ''}`}>{t('developmentPlan.language')}</FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
-                                  <SelectTrigger className="bg-athlete-gray-700 border-gray-600 text-white" data-testid="select-development-language">
+                                  <SelectTrigger className="bg-muted border text-foreground" data-testid="select-development-language">
                                     <SelectValue placeholder={t('developmentPlan.selectLanguage')} />
                                   </SelectTrigger>
                                 </FormControl>
-                                <SelectContent className="bg-athlete-gray-700 border-gray-600">
-                                  <SelectItem value="en" className="text-white hover:bg-athlete-gray-600">English</SelectItem>
-                                  <SelectItem value="ar" className="text-white hover:bg-athlete-gray-600">العربية</SelectItem>
+                                <SelectContent className="bg-muted border">
+                                  <SelectItem value="en" className="text-foreground hover:bg-accent">English</SelectItem>
+                                  <SelectItem value="ar" className="text-foreground hover:bg-accent">العربية</SelectItem>
                                 </SelectContent>
                               </Select>
                               <FormMessage className="text-red-400" />
@@ -3286,7 +3286,7 @@ export default function Home() {
 
                         <Button 
                           type="submit" 
-                          className="w-full bg-athlete-accent hover:bg-athlete-accent-dark text-white"
+                          className="w-full bg-primary hover:bg-primary-dark text-foreground"
                           disabled={createDevelopmentPlanJobMutation.isPending || !!developmentJobId}
                           data-testid="button-generate-development-plan"
                         >
@@ -3411,13 +3411,13 @@ export default function Home() {
                 developmentPlanData && (
                   <div className="space-y-6">
                     <div className={`flex justify-between items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
-                      <h2 className="text-2xl font-bold text-white">{t('developmentPlan.yourPlan')}</h2>
+                      <h2 className="text-2xl font-bold text-foreground">{t('developmentPlan.yourPlan')}</h2>
                       <Button
                         onClick={() => {
                           setShowDevelopmentForm(true);
                           setDevelopmentPlanData(null);
                         }}
-                        className={`bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold shadow-lg ${isArabic ? 'flex-row-reverse' : ''}`}
+                        className={`bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-foreground font-semibold shadow-lg ${isArabic ? 'flex-row-reverse' : ''}`}
                         data-testid="button-new-development-plan"
                       >
                         <RefreshCw className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />

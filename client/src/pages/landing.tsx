@@ -61,13 +61,13 @@ export default function Landing() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-athlete-primary text-white">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-athlete-primary/90 backdrop-blur-lg border-b border-gray-800">
+      <nav className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-lg border-b border-gray-200 shadow-sm">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2 flex-shrink-0">
-            <Trophy className="text-athlete-accent text-xl sm:text-2xl" />
-            <span className="text-lg sm:text-xl font-bold">{t('landing.navigation.brand')}</span>
+            <Trophy className="text-primary text-xl sm:text-2xl" />
+            <span className="text-lg sm:text-xl font-bold text-foreground">{t('landing.navigation.brand')}</span>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-3">
             <Button 
@@ -82,7 +82,7 @@ export default function Landing() {
               onClick={() => setLocation('/login')}
               data-testid="button-login"
               variant="outline"
-              className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white text-xs sm:text-sm px-2 sm:px-4 h-11"
+              className="border-primary text-primary hover:bg-primary hover:text-white text-xs sm:text-sm px-2 sm:px-4 h-11"
             >
               {t('landing.navigation.signIn')}
             </Button>
@@ -96,15 +96,15 @@ export default function Landing() {
       <section className="pt-16 sm:pt-20 min-h-screen gradient-bg flex items-center">
         <div className="container mx-auto px-3 sm:px-4 py-12 sm:py-20">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold mb-4 sm:mb-6 text-white leading-tight">
-              <span className="bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold mb-4 sm:mb-6 text-foreground leading-tight">
+              <span className="bg-gradient-to-r from-primary to-teal-400 bg-clip-text text-transparent">
                 {t('landing.hero.title')}
               </span>
             </h1>
-            <p className="text-base sm:text-xl md:text-2xl text-gray-300 mb-6 sm:mb-8 px-2">
+            <p className="text-base sm:text-xl md:text-2xl text-muted-foreground mb-6 sm:mb-8 px-2">
               {t('landing.hero.subtitle')}
             </p>
-            <p className="text-sm sm:text-lg text-gray-400 mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
+            <p className="text-sm sm:text-lg text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
               {t('landing.hero.description')}
             </p>
             
@@ -122,7 +122,7 @@ export default function Landing() {
                 onClick={() => setLocation('/login')}
                 data-testid="button-hero-signin"
                 variant="outline"
-                className="border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white px-6 sm:px-8 h-12 sm:h-14 text-base sm:text-lg font-semibold w-full sm:w-auto"
+                className="border-primary text-primary hover:bg-primary hover:text-white px-6 sm:px-8 h-12 sm:h-14 text-base sm:text-lg font-semibold w-full sm:w-auto"
               >
                 {t('landing.hero.ctaSignIn')}
               </Button>
@@ -135,7 +135,7 @@ export default function Landing() {
                   <Gift className="h-5 w-5" />
                   <span className="font-semibold">{t('landing.referralBanner.title')}</span>
                 </div>
-                <p className="text-sm text-gray-300">
+                <p className="text-sm text-muted-foreground">
                   {t('landing.referralBanner.description')}
                 </p>
               </div>
@@ -143,14 +143,14 @@ export default function Landing() {
             
             {/* Analysis Preview Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 px-2">
-              <Card className="bg-athlete-gray-700 border-gray-600 h-full">
+              <Card className="bg-card border shadow-sm h-full">
                 <CardContent className="p-6 h-full flex flex-col">
                   <div className="flex justify-between items-start mb-4">
-                    <ChartPie className="text-2xl text-athlete-accent" size={32} />
-                    <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">50 {t('units.tokens', { ns: 'common' })}</span>
+                    <ChartPie className="text-2xl text-primary" size={32} />
+                    <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">50 {t('units.tokens', { ns: 'common' })}</span>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-white">{t('services.bioAnalysis.title')}</h3>
-                  <p className="text-gray-400 text-sm mb-3 flex-grow">{t('services.bioAnalysis.description')}</p>
+                  <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.bioAnalysis.title')}</h3>
+                  <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.bioAnalysis.description')}</p>
                   <Button 
                     onClick={() => setPreviewModal({ open: true, serviceType: 'bio' })}
                     data-testid="button-preview-bio"
@@ -164,14 +164,14 @@ export default function Landing() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-athlete-gray-700 border-gray-600 h-full">
+              <Card className="bg-card border shadow-sm h-full">
                 <CardContent className="p-6 h-full flex flex-col">
                   <div className="flex justify-between items-start mb-4">
-                    <Trophy className="text-2xl text-athlete-warning" size={32} />
-                    <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">70 {t('units.tokens', { ns: 'common' })}</span>
+                    <Trophy className="text-2xl text-amber-500" size={32} />
+                    <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">70 {t('units.tokens', { ns: 'common' })}</span>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-white">{t('services.rankHistory.title')}</h3>
-                  <p className="text-gray-400 text-sm mb-3 flex-grow">{t('services.rankHistory.description')}</p>
+                  <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.rankHistory.title')}</h3>
+                  <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.rankHistory.description')}</p>
                   <Button 
                     onClick={() => setPreviewModal({ open: true, serviceType: 'rank' })}
                     data-testid="button-preview-rank"
@@ -185,14 +185,14 @@ export default function Landing() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-athlete-gray-700 border-gray-600 h-full">
+              <Card className="bg-card border shadow-sm h-full">
                 <CardContent className="p-6 h-full flex flex-col">
                   <div className="flex justify-between items-start mb-4">
                     <Star className="text-2xl text-athlete-success" size={32} />
-                    <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">50 {t('units.tokens', { ns: 'common' })}</span>
+                    <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">50 {t('units.tokens', { ns: 'common' })}</span>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-white">{t('services.strengths.title')}</h3>
-                  <p className="text-gray-400 text-sm mb-3 flex-grow">{t('services.strengths.description')}</p>
+                  <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.strengths.title')}</h3>
+                  <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.strengths.description')}</p>
                   <Button 
                     onClick={() => setPreviewModal({ open: true, serviceType: 'strengths' })}
                     data-testid="button-preview-strengths"
@@ -206,14 +206,14 @@ export default function Landing() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-athlete-gray-700 border-gray-600 h-full">
+              <Card className="bg-card border shadow-sm h-full">
                 <CardContent className="p-6 h-full flex flex-col">
                   <div className="flex justify-between items-start mb-4">
                     <TrendingDown className="text-2xl text-red-400" size={32} />
-                    <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">50 {t('units.tokens', { ns: 'common' })}</span>
+                    <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">50 {t('units.tokens', { ns: 'common' })}</span>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-white">{t('services.weaknesses.title')}</h3>
-                  <p className="text-gray-400 text-sm mb-3 flex-grow">{t('services.weaknesses.description')}</p>
+                  <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.weaknesses.title')}</h3>
+                  <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.weaknesses.description')}</p>
                   <Button 
                     onClick={() => setPreviewModal({ open: true, serviceType: 'weaknesses' })}
                     data-testid="button-preview-weaknesses"
@@ -229,14 +229,14 @@ export default function Landing() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8 px-2">
-              <Card className="bg-athlete-gray-700 border-gray-600 h-full">
+              <Card className="bg-card border shadow-sm h-full">
                 <CardContent className="p-6 h-full flex flex-col">
                   <div className="flex justify-between items-start mb-4">
                     <Target className="text-2xl text-purple-400" size={32} />
-                    <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">80 {t('units.tokens', { ns: 'common' })}</span>
+                    <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">80 {t('units.tokens', { ns: 'common' })}</span>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-white">{t('services.tacticRecommendations.title', 'How to Beat')}</h3>
-                  <p className="text-gray-400 text-sm mb-3 flex-grow">{t('services.tacticRecommendations.description', 'Strategic insights on how to defeat specific opponents or improve matchups')}</p>
+                  <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.tacticRecommendations.title', 'How to Beat')}</h3>
+                  <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.tacticRecommendations.description', 'Strategic insights on how to defeat specific opponents or improve matchups')}</p>
                   <Button 
                     onClick={() => setPreviewModal({ open: true, serviceType: 'beat-strategies' })}
                     data-testid="button-preview-beat"
@@ -250,14 +250,14 @@ export default function Landing() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-athlete-gray-700 border-gray-600 h-full">
+              <Card className="bg-card border shadow-sm h-full">
                 <CardContent className="p-6 h-full flex flex-col">
                   <div className="flex justify-between items-start mb-4">
                     <Calendar className="text-2xl text-blue-400" size={32} />
-                    <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">80 {t('units.tokens', { ns: 'common' })}</span>
+                    <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">80 {t('units.tokens', { ns: 'common' })}</span>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-white">{t('services.developmentPlan.title', 'Development Plan')}</h3>
-                  <p className="text-gray-400 text-sm mb-3 flex-grow">{t('services.developmentPlan.description', 'Personalized training roadmap with specific goals and timelines')}</p>
+                  <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.developmentPlan.title', 'Development Plan')}</h3>
+                  <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.developmentPlan.description', 'Personalized training roadmap with specific goals and timelines')}</p>
                   <Button 
                     onClick={() => setPreviewModal({ open: true, serviceType: 'development-plan' })}
                     data-testid="button-preview-development"
@@ -271,14 +271,14 @@ export default function Landing() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-athlete-gray-700 border-gray-600 h-full">
+              <Card className="bg-card border shadow-sm h-full">
                 <CardContent className="p-6 h-full flex flex-col">
                   <div className="flex justify-between items-start mb-4">
                     <Dumbbell className="text-2xl text-green-400" size={32} />
-                    <span className="bg-athlete-warning text-black text-xs px-2 py-1 rounded-full font-semibold">90 {t('units.tokens', { ns: 'common' })}</span>
+                    <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">90 {t('units.tokens', { ns: 'common' })}</span>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-white">{t('services.nutritionPlan.title', 'Nutrition Plan')}</h3>
-                  <p className="text-gray-400 text-sm mb-3 flex-grow">{t('services.nutritionPlan.description', 'Comprehensive meal planning based on body composition and goals')}</p>
+                  <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.nutritionPlan.title', 'Nutrition Plan')}</h3>
+                  <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.nutritionPlan.description', 'Comprehensive meal planning based on body composition and goals')}</p>
                   <Button 
                     onClick={() => setPreviewModal({ open: true, serviceType: 'nutrition-plan' })}
                     data-testid="button-preview-nutrition"
@@ -301,7 +301,7 @@ export default function Landing() {
                     <div className="flex justify-center mb-4">
                       <Video className="text-4xl text-orange-400" size={48} />
                     </div>
-                    <h3 className="text-2xl font-semibold mb-3 text-white">{t('services.videoAnalysis.title', 'Video Analysis')}</h3>
+                    <h3 className="text-2xl font-semibold mb-3 text-foreground">{t('services.videoAnalysis.title', 'Video Analysis')}</h3>
                     <p className="text-gray-300 mb-4 flex-grow">{t('services.videoAnalysis.description', 'Frame-by-frame performance breakdown with AI-powered insights')}</p>
                     <div className="flex items-center justify-center gap-4 mb-4 mt-auto">
                       <span className="bg-orange-500 text-white text-sm px-4 rounded-full font-semibold inline-flex items-center justify-center h-9">120 {t('units.tokens', { ns: 'common' })}</span>
@@ -324,7 +324,7 @@ export default function Landing() {
                     <div className="flex justify-center mb-4">
                       <Users className="text-4xl text-purple-400" size={48} />
                     </div>
-                    <h3 className="text-2xl font-semibold mb-3 text-white">{t('services.athleteComparison.title', 'Compare Athletes')}</h3>
+                    <h3 className="text-2xl font-semibold mb-3 text-foreground">{t('services.athleteComparison.title', 'Compare Athletes')}</h3>
                     <p className="text-gray-300 mb-4 flex-grow">{t('services.athleteComparison.description', 'Head-to-head analysis comparing any two athletes across all performance metrics')}</p>
                     <div className="flex items-center justify-center gap-4 mb-4 mt-auto">
                       <span className="bg-purple-500 text-white text-sm px-4 rounded-full font-semibold inline-flex items-center justify-center h-9">150 {t('units.tokens', { ns: 'common' })}</span>
@@ -345,11 +345,11 @@ export default function Landing() {
             </div>
 
             {/* Subscription Pricing */}
-            <Card className="bg-gray-800/30 border-gray-700 backdrop-blur-sm max-w-md mx-auto">
+            <Card className="bg-card/80 border shadow-lg backdrop-blur-sm max-w-md mx-auto">
               <CardContent className="p-8 text-center">
-                <h2 className="text-2xl font-bold mb-4 text-athlete-accent">{t('landing.pricing.journeyTitle')}</h2>
-                <div className="text-4xl font-bold mb-2 text-white">{t('landing.pricing.price')}<span className="text-lg text-gray-400">{t('landing.pricing.period')}</span></div>
-                <p className="text-gray-300 mb-6">{t('landing.pricing.tokenDescription')}</p>
+                <h2 className="text-2xl font-bold mb-4 text-primary">{t('landing.pricing.journeyTitle')}</h2>
+                <div className="text-4xl font-bold mb-2 text-foreground">{t('landing.pricing.price')}<span className="text-lg text-muted-foreground">{t('landing.pricing.period')}</span></div>
+                <p className="text-muted-foreground mb-6">{t('landing.pricing.tokenDescription')}</p>
                 <div className="space-y-3">
                   <Button 
                     onClick={() => setLocation('/signup')}
@@ -363,7 +363,7 @@ export default function Landing() {
                     onClick={() => setLocation('/login')}
                     data-testid="button-start-now"
                     variant="outline"
-                    className="w-full border-athlete-accent text-athlete-accent hover:bg-athlete-accent hover:text-white py-4 text-lg font-semibold"
+                    className="w-full border-athlete-accent text-primary hover:bg-athlete-accent hover:text-white py-4 text-lg font-semibold"
                   >
                     {t('landing.navigation.signIn')} <ArrowRight className="ml-2" size={20} />
                   </Button>
@@ -423,7 +423,7 @@ export default function Landing() {
             </DialogTitle>
           </DialogHeader>
           <div className="text-center py-8">
-            <p className="text-gray-400">
+            <p className="text-muted-foreground">
               Fetching the latest {previewModal.serviceType} analysis for preview
             </p>
           </div>
@@ -431,19 +431,19 @@ export default function Landing() {
       </Dialog>
 
       {/* Footer */}
-      <footer className="bg-athlete-primary border-t border-gray-800 py-8 sm:py-12">
+      <footer className="bg-muted border-t py-8 sm:py-12">
         <div className="container mx-auto px-3 sm:px-4">
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <Trophy className="text-athlete-accent text-xl" />
-                <span className="text-lg font-bold text-white">Athlete360</span>
+                <Trophy className="text-primary text-xl" />
+                <span className="text-lg font-bold text-foreground">Athlete360</span>
               </div>
-              <p className="text-gray-400 text-sm">AI-powered athlete analytics for the next generation of sports analysis.</p>
+              <p className="text-muted-foreground text-sm">AI-powered athlete analytics for the next generation of sports analysis.</p>
             </div>
             <div>
-              <h5 className="font-semibold mb-4 text-white">Features</h5>
-              <ul className="space-y-2 text-sm text-gray-400">
+              <h5 className="font-semibold mb-4 text-foreground">Features</h5>
+              <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>Athlete Profiles</li>
                 <li>Performance Analytics</li>
                 <li>Training Plans</li>
@@ -451,8 +451,8 @@ export default function Landing() {
               </ul>
             </div>
             <div>
-              <h5 className="font-semibold mb-4 text-white">Support</h5>
-              <ul className="space-y-2 text-sm text-gray-400">
+              <h5 className="font-semibold mb-4 text-foreground">Support</h5>
+              <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>Help Center</li>
                 <li>API Documentation</li>
                 <li>Contact Us</li>
@@ -460,13 +460,13 @@ export default function Landing() {
               </ul>
             </div>
             <div>
-              <h5 className="font-semibold mb-4 text-white">Connect</h5>
+              <h5 className="font-semibold mb-4 text-foreground">Connect</h5>
               <div className="space-y-3">
                 <div className="flex space-x-3">
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="text-gray-400 hover:text-blue-400 p-2"
+                    className="text-muted-foreground hover:text-blue-500 p-2"
                     data-testid="link-twitter"
                   >
                     <Twitter size={18} />
@@ -474,7 +474,7 @@ export default function Landing() {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="text-gray-400 hover:text-pink-400 p-2"
+                    className="text-muted-foreground hover:text-pink-500 p-2"
                     data-testid="link-instagram"
                   >
                     <Instagram size={18} />
@@ -482,13 +482,13 @@ export default function Landing() {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="text-gray-400 hover:text-blue-600 p-2"
+                    className="text-muted-foreground hover:text-blue-600 p-2"
                     data-testid="link-linkedin"
                   >
                     <Linkedin size={18} />
                   </Button>
                 </div>
-                <div className="text-sm text-gray-400 space-y-2">
+                <div className="text-sm text-muted-foreground space-y-2">
                   <div className="flex items-center space-x-2">
                     <Mail size={14} />
                     <span>support@athlete360.ai</span>
@@ -501,7 +501,7 @@ export default function Landing() {
               </div>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
+          <div className="border-t mt-8 pt-8 text-center text-muted-foreground text-sm">
             <p>&copy; 2024 Athlete360. All rights reserved.</p>
           </div>
         </div>
