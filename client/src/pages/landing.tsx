@@ -430,81 +430,159 @@ export default function Landing() {
         </DialogContent>
       </Dialog>
 
-      {/* Footer */}
-      <footer className="bg-muted border-t py-8 sm:py-12">
-        <div className="container mx-auto px-3 sm:px-4">
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <img src={logoImage} alt="Athlete360" className="h-12 w-auto" />
-              </div>
-              <p className="text-muted-foreground text-sm">AI-powered athlete analytics for the next generation of sports analysis.</p>
-            </div>
-            <div>
-              <h5 className="font-semibold mb-4 text-foreground">Features</h5>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>Athlete Profiles</li>
-                <li>Performance Analytics</li>
-                <li>Training Plans</li>
-                <li>Video Analysis</li>
-              </ul>
-            </div>
-            <div>
-              <h5 className="font-semibold mb-4 text-foreground">Support</h5>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>Help Center</li>
-                <li>API Documentation</li>
-                <li>Contact Us</li>
-                <li>Community</li>
-              </ul>
-            </div>
-            <div>
-              <h5 className="font-semibold mb-4 text-foreground">Connect</h5>
-              <div className="space-y-3">
-                <div className="flex space-x-3">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-muted-foreground hover:text-blue-500 p-2"
-                    data-testid="link-twitter"
-                  >
-                    <Twitter size={18} />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-muted-foreground hover:text-pink-500 p-2"
-                    data-testid="link-instagram"
-                  >
-                    <Instagram size={18} />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-muted-foreground hover:text-blue-600 p-2"
-                    data-testid="link-linkedin"
-                  >
-                    <Linkedin size={18} />
-                  </Button>
-                </div>
-                <div className="text-sm text-muted-foreground space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Mail size={14} />
-                    <span>support@athlete360.ai</span>
+      {/* Footer - Arabic Version */}
+      {language === 'ar' ? (
+        <footer className="bg-muted border-t py-8 sm:py-12" dir="rtl">
+          <div className="container mx-auto px-3 sm:px-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+              <div>
+                <h5 className="font-semibold mb-4 text-foreground">تواصل</h5>
+                <div className="space-y-3">
+                  <div className="flex space-x-3 space-x-reverse">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-muted-foreground hover:text-blue-600 p-2"
+                      data-testid="link-linkedin-ar"
+                    >
+                      <Linkedin size={18} />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-muted-foreground hover:text-pink-500 p-2"
+                      data-testid="link-instagram-ar"
+                    >
+                      <Instagram size={18} />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-muted-foreground hover:text-blue-500 p-2"
+                      data-testid="link-twitter-ar"
+                    >
+                      <Twitter size={18} />
+                    </Button>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <MessageCircle size={14} />
-                    <span>Live Chat Support</span>
+                  <div className="text-sm text-muted-foreground space-y-2">
+                    <div className="flex items-center space-x-2 space-x-reverse">
+                      <Mail size={14} />
+                      <span>support@athlete360.ai</span>
+                    </div>
+                    <div className="flex items-center space-x-2 space-x-reverse">
+                      <MessageCircle size={14} />
+                      <span>دعم الدردشة المباشرة</span>
+                    </div>
                   </div>
                 </div>
               </div>
+              <div>
+                <h5 className="font-semibold mb-4 text-foreground">الدعم</h5>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li>مركز المساعدة</li>
+                  <li>وثائق API</li>
+                  <li>اتصل بنا</li>
+                  <li>المجتمع</li>
+                </ul>
+              </div>
+              <div>
+                <h5 className="font-semibold mb-4 text-foreground">المميزات</h5>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li>ملفات الرياضيين</li>
+                  <li>تحليلات الأداء</li>
+                  <li>خطط التدريب</li>
+                  <li>تحليل الفيديو</li>
+                </ul>
+              </div>
+              <div className="text-right">
+                <div className="flex items-center justify-end space-x-2 space-x-reverse mb-4">
+                  <img src={logoImage} alt="Athlete360" className="h-12 w-auto" />
+                </div>
+                <p className="text-muted-foreground text-sm">تحليلات رياضية مدعومة بالذكاء الاصطناعي للجيل القادم من التحليل الرياضي.</p>
+              </div>
+            </div>
+            <div className="border-t mt-8 pt-8 text-center text-muted-foreground text-sm">
+              <p>&copy; ٢٠٢٤ Athlete360. جميع الحقوق محفوظة.</p>
             </div>
           </div>
-          <div className="border-t mt-8 pt-8 text-center text-muted-foreground text-sm">
-            <p>&copy; 2024 Athlete360. All rights reserved.</p>
+        </footer>
+      ) : (
+        /* Footer - English Version */
+        <footer className="bg-muted border-t py-8 sm:py-12">
+          <div className="container mx-auto px-3 sm:px-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+              <div>
+                <div className="flex items-center space-x-2 mb-4">
+                  <img src={logoImage} alt="Athlete360" className="h-12 w-auto" />
+                </div>
+                <p className="text-muted-foreground text-sm">AI-powered athlete analytics for the next generation of sports analysis.</p>
+              </div>
+              <div>
+                <h5 className="font-semibold mb-4 text-foreground">Features</h5>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li>Athlete Profiles</li>
+                  <li>Performance Analytics</li>
+                  <li>Training Plans</li>
+                  <li>Video Analysis</li>
+                </ul>
+              </div>
+              <div>
+                <h5 className="font-semibold mb-4 text-foreground">Support</h5>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li>Help Center</li>
+                  <li>API Documentation</li>
+                  <li>Contact Us</li>
+                  <li>Community</li>
+                </ul>
+              </div>
+              <div>
+                <h5 className="font-semibold mb-4 text-foreground">Connect</h5>
+                <div className="space-y-3">
+                  <div className="flex space-x-3">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-muted-foreground hover:text-blue-500 p-2"
+                      data-testid="link-twitter"
+                    >
+                      <Twitter size={18} />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-muted-foreground hover:text-pink-500 p-2"
+                      data-testid="link-instagram"
+                    >
+                      <Instagram size={18} />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-muted-foreground hover:text-blue-600 p-2"
+                      data-testid="link-linkedin"
+                    >
+                      <Linkedin size={18} />
+                    </Button>
+                  </div>
+                  <div className="text-sm text-muted-foreground space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Mail size={14} />
+                      <span>support@athlete360.ai</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <MessageCircle size={14} />
+                      <span>Live Chat Support</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="border-t mt-8 pt-8 text-center text-muted-foreground text-sm">
+              <p>&copy; 2024 Athlete360. All rights reserved.</p>
+            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      )}
 
     </div>
   );
