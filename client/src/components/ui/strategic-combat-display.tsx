@@ -2,14 +2,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
-  Target,
+  ClipboardList,
   Shield,
   Zap,
   Brain,
   TrendingUp,
   AlertTriangle,
-  Star,
-  Clock,
   Award,
 } from "lucide-react";
 import { useTranslation } from 'react-i18next';
@@ -121,40 +119,40 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
   const getRiskIcon = (risk: string) => {
     const level = normalizeRiskLevel(risk);
     switch (level) {
-      case 'low': return <Shield className="w-4 h-4" />;
-      case 'medium': return <AlertTriangle className="w-4 h-4" />;
-      case 'high': return <Zap className="w-4 h-4" />;
-      default: return <Target className="w-4 h-4" />;
+      case 'low': return <Shield className="w-5 h-5" />;
+      case 'medium': return <AlertTriangle className="w-5 h-5" />;
+      case 'high': return <Zap className="w-5 h-5" />;
+      default: return <ClipboardList className="w-5 h-5" />;
     }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="text-center space-y-2 mb-8">
-        <div className="flex items-center justify-center space-x-2 text-primary">
-          <Target size={24} />
-          <h2 className="text-2xl font-bold text-foreground">{t("analysis.combat.strategiesTitle", "Combat Strategies")}</h2>
+      <div className="text-center space-y-3 mb-10">
+        <div className="flex items-center justify-center gap-3 text-purple-500">
+          <ClipboardList size={32} />
+          <h2 className="text-3xl font-bold text-gray-800">{t("services.tacticRecommendations.title", "Tactical Recommendations")}</h2>
         </div>
-        <p className="text-muted-foreground">
+        <p className="text-gray-600 text-lg">
           {t("analysis.combat.tacticalAnalysis", "Advanced tactical analysis with {{count}} strategic approaches", { count: data.strategies.length })}
         </p>
       </div>
 
       {/* Strategies Grid */}
-      <div className="space-y-6">
+      <div className="space-y-8">
         {data.strategies.map((strategy, index) => (
           <Card 
             key={index} 
-            className="bg-white/60 backdrop-blur-sm border-slate-200 hover:border-primary/30 hover:shadow-md transition-all duration-300"
+            className="bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300"
             data-testid={`strategy-card-${index}`}
           >
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-4 border-b border-gray-100">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <CardTitle className="text-foreground text-lg font-semibold mb-2 flex items-center">
-                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mr-3 shadow-sm">
-                      <span className="text-primary font-bold text-sm">{index + 1}</span>
+                  <CardTitle className="text-gray-800 text-xl font-bold flex items-center">
+                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-4 shadow-sm">
+                      <span className="text-purple-600 font-bold text-lg">{index + 1}</span>
                     </div>
                     {strategy.strategy}
                   </CardTitle>
@@ -162,11 +160,11 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
                 <div className="flex space-x-2 ml-4">
                   <Badge 
                     variant="outline" 
-                    className={`${getRiskColor(strategy.risk_level)} border`}
+                    className={`${getRiskColor(strategy.risk_level)} border text-sm px-3 py-1`}
                     data-testid={`risk-badge-${index}`}
                   >
                     {getRiskIcon(strategy.risk_level)}
-                    <span className="ml-1">
+                    <span className="ml-2">
                       {i18n.language === 'ar' 
                         ? `${t("analysis.combat.risk", "Risk")} ${translateRiskLevel(strategy.risk_level)}`
                         : `${translateRiskLevel(strategy.risk_level)} ${t("analysis.combat.risk", "Risk")}`
@@ -177,52 +175,61 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
               </div>
             </CardHeader>
 
-            <CardContent className="space-y-4">
-              {/* Strategy Description */}
-              <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-slate-700 flex items-center">
-                  <Brain className="w-4 h-4 mr-2 text-blue-500" />
+            <CardContent className="p-0">
+              {/* Strategy Description Card */}
+              <div className="p-6 border-b border-gray-100">
+                <h4 className="text-base font-semibold text-gray-700 flex items-center mb-3">
+                  <Brain className="w-5 h-5 mr-2 text-blue-500" />
                   {t("analysis.combat.strategicOverview", "Strategic Overview")}
                 </h4>
-                <p className="text-slate-600 leading-relaxed text-sm bg-slate-50 p-4 rounded-lg border border-slate-100">
-                  {strategy.description}
-                </p>
+                <Card className="bg-gray-50 border border-gray-200 shadow-sm">
+                  <CardContent className="p-5">
+                    <p className="text-gray-700 leading-relaxed text-base">
+                      {strategy.description}
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
 
-              <div className="border-t border-slate-200 my-4"></div>
-
-              {/* Execution Details */}
-              <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-slate-700 flex items-center">
-                  <Zap className="w-4 h-4 mr-2 text-amber-500" />
+              {/* Execution Details Card */}
+              <div className="p-6 border-b border-gray-100">
+                <h4 className="text-base font-semibold text-gray-700 flex items-center mb-3">
+                  <Zap className="w-5 h-5 mr-2 text-amber-500" />
                   {t("analysis.combat.executionPlan", "Execution Plan")}
                 </h4>
-                <p className="text-slate-600 leading-relaxed text-sm bg-slate-50 p-4 rounded-lg border border-slate-100">
-                  {strategy.execution}
-                </p>
+                <Card className="bg-gray-50 border border-gray-200 shadow-sm">
+                  <CardContent className="p-5">
+                    <p className="text-gray-700 leading-relaxed text-base">
+                      {strategy.execution}
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
 
-              <div className="border-t border-slate-200 my-4"></div>
-
-              {/* Success Probability */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-slate-700 flex items-center">
-                    <TrendingUp className="w-4 h-4 mr-2 text-green-500" />
-                    {t("analysis.combat.successProbability", "Success Probability")}
-                  </h4>
-                  <span 
-                    className={`text-sm ${getSuccessColor(strategy.success_probability)}`}
-                    data-testid={`success-probability-${index}`}
-                  >
-                    {translateSuccessProbability(strategy.success_probability)}
-                  </span>
-                </div>
-                <Progress 
-                  value={getSuccessProgress(strategy.success_probability)} 
-                  className="h-2 bg-slate-200"
-                  data-testid={`success-progress-${index}`}
-                />
+              {/* Success Probability Card */}
+              <div className="p-6">
+                <h4 className="text-base font-semibold text-gray-700 flex items-center mb-3">
+                  <TrendingUp className="w-5 h-5 mr-2 text-green-500" />
+                  {t("analysis.combat.successProbability", "Success Probability")}
+                </h4>
+                <Card className="bg-gray-50 border border-gray-200 shadow-sm">
+                  <CardContent className="p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-gray-600 text-base">{t("analysis.combat.estimatedSuccess", "Estimated Success Rate")}</span>
+                      <span 
+                        className={`text-lg ${getSuccessColor(strategy.success_probability)}`}
+                        data-testid={`success-probability-${index}`}
+                      >
+                        {translateSuccessProbability(strategy.success_probability)}
+                      </span>
+                    </div>
+                    <Progress 
+                      value={getSuccessProgress(strategy.success_probability)} 
+                      className="h-3 bg-gray-200"
+                      data-testid={`success-progress-${index}`}
+                    />
+                  </CardContent>
+                </Card>
               </div>
             </CardContent>
           </Card>
@@ -230,13 +237,15 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
       </div>
 
       {/* Summary Footer */}
-      <Card className="bg-gradient-to-r from-primary/10 to-teal-100 border-primary/30 mt-8 shadow-sm">
-        <CardContent className="p-4">
-          <div className="flex items-center space-x-3">
-            <Award className="text-primary" size={20} />
+      <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200 mt-10 shadow-md">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-purple-200 flex items-center justify-center">
+              <Award className="text-purple-600" size={24} />
+            </div>
             <div>
-              <h3 className="text-foreground font-semibold">{t("analysis.combat.analysisComplete", "Strategic Analysis Complete")}</h3>
-              <p className="text-muted-foreground text-sm">
+              <h3 className="text-gray-800 font-bold text-lg">{t("analysis.combat.analysisComplete", "Strategic Analysis Complete")}</h3>
+              <p className="text-gray-600 text-base">
                 {t("analysis.combat.tacticalApproaches", "{{count}} tactical approaches identified for optimal performance advantage", { count: data.strategies.length })}
               </p>
             </div>
