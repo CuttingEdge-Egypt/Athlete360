@@ -148,6 +148,11 @@
   h3 {
     font-weight: 600;
   }
+
+  /* Ensure strong tags are visible in light mode */
+  strong, b {
+    @apply text-foreground font-semibold;
+  }
 }
 
 /* Animated Border Rotation for Video Analysis Button */

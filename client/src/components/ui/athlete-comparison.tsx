@@ -693,13 +693,13 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
       <CardHeader>
         <div className={`flex flex-col md:flex-row md:justify-between md:items-center gap-3 ${isArabic ? 'md:flex-row-reverse' : ''}`}>
           <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
-            <CardTitle className={`flex items-center gap-2 text-white ${isArabic ? 'flex-row-reverse' : ''}`}>
+            <CardTitle className={`flex items-center gap-2 text-foreground ${isArabic ? 'flex-row-reverse' : ''}`}>
               <Users2 className="h-5 w-5" />
               {t("analysis.comparison.title", "Athlete Comparison")}
             </CardTitle>
           </div>
           <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
-            <Badge variant="secondary" className="bg-blue-600/20 text-blue-300 border-blue-300 text-xs font-medium md:mx-0 mx-auto">
+            <Badge variant="secondary" className="bg-blue-100 text-blue-600 border-blue-300 text-xs font-medium md:mx-0 mx-auto">
               {t('home:services.athleteComparison.tokenCost')}
             </Badge>
             {showForm && (
@@ -708,7 +708,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                 size="sm"
                 onClick={() => setPreviewModal({ open: true, serviceType: 'comparison' })}
                 disabled={previewLoading && previewModal.serviceType === 'comparison'}
-                className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
+                className={`border-blue-500 text-blue-600 hover:bg-blue-100 hover:text-blue-700 ${isArabic ? 'flex-row-reverse' : ''}`}
                 data-testid="button-preview-comparison"
               >
                 {previewLoading && previewModal.serviceType === 'comparison' ? (
@@ -753,7 +753,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       variant="outline"
                       role="combobox"
                       aria-expanded={openSportPopover}
-                      className={`w-full justify-between bg-slate-100 border-slate-200 hover:bg-slate-100 text-white ${isArabic ? 'flex-row-reverse' : ''}`}
+                      className={`w-full justify-between bg-slate-100 border-slate-200 hover:bg-slate-100 text-foreground ${isArabic ? 'flex-row-reverse' : ''}`}
                       data-testid="select-sport"
                     >
                       <span className={`${!selectedSport && 'text-muted-foreground'}`}>
@@ -770,7 +770,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           placeholder={t("analysis.comparison.searchSports", "Search sports...")}
                           value={searchSport}
                           onChange={(e) => setSearchSport(e.target.value)}
-                          className={`!bg-slate-100 border-gray-500 !text-white placeholder:text-muted-foreground ${isArabic ? 'pr-8 text-right' : 'pl-8'}`}
+                          className={`!bg-slate-100 border-gray-400 !text-foreground placeholder:text-muted-foreground ${isArabic ? 'pr-8 text-right' : 'pl-8'}`}
                           dir={isArabic ? 'rtl' : 'ltr'}
                         />
                       </div>
@@ -793,7 +793,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               setOpenSportPopover(false);
                               setSearchSport("");
                             }}
-                            className={`w-full px-4 py-2 text-left hover:bg-slate-100 text-white transition-colors ${
+                            className={`w-full px-4 py-2 text-left hover:bg-slate-100 text-foreground transition-colors ${
                               selectedSport === sport.id ? 'bg-slate-100' : ''
                             } ${isArabic ? 'text-right' : ''}`}
                           >
@@ -841,7 +841,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
               {/* Athlete 1 Column */}
               <Card className="bg-slate-100/50 border-slate-200">
                 <CardHeader>
-                  <CardTitle className={`text-lg text-white flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                  <CardTitle className={`text-lg text-foreground flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                     <User className="h-5 w-5 text-blue-400" />
                     {t("analysis.comparison.athlete1", "Athlete 1")}
                   </CardTitle>
@@ -875,7 +875,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           variant="outline"
                           role="combobox"
                           aria-expanded={openAthletePopover1}
-                          className={`w-full justify-between bg-slate-100 border-slate-200 text-white hover:bg-slate-100 ${isArabic ? 'flex-row-reverse' : ''}`}
+                          className={`w-full justify-between bg-slate-100 border-slate-200 text-foreground hover:bg-slate-100 ${isArabic ? 'flex-row-reverse' : ''}`}
                           disabled={!selectedSport}
                           data-testid="select-athlete1"
                         >
@@ -897,7 +897,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               placeholder={t("analysis.comparison.searchAthletes", "Search athletes...")}
                               value={searchAthlete1}
                               onChange={(e) => setSearchAthlete1(e.target.value)}
-                              className={`!bg-slate-100 border-athlete-gray-600 !text-white placeholder:text-muted-foreground focus:!bg-slate-100 focus:border-athlete-gray-500 ${isArabic ? 'pr-9' : 'pl-9'}`}
+                              className={`!bg-slate-100 border-slate-300 !text-foreground placeholder:text-muted-foreground focus:!bg-slate-100 focus:border-slate-400 ${isArabic ? 'pr-9' : 'pl-9'}`}
                               data-testid="input-athlete1-search"
                               dir={isArabic ? 'rtl' : 'ltr'}
                             />
@@ -936,7 +936,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               >
                                 <Check className={`h-4 w-4 flex-shrink-0 ${selectedAthlete1 === athlete.id ? 'opacity-100' : 'opacity-0'} ${isArabic ? 'ml-2' : 'mr-2'}`} />
                                 <div className="flex-1 min-w-0 space-y-1">
-                                  <div className="text-white font-medium truncate">{athlete.name}</div>
+                                  <div className="text-foreground font-medium truncate">{athlete.name}</div>
                                   {athlete.nameArabic && (
                                     <div className="text-muted-foreground text-sm truncate">{athlete.nameArabic}</div>
                                   )}
@@ -991,7 +991,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
                           {/* Athlete Info and Buttons */}
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-white font-semibold truncate">{selectedAthleteObject1.name}</h4>
+                            <h4 className="text-foreground font-semibold truncate">{selectedAthleteObject1.name}</h4>
                             {selectedAthleteObject1.nameArabic && (
                               <p className="text-muted-foreground text-sm truncate">{selectedAthleteObject1.nameArabic}</p>
                             )}
@@ -1006,7 +1006,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="mt-2 w-full bg-blue-600/20 border-blue-500/50 text-blue-300 hover:bg-blue-600/30 text-xs"
+                                  className="mt-2 w-full bg-blue-100 border-blue-400 text-blue-600 hover:bg-blue-200 text-xs"
                                   data-testid="button-update-info-athlete1"
                                 >
                                   <RefreshCw className={`h-3 w-3 ${isArabic ? 'ml-1' : 'mr-1'}`} />
@@ -1028,7 +1028,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
               {/* Athlete 2 Column */}
               <Card className="bg-slate-100/50 border-slate-200">
                 <CardHeader>
-                  <CardTitle className={`text-lg text-white flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                  <CardTitle className={`text-lg text-foreground flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                     <User className="h-5 w-5 text-purple-400" />
                     {t("analysis.comparison.athlete2", "Athlete 2")}
                   </CardTitle>
@@ -1062,7 +1062,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           variant="outline"
                           role="combobox"
                           aria-expanded={openAthletePopover2}
-                          className={`w-full justify-between bg-slate-100 border-slate-200 text-white hover:bg-slate-100 ${isArabic ? 'flex-row-reverse' : ''}`}
+                          className={`w-full justify-between bg-slate-100 border-slate-200 text-foreground hover:bg-slate-100 ${isArabic ? 'flex-row-reverse' : ''}`}
                           disabled={!selectedSport}
                           data-testid="select-athlete2"
                         >
@@ -1084,7 +1084,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               placeholder={t("analysis.comparison.searchAthletes", "Search athletes...")}
                               value={searchAthlete2}
                               onChange={(e) => setSearchAthlete2(e.target.value)}
-                              className={`!bg-slate-100 border-athlete-gray-600 !text-white placeholder:text-muted-foreground focus:!bg-slate-100 focus:border-athlete-gray-500 ${isArabic ? 'pr-9' : 'pl-9'}`}
+                              className={`!bg-slate-100 border-slate-300 !text-foreground placeholder:text-muted-foreground focus:!bg-slate-100 focus:border-slate-400 ${isArabic ? 'pr-9' : 'pl-9'}`}
                               data-testid="input-athlete2-search"
                               dir={isArabic ? 'rtl' : 'ltr'}
                             />
@@ -1123,7 +1123,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               >
                                 <Check className={`h-4 w-4 flex-shrink-0 ${selectedAthlete2 === athlete.id ? 'opacity-100' : 'opacity-0'} ${isArabic ? 'ml-2' : 'mr-2'}`} />
                                 <div className="flex-1 min-w-0 space-y-1">
-                                  <div className="text-white font-medium truncate">{athlete.name}</div>
+                                  <div className="text-foreground font-medium truncate">{athlete.name}</div>
                                   {athlete.nameArabic && (
                                     <div className="text-muted-foreground text-sm truncate">{athlete.nameArabic}</div>
                                   )}
@@ -1178,7 +1178,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
                           {/* Athlete Info and Buttons */}
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-white font-semibold truncate">{selectedAthleteObject2.name}</h4>
+                            <h4 className="text-foreground font-semibold truncate">{selectedAthleteObject2.name}</h4>
                             {selectedAthleteObject2.nameArabic && (
                               <p className="text-muted-foreground text-sm truncate">{selectedAthleteObject2.nameArabic}</p>
                             )}
@@ -1193,7 +1193,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="mt-2 w-full bg-blue-600/20 border-blue-500/50 text-blue-300 hover:bg-blue-600/30 text-xs"
+                                  className="mt-2 w-full bg-blue-100 border-blue-400 text-blue-600 hover:bg-blue-200 text-xs"
                                   data-testid="button-update-info-athlete2"
                                 >
                                   <RefreshCw className={`h-3 w-3 ${isArabic ? 'ml-1' : 'mr-1'}`} />
@@ -1663,7 +1663,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                              parsedData.headToHead?.prediction === 'athlete2' ? parsedData.athlete2?.name : t('analysis.comparison.evenMatch', 'Even Match')}
                           </div>
                           {parsedData.headToHead?.confidence && (
-                            <div className="text-sm text-purple-300">
+                            <div className="text-sm text-purple-600">
                               {parsedData.headToHead.confidence}% {t('analysis.comparison.confidence', 'confidence')}
                             </div>
                           )}
@@ -1692,7 +1692,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                       </div>
                                     )}
                                     {typeof strength === 'object' && strength.evidence && (
-                                      <div className={`text-xs text-green-300 mt-2 italic ${isComparisonArabic ? 'text-right' : ''}`}>
+                                      <div className={`text-xs text-green-600 mt-2 italic ${isComparisonArabic ? 'text-right' : ''}`}>
                                         {t('analysis.comparison.evidence', 'Evidence')}: {strength.evidence}
                                       </div>
                                     )}
@@ -1729,7 +1729,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                       </div>
                                     )}
                                     {typeof strength === 'object' && strength.evidence && (
-                                      <div className={`text-xs text-green-300 mt-2 italic ${isComparisonArabic ? 'text-right' : ''}`}>
+                                      <div className={`text-xs text-green-600 mt-2 italic ${isComparisonArabic ? 'text-right' : ''}`}>
                                         {t('analysis.comparison.evidence', 'Evidence')}: {strength.evidence}
                                       </div>
                                     )}
@@ -1771,7 +1771,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                       </div>
                                     )}
                                     {typeof weakness === 'object' && weakness.exploitation && (
-                                      <div className={`text-xs text-orange-300 mt-2 italic ${isComparisonArabic ? 'text-right' : ''}`}>
+                                      <div className={`text-xs text-orange-600 mt-2 italic ${isComparisonArabic ? 'text-right' : ''}`}>
                                         {t('analysis.comparison.exploitation', 'Exploitation')}: {weakness.exploitation}
                                       </div>
                                     )}
@@ -1808,7 +1808,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                       </div>
                                     )}
                                     {typeof weakness === 'object' && weakness.exploitation && (
-                                      <div className={`text-xs text-orange-300 mt-2 italic ${isComparisonArabic ? 'text-right' : ''}`}>
+                                      <div className={`text-xs text-orange-600 mt-2 italic ${isComparisonArabic ? 'text-right' : ''}`}>
                                         {t('analysis.comparison.exploitation', 'Exploitation')}: {weakness.exploitation}
                                       </div>
                                     )}
@@ -1842,7 +1842,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               {/* Current Ranking Comparison - Improved Spacing */}
                               {parsedData.ranking.comparison && (
                                 <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-5">
-                                  <h5 className={`font-semibold text-blue-300 mb-4 text-lg ${isComparisonArabic ? 'text-right' : ''}`}>
+                                  <h5 className={`font-semibold text-blue-600 mb-4 text-lg ${isComparisonArabic ? 'text-right' : ''}`}>
                                     {t('analysis.comparison.currentRankingComparison', 'Current Ranking Comparison')}
                                   </h5>
                                   <p className={`text-foreground text-base leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>
@@ -1855,7 +1855,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {parsedData.ranking.athlete1Trajectory && (
                                   <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-5">
-                                    <h5 className={`font-semibold text-green-300 mb-4 text-base ${isComparisonArabic ? 'text-right' : ''}`}>
+                                    <h5 className={`font-semibold text-green-600 mb-4 text-base ${isComparisonArabic ? 'text-right' : ''}`}>
                                       {parsedData.athlete1?.name} {t('analysis.comparison.trajectory', 'Trajectory')}
                                     </h5>
                                     <p className={`text-foreground text-sm leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>
@@ -1866,7 +1866,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
 
                                 {parsedData.ranking.athlete2Trajectory && (
                                   <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-5">
-                                    <h5 className={`font-semibold text-green-300 mb-4 text-base ${isComparisonArabic ? 'text-right' : ''}`}>
+                                    <h5 className={`font-semibold text-green-600 mb-4 text-base ${isComparisonArabic ? 'text-right' : ''}`}>
                                       {parsedData.athlete2?.name} {t('analysis.comparison.trajectory', 'Trajectory')}
                                     </h5>
                                     <p className={`text-foreground text-sm leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>
@@ -2071,7 +2071,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               {/* Competitive Edge Summary */}
                               {parsedData.ranking.competitiveEdge && (
                                 <div className="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-300 rounded-xl p-5">
-                                  <h5 className={`font-semibold text-purple-300 mb-4 ${isComparisonArabic ? 'text-right' : ''}`}>
+                                  <h5 className={`font-semibold text-purple-600 mb-4 ${isComparisonArabic ? 'text-right' : ''}`}>
                                     {t('analysis.comparison.competitiveEdge', 'Competitive Edge')}
                                   </h5>
                                   <div className="text-center">
@@ -2079,7 +2079,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                       {parsedData.ranking.competitiveEdge === 'athlete1' ? parsedData.athlete1?.name :
                                        parsedData.ranking.competitiveEdge === 'athlete2' ? parsedData.athlete2?.name : t('analysis.comparison.evenCompetition', 'Even Competition')}
                                     </div>
-                                    <div className="text-purple-300 text-sm mt-2">
+                                    <div className="text-purple-600 text-sm mt-2">
                                       {parsedData.ranking.competitiveEdge === 'even' ? t('analysis.comparison.bothAthletesEvenlyMatched', 'Both athletes are evenly matched') : t('analysis.comparison.hasCompetitiveAdvantage', 'Has the competitive advantage')}
                                     </div>
                                   </div>
@@ -2102,10 +2102,10 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           <div className="space-y-6">
                             {/* Prediction Section */}
                             <div className="text-center">
-                              <h3 className="text-xl font-bold text-white mb-2">{t('analysis.comparison.headToHeadPrediction', 'Head-to-Head Prediction')}</h3>
+                              <h3 className="text-xl font-bold text-foreground mb-2">{t('analysis.comparison.headToHeadPrediction', 'Head-to-Head Prediction')}</h3>
                               {parsedData.headToHead?.prediction && parsedData.headToHead.prediction !== 'even' ? (
                                 <div className="bg-purple-100 border border-purple-300 rounded-lg p-4 mb-4">
-                                  <div className="text-2xl font-bold text-purple-300 mb-2">
+                                  <div className="text-2xl font-bold text-purple-600 mb-2">
                                     {t('analysis.comparison.predictedWinner', 'Predicted Winner')}: {parsedData.headToHead.prediction === 'athlete1' ? 
                                       parsedData.athlete1?.name : parsedData.athlete2?.name}
                                   </div>
@@ -2197,7 +2197,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               <div className="space-y-4">
                                 {parsedData.headToHead.historicalContext && (
                                   <div>
-                                    <h5 className={`font-medium text-yellow-400 mb-2 ${isComparisonArabic ? 'text-right' : ''}`}>{t('analysis.comparison.historicalContext', 'Historical Context')}</h5>
+                                    <h5 className={`font-medium text-amber-600 mb-2 ${isComparisonArabic ? 'text-right' : ''}`}>{t('analysis.comparison.historicalContext', 'Historical Context')}</h5>
                                     <p className={`text-gray-600 text-sm bg-slate-50 p-3 rounded-lg ${isComparisonArabic ? 'text-right' : ''}`}>
                                       {parsedData.headToHead.historicalContext}
                                     </p>
