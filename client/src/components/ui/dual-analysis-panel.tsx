@@ -1204,7 +1204,7 @@ export function DualAnalysisPanel({
     const placeNumber = placeMatch ? placeMatch[1] : null;
     
     if (resultLower.includes('1st') || resultLower.includes('gold') || resultLower.includes('🥇')) {
-      return <Badge className="bg-amber-600 text-white">🥇 {isArabic ? `${t('competitiveHistory.place')} 1` : result}</Badge>;
+      return <Badge className="text-white" style={{ backgroundColor: '#EFBF04' }}>🥇 {isArabic ? `${t('competitiveHistory.place')} 1` : result}</Badge>;
     } else if (resultLower.includes('2nd') || resultLower.includes('silver') || resultLower.includes('🥈')) {
       return <Badge className="bg-slate-500 text-white">🥈 {isArabic ? `${t('competitiveHistory.place')} 2` : result}</Badge>;
     } else if (resultLower.includes('3rd') || resultLower.includes('bronze') || resultLower.includes('🥉')) {
