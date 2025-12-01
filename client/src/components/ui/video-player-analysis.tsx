@@ -1798,8 +1798,8 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
   return (
     <Card className="bg-slate-50 border-slate-200">
       <CardHeader>
-        <CardTitle className="text-white flex items-center">
-          <Brain className="mr-2 text-purple-400" size={20} />
+        <CardTitle className="text-purple-600 flex items-center">
+          <Brain className="mr-2 text-purple-500" size={20} />
           {getTitle('Advice for Each Player')}
         </CardTitle>
       </CardHeader>
@@ -1824,10 +1824,10 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
           <div className="space-y-6" data-testid="advice-results">
             {/* General Observations */}
             {parsedAdviceData.general_observations && (
-              <Card className="bg-card border-slate-200">
+              <Card className="bg-white border-slate-200 shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-white text-lg flex items-center">
-                    <MessageSquare className="mr-2 text-blue-400" size={18} />
+                  <CardTitle className="text-blue-600 text-lg flex items-center">
+                    <MessageSquare className="mr-2 text-blue-500" size={18} />
                     {getTitle('General Observations')}
                   </CardTitle>
                 </CardHeader>
@@ -1844,12 +1844,12 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
               {parsedAdviceData.players?.map((player, index) => (
                 <Card 
                   key={index}
-                  className={`border-2 ${
+                  className={`border-2 shadow-sm ${
                     player.color?.toLowerCase() === 'blue' 
-                      ? 'bg-blue-900/20 border-blue-500/50' 
+                      ? 'bg-blue-50 border-blue-300' 
                       : player.color?.toLowerCase() === 'red'
-                      ? 'bg-red-900/20 border-red-500/50'
-                      : 'bg-card border-slate-200'
+                      ? 'bg-red-50 border-red-300'
+                      : 'bg-white border-slate-200'
                   }`}
                   data-testid={`player-advice-${index}`}
                 >
@@ -1857,10 +1857,10 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
                     <CardTitle 
                       className={`text-lg flex items-center ${
                         player.color?.toLowerCase() === 'blue' 
-                          ? 'text-blue-300' 
+                          ? 'text-blue-600' 
                           : player.color?.toLowerCase() === 'red'
-                          ? 'text-red-300'
-                          : 'text-white'
+                          ? 'text-red-600'
+                          : 'text-foreground'
                       }`}
                     >
                       {player.name} ({player.color})
@@ -1869,14 +1869,14 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
                   <CardContent className="space-y-4">
                     {/* Tactical Advice */}
                     <div className="space-y-2">
-                      <h4 className="text-yellow-400 font-semibold text-sm flex items-center">
+                      <h4 className="text-amber-600 font-semibold text-sm flex items-center">
                         <Target className="mr-1" size={14} />
                         {getTitle('TACTICAL')}
                       </h4>
                       {player.tactical_advice?.issues?.length > 0 && (
                         <div>
-                          <p className="text-red-300 text-xs font-medium">{getTitle('Issues:')}</p>
-                          <ul className="text-gray-600 text-sm space-y-1 ml-4">
+                          <p className="text-red-600 text-xs font-medium">{getTitle('Issues:')}</p>
+                          <ul className="text-gray-700 text-sm space-y-1 ml-4">
                             {player.tactical_advice.issues.map((issue, i) => (
                               <li key={i} className="list-disc" data-testid={`tactical-issue-${index}-${i}`}>
                                 {issue}
@@ -1887,8 +1887,8 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
                       )}
                       {player.tactical_advice?.improvements?.length > 0 && (
                         <div>
-                          <p className="text-green-300 text-xs font-medium">{getTitle('Improvements:')}</p>
-                          <ul className="text-gray-600 text-sm space-y-1 ml-4">
+                          <p className="text-green-600 text-xs font-medium">{getTitle('Improvements:')}</p>
+                          <ul className="text-gray-700 text-sm space-y-1 ml-4">
                             {player.tactical_advice.improvements.map((improvement, i) => (
                               <li key={i} className="list-disc" data-testid={`tactical-improvement-${index}-${i}`}>
                                 {improvement}
@@ -1901,14 +1901,14 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
 
                     {/* Technical Advice */}
                     <div className="space-y-2">
-                      <h4 className="text-blue-400 font-semibold text-sm flex items-center">
+                      <h4 className="text-blue-600 font-semibold text-sm flex items-center">
                         <Brain className="mr-1" size={14} />
                         {getTitle('TECHNICAL')}
                       </h4>
                       {player.technical_advice?.issues?.length > 0 && (
                         <div>
-                          <p className="text-red-300 text-xs font-medium">{getTitle('Issues:')}</p>
-                          <ul className="text-gray-600 text-sm space-y-1 ml-4">
+                          <p className="text-red-600 text-xs font-medium">{getTitle('Issues:')}</p>
+                          <ul className="text-gray-700 text-sm space-y-1 ml-4">
                             {player.technical_advice.issues.map((issue, i) => (
                               <li key={i} className="list-disc" data-testid={`technical-issue-${index}-${i}`}>
                                 {issue}
@@ -1919,8 +1919,8 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
                       )}
                       {player.technical_advice?.improvements?.length > 0 && (
                         <div>
-                          <p className="text-green-300 text-xs font-medium">{getTitle('Improvements:')}</p>
-                          <ul className="text-gray-600 text-sm space-y-1 ml-4">
+                          <p className="text-green-600 text-xs font-medium">{getTitle('Improvements:')}</p>
+                          <ul className="text-gray-700 text-sm space-y-1 ml-4">
                             {player.technical_advice.improvements.map((improvement, i) => (
                               <li key={i} className="list-disc" data-testid={`technical-improvement-${index}-${i}`}>
                                 {improvement}
@@ -1933,14 +1933,14 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
 
                     {/* Mental Advice */}
                     <div className="space-y-2">
-                      <h4 className="text-purple-400 font-semibold text-sm flex items-center">
+                      <h4 className="text-purple-600 font-semibold text-sm flex items-center">
                         <MessageSquare className="mr-1" size={14} />
                         {getTitle('MENTAL')}
                       </h4>
                       {player.mental_advice?.issues?.length > 0 && (
                         <div>
-                          <p className="text-red-300 text-xs font-medium">{getTitle('Issues:')}</p>
-                          <ul className="text-gray-600 text-sm space-y-1 ml-4">
+                          <p className="text-red-600 text-xs font-medium">{getTitle('Issues:')}</p>
+                          <ul className="text-gray-700 text-sm space-y-1 ml-4">
                             {player.mental_advice.issues.map((issue, i) => (
                               <li key={i} className="list-disc" data-testid={`mental-issue-${index}-${i}`}>
                                 {issue}
@@ -1951,8 +1951,8 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
                       )}
                       {player.mental_advice?.improvements?.length > 0 && (
                         <div>
-                          <p className="text-green-300 text-xs font-medium">{getTitle('Improvements:')}</p>
-                          <ul className="text-gray-600 text-sm space-y-1 ml-4">
+                          <p className="text-green-600 text-xs font-medium">{getTitle('Improvements:')}</p>
+                          <ul className="text-gray-700 text-sm space-y-1 ml-4">
                             {player.mental_advice.improvements.map((improvement, i) => (
                               <li key={i} className="list-disc" data-testid={`mental-improvement-${index}-${i}`}>
                                 {improvement}
