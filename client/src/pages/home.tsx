@@ -2632,7 +2632,7 @@ export default function Home() {
                         <h2 className="text-2xl font-bold text-foreground">{t('nutritionPlan.title')}</h2>
                       </div>
                       <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                        <Badge variant="secondary" className="bg-green-600/20 text-green-300 border-green-500/30 text-xs font-medium md:mx-0 mx-auto">
+                        <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-400 text-xs font-medium md:mx-0 mx-auto">
                           {t('nutritionPlan.tokenCost')}
                         </Badge>
                         <Button
@@ -2640,7 +2640,7 @@ export default function Home() {
                           size="sm"
                           onClick={() => setPreviewModal({ open: true, serviceType: 'nutrition-plan' })}
                           disabled={previewLoading && previewModal.serviceType === 'nutrition-plan'}
-                          className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
+                          className={`border-blue-600 text-blue-700 hover:bg-blue-600 hover:text-white ${isArabic ? 'flex-row-reverse' : ''}`}
                           data-testid="button-preview-nutrition-form"
                         >
                           {previewLoading && previewModal.serviceType === 'nutrition-plan' ? (
@@ -3057,7 +3057,7 @@ export default function Home() {
                         <h2 className="text-2xl font-bold text-foreground">{t('developmentPlan.title')}</h2>
                       </div>
                       <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                        <Badge variant="secondary" className="bg-purple-600/20 text-purple-300 border-purple-500/30 text-xs font-medium md:mx-0 mx-auto">
+                        <Badge variant="secondary" className="bg-purple-100 text-purple-700 border-purple-400 text-xs font-medium md:mx-0 mx-auto">
                           {t('developmentPlan.tokenCost')}
                         </Badge>
                         <Button
@@ -3065,7 +3065,7 @@ export default function Home() {
                           size="sm"
                           onClick={() => setPreviewModal({ open: true, serviceType: 'development-plan' })}
                           disabled={previewLoading && previewModal.serviceType === 'development-plan'}
-                          className={`border-blue-500 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 ${isArabic ? 'flex-row-reverse' : ''}`}
+                          className={`border-blue-600 text-blue-700 hover:bg-blue-600 hover:text-white ${isArabic ? 'flex-row-reverse' : ''}`}
                           data-testid="button-preview-development-form"
                         >
                           {previewLoading && previewModal.serviceType === 'development-plan' ? (
