@@ -1770,7 +1770,7 @@ export default function Home() {
       description: t('services.tacticRecommendations.description'),
       cost: 100,
       icon: "chess",
-      color: "text-red-400"
+      color: "text-purple-500"
     },
     {
       id: "statistics",

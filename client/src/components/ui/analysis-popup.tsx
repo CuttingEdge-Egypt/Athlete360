@@ -25,7 +25,7 @@ import {
   AlertTriangle,
   Calendar,
   Apple,
-  Swords,
+  LayoutDashboard,
   Video,
   Clock,
   Target,
@@ -2169,7 +2169,7 @@ export function AnalysisPopup({
         return <Apple className="text-green-400" size={28} />;
       case "beat":
       case "beat-strategies":
-        return <Swords className="text-red-400" size={28} />;
+        return <LayoutDashboard className="text-purple-500" size={28} />;
       case "video":
       case "video-analysis":
         return <Video className="text-indigo-400" size={28} />;
