@@ -366,17 +366,19 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
   return (
     <>
       <Card 
-        className={`service-card h-full bg-white border border-gray-100 shadow-md transition-all duration-300 ${
+        className={`service-card h-full bg-white border border-gray-100 shadow-md ${
           (analysisMutation.isPending || isProcessing) ? 'opacity-75' : ''
         } relative overflow-hidden`}
         style={{
-          transition: 'box-shadow 0.3s ease'
+          transition: 'box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.boxShadow = '0 12px 35px -8px rgba(45, 170, 157, 0.5)';
+          e.currentTarget.style.boxShadow = '0 20px 40px -12px rgba(45, 170, 157, 0.45)';
+          e.currentTarget.style.transform = 'translateY(-4px)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)';
+          e.currentTarget.style.transform = 'translateY(0)';
         }}
       >
       {service.id === 'statistics' && (
