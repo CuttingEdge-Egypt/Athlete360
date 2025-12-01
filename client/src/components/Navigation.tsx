@@ -137,7 +137,7 @@ export function Navigation() {
                 data-testid="button-logout"
                 variant="ghost" 
                 size="sm"
-                className="text-muted-foreground hover:text-foreground"
+                className="text-foreground hover:bg-primary hover:text-white"
               >
                 <LogOut size={16} />
                 <span className={`hidden lg:inline ${isArabic ? 'mr-2' : 'ml-2'}`}>{t('menu.logout')}</span>

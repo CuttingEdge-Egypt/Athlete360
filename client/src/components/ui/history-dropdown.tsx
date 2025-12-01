@@ -173,10 +173,10 @@ export function HistoryDropdown({ customTrigger }: HistoryDropdownProps = {}) {
             <Button 
               variant="ghost" 
               data-testid="button-history"
-              className="relative flex items-center gap-2 px-3 text-foreground"
+              className="relative flex items-center gap-2 px-3 text-foreground hover:bg-primary hover:text-white"
             >
-              <History className="h-4 w-4 text-foreground" />
-              <span className="text-sm text-foreground">{t('menu.history')}</span>
+              <History className="h-4 w-4" />
+              <span className="text-sm">{t('menu.history')}</span>
               {historyItems.length > 0 && (
                 <Badge 
                   variant="secondary" 
