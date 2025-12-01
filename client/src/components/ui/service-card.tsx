@@ -366,7 +366,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
   return (
     <>
       <Card 
-        className={`service-card h-full bg-white border border-gray-100 shadow-md hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 ${
+        className={`service-card h-full bg-white border border-gray-100 shadow-md hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 ${
           (analysisMutation.isPending || isProcessing) ? 'opacity-75' : ''
         } relative overflow-hidden`}
       >
