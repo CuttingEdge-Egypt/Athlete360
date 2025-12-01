@@ -2948,16 +2948,16 @@ export default function Home() {
 
                       {/* Progress tracking for nutrition plan generation */}
                       {nutritionJobId && (
-                        <div className="mb-6 p-6 bg-muted border border rounded-lg shadow-lg">
+                        <div className="mb-6 p-6 bg-gray-50 border border-gray-200 rounded-lg shadow-sm">
                           <div className="space-y-4">
                             {/* Progress message with dynamic animation */}
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
                               <div className="flex space-x-1 flex-shrink-0">
-                                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce delay-0"></div>
-                                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce delay-150"></div>
-                                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce delay-300"></div>
+                                <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce delay-0"></div>
+                                <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce delay-150"></div>
+                                <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce delay-300"></div>
                               </div>
-                              <p className="text-sm sm:text-lg font-medium text-emerald-200 text-center">
+                              <p className="text-sm sm:text-lg font-medium text-teal-700 text-center">
                                 {nutritionJobProgressMessage || t('common:messages.generatingNutritionPlan', "Generating your personalized nutrition plan...")}
                               </p>
                             </div>
@@ -2965,22 +2965,22 @@ export default function Home() {
                             {/* Progress bar */}
                             <div className="space-y-2">
                               <div className={`flex justify-between items-center text-sm ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                                <span className="text-slate-300 font-medium">{t('common:messages.progress', 'Progress')}</span>
+                                <span className="text-gray-600 font-medium">{t('common:messages.progress', 'Progress')}</span>
                                 <div className="flex items-center gap-2">
-                                  <div className="px-2 py-1 bg-emerald-500/20 rounded-full">
-                                    <span className="text-emerald-200 font-bold text-xs">
+                                  <div className="px-2 py-1 bg-teal-100 rounded-full">
+                                    <span className="text-teal-700 font-bold text-xs">
                                       {i18n.language === 'ar' ? toArabicNumerals(nutritionProgress) : nutritionProgress}٪
                                     </span>
                                   </div>
                                 </div>
                               </div>
-                              <div className="relative w-full bg-slate-700 rounded-full h-3 overflow-hidden shadow-inner" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
-                                <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700"></div>
+                              <div className="relative w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+                                <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-200"></div>
                                 <div 
-                                  className="bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-400 h-3 rounded-full transition-all duration-700 ease-out shadow-sm relative" 
+                                  className="bg-gradient-to-r from-teal-400 via-teal-500 to-blue-500 h-3 rounded-full transition-all duration-700 ease-out shadow-sm relative" 
                                   style={{ width: `${nutritionProgress}%` }}
                                 >
-                                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
+                                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
                                 </div>
                               </div>
                             </div>
@@ -2992,7 +2992,7 @@ export default function Home() {
                                 variant="outline"
                                 onClick={() => cancelNutritionPlanJobMutation.mutate(nutritionJobId)}
                                 disabled={cancelNutritionPlanJobMutation.isPending}
-                                className="border-red-500/50 text-red-300 hover:bg-red-500/10 hover:border-red-500"
+                                className="border-red-400 text-red-600 hover:bg-red-50 hover:border-red-500"
                               >
                                 <X className={i18n.language === 'ar' ? 'ml-2' : 'mr-2'} size={16} />
                                 {t('home:services.queue.cancel')}
@@ -3007,7 +3007,7 @@ export default function Home() {
                           type="submit"
                           data-testid="button-generate-nutrition-plan"
                           disabled={nutritionJobId !== null || createNutritionPlanJobMutation.isPending}
-                          className="bg-primary hover:bg-blue-600 text-foreground px-8 py-3 text-lg"
+                          className="bg-primary hover:bg-primary/90 text-white px-8 py-3 text-lg"
                         >
                           {(nutritionJobId || createNutritionPlanJobMutation.isPending) ? (
                             <Loader2 className="mr-2 animate-spin" size={20} />

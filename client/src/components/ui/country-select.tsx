@@ -43,7 +43,7 @@ export function CountrySelect({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full justify-between bg-white border-gray-300 text-gray-800 hover:bg-gray-50",
+            "w-full justify-between bg-white border-gray-300 text-gray-800 hover:bg-primary hover:text-white hover:border-primary transition-colors",
             className
           )}
           data-testid={testId}
