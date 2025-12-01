@@ -216,7 +216,7 @@ export function AnalysisPopup({
             <Card key={index} className="bg-card border hover:border-athlete-success/50 transition-colors">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
-                  <h3 className="font-bold text-green-400 text-lg mb-2">
+                  <h3 className="font-bold text-green-600 text-lg mb-2">
                     <Star className="inline-block w-5 h-5 mr-2" />
                     {strength.title}
                   </h3>
@@ -326,7 +326,7 @@ export function AnalysisPopup({
           {weaknesses.length > 0 ? weaknesses.map((weakness: any, index: number) => (
             <Card key={index} className="bg-card border hover:border-athlete-danger/50 transition-colors">
               <CardContent className={`p-6 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
-                <h3 className={`font-bold text-red-400 text-lg mb-4 flex items-start ${i18n.language === 'ar' ? 'flex-row-reverse text-right justify-end' : ''}`}>
+                <h3 className={`font-bold text-red-600 text-lg mb-4 flex items-start ${i18n.language === 'ar' ? 'flex-row-reverse text-right justify-end' : ''}`}>
                   <AlertTriangle className={`inline-block w-5 h-5 mt-0.5 flex-shrink-0 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
                   <span>{weakness.title}</span>
                 </h3>
@@ -2457,7 +2457,7 @@ export function AnalysisPopup({
           {normalizedComparison.tabs.strengths && (
             <Card className="bg-card border">
               <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-green-400 mb-4 flex items-center">
+                <h3 className="text-xl font-bold text-green-600 mb-4 flex items-center">
                   <Star className="mr-3" size={24} />
                   {t("analysis.comparison.strengthsTitle", "Strengths Analysis")}
                 </h3>
@@ -2475,7 +2475,7 @@ export function AnalysisPopup({
           {normalizedComparison.tabs.weaknesses && (
             <Card className="bg-card border">
               <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-red-400 mb-4 flex items-center">
+                <h3 className="text-xl font-bold text-red-600 mb-4 flex items-center">
                   <AlertTriangle className="mr-3" size={24} />
                   {isArabicComparison ? "مجالات التحسين" : t("analysis.weaknesses.title", "Areas for Improvement")}
                 </h3>
