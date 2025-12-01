@@ -1675,12 +1675,12 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                     <TabsContent value="strengths" className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <Card className="bg-white border-gray-200 shadow-sm">
-                          <CardHeader className="bg-green-50 border-b border-green-100">
-                            <CardTitle className={`text-lg text-green-800 ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.athlete1?.name || "Athlete 1"} {t('analysis.comparison.strengths', 'Strengths')}</CardTitle>
+                          <CardHeader className="bg-green-700 border-b border-green-600">
+                            <CardTitle className={`text-lg text-white ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.athlete1?.name || "Athlete 1"} {t('analysis.comparison.strengths', 'Strengths')}</CardTitle>
                           </CardHeader>
-                          <CardContent className="space-y-3 p-4">
+                          <CardContent className="space-y-3 p-4 bg-green-50/30">
                             {(parsedData.strengths?.athlete1 || []).map((strength: any, index: number) => (
-                              <div key={index} className={`${isComparisonArabic ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-green-500 py-3 px-4 bg-green-50/50 rounded-r-lg`}>
+                              <div key={index} className={`${isComparisonArabic ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-green-600 py-3 px-4 bg-white rounded-r-lg shadow-sm`}>
                                 <div className={`flex items-start justify-between ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                                   <div className="flex-1">
                                     <div className={`font-semibold text-gray-800 ${isComparisonArabic ? 'text-right' : ''}`}>
@@ -1692,13 +1692,13 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                       </div>
                                     )}
                                     {typeof strength === 'object' && strength.evidence && (
-                                      <div className={`text-xs text-green-700 mt-2 italic ${isComparisonArabic ? 'text-right' : ''}`}>
+                                      <div className={`text-xs text-blue-700 mt-2 italic bg-blue-50 p-2 rounded ${isComparisonArabic ? 'text-right' : ''}`}>
                                         {t('analysis.comparison.evidence', 'Evidence')}: {strength.evidence}
                                       </div>
                                     )}
                                   </div>
                                   {typeof strength === 'object' && strength.rating && (
-                                    <div className={`text-lg font-bold text-green-600 bg-green-100 px-2 py-1 rounded ${isComparisonArabic ? 'mr-3' : 'ml-3'}`}>
+                                    <div className={`text-lg font-bold text-green-700 bg-green-100 px-2 py-1 rounded ${isComparisonArabic ? 'mr-3' : 'ml-3'}`}>
                                       {strength.rating}
                                     </div>
                                   )}
@@ -1712,12 +1712,12 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                         </Card>
 
                         <Card className="bg-white border-gray-200 shadow-sm">
-                          <CardHeader className="bg-green-50 border-b border-green-100">
-                            <CardTitle className={`text-lg text-green-800 ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.athlete2?.name || "Athlete 2"} {t('analysis.comparison.strengths', 'Strengths')}</CardTitle>
+                          <CardHeader className="bg-green-700 border-b border-green-600">
+                            <CardTitle className={`text-lg text-white ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.athlete2?.name || "Athlete 2"} {t('analysis.comparison.strengths', 'Strengths')}</CardTitle>
                           </CardHeader>
-                          <CardContent className="space-y-3 p-4">
+                          <CardContent className="space-y-3 p-4 bg-green-50/30">
                             {(parsedData.strengths?.athlete2 || []).map((strength: any, index: number) => (
-                              <div key={index} className={`${isComparisonArabic ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-green-500 py-3 px-4 bg-green-50/50 rounded-r-lg`}>
+                              <div key={index} className={`${isComparisonArabic ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-green-600 py-3 px-4 bg-white rounded-r-lg shadow-sm`}>
                                 <div className={`flex items-start justify-between ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                                   <div className="flex-1">
                                     <div className={`font-semibold text-gray-800 ${isComparisonArabic ? 'text-right' : ''}`}>
@@ -1729,13 +1729,13 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                       </div>
                                     )}
                                     {typeof strength === 'object' && strength.evidence && (
-                                      <div className={`text-xs text-green-700 mt-2 italic ${isComparisonArabic ? 'text-right' : ''}`}>
+                                      <div className={`text-xs text-blue-700 mt-2 italic bg-blue-50 p-2 rounded ${isComparisonArabic ? 'text-right' : ''}`}>
                                         {t('analysis.comparison.evidence', 'Evidence')}: {strength.evidence}
                                       </div>
                                     )}
                                   </div>
                                   {typeof strength === 'object' && strength.rating && (
-                                    <div className={`text-lg font-bold text-green-600 bg-green-100 px-2 py-1 rounded ${isComparisonArabic ? 'mr-3' : 'ml-3'}`}>
+                                    <div className={`text-lg font-bold text-green-700 bg-green-100 px-2 py-1 rounded ${isComparisonArabic ? 'mr-3' : 'ml-3'}`}>
                                       {strength.rating}
                                     </div>
                                   )}
@@ -1754,12 +1754,12 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                     <TabsContent value="weaknesses" className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <Card className="bg-white border-gray-200 shadow-sm">
-                          <CardHeader className="bg-slate-100 border-b border-slate-200">
-                            <CardTitle className={`text-lg text-slate-700 ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.athlete1?.name || "Athlete 1"} {t('analysis.comparison.areasToImprove', 'Areas to Improve')}</CardTitle>
+                          <CardHeader className="bg-red-700 border-b border-red-600">
+                            <CardTitle className={`text-lg text-white ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.athlete1?.name || "Athlete 1"} {t('analysis.comparison.areasToImprove', 'Areas to Improve')}</CardTitle>
                           </CardHeader>
-                          <CardContent className="space-y-3 p-4">
+                          <CardContent className="space-y-3 p-4 bg-red-50/30">
                             {(parsedData.weaknesses?.athlete1 || []).map((weakness: any, index: number) => (
-                              <div key={index} className={`${isComparisonArabic ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-slate-400 py-3 px-4 bg-slate-50 rounded-r-lg`}>
+                              <div key={index} className={`${isComparisonArabic ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-red-600 py-3 px-4 bg-white rounded-r-lg shadow-sm`}>
                                 <div className={`flex items-start justify-between ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                                   <div className="flex-1">
                                     <div className={`font-semibold text-gray-800 ${isComparisonArabic ? 'text-right' : ''}`}>
@@ -1771,13 +1771,13 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                       </div>
                                     )}
                                     {typeof weakness === 'object' && weakness.exploitation && (
-                                      <div className={`text-xs text-rose-600 mt-2 italic ${isComparisonArabic ? 'text-right' : ''}`}>
+                                      <div className={`text-xs text-purple-700 mt-2 italic bg-purple-50 p-2 rounded ${isComparisonArabic ? 'text-right' : ''}`}>
                                         {t('analysis.comparison.exploitation', 'Exploitation')}: {weakness.exploitation}
                                       </div>
                                     )}
                                   </div>
                                   {typeof weakness === 'object' && weakness.impact && (
-                                    <div className={`text-lg font-bold text-slate-600 bg-slate-200 px-2 py-1 rounded ${isComparisonArabic ? 'mr-3' : 'ml-3'}`}>
+                                    <div className={`text-lg font-bold text-red-700 bg-red-100 px-2 py-1 rounded ${isComparisonArabic ? 'mr-3' : 'ml-3'}`}>
                                       {weakness.impact}
                                     </div>
                                   )}
@@ -1791,12 +1791,12 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                         </Card>
 
                         <Card className="bg-white border-gray-200 shadow-sm">
-                          <CardHeader className="bg-slate-100 border-b border-slate-200">
-                            <CardTitle className={`text-lg text-slate-700 ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.athlete2?.name || "Athlete 2"} {t('analysis.comparison.areasToImprove', 'Areas to Improve')}</CardTitle>
+                          <CardHeader className="bg-red-700 border-b border-red-600">
+                            <CardTitle className={`text-lg text-white ${isComparisonArabic ? 'text-right' : ''}`}>{parsedData.athlete2?.name || "Athlete 2"} {t('analysis.comparison.areasToImprove', 'Areas to Improve')}</CardTitle>
                           </CardHeader>
-                          <CardContent className="space-y-3 p-4">
+                          <CardContent className="space-y-3 p-4 bg-red-50/30">
                             {(parsedData.weaknesses?.athlete2 || []).map((weakness: any, index: number) => (
-                              <div key={index} className={`${isComparisonArabic ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-slate-400 py-3 px-4 bg-slate-50 rounded-r-lg`}>
+                              <div key={index} className={`${isComparisonArabic ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-red-600 py-3 px-4 bg-white rounded-r-lg shadow-sm`}>
                                 <div className={`flex items-start justify-between ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
                                   <div className="flex-1">
                                     <div className={`font-semibold text-gray-800 ${isComparisonArabic ? 'text-right' : ''}`}>
@@ -1808,13 +1808,13 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                       </div>
                                     )}
                                     {typeof weakness === 'object' && weakness.exploitation && (
-                                      <div className={`text-xs text-rose-600 mt-2 italic ${isComparisonArabic ? 'text-right' : ''}`}>
+                                      <div className={`text-xs text-purple-700 mt-2 italic bg-purple-50 p-2 rounded ${isComparisonArabic ? 'text-right' : ''}`}>
                                         {t('analysis.comparison.exploitation', 'Exploitation')}: {weakness.exploitation}
                                       </div>
                                     )}
                                   </div>
                                   {typeof weakness === 'object' && weakness.impact && (
-                                    <div className={`text-lg font-bold text-slate-600 bg-slate-200 px-2 py-1 rounded ${isComparisonArabic ? 'mr-3' : 'ml-3'}`}>
+                                    <div className={`text-lg font-bold text-red-700 bg-red-100 px-2 py-1 rounded ${isComparisonArabic ? 'mr-3' : 'ml-3'}`}>
                                       {weakness.impact}
                                     </div>
                                   )}
@@ -2054,11 +2054,11 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                 return (
                                   <div className="space-y-6">
                                     <div className={`flex items-center gap-3 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
-                                      <div className="h-1 w-12 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full"></div>
-                                      <h5 className={`font-bold text-yellow-300 text-xl tracking-tight ${isComparisonArabic ? 'text-right' : ''}`}>
+                                      <div className="h-1 w-12 bg-gradient-to-r from-amber-600 to-amber-700 rounded-full"></div>
+                                      <h5 className={`font-bold text-amber-700 text-xl tracking-tight ${isComparisonArabic ? 'text-right' : ''}`}>
                                         {t('analysis.comparison.competitiveHistoryDetails', 'Competitive History Details')}
                                       </h5>
-                                      <div className="h-1 flex-1 bg-gradient-to-r from-amber-500/50 to-transparent rounded-full"></div>
+                                      <div className="h-1 flex-1 bg-gradient-to-r from-amber-600/50 to-transparent rounded-full"></div>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                       {parsedData.athlete1?.competitiveHistory && renderCompetitiveHistoryPanel(parsedData.athlete1, parsedData.athlete1?.name || 'Athlete 1', 'blue')}
