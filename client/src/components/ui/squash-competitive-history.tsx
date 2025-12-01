@@ -95,7 +95,7 @@ export function SquashCompetitiveHistory({ competitiveHistory, language }: Props
         <Card className="bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-cyan-500/30 shadow-2xl">
           <CardHeader>
             <CardTitle className={`flex items-center gap-3 ${isArabic ? 'text-3xl flex-row-reverse' : 'text-xl'}`}>
-              <Trophy className="w-8 h-8 text-yellow-400" />
+              <Trophy className="w-8 h-8 text-amber-500" />
               <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                 {isArabic ? 'إحصائيات المسيرة' : 'Career Statistics'}
               </span>
@@ -104,27 +104,27 @@ export function SquashCompetitiveHistory({ competitiveHistory, language }: Props
           <CardContent>
             <div className={`grid grid-cols-2 gap-6 ${isArabic ? 'text-right' : ''}`}>
               {/* Wins */}
-              <div className="bg-gradient-to-br from-green-500/20 to-emerald-600/20 rounded-xl p-6 border-2 border-green-500/50">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl p-6 border-2 border-green-400/50 shadow-md">
                 <div className={`flex items-center gap-3 mb-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
-                  <Target className="w-6 h-6 text-green-400" />
-                  <span className={`text-green-300 font-medium ${isArabic ? 'text-2xl' : 'text-lg'}`}>
+                  <Target className="w-6 h-6 text-green-600" />
+                  <span className={`text-green-700 font-medium ${isArabic ? 'text-2xl' : 'text-lg'}`}>
                     {isArabic ? 'الانتصارات' : 'Wins'}
                   </span>
                 </div>
-                <p className={`font-bold text-white ${isArabic ? 'text-4xl' : 'text-3xl'}`}>
+                <p className={`font-bold text-green-700 ${isArabic ? 'text-4xl' : 'text-3xl'}`}>
                   {isArabic ? toArabicNumerals(career_stats.wins) : career_stats.wins}
                 </p>
               </div>
 
               {/* Losses */}
-              <div className="bg-gradient-to-br from-red-500/20 to-rose-600/20 rounded-xl p-6 border-2 border-red-500/50">
+              <div className="bg-gradient-to-br from-red-50 to-rose-100 rounded-xl p-6 border-2 border-red-400/50 shadow-md">
                 <div className={`flex items-center gap-3 mb-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
-                  <TrendingUp className="w-6 h-6 text-red-400" />
-                  <span className={`text-red-300 font-medium ${isArabic ? 'text-2xl' : 'text-lg'}`}>
+                  <TrendingUp className="w-6 h-6 text-red-600" />
+                  <span className={`text-red-700 font-medium ${isArabic ? 'text-2xl' : 'text-lg'}`}>
                     {isArabic ? 'الهزائم' : 'Losses'}
                   </span>
                 </div>
-                <p className={`font-bold text-white ${isArabic ? 'text-4xl' : 'text-3xl'}`}>
+                <p className={`font-bold text-red-700 ${isArabic ? 'text-4xl' : 'text-3xl'}`}>
                   {isArabic ? toArabicNumerals(career_stats.losses) : career_stats.losses}
                 </p>
               </div>
@@ -149,16 +149,16 @@ export function SquashCompetitiveHistory({ competitiveHistory, language }: Props
               <table className={`w-full ${isArabic ? 'text-right' : 'text-left'}`}>
                 <thead>
                   <tr className="border-b-2 border-purple-300">
-                    <th className={`pb-3 ${isArabic ? 'text-xl pr-4' : 'text-sm font-semibold pl-4'} text-purple-300`}>
+                    <th className={`pb-3 ${isArabic ? 'text-xl pr-4' : 'text-sm font-semibold pl-4'} text-purple-600`}>
                       {isArabic ? 'البطولة' : 'Tournament'}
                     </th>
-                    <th className={`pb-3 ${isArabic ? 'text-xl pr-4' : 'text-sm font-semibold pl-4'} text-purple-300`}>
+                    <th className={`pb-3 ${isArabic ? 'text-xl pr-4' : 'text-sm font-semibold pl-4'} text-purple-600`}>
                       {isArabic ? 'النتيجة' : 'Result'}
                     </th>
-                    <th className={`pb-3 ${isArabic ? 'text-xl pr-4' : 'text-sm font-semibold pl-4'} text-purple-300`}>
+                    <th className={`pb-3 ${isArabic ? 'text-xl pr-4' : 'text-sm font-semibold pl-4'} text-purple-600`}>
                       {isArabic ? 'تنتهي' : 'Expires'}
                     </th>
-                    <th className={`pb-3 ${isArabic ? 'text-xl pr-4' : 'text-sm font-semibold pl-4'} text-purple-300`}>
+                    <th className={`pb-3 ${isArabic ? 'text-xl pr-4' : 'text-sm font-semibold pl-4'} text-purple-600`}>
                       {isArabic ? 'النقاط' : 'Points'}
                     </th>
                   </tr>
@@ -182,7 +182,7 @@ export function SquashCompetitiveHistory({ competitiveHistory, language }: Props
                         {isArabic ? toArabicNumerals(rp.expires) : rp.expires}
                       </td>
                       <td className={`py-4 ${isArabic ? 'pr-4' : 'pl-4'}`}>
-                        <span className={`font-bold ${isArabic ? 'text-2xl' : 'text-lg'} text-yellow-400`}>
+                        <span className={`font-bold ${isArabic ? 'text-2xl' : 'text-lg'} text-amber-600`}>
                           {isArabic ? toArabicNumerals(rp.points) : rp.points}
                         </span>
                       </td>
@@ -229,7 +229,7 @@ export function SquashCompetitiveHistory({ competitiveHistory, language }: Props
                       </div>
 
                       {/* Content card */}
-                      <div className="flex-1 bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-xl border-2 border-slate-600/50 p-5 hover:border-cyan-500/60 hover:shadow-xl hover:shadow-cyan-500/10 transition-all duration-300">
+                      <div className="flex-1 bg-white rounded-xl border-2 border-gray-200 p-5 hover:border-primary/60 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 shadow-sm">
                         <div className={`flex items-start justify-between gap-4 mb-4`}>
                           {/* Left side (Arabic) / Right side (English): Result badge */}
                           {isArabic && (
@@ -238,9 +238,9 @@ export function SquashCompetitiveHistory({ competitiveHistory, language }: Props
                               
                               {/* Match Time - Below result, left-aligned for Arabic */}
                               {match.time && (
-                                <div className={`inline-flex items-center gap-2 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 px-3 py-1.5 rounded-lg border border-blue-500/50 text-base flex-row-reverse`}>
-                                  <Clock className="w-4 h-4 text-blue-400" />
-                                  <span className="text-blue-300 font-semibold">{match.time}</span>
+                                <div className={`inline-flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-300 text-base flex-row-reverse`}>
+                                  <Clock className="w-4 h-4 text-blue-600" />
+                                  <span className="text-blue-700 font-semibold">{match.time}</span>
                                 </div>
                               )}
                             </div>
@@ -249,24 +249,24 @@ export function SquashCompetitiveHistory({ competitiveHistory, language }: Props
                           <div className="flex-1 space-y-3">
                             {/* Date - Right aligned for Arabic */}
                             <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
-                              <Calendar className="w-4 h-4 text-yellow-400" />
-                              <Badge variant="outline" className={`border-yellow-400/60 text-yellow-400 bg-yellow-400/10 ${isArabic ? 'text-lg px-4 py-1.5' : 'text-xs'}`}>
+                              <Calendar className="w-4 h-4 text-amber-500" />
+                              <Badge variant="outline" className={`border-amber-400 text-amber-700 bg-amber-50 ${isArabic ? 'text-lg px-4 py-1.5' : 'text-xs'}`}>
                                 {matchDate}
                               </Badge>
                             </div>
 
                             {/* Opponent */}
                             <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
-                              <Users className="w-5 h-5 text-purple-400" />
-                              <h3 className={`font-bold text-white leading-tight ${isArabic ? 'text-2xl text-right' : 'text-base'}`}>
+                              <Users className="w-5 h-5 text-purple-500" />
+                              <h3 className={`font-bold text-foreground leading-tight ${isArabic ? 'text-2xl text-right' : 'text-base'}`}>
                                 {isArabic ? 'ضد ' : 'vs '}{match.opponent}
                               </h3>
                             </div>
 
                             {/* Score */}
-                            <div className={`inline-flex items-center gap-2 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 px-4 py-2 rounded-lg border-2 border-yellow-500/50 ${isArabic ? 'text-xl float-right' : 'text-lg'}`}>
-                              <Trophy className="w-5 h-5 text-yellow-400" />
-                              <span className="text-yellow-300 font-bold">
+                            <div className={`inline-flex items-center gap-2 bg-amber-50 px-4 py-2 rounded-lg border-2 border-amber-400 ${isArabic ? 'text-xl float-right' : 'text-lg'}`}>
+                              <Trophy className="w-5 h-5 text-amber-500" />
+                              <span className="text-amber-700 font-bold">
                                 {isArabic ? toArabicNumerals(match.score) : match.score}
                               </span>
                             </div>
@@ -274,7 +274,7 @@ export function SquashCompetitiveHistory({ competitiveHistory, language }: Props
                             {/* Competition */}
                             <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
                               <Trophy className="w-4 h-4 text-muted-foreground" />
-                              <span className={`text-gray-600 ${isArabic ? 'text-lg' : 'text-sm'}`}>
+                              <span className={`text-muted-foreground ${isArabic ? 'text-lg' : 'text-sm'}`}>
                                 {match.competition}
                               </span>
                             </div>
@@ -287,9 +287,9 @@ export function SquashCompetitiveHistory({ competitiveHistory, language }: Props
                               
                               {/* Match Time - Below result */}
                               {match.time && (
-                                <div className={`inline-flex items-center gap-2 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 px-3 py-1.5 rounded-lg border border-blue-500/50 text-xs`}>
-                                  <Clock className="w-4 h-4 text-blue-400" />
-                                  <span className="text-blue-300 font-semibold">{match.time}</span>
+                                <div className={`inline-flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-300 text-xs`}>
+                                  <Clock className="w-4 h-4 text-blue-600" />
+                                  <span className="text-blue-700 font-semibold">{match.time}</span>
                                 </div>
                               )}
                             </div>
@@ -298,8 +298,8 @@ export function SquashCompetitiveHistory({ competitiveHistory, language }: Props
 
                         {/* Notes */}
                         {match.notes && (
-                          <div className="pt-3 border-t border-slate-600/50">
-                            <p className={`text-gray-600 leading-relaxed ${isArabic ? 'text-right text-lg' : 'text-base'}`}>
+                          <div className="pt-3 border-t border-gray-200">
+                            <p className={`text-muted-foreground leading-relaxed ${isArabic ? 'text-right text-lg' : 'text-base'}`}>
                               {match.notes}
                             </p>
                           </div>
