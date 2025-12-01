@@ -3286,7 +3286,7 @@ export default function Home() {
 
                         <Button 
                           type="submit" 
-                          className="w-full bg-primary hover:bg-primary-dark text-foreground"
+                          className="w-full bg-primary hover:bg-primary/90 text-white"
                           disabled={createDevelopmentPlanJobMutation.isPending || !!developmentJobId}
                           data-testid="button-generate-development-plan"
                         >
@@ -3305,7 +3305,7 @@ export default function Home() {
                         
                         {/* Enhanced Progress indicator */}
                         {developmentJobId && (
-                          <div className="mt-6 p-6 bg-gradient-to-r from-slate-800/80 to-slate-700/80 rounded-xl border border-slate-600/50 shadow-lg" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+                          <div className="mt-6 p-6 bg-gray-50 rounded-xl border border-gray-200 shadow-sm" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
                             <div className="space-y-4">
                               {/* Progress Header with Cancel Button */}
                               <div className={`flex items-center ${i18n.language === 'ar' ? 'flex-row-reverse' : 'justify-between'}`}>
@@ -3320,7 +3320,7 @@ export default function Home() {
                                       cancelDevelopmentPlanJobMutation.mutate(developmentJobId);
                                     }}
                                     disabled={cancelDevelopmentPlanJobMutation.isPending}
-                                    className="bg-red-500/10 border-red-400/50 text-red-300 hover:bg-red-500/20 hover:border-red-400 transition-all duration-200"
+                                    className="border-red-400 text-red-600 hover:bg-red-50 hover:border-red-500 transition-all duration-200"
                                     data-testid="button-cancel-development-plan"
                                   >
                                     {cancelDevelopmentPlanJobMutation.isPending ? (
@@ -3338,14 +3338,14 @@ export default function Home() {
                                 )}
                                 <div className={`flex items-center gap-3 flex-1 min-w-0 ${i18n.language === 'ar' ? 'justify-end flex-row-reverse' : ''}`}>
                                   <div className="relative flex-shrink-0">
-                                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-emerald-500/30 border-t-emerald-400"></div>
-                                    <div className="absolute inset-0 rounded-full h-6 w-6 bg-emerald-500/10"></div>
+                                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-teal-300 border-t-teal-500"></div>
+                                    <div className="absolute inset-0 rounded-full h-6 w-6 bg-teal-100/50"></div>
                                   </div>
                                   <div className={`min-w-0 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
-                                    <p className={`text-emerald-100 font-semibold text-sm sm:text-base truncate ${i18n.language === 'ar' ? 'sm:text-lg' : ''}`}>
+                                    <p className={`text-teal-700 font-semibold text-sm sm:text-base truncate ${i18n.language === 'ar' ? 'sm:text-lg' : ''}`}>
                                       {developmentProgressMessage || t('common:messages.generatingDevelopmentPlan', 'Generating your development plan...')}
                                     </p>
-                                    <p className={`text-slate-300 text-xs sm:text-sm ${i18n.language === 'ar' ? 'sm:text-base' : ''}`}>{t('common:messages.thisMayTakeFewMinutes', 'This may take a few minutes')}</p>
+                                    <p className={`text-gray-500 text-xs sm:text-sm ${i18n.language === 'ar' ? 'sm:text-base' : ''}`}>{t('common:messages.thisMayTakeFewMinutes', 'This may take a few minutes')}</p>
                                   </div>
                                 </div>
                                 {i18n.language !== 'ar' && (
@@ -3359,7 +3359,7 @@ export default function Home() {
                                       cancelDevelopmentPlanJobMutation.mutate(developmentJobId);
                                     }}
                                     disabled={cancelDevelopmentPlanJobMutation.isPending}
-                                    className="bg-red-500/10 border-red-400/50 text-red-300 hover:bg-red-500/20 hover:border-red-400 transition-all duration-200"
+                                    className="border-red-400 text-red-600 hover:bg-red-50 hover:border-red-500 transition-all duration-200"
                                     data-testid="button-cancel-development-plan"
                                   >
                                     {cancelDevelopmentPlanJobMutation.isPending ? (
@@ -3380,22 +3380,22 @@ export default function Home() {
                               {/* Progress Bar with Percentage */}
                               <div className="space-y-2">
                                 <div className="flex justify-between items-center text-sm">
-                                  <span className="text-slate-300 font-medium">{t('common:messages.progress', 'Progress')}</span>
+                                  <span className="text-gray-600 font-medium">{t('common:messages.progress', 'Progress')}</span>
                                   <div className="flex items-center gap-2">
-                                    <div className="px-2 py-1 bg-emerald-500/20 rounded-full">
-                                      <span className="text-emerald-200 font-bold text-xs">
+                                    <div className="px-2 py-1 bg-teal-100 rounded-full">
+                                      <span className="text-teal-700 font-bold text-xs">
                                         {i18n.language === 'ar' ? toArabicNumerals(developmentProgress) : developmentProgress}%
                                       </span>
                                     </div>
                                   </div>
                                 </div>
-                                <div className="relative w-full bg-slate-700 rounded-full h-3 overflow-hidden shadow-inner">
-                                  <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700"></div>
+                                <div className="relative w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
+                                  <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-200"></div>
                                   <div 
-                                    className="bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-400 h-3 rounded-full transition-all duration-700 ease-out shadow-sm relative" 
+                                    className="bg-gradient-to-r from-teal-400 via-teal-500 to-blue-500 h-3 rounded-full transition-all duration-700 ease-out shadow-sm relative" 
                                     style={{ width: `${developmentProgress}%` }}
                                   >
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
                                   </div>
                                 </div>
                               </div>

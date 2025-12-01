@@ -248,7 +248,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                       className={`${
                         selectedGoalIndex === index 
                           ? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white border-emerald-400 shadow-lg" 
-                          : "bg-white border-slate-300 text-slate-600 hover:bg-slate-50 hover:border-slate-400"
+                          : "bg-white border-slate-300 text-slate-600 hover:bg-emerald-50 hover:border-emerald-400 hover:text-emerald-700"
                       } ${contentIsArabic ? 'flex-row-reverse text-base' : ''}`}
                       data-testid={`goal-button-${index}`}
                     >
