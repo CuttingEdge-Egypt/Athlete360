@@ -2218,12 +2218,12 @@ export default function Home() {
                                 }}
                                 size="sm"
                                 variant="outline"
-                                className="bg-accent border-muted-foreground text-muted-foreground hover:bg-accent hover:text-foreground text-xs px-2 py-1 h-6 relative w-full"
+                                className="bg-primary/10 border-primary/50 text-primary hover:bg-primary/20 hover:text-primary hover:border-primary text-xs px-2 py-1 h-6 relative w-full"
                                 disabled={isSearchingImage}
                               >
                                 {isSearchingImage ? (
                                   <div className="flex items-center space-x-1">
-                                    <div className="w-3 h-3 border border-muted-foreground border-t-transparent rounded-full animate-spin" />
+                                    <div className="w-3 h-3 border border-primary border-t-transparent rounded-full animate-spin" />
                                     <span>{t('athleteSearch.imageUpdate.searching')}</span>
                                   </div>
                                 ) : (
@@ -2280,22 +2280,22 @@ export default function Home() {
                           {/* Image Update Tip Popup */}
                           {showImageUpdateTip && (
                             <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 z-50 w-max max-w-[280px]">
-                              <div className="bg-gradient-to-r from-primary to-teal-500 text-white px-4 py-2 rounded-lg shadow-xl border border-primary/40 relative animate-in slide-in-from-top-2 duration-300">
+                              <div className="bg-white border border-primary/30 text-foreground px-4 py-2 rounded-lg shadow-xl relative animate-in slide-in-from-top-2 duration-300">
                                 {/* Arrow pointing up to button */}
                                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full">
-                                  <div className="w-0 h-0 border-l-4 border-r-4 border-b-8 border-l-transparent border-r-transparent border-b-primary"></div>
+                                  <div className="w-0 h-0 border-l-4 border-r-4 border-b-8 border-l-transparent border-r-transparent border-b-white"></div>
                                 </div>
                                 
                                 <div className="text-sm font-medium">
-                                  <p className="mb-1">{t('athleteSearch.imageUpdate.popup.question', { name: i18n.language === 'ar' && selectedAthlete.nameArabic ? selectedAthlete.nameArabic : selectedAthlete.name })}</p>
-                                  <p className="text-white/90">{t('athleteSearch.imageUpdate.popup.help')}</p>
-                                  <p className="text-xs text-white/80 mt-1 font-semibold">{t('athleteSearch.imageUpdate.popup.noTokens')}</p>
+                                  <p className="mb-1 text-foreground">{t('athleteSearch.imageUpdate.popup.question', { name: i18n.language === 'ar' && selectedAthlete.nameArabic ? selectedAthlete.nameArabic : selectedAthlete.name })}</p>
+                                  <p className="text-muted-foreground">{t('athleteSearch.imageUpdate.popup.help')}</p>
+                                  <p className="text-xs text-emerald-600 mt-1 font-semibold">{t('athleteSearch.imageUpdate.popup.noTokens')}</p>
                                 </div>
                                 
                                 {/* Close button */}
                                 <button
                                   onClick={() => setShowImageUpdateTip(false)}
-                                  className="absolute -top-1 -right-1 w-5 h-5 bg-white/30 hover:bg-white/40 rounded-full flex items-center justify-center text-xs text-white transition-colors"
+                                  className="absolute -top-1 -right-1 w-5 h-5 bg-primary/20 hover:bg-primary/30 rounded-full flex items-center justify-center text-xs text-primary transition-colors"
                                 >
                                   ×
                                 </button>
