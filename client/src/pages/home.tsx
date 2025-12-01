@@ -1858,7 +1858,7 @@ export default function Home() {
                 <TabsTrigger 
                   value="analysis" 
                   data-testid="tab-analysis"
-                  className="data-[state=active]:bg-primary flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm h-11"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-white flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm h-11"
                 >
                   <BarChart3 size={14} className="sm:w-4 sm:h-4" />
                   {t('interface.athleteAnalysis')}
@@ -1866,7 +1866,7 @@ export default function Home() {
                 <TabsTrigger 
                   value="comparison" 
                   data-testid="tab-comparison"
-                  className="data-[state=active]:bg-primary flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm h-11"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-white flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm h-11"
                 >
                   <Users size={14} className="sm:w-4 sm:h-4" />
                   {t('interface.compareAthletes')}
@@ -1874,7 +1874,7 @@ export default function Home() {
                 <TabsTrigger 
                   value="nutrition" 
                   data-testid="tab-nutrition"
-                  className="data-[state=active]:bg-primary flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm h-11"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-white flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm h-11"
                 >
                   <Apple size={14} className="sm:w-4 sm:h-4" />
                   {t('interface.nutritionPlan')}
@@ -1882,7 +1882,7 @@ export default function Home() {
                 <TabsTrigger 
                   value="development" 
                   data-testid="tab-development"
-                  className="data-[state=active]:bg-primary flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm h-11"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-white flex items-center gap-2 whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm h-11"
                 >
                   <CalendarDays size={14} className="sm:w-4 sm:h-4" />
                   {t('interface.developmentPlan')}
