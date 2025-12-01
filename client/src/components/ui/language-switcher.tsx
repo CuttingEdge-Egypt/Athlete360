@@ -24,7 +24,7 @@ export const LanguageSwitcher = ({ customTrigger }: LanguageSwitcherProps = {}) 
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 px-0"
+            className="h-8 w-8 px-0 text-foreground hover:text-primary hover:bg-primary/10"
             data-testid="button-language-switcher"
           >
             <Globe className="h-4 w-4" />
