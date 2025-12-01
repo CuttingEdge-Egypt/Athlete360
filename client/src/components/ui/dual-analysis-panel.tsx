@@ -1576,8 +1576,8 @@ export function DualAnalysisPanel({
         {(careerOverview || peakPerformancePeriods?.length > 0 || notableAchievements?.length > 0 || recentForm) && (
           <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-500">
             <CardHeader>
-              <CardTitle className={`text-2xl text-white flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
-                <Calendar className={`${isArabic ? 'ml-3' : 'mr-3'} text-purple-400`} size={24} />
+              <CardTitle className={`text-2xl text-purple-800 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <Calendar className={`${isArabic ? 'ml-3' : 'mr-3'} text-purple-600`} size={24} />
                 {t('competitiveHistory.title')}
               </CardTitle>
               <div className={`text-sm text-muted-foreground ${isArabic ? 'text-right' : ''}`}>{t('competitiveHistory.subtitle')}</div>
@@ -1585,8 +1585,8 @@ export function DualAnalysisPanel({
             <CardContent className={`space-y-6 ${isArabic ? 'text-right' : ''}`} dir={isArabic ? 'rtl' : 'ltr'}>
               {careerOverview && (
                 <div className={isArabic ? 'text-right' : ''}>
-                  <h3 className={`text-lg font-semibold text-white mb-3 flex items-center ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
-                    <Trophy className={`${isArabic ? 'ml-2' : 'mr-2'} text-amber-500`} size={20} />
+                  <h3 className={`text-lg font-semibold text-purple-800 mb-3 flex items-center ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
+                    <Trophy className={`${isArabic ? 'ml-2' : 'mr-2'} text-amber-600`} size={20} />
                     {t('competitiveHistory.careerOverview')}
                   </h3>
                   <p className={`text-muted-foreground leading-relaxed ${isArabic ? 'text-right' : ''}`}>{careerOverview}</p>
@@ -1595,8 +1595,8 @@ export function DualAnalysisPanel({
               
               {peakPerformancePeriods && peakPerformancePeriods.length > 0 && (
                 <div className={isArabic ? 'text-right' : ''}>
-                  <h3 className={`text-lg font-semibold text-white mb-3 flex items-center ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
-                    <TrendingUp className={`${isArabic ? 'ml-2' : 'mr-2'} text-green-400`} size={20} />
+                  <h3 className={`text-lg font-semibold text-purple-800 mb-3 flex items-center ${isArabic ? 'flex-row-reverse justify-end' : ''}`}>
+                    <TrendingUp className={`${isArabic ? 'ml-2' : 'mr-2'} text-green-600`} size={20} />
                     {t('competitiveHistory.peakPerformance')}
                   </h3>
                   <div className="space-y-4">
