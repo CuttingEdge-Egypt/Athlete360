@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import { AnalysisPopup } from "./analysis-popup";
 import { 
   User, Trophy, Star, AlertTriangle, Calendar, Apple, 
-  LayoutDashboard, Video, Loader2, Coins, BarChart3, HelpCircle, Eye 
+  ClipboardList, Video, Loader2, Coins, BarChart3, HelpCircle, Eye 
 } from "lucide-react";
 import type { Athlete, User as UserType } from "@shared/schema";
 
@@ -35,7 +35,7 @@ const iconMap = {
   "exclamation-triangle": AlertTriangle,
   "calendar-alt": Calendar,
   "apple-alt": Apple,
-  "chess": LayoutDashboard,
+  "chess": ClipboardList,
   "video": Video,
   "bar-chart": BarChart3,
 };
