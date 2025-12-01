@@ -1842,62 +1842,36 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               {/* Current Ranking Comparison - Improved Spacing */}
                               {parsedData.ranking.comparison && (
                                 <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-300 rounded-xl p-5">
-                                  <h5 className={`font-semibold text-blue-700 mb-4 text-lg flex items-center gap-2 ${isComparisonArabic ? 'flex-row-reverse text-right' : ''}`}>
-                                    <Trophy className="h-5 w-5 text-blue-600" />
+                                  <h5 className={`font-semibold text-blue-700 mb-4 text-lg ${isComparisonArabic ? 'text-right' : ''}`}>
                                     {t('analysis.comparison.currentRankingComparison', 'Current Ranking Comparison')}
                                   </h5>
-                                  <div className={`text-gray-700 text-base leading-relaxed space-y-2 ${isComparisonArabic ? 'text-right' : ''}`}>
-                                    {parsedData.ranking.comparison.split(/[.!?]+/).filter((s: string) => s.trim()).map((sentence: string, idx: number) => (
-                                      <div key={idx} className={`flex items-start gap-2 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
-                                        <span className="text-blue-500 mt-1">•</span>
-                                        <span>{sentence.trim()}.</span>
-                                      </div>
-                                    ))}
-                                  </div>
+                                  <p className={`text-gray-700 text-base leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>
+                                    {parsedData.ranking.comparison}
+                                  </p>
                                 </div>
                               )}
 
                               {/* Trajectory - Improved Spacing */}
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {parsedData.ranking.athlete1Trajectory && (
-                                  <div className="bg-white border border-blue-200 rounded-xl overflow-hidden shadow-sm">
-                                    <div className="bg-blue-600 px-4 py-3">
-                                      <h5 className={`font-semibold text-white text-base flex items-center gap-2 ${isComparisonArabic ? 'flex-row-reverse text-right' : ''}`}>
-                                        <TrendingUp className="h-4 w-4" />
-                                        {parsedData.athlete1?.name} {t('analysis.comparison.trajectory', 'Trajectory')}
-                                      </h5>
-                                    </div>
-                                    <div className="p-4">
-                                      <div className={`text-gray-700 text-sm leading-relaxed space-y-2 ${isComparisonArabic ? 'text-right' : ''}`}>
-                                        {parsedData.ranking.athlete1Trajectory.split(/[.!?]+/).filter((s: string) => s.trim()).slice(0, 5).map((sentence: string, idx: number) => (
-                                          <div key={idx} className={`flex items-start gap-2 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
-                                            <span className="text-blue-500 mt-0.5 text-xs">▸</span>
-                                            <span>{sentence.trim()}.</span>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </div>
+                                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-300 rounded-xl p-5">
+                                    <h5 className={`font-semibold text-green-700 mb-4 text-base ${isComparisonArabic ? 'text-right' : ''}`}>
+                                      {parsedData.athlete1?.name} {t('analysis.comparison.trajectory', 'Trajectory')}
+                                    </h5>
+                                    <p className={`text-gray-700 text-sm leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>
+                                      {parsedData.ranking.athlete1Trajectory}
+                                    </p>
                                   </div>
                                 )}
 
                                 {parsedData.ranking.athlete2Trajectory && (
-                                  <div className="bg-white border border-teal-200 rounded-xl overflow-hidden shadow-sm">
-                                    <div className="bg-teal-600 px-4 py-3">
-                                      <h5 className={`font-semibold text-white text-base flex items-center gap-2 ${isComparisonArabic ? 'flex-row-reverse text-right' : ''}`}>
-                                        <TrendingUp className="h-4 w-4" />
-                                        {parsedData.athlete2?.name} {t('analysis.comparison.trajectory', 'Trajectory')}
-                                      </h5>
-                                    </div>
-                                    <div className="p-4">
-                                      <div className={`text-gray-700 text-sm leading-relaxed space-y-2 ${isComparisonArabic ? 'text-right' : ''}`}>
-                                        {parsedData.ranking.athlete2Trajectory.split(/[.!?]+/).filter((s: string) => s.trim()).slice(0, 5).map((sentence: string, idx: number) => (
-                                          <div key={idx} className={`flex items-start gap-2 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
-                                            <span className="text-teal-500 mt-0.5 text-xs">▸</span>
-                                            <span>{sentence.trim()}.</span>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </div>
+                                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-300 rounded-xl p-5">
+                                    <h5 className={`font-semibold text-green-700 mb-4 text-base ${isComparisonArabic ? 'text-right' : ''}`}>
+                                      {parsedData.athlete2?.name} {t('analysis.comparison.trajectory', 'Trajectory')}
+                                    </h5>
+                                    <p className={`text-gray-700 text-sm leading-relaxed ${isComparisonArabic ? 'text-right' : ''}`}>
+                                      {parsedData.ranking.athlete2Trajectory}
+                                    </p>
                                   </div>
                                 )}
                               </div>
@@ -2080,11 +2054,11 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                 return (
                                   <div className="space-y-6">
                                     <div className={`flex items-center gap-3 ${isComparisonArabic ? 'flex-row-reverse' : ''}`}>
-                                      <div className="h-1 w-12 bg-gradient-to-r from-amber-600 to-amber-700 rounded-full"></div>
-                                      <h5 className={`font-bold text-amber-700 text-xl tracking-tight ${isComparisonArabic ? 'text-right' : ''}`}>
+                                      <div className="h-1 w-12 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full"></div>
+                                      <h5 className={`font-bold text-yellow-300 text-xl tracking-tight ${isComparisonArabic ? 'text-right' : ''}`}>
                                         {t('analysis.comparison.competitiveHistoryDetails', 'Competitive History Details')}
                                       </h5>
-                                      <div className="h-1 flex-1 bg-gradient-to-r from-amber-600/50 to-transparent rounded-full"></div>
+                                      <div className="h-1 flex-1 bg-gradient-to-r from-amber-500/50 to-transparent rounded-full"></div>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                       {parsedData.athlete1?.competitiveHistory && renderCompetitiveHistoryPanel(parsedData.athlete1, parsedData.athlete1?.name || 'Athlete 1', 'blue')}
