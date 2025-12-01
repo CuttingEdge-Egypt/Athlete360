@@ -54,13 +54,13 @@ export function ProgressBar({ isActive, currentPhase, onCancel, className = "" }
   if (!isActive) return null;
 
   return (
-    <div className={`bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-300 p-6 ${className}`} dir={isArabic ? 'rtl' : 'ltr'}>
+    <div className={`bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200 p-6 shadow-sm ${className}`} dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="space-y-4">
         {/* Header with cancel button */}
         <div className="flex items-center justify-between">
           <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
-            <Loader2 className="h-5 w-5 text-purple-400 animate-spin" />
-            <h3 className="text-lg font-semibold text-white">
+            <Loader2 className="h-5 w-5 text-purple-500 animate-spin" />
+            <h3 className="text-lg font-semibold text-gray-800">
               {t('analysis.comparison.generatingComparison')}
             </h3>
           </div>
@@ -69,7 +69,7 @@ export function ProgressBar({ isActive, currentPhase, onCancel, className = "" }
               onClick={onCancel}
               variant="destructive"
               size="sm"
-              className={`bg-red-600 hover:bg-red-700 text-white font-medium ${isArabic ? 'flex-row-reverse' : ''}`}
+              className={`bg-red-500 hover:bg-red-600 text-white font-medium ${isArabic ? 'flex-row-reverse' : ''}`}
               data-testid="button-cancel-comparison"
             >
               <X className={`h-4 w-4 ${isArabic ? 'ml-1' : 'mr-1'}`} />
@@ -80,7 +80,7 @@ export function ProgressBar({ isActive, currentPhase, onCancel, className = "" }
 
         {/* Progress bar */}
         <div className="space-y-3">
-          <div className="relative h-3 bg-gray-700 border border rounded-full overflow-hidden">
+          <div className="relative h-3 bg-gray-200 border border-gray-300 rounded-full overflow-hidden">
             <div 
               className="absolute top-0 h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300"
               style={isArabic ? { 
@@ -94,17 +94,17 @@ export function ProgressBar({ isActive, currentPhase, onCancel, className = "" }
             />
           </div>
           <div className="flex items-center justify-between text-sm">
-            <p className="text-foreground font-medium">
+            <p className="text-gray-700 font-medium">
               {currentPhase?.message || t('analysis.comparison.initializing')}
             </p>
-            <p className="text-purple-300 font-bold text-base">
+            <p className="text-purple-600 font-bold text-base">
               {isArabic ? `${toArabicNumerals(Math.round(displayProgress))}٪` : `${Math.round(displayProgress)}%`}
             </p>
           </div>
         </div>
 
         {/* Helpful info */}
-        <p className={`text-xs text-muted-foreground ${isArabic ? 'text-right' : ''}`}>
+        <p className={`text-xs text-gray-500 ${isArabic ? 'text-right' : ''}`}>
           {t('analysis.comparison.mayTakeTime')}
         </p>
       </div>
