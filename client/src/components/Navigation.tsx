@@ -86,11 +86,7 @@ export function Navigation() {
             <Button 
               data-testid="button-video-analysis"
               variant="ghost"
-              className="bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 text-white font-semibold hover:shadow-xl transition-all duration-300 whitespace-nowrap h-11"
-              style={{
-                backgroundSize: '200% 200%',
-                animation: 'gradientShift 3s ease infinite'
-              }}
+              className="bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 text-white font-semibold hover:opacity-90 hover:scale-[1.02] transition-all duration-200 whitespace-nowrap h-11"
               onClick={handleVideoAnalysis}
             >
               <Video className={isArabic ? 'ml-2' : 'mr-2'} size={16} />
@@ -100,7 +96,7 @@ export function Navigation() {
             <Link href="/payment-center">
               <Button 
                 data-testid="button-payment-center"
-                className="bg-primary hover:bg-teal-600 text-white whitespace-nowrap h-11"
+                className="bg-primary text-white whitespace-nowrap h-11 hover:opacity-90 hover:scale-[1.02] transition-all duration-200"
               >
                 <Plus className={isArabic ? 'ml-2' : 'mr-2'} size={16} />
                 {t('menu.buyTokens')}
