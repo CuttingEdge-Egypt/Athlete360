@@ -426,7 +426,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         <div className="mt-auto space-y-2">
           <Button 
             data-testid={`button-${service.id}`}
-            className="w-full bg-primary hover:bg-teal-600 text-white transition-colors min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-primary hover:bg-teal-500 text-white min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-lg hover:shadow-primary/30 transform hover:-translate-y-0.5 transition-all duration-300 ease-out"
             disabled={analysisMutation.isPending || isProcessing || service.id === 'statistics'}
             onClick={(e) => {
               e.stopPropagation();
@@ -465,7 +465,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
             <Button
               data-testid={`button-preview-history-${service.id}`}
               variant="outline"
-              className="w-full border text-muted-foreground hover:bg-muted hover:text-foreground min-h-[44px]"
+              className="w-full border border-gray-200 text-muted-foreground hover:bg-gray-50 hover:text-foreground hover:border-primary/40 min-h-[44px] shadow-sm hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-300 ease-out"
               onClick={handleHistoryPreview}
             >
               <Eye className="mr-2" size={16} />
