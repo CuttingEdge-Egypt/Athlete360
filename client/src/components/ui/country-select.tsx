@@ -43,7 +43,7 @@ export function CountrySelect({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full justify-between bg-muted border text-white hover:bg-slate-100",
+            "w-full justify-between bg-muted border text-foreground hover:bg-slate-100",
             className
           )}
           data-testid={testId}
@@ -58,7 +58,7 @@ export function CountrySelect({
         <Command className="bg-muted">
           <CommandInput
             placeholder="Search countries..."
-            className="h-9 text-white placeholder:text-muted-foreground"
+            className="h-9 text-foreground placeholder:text-muted-foreground"
           />
           <CommandList>
             <CommandEmpty className="text-foreground py-2 text-center text-sm">
@@ -71,7 +71,7 @@ export function CountrySelect({
                   onValueChange("all");
                   setOpen(false);
                 }}
-                className="text-white hover:bg-slate-100"
+                className="text-foreground hover:bg-slate-100"
               >
                 <Check
                   className={cn(
@@ -89,7 +89,7 @@ export function CountrySelect({
                     onValueChange(currentValue === value ? "" : currentValue);
                     setOpen(false);
                   }}
-                  className="text-white hover:bg-slate-100"
+                  className="text-foreground hover:bg-slate-100"
                 >
                   <Check
                     className={cn(
