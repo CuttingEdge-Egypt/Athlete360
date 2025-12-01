@@ -753,31 +753,31 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       variant="outline"
                       role="combobox"
                       aria-expanded={openSportPopover}
-                      className={`w-full justify-between bg-slate-100 border-slate-200 hover:bg-slate-100 text-foreground ${isArabic ? 'flex-row-reverse' : ''}`}
+                      className={`w-full justify-between bg-white border-gray-300 hover:bg-gray-50 text-gray-800 ${isArabic ? 'flex-row-reverse' : ''}`}
                       data-testid="select-sport"
                     >
-                      <span className={`${!selectedSport && 'text-muted-foreground'}`}>
+                      <span className={`${!selectedSport && 'text-gray-500'}`}>
                         {selectedSportObject?.name || t("analysis.comparison.selectSport", "Select sport...")}
                       </span>
-                      <ChevronDown className={`h-4 w-4 shrink-0 opacity-50 ${isArabic ? 'mr-2' : 'ml-2'}`} />
+                      <ChevronDown className={`h-4 w-4 shrink-0 text-gray-500 ${isArabic ? 'mr-2' : 'ml-2'}`} />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[400px] p-0 bg-slate-100 border-slate-200" align={isArabic ? "end" : "start"}>
-                    <div className="p-2">
+                  <PopoverContent className="w-[400px] p-0 bg-white border-gray-200 shadow-lg" align={isArabic ? "end" : "start"}>
+                    <div className="p-2 border-b border-gray-100">
                       <div className="relative">
-                        <Search className={`absolute top-2.5 h-4 w-4 text-muted-foreground ${isArabic ? 'right-2' : 'left-2'}`} />
+                        <Search className={`absolute top-2.5 h-4 w-4 text-gray-400 ${isArabic ? 'right-2' : 'left-2'}`} />
                         <Input
                           placeholder={t("analysis.comparison.searchSports", "Search sports...")}
                           value={searchSport}
                           onChange={(e) => setSearchSport(e.target.value)}
-                          className={`!bg-slate-100 border-gray-400 !text-foreground placeholder:text-muted-foreground ${isArabic ? 'pr-8 text-right' : 'pl-8'}`}
+                          className={`bg-white border-gray-300 text-gray-800 placeholder:text-gray-400 ${isArabic ? 'pr-8 text-right' : 'pl-8'}`}
                           dir={isArabic ? 'rtl' : 'ltr'}
                         />
                       </div>
                     </div>
                     <div className="max-h-64 overflow-y-auto">
                       {filteredSports.length === 0 ? (
-                        <div className={`p-4 text-center text-muted-foreground ${isArabic ? 'text-right' : ''}`}>
+                        <div className={`p-4 text-center text-gray-500 ${isArabic ? 'text-right' : ''}`}>
                           {t("analysis.comparison.noSportsFound", "No sports found")}
                         </div>
                       ) : (
@@ -793,8 +793,8 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               setOpenSportPopover(false);
                               setSearchSport("");
                             }}
-                            className={`w-full px-4 py-2 text-left hover:bg-slate-100 text-foreground transition-colors ${
-                              selectedSport === sport.id ? 'bg-slate-100' : ''
+                            className={`w-full px-4 py-2 text-left hover:bg-gray-100 text-gray-700 transition-colors ${
+                              selectedSport === sport.id ? 'bg-primary/10 text-primary font-medium' : ''
                             } ${isArabic ? 'text-right' : ''}`}
                           >
                             {sport.name}
@@ -815,19 +815,19 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                   onValueChange={setSelectedLanguage}
                   data-testid="select-language"
                 >
-                  <SelectTrigger className="bg-slate-100 border-slate-200" dir={isArabic ? 'rtl' : 'ltr'}>
+                  <SelectTrigger className="bg-white border-gray-300 text-gray-800" dir={isArabic ? 'rtl' : 'ltr'}>
                     <SelectValue placeholder={t("analysis.comparison.selectLanguage", "Select language...")} />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white border-gray-200">
                     <SelectItem value="english">
                       <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                        <Languages className="w-4 h-4" />
+                        <Languages className="w-4 h-4 text-gray-600" />
                         {t("analysis.comparison.english", "English")}
                       </div>
                     </SelectItem>
                     <SelectItem value="arabic">
                       <div className={`flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                        <Languages className="w-4 h-4" />
+                        <Languages className="w-4 h-4 text-gray-600" />
                         {t("analysis.comparison.arabic", "عربي")}
                       </div>
                     </SelectItem>
@@ -839,10 +839,10 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
             {/* Two-Column Athlete Selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
               {/* Athlete 1 Column */}
-              <Card className="bg-slate-100/50 border-slate-200">
+              <Card className="bg-white border-gray-200 shadow-sm">
                 <CardHeader>
-                  <CardTitle className={`text-lg text-foreground flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                    <User className="h-5 w-5 text-blue-400" />
+                  <CardTitle className={`text-lg text-gray-800 flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                    <User className="h-5 w-5 text-blue-500" />
                     {t("analysis.comparison.athlete1", "Athlete 1")}
                   </CardTitle>
                 </CardHeader>
@@ -875,29 +875,29 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           variant="outline"
                           role="combobox"
                           aria-expanded={openAthletePopover1}
-                          className={`w-full justify-between bg-slate-100 border-slate-200 text-foreground hover:bg-slate-100 ${isArabic ? 'flex-row-reverse' : ''}`}
+                          className={`w-full justify-between bg-white border-gray-300 text-gray-800 hover:bg-gray-50 ${isArabic ? 'flex-row-reverse' : ''}`}
                           disabled={!selectedSport}
                           data-testid="select-athlete1"
                         >
                           {selectedAthleteObject1 ? (
                             <span className="truncate">{selectedAthleteObject1.name}</span>
                           ) : (
-                            <span className="text-muted-foreground">
+                            <span className="text-gray-500">
                               {selectedSport ? t("analysis.comparison.selectFirstAthlete", "Select first athlete...") : t("analysis.comparison.selectSportFirst", "Select a sport first")}
                             </span>
                           )}
-                          <ChevronsUpDown className={`h-4 w-4 shrink-0 opacity-50 ${isArabic ? 'mr-2' : 'ml-2'}`} />
+                          <ChevronsUpDown className={`h-4 w-4 shrink-0 text-gray-500 ${isArabic ? 'mr-2' : 'ml-2'}`} />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-[400px] p-0 bg-slate-100 border-slate-200" align="start">
-                        <div className="p-3 border-b border-slate-200">
+                      <PopoverContent className="w-[400px] p-0 bg-white border-gray-200 shadow-lg" align="start">
+                        <div className="p-3 border-b border-gray-100">
                           <div className="relative">
-                            <Search className={`absolute top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 ${isArabic ? 'right-3' : 'left-3'}`} />
+                            <Search className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 ${isArabic ? 'right-3' : 'left-3'}`} />
                             <Input
                               placeholder={t("analysis.comparison.searchAthletes", "Search athletes...")}
                               value={searchAthlete1}
                               onChange={(e) => setSearchAthlete1(e.target.value)}
-                              className={`!bg-slate-100 border-slate-300 !text-foreground placeholder:text-muted-foreground focus:!bg-slate-100 focus:border-slate-400 ${isArabic ? 'pr-9' : 'pl-9'}`}
+                              className={`bg-white border-gray-300 text-gray-800 placeholder:text-gray-400 ${isArabic ? 'pr-9' : 'pl-9'}`}
                               data-testid="input-athlete1-search"
                               dir={isArabic ? 'rtl' : 'ltr'}
                             />
@@ -912,12 +912,12 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                     <HelpCircle className="w-4 h-4" />
                                     {t("analysis.comparison.noAthletesFound", "No athletes found")}
                                   </div>
-                                  <div className="text-sm text-muted-foreground">
+                                  <div className="text-sm text-gray-500">
                                     {t("analysis.comparison.addAthleteHint", "Search for this athlete in the Athlete Analysis tab first to add them to our database.")}
                                   </div>
                                 </div>
                               ) : (
-                                <div className="text-muted-foreground">
+                                <div className="text-gray-500">
                                   {t("analysis.comparison.noAthletesAvailable", "No athletes available")}
                                 </div>
                               )}
@@ -927,20 +927,20 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               <Button
                                 key={athlete.id}
                                 variant="ghost"
-                                className={`w-full justify-start text-left hover:bg-slate-100 h-auto py-3 px-3 ${isArabic ? 'flex-row-reverse' : ''}`}
+                                className={`w-full justify-start text-left hover:bg-gray-100 h-auto py-3 px-3 ${isArabic ? 'flex-row-reverse' : ''}`}
                                 onClick={() => {
                                   setSelectedAthlete1(athlete.id);
                                   setOpenAthletePopover1(false);
                                   setSearchAthlete1("");
                                 }}
                               >
-                                <Check className={`h-4 w-4 flex-shrink-0 ${selectedAthlete1 === athlete.id ? 'opacity-100' : 'opacity-0'} ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                                <Check className={`h-4 w-4 flex-shrink-0 text-primary ${selectedAthlete1 === athlete.id ? 'opacity-100' : 'opacity-0'} ${isArabic ? 'ml-2' : 'mr-2'}`} />
                                 <div className="flex-1 min-w-0 space-y-1">
-                                  <div className="text-foreground font-medium truncate">{athlete.name}</div>
+                                  <div className="text-gray-800 font-medium truncate">{athlete.name}</div>
                                   {athlete.nameArabic && (
-                                    <div className="text-muted-foreground text-sm truncate">{athlete.nameArabic}</div>
+                                    <div className="text-gray-500 text-sm truncate">{athlete.nameArabic}</div>
                                   )}
-                                  <div className="text-xs text-muted-foreground truncate">
+                                  <div className="text-xs text-gray-500 truncate">
                                     {athlete.country && `${athlete.country}`}
                                     {athlete.rank && ` • #${athlete.rank}`}
                                   </div>
@@ -1026,10 +1026,10 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
               </Card>
 
               {/* Athlete 2 Column */}
-              <Card className="bg-slate-100/50 border-slate-200">
+              <Card className="bg-white border-gray-200 shadow-sm">
                 <CardHeader>
-                  <CardTitle className={`text-lg text-foreground flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                    <User className="h-5 w-5 text-purple-400" />
+                  <CardTitle className={`text-lg text-gray-800 flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                    <User className="h-5 w-5 text-purple-500" />
                     {t("analysis.comparison.athlete2", "Athlete 2")}
                   </CardTitle>
                 </CardHeader>
@@ -1062,29 +1062,29 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                           variant="outline"
                           role="combobox"
                           aria-expanded={openAthletePopover2}
-                          className={`w-full justify-between bg-slate-100 border-slate-200 text-foreground hover:bg-slate-100 ${isArabic ? 'flex-row-reverse' : ''}`}
+                          className={`w-full justify-between bg-white border-gray-300 text-gray-800 hover:bg-gray-50 ${isArabic ? 'flex-row-reverse' : ''}`}
                           disabled={!selectedSport}
                           data-testid="select-athlete2"
                         >
                           {selectedAthleteObject2 ? (
                             <span className="truncate">{selectedAthleteObject2.name}</span>
                           ) : (
-                            <span className="text-muted-foreground">
+                            <span className="text-gray-500">
                               {selectedSport ? t("analysis.comparison.selectSecondAthlete", "Select second athlete...") : t("analysis.comparison.selectSportFirst", "Select a sport first")}
                             </span>
                           )}
-                          <ChevronsUpDown className={`h-4 w-4 shrink-0 opacity-50 ${isArabic ? 'mr-2' : 'ml-2'}`} />
+                          <ChevronsUpDown className={`h-4 w-4 shrink-0 text-gray-500 ${isArabic ? 'mr-2' : 'ml-2'}`} />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-[400px] p-0 bg-slate-100 border-slate-200" align="start">
-                        <div className="p-3 border-b border-slate-200">
+                      <PopoverContent className="w-[400px] p-0 bg-white border-gray-200 shadow-lg" align="start">
+                        <div className="p-3 border-b border-gray-100">
                           <div className="relative">
-                            <Search className={`absolute top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 ${isArabic ? 'right-3' : 'left-3'}`} />
+                            <Search className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 ${isArabic ? 'right-3' : 'left-3'}`} />
                             <Input
                               placeholder={t("analysis.comparison.searchAthletes", "Search athletes...")}
                               value={searchAthlete2}
                               onChange={(e) => setSearchAthlete2(e.target.value)}
-                              className={`!bg-slate-100 border-slate-300 !text-foreground placeholder:text-muted-foreground focus:!bg-slate-100 focus:border-slate-400 ${isArabic ? 'pr-9' : 'pl-9'}`}
+                              className={`bg-white border-gray-300 text-gray-800 placeholder:text-gray-400 ${isArabic ? 'pr-9' : 'pl-9'}`}
                               data-testid="input-athlete2-search"
                               dir={isArabic ? 'rtl' : 'ltr'}
                             />
@@ -1099,12 +1099,12 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                     <HelpCircle className="w-4 h-4" />
                                     {t("analysis.comparison.noAthletesFound", "No athletes found")}
                                   </div>
-                                  <div className="text-sm text-muted-foreground">
+                                  <div className="text-sm text-gray-500">
                                     {t("analysis.comparison.addAthleteHint", "Search for this athlete in the Athlete Analysis tab first to add them to our database.")}
                                   </div>
                                 </div>
                               ) : (
-                                <div className="text-muted-foreground">
+                                <div className="text-gray-500">
                                   {t("analysis.comparison.noAthletesAvailable", "No athletes available")}
                                 </div>
                               )}
@@ -1114,20 +1114,20 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               <Button
                                 key={athlete.id}
                                 variant="ghost"
-                                className={`w-full justify-start text-left hover:bg-slate-100 h-auto py-3 px-3 ${isArabic ? 'flex-row-reverse' : ''}`}
+                                className={`w-full justify-start text-left hover:bg-gray-100 h-auto py-3 px-3 ${isArabic ? 'flex-row-reverse' : ''}`}
                                 onClick={() => {
                                   setSelectedAthlete2(athlete.id);
                                   setOpenAthletePopover2(false);
                                   setSearchAthlete2("");
                                 }}
                               >
-                                <Check className={`h-4 w-4 flex-shrink-0 ${selectedAthlete2 === athlete.id ? 'opacity-100' : 'opacity-0'} ${isArabic ? 'ml-2' : 'mr-2'}`} />
+                                <Check className={`h-4 w-4 flex-shrink-0 text-primary ${selectedAthlete2 === athlete.id ? 'opacity-100' : 'opacity-0'} ${isArabic ? 'ml-2' : 'mr-2'}`} />
                                 <div className="flex-1 min-w-0 space-y-1">
-                                  <div className="text-foreground font-medium truncate">{athlete.name}</div>
+                                  <div className="text-gray-800 font-medium truncate">{athlete.name}</div>
                                   {athlete.nameArabic && (
-                                    <div className="text-muted-foreground text-sm truncate">{athlete.nameArabic}</div>
+                                    <div className="text-gray-500 text-sm truncate">{athlete.nameArabic}</div>
                                   )}
-                                  <div className="text-xs text-muted-foreground truncate">
+                                  <div className="text-xs text-gray-500 truncate">
                                     {athlete.country && `${athlete.country}`}
                                     {athlete.rank && ` • #${athlete.rank}`}
                                   </div>
