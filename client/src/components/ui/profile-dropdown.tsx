@@ -84,7 +84,7 @@ export function ProfileDropdown({ customTrigger }: ProfileDropdownProps = {}) {
         {customTrigger || (
           <Button 
             variant="ghost" 
-            className="relative h-8 w-8 rounded-full p-0 hover:bg-primary hover:ring-2 hover:ring-primary transition-all"
+            className="relative h-8 w-8 rounded-full p-0 text-foreground hover:text-white hover:bg-primary transition-all group"
             data-testid="profile-dropdown-trigger"
           >
             {user?.profileImageUrl ? (
@@ -94,7 +94,7 @@ export function ProfileDropdown({ customTrigger }: ProfileDropdownProps = {}) {
                 className="h-8 w-8 rounded-full object-cover"
               />
             ) : (
-              <UserIcon className="h-4 w-4 text-foreground hover:text-white" />
+              <UserIcon className="h-4 w-4" />
             )}
           </Button>
         )}
