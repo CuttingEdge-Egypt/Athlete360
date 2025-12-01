@@ -780,8 +780,8 @@ export function AnalysisPopup({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="prose prose-invert max-w-none">
-                <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+              <div className="prose max-w-none">
+                <p className="text-foreground leading-relaxed whitespace-pre-line">
                   {analysisNarrative}
                 </p>
               </div>
@@ -1245,7 +1245,7 @@ export function AnalysisPopup({
                 <User className="mr-4 text-emerald-400" size={32} />
                 Biography
               </h3>
-              <div className="prose prose-invert max-w-none">
+              <div className="prose max-w-none">
                 <p className="text-foreground leading-relaxed text-lg">
                   {bio || t("analysis.bio.noData", "No biography data available.")}
                 </p>
@@ -1261,7 +1261,7 @@ export function AnalysisPopup({
                   <Star className="mr-4 text-cyan-400" size={32} />
                   {t("common:analysis.bio.playersStory", "Player's Story")}
                 </h3>
-                <div className="prose prose-invert max-w-none">
+                <div className="prose max-w-none">
                   <p className="text-foreground leading-relaxed text-lg">{playersStory}</p>
                 </div>
               </CardContent>
@@ -1443,7 +1443,7 @@ export function AnalysisPopup({
                 <User className="mr-4 text-emerald-400" size={32} />
                 {t("common:analysis.bio.introduction", "Introduction")}
               </h3>
-              <div className="prose prose-invert max-w-none space-y-5" dir={(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'rtl' : 'ltr'}>
+              <div className="prose max-w-none space-y-5 [&_strong]:text-foreground [&_strong]:font-semibold" dir={(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'rtl' : 'ltr'}>
                 {bioSections.introduction.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => {
                   const trimmedPara = paragraph.trim();
                   
@@ -1527,7 +1527,7 @@ export function AnalysisPopup({
                 <Star className="mr-4 text-cyan-400" size={32} />
                 {t("common:analysis.bio.playersStory", "Player's Story")}
               </h3>
-              <div className="prose prose-invert max-w-none space-y-5" dir={(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'rtl' : 'ltr'}>
+              <div className="prose max-w-none space-y-5 [&_strong]:text-foreground [&_strong]:font-semibold" dir={(data?.language === 'ar' || data?.generationLanguage === 'ar') ? 'rtl' : 'ltr'}>
                 {(playersStory || bioSections.overallStory).split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => (
                   <p 
                     key={index} 
@@ -1549,7 +1549,7 @@ export function AnalysisPopup({
                 <Trophy className="mr-4 text-orange-400" size={32} />
                 Career Record and Rankings
               </h3>
-              <div className="prose prose-invert max-w-none space-y-5">
+              <div className="prose max-w-none space-y-5 [&_strong]:text-foreground [&_strong]:font-semibold">
                 {bioSections.careerRecord.split(/\n\n|\n/).filter((para: string) => para.trim()).map((paragraph: string, index: number) => (
                   <p 
                     key={index} 
@@ -2443,9 +2443,9 @@ export function AnalysisPopup({
                   <User className="mr-3" size={24} />
                   {t("analysis.comparison.overviewTitle", "Comparison Overview")}
                 </h3>
-                <div className="prose prose-invert max-w-none">
+                <div className="prose max-w-none">
                   <div 
-                    className="whitespace-pre-wrap text-muted-foreground leading-relaxed"
+                    className="whitespace-pre-wrap text-foreground leading-relaxed [&_strong]:text-foreground [&_strong]:font-semibold"
                     dangerouslySetInnerHTML={{ __html: normalizedComparison.tabs.overview }}
                   />
                 </div>
@@ -2461,9 +2461,9 @@ export function AnalysisPopup({
                   <Star className="mr-3" size={24} />
                   {t("analysis.comparison.strengthsTitle", "Strengths Analysis")}
                 </h3>
-                <div className="prose prose-invert max-w-none">
+                <div className="prose max-w-none">
                   <div 
-                    className="whitespace-pre-wrap text-muted-foreground leading-relaxed"
+                    className="whitespace-pre-wrap text-foreground leading-relaxed [&_strong]:text-foreground [&_strong]:font-semibold"
                     dangerouslySetInnerHTML={{ __html: normalizedComparison.tabs.strengths }}
                   />
                 </div>
@@ -2479,9 +2479,9 @@ export function AnalysisPopup({
                   <AlertTriangle className="mr-3" size={24} />
                   {isArabicComparison ? "مجالات التحسين" : t("analysis.weaknesses.title", "Areas for Improvement")}
                 </h3>
-                <div className="prose prose-invert max-w-none">
+                <div className="prose max-w-none">
                   <div 
-                    className="whitespace-pre-wrap text-muted-foreground leading-relaxed"
+                    className="whitespace-pre-wrap text-foreground leading-relaxed [&_strong]:text-foreground [&_strong]:font-semibold"
                     dangerouslySetInnerHTML={{ __html: normalizedComparison.tabs.weaknesses }}
                   />
                 </div>
@@ -2497,9 +2497,9 @@ export function AnalysisPopup({
                   <Brain className="mr-3" size={24} />
                   {t("analysis.comparison.detailsTitle", "Technical Details & Analysis")}
                 </h3>
-                <div className="prose prose-invert max-w-none">
+                <div className="prose max-w-none">
                   <div 
-                    className="whitespace-pre-wrap text-muted-foreground leading-relaxed"
+                    className="whitespace-pre-wrap text-foreground leading-relaxed [&_strong]:text-foreground [&_strong]:font-semibold"
                     dangerouslySetInnerHTML={{ __html: normalizedComparison.tabs.details }}
                   />
                 </div>
@@ -2515,9 +2515,9 @@ export function AnalysisPopup({
                   <Target className="mr-3" size={24} />
                   {t("analysis.comparison.headToHeadTitle", "Head-to-Head Analysis")}
                 </h3>
-                <div className="prose prose-invert max-w-none">
+                <div className="prose max-w-none">
                   <div 
-                    className="whitespace-pre-wrap text-muted-foreground leading-relaxed"
+                    className="whitespace-pre-wrap text-foreground leading-relaxed [&_strong]:text-foreground [&_strong]:font-semibold"
                     dangerouslySetInnerHTML={{ __html: normalizedComparison.tabs.headToHead }}
                   />
                 </div>
