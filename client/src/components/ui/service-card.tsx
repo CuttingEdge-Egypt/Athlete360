@@ -14,6 +14,7 @@ import {
   Swords, Video, Loader2, Coins, BarChart3, HelpCircle, Eye 
 } from "lucide-react";
 import type { Athlete, User as UserType } from "@shared/schema";
+import tacticalIcon from "@assets/Tactical Advantages_1764561462590.png";
 
 interface ServiceCardProps {
   service: {
@@ -402,7 +403,11 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
           </div>
           {/* Bottom row: icon and token badge horizontally aligned */}
           <div className="flex justify-between items-center">
-            <IconComponent className={`text-2xl ${service.color}`} size={32} />
+            {service.icon === "chess" ? (
+              <img src={tacticalIcon} alt="Tactical Advantages" className="w-8 h-8 object-contain" />
+            ) : (
+              <IconComponent className={`text-2xl ${service.color}`} size={32} />
+            )}
             <span className="bg-amber-400 text-black text-xs px-2 py-1 rounded-full font-semibold">
               {service.cost} {t('units.tokens', { ns: 'common' })}
             </span>
