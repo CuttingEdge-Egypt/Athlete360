@@ -261,30 +261,30 @@ export function HistoryDropdown({ customTrigger }: HistoryDropdownProps = {}) {
                     key={item.id}
                     onClick={() => handleHistoryItemClick(item)}
                     data-testid={`history-item-${item.id}`}
-                    className="flex flex-col items-start gap-2 p-3 cursor-pointer hover:bg-accent"
+                    className="group flex flex-col items-start gap-2 p-3 cursor-pointer hover:bg-primary"
                   >
                     <div className="flex items-center gap-2 w-full">
-                      <ServiceIcon className="h-4 w-4 text-primary" />
+                      <ServiceIcon className="h-4 w-4 text-primary group-hover:text-white" />
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm truncate">
+                        <div className="font-medium text-sm truncate text-foreground group-hover:text-white">
                           {serviceLabel}
                         </div>
                         {item.serviceType === 'comparison' ? (
-                          <div className="text-xs text-muted-foreground truncate">
+                          <div className="text-xs text-muted-foreground group-hover:text-white/80 truncate">
                             {item.resultData?.athlete1?.name || 'Athlete 1'} vs {item.resultData?.athlete2?.name || 'Athlete 2'}
                           </div>
                         ) : item.athleteName && (
-                          <div className="text-xs text-muted-foreground truncate">
+                          <div className="text-xs text-muted-foreground group-hover:text-white/80 truncate">
                             {item.athleteName} ({item.athleteSport})
                           </div>
                         )}
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover:text-white/80">
                         <Coins className="h-3 w-3" />
                         {item.tokensDeducted < 0 ? `+${formatNumber(Math.abs(item.tokensDeducted), isArabic)}` : formatNumber(item.tokensDeducted, isArabic)}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground w-full">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground group-hover:text-white/80 w-full">
                       <Clock className="h-3 w-3" />
                       {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}
                     </div>
