@@ -258,7 +258,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
     <div className="w-full space-y-6">
 
       {/* Consolidated Navigation Header */}
-      <Card className="w-full bg-gradient-to-r from-card to-slate-700 border-border">
+      <Card className="w-full bg-gradient-to-r from-white to-slate-50 border-slate-200 shadow-sm">
         <CardHeader dir={isArabic ? 'rtl' : 'ltr'}>
           <CardTitle className={`flex items-center justify-between text-foreground ${isArabic ? 'flex-row-reverse' : ''}`}>
             {/* For Arabic: days info on left, title on right. For English: title on left, days info on right */}
@@ -336,7 +336,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                       className={`w-10 h-10 rounded-lg transition-all duration-200 flex items-center justify-center font-bold border-2 ${
                         weekIndex === currentWeek
                           ? 'bg-green-500 text-white border-green-400 scale-110 shadow-lg'
-                          : 'bg-slate-700 text-slate-200 border-slate-600 hover:bg-slate-600'
+                          : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
                       }`}
                       title={`Week ${weekIndex + 1}`}
                       data-testid={`week-${weekIndex}`}
@@ -406,7 +406,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                         className={`w-10 h-10 rounded-lg transition-all duration-200 flex items-center justify-center font-bold border-2 flex-shrink-0 ${
                           dayIndex === safCurrentDay
                             ? 'bg-green-500 text-white border-green-400 scale-110 shadow-lg'
-                            : 'bg-slate-700 text-slate-200 border-slate-600 hover:bg-slate-600'
+                            : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
                         }`}
                         title={`${day.day.name}`}
                         data-testid={`day-${dayIndex}`}
@@ -437,7 +437,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
               {currentDayData.meals.map((meal, mealIndex) => (
                 <div 
                   key={mealIndex} 
-                  className="bg-gradient-to-br from-slate-700 to-slate-600 border border-slate-500 rounded-xl p-4 hover:shadow-xl transition-all duration-300 hover:border-green-400"
+                  className="bg-gradient-to-br from-white to-slate-50 border border-slate-200 rounded-xl p-4 hover:shadow-xl transition-all duration-300 hover:border-green-400"
                 >
                   {/* Meal Header */}
                   <div className={`mb-3 ${isArabic ? 'text-right' : 'text-left'}`}>
@@ -457,7 +457,7 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                     {meal.meal_description.map((item, itemIndex) => (
                       <div 
                         key={itemIndex} 
-                        className={`bg-slate-800/50 text-slate-100 p-2.5 rounded-lg border border-slate-600 text-base ${
+                        className={`bg-slate-50 text-slate-700 p-2.5 rounded-lg border border-slate-200 text-base ${
                           isArabic ? 'text-right' : 'text-left'
                         }`}
                         dir={isArabic ? 'rtl' : 'ltr'}
@@ -472,14 +472,14 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
 
             {/* Daily Explanation */}
             {currentDayData.explanation && (
-              <div className={`p-4 md:p-6 bg-gradient-to-r from-blue-900/30 to-blue-800/20 rounded-xl border-blue-400 ${isArabic ? 'border-r-4' : 'border-l-4'}`} dir={isArabic ? 'rtl' : 'ltr'}>
+              <div className={`p-4 md:p-6 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border-blue-400 ${isArabic ? 'border-r-4' : 'border-l-4'}`} dir={isArabic ? 'rtl' : 'ltr'}>
                 <div className={`flex items-start gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
-                  <Target className="h-6 w-6 text-blue-400 mt-1 flex-shrink-0" />
+                  <Target className="h-6 w-6 text-blue-500 mt-1 flex-shrink-0" />
                   <div className={isArabic ? 'text-right' : ''}>
-                    <h4 className="font-bold text-lg text-blue-300 mb-2">
+                    <h4 className="font-bold text-lg text-blue-600 mb-2">
                       {t('analysis.nutrition.dailyFocus', 'Daily Focus')}
                     </h4>
-                    <p className={`text-slate-200 leading-relaxed ${isArabic ? 'text-base' : ''}`}>
+                    <p className={`text-slate-700 leading-relaxed ${isArabic ? 'text-base' : ''}`}>
                       {currentDayData.explanation}
                     </p>
                   </div>
@@ -493,10 +493,10 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                 <div className={`flex items-start gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                   <Target className="h-6 w-6 text-purple-400 mt-1 flex-shrink-0" />
                   <div className={isArabic ? 'text-right' : ''}>
-                    <h4 className="font-bold text-lg text-purple-300 mb-2">
+                    <h4 className="font-bold text-lg text-purple-600 mb-2">
                       {t('analysis.nutrition.personalizedInstructions', 'Personalized Instructions')}
                     </h4>
-                    <div className={`text-slate-200 leading-relaxed whitespace-pre-wrap ${isArabic ? 'text-base' : ''}`}>
+                    <div className={`text-slate-700 leading-relaxed whitespace-pre-wrap ${isArabic ? 'text-base' : ''}`}>
                       {nutritionData.instructions}
                     </div>
                   </div>
@@ -523,20 +523,20 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
               </div>
               <div className="text-sm text-muted-foreground">{t('analysis.nutrition.weeksPlanned', 'Weeks Planned')}</div>
             </div>
-            <div className={`p-4 md:p-6 bg-gradient-to-br from-blue-900/30 to-blue-800/20 rounded-xl border border-blue-700 ${isArabic ? 'text-right' : 'text-center'}`}>
-              <div className="text-3xl font-bold text-blue-400 mb-1">
+            <div className={`p-4 md:p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 ${isArabic ? 'text-right' : 'text-center'}`}>
+              <div className="text-3xl font-bold text-blue-600 mb-1">
                 {toArabicNumerals(totalDays)}
               </div>
               <div className="text-sm text-muted-foreground">{t('analysis.nutrition.totalDays', 'Total Days')}</div>
             </div>
-            <div className={`p-4 md:p-6 bg-gradient-to-br from-orange-900/30 to-orange-800/20 rounded-xl border border-orange-700 ${isArabic ? 'text-right' : 'text-center'}`}>
-              <div className="text-3xl font-bold text-orange-400 mb-1">
+            <div className={`p-4 md:p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200 ${isArabic ? 'text-right' : 'text-center'}`}>
+              <div className="text-3xl font-bold text-orange-600 mb-1">
                 {toArabicNumerals(totalMeals)}
               </div>
               <div className="text-sm text-muted-foreground">{t('analysis.nutrition.totalMeals', 'Total Meals')}</div>
             </div>
-            <div className={`p-4 md:p-6 bg-gradient-to-br from-green-900/30 to-green-800/20 rounded-xl border border-green-700 ${isArabic ? 'text-right' : 'text-center'}`}>
-              <div className="text-3xl font-bold text-green-400 mb-1">
+            <div className={`p-4 md:p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 ${isArabic ? 'text-right' : 'text-center'}`}>
+              <div className="text-3xl font-bold text-green-600 mb-1">
                 {toArabicNumerals(avgCaloriesPerDay)}
               </div>
               <div className="text-sm text-muted-foreground">{t('analysis.nutrition.avgCaloriesPerDay', 'Avg Calories/Day')}</div>

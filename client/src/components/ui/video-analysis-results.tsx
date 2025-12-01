@@ -129,7 +129,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
           flushParagraph(index);
           flushList(index);
           elements.push(
-            <h3 key={`h3-${index}`} className="text-white font-bold text-xl mb-3 mt-6">
+            <h3 key={`h3-${index}`} className="text-foreground font-bold text-xl mb-3 mt-6">
               {trimmedLine.replace(/^###\s*/, '').replace(/\*\*/g, '')}
             </h3>
           );
@@ -140,7 +140,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
           flushParagraph(index);
           flushList(index);
           elements.push(
-            <h2 key={`h2-${index}`} className="text-white font-bold text-2xl mb-4 mt-8">
+            <h2 key={`h2-${index}`} className="text-foreground font-bold text-2xl mb-4 mt-8">
               {trimmedLine.replace(/^##\s*/, '').replace(/\*\*/g, '')}
             </h2>
           );
@@ -193,7 +193,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
       return parts.map((part, index) => {
         if (part.startsWith('**') && part.endsWith('**')) {
           return (
-            <strong key={index} className="text-white font-semibold">
+            <strong key={index} className="text-foreground font-semibold">
               {part.slice(2, -2)}
             </strong>
           );
@@ -208,7 +208,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
         {/* User Request Card */}
         <Card className="bg-slate-50 border-slate-200">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
+            <CardTitle className="text-foreground flex items-center gap-2">
               <User className="text-indigo-400" size={20} />
               Your Request
             </CardTitle>
@@ -233,7 +233,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
         {/* Analysis Results */}
         <Card className="bg-slate-50 border-slate-200">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
+            <CardTitle className="text-foreground flex items-center gap-2">
               <MessageSquare className="text-indigo-400" size={20} />
               AI Analysis & Recommendations
             </CardTitle>
@@ -274,7 +274,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
         {parts.map((part, index) => {
           if (part.startsWith('**') && part.endsWith('**')) {
             return (
-              <strong key={index} className="text-white font-semibold">
+              <strong key={index} className="text-foreground font-semibold">
                 {part.slice(2, -2)}
               </strong>
             );
@@ -715,12 +715,12 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
       <div className="bg-slate-50 border-slate-200 rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-2xl font-bold text-white">{t('analysis.videoAnalysis.videoAnalysisResults', 'Video Analysis Results')}</h2>
+            <h2 className="text-2xl font-bold text-foreground">{t('analysis.videoAnalysis.videoAnalysisResults', 'Video Analysis Results')}</h2>
             <p className="text-gray-600">{t('analysis.videoAnalysis.round', 'Round')} {analysisData.roundAnalyzed || 1} {t('analysis.videoAnalysis.analysis', 'Analysis')}</p>
           </div>
           <div className="text-right">
             <p className="text-sm text-muted-foreground">{t('analysis.videoAnalysis.analyzedOn', 'Analyzed on')}</p>
-            <p className="text-white">{new Date(analysisData.processedAt || Date.now()).toLocaleDateString()}</p>
+            <p className="text-foreground">{new Date(analysisData.processedAt || Date.now()).toLocaleDateString()}</p>
           </div>
         </div>
       </div>
@@ -859,7 +859,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
                         <span className="text-muted-foreground text-sm">{event.description}</span>
                       )}
                     </div>
-                    <div className="text-white font-mono text-lg">
+                    <div className="text-foreground font-mono text-lg">
                       {event.score}
                     </div>
                   </div>
@@ -1043,7 +1043,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
                         )}
                       </div>
                     </div>
-                    <div className="text-white font-mono shrink-0">
+                    <div className="text-foreground font-mono shrink-0">
                       {event.blueScore} - {event.redScore}
                     </div>
                   </div>
@@ -1080,7 +1080,7 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
                       {event.player === 'blue' ? 'Blue' : 'Red'} Card
                     </span>
                   </div>
-                  <div className="text-white font-mono">
+                  <div className="text-foreground font-mono">
                     Cards: {event.blueCards} - {event.redCards}
                   </div>
                 </div>
