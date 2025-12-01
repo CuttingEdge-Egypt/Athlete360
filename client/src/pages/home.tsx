@@ -1939,7 +1939,7 @@ export default function Home() {
                             filteredSports.map((sportItem) => (
                               <div
                                 key={sportItem.id}
-                                className="flex items-center px-3 py-2 cursor-pointer hover:bg-accent text-foreground"
+                                className="flex items-center px-3 py-2 cursor-pointer hover:bg-primary hover:text-white text-foreground"
                                 onClick={() => {
                                   handleSportChange(sportItem.id);
                                   setSportDropdownOpen(false);
@@ -2725,7 +2725,7 @@ export default function Home() {
                                           filteredNutritionSports.map((sportItem) => (
                                             <div
                                               key={sportItem.id}
-                                              className="flex items-center px-3 py-2 cursor-pointer hover:bg-accent text-foreground"
+                                              className="flex items-center px-3 py-2 cursor-pointer hover:bg-primary hover:text-white text-foreground"
                                               onClick={() => {
                                                 field.onChange(sportItem.id);
                                                 setSelectedSport(sportItem.id);
@@ -3178,10 +3178,10 @@ export default function Home() {
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent className="bg-muted border">
-                                    <SelectItem value="male" className="text-foreground hover:bg-accent">
+                                    <SelectItem value="male" className="text-foreground data-[highlighted]:bg-primary data-[highlighted]:text-white">
                                       {t('developmentPlan.male')}
                                     </SelectItem>
-                                    <SelectItem value="female" className="text-foreground hover:bg-accent">
+                                    <SelectItem value="female" className="text-foreground data-[highlighted]:bg-primary data-[highlighted]:text-white">
                                       {t('developmentPlan.female')}
                                     </SelectItem>
                                   </SelectContent>
@@ -3239,7 +3239,7 @@ export default function Home() {
                                         filteredDevelopmentSports.map((sportItem) => (
                                           <div
                                             key={sportItem.id}
-                                            className="flex items-center px-3 py-2 cursor-pointer hover:bg-accent text-foreground"
+                                            className="flex items-center px-3 py-2 cursor-pointer hover:bg-primary hover:text-white text-foreground"
                                             onClick={() => {
                                               field.onChange(sportItem.name);
                                               setDevelopmentSportDropdownOpen(false);
@@ -3275,8 +3275,8 @@ export default function Home() {
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent className="bg-muted border">
-                                  <SelectItem value="en" className="text-foreground hover:bg-accent">English</SelectItem>
-                                  <SelectItem value="ar" className="text-foreground hover:bg-accent">العربية</SelectItem>
+                                  <SelectItem value="en" className="text-foreground data-[highlighted]:bg-primary data-[highlighted]:text-white">English</SelectItem>
+                                  <SelectItem value="ar" className="text-foreground data-[highlighted]:bg-primary data-[highlighted]:text-white">العربية</SelectItem>
                                 </SelectContent>
                               </Select>
                               <FormMessage className="text-red-400" />
