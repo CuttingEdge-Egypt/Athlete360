@@ -373,7 +373,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
           transition: 'box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.boxShadow = '0 20px 40px -12px rgba(45, 170, 157, 0.45)';
+          e.currentTarget.style.boxShadow = '0 20px 45px -10px rgba(45, 180, 167, 0.7)';
           e.currentTarget.style.transform = 'translateY(-4px)';
         }}
         onMouseLeave={(e) => {
