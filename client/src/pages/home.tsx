@@ -2176,7 +2176,7 @@ export default function Home() {
                     )}
                     
                     <Card 
-                      className="bg-muted border"
+                      className="bg-white border border-gray-100 shadow-md"
                     >
                       <CardContent className="p-4 sm:p-6">
                     <div className="flex flex-col sm:flex-row items-start gap-4">
