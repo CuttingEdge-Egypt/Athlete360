@@ -2159,11 +2159,11 @@ export default function Home() {
                     {/* Last Update Timestamp - Above Card */}
                     {selectedAthlete.updatedAt && (
                       <div className="flex justify-end mb-2">
-                        <div className={`flex items-center ${i18n.language === 'ar' ? 'gap-3 flex-row-reverse px-4 py-2' : 'gap-2 px-3 py-1.5'} bg-slate-800/60 backdrop-blur-sm rounded-lg border border-slate-600/40`}>
-                          <CalendarDays className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                        <div className={`flex items-center ${i18n.language === 'ar' ? 'gap-3 flex-row-reverse px-4 py-2' : 'gap-2 px-3 py-1.5'} bg-white/80 backdrop-blur-sm rounded-lg border border-primary/20 shadow-sm`}>
+                          <CalendarDays className="w-4 h-4 text-primary flex-shrink-0" />
                           <p className={`font-medium text-muted-foreground whitespace-nowrap ${i18n.language === 'ar' ? 'text-base' : 'text-sm'}`}>
                             <span>{t('interface.lastUpdate')}: </span>
-                            <span className="text-blue-400">{new Date(selectedAthlete.updatedAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { 
+                            <span className="text-primary font-semibold">{new Date(selectedAthlete.updatedAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { 
                               month: 'short', 
                               day: 'numeric', 
                               year: 'numeric',
@@ -2238,7 +2238,7 @@ export default function Home() {
                               <div className="text-sm">
                                 <p className="mb-1">{t('athleteSearch.imageUpdate.tooltip.question', { name: i18n.language === 'ar' && selectedAthlete.nameArabic ? selectedAthlete.nameArabic : selectedAthlete.name })}</p>
                                 <p className="text-muted-foreground">{t('athleteSearch.imageUpdate.tooltip.help')}</p>
-                                <p className="text-xs text-green-400 mt-1 font-semibold">{t('athleteSearch.imageUpdate.tooltip.noTokens')}</p>
+                                <p className="text-xs text-emerald-600 mt-1 font-semibold">{t('athleteSearch.imageUpdate.tooltip.noTokens')}</p>
                               </div>
                             </TooltipContent>
                           </Tooltip>
@@ -2252,12 +2252,12 @@ export default function Home() {
                                   onClick={() => handleSearchAthleteRankings(selectedAthlete.id)}
                                   size="sm"
                                   variant="outline"
-                                  className="bg-amber-600/20 border-amber-500/50 text-amber-300 hover:bg-amber-600/30 hover:text-amber-200 text-xs px-2 py-1 h-6 w-full"
+                                  className="bg-amber-50 border-amber-400 text-amber-700 hover:bg-amber-100 hover:text-amber-800 text-xs px-2 py-1 h-6 w-full"
                                   disabled={rankingFetchStatus[selectedAthlete.id]?.isLoading}
                                 >
                                   {rankingFetchStatus[selectedAthlete.id]?.isLoading ? (
                                     <div className="flex items-center space-x-1">
-                                      <div className="w-3 h-3 border border-amber-400 border-t-transparent rounded-full animate-spin" />
+                                      <div className="w-3 h-3 border border-amber-600 border-t-transparent rounded-full animate-spin" />
                                       <span className="text-xs">{rankingFetchStatus[selectedAthlete.id]?.currentPhase || t('athleteSearch.rankingUpdate.updating')}</span>
                                     </div>
                                   ) : (
@@ -2271,7 +2271,7 @@ export default function Home() {
                               <TooltipContent>
                                 <div>
                                   <p>{t('athleteSearch.rankingUpdate.tooltip.help', { name: i18n.language === 'ar' && selectedAthlete.nameArabic ? selectedAthlete.nameArabic : selectedAthlete.name })}</p>
-                                  <p className="text-xs text-green-400 mt-1 font-semibold">{t('athleteSearch.rankingUpdate.tooltip.noTokens')}</p>
+                                  <p className="text-xs text-emerald-600 mt-1 font-semibold">{t('athleteSearch.rankingUpdate.tooltip.noTokens')}</p>
                                 </div>
                               </TooltipContent>
                             </Tooltip>
@@ -2280,22 +2280,22 @@ export default function Home() {
                           {/* Image Update Tip Popup */}
                           {showImageUpdateTip && (
                             <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 z-50 w-max max-w-[280px]">
-                              <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-foreground px-4 py-2 rounded-lg shadow-xl border border-blue-400 relative animate-in slide-in-from-top-2 duration-300">
+                              <div className="bg-gradient-to-r from-primary to-teal-500 text-white px-4 py-2 rounded-lg shadow-xl border border-primary/40 relative animate-in slide-in-from-top-2 duration-300">
                                 {/* Arrow pointing up to button */}
                                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full">
-                                  <div className="w-0 h-0 border-l-4 border-r-4 border-b-8 border-l-transparent border-r-transparent border-b-blue-600"></div>
+                                  <div className="w-0 h-0 border-l-4 border-r-4 border-b-8 border-l-transparent border-r-transparent border-b-primary"></div>
                                 </div>
                                 
                                 <div className="text-sm font-medium">
                                   <p className="mb-1">{t('athleteSearch.imageUpdate.popup.question', { name: i18n.language === 'ar' && selectedAthlete.nameArabic ? selectedAthlete.nameArabic : selectedAthlete.name })}</p>
-                                  <p className="text-blue-100">{t('athleteSearch.imageUpdate.popup.help')}</p>
-                                  <p className="text-xs text-blue-200 mt-1 font-semibold">{t('athleteSearch.imageUpdate.popup.noTokens')}</p>
+                                  <p className="text-white/90">{t('athleteSearch.imageUpdate.popup.help')}</p>
+                                  <p className="text-xs text-white/80 mt-1 font-semibold">{t('athleteSearch.imageUpdate.popup.noTokens')}</p>
                                 </div>
                                 
                                 {/* Close button */}
                                 <button
                                   onClick={() => setShowImageUpdateTip(false)}
-                                  className="absolute -top-1 -right-1 w-5 h-5 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-xs transition-colors"
+                                  className="absolute -top-1 -right-1 w-5 h-5 bg-white/30 hover:bg-white/40 rounded-full flex items-center justify-center text-xs text-white transition-colors"
                                 >
                                   ×
                                 </button>
@@ -2341,106 +2341,106 @@ export default function Home() {
                                   if (isOlympic) {
                                     testId = 'rank-olympic';
                                     if (rankNum === 1) {
-                                      bgColor = 'bg-gradient-to-br from-yellow-400/30 via-amber-500/30 to-yellow-600/30';
-                                      borderColor = 'border-yellow-400';
-                                      textColor = 'text-yellow-300';
-                                      categoryTextColor = 'text-yellow-200/90';
+                                      bgColor = 'bg-gradient-to-br from-amber-50 via-yellow-50 to-amber-100';
+                                      borderColor = 'border-amber-400';
+                                      textColor = 'text-amber-700';
+                                      categoryTextColor = 'text-amber-600';
                                       medalEmoji = '🥇';
                                     } else if (rankNum === 2) {
-                                      bgColor = 'bg-gradient-to-br from-gray-300/30 via-slate-400/30 to-gray-500/30';
-                                      borderColor = 'border-muted-foreground';
-                                      textColor = 'text-foreground';
-                                      categoryTextColor = 'text-muted-foreground/90';
+                                      bgColor = 'bg-gradient-to-br from-slate-50 via-gray-100 to-slate-100';
+                                      borderColor = 'border-slate-400';
+                                      textColor = 'text-slate-700';
+                                      categoryTextColor = 'text-slate-600';
                                       medalEmoji = '🥈';
                                     } else if (rankNum === 3) {
-                                      bgColor = 'bg-gradient-to-br from-orange-400/30 via-amber-600/30 to-orange-700/30';
+                                      bgColor = 'bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100';
                                       borderColor = 'border-orange-400';
-                                      textColor = 'text-orange-300';
-                                      categoryTextColor = 'text-orange-200/90';
+                                      textColor = 'text-orange-700';
+                                      categoryTextColor = 'text-orange-600';
                                       medalEmoji = '🥉';
                                     } else {
-                                      bgColor = 'bg-yellow-500/15';
-                                      borderColor = 'border-yellow-500/60';
-                                      textColor = 'text-yellow-300';
-                                      categoryTextColor = 'text-yellow-200/70';
+                                      bgColor = 'bg-amber-50';
+                                      borderColor = 'border-amber-400';
+                                      textColor = 'text-amber-700';
+                                      categoryTextColor = 'text-amber-600';
                                     }
                                   } else if (isWorld) {
                                     testId = 'rank-world';
                                     if (rankNum === 1) {
-                                      bgColor = 'bg-gradient-to-br from-yellow-400/30 via-amber-500/30 to-yellow-600/30';
-                                      borderColor = 'border-yellow-400';
-                                      textColor = 'text-yellow-300';
-                                      categoryTextColor = 'text-yellow-200/90';
+                                      bgColor = 'bg-gradient-to-br from-amber-50 via-yellow-50 to-amber-100';
+                                      borderColor = 'border-amber-400';
+                                      textColor = 'text-amber-700';
+                                      categoryTextColor = 'text-amber-600';
                                       medalEmoji = '🥇';
                                     } else if (rankNum === 2) {
-                                      bgColor = 'bg-gradient-to-br from-gray-300/30 via-slate-400/30 to-gray-500/30';
-                                      borderColor = 'border-muted-foreground';
-                                      textColor = 'text-foreground';
-                                      categoryTextColor = 'text-muted-foreground/90';
+                                      bgColor = 'bg-gradient-to-br from-slate-50 via-gray-100 to-slate-100';
+                                      borderColor = 'border-slate-400';
+                                      textColor = 'text-slate-700';
+                                      categoryTextColor = 'text-slate-600';
                                       medalEmoji = '🥈';
                                     } else if (rankNum === 3) {
-                                      bgColor = 'bg-gradient-to-br from-orange-400/30 via-amber-600/30 to-orange-700/30';
+                                      bgColor = 'bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100';
                                       borderColor = 'border-orange-400';
-                                      textColor = 'text-orange-300';
-                                      categoryTextColor = 'text-orange-200/90';
+                                      textColor = 'text-orange-700';
+                                      categoryTextColor = 'text-orange-600';
                                       medalEmoji = '🥉';
                                     } else {
-                                      bgColor = 'bg-orange-500/15';
-                                      borderColor = 'border-orange-500/60';
-                                      textColor = 'text-orange-300';
-                                      categoryTextColor = 'text-orange-200/70';
+                                      bgColor = 'bg-orange-50';
+                                      borderColor = 'border-orange-400';
+                                      textColor = 'text-orange-700';
+                                      categoryTextColor = 'text-orange-600';
                                     }
                                   } else if (isContinental) {
                                     testId = 'rank-continental';
                                     if (rankNum === 1) {
-                                      bgColor = 'bg-gradient-to-br from-yellow-400/30 via-amber-500/30 to-yellow-600/30';
-                                      borderColor = 'border-yellow-400';
-                                      textColor = 'text-yellow-300';
-                                      categoryTextColor = 'text-yellow-200/90';
+                                      bgColor = 'bg-gradient-to-br from-amber-50 via-yellow-50 to-amber-100';
+                                      borderColor = 'border-amber-400';
+                                      textColor = 'text-amber-700';
+                                      categoryTextColor = 'text-amber-600';
                                       medalEmoji = '🥇';
                                     } else if (rankNum === 2) {
-                                      bgColor = 'bg-gradient-to-br from-gray-300/30 via-slate-400/30 to-gray-500/30';
-                                      borderColor = 'border-muted-foreground';
-                                      textColor = 'text-foreground';
-                                      categoryTextColor = 'text-muted-foreground/90';
+                                      bgColor = 'bg-gradient-to-br from-slate-50 via-gray-100 to-slate-100';
+                                      borderColor = 'border-slate-400';
+                                      textColor = 'text-slate-700';
+                                      categoryTextColor = 'text-slate-600';
                                       medalEmoji = '🥈';
                                     } else if (rankNum === 3) {
-                                      bgColor = 'bg-gradient-to-br from-orange-400/30 via-amber-600/30 to-orange-700/30';
+                                      bgColor = 'bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100';
                                       borderColor = 'border-orange-400';
-                                      textColor = 'text-orange-300';
-                                      categoryTextColor = 'text-orange-200/90';
+                                      textColor = 'text-orange-700';
+                                      categoryTextColor = 'text-orange-600';
                                       medalEmoji = '🥉';
                                     } else {
-                                      bgColor = 'bg-green-500/15';
-                                      borderColor = 'border-green-500/60';
-                                      textColor = 'text-green-300';
-                                      categoryTextColor = 'text-green-200/70';
+                                      bgColor = 'bg-emerald-50';
+                                      borderColor = 'border-emerald-400';
+                                      textColor = 'text-emerald-700';
+                                      categoryTextColor = 'text-emerald-600';
                                     }
                                   } else if (isNational) {
                                     testId = 'rank-national';
                                     if (rankNum === 1) {
-                                      bgColor = 'bg-gradient-to-br from-yellow-400/30 via-amber-500/30 to-yellow-600/30';
-                                      borderColor = 'border-yellow-400';
-                                      textColor = 'text-yellow-300';
-                                      categoryTextColor = 'text-yellow-200/90';
+                                      bgColor = 'bg-gradient-to-br from-amber-50 via-yellow-50 to-amber-100';
+                                      borderColor = 'border-amber-400';
+                                      textColor = 'text-amber-700';
+                                      categoryTextColor = 'text-amber-600';
                                       medalEmoji = '🥇';
                                     } else if (rankNum === 2) {
-                                      bgColor = 'bg-gradient-to-br from-gray-300/30 via-slate-400/30 to-gray-500/30';
-                                      borderColor = 'border-muted-foreground';
-                                      textColor = 'text-foreground';
-                                      categoryTextColor = 'text-muted-foreground/90';
+                                      bgColor = 'bg-gradient-to-br from-slate-50 via-gray-100 to-slate-100';
+                                      borderColor = 'border-slate-400';
+                                      textColor = 'text-slate-700';
+                                      categoryTextColor = 'text-slate-600';
                                       medalEmoji = '🥈';
                                     } else if (rankNum === 3) {
-                                      bgColor = 'bg-gradient-to-br from-orange-400/30 via-amber-600/30 to-orange-700/30';
+                                      bgColor = 'bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100';
                                       borderColor = 'border-orange-400';
-                                      textColor = 'text-orange-300';
-                                      categoryTextColor = 'text-orange-200/90';
+                                      textColor = 'text-orange-700';
+                                      categoryTextColor = 'text-orange-600';
                                       medalEmoji = '🥉';
                                     } else {
-                                      bgColor = 'bg-blue-500/15';
-                                      borderColor = 'border-blue-500/60';
-                                      textColor = 'text-blue-300';
-                                      categoryTextColor = 'text-blue-200/70';
+                                      bgColor = 'bg-blue-50';
+                                      borderColor = 'border-blue-400';
+                                      textColor = 'text-blue-700';
+                                      categoryTextColor = 'text-blue-600';
                                     }
                                   }
                                   
@@ -2472,27 +2472,27 @@ export default function Home() {
                               ) : (
                                 <>
                                   {selectedAthlete.olympicRank ? (
-                                    <div className="flex items-center space-x-1 bg-yellow-500/20 border-2 border-yellow-400 px-2 py-1 rounded-lg" data-testid="rank-olympic">
-                                      <Trophy className="w-3 h-3 text-yellow-300" />
-                                      <span className="text-yellow-300 font-bold text-xs">Olympic #{typeof selectedAthlete.olympicRank === 'number' || !isNaN(Number(selectedAthlete.olympicRank)) ? Math.floor(Number(selectedAthlete.olympicRank)) : selectedAthlete.olympicRank}</span>
+                                    <div className="flex items-center space-x-1 bg-amber-50 border-2 border-amber-400 px-2 py-1 rounded-lg shadow-sm" data-testid="rank-olympic">
+                                      <Trophy className="w-3 h-3 text-amber-600" />
+                                      <span className="text-amber-700 font-bold text-xs">Olympic #{typeof selectedAthlete.olympicRank === 'number' || !isNaN(Number(selectedAthlete.olympicRank)) ? Math.floor(Number(selectedAthlete.olympicRank)) : selectedAthlete.olympicRank}</span>
                                     </div>
                                   ) : null}
                                   {selectedAthlete.rank ? (
-                                    <div className="flex items-center space-x-1 bg-orange-500/20 border-2 border-orange-400 px-2 py-1 rounded-lg" data-testid="rank-world">
-                                      <Trophy className="w-3 h-3 text-orange-300" />
-                                      <span className="text-orange-300 font-bold text-xs">World #{typeof selectedAthlete.rank === 'number' || !isNaN(Number(selectedAthlete.rank)) ? Math.floor(Number(selectedAthlete.rank)) : selectedAthlete.rank}</span>
+                                    <div className="flex items-center space-x-1 bg-orange-50 border-2 border-orange-400 px-2 py-1 rounded-lg shadow-sm" data-testid="rank-world">
+                                      <Trophy className="w-3 h-3 text-orange-600" />
+                                      <span className="text-orange-700 font-bold text-xs">World #{typeof selectedAthlete.rank === 'number' || !isNaN(Number(selectedAthlete.rank)) ? Math.floor(Number(selectedAthlete.rank)) : selectedAthlete.rank}</span>
                                     </div>
                                   ) : null}
                                   {selectedAthlete.continentalRank ? (
-                                    <div className="flex items-center space-x-1 bg-green-500/20 border-2 border-green-400 px-2 py-1 rounded-lg" data-testid="rank-continental">
-                                      <Trophy className="w-3 h-3 text-green-300" />
-                                      <span className="text-green-300 font-bold text-xs">Continental #{typeof selectedAthlete.continentalRank === 'number' || !isNaN(Number(selectedAthlete.continentalRank)) ? Math.floor(Number(selectedAthlete.continentalRank)) : selectedAthlete.continentalRank}</span>
+                                    <div className="flex items-center space-x-1 bg-emerald-50 border-2 border-emerald-400 px-2 py-1 rounded-lg shadow-sm" data-testid="rank-continental">
+                                      <Trophy className="w-3 h-3 text-emerald-600" />
+                                      <span className="text-emerald-700 font-bold text-xs">Continental #{typeof selectedAthlete.continentalRank === 'number' || !isNaN(Number(selectedAthlete.continentalRank)) ? Math.floor(Number(selectedAthlete.continentalRank)) : selectedAthlete.continentalRank}</span>
                                     </div>
                                   ) : null}
                                   {selectedAthlete.nationalRank ? (
-                                    <div className="flex items-center space-x-1 bg-blue-500/20 border-2 border-blue-400 px-2 py-1 rounded-lg" data-testid="rank-national">
-                                      <TrendingUp className="w-3 h-3 text-blue-300" />
-                                      <span className="text-blue-300 font-bold text-xs">National #{typeof selectedAthlete.nationalRank === 'number' || !isNaN(Number(selectedAthlete.nationalRank)) ? Math.floor(Number(selectedAthlete.nationalRank)) : selectedAthlete.nationalRank}</span>
+                                    <div className="flex items-center space-x-1 bg-blue-50 border-2 border-blue-400 px-2 py-1 rounded-lg shadow-sm" data-testid="rank-national">
+                                      <TrendingUp className="w-3 h-3 text-blue-600" />
+                                      <span className="text-blue-700 font-bold text-xs">National #{typeof selectedAthlete.nationalRank === 'number' || !isNaN(Number(selectedAthlete.nationalRank)) ? Math.floor(Number(selectedAthlete.nationalRank)) : selectedAthlete.nationalRank}</span>
                                     </div>
                                   ) : null}
                                 </>
@@ -2503,78 +2503,78 @@ export default function Home() {
                           {selectedAthlete.personalInfo && (
                             <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-2">
                               {selectedAthlete.personalInfo.age && (
-                                <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-blue-400/60 transition-all duration-200">
-                                  <div className="flex items-center justify-center w-4 h-4 bg-blue-500/20 rounded-full">
-                                    <span className="text-[10px] text-blue-400">📅</span>
+                                <div className="flex items-center gap-1 px-2 py-1 bg-blue-50/80 backdrop-blur-sm rounded-full border border-blue-200 hover:border-blue-400 hover:shadow-sm transition-all duration-200">
+                                  <div className="flex items-center justify-center w-4 h-4 bg-blue-100 rounded-full">
+                                    <span className="text-[10px] text-blue-600">📅</span>
                                   </div>
-                                  <span className="text-xs text-slate-400 font-medium">Age</span>
-                                  <span className="text-xs font-bold text-foreground">{selectedAthlete.personalInfo.age}</span>
+                                  <span className="text-xs text-blue-600 font-medium">Age</span>
+                                  <span className="text-xs font-bold text-blue-800">{selectedAthlete.personalInfo.age}</span>
                                 </div>
                               )}
                               
                               {selectedAthlete.personalInfo.height && (
-                                <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-yellow-400/60 transition-all duration-200">
-                                  <div className="flex items-center justify-center w-4 h-4 bg-yellow-500/20 rounded-full">
-                                    <Ruler className="text-yellow-400" size={10} />
+                                <div className="flex items-center gap-1 px-2 py-1 bg-amber-50/80 backdrop-blur-sm rounded-full border border-amber-200 hover:border-amber-400 hover:shadow-sm transition-all duration-200">
+                                  <div className="flex items-center justify-center w-4 h-4 bg-amber-100 rounded-full">
+                                    <Ruler className="text-amber-600" size={10} />
                                   </div>
-                                  <span className="text-xs text-slate-400 font-medium">Height</span>
-                                  <span className="text-xs font-bold text-foreground">{selectedAthlete.personalInfo.height}</span>
+                                  <span className="text-xs text-amber-600 font-medium">Height</span>
+                                  <span className="text-xs font-bold text-amber-800">{selectedAthlete.personalInfo.height}</span>
                                 </div>
                               )}
                               
                               {selectedAthlete.personalInfo.position && selectedAthlete.personalInfo.position !== "N/A" && (
-                                <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-purple-400/60 transition-all duration-200">
-                                  <div className="flex items-center justify-center w-4 h-4 bg-purple-500/20 rounded-full">
-                                    <span className="text-[10px] text-purple-400">{selectedSport && ['taekwondo', 'boxing', 'athletics', 'tennis', 'golf', 'swimming'].some(sport => 
+                                <div className="flex items-center gap-1 px-2 py-1 bg-purple-50/80 backdrop-blur-sm rounded-full border border-purple-200 hover:border-purple-400 hover:shadow-sm transition-all duration-200">
+                                  <div className="flex items-center justify-center w-4 h-4 bg-purple-100 rounded-full">
+                                    <span className="text-[10px] text-purple-600">{selectedSport && ['taekwondo', 'boxing', 'athletics', 'tennis', 'golf', 'swimming'].some(sport => 
                                       sports.find(s => s.id === selectedSport)?.name.toLowerCase().includes(sport)
                                     ) ? '🥋' : '🏆'}</span>
                                   </div>
-                                  <span className="text-xs text-slate-400 font-medium">
+                                  <span className="text-xs text-purple-600 font-medium">
                                     {selectedSport && ['taekwondo', 'boxing', 'athletics', 'tennis', 'golf', 'swimming'].some(sport => 
                                       sports.find(s => s.id === selectedSport)?.name.toLowerCase().includes(sport)
                                     ) ? 'Weight Category' : 'Position'}
                                   </span>
-                                  <span className="text-xs font-bold text-foreground">{selectedAthlete.personalInfo.position}</span>
+                                  <span className="text-xs font-bold text-purple-800">{selectedAthlete.personalInfo.position}</span>
                                 </div>
                               )}
                               
                               {selectedAthlete.personalInfo.club && selectedAthlete.personalInfo.club !== "N/A" && (
-                                <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-green-400/60 transition-all duration-200">
-                                  <div className="flex items-center justify-center w-4 h-4 bg-green-500/20 rounded-full">
-                                    <Shield className="text-green-400" size={10} />
+                                <div className="flex items-center gap-1 px-2 py-1 bg-emerald-50/80 backdrop-blur-sm rounded-full border border-emerald-200 hover:border-emerald-400 hover:shadow-sm transition-all duration-200">
+                                  <div className="flex items-center justify-center w-4 h-4 bg-emerald-100 rounded-full">
+                                    <Shield className="text-emerald-600" size={10} />
                                   </div>
-                                  <span className="text-xs text-slate-400 font-medium">Club</span>
-                                  <span className="text-xs font-bold text-foreground">{selectedAthlete.personalInfo.club}</span>
+                                  <span className="text-xs text-emerald-600 font-medium">Club</span>
+                                  <span className="text-xs font-bold text-emerald-800">{selectedAthlete.personalInfo.club}</span>
                                 </div>
                               )}
                               
                               {selectedAthlete.personalInfo.category && selectedAthlete.personalInfo.category !== "N/A" && (
-                                <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-orange-400/60 transition-all duration-200">
-                                  <div className="flex items-center justify-center w-4 h-4 bg-orange-500/20 rounded-full">
-                                    <span className="text-[10px] text-orange-400">⚖️</span>
+                                <div className="flex items-center gap-1 px-2 py-1 bg-orange-50/80 backdrop-blur-sm rounded-full border border-orange-200 hover:border-orange-400 hover:shadow-sm transition-all duration-200">
+                                  <div className="flex items-center justify-center w-4 h-4 bg-orange-100 rounded-full">
+                                    <span className="text-[10px] text-orange-600">⚖️</span>
                                   </div>
-                                  <span className="text-xs text-slate-400 font-medium">Category</span>
-                                  <span className="text-xs font-bold text-foreground">{selectedAthlete.personalInfo.category}</span>
+                                  <span className="text-xs text-orange-600 font-medium">Category</span>
+                                  <span className="text-xs font-bold text-orange-800">{selectedAthlete.personalInfo.category}</span>
                                 </div>
                               )}
                               
                               {selectedAthlete.personalInfo.dateOfBirth && selectedAthlete.personalInfo.dateOfBirth !== "N/A" && (
-                                <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-pink-400/60 transition-all duration-200">
-                                  <div className="flex items-center justify-center w-4 h-4 bg-pink-500/20 rounded-full">
-                                    <span className="text-[10px] text-pink-400">🎂</span>
+                                <div className="flex items-center gap-1 px-2 py-1 bg-pink-50/80 backdrop-blur-sm rounded-full border border-pink-200 hover:border-pink-400 hover:shadow-sm transition-all duration-200">
+                                  <div className="flex items-center justify-center w-4 h-4 bg-pink-100 rounded-full">
+                                    <span className="text-[10px] text-pink-600">🎂</span>
                                   </div>
-                                  <span className="text-xs text-slate-400 font-medium">Birth</span>
-                                  <span className="text-xs font-bold text-foreground">{selectedAthlete.personalInfo.dateOfBirth}</span>
+                                  <span className="text-xs text-pink-600 font-medium">Birth</span>
+                                  <span className="text-xs font-bold text-pink-800">{selectedAthlete.personalInfo.dateOfBirth}</span>
                                 </div>
                               )}
                               
                               {selectedAthlete.personalInfo.educationalBackground && selectedAthlete.personalInfo.educationalBackground !== "N/A" && (
-                                <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-600/50 hover:border-indigo-400/60 transition-all duration-200 max-w-full">
-                                  <div className="flex items-center justify-center w-4 h-4 bg-indigo-500/20 rounded-full flex-shrink-0">
-                                    <span className="text-[10px] text-indigo-400">🎓</span>
+                                <div className="flex items-center gap-1 px-2 py-1 bg-indigo-50/80 backdrop-blur-sm rounded-full border border-indigo-200 hover:border-indigo-400 hover:shadow-sm transition-all duration-200 max-w-full">
+                                  <div className="flex items-center justify-center w-4 h-4 bg-indigo-100 rounded-full flex-shrink-0">
+                                    <span className="text-[10px] text-indigo-600">🎓</span>
                                   </div>
-                                  <span className="text-xs text-slate-400 font-medium flex-shrink-0">Education</span>
-                                  <span className="text-xs font-bold text-foreground truncate max-w-[200px] sm:max-w-xs" title={selectedAthlete.personalInfo.educationalBackground}>
+                                  <span className="text-xs text-indigo-600 font-medium flex-shrink-0">Education</span>
+                                  <span className="text-xs font-bold text-indigo-800 truncate max-w-[200px] sm:max-w-xs" title={selectedAthlete.personalInfo.educationalBackground}>
                                     {selectedAthlete.personalInfo.educationalBackground}
                                   </span>
                                 </div>
