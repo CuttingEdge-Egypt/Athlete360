@@ -335,7 +335,7 @@ export function DualAnalysisPanel({
         legend: {
           display: true,
           labels: {
-            color: 'rgb(209, 213, 219)',
+            color: 'rgb(55, 65, 81)',
             font: {
               size: isMobile ? 11 : 12
             },
@@ -873,7 +873,7 @@ export function DualAnalysisPanel({
         legend: {
           display: true,
           labels: {
-            color: 'rgb(209, 213, 219)',
+            color: 'rgb(55, 65, 81)',
             font: {
               size: isMobile ? 11 : 12
             },
