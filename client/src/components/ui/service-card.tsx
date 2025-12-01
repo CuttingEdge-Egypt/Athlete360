@@ -366,9 +366,18 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
   return (
     <>
       <Card 
-        className={`service-card h-full bg-white border border-gray-100 shadow-md hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 ${
+        className={`service-card h-full bg-white border border-gray-100 shadow-md hover:border-primary transition-all duration-300 ${
           (analysisMutation.isPending || isProcessing) ? 'opacity-75' : ''
         } relative overflow-hidden`}
+        style={{
+          transition: 'all 0.3s ease'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.boxShadow = '0 10px 40px -10px rgba(45, 170, 157, 0.4)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+        }}
       >
       {service.id === 'statistics' && (
         <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] z-10 flex items-center justify-center">
