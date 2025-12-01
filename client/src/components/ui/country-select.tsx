@@ -43,7 +43,7 @@ export function CountrySelect({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full justify-between bg-muted border text-foreground hover:bg-accent",
+            "w-full justify-between bg-white border-gray-300 text-gray-800 hover:bg-gray-50",
             className
           )}
           data-testid={testId}
@@ -51,17 +51,17 @@ export function CountrySelect({
           {value && value !== "all"
             ? countries.find((country) => country === value) || value
             : placeholder}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-gray-500" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0 bg-muted border">
-        <Command className="bg-muted">
+      <PopoverContent className="w-full p-0 bg-white border-gray-200 shadow-lg">
+        <Command className="bg-white">
           <CommandInput
             placeholder="Search countries..."
-            className="h-9 text-foreground placeholder:text-muted-foreground"
+            className="h-9 text-gray-800 placeholder:text-gray-400 bg-white"
           />
           <CommandList>
-            <CommandEmpty className="text-foreground py-2 text-center text-sm">
+            <CommandEmpty className="text-gray-500 py-2 text-center text-sm">
               No country found.
             </CommandEmpty>
             <CommandGroup>
@@ -71,7 +71,7 @@ export function CountrySelect({
                   onValueChange("all");
                   setOpen(false);
                 }}
-                className="text-foreground hover:bg-accent"
+                className="text-gray-700 hover:!bg-primary hover:!text-white data-[selected=true]:bg-primary data-[selected=true]:text-white"
               >
                 <Check
                   className={cn(
@@ -89,7 +89,7 @@ export function CountrySelect({
                     onValueChange(currentValue === value ? "" : currentValue);
                     setOpen(false);
                   }}
-                  className="text-foreground hover:bg-accent"
+                  className="text-gray-700 hover:!bg-primary hover:!text-white data-[selected=true]:bg-primary data-[selected=true]:text-white"
                 >
                   <Check
                     className={cn(

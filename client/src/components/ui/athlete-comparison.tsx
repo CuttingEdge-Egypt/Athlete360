@@ -793,7 +793,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                               setOpenSportPopover(false);
                               setSearchSport("");
                             }}
-                            className={`w-full px-4 py-2 text-left hover:bg-gray-100 text-gray-700 transition-colors ${
+                            className={`w-full px-4 py-2 text-left hover:bg-primary hover:text-white text-gray-700 transition-colors ${
                               selectedSport === sport.id ? 'bg-primary/10 text-primary font-medium' : ''
                             } ${isArabic ? 'text-right' : ''}`}
                           >
