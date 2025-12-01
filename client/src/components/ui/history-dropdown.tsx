@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AnalysisPopup } from "@/components/ui/analysis-popup";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { History, Clock, User, TrendingUp, Target, Utensils, Zap, Video, GitCompare, Coins, Trash2 } from "lucide-react";
+import { History, Clock, User, Trophy, Star, AlertTriangle, Calendar, Apple, ClipboardList, Video, GitCompare, BarChart3, Coins, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -29,17 +29,32 @@ interface HistoryItem {
 
 const serviceIcons = {
   bio: User,
-  rank: TrendingUp,
-  strengths: Target,
-  weaknesses: Target,
-  development: Zap,
-  'development-plan': Zap,
-  'nutrition-plan': Utensils,
-  nutrition: Utensils,
-  beat: Zap,
+  rank: Trophy,
+  strengths: Star,
+  weaknesses: AlertTriangle,
+  development: Calendar,
+  'development-plan': Calendar,
+  'nutrition-plan': Apple,
+  nutrition: Apple,
+  beat: ClipboardList,
   video: Video,
   comparison: GitCompare,
-  statistics: TrendingUp,
+  statistics: BarChart3,
+};
+
+const serviceColors = {
+  bio: "text-blue-500",
+  rank: "text-amber-500",
+  strengths: "text-green-500",
+  weaknesses: "text-red-500",
+  development: "text-purple-500",
+  'development-plan': "text-purple-500",
+  'nutrition-plan': "text-green-600",
+  nutrition: "text-green-600",
+  beat: "text-orange-500",
+  video: "text-purple-600",
+  comparison: "text-blue-600",
+  statistics: "text-blue-500",
 };
 
 // Moved to component to access t function
@@ -264,7 +279,7 @@ export function HistoryDropdown({ customTrigger }: HistoryDropdownProps = {}) {
                     className="group flex flex-col items-start gap-2 p-3 cursor-pointer hover:bg-primary"
                   >
                     <div className="flex items-center gap-2 w-full">
-                      <ServiceIcon className="h-4 w-4 text-primary group-hover:text-white" />
+                      <ServiceIcon className={`h-4 w-4 ${serviceColors[item.serviceType as keyof typeof serviceColors] || 'text-primary'} group-hover:text-white`} />
                       <div className="flex-1 min-w-0">
                         <div className="font-medium text-sm truncate text-foreground group-hover:text-white">
                           {serviceLabel}

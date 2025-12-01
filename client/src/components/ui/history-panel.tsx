@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AnalysisPopup } from "@/components/ui/analysis-popup";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { History, Clock, User, TrendingUp, Target, Utensils, Zap, Video, GitCompare, Coins, Trash2 } from "lucide-react";
+import { History, Clock, User, Trophy, Star, AlertTriangle, Calendar, Apple, ClipboardList, Video, GitCompare, BarChart3, Coins, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -25,14 +25,47 @@ interface HistoryItem {
 
 const serviceIcons = {
   bio: User,
-  rank: TrendingUp,
-  strengths: Target,
-  weaknesses: Target,
-  development: Zap,
-
-  beat: Zap,
+  rank: Trophy,
+  strengths: Star,
+  weaknesses: AlertTriangle,
+  development: Calendar,
+  'development-plan': Calendar,
+  'nutrition-plan': Apple,
+  nutrition: Apple,
+  beat: ClipboardList,
   video: Video,
   comparison: GitCompare,
+  statistics: BarChart3,
+};
+
+const serviceColors = {
+  bio: "text-blue-500",
+  rank: "text-amber-500",
+  strengths: "text-green-500",
+  weaknesses: "text-red-500",
+  development: "text-purple-500",
+  'development-plan': "text-purple-500",
+  'nutrition-plan': "text-green-600",
+  nutrition: "text-green-600",
+  beat: "text-orange-500",
+  video: "text-purple-600",
+  comparison: "text-blue-600",
+  statistics: "text-blue-500",
+};
+
+const serviceBgColors = {
+  bio: "bg-blue-100",
+  rank: "bg-amber-100",
+  strengths: "bg-green-100",
+  weaknesses: "bg-red-100",
+  development: "bg-purple-100",
+  'development-plan': "bg-purple-100",
+  'nutrition-plan': "bg-green-100",
+  nutrition: "bg-green-100",
+  beat: "bg-orange-100",
+  video: "bg-purple-100",
+  comparison: "bg-blue-100",
+  statistics: "bg-blue-100",
 };
 
 const serviceLabels = {
@@ -179,6 +212,8 @@ export function HistoryPanel({ showHeader = true, className = "", onComparisonSe
           {historyItems.map((item) => {
             const ServiceIcon = serviceIcons[item.serviceType as keyof typeof serviceIcons] || User;
             const serviceLabel = serviceLabels[item.serviceType as keyof typeof serviceLabels] || item.serviceType;
+            const iconColor = serviceColors[item.serviceType as keyof typeof serviceColors] || "text-blue-500";
+            const bgColor = serviceBgColors[item.serviceType as keyof typeof serviceBgColors] || "bg-blue-100";
             
             return (
               <Card 
@@ -190,8 +225,8 @@ export function HistoryPanel({ showHeader = true, className = "", onComparisonSe
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="p-2 bg-blue-500/10 rounded-lg">
-                        <ServiceIcon className="h-4 w-4 text-blue-400" />
+                      <div className={`p-2 ${bgColor} rounded-lg`}>
+                        <ServiceIcon className={`h-4 w-4 ${iconColor}`} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-foreground truncate">
