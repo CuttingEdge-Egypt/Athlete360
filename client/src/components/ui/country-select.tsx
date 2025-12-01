@@ -43,7 +43,7 @@ export function CountrySelect({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full justify-between bg-muted border text-foreground hover:bg-slate-100",
+            "w-full justify-between bg-muted border text-foreground hover:bg-accent",
             className
           )}
           data-testid={testId}
@@ -71,7 +71,7 @@ export function CountrySelect({
                   onValueChange("all");
                   setOpen(false);
                 }}
-                className="text-foreground hover:bg-slate-100"
+                className="text-foreground hover:bg-accent"
               >
                 <Check
                   className={cn(
@@ -89,7 +89,7 @@ export function CountrySelect({
                     onValueChange(currentValue === value ? "" : currentValue);
                     setOpen(false);
                   }}
-                  className="text-foreground hover:bg-slate-100"
+                  className="text-foreground hover:bg-accent"
                 >
                   <Check
                     className={cn(
