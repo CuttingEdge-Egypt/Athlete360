@@ -1906,7 +1906,7 @@ export default function Home() {
                           variant="outline"
                           role="combobox"
                           aria-expanded={sportDropdownOpen}
-                          className="bg-muted border text-foreground flex-1 justify-between hover:bg-accent"
+                          className="bg-background border text-foreground flex-1 justify-between hover:bg-accent"
                           data-testid="select-sport"
                         >
                           <span className="truncate">
@@ -1989,7 +1989,7 @@ export default function Home() {
                       placeholder={t('interface.searchAthlete')}
                       value={searchName}
                       onChange={(e) => setSearchName(e.target.value)}
-                      className="bg-muted border text-foreground pl-10"
+                      className="bg-background border text-foreground pl-10"
                     />
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
                     {isSearchLoading && (
