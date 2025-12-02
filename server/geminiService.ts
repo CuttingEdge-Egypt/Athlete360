@@ -42,7 +42,7 @@ const googleGenAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || "");
 
 // Initialize Gemini 2.5 Pro model with web search capabilities
 const model = googleGenAI.getGenerativeModel({ 
-  model: "gemini-2.5-pro",
+  model: "gemini-3-pro-preview",
   generationConfig: {
     temperature: 0.1,
     maxOutputTokens: 9000, // Increased for complex analyses (dual-analysis, rank history)
@@ -499,7 +499,7 @@ Requirements for Week ${weekNumber}:
     const weekStartTime = Date.now();
 
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-3-pro-preview",
       config: {
         systemInstruction: systemPrompt,
         responseMimeType: "application/json",
@@ -859,7 +859,7 @@ CRITICAL ERROR HANDLING:
 - Only provide nutrition plans if you can find authentic dietary information for the athlete's sport and nationality`;
 
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-pro-preview",
       config: {
         systemInstruction: systemPrompt,
         responseMimeType: "application/json",
@@ -1043,7 +1043,7 @@ Return JSON in this EXACT format:
       result = await retryWithBackoff(
         async () => {
           const res = await genAI.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3-pro-preview",
             contents: prompt,
             config: {
               temperature: 0.1,
@@ -1160,7 +1160,7 @@ CRITICAL INSTRUCTIONS:
       result = await retryWithBackoff(
         async () => {
           const res = await genAI.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3-pro-preview",
             contents: prompt,
             config: {
               temperature: 0.1,
@@ -1277,7 +1277,7 @@ CRITICAL INSTRUCTIONS:
       result = await retryWithBackoff(
         async () => {
           const res = await genAI.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3-pro-preview",
             contents: prompt,
             config: {
               temperature: 0.1,
@@ -1376,7 +1376,7 @@ Return ONLY pure JSON:
       result = await retryWithBackoff(
         async () => {
           const res = await genAI.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3-pro-preview",
             contents: prompt,
             config: {
               temperature: 0.1,
@@ -1474,7 +1474,7 @@ Return ONLY pure JSON:
       result = await retryWithBackoff(
         async () => {
           const res = await genAI.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3-pro-preview",
             contents: prompt,
             config: {
               temperature: 0.1,
@@ -1648,7 +1648,7 @@ Return JSON:
       result = await retryWithBackoff(
         async () => {
           const res = await genAI.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3-pro-preview",
             contents: prompt,
             config: {
               temperature: 0.1,
@@ -1928,7 +1928,7 @@ Otherwise, ALWAYS return the complete structure with available data.`;
 
     // Use GoogleGenAI with search tools enabled
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-pro-preview",
       contents: prompt,
       config: {
         temperature: 0.1,
@@ -1983,7 +1983,7 @@ export async function generateDetailedComparison(
     const sessionId = Math.random().toString(36).substring(7);
 
     const model = googleGenAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-pro-preview",
       generationConfig: {
         temperature: 0.1,
         maxOutputTokens: 8192,
@@ -2268,7 +2268,7 @@ Return ONLY valid JSON with no markdown formatting or additional text.`;
 
     // Use GoogleGenAI client with proper search grounding
     const model = googleGenAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-pro-preview",
       generationConfig: {
         temperature: 1,
         maxOutputTokens: 8000,
@@ -2406,7 +2406,7 @@ export async function generateAthleteBiography(name: string, sport: string, nati
 
   try {
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-pro-preview",
       contents: prompt,
       config: {
         temperature: 1,
@@ -2778,7 +2778,7 @@ Return ONLY valid JSON.`;
     const start = Date.now();
     
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-3-pro-preview",
       config: {
         systemInstruction: systemPrompt,
         responseMimeType: "application/json",
@@ -2831,7 +2831,7 @@ Return ONLY valid JSON.`;
       };
       
       const retryResult = await genAI.models.generateContent({
-        model: "gemini-2.5-pro",
+        model: "gemini-3-pro-preview",
         config: {
           systemInstruction: "You are a sports trainer. Be concise.",
           responseMimeType: "application/json",
@@ -2955,7 +2955,7 @@ Return ONLY valid JSON with all content in English.`;
     
     // Use maximum token limit (8192 for Gemini 2.5 Pro)
     let result = await genAI.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-3-pro-preview",
       config: {
         systemInstruction: systemPrompt,
         responseMimeType: "application/json",
@@ -3262,10 +3262,10 @@ export async function getAthletePersonalInfoGemini(name: string, sport: string, 
     }`;
 
   try {
-    console.log(`🔍 Searching for personal info for ${name} using gemini-flash-latest with web search...`);
+    console.log(`🔍 Searching for personal info for ${name} using gemini-3-pro-preview with web search...`);
     
     const result = await genAI.models.generateContent({
-      model: "gemini-flash-latest",
+      model: "gemini-3-pro-preview",
       contents: prompt,
       config: {
         temperature: 0.7, // Less restrictive than 0.1, but more factual than 1.0
@@ -3411,7 +3411,7 @@ Return ONLY a JSON array of image URLs in this exact format:
 ["https://url1.jpg", "https://url2.png", "https://url3.webp"]`;
 
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-3-pro-preview",
       contents: prompt,
       config: {
         temperature: 0.1,
@@ -3650,7 +3650,7 @@ Return your analysis in this JSON format:
   const result = await retryWithBackoff(
     async () => {
       const res = await genAI.models.generateContent({
-        model: "gemini-2.5-pro",
+        model: "gemini-3-pro-preview",
         config: {
           responseMimeType: "application/json",
           responseSchema: responseSchema,
@@ -3762,7 +3762,7 @@ Return your analysis in this JSON format:
   const result = await retryWithBackoff(
     async () => {
       const res = await genAI.models.generateContent({
-        model: "gemini-2.5-pro",
+        model: "gemini-3-pro-preview",
         config: {
           temperature: 0.3,
           maxOutputTokens: 9000, // Increased to prevent truncation
@@ -4045,7 +4045,7 @@ IMPORTANT: For active_period, determine the start_year from the earliest competi
       result = await retryWithBackoff(
         async () => {
           const res = await genAI.models.generateContent({
-            model: "gemini-2.5-pro",
+            model: "gemini-3-pro-preview",
             config: {
               responseMimeType: "application/json",
               responseSchema: responseSchema,
@@ -4155,7 +4155,7 @@ IMPORTANT - INCLUDE REFERENCES:
 
   try {
     const result = await genAI.models.generateContent({
-      model: 'gemini-2.5-pro',
+      model: 'gemini-3-pro-preview',
       contents: prompt,
       config: {
         temperature: 0.3,
@@ -4234,7 +4234,7 @@ IMPORTANT:
 
   try {
     const result = await genAI.models.generateContent({
-      model: 'gemini-2.5-pro',
+      model: 'gemini-3-pro-preview',
       contents: prompt,
       config: {
         temperature: 0.1,

@@ -17,7 +17,7 @@ const generationConfig = {
 };
 
 const model = genai.getGenerativeModel({
-  model: "gemini-2.5-pro",
+  model: "gemini-3-pro-preview",
   generationConfig,
 });
 
@@ -730,7 +730,7 @@ ${isTeamSport ? `- TEAM SPORTS: Each prompt MUST include the 'team' field for ev
 
   try {
     const jsonModel = genai.getGenerativeModel({
-      model: "gemini-2.5-pro",
+      model: "gemini-3-pro-preview",
       generationConfig: {
         temperature: 0,
         maxOutputTokens: 65536, // Maximum for Gemini 2.5 Pro
@@ -826,7 +826,7 @@ MANDATORY JSON RETURN RULES:
     
     try {
       const jsonModel = genai.getGenerativeModel({
-        model: "gemini-2.5-pro",
+        model: "gemini-3-pro-preview",
         generationConfig: {
           temperature: 0,
           maxOutputTokens: 65536, // Maximum for Gemini 2.5 Pro
@@ -887,7 +887,7 @@ ${playerInclusionRule}
   
   try {
     const jsonModel = genai.getGenerativeModel({
-      model: "gemini-2.5-pro",
+      model: "gemini-3-pro-preview",
       generationConfig: {
         temperature: 0,
         maxOutputTokens: 65536, // Maximum for Gemini 2.5 Pro
@@ -1016,7 +1016,7 @@ MANDATORY JSON FORMAT:
 
     try {
       const jsonModel = genai.getGenerativeModel({
-        model: "gemini-2.5-pro",
+        model: "gemini-3-pro-preview",
         generationConfig: {
           temperature: 0,
           maxOutputTokens: 65536, // Maximum for Gemini 2.5 Pro
@@ -1112,7 +1112,7 @@ Look for names on screen, scoreboards, or mentioned by commentators.`;
 
     try {
       const jsonModel = genai.getGenerativeModel({
-        model: "gemini-2.5-pro",
+        model: "gemini-3-pro-preview",
         generationConfig: {
           temperature: 0,
           responseMimeType: "application/json",
@@ -1250,7 +1250,7 @@ export async function processVideoGemini(videoFilePath: string, roundToAnalyze: 
     
     // Create model instances
     const textModel = genai.getGenerativeModel({
-      model: "gemini-2.5-pro",
+      model: "gemini-3-pro-preview",
       generationConfig: {
         temperature: 0,
         maxOutputTokens: 65536, // Maximum for Gemini 2.5 Pro
@@ -1258,7 +1258,7 @@ export async function processVideoGemini(videoFilePath: string, roundToAnalyze: 
     });
 
     const jsonModel = genai.getGenerativeModel({
-      model: "gemini-2.5-pro", 
+      model: "gemini-3-pro-preview", 
       generationConfig: {
         temperature: 0,
         maxOutputTokens: 65536, // Maximum for Gemini 2.5 Pro
@@ -1816,7 +1816,7 @@ Look for team names on jerseys, scoreboards, or court/field markings. If team na
         
         try {
           const model = genai.getGenerativeModel({
-            model: "gemini-2.5-pro",
+            model: "gemini-3-pro-preview",
             generationConfig: {
               temperature: 0,
               responseMimeType: "application/json",
@@ -1840,7 +1840,7 @@ Look for team names on jerseys, scoreboards, or court/field markings. If team na
       const scoreGenerationPromise = generateSeparateScores(uploadedFile, sport, roundToAnalyze, teamIdentification);
       
       const model2 = genai.getGenerativeModel({
-        model: "gemini-2.5-pro",
+        model: "gemini-3-pro-preview",
         generationConfig: {
           temperature: 0.3,
         }
@@ -2176,7 +2176,7 @@ Use your expertise in ${sport} to provide comprehensive technical guidance based
     
     // Generate analysis (web search is not supported with video files)
     const clipAnalysisModel = genai.getGenerativeModel({
-      model: "gemini-2.5-pro",
+      model: "gemini-3-pro-preview",
       generationConfig: {
         temperature: 0.7, // Slightly higher for more conversational responses
         maxOutputTokens: 65536, // Maximum for Gemini 2.5 Pro
