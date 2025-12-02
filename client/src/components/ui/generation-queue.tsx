@@ -132,6 +132,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
         'nutrition-plan': t('services.nutritionPlan.title'),
         nutrition: t('services.nutritionPlan.title'),
         beat: t('services.tacticRecommendations.title'),
+        'beat-strategies': t('services.tacticRecommendations.title'),
         video: t('services.videoAnalysis.title'),
         comparison: t('services.athleteComparison.title'),
         statistics: t('services.statistics.title'),
@@ -163,6 +164,7 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
       case 'development-plan':
         return <Calendar {...iconProps} />;
       case 'beat':
+      case 'beat-strategies':
         return <ClipboardList {...iconProps} />;
       case 'video':
         return <Video {...iconProps} />;
