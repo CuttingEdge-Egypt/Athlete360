@@ -961,6 +961,7 @@ async function generateSeparateScores(
 2. In "current_score" for each event, show that team's cumulative score
 3. All timestamps MUST be in MM:SS format
 4. Track events chronologically as they happen in the video
+5. "uniform_color" field: LOOK AT THE VIDEO and identify the PRIMARY jersey/uniform color each team is wearing (e.g., "purple", "white", "blue", "gold", "red", "black", "green", etc.)
 
 MANDATORY JSON FORMAT:
 {
@@ -968,6 +969,7 @@ MANDATORY JSON FORMAT:
     {
       "entity_name": "${teamIdentification.team1}",
       "entity_type": "team",
+      "uniform_color": "purple",
       "events": [
         {
           "timestamp": "00:15",
@@ -988,6 +990,7 @@ MANDATORY JSON FORMAT:
     {
       "entity_name": "${teamIdentification.team2}",
       "entity_type": "team",
+      "uniform_color": "white",
       "events": [
         {
           "timestamp": "00:30",
@@ -1012,7 +1015,8 @@ MANDATORY JSON FORMAT:
 - Track ALL scoring events for BOTH teams
 - current_score = ONLY that team's total points (NOT combined score)
 - Verify each event is attributed to the correct team
-- Events should be in chronological order within each team's array`;
+- Events should be in chronological order within each team's array
+- uniform_color MUST reflect the actual jersey/uniform color visible in the video`;
 
     try {
       const jsonModel = genai.getGenerativeModel({
