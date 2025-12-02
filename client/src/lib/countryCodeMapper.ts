@@ -109,7 +109,59 @@ export const countryCodeMap: Record<string, string> = {
 };
 
 // Map 3-letter ISO codes to 2-letter codes
+// Also includes IOC (International Olympic Committee) codes used in sports
 const iso3ToIso2Map: Record<string, string> = {
+  // IOC codes that DIFFER from ISO 3166-1 alpha-3 (used in sports events)
+  "PHI": "PH",  // Philippines (ISO: PHL)
+  "GER": "DE",  // Germany (ISO: DEU)
+  "NED": "NL",  // Netherlands (ISO: NLD)
+  "SUI": "CH",  // Switzerland (ISO: CHE)
+  "POR": "PT",  // Portugal (ISO: PRT)
+  "GRE": "GR",  // Greece (ISO: GRC)
+  "CRO": "HR",  // Croatia (ISO: HRV)
+  "RSA": "ZA",  // South Africa (ISO: ZAF)
+  "TPE": "TW",  // Chinese Taipei/Taiwan (ISO: TWN)
+  "IRI": "IR",  // Iran (ISO: IRN)
+  "MAS": "MY",  // Malaysia (ISO: MYS)
+  "SIN": "SG",  // Singapore (ISO: SGP)
+  "INA": "ID",  // Indonesia (ISO: IDN)
+  "VIE": "VN",  // Vietnam (ISO: VNM)
+  "HKG": "HK",  // Hong Kong
+  "DEN": "DK",  // Denmark (ISO: DNK)
+  "SLO": "SI",  // Slovenia (ISO: SVN)
+  "LAT": "LV",  // Latvia (ISO: LVA)
+  "BUL": "BG",  // Bulgaria (ISO: BGR)
+  "MGL": "MN",  // Mongolia (ISO: MNG)
+  "CHI": "CL",  // Chile (ISO: CHL)
+  "URU": "UY",  // Uruguay (ISO: URY)
+  "PAR": "PY",  // Paraguay (ISO: PRY)
+  "PUR": "PR",  // Puerto Rico (ISO: PRI)
+  "ESA": "SV",  // El Salvador (ISO: SLV)
+  "GUA": "GT",  // Guatemala (ISO: GTM)
+  "HON": "HN",  // Honduras (ISO: HND)
+  "CRC": "CR",  // Costa Rica (ISO: CRI)
+  "TRI": "TT",  // Trinidad and Tobago (ISO: TTO)
+  "BAH": "BS",  // Bahamas (ISO: BHS)
+  "BER": "BM",  // Bermuda (ISO: BMU)
+  "CAY": "KY",  // Cayman Islands (ISO: CYM)
+  "ISV": "VI",  // US Virgin Islands (ISO: VIR)
+  "NGR": "NG",  // Nigeria (ISO: NGA)
+  "ALG": "DZ",  // Algeria (ISO: DZA)
+  "LBA": "LY",  // Libya (ISO: LBY)
+  "TAN": "TZ",  // Tanzania (ISO: TZA)
+  "ZAM": "ZM",  // Zambia (ISO: ZMB)
+  "ZIM": "ZW",  // Zimbabwe (ISO: ZWE)
+  "BOT": "BW",  // Botswana (ISO: BWA)
+  "ANG": "AO",  // Angola (ISO: AGO)
+  "MAD": "MG",  // Madagascar (ISO: MDG)
+  "SEY": "SC",  // Seychelles (ISO: SYC)
+  "MRI": "MU",  // Mauritius (ISO: MUS)
+  "CGO": "CG",  // Congo (ISO: COG)
+  "TOG": "TG",  // Togo (ISO: TGO)
+  "BUR": "BF",  // Burkina Faso (ISO: BFA)
+  "NIG": "NE",  // Niger (ISO: NER)
+  
+  // Standard ISO 3166-1 alpha-3 codes
   "AFG": "AF", "ALB": "AL", "DZA": "DZ", "AND": "AD", "AGO": "AO", "ATG": "AG",
   "ARG": "AR", "ARM": "AM", "AUS": "AU", "AUT": "AT", "AZE": "AZ", "BHS": "BS",
   "BHR": "BH", "BGD": "BD", "BRB": "BB", "BLR": "BY", "BEL": "BE", "BLZ": "BZ",
