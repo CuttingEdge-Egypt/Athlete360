@@ -29,10 +29,10 @@ export function CancelConfirmationDialog({
   
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
-      <DialogContent className="bg-card border text-white">
-        <DialogHeader>
-          <DialogTitle className="text-white">{title || t('services.queue.cancelDialog.title')}</DialogTitle>
-          <DialogDescription className="text-foreground">
+      <DialogContent className="bg-card border text-foreground max-w-md [&>button]:text-foreground [&>button]:bg-muted/50 [&>button]:hover:bg-muted [&>button]:rounded-full [&>button]:p-1">
+        <DialogHeader className="text-right">
+          <DialogTitle className="text-foreground">{title || t('services.queue.cancelDialog.title')}</DialogTitle>
+          <DialogDescription className="text-muted-foreground text-right">
             {description || t('services.queue.cancelDialog.description')}
           </DialogDescription>
         </DialogHeader>

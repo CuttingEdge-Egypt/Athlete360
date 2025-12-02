@@ -93,13 +93,24 @@ export function HistoryDropdown({ customTrigger }: HistoryDropdownProps = {}) {
     return serviceLabels[serviceType] || serviceType;
   };
 
-  const { data: historyItems = [], isLoading } = useQuery<HistoryItem[]>({
+  const { data: rawHistoryItems = [], isLoading } = useQuery<HistoryItem[]>({
     queryKey: ["/api/user-history"],
     queryFn: async () => {
       const response = await fetch(`/api/user-history`);
       if (!response.ok) throw new Error('Failed to fetch history');
       return response.json();
     }
+  });
+  
+  // Filter out cancelled generations and refund entries from display
+  const historyItems = rawHistoryItems.filter((item: HistoryItem) => {
+    // Exclude refund entries (serviceType ends with -refund)
+    if (item.serviceType?.includes('-refund')) return false;
+    // Exclude cancelled entries (action contains "CANCELLED" or "REFUND")
+    if (item.action?.includes('CANCELLED') || item.action?.includes('REFUND')) return false;
+    // Exclude items with negative tokens (refunds)
+    if (item.tokensDeducted < 0) return false;
+    return true;
   });
 
   const clearHistoryMutation = useMutation({

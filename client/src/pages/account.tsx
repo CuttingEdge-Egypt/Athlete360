@@ -125,9 +125,20 @@ export default function Account() {
     }
   });
 
-  // Fetch user history
-  const { data: history = [] } = useQuery<any[]>({
+  // Fetch user history (filter out cancelled and refund entries)
+  const { data: rawHistory = [] } = useQuery<any[]>({
     queryKey: ["/api/user-history"]
+  });
+  
+  // Filter out cancelled generations and refund entries from display
+  const history = rawHistory.filter((item: any) => {
+    // Exclude refund entries (serviceType ends with -refund)
+    if (item.serviceType?.includes('-refund')) return false;
+    // Exclude cancelled entries (action contains "CANCELLED" or "REFUND")
+    if (item.action?.includes('CANCELLED') || item.action?.includes('REFUND')) return false;
+    // Exclude items with negative tokens (refunds)
+    if (item.tokensDeducted < 0) return false;
+    return true;
   });
 
   const handleSaveProfile = () => {

@@ -92,8 +92,19 @@ export function HistoryPanel({ showHeader = true, className = "", onComparisonSe
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: historyItems = [], isLoading } = useQuery<HistoryItem[]>({
+  const { data: rawHistoryItems = [], isLoading } = useQuery<HistoryItem[]>({
     queryKey: ["/api/user-history"],
+  });
+  
+  // Filter out cancelled generations and refund entries from display
+  const historyItems = rawHistoryItems.filter((item: HistoryItem) => {
+    // Exclude refund entries (serviceType ends with -refund)
+    if (item.serviceType?.includes('-refund')) return false;
+    // Exclude cancelled entries (action contains "CANCELLED" or "REFUND")
+    if (item.action?.includes('CANCELLED') || item.action?.includes('REFUND')) return false;
+    // Exclude items with negative tokens (refunds)
+    if (item.tokensDeducted < 0) return false;
+    return true;
   });
 
   const clearHistoryMutation = useMutation({
