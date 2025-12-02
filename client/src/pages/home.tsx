@@ -1906,7 +1906,7 @@ export default function Home() {
                           variant="outline"
                           role="combobox"
                           aria-expanded={sportDropdownOpen}
-                          className="bg-background border text-foreground flex-1 justify-between hover:bg-accent"
+                          className="bg-white border text-foreground flex-1 justify-between hover:bg-accent"
                           data-testid="select-sport"
                         >
                           <span className="truncate">
@@ -1989,7 +1989,7 @@ export default function Home() {
                       placeholder={t('interface.searchAthlete')}
                       value={searchName}
                       onChange={(e) => setSearchName(e.target.value)}
-                      className="bg-background border text-foreground pl-10"
+                      className="bg-white border text-foreground pl-10"
                     />
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
                     {isSearchLoading && (
@@ -2609,7 +2609,7 @@ export default function Home() {
               {/* Empty State */}
               {!selectedAthlete && (
                 <div className="text-center py-20">
-                  <div className="text-6xl mb-4">🏆</div>
+                  <div className="text-6xl mb-4">📊</div>
                   <h3 className="text-2xl font-bold mb-4 text-foreground">{t('interface.readyToAnalyze.title')}</h3>
                   <p className="text-muted-foreground max-w-md mx-auto">
                     {t('interface.readyToAnalyze.description')}
