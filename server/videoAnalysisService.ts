@@ -17,7 +17,7 @@ const generationConfig = {
 };
 
 const model = genai.getGenerativeModel({
-  model: "gemini-3-pro",
+  model: "gemini-2.5-pro",
   generationConfig,
 });
 
