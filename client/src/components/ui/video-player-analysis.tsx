@@ -1233,7 +1233,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
       const formattedText = paragraph.split(/(\*\*[^*]+\*\*)/g).map((part, partIndex) => {
         if (part.startsWith('**') && part.endsWith('**')) {
           const boldText = part.slice(2, -2);
-          return <strong key={partIndex} className="font-bold text-white">{boldText}</strong>;
+          return <strong key={partIndex} className="font-bold text-gray-900">{boldText}</strong>;
         }
         return part;
       });
@@ -1260,18 +1260,18 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           {isTaekwondo ? (
             <>
               {/* Blue Kicks */}
-              <Card className="bg-blue-900/20 border-blue-500/30" data-testid="blue-kicks-card">
+              <Card className="bg-blue-50 border-blue-200 shadow-sm" data-testid="blue-kicks-card">
                 <CardContent className="p-2 sm:p-4 text-center">
-                  <div className="text-blue-400 font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate">{getTitle(sportConfig.action)}</div>
-                  <div className="text-xl sm:text-2xl font-bold text-blue-300" data-testid="blue-kicks">{blueKicks}</div>
+                  <div className="text-blue-700 font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate">{getTitle(sportConfig.action)}</div>
+                  <div className="text-xl sm:text-2xl font-bold text-blue-600" data-testid="blue-kicks">{blueKicks}</div>
                 </CardContent>
               </Card>
 
               {/* Blue Yellow Cards */}
-              <Card className="bg-blue-900/20 border-blue-500/30" data-testid="blue-cards-card">
+              <Card className="bg-blue-50 border-blue-200 shadow-sm" data-testid="blue-cards-card">
                 <CardContent className="p-2 sm:p-4 text-center">
-                  <div className="text-blue-400 font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate">{getTitle(sportConfig.violation)}</div>
-                  <div className="text-xl sm:text-2xl font-bold text-yellow-400" data-testid="blue-cards">{currentStats.blueCards}</div>
+                  <div className="text-blue-700 font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate">{getTitle(sportConfig.violation)}</div>
+                  <div className="text-xl sm:text-2xl font-bold text-yellow-600" data-testid="blue-cards">{currentStats.blueCards}</div>
                 </CardContent>
               </Card>
             </>
@@ -1286,11 +1286,11 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   
                   if (!team1) {
                     return (
-                      <Card key={index} className="bg-blue-900/20 border-blue-500/30" data-testid={`metric-${index}-team-1`}>
+                      <Card key={index} className="bg-blue-50 border-blue-200 shadow-sm" data-testid={`metric-${index}-team-1`}>
                         <CardContent className="p-2 sm:p-4 text-center">
-                          <div className={`text-blue-400 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
-                          <div className="text-[10px] sm:text-xs text-blue-300 mb-1 truncate">No data</div>
-                          <div className="text-xl sm:text-2xl font-bold text-blue-300">0</div>
+                          <div className={`text-blue-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
+                          <div className="text-[10px] sm:text-xs text-blue-600 mb-1 truncate">No data</div>
+                          <div className="text-xl sm:text-2xl font-bold text-blue-600">0</div>
                         </CardContent>
                       </Card>
                     );
@@ -1302,13 +1302,13 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   const lastEvent = currentEvents[currentEvents.length - 1];
                   
                   return (
-                    <Card key={index} className="bg-blue-900/20 border-blue-500/30" data-testid={`metric-${index}-team-1`}>
+                    <Card key={index} className="bg-blue-50 border-blue-200 shadow-sm" data-testid={`metric-${index}-team-1`}>
                       <CardContent className="p-2 sm:p-4 text-center">
-                        <div className={`text-blue-400 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
-                        <div className="text-[10px] sm:text-xs text-blue-300 mb-1 transition-all duration-300 truncate">
+                        <div className={`text-blue-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
+                        <div className="text-[10px] sm:text-xs text-blue-600 mb-1 transition-all duration-300 truncate">
                           {lastEvent ? lastEvent.playerName : team1.name}
                         </div>
-                        <div className="text-xl sm:text-2xl font-bold text-blue-300">{currentValue}</div>
+                        <div className="text-xl sm:text-2xl font-bold text-blue-600">{currentValue}</div>
                       </CardContent>
                     </Card>
                   );
@@ -1318,11 +1318,11 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   const player1 = playerValues[0] || { name: 'Player 1', value: 0 };
                   
                   return (
-                    <Card key={index} className="bg-blue-900/20 border-blue-500/30" data-testid={`metric-${index}-player-1`}>
+                    <Card key={index} className="bg-blue-50 border-blue-200 shadow-sm" data-testid={`metric-${index}-player-1`}>
                       <CardContent className="p-2 sm:p-4 text-center">
-                        <div className={`text-blue-400 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
-                        <div className="text-[10px] sm:text-xs text-blue-300 mb-1 truncate">{player1.name}</div>
-                        <div className="text-xl sm:text-2xl font-bold text-blue-300" data-testid={`metric-value-${index}-player-1`}>{player1.value}</div>
+                        <div className={`text-blue-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
+                        <div className="text-[10px] sm:text-xs text-blue-600 mb-1 truncate">{player1.name}</div>
+                        <div className="text-xl sm:text-2xl font-bold text-blue-600" data-testid={`metric-value-${index}-player-1`}>{player1.value}</div>
                       </CardContent>
                     </Card>
                   );
@@ -1372,7 +1372,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                 }
                 
                 return (
-                  <div className="bg-gradient-to-r from-blue-900/40 via-athlete-gray-800 to-red-900/40 border-b border-slate-200 px-3 sm:px-6 py-3 sm:py-4">
+                  <div className="bg-white border-b border-gray-200 px-3 sm:px-6 py-3 sm:py-4">
                     <div className="flex items-center justify-between max-w-4xl mx-auto">
                       {/* Entity 1 (Blue/Team 1) */}
                       <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
@@ -1383,25 +1383,25 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                           />
                         )}
                         <div className="flex-1 text-left min-w-0">
-                          <div className="text-xs sm:text-lg font-bold text-blue-300 truncate">{entity1Name}</div>
+                          <div className="text-xs sm:text-lg font-bold text-blue-700 truncate">{entity1Name}</div>
                           {isTeamSport && entity1Scorer && (
-                            <div className="text-[10px] sm:text-xs text-blue-400 font-medium mt-0.5 truncate" data-testid="entity1-scorer">
+                            <div className="text-[10px] sm:text-xs text-blue-600 font-medium mt-0.5 truncate" data-testid="entity1-scorer">
                               {entity1Scorer}
                             </div>
                           )}
                           {entity1Country && !isTeamSport && (
-                            <div className="text-[10px] sm:text-xs text-muted-foreground truncate">{entity1Country}</div>
+                            <div className="text-[10px] sm:text-xs text-gray-500 truncate">{entity1Country}</div>
                           )}
                         </div>
                       </div>
                       
                       {/* Score Display */}
                       <div className="flex items-center gap-2 sm:gap-4 px-2 sm:px-6 flex-shrink-0">
-                        <div className="text-2xl sm:text-4xl font-bold text-blue-400" data-testid="entity1-score">
+                        <div className="text-2xl sm:text-4xl font-bold text-blue-600" data-testid="entity1-score">
                           {entity1Score}
                         </div>
-                        <div className="text-lg sm:text-2xl font-bold text-muted-foreground">-</div>
-                        <div className="text-2xl sm:text-4xl font-bold text-red-400" data-testid="entity2-score">
+                        <div className="text-lg sm:text-2xl font-bold text-gray-400">-</div>
+                        <div className="text-2xl sm:text-4xl font-bold text-red-600" data-testid="entity2-score">
                           {entity2Score}
                         </div>
                       </div>
@@ -1409,14 +1409,14 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                       {/* Entity 2 (Red/Team 2) */}
                       <div className="flex items-center gap-2 sm:gap-3 flex-1 justify-end min-w-0">
                         <div className="flex-1 text-right min-w-0">
-                          <div className="text-xs sm:text-lg font-bold text-red-300 truncate">{entity2Name}</div>
+                          <div className="text-xs sm:text-lg font-bold text-red-700 truncate">{entity2Name}</div>
                           {isTeamSport && entity2Scorer && (
-                            <div className="text-[10px] sm:text-xs text-red-400 font-medium mt-0.5 truncate" data-testid="entity2-scorer">
+                            <div className="text-[10px] sm:text-xs text-red-600 font-medium mt-0.5 truncate" data-testid="entity2-scorer">
                               {entity2Scorer}
                             </div>
                           )}
                           {entity2Country && !isTeamSport && (
-                            <div className="text-[10px] sm:text-xs text-muted-foreground truncate">{entity2Country}</div>
+                            <div className="text-[10px] sm:text-xs text-gray-500 truncate">{entity2Country}</div>
                           )}
                         </div>
                         {entity2Country && (
@@ -1582,18 +1582,18 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           {isTaekwondo ? (
             <>
               {/* Red Kicks */}
-              <Card className="bg-red-900/20 border-red-500/30" data-testid="red-kicks-card">
+              <Card className="bg-red-50 border-red-200 shadow-sm" data-testid="red-kicks-card">
                 <CardContent className="p-2 sm:p-4 text-center">
-                  <div className="text-red-400 font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate">{getTitle(sportConfig.action)}</div>
-                  <div className="text-xl sm:text-2xl font-bold text-red-300" data-testid="red-kicks">{redKicks}</div>
+                  <div className="text-red-700 font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate">{getTitle(sportConfig.action)}</div>
+                  <div className="text-xl sm:text-2xl font-bold text-red-600" data-testid="red-kicks">{redKicks}</div>
                 </CardContent>
               </Card>
 
               {/* Red Yellow Cards */}
-              <Card className="bg-red-900/20 border-red-500/30" data-testid="red-cards-card">
+              <Card className="bg-red-50 border-red-200 shadow-sm" data-testid="red-cards-card">
                 <CardContent className="p-2 sm:p-4 text-center">
-                  <div className="text-red-400 font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate">{getTitle(sportConfig.violation)}</div>
-                  <div className="text-xl sm:text-2xl font-bold text-yellow-400" data-testid="red-cards">{currentStats.redCards}</div>
+                  <div className="text-red-700 font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate">{getTitle(sportConfig.violation)}</div>
+                  <div className="text-xl sm:text-2xl font-bold text-yellow-600" data-testid="red-cards">{currentStats.redCards}</div>
                 </CardContent>
               </Card>
             </>
@@ -1608,11 +1608,11 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   
                   if (!team2) {
                     return (
-                      <Card key={index} className="bg-red-900/20 border-red-500/30" data-testid={`metric-${index}-team-2`}>
+                      <Card key={index} className="bg-red-50 border-red-200 shadow-sm" data-testid={`metric-${index}-team-2`}>
                         <CardContent className="p-2 sm:p-4 text-center">
-                          <div className={`text-red-400 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
-                          <div className="text-[10px] sm:text-xs text-red-300 mb-1 truncate">No data</div>
-                          <div className="text-xl sm:text-2xl font-bold text-red-300">0</div>
+                          <div className={`text-red-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
+                          <div className="text-[10px] sm:text-xs text-red-600 mb-1 truncate">No data</div>
+                          <div className="text-xl sm:text-2xl font-bold text-red-600">0</div>
                         </CardContent>
                       </Card>
                     );
@@ -1624,13 +1624,13 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   const lastEvent = currentEvents[currentEvents.length - 1];
                   
                   return (
-                    <Card key={index} className="bg-red-900/20 border-red-500/30" data-testid={`metric-${index}-team-2`}>
+                    <Card key={index} className="bg-red-50 border-red-200 shadow-sm" data-testid={`metric-${index}-team-2`}>
                       <CardContent className="p-2 sm:p-4 text-center">
-                        <div className={`text-red-400 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
-                        <div className="text-[10px] sm:text-xs text-red-300 mb-1 transition-all duration-300 truncate">
+                        <div className={`text-red-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
+                        <div className="text-[10px] sm:text-xs text-red-600 mb-1 transition-all duration-300 truncate">
                           {lastEvent ? lastEvent.playerName : team2.name}
                         </div>
-                        <div className="text-xl sm:text-2xl font-bold text-red-300">{currentValue}</div>
+                        <div className="text-xl sm:text-2xl font-bold text-red-600">{currentValue}</div>
                       </CardContent>
                     </Card>
                   );
@@ -1640,11 +1640,11 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   const player2 = playerValues[1] || { name: 'Player 2', value: 0 };
                   
                   return (
-                    <Card key={index} className="bg-red-900/20 border-red-500/30" data-testid={`metric-${index}-player-2`}>
+                    <Card key={index} className="bg-red-50 border-red-200 shadow-sm" data-testid={`metric-${index}-player-2`}>
                       <CardContent className="p-2 sm:p-4 text-center">
-                        <div className={`text-red-400 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
-                        <div className="text-[10px] sm:text-xs text-red-300 mb-1 truncate">{player2.name}</div>
-                        <div className="text-xl sm:text-2xl font-bold text-red-300" data-testid={`metric-value-${index}-player-2`}>{player2.value}</div>
+                        <div className={`text-red-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
+                        <div className="text-[10px] sm:text-xs text-red-600 mb-1 truncate">{player2.name}</div>
+                        <div className="text-xl sm:text-2xl font-bold text-red-600" data-testid={`metric-value-${index}-player-2`}>{player2.value}</div>
                       </CardContent>
                     </Card>
                   );
@@ -1658,8 +1658,8 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
       {/* Match Analysis - Bottom */}
       <Card className="bg-slate-50 border-slate-200">
         <CardHeader>
-          <CardTitle className="text-white flex items-center">
-            <Trophy className="mr-2 text-yellow-400" size={20} />
+          <CardTitle className="text-gray-900 flex items-center">
+            <Trophy className="mr-2 text-yellow-500" size={20} />
             {getTitle('Complete Match Analysis')}
           </CardTitle>
         </CardHeader>
