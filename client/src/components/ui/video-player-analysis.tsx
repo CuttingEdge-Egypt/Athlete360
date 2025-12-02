@@ -1262,17 +1262,19 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
             <>
               {/* Blue Kicks - Glassmorphism */}
               <div 
-                className="rounded-2xl text-center"
+                className="rounded-[20px] text-center relative overflow-hidden"
                 style={{ 
                   background: 'rgba(255, 255, 255, 0.23)',
-                  boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-                  backdropFilter: 'blur(6.7px)',
-                  WebkitBackdropFilter: 'blur(6.7px)',
-                  border: '1px solid rgba(255, 255, 255, 0.17)'
+                  backdropFilter: 'blur(13px)',
+                  WebkitBackdropFilter: 'blur(13px)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px 7px rgba(255, 255, 255, 0.7)'
                 }}
                 data-testid="blue-kicks-card"
               >
-                <div className="p-2 sm:p-4">
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
+                <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-white/80 via-transparent to-white/30"></div>
+                <div className="p-2 sm:p-4 relative">
                   <div className="text-blue-700 font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate">{getTitle(sportConfig.action)}</div>
                   <div className="text-xl sm:text-2xl font-bold text-blue-600" data-testid="blue-kicks">{blueKicks}</div>
                 </div>
@@ -1280,17 +1282,19 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
 
               {/* Blue Yellow Cards - Glassmorphism */}
               <div 
-                className="rounded-2xl text-center"
+                className="rounded-[20px] text-center relative overflow-hidden"
                 style={{ 
                   background: 'rgba(255, 255, 255, 0.23)',
-                  boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-                  backdropFilter: 'blur(6.7px)',
-                  WebkitBackdropFilter: 'blur(6.7px)',
-                  border: '1px solid rgba(255, 255, 255, 0.17)'
+                  backdropFilter: 'blur(13px)',
+                  WebkitBackdropFilter: 'blur(13px)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px 7px rgba(255, 255, 255, 0.7)'
                 }}
                 data-testid="blue-cards-card"
               >
-                <div className="p-2 sm:p-4">
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
+                <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-white/80 via-transparent to-white/30"></div>
+                <div className="p-2 sm:p-4 relative">
                   <div className="text-blue-700 font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate">{getTitle(sportConfig.violation)}</div>
                   <div className="text-xl sm:text-2xl font-bold text-yellow-600" data-testid="blue-cards">{currentStats.blueCards}</div>
                 </div>
@@ -1309,17 +1313,19 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                     return (
                       <div 
                         key={index} 
-                        className="rounded-2xl text-center"
+                        className="rounded-[20px] text-center relative overflow-hidden"
                         style={{ 
                           background: 'rgba(255, 255, 255, 0.23)',
-                          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-                          backdropFilter: 'blur(6.7px)',
-                          WebkitBackdropFilter: 'blur(6.7px)',
-                          border: '1px solid rgba(255, 255, 255, 0.17)'
+                          backdropFilter: 'blur(13px)',
+                          WebkitBackdropFilter: 'blur(13px)',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px 7px rgba(255, 255, 255, 0.7)'
                         }}
                         data-testid={`metric-${index}-team-1`}
                       >
-                        <div className="p-2 sm:p-4">
+                        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
+                        <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-white/80 via-transparent to-white/30"></div>
+                        <div className="p-2 sm:p-4 relative">
                           <div className={`text-blue-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
                           <div className="text-[10px] sm:text-xs text-blue-600 mb-1 truncate">No data</div>
                           <div className="text-xl sm:text-2xl font-bold text-blue-600">0</div>
@@ -1336,17 +1342,19 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   return (
                     <div 
                       key={index} 
-                      className="rounded-2xl text-center"
+                      className="rounded-[20px] text-center relative overflow-hidden"
                       style={{ 
                         background: 'rgba(255, 255, 255, 0.23)',
-                        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-                        backdropFilter: 'blur(6.7px)',
-                        WebkitBackdropFilter: 'blur(6.7px)',
-                        border: '1px solid rgba(255, 255, 255, 0.17)'
+                        backdropFilter: 'blur(13px)',
+                        WebkitBackdropFilter: 'blur(13px)',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px 7px rgba(255, 255, 255, 0.7)'
                       }}
                       data-testid={`metric-${index}-team-1`}
                     >
-                      <div className="p-2 sm:p-4">
+                      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
+                      <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-white/80 via-transparent to-white/30"></div>
+                      <div className="p-2 sm:p-4 relative">
                         <div className={`text-blue-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
                         <div className="text-[10px] sm:text-xs text-blue-600 mb-1 transition-all duration-300 truncate">
                           {lastEvent ? lastEvent.playerName : team1.name}
@@ -1363,17 +1371,19 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   return (
                     <div 
                       key={index} 
-                      className="rounded-2xl text-center"
+                      className="rounded-[20px] text-center relative overflow-hidden"
                       style={{ 
                         background: 'rgba(255, 255, 255, 0.23)',
-                        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-                        backdropFilter: 'blur(6.7px)',
-                        WebkitBackdropFilter: 'blur(6.7px)',
-                        border: '1px solid rgba(255, 255, 255, 0.17)'
+                        backdropFilter: 'blur(13px)',
+                        WebkitBackdropFilter: 'blur(13px)',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px 7px rgba(255, 255, 255, 0.7)'
                       }}
                       data-testid={`metric-${index}-player-1`}
                     >
-                      <div className="p-2 sm:p-4">
+                      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
+                      <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-white/80 via-transparent to-white/30"></div>
+                      <div className="p-2 sm:p-4 relative">
                         <div className={`text-blue-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
                         <div className="text-[10px] sm:text-xs text-blue-600 mb-1 truncate">{player1.name}</div>
                         <div className="text-xl sm:text-2xl font-bold text-blue-600" data-testid={`metric-value-${index}-player-1`}>{player1.value}</div>
@@ -1637,17 +1647,19 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
             <>
               {/* Red Kicks - Glassmorphism */}
               <div 
-                className="rounded-2xl text-center"
+                className="rounded-[20px] text-center relative overflow-hidden"
                 style={{ 
                   background: 'rgba(255, 255, 255, 0.23)',
-                  boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-                  backdropFilter: 'blur(6.7px)',
-                  WebkitBackdropFilter: 'blur(6.7px)',
-                  border: '1px solid rgba(255, 255, 255, 0.17)'
+                  backdropFilter: 'blur(13px)',
+                  WebkitBackdropFilter: 'blur(13px)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px 7px rgba(255, 255, 255, 0.7)'
                 }}
                 data-testid="red-kicks-card"
               >
-                <div className="p-2 sm:p-4">
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
+                <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-white/80 via-transparent to-white/30"></div>
+                <div className="p-2 sm:p-4 relative">
                   <div className="text-red-700 font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate">{getTitle(sportConfig.action)}</div>
                   <div className="text-xl sm:text-2xl font-bold text-red-600" data-testid="red-kicks">{redKicks}</div>
                 </div>
@@ -1655,17 +1667,19 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
 
               {/* Red Yellow Cards - Glassmorphism */}
               <div 
-                className="rounded-2xl text-center"
+                className="rounded-[20px] text-center relative overflow-hidden"
                 style={{ 
                   background: 'rgba(255, 255, 255, 0.23)',
-                  boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-                  backdropFilter: 'blur(6.7px)',
-                  WebkitBackdropFilter: 'blur(6.7px)',
-                  border: '1px solid rgba(255, 255, 255, 0.17)'
+                  backdropFilter: 'blur(13px)',
+                  WebkitBackdropFilter: 'blur(13px)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px 7px rgba(255, 255, 255, 0.7)'
                 }}
                 data-testid="red-cards-card"
               >
-                <div className="p-2 sm:p-4">
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
+                <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-white/80 via-transparent to-white/30"></div>
+                <div className="p-2 sm:p-4 relative">
                   <div className="text-red-700 font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate">{getTitle(sportConfig.violation)}</div>
                   <div className="text-xl sm:text-2xl font-bold text-yellow-600" data-testid="red-cards">{currentStats.redCards}</div>
                 </div>
@@ -1684,17 +1698,19 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                     return (
                       <div 
                         key={index} 
-                        className="rounded-2xl text-center"
+                        className="rounded-[20px] text-center relative overflow-hidden"
                         style={{ 
                           background: 'rgba(255, 255, 255, 0.23)',
-                          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-                          backdropFilter: 'blur(6.7px)',
-                          WebkitBackdropFilter: 'blur(6.7px)',
-                          border: '1px solid rgba(255, 255, 255, 0.17)'
+                          backdropFilter: 'blur(13px)',
+                          WebkitBackdropFilter: 'blur(13px)',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px 7px rgba(255, 255, 255, 0.7)'
                         }}
                         data-testid={`metric-${index}-team-2`}
                       >
-                        <div className="p-2 sm:p-4">
+                        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
+                        <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-white/80 via-transparent to-white/30"></div>
+                        <div className="p-2 sm:p-4 relative">
                           <div className={`text-red-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
                           <div className="text-[10px] sm:text-xs text-red-600 mb-1 truncate">No data</div>
                           <div className="text-xl sm:text-2xl font-bold text-red-600">0</div>
@@ -1711,17 +1727,19 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   return (
                     <div 
                       key={index} 
-                      className="rounded-2xl text-center"
+                      className="rounded-[20px] text-center relative overflow-hidden"
                       style={{ 
                         background: 'rgba(255, 255, 255, 0.23)',
-                        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-                        backdropFilter: 'blur(6.7px)',
-                        WebkitBackdropFilter: 'blur(6.7px)',
-                        border: '1px solid rgba(255, 255, 255, 0.17)'
+                        backdropFilter: 'blur(13px)',
+                        WebkitBackdropFilter: 'blur(13px)',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px 7px rgba(255, 255, 255, 0.7)'
                       }}
                       data-testid={`metric-${index}-team-2`}
                     >
-                      <div className="p-2 sm:p-4">
+                      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
+                      <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-white/80 via-transparent to-white/30"></div>
+                      <div className="p-2 sm:p-4 relative">
                         <div className={`text-red-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
                         <div className="text-[10px] sm:text-xs text-red-600 mb-1 transition-all duration-300 truncate">
                           {lastEvent ? lastEvent.playerName : team2.name}
@@ -1738,17 +1756,19 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   return (
                     <div 
                       key={index} 
-                      className="rounded-2xl text-center"
+                      className="rounded-[20px] text-center relative overflow-hidden"
                       style={{ 
                         background: 'rgba(255, 255, 255, 0.23)',
-                        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-                        backdropFilter: 'blur(6.7px)',
-                        WebkitBackdropFilter: 'blur(6.7px)',
-                        border: '1px solid rgba(255, 255, 255, 0.17)'
+                        backdropFilter: 'blur(13px)',
+                        WebkitBackdropFilter: 'blur(13px)',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px 7px rgba(255, 255, 255, 0.7)'
                       }}
                       data-testid={`metric-${index}-player-2`}
                     >
-                      <div className="p-2 sm:p-4">
+                      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
+                      <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-white/80 via-transparent to-white/30"></div>
+                      <div className="p-2 sm:p-4 relative">
                         <div className={`text-red-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
                         <div className="text-[10px] sm:text-xs text-red-600 mb-1 truncate">{player2.name}</div>
                         <div className="text-xl sm:text-2xl font-bold text-red-600" data-testid={`metric-value-${index}-player-2`}>{player2.value}</div>

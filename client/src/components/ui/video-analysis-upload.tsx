@@ -553,7 +553,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
                   variant="outline"
                   role="combobox"
                   aria-expanded={sportDropdownOpen}
-                  className="w-full max-w-xs justify-between bg-white border-gray-200 text-foreground hover:bg-gray-50"
+                  className="w-full max-w-xs justify-between bg-white border-gray-200 text-foreground hover:bg-gray-100 hover:text-foreground"
                   data-testid="button-sport-select"
                 >
                   {sport
