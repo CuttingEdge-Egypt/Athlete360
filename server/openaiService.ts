@@ -1093,7 +1093,7 @@ Return comprehensive JSON with verified, authentic ranking data from official so
     console.log(`🔍 Starting Gemini-2.5-pro rank analysis for ${athleteName}...`);
     
     const result = await genAI.models.generateContent({
-      model: "gemini-3-pro-preview",
+      model: "gemini-2.5-pro",
       contents: prompt,
       config: {
         temperature: 0.1,
@@ -2664,7 +2664,7 @@ If web search provides limited information, use these approaches:
     console.log("Prompt length:", prompt.length);
     
     const response = await genAI.models.generateContent({
-      model: "gemini-3-pro-preview",
+      model: "gemini-2.5-pro",
       contents: prompt,
       config: {
         temperature: 0.1,
