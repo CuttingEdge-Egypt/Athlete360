@@ -33,13 +33,13 @@ export function CancelConfirmationDialog({
         className="bg-card border text-foreground max-w-md [&>button]:text-foreground [&>button]:bg-muted/50 [&>button]:hover:bg-muted [&>button]:rounded-full [&>button]:p-1"
         dir={isArabic ? 'rtl' : 'ltr'}
       >
-        <DialogHeader className={isArabic ? 'text-right' : 'text-left'}>
-          <DialogTitle className="text-foreground">{title || t('services.queue.cancelDialog.title')}</DialogTitle>
-          <DialogDescription className={`text-muted-foreground ${isArabic ? 'text-right' : 'text-left'}`}>
+        <DialogHeader className={isArabic ? '!text-right sm:!text-right' : '!text-left sm:!text-left'}>
+          <DialogTitle className={`text-foreground ${isArabic ? 'text-right' : 'text-left'}`}>{title || t('services.queue.cancelDialog.title')}</DialogTitle>
+          <DialogDescription className={`text-muted-foreground ${isArabic ? '!text-right' : '!text-left'}`}>
             {description || t('services.queue.cancelDialog.description')}
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className={`gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+        <DialogFooter className={`gap-2 ${isArabic ? 'sm:!justify-start !flex-row-reverse' : 'sm:!justify-end'}`}>
           <Button
             variant="outline"
             onClick={onCancel}
