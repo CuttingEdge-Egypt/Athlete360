@@ -42,21 +42,21 @@ function TiltCard({ children, className = "" }: { children: ReactNode; className
   };
 
   return (
-    <motion.div
-      ref={ref}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        rotateX,
-        rotateY,
-        transformStyle: "preserve-3d",
-      }}
-      className={`h-full ${className}`}
-    >
-      <div className="h-full" style={{ transformStyle: "preserve-3d" }}>
+    <div className={`h-full ${className}`} style={{ perspective: "1000px" }}>
+      <motion.div
+        ref={ref}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        style={{
+          rotateX,
+          rotateY,
+          transformStyle: "preserve-3d",
+        }}
+        className="h-full"
+      >
         {children}
-      </div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 }
 
