@@ -411,6 +411,26 @@
       "strengthsTitle": "Strengths Analysis",
       "detailsTitle": "Technical Details & Analysis",
       "headToHeadTitle": "Head-to-Head Analysis"
+    },
+    "combat": {
+      "noData": "Strategic combat analysis data is not available",
+      "riskLow": "Low",
+      "riskMedium": "Medium",
+      "riskHigh": "High",
+      "estimatedSuccess": "Estimated Success Rate",
+      "successProbability": "Success Probability",
+      "riskLevel": "Risk Level",
+      "execution": "Execution",
+      "references": "References",
+      "risk": "Risk",
+      "successLow": "Low",
+      "successMedium": "Medium",
+      "successHigh": "High",
+      "strategicOverview": "Strategic Overview",
+      "executionPlan": "Execution Plan",
+      "tacticalAnalysis": "Advanced tactical analysis with {{count}} strategic approaches",
+      "analysisComplete": "Strategic Analysis Complete",
+      "tacticalApproaches": "{{count}} tactical approaches identified for optimal performance advantage"
     }
   }
 }

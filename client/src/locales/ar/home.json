@@ -411,6 +411,26 @@
       "strengthsTitle": "تحليل نقاط القوة",
       "detailsTitle": "التفاصيل الفنية والتحليل",
       "headToHeadTitle": "التحليل المباشر"
+    },
+    "combat": {
+      "noData": "بيانات التحليل التكتيكي غير متاحة",
+      "riskLow": "منخفض",
+      "riskMedium": "متوسط",
+      "riskHigh": "عالي",
+      "estimatedSuccess": "معدل النجاح المتوقع",
+      "successProbability": "احتمالية النجاح",
+      "riskLevel": "مستوى المخاطرة",
+      "execution": "التنفيذ",
+      "references": "المراجع",
+      "risk": "المخاطرة",
+      "successLow": "منخفض",
+      "successMedium": "متوسط",
+      "successHigh": "عالي",
+      "strategicOverview": "نظرة استراتيجية",
+      "executionPlan": "خطة التنفيذ",
+      "tacticalAnalysis": "تحليل تكتيكي متقدم مع {{count}} نهج استراتيجي",
+      "analysisComplete": "اكتمل التحليل الاستراتيجي",
+      "tacticalApproaches": "تم تحديد {{count}} نهج تكتيكي لتحقيق أفضل أداء"
     }
   }
 }

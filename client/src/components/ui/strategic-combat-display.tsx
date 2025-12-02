@@ -30,7 +30,7 @@ interface StrategicCombatDisplayProps {
 }
 
 export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation('home');
   if (!data || !data.strategies || !Array.isArray(data.strategies)) {
     return (
       <div className="text-center text-muted-foreground py-8">
@@ -126,8 +126,10 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
     }
   };
 
+  const isArabic = i18n.language === 'ar';
+  
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" dir={isArabic ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="text-center space-y-3 mb-10">
         <div className="flex items-center justify-center gap-3 text-purple-500">
@@ -151,21 +153,21 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <CardTitle className="text-gray-800 text-xl font-bold flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-4 shadow-sm">
+                    <div className={`w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center shadow-sm ${isArabic ? 'ml-4' : 'mr-4'}`}>
                       <span className="text-purple-600 font-bold text-lg">{index + 1}</span>
                     </div>
                     {strategy.strategy}
                   </CardTitle>
                 </div>
-                <div className="flex space-x-2 ml-4">
+                <div className={`flex gap-2 ${isArabic ? 'mr-4' : 'ml-4'}`}>
                   <Badge 
                     variant="outline" 
                     className={`${getRiskColor(strategy.risk_level)} border text-sm px-3 py-1`}
                     data-testid={`risk-badge-${index}`}
                   >
                     {getRiskIcon(strategy.risk_level)}
-                    <span className="ml-2">
-                      {i18n.language === 'ar' 
+                    <span className={isArabic ? 'mr-2' : 'ml-2'}>
+                      {isArabic 
                         ? `${t("analysis.combat.risk", "Risk")} ${translateRiskLevel(strategy.risk_level)}`
                         : `${translateRiskLevel(strategy.risk_level)} ${t("analysis.combat.risk", "Risk")}`
                       }
@@ -179,7 +181,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
               {/* Strategy Description Card */}
               <div className="p-6 border-b border-gray-100">
                 <h4 className="text-base font-semibold text-gray-700 flex items-center mb-3">
-                  <Brain className="w-5 h-5 mr-2 text-blue-500" />
+                  <Brain className={`w-5 h-5 text-blue-500 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                   {t("analysis.combat.strategicOverview", "Strategic Overview")}
                 </h4>
                 <Card className="bg-gray-50 border border-gray-200 shadow-sm">
@@ -194,7 +196,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
               {/* Execution Details Card */}
               <div className="p-6 border-b border-gray-100">
                 <h4 className="text-base font-semibold text-gray-700 flex items-center mb-3">
-                  <Zap className="w-5 h-5 mr-2 text-amber-500" />
+                  <Zap className={`w-5 h-5 text-amber-500 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                   {t("analysis.combat.executionPlan", "Execution Plan")}
                 </h4>
                 <Card className="bg-gray-50 border border-gray-200 shadow-sm">
@@ -209,7 +211,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
               {/* Success Probability Card */}
               <div className="p-6">
                 <h4 className="text-base font-semibold text-gray-700 flex items-center mb-3">
-                  <TrendingUp className="w-5 h-5 mr-2 text-green-500" />
+                  <TrendingUp className={`w-5 h-5 text-green-500 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                   {t("analysis.combat.successProbability", "Success Probability")}
                 </h4>
                 <Card className="bg-gray-50 border border-gray-200 shadow-sm">
