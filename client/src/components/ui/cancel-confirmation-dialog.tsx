@@ -30,7 +30,7 @@ export function CancelConfirmationDialog({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
       <DialogContent 
-        className={`bg-card border text-foreground max-w-md [&>button]:text-foreground [&>button]:bg-muted/50 [&>button]:hover:bg-muted [&>button]:rounded-full [&>button]:p-1 ${isArabic ? '[&>button:last-child]:right-auto [&>button:last-child]:left-4' : ''}`}
+        className={`bg-card border text-foreground !w-auto !max-w-sm sm:!max-w-sm md:!max-w-sm lg:!max-w-sm [&>button]:text-foreground [&>button]:bg-muted/50 [&>button]:hover:bg-muted [&>button]:rounded-full [&>button]:p-1 ${isArabic ? '[&>button:last-child]:right-auto [&>button:last-child]:left-4' : ''}`}
         dir={isArabic ? 'rtl' : 'ltr'}
       >
         <DialogHeader className={isArabic ? '!text-right sm:!text-right' : '!text-left sm:!text-left'}>
