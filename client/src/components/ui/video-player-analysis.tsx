@@ -1261,32 +1261,40 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           {isTaekwondo ? (
             <>
               {/* Blue Kicks - Glassmorphism */}
-              <Card 
-                className="rounded-2xl border border-blue-300/30 backdrop-blur-md bg-transparent" 
+              <div 
+                className="rounded-2xl text-center"
                 style={{ 
-                  boxShadow: '0 4px 30px rgba(59, 130, 246, 0.1)'
+                  background: 'rgba(255, 255, 255, 0.23)',
+                  boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+                  backdropFilter: 'blur(6.7px)',
+                  WebkitBackdropFilter: 'blur(6.7px)',
+                  border: '1px solid rgba(255, 255, 255, 0.17)'
                 }}
                 data-testid="blue-kicks-card"
               >
-                <CardContent className="p-2 sm:p-4 text-center">
+                <div className="p-2 sm:p-4">
                   <div className="text-blue-700 font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate">{getTitle(sportConfig.action)}</div>
                   <div className="text-xl sm:text-2xl font-bold text-blue-600" data-testid="blue-kicks">{blueKicks}</div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Blue Yellow Cards - Glassmorphism */}
-              <Card 
-                className="rounded-2xl border border-blue-300/30 backdrop-blur-md bg-transparent" 
+              <div 
+                className="rounded-2xl text-center"
                 style={{ 
-                  boxShadow: '0 4px 30px rgba(59, 130, 246, 0.1)'
+                  background: 'rgba(255, 255, 255, 0.23)',
+                  boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+                  backdropFilter: 'blur(6.7px)',
+                  WebkitBackdropFilter: 'blur(6.7px)',
+                  border: '1px solid rgba(255, 255, 255, 0.17)'
                 }}
                 data-testid="blue-cards-card"
               >
-                <CardContent className="p-2 sm:p-4 text-center">
+                <div className="p-2 sm:p-4">
                   <div className="text-blue-700 font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate">{getTitle(sportConfig.violation)}</div>
                   <div className="text-xl sm:text-2xl font-bold text-yellow-600" data-testid="blue-cards">{currentStats.blueCards}</div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </>
           ) : (
             <>
@@ -1299,20 +1307,24 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   
                   if (!team1) {
                     return (
-                      <Card 
+                      <div 
                         key={index} 
-                        className="rounded-2xl border border-blue-300/30 backdrop-blur-md bg-transparent" 
+                        className="rounded-2xl text-center"
                         style={{ 
-                          boxShadow: '0 4px 30px rgba(59, 130, 246, 0.1)'
+                          background: 'rgba(255, 255, 255, 0.23)',
+                          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+                          backdropFilter: 'blur(6.7px)',
+                          WebkitBackdropFilter: 'blur(6.7px)',
+                          border: '1px solid rgba(255, 255, 255, 0.17)'
                         }}
                         data-testid={`metric-${index}-team-1`}
                       >
-                        <CardContent className="p-2 sm:p-4 text-center">
+                        <div className="p-2 sm:p-4">
                           <div className={`text-blue-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
                           <div className="text-[10px] sm:text-xs text-blue-600 mb-1 truncate">No data</div>
                           <div className="text-xl sm:text-2xl font-bold text-blue-600">0</div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     );
                   }
                   
@@ -1322,22 +1334,26 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   const lastEvent = currentEvents[currentEvents.length - 1];
                   
                   return (
-                    <Card 
+                    <div 
                       key={index} 
-                      className="rounded-2xl border border-blue-300/30 backdrop-blur-md bg-transparent" 
+                      className="rounded-2xl text-center"
                       style={{ 
-                        boxShadow: '0 4px 30px rgba(59, 130, 246, 0.1)'
+                        background: 'rgba(255, 255, 255, 0.23)',
+                        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+                        backdropFilter: 'blur(6.7px)',
+                        WebkitBackdropFilter: 'blur(6.7px)',
+                        border: '1px solid rgba(255, 255, 255, 0.17)'
                       }}
                       data-testid={`metric-${index}-team-1`}
                     >
-                      <CardContent className="p-2 sm:p-4 text-center">
+                      <div className="p-2 sm:p-4">
                         <div className={`text-blue-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
                         <div className="text-[10px] sm:text-xs text-blue-600 mb-1 transition-all duration-300 truncate">
                           {lastEvent ? lastEvent.playerName : team1.name}
                         </div>
                         <div className="text-xl sm:text-2xl font-bold text-blue-600">{currentValue}</div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   );
                 } else {
                   // For individual sports, show player stats
@@ -1345,20 +1361,24 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   const player1 = playerValues[0] || { name: 'Player 1', value: 0 };
                   
                   return (
-                    <Card 
+                    <div 
                       key={index} 
-                      className="rounded-2xl border border-blue-300/30 backdrop-blur-md bg-transparent" 
+                      className="rounded-2xl text-center"
                       style={{ 
-                        boxShadow: '0 4px 30px rgba(59, 130, 246, 0.1)'
+                        background: 'rgba(255, 255, 255, 0.23)',
+                        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+                        backdropFilter: 'blur(6.7px)',
+                        WebkitBackdropFilter: 'blur(6.7px)',
+                        border: '1px solid rgba(255, 255, 255, 0.17)'
                       }}
                       data-testid={`metric-${index}-player-1`}
                     >
-                      <CardContent className="p-2 sm:p-4 text-center">
+                      <div className="p-2 sm:p-4">
                         <div className={`text-blue-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
                         <div className="text-[10px] sm:text-xs text-blue-600 mb-1 truncate">{player1.name}</div>
                         <div className="text-xl sm:text-2xl font-bold text-blue-600" data-testid={`metric-value-${index}-player-1`}>{player1.value}</div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   );
                 }
               })}
@@ -1616,32 +1636,40 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           {isTaekwondo ? (
             <>
               {/* Red Kicks - Glassmorphism */}
-              <Card 
-                className="rounded-2xl border border-red-300/30 backdrop-blur-md bg-transparent" 
+              <div 
+                className="rounded-2xl text-center"
                 style={{ 
-                  boxShadow: '0 4px 30px rgba(239, 68, 68, 0.1)'
+                  background: 'rgba(255, 255, 255, 0.23)',
+                  boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+                  backdropFilter: 'blur(6.7px)',
+                  WebkitBackdropFilter: 'blur(6.7px)',
+                  border: '1px solid rgba(255, 255, 255, 0.17)'
                 }}
                 data-testid="red-kicks-card"
               >
-                <CardContent className="p-2 sm:p-4 text-center">
+                <div className="p-2 sm:p-4">
                   <div className="text-red-700 font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate">{getTitle(sportConfig.action)}</div>
                   <div className="text-xl sm:text-2xl font-bold text-red-600" data-testid="red-kicks">{redKicks}</div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Red Yellow Cards - Glassmorphism */}
-              <Card 
-                className="rounded-2xl border border-red-300/30 backdrop-blur-md bg-transparent" 
+              <div 
+                className="rounded-2xl text-center"
                 style={{ 
-                  boxShadow: '0 4px 30px rgba(239, 68, 68, 0.1)'
+                  background: 'rgba(255, 255, 255, 0.23)',
+                  boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+                  backdropFilter: 'blur(6.7px)',
+                  WebkitBackdropFilter: 'blur(6.7px)',
+                  border: '1px solid rgba(255, 255, 255, 0.17)'
                 }}
                 data-testid="red-cards-card"
               >
-                <CardContent className="p-2 sm:p-4 text-center">
+                <div className="p-2 sm:p-4">
                   <div className="text-red-700 font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate">{getTitle(sportConfig.violation)}</div>
                   <div className="text-xl sm:text-2xl font-bold text-yellow-600" data-testid="red-cards">{currentStats.redCards}</div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </>
           ) : (
             <>
@@ -1654,20 +1682,24 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   
                   if (!team2) {
                     return (
-                      <Card 
+                      <div 
                         key={index} 
-                        className="rounded-2xl border border-red-300/30 backdrop-blur-md bg-transparent" 
+                        className="rounded-2xl text-center"
                         style={{ 
-                          boxShadow: '0 4px 30px rgba(239, 68, 68, 0.1)'
+                          background: 'rgba(255, 255, 255, 0.23)',
+                          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+                          backdropFilter: 'blur(6.7px)',
+                          WebkitBackdropFilter: 'blur(6.7px)',
+                          border: '1px solid rgba(255, 255, 255, 0.17)'
                         }}
                         data-testid={`metric-${index}-team-2`}
                       >
-                        <CardContent className="p-2 sm:p-4 text-center">
+                        <div className="p-2 sm:p-4">
                           <div className={`text-red-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
                           <div className="text-[10px] sm:text-xs text-red-600 mb-1 truncate">No data</div>
                           <div className="text-xl sm:text-2xl font-bold text-red-600">0</div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     );
                   }
                   
@@ -1677,22 +1709,26 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   const lastEvent = currentEvents[currentEvents.length - 1];
                   
                   return (
-                    <Card 
+                    <div 
                       key={index} 
-                      className="rounded-2xl border border-red-300/30 backdrop-blur-md bg-transparent" 
+                      className="rounded-2xl text-center"
                       style={{ 
-                        boxShadow: '0 4px 30px rgba(239, 68, 68, 0.1)'
+                        background: 'rgba(255, 255, 255, 0.23)',
+                        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+                        backdropFilter: 'blur(6.7px)',
+                        WebkitBackdropFilter: 'blur(6.7px)',
+                        border: '1px solid rgba(255, 255, 255, 0.17)'
                       }}
                       data-testid={`metric-${index}-team-2`}
                     >
-                      <CardContent className="p-2 sm:p-4 text-center">
+                      <div className="p-2 sm:p-4">
                         <div className={`text-red-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
                         <div className="text-[10px] sm:text-xs text-red-600 mb-1 transition-all duration-300 truncate">
                           {lastEvent ? lastEvent.playerName : team2.name}
                         </div>
                         <div className="text-xl sm:text-2xl font-bold text-red-600">{currentValue}</div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   );
                 } else {
                   // For individual sports, show player stats
@@ -1700,20 +1736,24 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   const player2 = playerValues[1] || { name: 'Player 2', value: 0 };
                   
                   return (
-                    <Card 
+                    <div 
                       key={index} 
-                      className="rounded-2xl border border-red-300/30 backdrop-blur-md bg-transparent" 
+                      className="rounded-2xl text-center"
                       style={{ 
-                        boxShadow: '0 4px 30px rgba(239, 68, 68, 0.1)'
+                        background: 'rgba(255, 255, 255, 0.23)',
+                        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+                        backdropFilter: 'blur(6.7px)',
+                        WebkitBackdropFilter: 'blur(6.7px)',
+                        border: '1px solid rgba(255, 255, 255, 0.17)'
                       }}
                       data-testid={`metric-${index}-player-2`}
                     >
-                      <CardContent className="p-2 sm:p-4 text-center">
+                      <div className="p-2 sm:p-4">
                         <div className={`text-red-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
                         <div className="text-[10px] sm:text-xs text-red-600 mb-1 truncate">{player2.name}</div>
                         <div className="text-xl sm:text-2xl font-bold text-red-600" data-testid={`metric-value-${index}-player-2`}>{player2.value}</div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   );
                 }
               })}
