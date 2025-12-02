@@ -259,7 +259,7 @@ export default function Landing() {
               animate="visible"
             >
               <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 0.4 }} whileHover={{ y: -8, transition: { duration: 0.2 } }}>
-                <Card className="bg-card border shadow-sm h-full hover:shadow-lg transition-shadow">
+                <Card className="service-card bg-card border shadow-sm h-full">
                   <CardContent className="p-6 h-full flex flex-col">
                     <div className="flex justify-between items-start mb-4">
                       <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
@@ -284,7 +284,7 @@ export default function Landing() {
               </motion.div>
 
               <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 0.5 }} whileHover={{ y: -8, transition: { duration: 0.2 } }}>
-                <Card className="bg-card border shadow-sm h-full hover:shadow-lg transition-shadow">
+                <Card className="service-card bg-card border shadow-sm h-full">
                   <CardContent className="p-6 h-full flex flex-col">
                     <div className="flex justify-between items-start mb-4">
                       <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
@@ -309,7 +309,7 @@ export default function Landing() {
               </motion.div>
 
               <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 0.6 }} whileHover={{ y: -8, transition: { duration: 0.2 } }}>
-                <Card className="bg-card border shadow-sm h-full hover:shadow-lg transition-shadow">
+                <Card className="service-card bg-card border shadow-sm h-full">
                   <CardContent className="p-6 h-full flex flex-col">
                     <div className="flex justify-between items-start mb-4">
                       <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
@@ -334,7 +334,7 @@ export default function Landing() {
               </motion.div>
 
               <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 0.7 }} whileHover={{ y: -8, transition: { duration: 0.2 } }}>
-                <Card className="bg-card border shadow-sm h-full hover:shadow-lg transition-shadow">
+                <Card className="service-card bg-card border shadow-sm h-full">
                   <CardContent className="p-6 h-full flex flex-col">
                     <div className="flex justify-between items-start mb-4">
                       <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
@@ -366,7 +366,7 @@ export default function Landing() {
               animate="visible"
             >
               <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 0.8 }} whileHover={{ y: -8, transition: { duration: 0.2 } }}>
-                <Card className="bg-card border shadow-sm h-full hover:shadow-lg transition-shadow">
+                <Card className="service-card bg-card border shadow-sm h-full">
                   <CardContent className="p-6 h-full flex flex-col">
                     <div className="flex justify-between items-start mb-4">
                       <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
@@ -391,7 +391,7 @@ export default function Landing() {
               </motion.div>
 
               <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 0.9 }} whileHover={{ y: -8, transition: { duration: 0.2 } }}>
-                <Card className="bg-card border shadow-sm h-full hover:shadow-lg transition-shadow">
+                <Card className="service-card bg-card border shadow-sm h-full">
                   <CardContent className="p-6 h-full flex flex-col">
                     <div className="flex justify-between items-start mb-4">
                       <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
@@ -416,7 +416,7 @@ export default function Landing() {
               </motion.div>
 
               <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 1.0 }} whileHover={{ y: -8, transition: { duration: 0.2 } }}>
-                <Card className="bg-card border shadow-sm h-full hover:shadow-lg transition-shadow">
+                <Card className="service-card bg-card border shadow-sm h-full">
                   <CardContent className="p-6 h-full flex flex-col">
                     <div className="flex justify-between items-start mb-4">
                       <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
@@ -451,7 +451,7 @@ export default function Landing() {
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 max-w-4xl mx-auto">
                 <motion.div whileHover={{ scale: 1.02, y: -5 }} transition={{ duration: 0.3 }}>
-                  <Card className="bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-400/30 h-full hover:shadow-xl transition-shadow">
+                  <Card className="service-card bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-400/30 h-full">
                     <CardContent className="p-8 text-center h-full flex flex-col">
                       <motion.div 
                         className="flex justify-center mb-4"
@@ -480,7 +480,7 @@ export default function Landing() {
                 </motion.div>
 
                 <motion.div whileHover={{ scale: 1.02, y: -5 }} transition={{ duration: 0.3 }}>
-                  <Card className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 border-purple-400/30 h-full hover:shadow-xl transition-shadow">
+                  <Card className="service-card bg-gradient-to-r from-purple-500/20 to-blue-500/20 border-purple-400/30 h-full">
                     <CardContent className="p-8 text-center h-full flex flex-col">
                       <motion.div 
                         className="flex justify-center mb-4"
@@ -518,7 +518,7 @@ export default function Landing() {
               transition={{ duration: 0.6, delay: 1.2 }}
               whileHover={{ scale: 1.02 }}
             >
-              <Card className="bg-card/80 border shadow-lg backdrop-blur-sm max-w-md mx-auto hover:shadow-2xl transition-shadow">
+              <Card className="service-card bg-card/80 border shadow-lg backdrop-blur-sm max-w-md mx-auto">
                 <CardContent className="p-8 text-center">
                   <motion.h2 
                     className="text-2xl font-bold mb-4 text-primary"
