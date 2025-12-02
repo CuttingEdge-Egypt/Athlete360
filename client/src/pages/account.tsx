@@ -208,7 +208,7 @@ export default function Account() {
           <Button 
             variant="outline" 
             onClick={() => setLocation('/')}
-            className={`h-11 w-full sm:w-auto ${isArabic ? 'flex-row-reverse' : ''}`}
+            className={`h-11 w-full sm:w-auto border-gray-300 text-gray-700 bg-gray-50 hover:bg-accent hover:text-accent-foreground ${isArabic ? 'flex-row-reverse' : ''}`}
             data-testid="button-back-home"
           >
             <ArrowLeft className={`${isArabic ? 'ml-2 rotate-180' : 'mr-2'} h-4 w-4`} />
