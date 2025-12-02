@@ -1947,53 +1947,50 @@ export function PlayerAdviceSection({ adviceData, language = 'english' }: Player
   useEffect(() => {
     if (adviceData) {
       try {
-        // Use the same robust parsing logic as other components
+        // Use robust parsing logic to handle various formats
         let parsed: any = adviceData;
         
         if (typeof adviceData === 'string') {
-          // Check if it's a markdown-wrapped JSON string
-          if (adviceData.includes('```json') || adviceData.includes('```')) {
-            // Extract JSON from markdown code blocks
-            let content = adviceData;
-            if (content.startsWith('```json') && content.endsWith('```')) {
-              content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-            } else if (content.startsWith('```') && content.endsWith('```')) {
-              content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
-            }
-            // Try to parse the extracted content as JSON
-            parsed = JSON.parse(content.trim());
+          let content = adviceData.trim();
+          
+          // Use regex to extract JSON from markdown code blocks (handles newlines and whitespace)
+          const jsonCodeBlockMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
+          const genericCodeBlockMatch = content.match(/```\s*([\s\S]*?)\s*```/);
+          
+          if (jsonCodeBlockMatch && jsonCodeBlockMatch[1]) {
+            // Extract from ```json ... ``` block
+            content = jsonCodeBlockMatch[1].trim();
+            parsed = JSON.parse(content);
+          } else if (genericCodeBlockMatch && genericCodeBlockMatch[1]) {
+            // Extract from generic ``` ... ``` block
+            content = genericCodeBlockMatch[1].trim();
+            parsed = JSON.parse(content);
           } else {
             // Try to parse as direct JSON
             try {
-              parsed = JSON.parse(adviceData);
+              parsed = JSON.parse(content);
             } catch (directParseError) {
-              // If direct parse fails, check if it's wrapped in a content field object
-              try {
-                const contentWrapper = JSON.parse(adviceData);
-                if (contentWrapper.content) {
-                  // Extract JSON from markdown code blocks in content
-                  let content = contentWrapper.content;
-                  if (content.startsWith('```json') && content.endsWith('```')) {
-                    content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-                  } else if (content.startsWith('```') && content.endsWith('```')) {
-                    content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
-                  }
-                  parsed = JSON.parse(content.trim());
-                } else {
-                  parsed = contentWrapper;
-                }
-              } catch (wrapperParseError) {
-                // If all parsing fails, use the original string
-                throw new Error('Could not parse advice data');
+              // If direct parse fails, try to find JSON object in the string
+              const jsonMatch = content.match(/\{[\s\S]*\}/);
+              if (jsonMatch) {
+                parsed = JSON.parse(jsonMatch[0]);
+              } else {
+                throw new Error('Could not find valid JSON in advice data');
               }
             }
           }
         }
         
-        setParsedAdviceData(parsed);
-        setHasParsingError(false);
+        // Validate the parsed data has the expected structure
+        if (parsed && (parsed.players || parsed.general_observations)) {
+          setParsedAdviceData(parsed);
+          setHasParsingError(false);
+        } else {
+          console.error("Parsed advice data missing expected fields:", parsed);
+          setHasParsingError(true);
+        }
       } catch (error) {
-        console.error("Error parsing advice data:", error);
+        console.error("Error parsing advice data:", error, "Raw data:", adviceData?.substring(0, 200));
         setHasParsingError(true);
       }
     }
