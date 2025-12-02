@@ -791,12 +791,13 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
         
         if (Array.isArray(playersArray) && playersArray.length >= 2) {
           playersArray.forEach((player: any) => {
-            if (player.color && player.name) {
-              const color = player.color.toLowerCase();
-              if (color.includes('blue')) {
+            // Check for both 'color' and 'side' fields (AI uses either format)
+            const colorOrSide = (player.color || player.side || '').toLowerCase();
+            if (colorOrSide && player.name) {
+              if (colorOrSide.includes('blue')) {
                 entity1Name = player.name;
                 entity1Country = player.country || null;
-              } else if (color.includes('red')) {
+              } else if (colorOrSide.includes('red')) {
                 entity2Name = player.name;
                 entity2Country = player.country || null;
               }
