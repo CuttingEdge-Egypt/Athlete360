@@ -137,7 +137,7 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
           <h2 className="text-3xl font-bold text-gray-800">{t("services.tacticRecommendations.title", "Tactical Recommendations")}</h2>
         </div>
         <p className="text-gray-600 text-lg">
-          {t("analysis.combat.tacticalAnalysis", "Advanced tactical analysis with {{count}} strategic approaches", { count: data.strategies.length })}
+          {t("analysis.combat.tacticalAnalysis", { count: data.strategies.length, defaultValue: "Advanced tactical analysis with {{count}} strategic approaches" })}
         </p>
       </div>
 
