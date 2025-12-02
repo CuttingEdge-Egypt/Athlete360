@@ -1262,10 +1262,9 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
             <>
               {/* Blue Kicks - Glassmorphism */}
               <Card 
-                className="rounded-2xl border border-blue-300/30 backdrop-blur-md" 
+                className="rounded-2xl border border-blue-300/30 backdrop-blur-md bg-white/60" 
                 style={{ 
-                  background: 'rgba(59, 130, 246, 0.15)',
-                  boxShadow: '0 4px 30px rgba(59, 130, 246, 0.15)'
+                  boxShadow: '0 4px 30px rgba(59, 130, 246, 0.1)'
                 }}
                 data-testid="blue-kicks-card"
               >
@@ -1277,10 +1276,9 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
 
               {/* Blue Yellow Cards - Glassmorphism */}
               <Card 
-                className="rounded-2xl border border-blue-300/30 backdrop-blur-md" 
+                className="rounded-2xl border border-blue-300/30 backdrop-blur-md bg-white/60" 
                 style={{ 
-                  background: 'rgba(59, 130, 246, 0.15)',
-                  boxShadow: '0 4px 30px rgba(59, 130, 246, 0.15)'
+                  boxShadow: '0 4px 30px rgba(59, 130, 246, 0.1)'
                 }}
                 data-testid="blue-cards-card"
               >
@@ -1303,10 +1301,9 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                     return (
                       <Card 
                         key={index} 
-                        className="rounded-2xl border border-blue-300/30 backdrop-blur-md" 
+                        className="rounded-2xl border border-blue-300/30 backdrop-blur-md bg-white/60" 
                         style={{ 
-                          background: 'rgba(59, 130, 246, 0.15)',
-                          boxShadow: '0 4px 30px rgba(59, 130, 246, 0.15)'
+                          boxShadow: '0 4px 30px rgba(59, 130, 246, 0.1)'
                         }}
                         data-testid={`metric-${index}-team-1`}
                       >
@@ -1327,10 +1324,9 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   return (
                     <Card 
                       key={index} 
-                      className="rounded-2xl border border-blue-300/30 backdrop-blur-md" 
+                      className="rounded-2xl border border-blue-300/30 backdrop-blur-md bg-white/60" 
                       style={{ 
-                        background: 'rgba(59, 130, 246, 0.15)',
-                        boxShadow: '0 4px 30px rgba(59, 130, 246, 0.15)'
+                        boxShadow: '0 4px 30px rgba(59, 130, 246, 0.1)'
                       }}
                       data-testid={`metric-${index}-team-1`}
                     >
@@ -1351,10 +1347,9 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   return (
                     <Card 
                       key={index} 
-                      className="rounded-2xl border border-blue-300/30 backdrop-blur-md" 
+                      className="rounded-2xl border border-blue-300/30 backdrop-blur-md bg-white/60" 
                       style={{ 
-                        background: 'rgba(59, 130, 246, 0.15)',
-                        boxShadow: '0 4px 30px rgba(59, 130, 246, 0.15)'
+                        boxShadow: '0 4px 30px rgba(59, 130, 246, 0.1)'
                       }}
                       data-testid={`metric-${index}-player-1`}
                     >
@@ -1622,10 +1617,9 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
             <>
               {/* Red Kicks - Glassmorphism */}
               <Card 
-                className="rounded-2xl border border-red-300/30 backdrop-blur-md" 
+                className="rounded-2xl border border-red-300/30 backdrop-blur-md bg-white/60" 
                 style={{ 
-                  background: 'rgba(239, 68, 68, 0.15)',
-                  boxShadow: '0 4px 30px rgba(239, 68, 68, 0.15)'
+                  boxShadow: '0 4px 30px rgba(239, 68, 68, 0.1)'
                 }}
                 data-testid="red-kicks-card"
               >
@@ -1637,10 +1631,9 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
 
               {/* Red Yellow Cards - Glassmorphism */}
               <Card 
-                className="rounded-2xl border border-red-300/30 backdrop-blur-md" 
+                className="rounded-2xl border border-red-300/30 backdrop-blur-md bg-white/60" 
                 style={{ 
-                  background: 'rgba(239, 68, 68, 0.15)',
-                  boxShadow: '0 4px 30px rgba(239, 68, 68, 0.15)'
+                  boxShadow: '0 4px 30px rgba(239, 68, 68, 0.1)'
                 }}
                 data-testid="red-cards-card"
               >
@@ -1663,10 +1656,9 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                     return (
                       <Card 
                         key={index} 
-                        className="rounded-2xl border border-red-300/30 backdrop-blur-md" 
+                        className="rounded-2xl border border-red-300/30 backdrop-blur-md bg-white/60" 
                         style={{ 
-                          background: 'rgba(239, 68, 68, 0.15)',
-                          boxShadow: '0 4px 30px rgba(239, 68, 68, 0.15)'
+                          boxShadow: '0 4px 30px rgba(239, 68, 68, 0.1)'
                         }}
                         data-testid={`metric-${index}-team-2`}
                       >
@@ -1687,10 +1679,9 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   return (
                     <Card 
                       key={index} 
-                      className="rounded-2xl border border-red-300/30 backdrop-blur-md" 
+                      className="rounded-2xl border border-red-300/30 backdrop-blur-md bg-white/60" 
                       style={{ 
-                        background: 'rgba(239, 68, 68, 0.15)',
-                        boxShadow: '0 4px 30px rgba(239, 68, 68, 0.15)'
+                        boxShadow: '0 4px 30px rgba(239, 68, 68, 0.1)'
                       }}
                       data-testid={`metric-${index}-team-2`}
                     >
@@ -1711,10 +1702,9 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   return (
                     <Card 
                       key={index} 
-                      className="rounded-2xl border border-red-300/30 backdrop-blur-md" 
+                      className="rounded-2xl border border-red-300/30 backdrop-blur-md bg-white/60" 
                       style={{ 
-                        background: 'rgba(239, 68, 68, 0.15)',
-                        boxShadow: '0 4px 30px rgba(239, 68, 68, 0.15)'
+                        boxShadow: '0 4px 30px rgba(239, 68, 68, 0.1)'
                       }}
                       data-testid={`metric-${index}-player-2`}
                     >
