@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Trophy, ChartPie, ChartLine, Dumbbell, Star, ArrowRight, Coins, Plus, Gift, UserPlus, TrendingDown, Target, Calendar, Video, Users, Twitter, Instagram, Linkedin, Mail, MessageCircle, HelpCircle, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, ReactNode } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { AnalysisPopup } from "@/components/ui/analysis-popup";
@@ -10,7 +10,55 @@ import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/useLanguage";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import logoImage from "@assets/Athlete360Logo-removebg-preview_1764434600616.png";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+
+function TiltCard({ children, className = "" }: { children: ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30 });
+  const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30 });
+
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["7deg", "-7deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-7deg", "7deg"]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const xPct = mouseX / width - 0.5;
+    const yPct = mouseY / height - 0.5;
+    x.set(xPct);
+    y.set(yPct);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        rotateX,
+        rotateY,
+        transformStyle: "preserve-3d",
+      }}
+      className={`${className}`}
+    >
+      <div style={{ transform: "translateZ(30px)", transformStyle: "preserve-3d" }}>
+        {children}
+      </div>
+    </motion.div>
+  );
+}
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
@@ -258,104 +306,112 @@ export default function Landing() {
               initial="hidden"
               animate="visible"
             >
-              <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 0.4 }} whileHover={{ y: -8, transition: { duration: 0.2 } }}>
-                <Card className="service-card bg-card border shadow-sm h-full">
-                  <CardContent className="p-6 h-full flex flex-col">
-                    <div className="flex justify-between items-start mb-4">
-                      <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
-                        <ChartPie className="text-2xl text-primary" size={32} />
-                      </motion.div>
-                      <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">50 {t('units.tokens', { ns: 'common' })}</span>
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.bioAnalysis.title')}</h3>
-                    <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.bioAnalysis.description')}</p>
-                    <Button 
-                      onClick={() => setPreviewModal({ open: true, serviceType: 'bio' })}
-                      data-testid="button-preview-bio"
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white hover:border-blue-500 mt-auto transition-colors"
-                    >
-                      <HelpCircle className="mr-2" size={14} />
-                      {t('actions.preview')}
-                    </Button>
-                  </CardContent>
-                </Card>
+              <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 0.4 }}>
+                <TiltCard className="h-full">
+                  <Card className="service-card bg-card border shadow-sm h-full">
+                    <CardContent className="p-6 h-full flex flex-col">
+                      <div className="flex justify-between items-start mb-4">
+                        <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
+                          <ChartPie className="text-2xl text-primary" size={32} />
+                        </motion.div>
+                        <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">50 {t('units.tokens', { ns: 'common' })}</span>
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.bioAnalysis.title')}</h3>
+                      <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.bioAnalysis.description')}</p>
+                      <Button 
+                        onClick={() => setPreviewModal({ open: true, serviceType: 'bio' })}
+                        data-testid="button-preview-bio"
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white hover:border-blue-500 mt-auto transition-colors"
+                      >
+                        <HelpCircle className="mr-2" size={14} />
+                        {t('actions.preview')}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </TiltCard>
               </motion.div>
 
-              <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 0.5 }} whileHover={{ y: -8, transition: { duration: 0.2 } }}>
-                <Card className="service-card bg-card border shadow-sm h-full">
-                  <CardContent className="p-6 h-full flex flex-col">
-                    <div className="flex justify-between items-start mb-4">
-                      <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
-                        <Trophy className="text-2xl text-amber-500" size={32} />
-                      </motion.div>
-                      <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">70 {t('units.tokens', { ns: 'common' })}</span>
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.rankHistory.title')}</h3>
-                    <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.rankHistory.description')}</p>
-                    <Button 
-                      onClick={() => setPreviewModal({ open: true, serviceType: 'rank' })}
-                      data-testid="button-preview-rank"
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white hover:border-amber-500 mt-auto transition-colors"
-                    >
-                      <HelpCircle className="mr-2" size={14} />
-                      {t('actions.preview')}
-                    </Button>
-                  </CardContent>
-                </Card>
+              <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 0.5 }}>
+                <TiltCard className="h-full">
+                  <Card className="service-card bg-card border shadow-sm h-full">
+                    <CardContent className="p-6 h-full flex flex-col">
+                      <div className="flex justify-between items-start mb-4">
+                        <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
+                          <Trophy className="text-2xl text-amber-500" size={32} />
+                        </motion.div>
+                        <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">70 {t('units.tokens', { ns: 'common' })}</span>
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.rankHistory.title')}</h3>
+                      <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.rankHistory.description')}</p>
+                      <Button 
+                        onClick={() => setPreviewModal({ open: true, serviceType: 'rank' })}
+                        data-testid="button-preview-rank"
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white hover:border-amber-500 mt-auto transition-colors"
+                      >
+                        <HelpCircle className="mr-2" size={14} />
+                        {t('actions.preview')}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </TiltCard>
               </motion.div>
 
-              <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 0.6 }} whileHover={{ y: -8, transition: { duration: 0.2 } }}>
-                <Card className="service-card bg-card border shadow-sm h-full">
-                  <CardContent className="p-6 h-full flex flex-col">
-                    <div className="flex justify-between items-start mb-4">
-                      <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
-                        <Star className="text-2xl text-athlete-success" size={32} />
-                      </motion.div>
-                      <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">50 {t('units.tokens', { ns: 'common' })}</span>
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.strengths.title')}</h3>
-                    <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.strengths.description')}</p>
-                    <Button 
-                      onClick={() => setPreviewModal({ open: true, serviceType: 'strengths' })}
-                      data-testid="button-preview-strengths"
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full border-green-500 text-green-600 hover:bg-green-500 hover:text-white hover:border-green-500 mt-auto transition-colors"
-                    >
-                      <HelpCircle className="mr-2" size={14} />
-                      {t('actions.preview')}
-                    </Button>
-                  </CardContent>
-                </Card>
+              <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 0.6 }}>
+                <TiltCard className="h-full">
+                  <Card className="service-card bg-card border shadow-sm h-full">
+                    <CardContent className="p-6 h-full flex flex-col">
+                      <div className="flex justify-between items-start mb-4">
+                        <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
+                          <Star className="text-2xl text-athlete-success" size={32} />
+                        </motion.div>
+                        <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">50 {t('units.tokens', { ns: 'common' })}</span>
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.strengths.title')}</h3>
+                      <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.strengths.description')}</p>
+                      <Button 
+                        onClick={() => setPreviewModal({ open: true, serviceType: 'strengths' })}
+                        data-testid="button-preview-strengths"
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full border-green-500 text-green-600 hover:bg-green-500 hover:text-white hover:border-green-500 mt-auto transition-colors"
+                      >
+                        <HelpCircle className="mr-2" size={14} />
+                        {t('actions.preview')}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </TiltCard>
               </motion.div>
 
-              <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 0.7 }} whileHover={{ y: -8, transition: { duration: 0.2 } }}>
-                <Card className="service-card bg-card border shadow-sm h-full">
-                  <CardContent className="p-6 h-full flex flex-col">
-                    <div className="flex justify-between items-start mb-4">
-                      <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
-                        <TrendingDown className="text-2xl text-red-400" size={32} />
-                      </motion.div>
-                      <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">50 {t('units.tokens', { ns: 'common' })}</span>
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.weaknesses.title')}</h3>
-                    <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.weaknesses.description')}</p>
-                    <Button 
-                      onClick={() => setPreviewModal({ open: true, serviceType: 'weaknesses' })}
-                      data-testid="button-preview-weaknesses"
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full border-red-500 text-red-600 hover:bg-red-500 hover:text-white hover:border-red-500 mt-auto transition-colors"
-                    >
-                      <HelpCircle className="mr-2" size={14} />
-                      {t('actions.preview')}
-                    </Button>
-                  </CardContent>
-                </Card>
+              <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 0.7 }}>
+                <TiltCard className="h-full">
+                  <Card className="service-card bg-card border shadow-sm h-full">
+                    <CardContent className="p-6 h-full flex flex-col">
+                      <div className="flex justify-between items-start mb-4">
+                        <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
+                          <TrendingDown className="text-2xl text-red-400" size={32} />
+                        </motion.div>
+                        <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">50 {t('units.tokens', { ns: 'common' })}</span>
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.weaknesses.title')}</h3>
+                      <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.weaknesses.description')}</p>
+                      <Button 
+                        onClick={() => setPreviewModal({ open: true, serviceType: 'weaknesses' })}
+                        data-testid="button-preview-weaknesses"
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full border-red-500 text-red-600 hover:bg-red-500 hover:text-white hover:border-red-500 mt-auto transition-colors"
+                      >
+                        <HelpCircle className="mr-2" size={14} />
+                        {t('actions.preview')}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </TiltCard>
               </motion.div>
             </motion.div>
 
@@ -365,79 +421,85 @@ export default function Landing() {
               initial="hidden"
               animate="visible"
             >
-              <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 0.8 }} whileHover={{ y: -8, transition: { duration: 0.2 } }}>
-                <Card className="service-card bg-card border shadow-sm h-full">
-                  <CardContent className="p-6 h-full flex flex-col">
-                    <div className="flex justify-between items-start mb-4">
-                      <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
-                        <Target className="text-2xl text-purple-400" size={32} />
-                      </motion.div>
-                      <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">80 {t('units.tokens', { ns: 'common' })}</span>
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.tacticRecommendations.title', 'How to Beat')}</h3>
-                    <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.tacticRecommendations.description', 'Strategic insights on how to defeat specific opponents or improve matchups')}</p>
-                    <Button 
-                      onClick={() => setPreviewModal({ open: true, serviceType: 'beat-strategies' })}
-                      data-testid="button-preview-beat"
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full border-purple-500 text-purple-600 hover:bg-purple-500 hover:text-white hover:border-purple-500 mt-auto transition-colors"
-                    >
-                      <HelpCircle className="mr-2" size={14} />
-                      {t('actions.preview')}
-                    </Button>
-                  </CardContent>
-                </Card>
+              <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 0.8 }}>
+                <TiltCard className="h-full">
+                  <Card className="service-card bg-card border shadow-sm h-full">
+                    <CardContent className="p-6 h-full flex flex-col">
+                      <div className="flex justify-between items-start mb-4">
+                        <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
+                          <Target className="text-2xl text-purple-400" size={32} />
+                        </motion.div>
+                        <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">80 {t('units.tokens', { ns: 'common' })}</span>
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.tacticRecommendations.title', 'How to Beat')}</h3>
+                      <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.tacticRecommendations.description', 'Strategic insights on how to defeat specific opponents or improve matchups')}</p>
+                      <Button 
+                        onClick={() => setPreviewModal({ open: true, serviceType: 'beat-strategies' })}
+                        data-testid="button-preview-beat"
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full border-purple-500 text-purple-600 hover:bg-purple-500 hover:text-white hover:border-purple-500 mt-auto transition-colors"
+                      >
+                        <HelpCircle className="mr-2" size={14} />
+                        {t('actions.preview')}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </TiltCard>
               </motion.div>
 
-              <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 0.9 }} whileHover={{ y: -8, transition: { duration: 0.2 } }}>
-                <Card className="service-card bg-card border shadow-sm h-full">
-                  <CardContent className="p-6 h-full flex flex-col">
-                    <div className="flex justify-between items-start mb-4">
-                      <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
-                        <Calendar className="text-2xl text-blue-400" size={32} />
-                      </motion.div>
-                      <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">80 {t('units.tokens', { ns: 'common' })}</span>
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.developmentPlan.title', 'Development Plan')}</h3>
-                    <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.developmentPlan.description', 'Personalized training roadmap with specific goals and timelines')}</p>
-                    <Button 
-                      onClick={() => setPreviewModal({ open: true, serviceType: 'development-plan' })}
-                      data-testid="button-preview-development"
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white hover:border-blue-500 mt-auto transition-colors"
-                    >
-                      <HelpCircle className="mr-2" size={14} />
-                      {t('actions.preview')}
-                    </Button>
-                  </CardContent>
-                </Card>
+              <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 0.9 }}>
+                <TiltCard className="h-full">
+                  <Card className="service-card bg-card border shadow-sm h-full">
+                    <CardContent className="p-6 h-full flex flex-col">
+                      <div className="flex justify-between items-start mb-4">
+                        <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
+                          <Calendar className="text-2xl text-blue-400" size={32} />
+                        </motion.div>
+                        <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">80 {t('units.tokens', { ns: 'common' })}</span>
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.developmentPlan.title', 'Development Plan')}</h3>
+                      <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.developmentPlan.description', 'Personalized training roadmap with specific goals and timelines')}</p>
+                      <Button 
+                        onClick={() => setPreviewModal({ open: true, serviceType: 'development-plan' })}
+                        data-testid="button-preview-development"
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white hover:border-blue-500 mt-auto transition-colors"
+                      >
+                        <HelpCircle className="mr-2" size={14} />
+                        {t('actions.preview')}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </TiltCard>
               </motion.div>
 
-              <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 1.0 }} whileHover={{ y: -8, transition: { duration: 0.2 } }}>
-                <Card className="service-card bg-card border shadow-sm h-full">
-                  <CardContent className="p-6 h-full flex flex-col">
-                    <div className="flex justify-between items-start mb-4">
-                      <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
-                        <Dumbbell className="text-2xl text-green-400" size={32} />
-                      </motion.div>
-                      <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">90 {t('units.tokens', { ns: 'common' })}</span>
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.nutritionPlan.title', 'Nutrition Plan')}</h3>
-                    <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.nutritionPlan.description', 'Comprehensive meal planning based on body composition and goals')}</p>
-                    <Button 
-                      onClick={() => setPreviewModal({ open: true, serviceType: 'nutrition-plan' })}
-                      data-testid="button-preview-nutrition"
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full border-green-500 text-green-600 hover:bg-green-500 hover:text-white hover:border-green-500 mt-auto transition-colors"
-                    >
-                      <HelpCircle className="mr-2" size={14} />
-                      {t('actions.preview')}
-                    </Button>
-                  </CardContent>
-                </Card>
+              <motion.div variants={fadeInUp} transition={{ duration: 0.5, delay: 1.0 }}>
+                <TiltCard className="h-full">
+                  <Card className="service-card bg-card border shadow-sm h-full">
+                    <CardContent className="p-6 h-full flex flex-col">
+                      <div className="flex justify-between items-start mb-4">
+                        <motion.div whileHover={{ rotate: 360, scale: 1.1 }} transition={{ duration: 0.5 }}>
+                          <Dumbbell className="text-2xl text-green-400" size={32} />
+                        </motion.div>
+                        <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">90 {t('units.tokens', { ns: 'common' })}</span>
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.nutritionPlan.title', 'Nutrition Plan')}</h3>
+                      <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.nutritionPlan.description', 'Comprehensive meal planning based on body composition and goals')}</p>
+                      <Button 
+                        onClick={() => setPreviewModal({ open: true, serviceType: 'nutrition-plan' })}
+                        data-testid="button-preview-nutrition"
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full border-green-500 text-green-600 hover:bg-green-500 hover:text-white hover:border-green-500 mt-auto transition-colors"
+                      >
+                        <HelpCircle className="mr-2" size={14} />
+                        {t('actions.preview')}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </TiltCard>
               </motion.div>
             </motion.div>
 
@@ -450,7 +512,7 @@ export default function Landing() {
               transition={{ duration: 0.6, delay: 1.1 }}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 max-w-4xl mx-auto">
-                <motion.div whileHover={{ scale: 1.02, y: -5 }} transition={{ duration: 0.3 }}>
+                <TiltCard className="h-full">
                   <Card className="service-card bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-400/30 h-full">
                     <CardContent className="p-8 text-center h-full flex flex-col">
                       <motion.div 
@@ -477,9 +539,9 @@ export default function Landing() {
                       </div>
                     </CardContent>
                   </Card>
-                </motion.div>
+                </TiltCard>
 
-                <motion.div whileHover={{ scale: 1.02, y: -5 }} transition={{ duration: 0.3 }}>
+                <TiltCard className="h-full">
                   <Card className="service-card bg-gradient-to-r from-purple-500/20 to-blue-500/20 border-purple-400/30 h-full">
                     <CardContent className="p-8 text-center h-full flex flex-col">
                       <motion.div 
@@ -506,7 +568,7 @@ export default function Landing() {
                       </div>
                     </CardContent>
                   </Card>
-                </motion.div>
+                </TiltCard>
               </div>
             </motion.div>
 
