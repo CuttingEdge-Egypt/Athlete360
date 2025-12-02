@@ -20,8 +20,8 @@ function TiltCard({ children, className = "" }: { children: ReactNode; className
   const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30 });
   const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30 });
 
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["7deg", "-7deg"]);
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-7deg", "7deg"]);
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["5deg", "-5deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-5deg", "5deg"]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!ref.current) return;
@@ -51,9 +51,9 @@ function TiltCard({ children, className = "" }: { children: ReactNode; className
         rotateY,
         transformStyle: "preserve-3d",
       }}
-      className={`${className}`}
+      className={`h-full ${className}`}
     >
-      <div style={{ transform: "translateZ(30px)", transformStyle: "preserve-3d" }}>
+      <div className="h-full" style={{ transformStyle: "preserve-3d" }}>
         {children}
       </div>
     </motion.div>
