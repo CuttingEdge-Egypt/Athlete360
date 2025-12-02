@@ -33,7 +33,7 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
         elements.push(
           <p key={`p-${index}`} className={`mb-7 leading-[2] ${
             isArabic 
-              ? 'text-slate-200 text-[18px] font-light tracking-wide' 
+              ? 'text-gray-700 text-[18px] font-light tracking-wide' 
               : 'text-foreground text-base leading-relaxed'
           }`}>
             {renderInlineFormatting(paragraphText)}
@@ -48,13 +48,13 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
         elements.push(
           <ul key={`ul-${index}`} className={`mb-8 space-y-5 ${
             isArabic 
-              ? 'list-none text-slate-200 text-[17px] font-light' 
+              ? 'list-none text-gray-700 text-[17px] font-light' 
               : 'list-disc list-inside text-foreground'
           }`}>
             {listItems.map((item, i) => (
               <li key={i} className={`leading-[1.9] ${
                 isArabic 
-                  ? 'mr-0 pr-5 border-r-[3px] border-indigo-500 bg-slate-800/30 py-3 rounded-r-lg hover:bg-slate-800/50 transition-colors' 
+                  ? 'mr-0 pr-5 border-r-[3px] border-primary bg-primary/5 py-3 rounded-r-lg hover:bg-primary/10 transition-colors' 
                   : 'ml-4'
               }`}>
                 {renderInlineFormatting(item)}
@@ -84,8 +84,8 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
         elements.push(
           <h3 key={`h3-${index}`} className={`font-bold mb-5 mt-10 pb-3 ${
             isArabic 
-              ? 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 text-[21px] border-b border-cyan-500/30' 
-              : 'text-foreground text-xl border-b border-slate-200'
+              ? 'text-primary text-[21px] border-b border-primary/30' 
+              : 'text-foreground text-xl border-b border-gray-200'
           }`}>
             {trimmedLine.replace(/^###\s*/, '').replace(/\*\*/g, '')}
           </h3>
@@ -99,8 +99,8 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
         elements.push(
           <h2 key={`h2-${index}`} className={`font-extrabold mb-6 mt-12 pb-4 ${
             isArabic 
-              ? 'text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 text-[24px] border-b-2 border-purple-300' 
-              : 'text-foreground text-2xl border-b-2 border-indigo-500'
+              ? 'text-primary text-[24px] border-b-2 border-primary/50' 
+              : 'text-foreground text-2xl border-b-2 border-primary'
           }`}>
             {trimmedLine.replace(/^##\s*/, '').replace(/\*\*/g, '')}
           </h2>
@@ -131,7 +131,7 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
       if (trimmedLine === '---') {
         flushParagraph(index);
         flushList(index);
-        elements.push(<hr key={`hr-${index}`} className="my-6 border-slate-200" />);
+        elements.push(<hr key={`hr-${index}`} className="my-6 border-gray-200" />);
         return;
       }
       
@@ -156,7 +156,7 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
         return (
           <strong key={index} className={`font-semibold ${
             isArabic 
-              ? 'text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-400' 
+              ? 'text-primary font-bold' 
               : 'text-foreground font-bold'
           }`}>
             {part.slice(2, -2)}
@@ -171,10 +171,10 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
     <div className="space-y-6">
       {/* Video Preview */}
       {videoFile && (
-        <Card className="bg-slate-50 border-slate-200">
+        <Card className="bg-white border border-gray-200 shadow-sm">
           <CardHeader>
             <CardTitle className="text-foreground flex items-center gap-2">
-              <Trophy className="text-indigo-500" size={20} />
+              <Trophy className="text-primary" size={20} />
               {t('results.videoPreview')}
             </CardTitle>
           </CardHeader>
@@ -192,15 +192,15 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
       )}
 
       {/* User Request Card */}
-      <Card className="bg-slate-50 border-slate-200">
+      <Card className="bg-white border border-gray-200 shadow-sm">
         <CardHeader>
           <CardTitle className="text-foreground flex items-center gap-2">
-            <User className="text-indigo-500" size={20} />
+            <User className="text-primary" size={20} />
             {t('results.yourRequest')}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="bg-slate-100 p-4 rounded-lg">
+          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
             <p className="text-foreground italic">"{analysisData.userRequest}"</p>
             <div className="flex gap-4 mt-3 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
@@ -219,22 +219,22 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
       {/* Analysis Results */}
       <Card className={`border ${
         isArabic 
-          ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-200' 
-          : 'bg-slate-50 border-slate-200'
+          ? 'bg-white border-gray-200 shadow-sm' 
+          : 'bg-white border-gray-200 shadow-sm'
       }`}>
         <CardHeader>
           <CardTitle className={`flex items-center gap-2 ${
             isArabic 
-              ? 'text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400' 
+              ? 'text-primary' 
               : 'text-foreground'
           }`}>
-            <MessageSquare className={isArabic ? 'text-purple-400' : 'text-indigo-500'} size={20} />
+            <MessageSquare className="text-primary" size={20} />
             {t('results.aiAnalysisRecommendations')}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className={`prose prose-invert max-w-none ${
-            isArabic ? 'bg-gradient-to-br from-slate-800/40 via-slate-900/40 to-slate-800/40 p-8 rounded-2xl border border-slate-700/30' : ''
+          <div className={`prose max-w-none ${
+            isArabic ? 'bg-gray-50 p-8 rounded-2xl border border-gray-200' : ''
           }`}>
             <div className={`${isArabic ? 'text-right dir-rtl space-y-1' : 'space-y-2'}`} dir={isArabic ? 'rtl' : 'ltr'}>
               {formatAnalysisText(analysisData.analysis)}
@@ -243,10 +243,10 @@ export function ClipAnalysisDisplay({ analysisData, videoFile }: ClipAnalysisDis
           
           {/* Analysis Metadata */}
           <div className={`mt-6 pt-4 border-t ${
-            isArabic ? 'border-slate-200 text-right' : 'border-slate-200'
+            isArabic ? 'border-gray-200 text-right' : 'border-gray-200'
           }`}>
             <div className={`flex items-center gap-2 text-sm ${
-              isArabic ? 'text-slate-400 flex-row-reverse' : 'text-muted-foreground'
+              isArabic ? 'text-muted-foreground flex-row-reverse' : 'text-muted-foreground'
             }`}>
               <Calendar size={14} />
               <span>{t('results.analyzedOn')} {new Date(analysisData.processedAt).toLocaleString()}</span>
