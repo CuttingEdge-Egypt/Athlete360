@@ -147,15 +147,17 @@ export function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-white flex items-center justify-center p-3 sm:p-4" dir={isArabic ? 'rtl' : 'ltr'}>
-      <div className="w-full max-w-2xl">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6" dir={isArabic ? 'rtl' : 'ltr'}>
+      <div className="w-full max-w-xl">
         {/* Header */}
-        <div className="text-center mb-6 sm:mb-8">
-          <div className={`flex items-center justify-center gap-2 mb-3 sm:mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
-            <Zap className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
-            <h1 className={`${isArabic ? 'text-3xl sm:text-4xl' : 'text-2xl sm:text-3xl'} font-bold text-foreground`}>{t('header.title')}</h1>
+        <div className="text-center mb-8">
+          <div className={`flex items-center justify-center gap-3 mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center shadow-lg">
+              <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+            </div>
+            <h1 className={`${isArabic ? 'text-3xl sm:text-4xl' : 'text-2xl sm:text-3xl'} font-bold text-slate-800`}>{t('header.title')}</h1>
           </div>
-          <p className={`text-muted-foreground ${isArabic ? 'text-base sm:text-xl' : 'text-base sm:text-lg'} px-2`}>
+          <p className={`text-slate-500 ${isArabic ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>
             {t('header.subtitle')}
           </p>
           
@@ -163,7 +165,7 @@ export function SignupPage() {
           <Button 
             variant="ghost" 
             onClick={() => setLocation('/')}
-            className={`mt-3 sm:mt-4 text-muted-foreground hover:text-foreground h-11 ${isArabic ? 'flex-row-reverse' : ''}`}
+            className={`mt-4 text-slate-500 hover:text-slate-700 hover:bg-slate-100 ${isArabic ? 'flex-row-reverse' : ''}`}
             data-testid="button-back-home"
           >
             <ArrowLeft className={`${isArabic ? 'ml-2 rotate-180' : 'mr-2'} h-4 w-4`} />
@@ -172,59 +174,59 @@ export function SignupPage() {
         </div>
 
         {/* Main Content */}
-        <Card className="bg-card/80 border shadow-lg backdrop-blur-sm">
-          <CardHeader className="px-4 sm:px-6">
-            <CardTitle className={`${isArabic ? 'text-2xl sm:text-3xl' : 'text-xl sm:text-2xl'} font-bold text-foreground flex items-center justify-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
-              <User className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+        <Card className="bg-white border-0 shadow-xl shadow-slate-200/50 rounded-2xl overflow-hidden">
+          <CardHeader className="px-6 sm:px-8 pt-8 pb-2">
+            <CardTitle className={`${isArabic ? 'text-xl sm:text-2xl' : 'text-lg sm:text-xl'} font-semibold text-slate-800 flex items-center justify-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <User className="h-5 w-5 text-teal-500" />
               {t('card.title')}
             </CardTitle>
-            <CardDescription className={`text-muted-foreground text-center ${isArabic ? 'text-base sm:text-lg' : 'text-sm sm:text-base'} px-2`}>
+            <CardDescription className={`text-slate-400 text-center ${isArabic ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'} mt-1`}>
               {t('card.subtitle')}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          <CardContent className="space-y-5 px-6 sm:px-8 pb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName" className={`${isArabic ? 'text-base' : 'text-sm'} font-medium text-foreground`}>{t('form.firstName')}</Label>
+                <Label htmlFor="firstName" className={`${isArabic ? 'text-sm' : 'text-xs'} font-medium text-slate-600 uppercase tracking-wide`}>{t('form.firstName')}</Label>
                 <Input
                   id="firstName"
                   value={personalInfo.firstName}
                   onChange={(e) => setPersonalInfo(prev => ({ ...prev, firstName: e.target.value }))}
                   placeholder={t('form.firstNamePlaceholder')}
-                  className={`h-12 ${isArabic ? 'text-lg' : 'text-base'} bg-background border text-foreground`}
+                  className={`h-11 ${isArabic ? 'text-base' : 'text-sm'} bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-teal-400 focus:ring-teal-400/20 transition-all rounded-lg`}
                   data-testid="input-first-name"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName" className={`${isArabic ? 'text-base' : 'text-sm'} font-medium text-foreground`}>{t('form.lastName')}</Label>
+                <Label htmlFor="lastName" className={`${isArabic ? 'text-sm' : 'text-xs'} font-medium text-slate-600 uppercase tracking-wide`}>{t('form.lastName')}</Label>
                 <Input
                   id="lastName"
                   value={personalInfo.lastName}
                   onChange={(e) => setPersonalInfo(prev => ({ ...prev, lastName: e.target.value }))}
                   placeholder={t('form.lastNamePlaceholder')}
-                  className={`h-12 ${isArabic ? 'text-lg' : 'text-base'} bg-background border text-foreground`}
+                  className={`h-11 ${isArabic ? 'text-base' : 'text-sm'} bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-teal-400 focus:ring-teal-400/20 transition-all rounded-lg`}
                   data-testid="input-last-name"
                 />
               </div>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="email" className={`${isArabic ? 'text-base' : 'text-sm'} font-medium text-foreground`}>{t('form.email')}</Label>
+              <Label htmlFor="email" className={`${isArabic ? 'text-sm' : 'text-xs'} font-medium text-slate-600 uppercase tracking-wide`}>{t('form.email')}</Label>
               <Input
                 id="email"
                 type="email"
                 value={personalInfo.email}
                 onChange={(e) => setPersonalInfo(prev => ({ ...prev, email: e.target.value }))}
                 placeholder={t('form.emailPlaceholder')}
-                className={`h-12 ${isArabic ? 'text-lg' : 'text-base'} bg-background border text-foreground`}
+                className={`h-11 ${isArabic ? 'text-base' : 'text-sm'} bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-teal-400 focus:ring-teal-400/20 transition-all rounded-lg`}
                 data-testid="input-email"
               />
             </div>
             
             {/* Referral Code Field */}
             <div className="space-y-2">
-              <Label htmlFor="referralCode" className={`${isArabic ? 'text-base flex-row-reverse' : 'text-sm'} font-medium text-foreground flex items-center gap-2`}>
-                <Gift className="h-4 w-4 text-green-500" />
+              <Label htmlFor="referralCode" className={`${isArabic ? 'text-sm flex-row-reverse' : 'text-xs'} font-medium text-slate-600 uppercase tracking-wide flex items-center gap-2`}>
+                <Gift className="h-3.5 w-3.5 text-emerald-500" />
                 {t('form.referralCode')}
               </Label>
               <Input
@@ -232,39 +234,39 @@ export function SignupPage() {
                 value={personalInfo.referralCode}
                 onChange={(e) => setPersonalInfo(prev => ({ ...prev, referralCode: e.target.value.toUpperCase() }))}
                 placeholder={t('form.referralCodePlaceholder')}
-                className={`h-12 ${isArabic ? 'text-lg' : 'text-base'} bg-background border text-foreground`}
+                className={`h-11 ${isArabic ? 'text-base' : 'text-sm'} bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-emerald-400 focus:ring-emerald-400/20 transition-all rounded-lg`}
                 data-testid="input-referral-code"
               />
               {personalInfo.referralCode && (
-                <p className={`text-xs text-green-600 flex items-center gap-1 ${isArabic ? 'flex-row-reverse text-sm' : ''}`}>
+                <p className={`text-xs text-emerald-600 flex items-center gap-1.5 mt-1.5 ${isArabic ? 'flex-row-reverse' : ''}`}>
                   <Gift className="h-3 w-3" />
                   {t('form.referralBonus')}
                 </p>
               )}
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="password" className={`${isArabic ? 'text-base' : 'text-sm'} font-medium text-foreground`}>{t('form.password')}</Label>
+                <Label htmlFor="password" className={`${isArabic ? 'text-sm' : 'text-xs'} font-medium text-slate-600 uppercase tracking-wide`}>{t('form.password')}</Label>
                 <Input
                   id="password"
                   type="password"
                   value={personalInfo.password}
                   onChange={(e) => setPersonalInfo(prev => ({ ...prev, password: e.target.value }))}
                   placeholder={t('form.passwordPlaceholder')}
-                  className={`h-12 ${isArabic ? 'text-lg' : 'text-base'} bg-background border text-foreground`}
+                  className={`h-11 ${isArabic ? 'text-base' : 'text-sm'} bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-teal-400 focus:ring-teal-400/20 transition-all rounded-lg`}
                   data-testid="input-password"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className={`${isArabic ? 'text-base' : 'text-sm'} font-medium text-foreground`}>{t('form.confirmPassword')}</Label>
+                <Label htmlFor="confirmPassword" className={`${isArabic ? 'text-sm' : 'text-xs'} font-medium text-slate-600 uppercase tracking-wide`}>{t('form.confirmPassword')}</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
                   value={personalInfo.confirmPassword}
                   onChange={(e) => setPersonalInfo(prev => ({ ...prev, confirmPassword: e.target.value }))}
                   placeholder={t('form.confirmPasswordPlaceholder')}
-                  className={`h-12 ${isArabic ? 'text-lg' : 'text-base'} bg-background border text-foreground`}
+                  className={`h-11 ${isArabic ? 'text-base' : 'text-sm'} bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-teal-400 focus:ring-teal-400/20 transition-all rounded-lg`}
                   data-testid="input-confirm-password"
                 />
               </div>
@@ -273,23 +275,23 @@ export function SignupPage() {
             <Button 
               onClick={handleSignup}
               disabled={isProcessing}
-              className={`w-full bg-primary hover:bg-teal-600 text-white font-medium h-12 ${isArabic ? 'text-lg flex-row-reverse' : 'text-base'}`}
+              className={`w-full bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-medium h-12 rounded-xl shadow-lg shadow-teal-500/25 hover:shadow-teal-500/40 transition-all ${isArabic ? 'text-base flex-row-reverse' : 'text-sm'}`}
               data-testid="button-create-account"
             >
               {isProcessing ? t('form.creating') : t('form.createButton')}
-              <Gift className={`${isArabic ? 'mr-2' : 'ml-2'} h-5 w-5`} />
+              <Gift className={`${isArabic ? 'mr-2' : 'ml-2'} h-4 w-4`} />
             </Button>
           </CardContent>
         </Card>
         
         {/* Footer */}
-        <div className="text-center mt-8">
-          <p className={`text-muted-foreground ${isArabic ? 'text-lg' : 'text-base'}`}>
+        <div className="text-center mt-6">
+          <p className={`text-slate-500 ${isArabic ? 'text-base' : 'text-sm'}`}>
             {t('footer.haveAccount')}{' '}
             <Button 
               variant="link" 
               onClick={() => setLocation('/login')}
-              className="text-primary hover:text-teal-600 p-0 h-auto"
+              className="text-teal-600 hover:text-teal-700 p-0 h-auto font-medium"
               data-testid="link-login"
             >
               {t('footer.signIn')}
