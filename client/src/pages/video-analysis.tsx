@@ -169,20 +169,20 @@ export default function VideoAnalysis() {
     <div className="min-h-screen bg-background p-3 sm:p-6">
       <div className="max-w-6xl mx-auto">
         <div className="mb-6 sm:mb-8">
-          <h1 className={`${isArabic ? 'text-2xl sm:text-4xl text-right' : 'text-xl sm:text-3xl'} font-bold text-white`}>{t('title')}</h1>
+          <h1 className={`${isArabic ? 'text-2xl sm:text-4xl text-right' : 'text-xl sm:text-3xl'} font-bold text-foreground`}>{t('title')}</h1>
         </div>
         
         {isLoading ? (
           <div className="flex items-center justify-center min-h-[400px]">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-            <span className="ml-3 text-white">Loading video analysis...</span>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            <span className="ml-3 text-foreground">Loading video analysis...</span>
           </div>
         ) : hasError ? (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
-            <h3 className="text-red-800 dark:text-red-200 font-medium mb-2">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h3 className="text-red-800 font-medium mb-2">
               Error Loading Video Analysis
             </h3>
-            <p className="text-red-700 dark:text-red-300 mb-4">
+            <p className="text-red-700 mb-4">
               There was an issue loading the video analysis data. This might happen if the analysis data is corrupted or the session has expired.
             </p>
             <div className="flex space-x-3">
@@ -190,7 +190,6 @@ export default function VideoAnalysis() {
                 onClick={() => {
                   setHasError(false);
                   setHistoryAnalysisData(null);
-                  // Clear any stored data
                   sessionStorage.removeItem('videoAnalysisData');
                 }}
                 variant="outline"
@@ -203,7 +202,7 @@ export default function VideoAnalysis() {
                 onClick={() => {
                   resetToUploadState();
                 }}
-                className="bg-indigo-600 hover:bg-indigo-700 h-11"
+                className="bg-primary hover:bg-primary/90 text-white h-11"
                 data-testid="button-upload-new"
               >
                 Upload New Video
