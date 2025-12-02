@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Dialog,
@@ -25,18 +24,22 @@ export function CancelConfirmationDialog({
   title,
   description
 }: CancelConfirmationDialogProps) {
-  const { t } = useTranslation('home');
+  const { t, i18n } = useTranslation('home');
+  const isArabic = i18n.language === 'ar';
   
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
-      <DialogContent className="bg-card border text-foreground max-w-md [&>button]:text-foreground [&>button]:bg-muted/50 [&>button]:hover:bg-muted [&>button]:rounded-full [&>button]:p-1">
-        <DialogHeader className="text-right">
+      <DialogContent 
+        className="bg-card border text-foreground max-w-md [&>button]:text-foreground [&>button]:bg-muted/50 [&>button]:hover:bg-muted [&>button]:rounded-full [&>button]:p-1"
+        dir={isArabic ? 'rtl' : 'ltr'}
+      >
+        <DialogHeader className={isArabic ? 'text-right' : 'text-left'}>
           <DialogTitle className="text-foreground">{title || t('services.queue.cancelDialog.title')}</DialogTitle>
-          <DialogDescription className="text-muted-foreground text-right">
+          <DialogDescription className={`text-muted-foreground ${isArabic ? 'text-right' : 'text-left'}`}>
             {description || t('services.queue.cancelDialog.description')}
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="gap-2">
+        <DialogFooter className={`gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
           <Button
             variant="outline"
             onClick={onCancel}
