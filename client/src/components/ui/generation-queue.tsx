@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AnalysisPopup } from '@/components/ui/analysis-popup';
 import { CancelConfirmationDialog } from '@/components/ui/cancel-confirmation-dialog';
-import { X, Play, Pause, RotateCcw, Check, Loader2, Eye, Trash2 } from 'lucide-react';
+import { X, Play, Pause, RotateCcw, Check, Loader2, Eye, Trash2, User, Trophy, Star, AlertTriangle, Apple, Calendar, ClipboardList, Video, BarChart3, Users } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useTranslation } from 'react-i18next';
 
@@ -140,6 +140,38 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
     } catch (error) {
       console.error('Error getting service label:', error);
       return serviceType;
+    }
+  };
+
+  const getServiceIcon = (serviceType: string) => {
+    const iconSize = isMobile ? 10 : 12;
+    const iconProps = { size: iconSize, className: "flex-shrink-0" };
+    
+    switch (serviceType) {
+      case 'bio':
+        return <User {...iconProps} />;
+      case 'rank':
+        return <Trophy {...iconProps} />;
+      case 'strengths':
+        return <Star {...iconProps} />;
+      case 'weaknesses':
+        return <AlertTriangle {...iconProps} />;
+      case 'nutrition':
+      case 'nutrition-plan':
+        return <Apple {...iconProps} />;
+      case 'development':
+      case 'development-plan':
+        return <Calendar {...iconProps} />;
+      case 'beat':
+        return <ClipboardList {...iconProps} />;
+      case 'video':
+        return <Video {...iconProps} />;
+      case 'comparison':
+        return <Users {...iconProps} />;
+      case 'statistics':
+        return <BarChart3 {...iconProps} />;
+      default:
+        return null;
     }
   };
 
@@ -607,9 +639,10 @@ const GenerationQueue: React.FC<GenerationQueueProps> = ({
                       </span>
                       <Badge 
                         variant="outline" 
-                        className="border text-muted-foreground text-center whitespace-nowrap"
-                        style={{ fontSize: isMobile ? '10px' : '12px', padding: isMobile ? '1px 4px' : '0 8px', height: isMobile ? 'auto' : 'auto', lineHeight: isMobile ? '1.2' : 'normal' }}
+                        className="border text-muted-foreground whitespace-nowrap flex items-center gap-1"
+                        style={{ fontSize: isMobile ? '10px' : '12px', padding: isMobile ? '1px 4px' : '2px 8px', height: isMobile ? 'auto' : 'auto', lineHeight: isMobile ? '1.2' : 'normal' }}
                       >
+                        {getServiceIcon(item.serviceType)}
                         {getServiceLabel(item.serviceType)}
                       </Badge>
                     </div>
