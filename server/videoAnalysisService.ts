@@ -1124,88 +1124,68 @@ Look for names on screen, scoreboards, or mentioned by commentators.`;
       
       console.log(`[GENERATE_SEPARATE_SCORES] Players identified: ${players.player1} vs ${players.player2}`);
       
-      // Generate score progression for each player
-      const player1ScorePrompt = `Watch ${roundText} of this ${sportConfig.name} match. Track the score progression for ${players.player1} ONLY.
+      // Generate score progression for both players together to ensure consistent color detection
+      const bothPlayersScorePrompt = `Watch ${roundText} of this ${sportConfig.name} match. Track the score progression for BOTH players.
 
 🚨 CRITICAL REQUIREMENTS:
-1. Track every point/score gained by ${players.player1}
-2. In "current_score", show ONLY ${players.player1}'s score using the sport's native scoring system
+1. Track every point/score gained by each player
+2. In "current_score", show ONLY that player's score using the sport's native scoring system
 3. Use the sport's official notation (e.g., tennis: "15", "30", "40" | basketball: "2", "5", "7" | table tennis: "1", "3", "5")
 4. All timestamps MUST be in MM:SS format
-5. "side" field MUST be "blue" for ${players.player1}
+5. "uniform_color" field: LOOK AT THE VIDEO and identify the ACTUAL color of each player's uniform/gear (red, blue, white, black, green, yellow, etc.)
 6. "country" field: Extract the 3-letter country code (like "USA", "ITA", "GER") from scoreboards, player info, or flags visible in the video. If not visible, use null.
 
 MANDATORY JSON FORMAT:
 {
-  "entity_name": "${players.player1}",
-  "entity_type": "player",
-  "country": "ITA",
-  "side": "blue",
-  "events": [
+  "players": [
     {
-      "timestamp": "01:23",
-      "description": "Point scored",
-      "points_scored": 1,
-      "current_score": "[PLAYER_1_SCORE_ONLY]"
+      "entity_name": "${players.player1}",
+      "entity_type": "player",
+      "country": "ITA",
+      "uniform_color": "[ACTUAL_UNIFORM_COLOR_FROM_VIDEO]",
+      "events": [
+        {
+          "timestamp": "01:23",
+          "description": "Point scored",
+          "points_scored": 1,
+          "current_score": "[PLAYER_1_SCORE_ONLY]"
+        }
+      ]
     },
     {
-      "timestamp": "02:10",
-      "description": "Another point",
-      "points_scored": 1,
-      "current_score": "[UPDATED_PLAYER_1_SCORE]"
+      "entity_name": "${players.player2}",
+      "entity_type": "player",
+      "country": "USA",
+      "uniform_color": "[ACTUAL_UNIFORM_COLOR_FROM_VIDEO]",
+      "events": [
+        {
+          "timestamp": "02:45",
+          "description": "Point scored",
+          "points_scored": 1,
+          "current_score": "[PLAYER_2_SCORE_ONLY]"
+        }
+      ]
     }
   ]
 }
 
-⚠️ CRITICAL: current_score must contain ONLY ${players.player1}'s individual score in sport-specific notation, NOT a combined score like "${players.player1} vs ${players.player2}"`;
+⚠️ CRITICAL INSTRUCTIONS:
+- "uniform_color" MUST be the actual color you see in the video (e.g., "red", "blue", "white", "black", "green", "yellow")
+- For combat sports like Taekwondo/Karate, players typically wear red or blue protective gear - identify which player wears which
+- current_score must contain ONLY that player's individual score, NOT a combined score`;
 
-      const player2ScorePrompt = `Watch ${roundText} of this ${sportConfig.name} match. Track the score progression for ${players.player2} ONLY.
-
-🚨 CRITICAL REQUIREMENTS:
-1. Track every point/score gained by ${players.player2}
-2. In "current_score", show ONLY ${players.player2}'s score using the sport's native scoring system
-3. Use the sport's official notation (e.g., tennis: "15", "30", "40" | basketball: "2", "5", "7" | table tennis: "1", "3", "5")
-4. All timestamps MUST be in MM:SS format
-5. "side" field MUST be "red" for ${players.player2}
-6. "country" field: Extract the 3-letter country code (like "USA", "ITA", "GER") from scoreboards, player info, or flags visible in the video. If not visible, use null.
-
-MANDATORY JSON FORMAT:
-{
-  "entity_name": "${players.player2}",
-  "entity_type": "player",
-  "country": "USA",
-  "side": "red",
-  "events": [
-    {
-      "timestamp": "02:45",
-      "description": "Point scored",
-      "points_scored": 1,
-      "current_score": "[PLAYER_2_SCORE_ONLY]"
-    },
-    {
-      "timestamp": "03:20",
-      "description": "Another point",
-      "points_scored": 1,
-      "current_score": "[UPDATED_PLAYER_2_SCORE]"
-    }
-  ]
-}
-
-⚠️ CRITICAL: current_score must contain ONLY ${players.player2}'s individual score in sport-specific notation, NOT a combined score like "${players.player1} vs ${players.player2}"`;
-
-      // Generate both player scores in parallel
-      const [player1Response, player2Response] = await Promise.all([
-        jsonModel.generateContent([videoFile, player1ScorePrompt]),
-        jsonModel.generateContent([videoFile, player2ScorePrompt])
-      ]);
+      // Generate both player scores in one call for consistency
+      const bothPlayersResponse = await jsonModel.generateContent([videoFile, bothPlayersScorePrompt]);
+      const bothPlayersData = JSON.parse(bothPlayersResponse.response.text());
       
-      const player1Score = JSON.parse(player1Response.response.text());
-      const player2Score = JSON.parse(player2Response.response.text());
+      // Extract player scores from the combined response
+      const player1Score = bothPlayersData.players?.[0] || { entity_name: players.player1, entity_type: "player", country: null, uniform_color: "blue", events: [] };
+      const player2Score = bothPlayersData.players?.[1] || { entity_name: players.player2, entity_type: "player", country: null, uniform_color: "red", events: [] };
       
-      console.log(`[GENERATE_SEPARATE_SCORES] Player 1 (${players.player1}) events: ${player1Score.events?.length || 0}`);
-      console.log(`[GENERATE_SEPARATE_SCORES] Player 2 (${players.player2}) events: ${player2Score.events?.length || 0}`);
+      console.log(`[GENERATE_SEPARATE_SCORES] Player 1 (${players.player1}) color: ${player1Score.uniform_color}, events: ${player1Score.events?.length || 0}`);
+      console.log(`[GENERATE_SEPARATE_SCORES] Player 2 (${players.player2}) color: ${player2Score.uniform_color}, events: ${player2Score.events?.length || 0}`);
       
-      // Return both player scores
+      // Return both player scores with uniform colors
       return {
         scores: [player1Score, player2Score],
         type: 'individual'
