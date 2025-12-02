@@ -1566,11 +1566,13 @@ CRITICAL ERROR HANDLING:
       ]
     }
 
-IMPORTANT - INCLUDE REFERENCES:
+IMPORTANT - REFERENCES AND FORMATTING:
 - For each strategy, include a "references" array with 1-3 relevant sources
 - References can be URLs to videos, articles, match analyses, or expert commentary
 - Format references as: ["https://example.com/analysis", "Expert Coach Analysis - Match Review"]
-- Keep references clean and informative to support the strategy recommendations
+- CRITICAL: Do NOT include any URLs or links in the "description" or "execution" text fields
+- All URLs must ONLY appear in the "references" array - never embed links in prose text
+- Keep the description and execution fields as clean narrative text without any hyperlinks
 
 CRITICAL ERROR HANDLING:
 - If you cannot find any reliable data through web search, respond with exactly: {"error": "no_data_found", "success": false}

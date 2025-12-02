@@ -428,9 +428,9 @@
       "successHigh": "عالي",
       "strategicOverview": "نظرة استراتيجية",
       "executionPlan": "خطة التنفيذ",
-      "tacticalAnalysis": "تحليل تكتيكي متقدم مع {{count}} نهج استراتيجي",
+      "tacticalAnalysis": "تحليل تكتيكي متقدم مع {count} نهج استراتيجي",
       "analysisComplete": "اكتمل التحليل الاستراتيجي",
-      "tacticalApproaches": "تم تحديد {{count}} نهج تكتيكي لتحقيق أفضل أداء"
+      "tacticalApproaches": "تم تحديد {count} نهج تكتيكي لتحقيق أفضل أداء"
     }
   }
 }

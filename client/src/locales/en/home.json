@@ -428,9 +428,9 @@
       "successHigh": "High",
       "strategicOverview": "Strategic Overview",
       "executionPlan": "Execution Plan",
-      "tacticalAnalysis": "Advanced tactical analysis with {{count}} strategic approaches",
+      "tacticalAnalysis": "Advanced tactical analysis with {count} strategic approaches",
       "analysisComplete": "Strategic Analysis Complete",
-      "tacticalApproaches": "{{count}} tactical approaches identified for optimal performance advantage"
+      "tacticalApproaches": "{count} tactical approaches identified for optimal performance advantage"
     }
   }
 }
