@@ -2868,6 +2868,7 @@ export default function Home() {
                                   placeholder={t('interface.selectCountry')}
                                   countries={countries}
                                   testId="select-nutrition-country"
+                                  className="bg-muted border-input text-foreground hover:bg-accent hover:text-accent-foreground hover:border-input"
                                 />
                               </FormControl>
                               <FormMessage className="text-red-400" />
