@@ -46,10 +46,10 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
     if (riskLower.includes('low') || riskLower.includes('minimal')) return 'low';
     if (riskLower.includes('medium') || riskLower.includes('moderate')) return 'medium';
     if (riskLower.includes('high') || riskLower.includes('severe')) return 'high';
-    // Arabic terms
+    // Arabic terms (including variations with tanween)
     if (riskLower.includes('منخفض') || riskLower.includes('قليل')) return 'low';
     if (riskLower.includes('متوسط') || riskLower.includes('معتدل')) return 'medium';
-    if (riskLower.includes('عالي') || riskLower.includes('مرتفع')) return 'high';
+    if (riskLower.includes('عالي') || riskLower.includes('عالٍ') || riskLower.includes('مرتفع')) return 'high';
     return 'unknown';
   };
 
@@ -79,8 +79,8 @@ export function StrategicCombatDisplay({ data }: StrategicCombatDisplayProps) {
     if (probLower.includes('high') || probLower.includes('excellent')) return 'high';
     if (probLower.includes('medium') || probLower.includes('moderate')) return 'medium';
     if (probLower.includes('low') || probLower.includes('poor')) return 'low';
-    // Arabic terms
-    if (probLower.includes('عالي') || probLower.includes('مرتفع') || probLower.includes('ممتاز')) return 'high';
+    // Arabic terms (including variations with tanween)
+    if (probLower.includes('عالي') || probLower.includes('عالٍ') || probLower.includes('مرتفع') || probLower.includes('ممتاز')) return 'high';
     if (probLower.includes('متوسط') || probLower.includes('معتدل')) return 'medium';
     if (probLower.includes('منخفض') || probLower.includes('قليل') || probLower.includes('ضعيف')) return 'low';
     return 'unknown';
