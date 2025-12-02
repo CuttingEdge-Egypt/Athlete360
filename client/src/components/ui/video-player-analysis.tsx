@@ -870,6 +870,10 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
   const rawScoreboardData = getScoreboardData();
   const { entity1Country, entity2Country, isTeamSport, scoreFormat, isTaekwondo } = rawScoreboardData;
   
+  // Detect combat sports that use red/blue player colors (for swapped positioning)
+  const sportLower = sport.toLowerCase();
+  const isCombatSport = ['taekwondo', 'karate', 'judo', 'mma', 'boxing', 'wrestling', 'kickboxing', 'kung fu', 'muay thai', 'sambo', 'fencing'].some(s => sportLower.includes(s));
+  
   // Get fallback names from dynamic metrics
   const metricPlayerNames = getPlayerNamesFromDynamicMetrics();
   
@@ -1254,13 +1258,14 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
       {/* Main Video Layout with Side Stats - Responsive */}
       {/* Mobile: Video first, then metrics below. Desktop: Video center with metrics on sides */}
       <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:gap-6">
-        {/* Blue Player Stats - Left Side on Desktop, Below Video on Mobile */}
+        {/* Left Side Stats - Red for combat sports, Blue for others */}
         <div className="order-2 lg:order-1 lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-2 lg:gap-4 lg:space-y-0">
 
           {/* Dynamic Metrics or Traditional Kicks/Warnings */}
           {isTaekwondo ? (
             <>
-              {/* Blue Kicks - Glassmorphism */}
+              {/* For combat sports: Show RED on left side */}
+              {/* Left Kicks - Glassmorphism */}
               <div 
                 className="rounded-[20px] text-center relative overflow-hidden"
                 style={{ 
@@ -1270,17 +1275,17 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   border: '1px solid rgba(255, 255, 255, 0.3)',
                   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px 7px rgba(255, 255, 255, 0.7)'
                 }}
-                data-testid="blue-kicks-card"
+                data-testid={isCombatSport ? "red-kicks-card" : "blue-kicks-card"}
               >
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
                 <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-white/80 via-transparent to-white/30"></div>
                 <div className="p-2 sm:p-4 relative">
-                  <div className="text-blue-700 font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate">{getTitle(sportConfig.action)}</div>
-                  <div className="text-xl sm:text-2xl font-bold text-blue-600" data-testid="blue-kicks">{blueKicks}</div>
+                  <div className={`font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate ${isCombatSport ? 'text-red-700' : 'text-blue-700'}`}>{getTitle(sportConfig.action)}</div>
+                  <div className={`text-xl sm:text-2xl font-bold ${isCombatSport ? 'text-red-600' : 'text-blue-600'}`} data-testid={isCombatSport ? "red-kicks" : "blue-kicks"}>{isCombatSport ? redKicks : blueKicks}</div>
                 </div>
               </div>
 
-              {/* Blue Yellow Cards - Glassmorphism */}
+              {/* Left Yellow Cards - Glassmorphism */}
               <div 
                 className="rounded-[20px] text-center relative overflow-hidden"
                 style={{ 
@@ -1290,26 +1295,30 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   border: '1px solid rgba(255, 255, 255, 0.3)',
                   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px 7px rgba(255, 255, 255, 0.7)'
                 }}
-                data-testid="blue-cards-card"
+                data-testid={isCombatSport ? "red-cards-card" : "blue-cards-card"}
               >
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
                 <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-white/80 via-transparent to-white/30"></div>
                 <div className="p-2 sm:p-4 relative">
-                  <div className="text-blue-700 font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate">{getTitle(sportConfig.violation)}</div>
-                  <div className="text-xl sm:text-2xl font-bold text-yellow-600" data-testid="blue-cards">{currentStats.blueCards}</div>
+                  <div className={`font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate ${isCombatSport ? 'text-red-700' : 'text-blue-700'}`}>{getTitle(sportConfig.violation)}</div>
+                  <div className="text-xl sm:text-2xl font-bold text-yellow-600" data-testid={isCombatSport ? "red-cards" : "blue-cards"}>{isCombatSport ? currentStats.redCards : currentStats.blueCards}</div>
                 </div>
               </div>
             </>
           ) : (
             <>
-              {/* Dynamic Metrics for Non-Taekwondo Sports */}
+              {/* Dynamic Metrics for Non-Taekwondo Sports - Left side shows red for combat sports */}
               {normalizedDynamicMetrics.map((metric: any, index: number) => {
+                // For combat sports: left side shows player 2 (red), right side shows player 1 (blue)
+                const leftPlayerIndex = isCombatSport ? 1 : 0;
+                const leftColor = isCombatSport ? 'red' : 'blue';
+                
                 if (isTeamSport) {
                   // For team sports, show team totals
                   const teamData = getTeamMetrics(metric);
-                  const team1 = teamData.teams[0]; // First team (e.g., Lakers)
+                  const team = isCombatSport ? teamData.teams[1] : teamData.teams[0];
                   
-                  if (!team1) {
+                  if (!team) {
                     return (
                       <div 
                         key={index} 
@@ -1321,21 +1330,21 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                           border: '1px solid rgba(255, 255, 255, 0.3)',
                           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px 7px rgba(255, 255, 255, 0.7)'
                         }}
-                        data-testid={`metric-${index}-team-1`}
+                        data-testid={`metric-${index}-team-left`}
                       >
                         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
                         <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-white/80 via-transparent to-white/30"></div>
                         <div className="p-2 sm:p-4 relative">
-                          <div className={`text-blue-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
-                          <div className="text-[10px] sm:text-xs text-blue-600 mb-1 truncate">No data</div>
-                          <div className="text-xl sm:text-2xl font-bold text-blue-600">0</div>
+                          <div className={`font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'} ${leftColor === 'red' ? 'text-red-700' : 'text-blue-700'}`}>{metric.title}</div>
+                          <div className={`text-[10px] sm:text-xs mb-1 truncate ${leftColor === 'red' ? 'text-red-600' : 'text-blue-600'}`}>No data</div>
+                          <div className={`text-xl sm:text-2xl font-bold ${leftColor === 'red' ? 'text-red-600' : 'text-blue-600'}`}>0</div>
                         </div>
                       </div>
                     );
                   }
                   
                   // Get current value based on video time
-                  const currentEvents = team1.events.filter((e: any) => e.timestamp <= currentTime);
+                  const currentEvents = team.events.filter((e: any) => e.timestamp <= currentTime);
                   const currentValue = currentEvents.length;
                   const lastEvent = currentEvents[currentEvents.length - 1];
                   
@@ -1350,23 +1359,23 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                         border: '1px solid rgba(255, 255, 255, 0.3)',
                         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px 7px rgba(255, 255, 255, 0.7)'
                       }}
-                      data-testid={`metric-${index}-team-1`}
+                      data-testid={`metric-${index}-team-left`}
                     >
                       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
                       <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-white/80 via-transparent to-white/30"></div>
                       <div className="p-2 sm:p-4 relative">
-                        <div className={`text-blue-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
-                        <div className="text-[10px] sm:text-xs text-blue-600 mb-1 transition-all duration-300 truncate">
-                          {lastEvent ? lastEvent.playerName : team1.name}
+                        <div className={`font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'} ${leftColor === 'red' ? 'text-red-700' : 'text-blue-700'}`}>{metric.title}</div>
+                        <div className={`text-[10px] sm:text-xs mb-1 transition-all duration-300 truncate ${leftColor === 'red' ? 'text-red-600' : 'text-blue-600'}`}>
+                          {lastEvent ? lastEvent.playerName : team.name}
                         </div>
-                        <div className="text-xl sm:text-2xl font-bold text-blue-600">{currentValue}</div>
+                        <div className={`text-xl sm:text-2xl font-bold ${leftColor === 'red' ? 'text-red-600' : 'text-blue-600'}`}>{currentValue}</div>
                       </div>
                     </div>
                   );
                 } else {
                   // For individual sports, show player stats
                   const playerValues = getCurrentDynamicMetricValues(metric);
-                  const player1 = playerValues[0] || { name: 'Player 1', value: 0 };
+                  const player = playerValues[leftPlayerIndex] || { name: leftColor === 'red' ? 'Player 2' : 'Player 1', value: 0 };
                   
                   return (
                     <div 
@@ -1379,14 +1388,14 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                         border: '1px solid rgba(255, 255, 255, 0.3)',
                         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px 7px rgba(255, 255, 255, 0.7)'
                       }}
-                      data-testid={`metric-${index}-player-1`}
+                      data-testid={`metric-${index}-player-left`}
                     >
                       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
                       <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-white/80 via-transparent to-white/30"></div>
                       <div className="p-2 sm:p-4 relative">
-                        <div className={`text-blue-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
-                        <div className="text-[10px] sm:text-xs text-blue-600 mb-1 truncate">{player1.name}</div>
-                        <div className="text-xl sm:text-2xl font-bold text-blue-600" data-testid={`metric-value-${index}-player-1`}>{player1.value}</div>
+                        <div className={`font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'} ${leftColor === 'red' ? 'text-red-700' : 'text-blue-700'}`}>{metric.title}</div>
+                        <div className={`text-[10px] sm:text-xs mb-1 truncate ${leftColor === 'red' ? 'text-red-600' : 'text-blue-600'}`}>{player.name}</div>
+                        <div className={`text-xl sm:text-2xl font-bold ${leftColor === 'red' ? 'text-red-600' : 'text-blue-600'}`} data-testid={`metric-value-${index}-player-left`}>{player.value}</div>
                       </div>
                     </div>
                   );
@@ -1435,57 +1444,71 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   entity2Scorer = lastRedEvent?.playerName || '';
                 }
                 
+                // For combat sports: Red on left, Blue on right
+                // For other sports: Blue on left, Red on right
+                const leftName = isCombatSport ? entity2Name : entity1Name;
+                const leftCountry = isCombatSport ? entity2Country : entity1Country;
+                const leftScore = isCombatSport ? entity2Score : entity1Score;
+                const leftScorer = isCombatSport ? entity2Scorer : entity1Scorer;
+                const leftColor = isCombatSport ? 'red' : 'blue';
+                
+                const rightName = isCombatSport ? entity1Name : entity2Name;
+                const rightCountry = isCombatSport ? entity1Country : entity2Country;
+                const rightScore = isCombatSport ? entity1Score : entity2Score;
+                const rightScorer = isCombatSport ? entity1Scorer : entity2Scorer;
+                const rightColor = isCombatSport ? 'blue' : 'red';
+                
                 return (
                   <div className="bg-white border-b border-gray-200 px-3 sm:px-6 py-3 sm:py-4">
                     <div className="flex items-center justify-between max-w-4xl mx-auto">
-                      {/* Entity 1 (Blue/Team 1) */}
+                      {/* Left Player/Team */}
                       <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                        {entity1Country && (
+                        {leftCountry && (
                           <Flag 
-                            country={entity1Country} 
+                            country={leftCountry} 
                             className="w-6 h-4 sm:w-8 sm:h-6 rounded shadow-sm flex-shrink-0" 
                           />
                         )}
                         <div className="flex-1 text-left min-w-0">
-                          <div className="text-xs sm:text-lg font-bold text-blue-700 truncate">{entity1Name}</div>
-                          {isTeamSport && entity1Scorer && (
-                            <div className="text-[10px] sm:text-xs text-blue-600 font-medium mt-0.5 truncate" data-testid="entity1-scorer">
-                              {entity1Scorer}
+                          <div className={`text-xs sm:text-lg font-bold truncate ${leftColor === 'red' ? 'text-red-700' : 'text-blue-700'}`}>{leftName}</div>
+                          {isTeamSport && leftScorer && (
+                            <div className={`text-[10px] sm:text-xs font-medium mt-0.5 truncate ${leftColor === 'red' ? 'text-red-600' : 'text-blue-600'}`} data-testid="left-scorer">
+                              {leftScorer}
                             </div>
                           )}
-                          {entity1Country && !isTeamSport && (
-                            <div className="text-[10px] sm:text-xs text-gray-500 truncate">{entity1Country}</div>
+                          {leftCountry && !isTeamSport && (
+                            <div className="text-[10px] sm:text-xs text-gray-500 truncate">{leftCountry}</div>
                           )}
                         </div>
                       </div>
                       
                       {/* Score Display */}
                       <div className="flex items-center gap-2 sm:gap-4 px-2 sm:px-6 flex-shrink-0">
-                        <div className="text-2xl sm:text-4xl font-bold text-blue-600" data-testid="entity1-score">
-                          {entity1Score}
+                        <div className={`text-2xl sm:text-4xl font-bold ${leftColor === 'red' ? 'text-red-600' : 'text-blue-600'}`} data-testid="left-score">
+                          {leftScore}
                         </div>
                         <div className="text-lg sm:text-2xl font-bold text-gray-400">-</div>
-                        <div className="text-2xl sm:text-4xl font-bold text-red-600" data-testid="entity2-score">
-                          {entity2Score}
+                        <div className={`text-2xl sm:text-4xl font-bold ${rightColor === 'red' ? 'text-red-600' : 'text-blue-600'}`} data-testid="right-score">
+                          {rightScore}
                         </div>
                       </div>
                       
-                      {/* Entity 2 (Red/Team 2) */}
+                      {/* Right Player/Team */}
                       <div className="flex items-center gap-2 sm:gap-3 flex-1 justify-end min-w-0">
                         <div className="flex-1 text-right min-w-0">
-                          <div className="text-xs sm:text-lg font-bold text-red-700 truncate">{entity2Name}</div>
-                          {isTeamSport && entity2Scorer && (
-                            <div className="text-[10px] sm:text-xs text-red-600 font-medium mt-0.5 truncate" data-testid="entity2-scorer">
-                              {entity2Scorer}
+                          <div className={`text-xs sm:text-lg font-bold truncate ${rightColor === 'red' ? 'text-red-700' : 'text-blue-700'}`}>{rightName}</div>
+                          {isTeamSport && rightScorer && (
+                            <div className={`text-[10px] sm:text-xs font-medium mt-0.5 truncate ${rightColor === 'red' ? 'text-red-600' : 'text-blue-600'}`} data-testid="right-scorer">
+                              {rightScorer}
                             </div>
                           )}
-                          {entity2Country && !isTeamSport && (
-                            <div className="text-[10px] sm:text-xs text-gray-500 truncate">{entity2Country}</div>
+                          {rightCountry && !isTeamSport && (
+                            <div className="text-[10px] sm:text-xs text-gray-500 truncate">{rightCountry}</div>
                           )}
                         </div>
-                        {entity2Country && (
+                        {rightCountry && (
                           <Flag 
-                            country={entity2Country} 
+                            country={rightCountry} 
                             className="w-6 h-4 sm:w-8 sm:h-6 rounded shadow-sm flex-shrink-0" 
                           />
                         )}
@@ -1639,13 +1662,14 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           </Card>
         </div>
 
-        {/* Red Player Stats - Right Side on Desktop, Below Video with Blue on Mobile */}
+        {/* Right Side Stats - Blue for combat sports, Red for others */}
         <div className="order-3 lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-2 lg:gap-4 lg:space-y-0">
 
           {/* Dynamic Metrics or Traditional Kicks/Warnings */}
           {isTaekwondo ? (
             <>
-              {/* Red Kicks - Glassmorphism */}
+              {/* For combat sports: Show BLUE on right side */}
+              {/* Right Kicks - Glassmorphism */}
               <div 
                 className="rounded-[20px] text-center relative overflow-hidden"
                 style={{ 
@@ -1655,17 +1679,17 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   border: '1px solid rgba(255, 255, 255, 0.3)',
                   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px 7px rgba(255, 255, 255, 0.7)'
                 }}
-                data-testid="red-kicks-card"
+                data-testid={isCombatSport ? "blue-kicks-card" : "red-kicks-card"}
               >
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
                 <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-white/80 via-transparent to-white/30"></div>
                 <div className="p-2 sm:p-4 relative">
-                  <div className="text-red-700 font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate">{getTitle(sportConfig.action)}</div>
-                  <div className="text-xl sm:text-2xl font-bold text-red-600" data-testid="red-kicks">{redKicks}</div>
+                  <div className={`font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate ${isCombatSport ? 'text-blue-700' : 'text-red-700'}`}>{getTitle(sportConfig.action)}</div>
+                  <div className={`text-xl sm:text-2xl font-bold ${isCombatSport ? 'text-blue-600' : 'text-red-600'}`} data-testid={isCombatSport ? "blue-kicks" : "red-kicks"}>{isCombatSport ? blueKicks : redKicks}</div>
                 </div>
               </div>
 
-              {/* Red Yellow Cards - Glassmorphism */}
+              {/* Right Yellow Cards - Glassmorphism */}
               <div 
                 className="rounded-[20px] text-center relative overflow-hidden"
                 style={{ 
@@ -1675,26 +1699,30 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   border: '1px solid rgba(255, 255, 255, 0.3)',
                   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px 7px rgba(255, 255, 255, 0.7)'
                 }}
-                data-testid="red-cards-card"
+                data-testid={isCombatSport ? "blue-cards-card" : "red-cards-card"}
               >
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
                 <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-white/80 via-transparent to-white/30"></div>
                 <div className="p-2 sm:p-4 relative">
-                  <div className="text-red-700 font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate">{getTitle(sportConfig.violation)}</div>
-                  <div className="text-xl sm:text-2xl font-bold text-yellow-600" data-testid="red-cards">{currentStats.redCards}</div>
+                  <div className={`font-semibold text-xs sm:text-sm mb-1 sm:mb-2 truncate ${isCombatSport ? 'text-blue-700' : 'text-red-700'}`}>{getTitle(sportConfig.violation)}</div>
+                  <div className="text-xl sm:text-2xl font-bold text-yellow-600" data-testid={isCombatSport ? "blue-cards" : "red-cards"}>{isCombatSport ? currentStats.blueCards : currentStats.redCards}</div>
                 </div>
               </div>
             </>
           ) : (
             <>
-              {/* Dynamic Metrics for Non-Taekwondo Sports */}
+              {/* Dynamic Metrics for Non-Taekwondo Sports - Right side shows blue for combat sports */}
               {normalizedDynamicMetrics.map((metric: any, index: number) => {
+                // For combat sports: right side shows player 1 (blue), left side shows player 2 (red)
+                const rightPlayerIndex = isCombatSport ? 0 : 1;
+                const rightColor = isCombatSport ? 'blue' : 'red';
+                
                 if (isTeamSport) {
                   // For team sports, show team totals
                   const teamData = getTeamMetrics(metric);
-                  const team2 = teamData.teams[1]; // Second team (e.g., Warriors)
+                  const team = isCombatSport ? teamData.teams[0] : teamData.teams[1];
                   
-                  if (!team2) {
+                  if (!team) {
                     return (
                       <div 
                         key={index} 
@@ -1706,21 +1734,21 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                           border: '1px solid rgba(255, 255, 255, 0.3)',
                           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px 7px rgba(255, 255, 255, 0.7)'
                         }}
-                        data-testid={`metric-${index}-team-2`}
+                        data-testid={`metric-${index}-team-right`}
                       >
                         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
                         <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-white/80 via-transparent to-white/30"></div>
                         <div className="p-2 sm:p-4 relative">
-                          <div className={`text-red-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
-                          <div className="text-[10px] sm:text-xs text-red-600 mb-1 truncate">No data</div>
-                          <div className="text-xl sm:text-2xl font-bold text-red-600">0</div>
+                          <div className={`font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'} ${rightColor === 'blue' ? 'text-blue-700' : 'text-red-700'}`}>{metric.title}</div>
+                          <div className={`text-[10px] sm:text-xs mb-1 truncate ${rightColor === 'blue' ? 'text-blue-600' : 'text-red-600'}`}>No data</div>
+                          <div className={`text-xl sm:text-2xl font-bold ${rightColor === 'blue' ? 'text-blue-600' : 'text-red-600'}`}>0</div>
                         </div>
                       </div>
                     );
                   }
                   
                   // Get current value based on video time
-                  const currentEvents = team2.events.filter((e: any) => e.timestamp <= currentTime);
+                  const currentEvents = team.events.filter((e: any) => e.timestamp <= currentTime);
                   const currentValue = currentEvents.length;
                   const lastEvent = currentEvents[currentEvents.length - 1];
                   
@@ -1735,23 +1763,23 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                         border: '1px solid rgba(255, 255, 255, 0.3)',
                         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px 7px rgba(255, 255, 255, 0.7)'
                       }}
-                      data-testid={`metric-${index}-team-2`}
+                      data-testid={`metric-${index}-team-right`}
                     >
                       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
                       <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-white/80 via-transparent to-white/30"></div>
                       <div className="p-2 sm:p-4 relative">
-                        <div className={`text-red-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
-                        <div className="text-[10px] sm:text-xs text-red-600 mb-1 transition-all duration-300 truncate">
-                          {lastEvent ? lastEvent.playerName : team2.name}
+                        <div className={`font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'} ${rightColor === 'blue' ? 'text-blue-700' : 'text-red-700'}`}>{metric.title}</div>
+                        <div className={`text-[10px] sm:text-xs mb-1 transition-all duration-300 truncate ${rightColor === 'blue' ? 'text-blue-600' : 'text-red-600'}`}>
+                          {lastEvent ? lastEvent.playerName : team.name}
                         </div>
-                        <div className="text-xl sm:text-2xl font-bold text-red-600">{currentValue}</div>
+                        <div className={`text-xl sm:text-2xl font-bold ${rightColor === 'blue' ? 'text-blue-600' : 'text-red-600'}`}>{currentValue}</div>
                       </div>
                     </div>
                   );
                 } else {
                   // For individual sports, show player stats
                   const playerValues = getCurrentDynamicMetricValues(metric);
-                  const player2 = playerValues[1] || { name: 'Player 2', value: 0 };
+                  const player = playerValues[rightPlayerIndex] || { name: rightColor === 'blue' ? 'Player 1' : 'Player 2', value: 0 };
                   
                   return (
                     <div 
@@ -1764,14 +1792,14 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                         border: '1px solid rgba(255, 255, 255, 0.3)',
                         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px 7px rgba(255, 255, 255, 0.7)'
                       }}
-                      data-testid={`metric-${index}-player-2`}
+                      data-testid={`metric-${index}-player-right`}
                     >
                       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
                       <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-white/80 via-transparent to-white/30"></div>
                       <div className="p-2 sm:p-4 relative">
-                        <div className={`text-red-700 font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'}`}>{metric.title}</div>
-                        <div className="text-[10px] sm:text-xs text-red-600 mb-1 truncate">{player2.name}</div>
-                        <div className="text-xl sm:text-2xl font-bold text-red-600" data-testid={`metric-value-${index}-player-2`}>{player2.value}</div>
+                        <div className={`font-semibold mb-1 truncate ${isArabicText(metric.title) ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs'} ${rightColor === 'blue' ? 'text-blue-700' : 'text-red-700'}`}>{metric.title}</div>
+                        <div className={`text-[10px] sm:text-xs mb-1 truncate ${rightColor === 'blue' ? 'text-blue-600' : 'text-red-600'}`}>{player.name}</div>
+                        <div className={`text-xl sm:text-2xl font-bold ${rightColor === 'blue' ? 'text-blue-600' : 'text-red-600'}`} data-testid={`metric-value-${index}-player-right`}>{player.value}</div>
                       </div>
                     </div>
                   );
