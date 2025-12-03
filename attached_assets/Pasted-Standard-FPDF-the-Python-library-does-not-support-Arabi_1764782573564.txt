@@ -1,0 +1,106 @@
+Standard FPDF (the Python library) does not support Arabic text out of the box.[1][2][3][4]
+
+If you simply load your JSON and try to print the Arabic strings, two things will go wrong:
+
+Direction: The text will display Left-to-Right (reversed).
+
+Connectivity: The letters will be disconnected (appearing as isolated characters rather than cursive Arabic script).
+
+You can still make it work, but you need to add two small helper libraries (arabic-reshaper and python-bidi) to "fix" the text before passing it to FPDF.[2][4]
+
+The Solution (Code Example)
+
+You need to install these three packages:
+
+code
+Bash
+download
+content_copy
+expand_less
+pip install fpdf arabic-reshaper python-bidi
+
+[2][4]
+Here is a script that takes your JSON with Arabic text and generates a correct PDF:
+
+code
+Python
+download
+content_copy
+expand_less
+import json
+from fpdf import FPDF
+import arabic_reshaper
+from bidi.algorithm import get_display
+
+# 1. Sample JSON data containing Arabic
+json_data = '''
+{
+    "items": [
+        {"name": "Imac 27 Inch", "price": "5000 AED"},
+        {"name": "لوحة مفاتيح ميكانيكية", "price": "300 AED"},
+        {"name": "شاشة سامسونج", "price": "1200 AED"}
+    ]
+}
+'''
+data = json.loads(json_data)
+
+# 2. Setup FPDF with a font that supports Arabic
+# You MUST download a .ttf font that supports Arabic (e.g., Arial or Amiri)
+# For this example, assume you have 'Amiri-Regular.ttf' in the same folder.
+# Download Amiri here: https://fonts.google.com/specimen/Amiri
+pdf = FPDF()
+pdf.add_page()
+
+# Register the font (standard fonts like Courier/Times won't work)
+pdf.add_font('Amiri', '', 'Amiri-Regular.ttf', uni=True)
+pdf.set_font('Amiri', '', 14)
+
+# 3. Helper function to fix Arabic text
+def fix_text(text):
+    # Reshape: connects the letters (isolated -> connected forms)
+    reshaped_text = arabic_reshaper.reshape(text)
+    # Bidi: reverses the direction (RTL -> LTR for the library to draw correctly)
+    bidi_text = get_display(reshaped_text)
+    return bidi_text
+
+# 4. Generate the PDF
+pdf.cell(200, 10, txt="Invoice / فاتورة", ln=1, align='C')
+
+for item in data['items']:
+    # Fix the name if it might contain Arabic
+    name = fix_text(item['name'])
+    price = item['price']
+    
+    # Render the row
+    pdf.cell(100, 10, txt=name, border=1, align='R') # 'R' align often looks better for Arabic lists
+    pdf.cell(50, 10, txt=price, border=1, align='C')
+    pdf.ln()
+
+pdf.output("invoice.pdf")
+Why this is necessary
+
+arabic_reshaper: Standard FPDF treats every character individually.[2][4] This library replaces the "isolated" version of the letter "ب" with the "connected" version that links to the next letter.
+
+python-bidi: FPDF draws text from Left-to-Right.[2][4] This library reverses your Arabic string logically so that when FPDF paints it Left-to-Right, it appears visually correct as Right-to-Left.[2][4]
+
+Alternative: fpdf2
+
+There is a newer fork called fpdf2 which has built-in support for text shaping, but it can sometimes be trickier to configure than the method above.[2][4] If you are starting a new project, I recommend sticking to the arabic-reshaper + bidi method with standard fpdf (or fpdf2) as it is very reliable.[2][4]
+
+Sources
+help
+stackoverflow.com
+stackoverflow.com
+openai.com
+stackoverflow.com
+stackoverflow.com
+researchgate.net
+medium.com
+stackoverflow.com
+Google Search Suggestions
+Display of Search Suggestions is required when using Grounding with Google Search. Learn more
+fpdf python arabic text display issues
+how to use arabic in fpdf python
+python pdf library arabic support
+does fpdf python support arabic
+fpdf2 arabic support
