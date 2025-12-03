@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Clock, Target, AlertTriangle, Calendar, Users, Brain, MessageSquare, User } from "lucide-react";
+import { Trophy, Clock, Target, AlertTriangle, Calendar, Users, Brain, MessageSquare, User, FileDown, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useToast } from "@/hooks/use-toast";
+import { generateVideoAnalysisPDF } from "@/lib/pdf/video-analysis-generator";
 
 // Import the PlayerAdviceSection from VideoPlayerAnalysis
 import { PlayerAdviceSection } from "@/components/ui/video-player-analysis";
@@ -74,9 +76,43 @@ interface YellowCardEvent {
 
 export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: VideoAnalysisResultsProps) {
   const [selectedTimestamp, setSelectedTimestamp] = useState<number | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
   const { t, i18n } = useTranslation('common');
   const { direction, isRTL } = useLanguage();
+  const { toast } = useToast();
   const isArabic = i18n.language === 'ar';
+  
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    try {
+      const locale = analysisData?.language === 'arabic' ? 'ar' : i18n.language;
+      const blob = await generateVideoAnalysisPDF(analysisData, sport, locale);
+      
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const analysisType = analysisData?.analysisType === 'clip' ? 'clip-analysis' : 'match-analysis';
+      link.download = `video-${analysisType}-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: t('analysis.export.success', 'PDF exported successfully'),
+        description: t('analysis.export.downloadStarted', 'Your analysis report is downloading'),
+      });
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast({
+        title: t('analysis.export.error', 'Export failed'),
+        description: t('analysis.export.errorMessage', 'Could not generate PDF. Please try again.'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
   
   // Check if this is a clip analysis
   if (analysisData?.analysisType === 'clip') {
@@ -205,6 +241,30 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
     // Render clip analysis view
     return (
       <div className="space-y-6">
+        {/* Export Button */}
+        <div className="flex justify-end">
+          <Button
+            onClick={handleExportPDF}
+            disabled={isExporting}
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            data-testid="export-video-analysis-pdf"
+          >
+            {isExporting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {t('analysis.export.exporting', 'Exporting...')}
+              </>
+            ) : (
+              <>
+                <FileDown className="h-4 w-4" />
+                {t('analysis.export.exportPdf', 'Export PDF')}
+              </>
+            )}
+          </Button>
+        </div>
+        
         {/* User Request Card */}
         <Card className="bg-white border border-gray-200 shadow-sm">
           <CardHeader>
@@ -718,9 +778,31 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
             <h2 className="text-2xl font-bold text-foreground">{t('analysis.videoAnalysis.videoAnalysisResults', 'Video Analysis Results')}</h2>
             <p className="text-muted-foreground">{t('analysis.videoAnalysis.round', 'Round')} {analysisData.roundAnalyzed || 1} {t('analysis.videoAnalysis.analysis', 'Analysis')}</p>
           </div>
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">{t('analysis.videoAnalysis.analyzedOn', 'Analyzed on')}</p>
-            <p className="text-foreground">{new Date(analysisData.processedAt || Date.now()).toLocaleDateString()}</p>
+          <div className="flex items-center gap-4">
+            <Button
+              onClick={handleExportPDF}
+              disabled={isExporting}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              data-testid="export-match-analysis-pdf"
+            >
+              {isExporting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t('analysis.export.exporting', 'Exporting...')}
+                </>
+              ) : (
+                <>
+                  <FileDown className="h-4 w-4" />
+                  {t('analysis.export.exportPdf', 'Export PDF')}
+                </>
+              )}
+            </Button>
+            <div className="text-right">
+              <p className="text-sm text-muted-foreground">{t('analysis.videoAnalysis.analyzedOn', 'Analyzed on')}</p>
+              <p className="text-foreground">{new Date(analysisData.processedAt || Date.now()).toLocaleDateString()}</p>
+            </div>
           </div>
         </div>
       </div>

@@ -3,8 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Target, Dumbbell, Play, ExternalLink, Activity, Zap, Timer, Users, CheckCircle } from 'lucide-react';
+import { Target, Dumbbell, Play, ExternalLink, Activity, Zap, Timer, Users, CheckCircle, FileDown, Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { generateDevelopmentPlanPDF } from '@/lib/pdf/development-plan-generator';
 
 // Goal-based development plan interfaces
 interface Exercise {
@@ -129,12 +131,44 @@ function getExercisePrescriptionText(exercise: Exercise, planLanguage: string): 
 
 export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: DevelopmentPlanDisplayProps) {
   const { t, i18n } = useTranslation('common');
+  const { toast } = useToast();
   const [selectedGoalIndex, setSelectedGoalIndex] = useState(0);
   const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
+  const [isExporting, setIsExporting] = useState(false);
   // Content generation language (for video button positioning based on content language)
   const contentIsArabic = language === 'ar';
   // UI language (for UI elements like tabs, labels)
   const isArabic = i18n.language === 'ar';
+
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    try {
+      const blob = await generateDevelopmentPlanPDF(plan, language);
+      
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `development-plan-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: t('analysis.export.success', 'PDF exported successfully'),
+        description: t('analysis.export.downloadStarted', 'Your development plan is downloading'),
+      });
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast({
+        title: t('analysis.export.error', 'Export failed'),
+        description: t('analysis.export.errorMessage', 'Could not generate PDF. Please try again.'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // Validate that plan is a valid object with goal analysis
   if (!plan || typeof plan !== 'object' || !plan.title || !plan.goalAnalysis) {
@@ -198,6 +232,26 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                   </div>
                   <span className="font-semibold text-purple-700" dir={contentIsArabic ? 'rtl' : 'ltr'}>{counts?.videos || allExercisesWithVideos.length} {getPlanTranslation('videos', language)}</span>
                 </div>
+                <Button
+                  onClick={handleExportPDF}
+                  disabled={isExporting}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 ml-4"
+                  data-testid="export-development-plan-pdf"
+                >
+                  {isExporting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {t('analysis.export.exporting', 'Exporting...')}
+                    </>
+                  ) : (
+                    <>
+                      <FileDown className="h-4 w-4" />
+                      {t('analysis.export.exportPdf', 'Export PDF')}
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
           </div>

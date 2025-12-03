@@ -39,8 +39,10 @@ import {
   Loader2,
   HelpCircle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  FileDown
 } from "lucide-react";
+import { generateComparisonReport } from "@/lib/pdf/generator";
 
 type Sport = {
   id: string;
@@ -88,6 +90,7 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
   const queueIdRef = useRef<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isExportingComparison, setIsExportingComparison] = useState(false);
   const [progressPhase, setProgressPhase] = useState<{ message: string; progress: number; originalMessage?: string } | null>(null);
   const [comparisonData, setComparisonData] = useState(() => {
     console.log("AthleteComparison received preloadedComparisonData:", preloadedComparisonData);
@@ -142,6 +145,42 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
   };
 
   const selectedPreviewAnalysis = getAnalysisForPreview();
+
+  const handleExportComparisonPDF = async () => {
+    if (!comparisonData) return;
+    
+    setIsExportingComparison(true);
+    try {
+      const athlete1Name = comparisonData.athlete1?.name || comparisonData.athletes?.[0]?.name || 'Athlete 1';
+      const athlete2Name = comparisonData.athlete2?.name || comparisonData.athletes?.[1]?.name || 'Athlete 2';
+      const locale = isComparisonArabic ? 'ar' : 'en';
+      
+      const blob = await generateComparisonReport(comparisonData, athlete1Name, athlete2Name, locale);
+      
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `athlete-comparison-${athlete1Name}-vs-${athlete2Name}-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: t('analysis.export.success', 'PDF exported successfully'),
+        description: t('analysis.export.downloadStarted', 'Your comparison report is downloading'),
+      });
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast({
+        title: t('analysis.export.error', 'Export failed'),
+        description: t('analysis.export.errorMessage', 'Could not generate PDF. Please try again.'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsExportingComparison(false);
+    }
+  };
 
   // Restore loading state from queue when component mounts or becomes active
   useEffect(() => {
@@ -723,19 +762,40 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Show "Generate New Comparison" button when results are displayed */}
+        {/* Show action buttons when results are displayed */}
         {comparisonData && !showForm && (
-          <Button
-            onClick={() => {
-              setShowForm(true);
-              setComparisonData(null);
-            }}
-            className={`w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 flex items-center justify-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}
-            data-testid="button-generate-new-comparison"
-          >
-            <Sparkles className="h-4 w-4" />
-            {t("analysis.comparison.generateNew", "Generate New Comparison")}
-          </Button>
+          <div className={`flex gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
+            <Button
+              onClick={() => {
+                setShowForm(true);
+                setComparisonData(null);
+              }}
+              className={`flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 flex items-center justify-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}
+              data-testid="button-generate-new-comparison"
+            >
+              <Sparkles className="h-4 w-4" />
+              {t("analysis.comparison.generateNew", "Generate New Comparison")}
+            </Button>
+            <Button
+              onClick={handleExportComparisonPDF}
+              disabled={isExportingComparison}
+              variant="outline"
+              className={`gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}
+              data-testid="export-comparison-pdf"
+            >
+              {isExportingComparison ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t('analysis.export.exporting', 'Exporting...')}
+                </>
+              ) : (
+                <>
+                  <FileDown className="h-4 w-4" />
+                  {t('analysis.export.exportPdf', 'Export PDF')}
+                </>
+              )}
+            </Button>
+          </div>
         )}
 
         {/* Selection Form */}

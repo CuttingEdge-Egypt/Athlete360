@@ -1,0 +1,678 @@
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import athleteLogoUrl from '@assets/Athlete360Logo-removebg-preview_1764432432230.png';
+import { 
+  processArabicText, 
+  sanitizeArabicText, 
+  getRTLTextAlign, 
+  getRTLXPosition,
+  formatDateForLocale,
+  setTextFont,
+  normalizeNumbers,
+  loadArabicFonts
+} from './arabic-utils';
+
+const pdfTheme = {
+  colors: {
+    primary: '#000000',
+    headerBg: '#0f1729',
+    secondary: '#333333',
+    text: '#000000',
+    lightGray: '#f5f5f5',
+    accent: '#2563eb',
+    border: '#0f1729',
+    bluePlayer: '#3b82f6',
+    redPlayer: '#ef4444',
+    scoreHeaderBg: '#e6fffa',
+    warningBg: '#fef3c7',
+  },
+  fonts: {
+    primary: 'times',
+    sizes: {
+      header: 16,
+      subheader: 14,
+      body: 12,
+      small: 10,
+    }
+  },
+  spacing: {
+    margin: 15,
+    lineHeight: 7,
+    sectionGap: 15,
+    paragraphGap: 12,
+  },
+  layout: {
+    pageWidth: 210,
+    pageHeight: 297,
+    borderWidth: 1,
+  }
+};
+
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: (options: any) => jsPDF;
+    lastAutoTable: {
+      finalY: number;
+    };
+  }
+}
+
+const hexToRgb = (hex: string) => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : { r: 0, g: 0, b: 0 };
+};
+
+const sanitizeText = (text: string, locale: string = 'en'): string => {
+  if (!text || typeof text !== 'string') return '';
+  
+  if (locale === 'ar') {
+    let arabicText = sanitizeArabicText(text);
+    arabicText = processArabicText(arabicText);
+    arabicText = normalizeNumbers(arabicText, true);
+    return arabicText;
+  }
+  
+  let cleaned = text;
+  cleaned = cleaned.replace(/[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/g, ' ');
+  cleaned = cleaned.replace(/\*\*/g, '');
+  cleaned = cleaned.replace(/###?\s*/g, '');
+  cleaned = cleaned.replace(/\s+/g, ' ');
+  cleaned = cleaned.trim();
+  
+  return cleaned;
+};
+
+let logoDataUrl: string | null = null;
+
+const loadLogoDataUrl = async (): Promise<string> => {
+  if (logoDataUrl) return logoDataUrl;
+  
+  try {
+    const response = await fetch(athleteLogoUrl);
+    const blob = await response.blob();
+    
+    logoDataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+    
+    return logoDataUrl;
+  } catch (error) {
+    console.log('Error loading logo:', error);
+    throw error;
+  }
+};
+
+const addLogoToHeader = async (pdf: jsPDF, x: number, y: number, width: number, height: number) => {
+  try {
+    const logoData = await loadLogoDataUrl();
+    pdf.addImage(logoData, 'PNG', x, y, width, height);
+  } catch (error) {
+    console.log('Could not add logo to PDF:', error);
+  }
+};
+
+const drawHeaderBar = async (pdf: jsPDF, title: string, subtitle: string) => {
+  const { margin } = pdfTheme.spacing;
+  const { pageWidth } = pdfTheme.layout;
+  
+  const logoSpace = 60;
+  const headerTextWidth = pageWidth - 2 * margin - 20 - logoSpace - 10;
+  
+  setTextFont(pdf, 'en', 'bold');
+  pdf.setFontSize(pdfTheme.fonts.sizes.header);
+  const titleLines = pdf.splitTextToSize(title, headerTextWidth);
+  
+  const lineHeight = 6;
+  const baseHeight = 35;
+  const headerHeight = baseHeight + (titleLines.length * lineHeight);
+  
+  const headerColor = pdfTheme.colors.headerBg;
+  const rgb = hexToRgb(headerColor);
+  pdf.setFillColor(rgb.r, rgb.g, rgb.b);
+  pdf.rect(0, 0, pageWidth, headerHeight, 'F');
+  
+  try {
+    const logoWidth = 50;
+    const logoHeight = 20;
+    const logoX = (pageWidth - logoWidth) / 2;
+    const logoY = 5;
+    
+    await addLogoToHeader(pdf, logoX, logoY, logoWidth, logoHeight);
+  } catch (error) {
+    console.log('Logo could not be added to PDF');
+  }
+  
+  pdf.setTextColor(255, 255, 255);
+  
+  setTextFont(pdf, 'en', 'bold');
+  pdf.setFontSize(pdfTheme.fonts.sizes.header);
+  
+  let currentY = 30;
+  
+  titleLines.forEach((line: string) => {
+    const textWidth = pdf.getTextWidth(line);
+    const centeredX = (pageWidth - textWidth) / 2;
+    pdf.text(line, centeredX, currentY);
+    currentY += lineHeight;
+  });
+  
+  pdf.setTextColor(pdfTheme.colors.text);
+};
+
+const addFooter = (pdf: jsPDF, pageNum: number, totalPages?: number) => {
+  const { margin } = pdfTheme.spacing;
+  const { pageHeight, pageWidth } = pdfTheme.layout;
+  
+  setTextFont(pdf, 'en', 'normal');
+  pdf.setFontSize(pdfTheme.fonts.sizes.small);
+  pdf.setTextColor(pdfTheme.colors.secondary);
+  
+  const footerY = pageHeight - margin + 5;
+  
+  const generationDate = new Date().toLocaleDateString();
+  pdf.text(`Generated on ${generationDate}`, margin, footerY);
+  
+  const pageText = totalPages ? `Page ${pageNum} of ${totalPages}` : `Page ${pageNum}`;
+  const pageTextWidth = pdf.getTextWidth(pageText);
+  const centerX = (pageWidth - pageTextWidth) / 2;
+  pdf.text(pageText, centerX, footerY);
+  
+  const brandingText = "Generated by Athlete360";
+  const brandingTextWidth = pdf.getTextWidth(brandingText);
+  const rightX = pageWidth - margin - brandingTextWidth;
+  pdf.text(brandingText, rightX, footerY);
+  
+  pdf.setTextColor(pdfTheme.colors.text);
+};
+
+const drawPageFrame = (pdf: jsPDF) => {
+  const { margin } = pdfTheme.spacing;
+  const { pageWidth, pageHeight, borderWidth } = pdfTheme.layout;
+  
+  pdf.setDrawColor(pdfTheme.colors.border);
+  pdf.setLineWidth(borderWidth);
+  pdf.rect(margin, margin, pageWidth - 2 * margin, pageHeight - 2 * margin);
+};
+
+const checkPageBreak = (pdf: jsPDF, currentY: number, requiredHeight: number = 20): number => {
+  const { margin } = pdfTheme.spacing;
+  const { pageHeight } = pdfTheme.layout;
+  const footerSpace = 20;
+  
+  if (currentY + requiredHeight > pageHeight - margin - footerSpace) {
+    pdf.addPage();
+    drawPageFrame(pdf);
+    return margin + 35;
+  }
+  return currentY;
+};
+
+const addSectionHeader = (pdf: jsPDF, title: string, currentY: number, estimatedContentHeight: number = 40): number => {
+  const { margin } = pdfTheme.spacing;
+  
+  const headerHeight = pdfTheme.fonts.sizes.subheader + pdfTheme.spacing.sectionGap + 5;
+  
+  currentY = checkPageBreak(pdf, currentY, headerHeight + estimatedContentHeight);
+  
+  setTextFont(pdf, 'en', 'bold');
+  pdf.setFontSize(pdfTheme.fonts.sizes.subheader);
+  pdf.setTextColor(pdfTheme.colors.text);
+  
+  const xPosition = margin + 5;
+  pdf.text(title, xPosition, currentY);
+  
+  const textWidth = pdf.getTextWidth(title);
+  const maxLineWidth = pdfTheme.layout.pageWidth - (margin * 2) - 10;
+  const lineWidth = Math.min(textWidth, maxLineWidth);
+  
+  pdf.setDrawColor(pdfTheme.colors.text);
+  pdf.setLineWidth(0.5);
+  pdf.line(xPosition, currentY + 2, xPosition + lineWidth, currentY + 2);
+  
+  return currentY + pdfTheme.spacing.sectionGap;
+};
+
+const addText = (pdf: jsPDF, text: string, y: number, options: { 
+  indent?: number; 
+  fontSize?: number; 
+  weight?: 'normal' | 'bold';
+  extraSpacing?: number;
+  locale?: string;
+} = {}): number => {
+  const { 
+    indent = 0, 
+    fontSize = pdfTheme.fonts.sizes.body, 
+    weight = 'normal',
+    extraSpacing = 0,
+    locale = 'en'
+  } = options;
+  
+  if (!text || text.trim() === '') return y;
+  
+  pdf.setFontSize(fontSize);
+  setTextFont(pdf, locale, weight);
+  pdf.setTextColor(pdfTheme.colors.text);
+  
+  let currentY = y;
+  const processedText = sanitizeText(text, locale);
+  
+  const maxWidth = pdfTheme.layout.pageWidth - (pdfTheme.spacing.margin * 2) - indent - 10;
+  const lines = pdf.splitTextToSize(processedText, maxWidth);
+  
+  lines.forEach((line: string) => {
+    currentY = checkPageBreak(pdf, currentY, pdfTheme.spacing.lineHeight);
+    
+    const xPosition = pdfTheme.spacing.margin + indent;
+    pdf.text(line, xPosition, currentY);
+    currentY += pdfTheme.spacing.lineHeight;
+  });
+  
+  return currentY + extraSpacing;
+};
+
+const formatTime = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
+
+const addScoreBox = (pdf: jsPDF, label: string, score: string | number, color: string, x: number, y: number, width: number, height: number) => {
+  const rgb = hexToRgb(color);
+  
+  pdf.setFillColor(rgb.r, rgb.g, rgb.b, 0.1);
+  pdf.setDrawColor(rgb.r, rgb.g, rgb.b);
+  pdf.setLineWidth(0.5);
+  pdf.rect(x, y, width, height, 'FD');
+  
+  setTextFont(pdf, 'en', 'bold');
+  pdf.setFontSize(pdfTheme.fonts.sizes.small);
+  pdf.setTextColor(rgb.r, rgb.g, rgb.b);
+  
+  const labelWidth = pdf.getTextWidth(label);
+  pdf.text(label, x + (width - labelWidth) / 2, y + 8);
+  
+  pdf.setFontSize(pdfTheme.fonts.sizes.header);
+  const scoreStr = String(score);
+  const scoreWidth = pdf.getTextWidth(scoreStr);
+  pdf.text(scoreStr, x + (width - scoreWidth) / 2, y + 18);
+  
+  pdf.setTextColor(pdfTheme.colors.text);
+};
+
+export const generateVideoAnalysisPDF = async (
+  analysisData: any,
+  sport: string = 'taekwondo',
+  locale: string = 'en'
+): Promise<Blob> => {
+  const pdf = new jsPDF('portrait', 'mm', 'a4');
+  const isArabic = locale === 'ar';
+  
+  if (isArabic) {
+    await loadArabicFonts(pdf);
+  }
+  
+  drawPageFrame(pdf);
+  
+  const isClipAnalysis = analysisData?.analysisType === 'clip';
+  const title = isClipAnalysis ? 'Video Clip Analysis Report' : 'Match Analysis Report';
+  const subtitle = `${sport} • ${new Date().toLocaleDateString()}`;
+  
+  await drawHeaderBar(pdf, title, subtitle);
+  
+  let currentY = pdfTheme.spacing.margin + 60;
+  
+  if (isClipAnalysis) {
+    currentY = generateClipAnalysisPDF(pdf, analysisData, currentY, locale);
+  } else {
+    currentY = generateMatchAnalysisPDF(pdf, analysisData, currentY, sport, locale);
+  }
+  
+  const totalPages = pdf.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    pdf.setPage(i);
+    addFooter(pdf, i, totalPages);
+  }
+  
+  return pdf.output('blob');
+};
+
+const generateClipAnalysisPDF = (pdf: jsPDF, analysisData: any, startY: number, locale: string): number => {
+  let currentY = startY;
+  
+  if (analysisData.userRequest) {
+    currentY = addSectionHeader(pdf, 'Your Request', currentY, 30);
+    currentY = addText(pdf, `"${analysisData.userRequest}"`, currentY, {
+      indent: 10,
+      extraSpacing: 10,
+      locale
+    });
+  }
+  
+  if (analysisData.sport) {
+    currentY = addText(pdf, `Sport: ${analysisData.sport}`, currentY, {
+      indent: 10,
+      fontSize: pdfTheme.fonts.sizes.small,
+      locale
+    });
+    currentY += 5;
+  }
+  
+  if (analysisData.analysis) {
+    currentY = addSectionHeader(pdf, 'AI Analysis & Recommendations', currentY, 50);
+    
+    const analysisText = analysisData.analysis;
+    const sections = analysisText.split(/(?=###?\s+)/);
+    
+    sections.forEach((section: string) => {
+      if (!section.trim()) return;
+      
+      const headerMatch = section.match(/^###?\s*(.+?)(?:\n|$)/);
+      if (headerMatch) {
+        const headerText = headerMatch[1].replace(/\*\*/g, '');
+        currentY = addText(pdf, headerText, currentY, {
+          indent: 10,
+          weight: 'bold',
+          fontSize: pdfTheme.fonts.sizes.subheader,
+          extraSpacing: 5,
+          locale
+        });
+        
+        const content = section.replace(/^###?\s*.+?\n/, '');
+        if (content.trim()) {
+          currentY = addText(pdf, sanitizeText(content, locale), currentY, {
+            indent: 15,
+            extraSpacing: 10,
+            locale
+          });
+        }
+      } else {
+        currentY = addText(pdf, sanitizeText(section, locale), currentY, {
+          indent: 10,
+          extraSpacing: 8,
+          locale
+        });
+      }
+    });
+  }
+  
+  return currentY;
+};
+
+const generateMatchAnalysisPDF = (pdf: jsPDF, analysisData: any, startY: number, sport: string, locale: string): number => {
+  let currentY = startY;
+  const isTaekwondo = sport?.toLowerCase() === 'taekwondo';
+  
+  const parseJsonData = (data: any) => {
+    if (!data) return null;
+    if (typeof data === 'object') return data;
+    try {
+      let content = data;
+      if (content.includes('```json')) {
+        content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (content.includes('```')) {
+        content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+      return JSON.parse(content.trim());
+    } catch (e) {
+      return null;
+    }
+  };
+  
+  const scoreData = parseJsonData(analysisData.score_analysis);
+  const yellowCardData = parseJsonData(analysisData.yellow_card_analysis);
+  const kickData = parseJsonData(analysisData.kick_count_analysis);
+  
+  currentY = addSectionHeader(pdf, 'Match Summary', currentY, 50);
+  
+  const { margin } = pdfTheme.spacing;
+  const boxWidth = 50;
+  const boxHeight = 25;
+  const startX = margin + 20;
+  const spacing = 10;
+  
+  let blueScore = 0;
+  let redScore = 0;
+  
+  if (scoreData?.final_score) {
+    blueScore = scoreData.final_score.blue || scoreData.final_score.Blue || 0;
+    redScore = scoreData.final_score.red || scoreData.final_score.Red || 0;
+  } else if (scoreData?.total_score) {
+    blueScore = scoreData.total_score.blue || scoreData.total_score.Blue || 0;
+    redScore = scoreData.total_score.red || scoreData.total_score.Red || 0;
+  }
+  
+  addScoreBox(pdf, 'Blue Player', blueScore, pdfTheme.colors.bluePlayer, startX, currentY, boxWidth, boxHeight);
+  
+  setTextFont(pdf, 'en', 'bold');
+  pdf.setFontSize(pdfTheme.fonts.sizes.header);
+  pdf.setTextColor(pdfTheme.colors.text);
+  const vsText = 'VS';
+  const vsWidth = pdf.getTextWidth(vsText);
+  pdf.text(vsText, startX + boxWidth + (spacing - vsWidth) / 2 + 5, currentY + 15);
+  
+  addScoreBox(pdf, 'Red Player', redScore, pdfTheme.colors.redPlayer, startX + boxWidth + spacing + 10, currentY, boxWidth, boxHeight);
+  
+  currentY += boxHeight + 15;
+  
+  if (isTaekwondo) {
+    let blueCards = 0;
+    let redCards = 0;
+    
+    if (yellowCardData?.total_yellow_cards) {
+      blueCards = yellowCardData.total_yellow_cards.blue || 0;
+      redCards = yellowCardData.total_yellow_cards.red || 0;
+    } else if (yellowCardData?.yellow_cards) {
+      blueCards = yellowCardData.yellow_cards.blue || 0;
+      redCards = yellowCardData.yellow_cards.red || 0;
+    }
+    
+    if (blueCards > 0 || redCards > 0) {
+      currentY = addSectionHeader(pdf, 'Yellow Cards', currentY, 30);
+      
+      currentY = addText(pdf, `Blue Player: ${blueCards} cards`, currentY, {
+        indent: 10,
+        locale
+      });
+      currentY = addText(pdf, `Red Player: ${redCards} cards`, currentY, {
+        indent: 10,
+        extraSpacing: 10,
+        locale
+      });
+    }
+    
+    let blueKicks = 0;
+    let redKicks = 0;
+    
+    if (kickData?.total_kicks) {
+      blueKicks = kickData.total_kicks.blue || 0;
+      redKicks = kickData.total_kicks.red || 0;
+    } else if (kickData?.kick_counts) {
+      blueKicks = kickData.kick_counts.blue || 0;
+      redKicks = kickData.kick_counts.red || 0;
+    }
+    
+    if (blueKicks > 0 || redKicks > 0) {
+      currentY = addSectionHeader(pdf, 'Total Kick Counts', currentY, 30);
+      
+      currentY = addText(pdf, `Blue Player: ${blueKicks} kicks`, currentY, {
+        indent: 10,
+        locale
+      });
+      currentY = addText(pdf, `Red Player: ${redKicks} kicks`, currentY, {
+        indent: 10,
+        extraSpacing: 10,
+        locale
+      });
+    }
+  }
+  
+  if (analysisData.dynamic_metrics && Array.isArray(analysisData.dynamic_metrics)) {
+    analysisData.dynamic_metrics.forEach((metric: any) => {
+      if (!metric?.title || !metric?.data?.players) return;
+      
+      currentY = addSectionHeader(pdf, metric.title, currentY, 30);
+      
+      metric.data.players.forEach((player: any) => {
+        const playerName = player.name || 'Player';
+        const total = player.total || 0;
+        currentY = addText(pdf, `${playerName}: ${total}`, currentY, {
+          indent: 10,
+          locale
+        });
+      });
+      
+      currentY += 10;
+    });
+  }
+  
+  const extractEvents = (data: any): any[] => {
+    if (!data) return [];
+    
+    if (Array.isArray(data.events)) {
+      return data.events;
+    }
+    
+    if (data.separate_scores && Array.isArray(data.separate_scores)) {
+      const allEvents: any[] = [];
+      data.separate_scores.forEach((entity: any) => {
+        if (entity.events && Array.isArray(entity.events)) {
+          entity.events.forEach((event: any) => {
+            allEvents.push({
+              ...event,
+              playerName: entity.entity_name
+            });
+          });
+        }
+      });
+      return allEvents.sort((a, b) => {
+        const parseTime = (t: string) => {
+          if (!t) return 0;
+          const [min, sec] = t.split(':').map(Number);
+          return min * 60 + sec;
+        };
+        return parseTime(a.timestamp) - parseTime(b.timestamp);
+      });
+    }
+    
+    return [];
+  };
+  
+  const scoreEvents = extractEvents(scoreData);
+  
+  if (scoreEvents.length > 0) {
+    currentY = addSectionHeader(pdf, 'Score Timeline', currentY, 50);
+    
+    const tableData = scoreEvents.slice(0, 20).map((event: any) => {
+      const timestamp = event.timestamp || formatTime(event.time || 0);
+      const player = event.playerName || event.player || 'Unknown';
+      const score = event.current_score || event.score || `${event.blueScore || 0} - ${event.redScore || 0}`;
+      const description = event.description || '';
+      
+      return [timestamp, player, score, description];
+    });
+    
+    pdf.autoTable({
+      startY: currentY,
+      head: [['Time', 'Player', 'Score', 'Description']],
+      body: tableData,
+      theme: 'striped',
+      headStyles: { 
+        fillColor: hexToRgb(pdfTheme.colors.headerBg),
+        textColor: [255, 255, 255]
+      },
+      styles: { fontSize: 9 },
+      margin: { left: pdfTheme.spacing.margin + 5, right: pdfTheme.spacing.margin + 5 },
+    });
+    
+    currentY = pdf.lastAutoTable.finalY + 15;
+  }
+  
+  if (analysisData.advice_analysis) {
+    currentY = addSectionHeader(pdf, 'Coach Analysis & Recommendations', currentY, 50);
+    
+    const adviceData = parseJsonData(analysisData.advice_analysis);
+    
+    if (adviceData) {
+      if (adviceData.for_blue_player || adviceData.blue_player_advice) {
+        currentY = addText(pdf, 'For Blue Player:', currentY, {
+          indent: 10,
+          weight: 'bold',
+          locale
+        });
+        const blueAdvice = adviceData.for_blue_player || adviceData.blue_player_advice;
+        if (Array.isArray(blueAdvice)) {
+          blueAdvice.forEach((tip: string) => {
+            currentY = addText(pdf, `• ${tip}`, currentY, {
+              indent: 15,
+              locale
+            });
+          });
+        } else if (typeof blueAdvice === 'string') {
+          currentY = addText(pdf, blueAdvice, currentY, {
+            indent: 15,
+            locale
+          });
+        }
+        currentY += 8;
+      }
+      
+      if (adviceData.for_red_player || adviceData.red_player_advice) {
+        currentY = addText(pdf, 'For Red Player:', currentY, {
+          indent: 10,
+          weight: 'bold',
+          locale
+        });
+        const redAdvice = adviceData.for_red_player || adviceData.red_player_advice;
+        if (Array.isArray(redAdvice)) {
+          redAdvice.forEach((tip: string) => {
+            currentY = addText(pdf, `• ${tip}`, currentY, {
+              indent: 15,
+              locale
+            });
+          });
+        } else if (typeof redAdvice === 'string') {
+          currentY = addText(pdf, redAdvice, currentY, {
+            indent: 15,
+            locale
+          });
+        }
+        currentY += 8;
+      }
+      
+      if (adviceData.general_observations) {
+        currentY = addText(pdf, 'General Observations:', currentY, {
+          indent: 10,
+          weight: 'bold',
+          locale
+        });
+        if (Array.isArray(adviceData.general_observations)) {
+          adviceData.general_observations.forEach((obs: string) => {
+            currentY = addText(pdf, `• ${obs}`, currentY, {
+              indent: 15,
+              locale
+            });
+          });
+        } else if (typeof adviceData.general_observations === 'string') {
+          currentY = addText(pdf, adviceData.general_observations, currentY, {
+            indent: 15,
+            locale
+          });
+        }
+      }
+    } else if (typeof analysisData.advice_analysis === 'string') {
+      currentY = addText(pdf, analysisData.advice_analysis, currentY, {
+        indent: 10,
+        locale
+      });
+    }
+  }
+  
+  return currentY;
+};

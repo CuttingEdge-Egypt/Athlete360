@@ -2,9 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Calendar, Utensils, Target, Apple } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, Utensils, Target, Apple, FileDown, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useToast } from "@/hooks/use-toast";
+import { generateNutritionPlanPDF } from '@/lib/pdf/nutrition-generator';
 import arTranslations from '@/locales/ar/common.json';
 import enTranslations from '@/locales/en/common.json';
 
@@ -42,8 +44,40 @@ interface WeekData {
 export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
   const [currentWeek, setCurrentWeek] = useState(0);
   const [currentDay, setCurrentDay] = useState(0);
-  const { i18n } = useTranslation('common');
+  const [isExporting, setIsExporting] = useState(false);
+  const { i18n, t: i18nT } = useTranslation('common');
   const { direction, isRTL } = useLanguage();
+  const { toast } = useToast();
+  
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    try {
+      const blob = await generateNutritionPlanPDF(plan, language);
+      
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `nutrition-plan-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: i18nT('analysis.export.success', 'PDF exported successfully'),
+        description: i18nT('analysis.export.downloadStarted', 'Your nutrition plan is downloading'),
+      });
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast({
+        title: i18nT('analysis.export.error', 'Export failed'),
+        description: i18nT('analysis.export.errorMessage', 'Could not generate PDF. Please try again.'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
   
   // Determine display language from prop or plan content
   const detectLanguageFromContent = (content: any): boolean => {
@@ -264,12 +298,34 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
             {/* For Arabic: days info on left, title on right. For English: title on left, days info on right */}
             {isArabic ? (
               <>
-                <div className="text-left">
-                  <Badge variant="secondary" className="bg-green-600 text-white mb-1">
-                    {t('analysis.nutrition.week', 'Week')} {toArabicNumerals(currentWeek + 1)} • {t('analysis.nutrition.day', 'Day')} {toArabicNumerals(safCurrentDay + 1)}
-                  </Badge>
-                  <div className="text-sm text-muted-foreground">
-                    {currentDayData?.day.name} - {currentDayData?.day.date}
+                <div className="flex items-center gap-3">
+                  <Button
+                    onClick={handleExportPDF}
+                    disabled={isExporting}
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    data-testid="export-nutrition-plan-pdf"
+                  >
+                    {isExporting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        {i18nT('analysis.export.exporting', 'Exporting...')}
+                      </>
+                    ) : (
+                      <>
+                        <FileDown className="h-4 w-4" />
+                        {i18nT('analysis.export.exportPdf', 'Export PDF')}
+                      </>
+                    )}
+                  </Button>
+                  <div className="text-left">
+                    <Badge variant="secondary" className="bg-green-600 text-white mb-1">
+                      {t('analysis.nutrition.week', 'Week')} {toArabicNumerals(currentWeek + 1)} • {t('analysis.nutrition.day', 'Day')} {toArabicNumerals(safCurrentDay + 1)}
+                    </Badge>
+                    <div className="text-sm text-muted-foreground">
+                      {currentDayData?.day.name} - {currentDayData?.day.date}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 flex-row-reverse">
@@ -293,12 +349,34 @@ export function NutritionPlanDisplay({ plan, language }: NutritionPlanProps) {
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <Badge variant="secondary" className="bg-green-600 text-white mb-1">
-                    {t('analysis.nutrition.week', 'Week')} {toArabicNumerals(currentWeek + 1)} • {t('analysis.nutrition.day', 'Day')} {toArabicNumerals(safCurrentDay + 1)}
-                  </Badge>
-                  <div className="text-sm text-muted-foreground">
-                    {currentDayData?.day.name} - {currentDayData?.day.date}
+                <div className="flex items-center gap-4">
+                  <Button
+                    onClick={handleExportPDF}
+                    disabled={isExporting}
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    data-testid="export-nutrition-plan-pdf"
+                  >
+                    {isExporting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        {i18nT('analysis.export.exporting', 'Exporting...')}
+                      </>
+                    ) : (
+                      <>
+                        <FileDown className="h-4 w-4" />
+                        {i18nT('analysis.export.exportPdf', 'Export PDF')}
+                      </>
+                    )}
+                  </Button>
+                  <div className="text-right">
+                    <Badge variant="secondary" className="bg-green-600 text-white mb-1">
+                      {t('analysis.nutrition.week', 'Week')} {toArabicNumerals(currentWeek + 1)} • {t('analysis.nutrition.day', 'Day')} {toArabicNumerals(safCurrentDay + 1)}
+                    </Badge>
+                    <div className="text-sm text-muted-foreground">
+                      {currentDayData?.day.name} - {currentDayData?.day.date}
+                    </div>
                   </div>
                 </div>
               </>
