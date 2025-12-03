@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Lora:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -147,6 +147,12 @@
 
   h3 {
     font-weight: 600;
+  }
+
+  /* Lora font for paragraphs and subtitles */
+  p, .text-muted-foreground, .text-slate-500, .text-slate-400, .text-gray-500, .text-gray-600,
+  span:not(.font-sans):not(.font-mono), li {
+    font-family: 'Lora', Georgia, 'Times New Roman', serif;
   }
 
   /* Ensure strong tags are visible in light mode */
