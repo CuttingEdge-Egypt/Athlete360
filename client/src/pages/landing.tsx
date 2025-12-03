@@ -229,7 +229,8 @@ export default function Landing() {
               transition={{ duration: 0.6, ease: "easeOut" }}
             >
               <motion.span 
-                className="bg-gradient-to-r from-primary to-teal-400 bg-clip-text text-transparent inline-block"
+                className="bg-gradient-to-r from-primary to-teal-400 bg-clip-text text-transparent inline-block font-sans"
+                style={{ fontFamily: "'Montserrat', sans-serif" }}
                 animate={{ 
                   backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
                 }}
