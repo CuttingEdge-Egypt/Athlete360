@@ -147,7 +147,7 @@ export function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6" dir={isArabic ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-white flex items-center justify-center p-4 sm:p-6" dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="w-full max-w-xl">
         {/* Header */}
         <div className="text-center mb-8">
