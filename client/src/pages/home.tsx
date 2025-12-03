@@ -2295,7 +2295,7 @@ export default function Home() {
                                 {/* Close button */}
                                 <button
                                   onClick={() => setShowImageUpdateTip(false)}
-                                  className="absolute -top-1 -right-1 w-5 h-5 bg-primary/20 hover:bg-primary/30 rounded-full flex items-center justify-center text-xs text-primary transition-colors"
+                                  className="absolute -top-2 -right-2 w-6 h-6 bg-slate-600 hover:bg-slate-700 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md transition-colors"
                                 >
                                   ×
                                 </button>
