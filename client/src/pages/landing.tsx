@@ -244,14 +244,14 @@ export default function Landing() {
               </motion.span>
             </motion.h1>
             <motion.p 
-              className="text-base sm:text-xl md:text-2xl text-muted-foreground mb-6 sm:mb-8 px-2"
+              className="font-lora text-base sm:text-xl md:text-2xl text-muted-foreground mb-6 sm:mb-8 px-2"
               variants={fadeInUp}
               transition={{ duration: 0.6, delay: 0.1 }}
             >
               {t('landing.hero.subtitle')}
             </motion.p>
             <motion.p 
-              className="text-sm sm:text-lg text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto px-2"
+              className="font-lora text-sm sm:text-lg text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto px-2"
               variants={fadeInUp}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
@@ -316,8 +316,8 @@ export default function Landing() {
                         </motion.div>
                         <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">50 {t('units.tokens', { ns: 'common' })}</span>
                       </div>
-                      <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.bioAnalysis.title')}</h3>
-                      <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.bioAnalysis.description')}</p>
+                      <h3 className="font-lora text-lg font-semibold mb-2 text-foreground">{t('services.bioAnalysis.title')}</h3>
+                      <p className="font-lora text-muted-foreground text-sm mb-3 flex-grow">{t('services.bioAnalysis.description')}</p>
                       <Button 
                         onClick={() => setPreviewModal({ open: true, serviceType: 'bio' })}
                         data-testid="button-preview-bio"
@@ -343,8 +343,8 @@ export default function Landing() {
                         </motion.div>
                         <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">70 {t('units.tokens', { ns: 'common' })}</span>
                       </div>
-                      <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.rankHistory.title')}</h3>
-                      <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.rankHistory.description')}</p>
+                      <h3 className="font-lora text-lg font-semibold mb-2 text-foreground">{t('services.rankHistory.title')}</h3>
+                      <p className="font-lora text-muted-foreground text-sm mb-3 flex-grow">{t('services.rankHistory.description')}</p>
                       <Button 
                         onClick={() => setPreviewModal({ open: true, serviceType: 'rank' })}
                         data-testid="button-preview-rank"
@@ -370,8 +370,8 @@ export default function Landing() {
                         </motion.div>
                         <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">50 {t('units.tokens', { ns: 'common' })}</span>
                       </div>
-                      <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.strengths.title')}</h3>
-                      <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.strengths.description')}</p>
+                      <h3 className="font-lora text-lg font-semibold mb-2 text-foreground">{t('services.strengths.title')}</h3>
+                      <p className="font-lora text-muted-foreground text-sm mb-3 flex-grow">{t('services.strengths.description')}</p>
                       <Button 
                         onClick={() => setPreviewModal({ open: true, serviceType: 'strengths' })}
                         data-testid="button-preview-strengths"
@@ -397,8 +397,8 @@ export default function Landing() {
                         </motion.div>
                         <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">50 {t('units.tokens', { ns: 'common' })}</span>
                       </div>
-                      <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.weaknesses.title')}</h3>
-                      <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.weaknesses.description')}</p>
+                      <h3 className="font-lora text-lg font-semibold mb-2 text-foreground">{t('services.weaknesses.title')}</h3>
+                      <p className="font-lora text-muted-foreground text-sm mb-3 flex-grow">{t('services.weaknesses.description')}</p>
                       <Button 
                         onClick={() => setPreviewModal({ open: true, serviceType: 'weaknesses' })}
                         data-testid="button-preview-weaknesses"
@@ -431,8 +431,8 @@ export default function Landing() {
                         </motion.div>
                         <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">80 {t('units.tokens', { ns: 'common' })}</span>
                       </div>
-                      <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.tacticRecommendations.title', 'How to Beat')}</h3>
-                      <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.tacticRecommendations.description', 'Strategic insights on how to defeat specific opponents or improve matchups')}</p>
+                      <h3 className="font-lora text-lg font-semibold mb-2 text-foreground">{t('services.tacticRecommendations.title', 'How to Beat')}</h3>
+                      <p className="font-lora text-muted-foreground text-sm mb-3 flex-grow">{t('services.tacticRecommendations.description', 'Strategic insights on how to defeat specific opponents or improve matchups')}</p>
                       <Button 
                         onClick={() => setPreviewModal({ open: true, serviceType: 'beat-strategies' })}
                         data-testid="button-preview-beat"
@@ -458,8 +458,8 @@ export default function Landing() {
                         </motion.div>
                         <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">80 {t('units.tokens', { ns: 'common' })}</span>
                       </div>
-                      <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.developmentPlan.title', 'Development Plan')}</h3>
-                      <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.developmentPlan.description', 'Personalized training roadmap with specific goals and timelines')}</p>
+                      <h3 className="font-lora text-lg font-semibold mb-2 text-foreground">{t('services.developmentPlan.title', 'Development Plan')}</h3>
+                      <p className="font-lora text-muted-foreground text-sm mb-3 flex-grow">{t('services.developmentPlan.description', 'Personalized training roadmap with specific goals and timelines')}</p>
                       <Button 
                         onClick={() => setPreviewModal({ open: true, serviceType: 'development-plan' })}
                         data-testid="button-preview-development"
@@ -485,8 +485,8 @@ export default function Landing() {
                         </motion.div>
                         <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">90 {t('units.tokens', { ns: 'common' })}</span>
                       </div>
-                      <h3 className="text-lg font-semibold mb-2 text-foreground">{t('services.nutritionPlan.title', 'Nutrition Plan')}</h3>
-                      <p className="text-muted-foreground text-sm mb-3 flex-grow">{t('services.nutritionPlan.description', 'Comprehensive meal planning based on body composition and goals')}</p>
+                      <h3 className="font-lora text-lg font-semibold mb-2 text-foreground">{t('services.nutritionPlan.title', 'Nutrition Plan')}</h3>
+                      <p className="font-lora text-muted-foreground text-sm mb-3 flex-grow">{t('services.nutritionPlan.description', 'Comprehensive meal planning based on body composition and goals')}</p>
                       <Button 
                         onClick={() => setPreviewModal({ open: true, serviceType: 'nutrition-plan' })}
                         data-testid="button-preview-nutrition"
@@ -522,8 +522,8 @@ export default function Landing() {
                       >
                         <Video className="text-4xl text-orange-400" size={48} />
                       </motion.div>
-                      <h3 className="text-2xl font-semibold mb-3 text-foreground">{t('services.videoAnalysis.title', 'Video Analysis')}</h3>
-                      <p className="text-gray-600 mb-4 flex-grow">{t('services.videoAnalysis.description', 'Frame-by-frame performance breakdown with AI-powered insights')}</p>
+                      <h3 className="font-lora text-2xl font-semibold mb-3 text-foreground">{t('services.videoAnalysis.title', 'Video Analysis')}</h3>
+                      <p className="font-lora text-gray-600 mb-4 flex-grow">{t('services.videoAnalysis.description', 'Frame-by-frame performance breakdown with AI-powered insights')}</p>
                       <div className="flex items-center justify-center gap-4 mb-4 mt-auto">
                         <span className="bg-orange-500 text-white text-sm px-4 rounded-full font-semibold inline-flex items-center justify-center h-9">120 {t('units.tokens', { ns: 'common' })}</span>
                         <Button 
@@ -551,8 +551,8 @@ export default function Landing() {
                       >
                         <Users className="text-4xl text-purple-400" size={48} />
                       </motion.div>
-                      <h3 className="text-2xl font-semibold mb-3 text-foreground">{t('services.athleteComparison.title', 'Compare Athletes')}</h3>
-                      <p className="text-gray-600 mb-4 flex-grow">{t('services.athleteComparison.description', 'Head-to-head analysis comparing any two athletes across all performance metrics')}</p>
+                      <h3 className="font-lora text-2xl font-semibold mb-3 text-foreground">{t('services.athleteComparison.title', 'Compare Athletes')}</h3>
+                      <p className="font-lora text-gray-600 mb-4 flex-grow">{t('services.athleteComparison.description', 'Head-to-head analysis comparing any two athletes across all performance metrics')}</p>
                       <div className="flex items-center justify-center gap-4 mb-4 mt-auto">
                         <span className="bg-purple-500 text-white text-sm px-4 rounded-full font-semibold inline-flex items-center justify-center h-9">150 {t('units.tokens', { ns: 'common' })}</span>
                         <Button 
@@ -583,7 +583,7 @@ export default function Landing() {
               <Card className="service-card bg-card/80 border shadow-lg backdrop-blur-sm max-w-md mx-auto">
                 <CardContent className="p-8 text-center">
                   <motion.h2 
-                    className="text-2xl font-bold mb-4 text-primary"
+                    className="font-lora text-2xl font-bold mb-4 text-primary"
                     animate={{ scale: [1, 1.02, 1] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   >
@@ -597,7 +597,7 @@ export default function Landing() {
                   >
                     {t('landing.pricing.price')}<span className="text-lg text-muted-foreground">{t('landing.pricing.period')}</span>
                   </motion.div>
-                  <p className="text-muted-foreground mb-6">{t('landing.pricing.tokenDescription')}</p>
+                  <p className="font-lora text-muted-foreground mb-6">{t('landing.pricing.tokenDescription')}</p>
                   <div className="space-y-3">
                     <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
                       <Button 
