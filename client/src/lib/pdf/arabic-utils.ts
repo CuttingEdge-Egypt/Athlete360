@@ -1,13 +1,11 @@
 // Arabic PDF utilities for RTL text processing and font support
-import arabicReshaper from 'arabic-reshaper';
-import bidiJs from 'bidi-js';
 import { jsPDF } from 'jspdf';
+import { amiriRegularBase64 } from './fonts/amiri-font';
 
 // Arabic font configuration
-// Using standard PDF fonts with Unicode support for Arabic text
 export const ARABIC_FONTS = {
-  regular: 'courier',
-  bold: 'courier'
+  regular: 'Amiri',
+  bold: 'Amiri'
 };
 
 // Check if text contains Arabic characters
@@ -23,12 +21,10 @@ export const processArabicText = (text: string): string => {
   // Only process if text contains Arabic characters
   if (containsArabic(text)) {
     try {
-      // Simple Arabic processing without external dependencies
-      // Just return the original text - jsPDF will handle basic RTL alignment
+      // Return the original text - the Amiri font will handle proper Arabic rendering
       return text;
     } catch (error) {
       console.warn('Arabic text processing failed, using original text:', error);
-      // Return original text if processing fails
       return text;
     }
   }
@@ -56,9 +52,6 @@ export const sanitizeArabicText = (text: string): string => {
   return text
     .replace(/[\r\n\t]/g, ' ') // Replace line breaks with spaces
     .replace(/\s+/g, ' ') // Normalize multiple spaces
-    .trim()
-    // Preserve Arabic diacritics (don't remove them like in the original sanitizer)
-    .replace(/[^\u0000-\u007F\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s]/g, '') // Keep ASCII and Arabic ranges
     .trim();
 };
 
@@ -104,16 +97,6 @@ export const formatDateForLocale = (date: Date, locale: string): string => {
   });
 };
 
-// Convert ArrayBuffer to base64 string for jsPDF
-const toBase64 = (buffer: ArrayBuffer): string => {
-  const uint8Array = new Uint8Array(buffer);
-  let binaryString = '';
-  for (let i = 0; i < uint8Array.length; i++) {
-    binaryString += String.fromCharCode(uint8Array[i]);
-  }
-  return btoa(binaryString);
-};
-
 // Track if Arabic fonts have been loaded to avoid duplicate loading
 let arabicFontsLoaded = false;
 
@@ -122,22 +105,31 @@ export const loadArabicFonts = async (pdf: jsPDF): Promise<boolean> => {
   try {
     // Check if fonts are already loaded globally
     if (arabicFontsLoaded) {
+      // Set the font if already loaded
+      try {
+        pdf.setFont('Amiri', 'normal');
+      } catch (e) {
+        // Font might need to be re-added to this PDF instance
+        pdf.addFileToVFS('Amiri-Regular.ttf', amiriRegularBase64);
+        pdf.addFont('Amiri-Regular.ttf', 'Amiri', 'normal');
+        pdf.setFont('Amiri', 'normal');
+      }
       return true;
     }
 
-    console.log('Initializing Arabic font support for PDF generation...');
+    console.log('Loading Amiri Arabic font for PDF generation...');
 
-    // Skip external font loading due to CORS/network restrictions in Replit
-    // Instead, we'll use Courier font which has better Unicode/Arabic character support
-    // than the default Times or Helvetica fonts
+    // Add the Amiri font to the PDF
+    pdf.addFileToVFS('Amiri-Regular.ttf', amiriRegularBase64);
+    pdf.addFont('Amiri-Regular.ttf', 'Amiri', 'normal');
+    pdf.setFont('Amiri', 'normal');
     
-    // Mark fonts as loaded so setTextFont will use the proper fallback
     arabicFontsLoaded = true;
-    console.log('Arabic font support initialized with Unicode-compatible fallback');
+    console.log('Amiri Arabic font loaded successfully');
     return true;
 
   } catch (error) {
-    console.error('Failed to initialize Arabic fonts:', error);
+    console.error('Failed to load Arabic fonts:', error);
     arabicFontsLoaded = true; // Prevent retry loops
     return false;
   }
@@ -146,14 +138,21 @@ export const loadArabicFonts = async (pdf: jsPDF): Promise<boolean> => {
 // Set appropriate font for text based on locale
 export const setTextFont = (pdf: jsPDF, locale: string, weight: 'normal' | 'bold' = 'normal') => {
   if (locale === 'ar') {
-    // Use Courier for Arabic text - it has the best Unicode/Arabic character support
-    // among the standard PDF fonts (Courier, Helvetica, Times)
     try {
-      pdf.setFont('courier', weight);
+      // Use Amiri font for Arabic text
+      pdf.setFont('Amiri', 'normal');
     } catch (error) {
-      // Final fallback to helvetica
-      console.warn('Courier font selection failed, using helvetica fallback:', error);
-      pdf.setFont('helvetica', weight);
+      console.warn('Amiri font not available, attempting to load...');
+      // Try to load the font
+      try {
+        pdf.addFileToVFS('Amiri-Regular.ttf', amiriRegularBase64);
+        pdf.addFont('Amiri-Regular.ttf', 'Amiri', 'normal');
+        pdf.setFont('Amiri', 'normal');
+      } catch (e) {
+        console.error('Failed to load Amiri font:', e);
+        // Final fallback to helvetica
+        pdf.setFont('helvetica', weight);
+      }
     }
   } else {
     // Use Times for English (existing behavior)

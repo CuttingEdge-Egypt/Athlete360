@@ -1642,12 +1642,20 @@ export function AnalysisPopup({
       // Parse the analysis data
       const parsedData = parseAnalysisData(data);
       
+      // Determine locale - check if data has Arabic content or language property
+      const hasArabicContent = (text: string) => /[\u0600-\u06FF]/.test(text || '');
+      const dataString = JSON.stringify(parsedData);
+      const locale = parsedData?.language === 'ar' || 
+                     parsedData?.language === 'arabic' || 
+                     hasArabicContent(dataString) ? 'ar' : 'en';
+      
       // Use the professional PDF generator
       const pdfBlob = await generateProfessionalPdf({
         type,
         data: parsedData,
         createdAt,
-        athleteName
+        athleteName,
+        locale
       });
 
       // Generate filename based on type, athlete name and current date

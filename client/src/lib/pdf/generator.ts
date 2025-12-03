@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import athleteLogoUrl from '@assets/Athlete360Logo-removebg-preview_1764432432230.png';
 import { 
   processArabicText, 
   sanitizeArabicText, 
@@ -520,8 +521,24 @@ let logoDataUrl: string | null = null;
 const loadLogoDataUrl = async (): Promise<string> => {
   if (logoDataUrl) return logoDataUrl;
   
-  // Logo file is missing, throw error to trigger fallback text
-  throw new Error('Logo file not available');
+  try {
+    // Use the imported logo URL
+    const response = await fetch(athleteLogoUrl);
+    const blob = await response.blob();
+    
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        logoDataUrl = reader.result as string;
+        resolve(logoDataUrl);
+      };
+      reader.onerror = () => reject(new Error('Failed to convert logo to data URL'));
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.error('Failed to load logo:', error);
+    throw new Error('Logo file not available');
+  }
 };
 
 // Function to add Athlete360 logo to PDF header
@@ -1366,18 +1383,28 @@ export const generateProfessionalPdf = async ({
   type,
   data,
   createdAt,
-  athleteName
+  athleteName,
+  locale = 'en'
 }: {
   type: string;
   data: any;
   createdAt?: string;
   athleteName?: string;
+  locale?: string;
 }): Promise<Blob> => {
   const pdf = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
     format: 'a4',
   });
+  
+  // Set global locale context for consistent font usage
+  (globalThis as any).__pdfLocale = locale;
+  
+  // Load Arabic fonts if needed
+  if (locale === 'ar') {
+    await loadArabicFonts(pdf);
+  }
   
   // Reset character spacing to prevent spacing issues
   try {
