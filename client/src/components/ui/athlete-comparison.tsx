@@ -1567,9 +1567,12 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                 className={`inline-flex items-center px-3 py-1.5 bg-gradient-to-r ${bgGradient} rounded-lg shadow-md`}
                                 data-testid={`badge-rank-athlete1-${index}`}
                               >
-                                <Trophy className={`w-3 h-3 ${textColor} ${isComparisonArabic ? 'ml-1.5' : 'mr-1.5'}`} />
-                                <span className={`font-bold text-xs ${textColor}`}>
-                                  #{!isNaN(Number(rankingCategory.rank)) ? Math.floor(Number(rankingCategory.rank)) : rankingCategory.rank} | {rankingCategory.category}
+                                <Trophy className={`w-4 h-4 ${textColor} ${isComparisonArabic ? 'ml-1.5' : 'mr-1.5'}`} />
+                                <span className={`font-extrabold text-base ${textColor} ${isComparisonArabic ? 'ml-1' : 'mr-1'}`}>
+                                  #{!isNaN(Number(rankingCategory.rank)) ? Math.floor(Number(rankingCategory.rank)) : rankingCategory.rank}
+                                </span>
+                                <span className={`font-medium text-xs ${textColor}`}>
+                                  | {rankingCategory.category}
                                 </span>
                               </div>
                             );
@@ -1629,9 +1632,12 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                                 className={`inline-flex items-center px-3 py-1.5 bg-gradient-to-r ${bgGradient} rounded-lg shadow-md`}
                                 data-testid={`badge-rank-athlete2-${index}`}
                               >
-                                <Trophy className={`w-3 h-3 ${textColor} ${isComparisonArabic ? 'ml-1.5' : 'mr-1.5'}`} />
-                                <span className={`font-bold text-xs ${textColor}`}>
-                                  #{!isNaN(Number(rankingCategory.rank)) ? Math.floor(Number(rankingCategory.rank)) : rankingCategory.rank} | {rankingCategory.category}
+                                <Trophy className={`w-4 h-4 ${textColor} ${isComparisonArabic ? 'ml-1.5' : 'mr-1.5'}`} />
+                                <span className={`font-extrabold text-base ${textColor} ${isComparisonArabic ? 'ml-1' : 'mr-1'}`}>
+                                  #{!isNaN(Number(rankingCategory.rank)) ? Math.floor(Number(rankingCategory.rank)) : rankingCategory.rank}
+                                </span>
+                                <span className={`font-medium text-xs ${textColor}`}>
+                                  | {rankingCategory.category}
                                 </span>
                               </div>
                             );
