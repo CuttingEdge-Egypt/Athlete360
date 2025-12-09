@@ -683,8 +683,8 @@ export default function Landing() {
         </DialogContent>
       </Dialog>
 
-      {/* Footer - Arabic Version */}
-      {language === 'ar' ? (
+      {/* Footer - Temporarily hidden */}
+      {false && (language === 'ar' ? (
         <footer className="bg-muted border-t py-8 sm:py-12" dir="rtl">
           <div className="container mx-auto px-3 sm:px-4">
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
@@ -835,7 +835,7 @@ export default function Landing() {
             </div>
           </div>
         </footer>
-      )}
+      ))}
 
     </div>
   );
