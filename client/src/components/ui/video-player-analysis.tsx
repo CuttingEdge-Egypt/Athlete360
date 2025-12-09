@@ -1058,14 +1058,56 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
   
   const playerOrder = getConsistentPlayerOrder();
   
+  // Helper function for fuzzy name matching (handles "M. Bouzkova" vs "Marie Bouzkova")
+  const fuzzyNameMatch = (name1: string, name2: string): boolean => {
+    if (!name1 || !name2) return false;
+    
+    // Exact match
+    if (name1.toLowerCase() === name2.toLowerCase()) return true;
+    
+    // Extract last name (last word) for comparison
+    const getLastName = (name: string) => {
+      const parts = name.trim().split(/\s+/);
+      return parts[parts.length - 1].toLowerCase();
+    };
+    
+    const lastName1 = getLastName(name1);
+    const lastName2 = getLastName(name2);
+    
+    // Last name match
+    if (lastName1 === lastName2) return true;
+    
+    // Check if one contains the other
+    const n1Lower = name1.toLowerCase();
+    const n2Lower = name2.toLowerCase();
+    if (n1Lower.includes(lastName2) || n2Lower.includes(lastName1)) return true;
+    
+    return false;
+  };
+  
+  // Find index in playerOrder using fuzzy matching
+  const findPlayerIndex = (playerName: string): number => {
+    // First try exact match
+    const exactIndex = playerOrder.indexOf(playerName);
+    if (exactIndex !== -1) return exactIndex;
+    
+    // Then try fuzzy match
+    for (let i = 0; i < playerOrder.length; i++) {
+      if (fuzzyNameMatch(playerName, playerOrder[i])) {
+        return i;
+      }
+    }
+    return -1;
+  };
+  
   // Normalize player order in all metrics to match the consistent order
   const normalizedDynamicMetrics = dynamicMetrics.map((metric: any) => {
     if (!metric.players || playerOrder.length < 2) return metric;
     
-    // Sort players based on the consistent order
+    // Sort players based on the consistent order using fuzzy matching
     const sortedPlayers = [...metric.players].sort((a, b) => {
-      const indexA = playerOrder.indexOf(a.name);
-      const indexB = playerOrder.indexOf(b.name);
+      const indexA = findPlayerIndex(a.name);
+      const indexB = findPlayerIndex(b.name);
       
       // If both found in order, sort by that
       if (indexA !== -1 && indexB !== -1) {
