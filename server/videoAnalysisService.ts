@@ -108,6 +108,42 @@ const SPORT_CONFIGS: Record<string, SportConfig> = {
       scoring: 'points'
     }
   },
+  'table_tennis': {
+    name: 'Table Tennis',
+    scoringEvents: ['winners', 'service aces', 'smashes'],
+    violationsEvents: ['service fault', 'time violation', 'unsportsmanlike conduct'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'shots',
+      violation: 'violations',
+      scoring: 'points'
+    }
+  },
+  'tabletennis': {
+    name: 'Table Tennis',
+    scoringEvents: ['winners', 'service aces', 'smashes'],
+    violationsEvents: ['service fault', 'time violation', 'unsportsmanlike conduct'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'shots',
+      violation: 'violations',
+      scoring: 'points'
+    }
+  },
+  'ping_pong': {
+    name: 'Table Tennis',
+    scoringEvents: ['winners', 'service aces', 'smashes'],
+    violationsEvents: ['service fault', 'time violation', 'unsportsmanlike conduct'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'shots',
+      violation: 'violations',
+      scoring: 'points'
+    }
+  },
   'martial_arts': {
     name: 'Martial Arts',
     scoringEvents: ['clean strike', 'power strike', 'combination'],
@@ -140,8 +176,16 @@ export function getSportConfig(sport: string): SportConfig {
     return SPORT_CONFIGS[cleanedSport];
   }
   
-  // Try partial match
-  for (const key of Object.keys(SPORT_CONFIGS)) {
+  // Try with underscores instead of spaces
+  const underscoreSport = normalizedSport.replace(/\s+/g, '_');
+  if (SPORT_CONFIGS[underscoreSport]) {
+    console.log(`[SPORT_CONFIG] Found underscore match for: ${underscoreSport}`);
+    return SPORT_CONFIGS[underscoreSport];
+  }
+  
+  // Try partial match - prioritize longer key matches to avoid "tennis" matching "table tennis"
+  const sortedKeys = Object.keys(SPORT_CONFIGS).sort((a, b) => b.length - a.length);
+  for (const key of sortedKeys) {
     if (normalizedSport.includes(key) || key.includes(normalizedSport)) {
       console.log(`[SPORT_CONFIG] Found partial match: ${key} for ${normalizedSport}`);
       return SPORT_CONFIGS[key];
