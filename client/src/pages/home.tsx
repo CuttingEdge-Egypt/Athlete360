@@ -2243,8 +2243,13 @@ export default function Home() {
                             </TooltipContent>
                           </Tooltip>
                           
-                          {/* Manual Ranking Search Button - Only show for existing athletes */}
-                          {!isAthleteNewlyCreated && (
+                          {/* Manual Ranking Search Button - Only show for existing athletes when 2+ weeks since last update */}
+                          {!isAthleteNewlyCreated && (() => {
+                            const twoWeeksAgo = new Date();
+                            twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+                            const lastUpdate = selectedAthlete.updatedAt ? new Date(selectedAthlete.updatedAt) : null;
+                            return !lastUpdate || lastUpdate < twoWeeksAgo;
+                          })() && (
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
