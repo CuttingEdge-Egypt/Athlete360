@@ -850,6 +850,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   console.log(`🏃 Launching background thread to fetch competitive history for userId ${taekwondoUserId}...`);
                   
                   // Update apiScrapeStatus to mark initial fetch complete and competitive history as pending
+                  // Don't update timestamp - only rankings data should trigger timestamp update
                   await storage.updateAthlete(newAthlete.id, {
                     apiScrapeStatus: {
                       initialFetchComplete: true,
@@ -861,7 +862,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       }],
                       lastUpdated: new Date().toISOString()
                     }
-                  });
+                  }, false);
                   
                   // Launch background process (don't await - let it run independently)
                   (async () => {
@@ -876,6 +877,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       );
                     } catch (bgError) {
                       console.error(`❌ Background competitive history fetch failed: ${bgError instanceof Error ? bgError.message : String(bgError)}`);
+                      // Don't update timestamp - only rankings data should trigger timestamp update
                       await storage.updateAthlete(newAthlete.id, {
                         apiScrapeStatus: {
                           initialFetchComplete: true,
@@ -887,7 +889,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                           }],
                           lastUpdated: new Date().toISOString()
                         }
-                      });
+                      }, false);
                     }
                   })();
                 }
@@ -1016,8 +1018,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       
       if (imageUrl) {
-        // Update athlete with found image
-        await storage.updateAthlete(athleteId, { profileImageUrl: imageUrl });
+        // Update athlete with found image (don't update timestamp - only rankings should)
+        await storage.updateAthlete(athleteId, { profileImageUrl: imageUrl }, false);
         console.log(`✅ Image search successful for ${athlete.name}: ${imageUrl}`);
         res.json({ success: true, imageUrl, message: `Image found and updated for ${athlete.name}` });
       } else {
@@ -1069,8 +1071,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const imageUrl = imageResult.downloadUrl || imageResult.embedUrl;
         
         if (imageUrl) {
-          // Update athlete with found image
-          await storage.updateAthlete(athleteId, { profileImageUrl: imageUrl });
+          // Update athlete with found image (don't update timestamp - only rankings should)
+          await storage.updateAthlete(athleteId, { profileImageUrl: imageUrl }, false);
           console.log(`✅ GPT-5 image search successful for ${athlete.name}: ${imageUrl}`);
           
           res.json({ 
@@ -5367,7 +5369,7 @@ Return only valid JSON with the missing fields.`;
         athleteData?.personalInfo || {}
       ).then(imageUrl => {
         if (imageUrl && athleteData?.id) {
-          storage.updateAthlete(athleteData.id, { profileImageUrl: imageUrl }).catch(err => 
+          storage.updateAthlete(athleteData.id, { profileImageUrl: imageUrl }, false).catch(err => 
             console.error(`❌ Failed to update athlete image: ${err}`)
           );
         }
@@ -5436,7 +5438,7 @@ Return only valid JSON with the missing fields.`;
         athleteData?.personalInfo || {}
       ).then(imageUrl => {
         if (imageUrl && athleteData?.id) {
-          storage.updateAthlete(athleteData.id, { profileImageUrl: imageUrl }).catch(err => 
+          storage.updateAthlete(athleteData.id, { profileImageUrl: imageUrl }, false).catch(err => 
             console.error(`❌ Failed to update athlete image: ${err}`)
           );
         }

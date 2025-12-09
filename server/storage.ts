@@ -617,10 +617,13 @@ export class DatabaseStorage implements IStorage {
     return newAthlete;
   }
 
-  async updateAthlete(id: string, athlete: Partial<Athlete>): Promise<Athlete> {
+  async updateAthlete(id: string, athlete: Partial<Athlete>, updateTimestamp: boolean = true): Promise<Athlete> {
+    const updateData = updateTimestamp 
+      ? { ...athlete, updatedAt: new Date() }
+      : athlete;
     const [updatedAthlete] = await db
       .update(athletes)
-      .set({ ...athlete, updatedAt: new Date() })
+      .set(updateData)
       .where(eq(athletes.id, id))
       .returning();
     return updatedAthlete;
