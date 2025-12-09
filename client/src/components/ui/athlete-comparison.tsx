@@ -1302,7 +1302,6 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
         {/* Parsed Comparison Results - New Modular Tab Structure */}
         {(comparisonData?.tabs || comparisonData?.isRawResponse) && (
           <div className="space-y-6 mt-8">
-            <Separator className="bg-gray-600" />
             {(() => {
               // Parse modular tab responses
               let overviewData = null;
