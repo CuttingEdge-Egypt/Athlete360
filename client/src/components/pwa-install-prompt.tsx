@@ -9,7 +9,7 @@ interface BeforeInstallPromptEvent extends Event {
 
 const translations = {
   en: {
-    title: "Install Athlete360",
+    title: "Install Athlete360 App",
     iosDescription: "Add to your home screen for quick access and offline use.",
     androidDescription: "Install our app for a better experience with offline access.",
     install: "Install",
@@ -24,7 +24,7 @@ const translations = {
     androidStep3: "Open anytime from your home screen",
   },
   ar: {
-    title: "تثبيت Athlete360",
+    title: "تثبيت تطبيق Athlete360",
     iosDescription: "أضف إلى شاشتك الرئيسية للوصول السريع والاستخدام بدون إنترنت.",
     androidDescription: "ثبّت تطبيقنا للحصول على تجربة أفضل مع إمكانية الوصول بدون إنترنت.",
     install: "تثبيت",
@@ -127,24 +127,24 @@ export function PWAInstallPrompt() {
       data-testid="pwa-install-prompt"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
-      <div className="bg-gradient-to-r from-primary to-primary/80 p-4">
+      <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
+            <div className="w-11 h-11 bg-primary rounded-xl flex items-center justify-center">
               <Download className="h-6 w-6 text-white" />
             </div>
-            <div>
-              <h3 className="font-bold text-white text-lg" data-testid="text-install-title">
+            <div className="flex-1">
+              <h3 className="font-bold text-white text-lg drop-shadow-sm" data-testid="text-install-title">
                 {t.title}
               </h3>
-              <p className="text-white/80 text-sm">
+              <p className="text-gray-300 text-sm">
                 {showIOSInstructions ? t.iosDescription : t.androidDescription}
               </p>
             </div>
           </div>
           <button
             onClick={handleDismiss}
-            className="p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            className="p-1.5 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
             data-testid="button-dismiss-install"
             aria-label="Dismiss"
           >
