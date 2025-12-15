@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Download, Share } from 'lucide-react';
+import { X, Download, Share, Globe, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -7,11 +7,52 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+const translations = {
+  en: {
+    title: "Install Athlete360",
+    iosDescription: "Add to your home screen for quick access and offline use.",
+    androidDescription: "Install our app for a better experience with offline access.",
+    install: "Install",
+    notNow: "Not now",
+    iosStep1: "Tap the",
+    iosStep2: "Share",
+    iosStep3: "button below",
+    iosStep4: 'Select "Add to Home Screen"',
+    iosStep5: 'Tap "Add" to confirm',
+    androidStep1: "Tap Install below",
+    androidStep2: "Follow the prompts to add to home screen",
+    androidStep3: "Open anytime from your home screen",
+  },
+  ar: {
+    title: "تثبيت Athlete360",
+    iosDescription: "أضف إلى شاشتك الرئيسية للوصول السريع والاستخدام بدون إنترنت.",
+    androidDescription: "ثبّت تطبيقنا للحصول على تجربة أفضل مع إمكانية الوصول بدون إنترنت.",
+    install: "تثبيت",
+    notNow: "ليس الآن",
+    iosStep1: "اضغط على زر",
+    iosStep2: "المشاركة",
+    iosStep3: "في الأسفل",
+    iosStep4: '"اختر "إضافة إلى الشاشة الرئيسية',
+    iosStep5: '"اضغط "إضافة" للتأكيد',
+    androidStep1: "اضغط على تثبيت أدناه",
+    androidStep2: "اتبع التعليمات لإضافته إلى الشاشة الرئيسية",
+    androidStep3: "افتح التطبيق في أي وقت من شاشتك الرئيسية",
+  }
+};
+
+type Language = 'en' | 'ar';
+
 export function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [language, setLanguage] = useState<Language>('en');
+  const [previewMode, setPreviewMode] = useState<'ios' | 'android' | null>(null);
+
+  const isDev = import.meta.env.DEV;
+  const t = translations[language];
+  const isRTL = language === 'ar';
 
   useEffect(() => {
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
@@ -26,11 +67,16 @@ export function PWAInstallPrompt() {
     const daysSinceDismissed = (Date.now() - dismissedTime) / (1000 * 60 * 60 * 24);
 
     if (isInStandalone || (dismissed && daysSinceDismissed < 7)) {
-      return;
+      if (!isDev) return;
     }
 
     if (isIOSDevice) {
-      setTimeout(() => setShowPrompt(true), 3000);
+      setTimeout(() => setShowPrompt(true), 1000);
+      return;
+    }
+
+    if (isDev) {
+      setTimeout(() => setShowPrompt(true), 1000);
       return;
     }
 
@@ -45,7 +91,7 @@ export function PWAInstallPrompt() {
     return () => {
       window.removeEventListener('beforeinstallprompt', handler);
     };
-  }, []);
+  }, [isDev]);
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
@@ -61,69 +107,180 @@ export function PWAInstallPrompt() {
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    localStorage.setItem('pwa-install-dismissed', Date.now().toString());
+    if (!isDev) {
+      localStorage.setItem('pwa-install-dismissed', Date.now().toString());
+    }
   };
+
+  const toggleLanguage = () => {
+    setLanguage(prev => prev === 'en' ? 'ar' : 'en');
+  };
+
+  const showIOSInstructions = previewMode === 'ios' || (previewMode === null && isIOS);
+  const showAndroidInstructions = previewMode === 'android' || (previewMode === null && !isIOS);
 
   if (!showPrompt || isStandalone) return null;
 
   return (
     <div 
-      className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4 z-50 animate-in slide-in-from-bottom-4"
+      className={`fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-[420px] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 animate-in slide-in-from-bottom-4 overflow-hidden ${isRTL ? 'rtl' : 'ltr'}`}
       data-testid="pwa-install-prompt"
+      dir={isRTL ? 'rtl' : 'ltr'}
     >
-      <button
-        onClick={handleDismiss}
-        className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-        data-testid="button-dismiss-install"
-        aria-label="Dismiss"
-      >
-        <X className="h-5 w-5" />
-      </button>
-
-      <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-          <Download className="h-6 w-6 text-primary" />
-        </div>
-        
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-gray-900 dark:text-white text-base" data-testid="text-install-title">
-            Install Athlete360
-          </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1" data-testid="text-install-description">
-            {isIOS 
-              ? "Add to your home screen for quick access and offline use."
-              : "Install our app for a better experience with offline access."}
-          </p>
+      <div className="bg-gradient-to-r from-primary to-primary/80 p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
+              <Download className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h3 className="font-bold text-white text-lg" data-testid="text-install-title">
+                {t.title}
+              </h3>
+              <p className="text-white/80 text-sm">
+                {showIOSInstructions ? t.iosDescription : t.androidDescription}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handleDismiss}
+            className="p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            data-testid="button-dismiss-install"
+            aria-label="Dismiss"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
       </div>
 
-      {isIOS ? (
-        <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-          <p className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2" data-testid="text-ios-instructions">
-            <span>Tap</span>
-            <Share className="h-4 w-4" />
-            <span>then "Add to Home Screen"</span>
-          </p>
-        </div>
-      ) : (
-        <div className="mt-4 flex gap-2">
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-4">
           <Button
-            onClick={handleInstall}
-            className="flex-1"
-            data-testid="button-install-app"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Install
-          </Button>
-          <Button
-            onClick={handleDismiss}
+            onClick={toggleLanguage}
             variant="outline"
-            data-testid="button-not-now"
+            size="sm"
+            className="gap-2"
+            data-testid="button-toggle-language"
           >
-            Not now
+            <Globe className="h-4 w-4" />
+            {language === 'en' ? 'العربية' : 'English'}
           </Button>
+
+          {isDev && (
+            <div className="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+              <button
+                onClick={() => setPreviewMode('ios')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 ${
+                  showIOSInstructions 
+                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' 
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+                data-testid="button-preview-ios"
+              >
+                <Smartphone className="h-3.5 w-3.5" />
+                iOS
+              </button>
+              <button
+                onClick={() => setPreviewMode('android')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 ${
+                  showAndroidInstructions 
+                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' 
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+                data-testid="button-preview-android"
+              >
+                <Smartphone className="h-3.5 w-3.5" />
+                Android
+              </button>
+            </div>
+          )}
         </div>
-      )}
+
+        {showIOSInstructions ? (
+          <div className="space-y-3" data-testid="ios-instructions">
+            <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+              <div className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                1
+              </div>
+              <p className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2 flex-wrap">
+                <span>{t.iosStep1}</span>
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-white dark:bg-gray-700 rounded-md shadow-sm">
+                  <Share className="h-4 w-4 text-blue-500" />
+                  <span className="font-medium">{t.iosStep2}</span>
+                </span>
+                <span>{t.iosStep3}</span>
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
+              <div className="flex-shrink-0 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                2
+              </div>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                {t.iosStep4}
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
+              <div className="flex-shrink-0 w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                3
+              </div>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                {t.iosStep5}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3" data-testid="android-instructions">
+            <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+              <div className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                1
+              </div>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                {t.androidStep1}
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
+              <div className="flex-shrink-0 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                2
+              </div>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                {t.androidStep2}
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
+              <div className="flex-shrink-0 w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                3
+              </div>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                {t.androidStep3}
+              </p>
+            </div>
+
+            <div className="mt-4 flex gap-2">
+              <Button
+                onClick={handleInstall}
+                className="flex-1"
+                size="lg"
+                data-testid="button-install-app"
+              >
+                <Download className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                {t.install}
+              </Button>
+              <Button
+                onClick={handleDismiss}
+                variant="outline"
+                size="lg"
+                data-testid="button-not-now"
+              >
+                {t.notNow}
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
