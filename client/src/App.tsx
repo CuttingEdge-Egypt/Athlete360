@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { AuthenticatedLayout } from "@/components/layouts/AuthenticatedLayout";
+import { PWAInstallPrompt } from "@/components/pwa-install-prompt";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
@@ -87,6 +88,7 @@ function App() {
           <TooltipProvider>
             <Router />
             <Toaster />
+            <PWAInstallPrompt />
           </TooltipProvider>
         </LanguageProvider>
       </Suspense>
