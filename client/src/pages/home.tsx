@@ -84,7 +84,7 @@ export default function Home() {
   const { t, i18n } = useTranslation('home');
   const isArabic = i18n.language === 'ar';
   const [selectedSport, setSelectedSport] = useState<string>("");
-  const [selectedCountry, setSelectedCountry] = useState<string>("");
+  const [selectedCountry, setSelectedCountry] = useState<string>("all");
   const [searchName, setSearchName] = useState<string>("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchProgress, setSearchProgress] = useState(0);
@@ -1612,7 +1612,7 @@ export default function Home() {
 
   // Reset selected athlete when country changes
   const handleCountryChange = (country: string) => {
-    setSelectedCountry(country && country.toLowerCase() !== "all" ? country : "");
+    setSelectedCountry(country || "all");
     setSelectedAthlete(null);
     setIsAthleteNewlyCreated(false);
   };
@@ -1991,7 +1991,7 @@ export default function Home() {
                 <div>
                   <label className="block text-sm font-medium mb-2 text-muted-foreground">{t('interface.country')}</label>
                   <CountrySelect
-                    value={selectedCountry || "all"}
+                    value={selectedCountry}
                     onValueChange={handleCountryChange}
                     placeholder={t('interface.allCountries')}
                     countries={countries}
