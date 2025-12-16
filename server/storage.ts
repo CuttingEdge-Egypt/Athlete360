@@ -609,7 +609,10 @@ export class DatabaseStorage implements IStorage {
     // Combine all countries with existing athlete countries, remove duplicates, and sort
     const combinedSet = new Set([...allCountries, ...existingCountries]);
     const combinedCountries = Array.from(combinedSet);
-    return combinedCountries.sort();
+    // Filter out any "All countries" entries that might exist in the database
+    return combinedCountries
+      .filter(c => c.toLowerCase() !== 'all countries' && c.toLowerCase() !== 'all')
+      .sort();
   }
 
   async createAthlete(athlete: InsertAthlete): Promise<Athlete> {
