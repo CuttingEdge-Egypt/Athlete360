@@ -1403,7 +1403,7 @@ export default function Home() {
 
   // Handle creating athlete with AI
   const handleCreateAthleteWithAI = async (athleteName: string) => {
-    if (!selectedSport || !athleteName.trim() || !selectedCountry || selectedCountry.toLowerCase() === "all") return;
+    if (!selectedSport || !athleteName.trim() || !selectedCountry) return;
     
     setIsSearching(true);
     setSearchProgress(0);
@@ -2133,14 +2133,14 @@ export default function Home() {
                           <Button
                             data-testid="create-athlete-ai"
                             onClick={() => handleCreateAthleteWithAI(searchName.trim())}
-                            className="bg-gradient-to-r from-primary to-green-500 hover:from-primary/90 hover:to-green-500/90 text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                            disabled={!selectedSport || isSearching || !selectedCountry || selectedCountry.toLowerCase() === "all"}
+                            className="bg-gradient-to-r from-primary to-green-500 hover:from-primary/90 hover:to-green-500/90 !text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 [&_*]:text-white"
+                            disabled={!selectedSport || isSearching || !selectedCountry}
                           >
                             <div className="flex items-center space-x-2">
                               <div className="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center">
                                 <Search className="w-3 h-3 text-white" />
                               </div>
-                              <span>{t('athleteSearch.notFound.button')}</span>
+                              <span className="text-white">{t('athleteSearch.notFound.button')}</span>
                             </div>
                           </Button>
                         </div>
