@@ -2031,7 +2031,7 @@ export default function Home() {
                             setIsAthleteNewlyCreated(false);
                             setSearchName("");
                           }}
-                          className="w-full text-left px-4 py-2 hover:bg-amber-500 text-foreground border-b border last:border-b-0 group"
+                          className="w-full text-left px-4 py-2 hover:bg-athlete-accent text-foreground border-b border last:border-b-0 group"
                         >
                           <div className="font-medium group-hover:text-white">
                             {athlete.name}
