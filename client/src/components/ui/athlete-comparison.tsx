@@ -391,10 +391,11 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
     queryKey: ["/api/sports"],
   });
 
-  // Get all countries
-  const { data: countries = [] } = useQuery<string[]>({
+  // Get all countries (filter out "All countries" placeholder if present)
+  const { data: countriesRaw = [] } = useQuery<string[]>({
     queryKey: ["/api/countries"],
   });
+  const countries = countriesRaw.filter(c => c.toLowerCase() !== 'all countries' && c.toLowerCase() !== 'all');
 
   // Get athletes for athlete 1 (by sport and country 1)
   const { data: allAthletes1 = [] } = useQuery<Athlete[]>({
@@ -913,12 +914,12 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       {t("analysis.comparison.country", "Country")}
                     </label>
                     <CountrySelect
-                      value={selectedCountry1 || "all"}
+                      value={selectedCountry1}
                       onValueChange={(value) => {
-                        setSelectedCountry1(value === "all" ? "" : value);
+                        setSelectedCountry1(value);
                         setSelectedAthlete1("");
                       }}
-                      placeholder="All countries"
+                      placeholder="Select country..."
                       countries={Array.isArray(countries) ? countries : []}
                       testId="select-country1"
                     />
@@ -1100,12 +1101,12 @@ export function AthleteComparison({ preloadedComparisonData }: AthleteComparison
                       {t("analysis.comparison.country", "Country")}
                     </label>
                     <CountrySelect
-                      value={selectedCountry2 || "all"}
+                      value={selectedCountry2}
                       onValueChange={(value) => {
-                        setSelectedCountry2(value === "all" ? "" : value);
+                        setSelectedCountry2(value);
                         setSelectedAthlete2("");
                       }}
-                      placeholder="All countries"
+                      placeholder="Select country..."
                       countries={Array.isArray(countries) ? countries : []}
                       testId="select-country2"
                     />
