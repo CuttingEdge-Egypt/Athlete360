@@ -34,6 +34,13 @@ export function CountrySelect({
   testId,
 }: CountrySelectProps) {
   const [open, setOpen] = useState(false);
+  
+  // Filter out any "All countries" entries that might slip through
+  const filteredCountries = countries.filter(c => 
+    c.toLowerCase() !== 'all countries' && 
+    c.toLowerCase() !== 'all' &&
+    c.trim() !== ''
+  );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -48,7 +55,7 @@ export function CountrySelect({
           )}
           data-testid={testId}
         >
-          {value && countries.includes(value)
+          {value && filteredCountries.includes(value)
             ? value
             : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-gray-500" />
@@ -65,7 +72,7 @@ export function CountrySelect({
               No country found.
             </CommandEmpty>
             <CommandGroup>
-              {countries.map((country) => (
+              {filteredCountries.map((country) => (
                 <CommandItem
                   key={country}
                   value={country}
