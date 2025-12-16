@@ -373,7 +373,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
           transition: 'box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.boxShadow = '0 20px 45px -10px rgba(45, 180, 167, 0.7)';
+          e.currentTarget.style.boxShadow = '0 20px 45px -10px rgba(197, 160, 84, 0.7)';
           e.currentTarget.style.transform = 'translateY(-4px)';
         }}
         onMouseLeave={(e) => {
@@ -426,7 +426,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         <div className="mt-auto space-y-2">
           <Button 
             data-testid={`button-${service.id}`}
-            className="w-full bg-primary hover:bg-blue-700 text-white min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-lg hover:shadow-primary/30 transform hover:-translate-y-0.5 transition-all duration-300 ease-out"
+            className="w-full bg-primary hover:bg-blue-700 text-white min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-lg hover:shadow-amber-400/40 transform hover:-translate-y-0.5 transition-all duration-300 ease-out"
             disabled={analysisMutation.isPending || isProcessing || service.id === 'statistics'}
             onClick={(e) => {
               e.stopPropagation();

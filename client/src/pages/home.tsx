@@ -1758,7 +1758,7 @@ export default function Home() {
       description: t('services.bioAnalysis.description'),
       cost: 50,
       icon: "user-alt",
-      color: "text-athlete-accent"
+      color: "text-primary"
     },
     {
       id: "rank",
