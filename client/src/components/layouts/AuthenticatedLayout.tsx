@@ -10,7 +10,7 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen bg-athlete-primary text-white">
+    <div className="min-h-screen bg-gray-100 text-foreground">
       <Navigation />
       <div className="pt-20 pb-20">
         {children}
