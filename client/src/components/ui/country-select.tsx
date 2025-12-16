@@ -48,7 +48,7 @@ export function CountrySelect({
           )}
           data-testid={testId}
         >
-          {value && value !== "all"
+          {value
             ? countries.find((country) => country === value) || value
             : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-gray-500" />
@@ -65,22 +65,6 @@ export function CountrySelect({
               No country found.
             </CommandEmpty>
             <CommandGroup>
-              <CommandItem
-                value="all"
-                onSelect={() => {
-                  onValueChange("all");
-                  setOpen(false);
-                }}
-                className="text-gray-700 hover:!bg-primary hover:!text-white data-[selected=true]:bg-primary data-[selected=true]:text-white"
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === "all" ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                All countries
-              </CommandItem>
               {countries.map((country) => (
                 <CommandItem
                   key={country}
