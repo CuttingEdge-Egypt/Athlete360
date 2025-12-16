@@ -1403,7 +1403,13 @@ export default function Home() {
 
   // Handle creating athlete with AI
   const handleCreateAthleteWithAI = async (athleteName: string) => {
-    if (!selectedSport || !athleteName.trim() || !selectedCountry) return;
+    console.log('handleCreateAthleteWithAI called with:', { athleteName, selectedSport, selectedCountry });
+    
+    // Validate that a specific country is selected (not "All countries")
+    if (!selectedSport || !athleteName.trim() || !selectedCountry || selectedCountry.toLowerCase() === 'all') {
+      console.log('Validation failed - missing country or sport selection');
+      return;
+    }
     
     setIsSearching(true);
     setSearchProgress(0);
@@ -2132,9 +2138,12 @@ export default function Home() {
                           {/* Enhanced CTA Button */}
                           <Button
                             data-testid="create-athlete-ai"
-                            onClick={() => handleCreateAthleteWithAI(searchName.trim())}
+                            onClick={() => {
+                              console.log('AI Search button clicked, selectedCountry:', selectedCountry);
+                              handleCreateAthleteWithAI(searchName.trim());
+                            }}
                             className="bg-gradient-to-r from-primary to-green-500 hover:from-primary/90 hover:to-green-500/90 !text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 [&_*]:text-white"
-                            disabled={!selectedSport || isSearching || !selectedCountry}
+                            disabled={!selectedSport || isSearching || !selectedCountry || selectedCountry.toLowerCase() === 'all'}
                           >
                             <div className="flex items-center space-x-2">
                               <div className="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center">
