@@ -1403,7 +1403,7 @@ export default function Home() {
 
   // Handle creating athlete with AI
   const handleCreateAthleteWithAI = async (athleteName: string) => {
-    if (!selectedSport || !athleteName.trim()) return;
+    if (!selectedSport || !athleteName.trim() || !selectedCountry || selectedCountry === "all") return;
     
     setIsSearching(true);
     setSearchProgress(0);
