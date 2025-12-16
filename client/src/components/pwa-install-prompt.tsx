@@ -12,6 +12,7 @@ const translations = {
     title: "Install Athlete360 App",
     iosDescription: "Add to your home screen for quick access and offline use.",
     androidDescription: "Install our app for a better experience with offline access.",
+    webDescription: "Bookmark this page for quick access to Athlete360.",
     install: "Install",
     notNow: "Not now",
     iosStep1: "Tap the",
@@ -22,11 +23,15 @@ const translations = {
     androidStep1: "Tap Install below",
     androidStep2: "Follow the prompts to add to home screen",
     androidStep3: "Open anytime from your home screen",
+    webStep1: "Press Ctrl+D (Cmd+D on Mac) to bookmark",
+    webStep2: "Or click the star icon in your browser's address bar",
+    webStep3: "Access Athlete360 anytime from your bookmarks",
   },
   ar: {
     title: "تثبيت تطبيق Athlete360",
     iosDescription: "أضف إلى شاشتك الرئيسية للوصول السريع والاستخدام بدون إنترنت.",
     androidDescription: "ثبّت تطبيقنا للحصول على تجربة أفضل مع إمكانية الوصول بدون إنترنت.",
+    webDescription: "أضف هذه الصفحة إلى المفضلة للوصول السريع إلى Athlete360.",
     install: "تثبيت",
     notNow: "ليس الآن",
     iosStep1: "اضغط على زر",
@@ -37,29 +42,42 @@ const translations = {
     androidStep1: "اضغط على تثبيت أدناه",
     androidStep2: "اتبع التعليمات لإضافته إلى الشاشة الرئيسية",
     androidStep3: "افتح التطبيق في أي وقت من شاشتك الرئيسية",
+    webStep1: "اضغط Ctrl+D (أو Cmd+D على Mac) لإضافة إلى المفضلة",
+    webStep2: "أو انقر على أيقونة النجمة في شريط العناوين",
+    webStep3: "ادخل إلى Athlete360 في أي وقت من المفضلة",
   }
 };
 
 type Language = 'en' | 'ar';
 
+type DeviceType = 'ios' | 'android' | 'web';
+
 export function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
+  const [deviceType, setDeviceType] = useState<DeviceType>('web');
   const [isStandalone, setIsStandalone] = useState(false);
   const [language, setLanguage] = useState<Language>('en');
-  const [previewMode, setPreviewMode] = useState<'ios' | 'android' | null>(null);
+  const [previewMode, setPreviewMode] = useState<DeviceType | null>(null);
 
   const isDev = import.meta.env.DEV;
   const t = translations[language];
   const isRTL = language === 'ar';
 
   useEffect(() => {
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isIOSDevice = /ipad|iphone|ipod/.test(userAgent) && !(window as any).MSStream;
+    const isAndroidDevice = /android/.test(userAgent);
     const isInStandalone = window.matchMedia('(display-mode: standalone)').matches || 
                           (window.navigator as any).standalone === true;
     
-    setIsIOS(isIOSDevice);
+    if (isIOSDevice) {
+      setDeviceType('ios');
+    } else if (isAndroidDevice) {
+      setDeviceType('android');
+    } else {
+      setDeviceType('web');
+    }
     setIsStandalone(isInStandalone);
 
     const dismissed = localStorage.getItem('pwa-install-dismissed');
@@ -70,7 +88,7 @@ export function PWAInstallPrompt() {
       if (!isDev) return;
     }
 
-    if (isIOSDevice) {
+    if (isIOSDevice || isAndroidDevice) {
       setTimeout(() => setShowPrompt(true), 1000);
       return;
     }
@@ -116,8 +134,10 @@ export function PWAInstallPrompt() {
     setLanguage(prev => prev === 'en' ? 'ar' : 'en');
   };
 
-  const showIOSInstructions = previewMode === 'ios' || (previewMode === null && isIOS);
-  const showAndroidInstructions = previewMode === 'android' || (previewMode === null && !isIOS);
+  const activeMode = previewMode || deviceType;
+  const showIOSInstructions = activeMode === 'ios';
+  const showAndroidInstructions = activeMode === 'android';
+  const showWebInstructions = activeMode === 'web';
 
   if (!showPrompt || isStandalone) return null;
 
@@ -138,7 +158,7 @@ export function PWAInstallPrompt() {
                 {t.title}
               </h3>
               <p className="text-gray-300 text-sm">
-                {showIOSInstructions ? t.iosDescription : t.androidDescription}
+                {showIOSInstructions ? t.iosDescription : showAndroidInstructions ? t.androidDescription : t.webDescription}
               </p>
             </div>
           </div>
@@ -192,11 +212,23 @@ export function PWAInstallPrompt() {
                 <Smartphone className="h-3.5 w-3.5" />
                 Android
               </button>
+              <button
+                onClick={() => setPreviewMode('web')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 ${
+                  showWebInstructions 
+                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' 
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+                data-testid="button-preview-web"
+              >
+                <Globe className="h-3.5 w-3.5" />
+                Web
+              </button>
             </div>
           )}
         </div>
 
-        {showIOSInstructions ? (
+        {showIOSInstructions && (
           <div className="space-y-3" data-testid="ios-instructions">
             <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
               <div className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
@@ -229,8 +261,22 @@ export function PWAInstallPrompt() {
                 {t.iosStep5}
               </p>
             </div>
+
+            <div className="mt-4">
+              <Button
+                onClick={handleDismiss}
+                variant="outline"
+                size="lg"
+                className="w-full"
+                data-testid="button-not-now"
+              >
+                {t.notNow}
+              </Button>
+            </div>
           </div>
-        ) : (
+        )}
+
+        {showAndroidInstructions && (
           <div className="space-y-3" data-testid="android-instructions">
             <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
               <div className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
@@ -273,6 +319,49 @@ export function PWAInstallPrompt() {
                 onClick={handleDismiss}
                 variant="outline"
                 size="lg"
+                data-testid="button-not-now"
+              >
+                {t.notNow}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {showWebInstructions && (
+          <div className="space-y-3" data-testid="web-instructions">
+            <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+              <div className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                1
+              </div>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                {t.webStep1}
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
+              <div className="flex-shrink-0 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                2
+              </div>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                {t.webStep2}
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
+              <div className="flex-shrink-0 w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                3
+              </div>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                {t.webStep3}
+              </p>
+            </div>
+
+            <div className="mt-4">
+              <Button
+                onClick={handleDismiss}
+                variant="outline"
+                size="lg"
+                className="w-full"
                 data-testid="button-not-now"
               >
                 {t.notNow}
