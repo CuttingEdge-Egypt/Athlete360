@@ -3062,7 +3062,7 @@ export default function Home() {
                         nutritionForm.reset();
                       }}
                       data-testid="button-new-nutrition-plan"
-                      className={`bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-foreground font-semibold shadow-lg ${isArabic ? 'flex-row-reverse' : ''}`}
+                      className={`bg-gradient-to-r from-blue-800 to-amber-500 hover:from-blue-900 hover:to-amber-600 text-foreground font-semibold shadow-lg ${isArabic ? 'flex-row-reverse' : ''}`}
                     >
                       <Apple className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                       {t('nutritionPlan.generateNew')}
@@ -3446,7 +3446,7 @@ export default function Home() {
                           setShowDevelopmentForm(true);
                           setDevelopmentPlanData(null);
                         }}
-                        className={`bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-foreground font-semibold shadow-lg ${isArabic ? 'flex-row-reverse' : ''}`}
+                        className={`bg-gradient-to-r from-blue-800 to-amber-500 hover:from-blue-900 hover:to-amber-600 text-foreground font-semibold shadow-lg ${isArabic ? 'flex-row-reverse' : ''}`}
                         data-testid="button-new-development-plan"
                       >
                         <RefreshCw className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />

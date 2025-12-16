@@ -9,7 +9,7 @@ import { AnalysisPopup } from "@/components/ui/analysis-popup";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/useLanguage";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
-import logoImage from "@assets/Athlete360Logo-removebg-preview_1764434600616.png";
+import logoImage from "@assets/NewLogo_1765909713887.jpeg";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 
 function TiltCard({ children, className = "" }: { children: ReactNode; className?: string }) {
@@ -190,7 +190,7 @@ export default function Landing() {
               <Button 
                 onClick={() => setLocation('/signup')}
                 data-testid="button-signup"
-                className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white text-xs sm:text-sm px-2 sm:px-4 h-11"
+                className="bg-gradient-to-r from-blue-800 to-amber-500 hover:from-blue-900 hover:to-amber-600 text-white text-xs sm:text-sm px-2 sm:px-4 h-11"
               >
                 <UserPlus className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                 {t('landing.navigation.signUp')}
@@ -229,7 +229,7 @@ export default function Landing() {
               transition={{ duration: 0.6, ease: "easeOut" }}
             >
               <motion.span 
-                className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent inline-block"
+                className="bg-gradient-to-r from-blue-800 via-blue-600 to-amber-500 bg-clip-text text-transparent inline-block"
                 animate={{ 
                   backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
                 }}
@@ -268,7 +268,7 @@ export default function Landing() {
                 <Button 
                   onClick={() => setLocation('/signup')}
                   data-testid="button-hero-signup"
-                  className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white px-6 sm:px-8 h-12 sm:h-14 text-base sm:text-lg font-semibold w-full sm:w-auto shadow-lg hover:shadow-xl transition-shadow"
+                  className="bg-gradient-to-r from-blue-800 to-amber-500 hover:from-blue-900 hover:to-amber-600 text-white px-6 sm:px-8 h-12 sm:h-14 text-base sm:text-lg font-semibold w-full sm:w-auto shadow-lg hover:shadow-xl transition-shadow"
                 >
                   <UserPlus className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                   {t('landing.hero.ctaStart')}
@@ -288,8 +288,8 @@ export default function Landing() {
             
             {/* Referral Bonus Banner - only show if there's a referral code */}
             {referralCode && (
-              <div className="bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-400/30 rounded-lg p-4 mb-12 max-w-lg mx-auto">
-                <div className="flex items-center justify-center gap-2 text-green-400 mb-2">
+              <div className="bg-gradient-to-r from-blue-800/20 to-amber-500/20 border border-amber-400/30 rounded-lg p-4 mb-12 max-w-lg mx-auto">
+                <div className="flex items-center justify-center gap-2 text-amber-500 mb-2">
                   <Gift className="h-5 w-5" />
                   <span className="font-semibold">{t('landing.referralBanner.title')}</span>
                 </div>
@@ -603,7 +603,7 @@ export default function Landing() {
                       <Button 
                         onClick={() => setLocation('/signup')}
                         data-testid="button-start-free-trial"
-                        className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-shadow"
+                        className="w-full bg-gradient-to-r from-blue-800 to-amber-500 hover:from-blue-900 hover:to-amber-600 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-shadow"
                       >
                         <UserPlus className="mr-2" size={20} />
                         {t('landing.hero.ctaStart')}
@@ -614,7 +614,7 @@ export default function Landing() {
                         onClick={() => setLocation('/login')}
                         data-testid="button-start-now"
                         variant="outline"
-                        className="w-full border-athlete-accent text-primary hover:bg-athlete-accent hover:text-white py-4 text-lg font-semibold"
+                        className="w-full border-primary text-primary hover:bg-primary hover:text-white py-4 text-lg font-semibold"
                       >
                         {t('landing.navigation.signIn')} <ArrowRight className="ml-2" size={20} />
                       </Button>
