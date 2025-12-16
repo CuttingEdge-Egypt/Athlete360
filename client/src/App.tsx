@@ -23,6 +23,7 @@ import PaymentSuccess from "@/pages/PaymentSuccess";
 import PaymentSuccessSimple from "@/pages/PaymentSuccessSimple";
 import TestPaymentPage from "@/pages/TestPaymentPage";
 import PaymentRedirectHandler from "@/pages/PaymentRedirectHandler";
+import LandingExperimental from "@/pages/landing-experimental";
 
 // Import i18n configuration and providers
 import "./lib/i18n";
@@ -41,6 +42,7 @@ function Router() {
         <Route path="/test-auth" component={TestAuthPage} />
         <Route path="/signup" component={SignupPage} />
         <Route path="/login" component={LoginPage} />
+        <Route path="/landing-new" component={LandingExperimental} />
         
         {isLoading ? (
           <Route path="/" component={() => (
