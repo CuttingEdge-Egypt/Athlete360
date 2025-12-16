@@ -2154,14 +2154,14 @@ export default function Home() {
                               console.log('AI Search button clicked, selectedCountry:', selectedCountry);
                               handleCreateAthleteWithAI(searchName.trim());
                             }}
-                            className="bg-gradient-to-r from-primary to-green-500 hover:from-primary/90 hover:to-green-500/90 !text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 [&_*]:text-white"
+                            className="bg-gradient-to-r from-primary to-green-500 hover:from-primary/90 hover:to-green-500/90 text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                             disabled={!selectedSport || isSearching || !selectedCountry || selectedCountry.trim() === '' || selectedCountry.toLowerCase() === 'all'}
                           >
                             <div className="flex items-center space-x-2">
                               <div className="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center">
                                 <Search className="w-3 h-3 text-white" />
                               </div>
-                              <span className="text-white">{t('athleteSearch.notFound.button')}</span>
+                              <span className="text-white font-semibold">{t('athleteSearch.notFound.button')}</span>
                             </div>
                           </Button>
                         </div>
