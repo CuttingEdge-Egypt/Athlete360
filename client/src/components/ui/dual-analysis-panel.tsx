@@ -1270,7 +1270,7 @@ export function DualAnalysisPanel({
               key={year}
               value={year.toString()}
               data-testid={`tab-competitive-year-${year}`}
-              className="data-[state=active]:bg-amber-400 data-[state=active]:text-gray-900"
+              className="data-[state=active]:bg-athlete-accent data-[state=active]:text-white"
             >
               {year}
             </TabsTrigger>
