@@ -48,8 +48,8 @@ export function CountrySelect({
           )}
           data-testid={testId}
         >
-          {value
-            ? countries.find((country) => country === value) || value
+          {value && countries.includes(value)
+            ? value
             : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-gray-500" />
         </Button>
