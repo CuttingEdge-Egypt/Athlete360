@@ -1261,10 +1261,11 @@ export default function Home() {
     setActiveTab("comparison");
   };
 
-  // Get all countries
-  const { data: countries = [] } = useQuery<string[]>({
+  // Get all countries (filter out "All countries" placeholder if present)
+  const { data: countriesRaw = [] } = useQuery<string[]>({
     queryKey: ["/api/countries"],
   });
+  const countries = countriesRaw.filter(c => c.toLowerCase() !== 'all countries' && c.toLowerCase() !== 'all');
   
   // Get athletes for the selected sport with deduplication (only if no search is active)
   const { data: allAthletes = [] } = useQuery<Athlete[]>({
