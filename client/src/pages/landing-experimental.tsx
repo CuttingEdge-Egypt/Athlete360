@@ -32,9 +32,9 @@ interface PlaneData {
   y: number;
 }
 
-const DEFAULT_DEPTH_RANGE = 50;
-const MAX_HORIZONTAL_OFFSET = 8;
-const MAX_VERTICAL_OFFSET = 8;
+const DEFAULT_DEPTH_RANGE = 80;
+const MAX_HORIZONTAL_OFFSET = 16;
+const MAX_VERTICAL_OFFSET = 12;
 
 function InfiniteGallery3D() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -45,7 +45,7 @@ function InfiniteGallery3D() {
   const planesDataRef = useRef<PlaneData[]>([]);
   const [, forceUpdate] = useState({});
 
-  const visibleCount = 12;
+  const visibleCount = 8;
   const totalImages = galleryImages.length;
   const depthRange = DEFAULT_DEPTH_RANGE;
   const speed = 1.2;
@@ -213,7 +213,7 @@ function InfiniteGallery3D() {
     const zIndex = Math.round((1 - normalizedPosition) * 100);
 
     return {
-      transform: `translate3d(${plane.x * 30}px, ${plane.y * 30}px, ${worldZ * 15}px) scale(${Math.max(0.3, scale)})`,
+      transform: `translate3d(${plane.x * 50}px, ${plane.y * 50}px, ${worldZ * 20}px) scale(${Math.max(0.3, scale)})`,
       opacity,
       filter: `blur(${blur}px)`,
       zIndex,
@@ -266,10 +266,6 @@ function InfiniteGallery3D() {
         </h1>
       </div>
 
-      <div className="absolute bottom-10 left-0 right-0 text-center font-mono uppercase text-[11px] font-semibold text-white/80">
-        <p>Use mouse wheel, arrow keys, or touch to navigate</p>
-        <p className="opacity-60">Auto-play resumes after 3 seconds of inactivity</p>
-      </div>
     </div>
   );
 }
@@ -309,7 +305,7 @@ export default function LandingExperimental() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white overflow-hidden">
+    <div className="min-h-[200vh] bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white">
       <motion.nav 
         initial="hidden"
         animate="visible"
@@ -359,50 +355,157 @@ export default function LandingExperimental() {
         </div>
       </motion.nav>
 
-      <InfiniteGallery3D />
-
-      <motion.div 
-        className="fixed bottom-32 left-0 right-0 flex flex-col sm:flex-row gap-4 justify-center px-4 z-20"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.5 }}
-      >
-        <Button 
-          onClick={() => setLocation('/signup')}
-          data-testid="button-get-started-experimental"
-          size="lg"
-          className="bg-gradient-to-r from-blue-500 to-amber-500 hover:from-blue-600 hover:to-amber-600 text-white text-lg px-8 py-6 rounded-full shadow-lg shadow-blue-500/25"
-        >
-          {t('landing.hero.ctaStart', 'Start Free Trial')}
-          <ArrowRight className="ml-2 h-5 w-5" />
-        </Button>
-        <Button 
-          onClick={() => setLocation('/login')}
-          data-testid="button-signin-hero-experimental"
-          size="lg"
-          variant="outline"
-          className="border-white/30 text-white hover:bg-white/10 text-lg px-8 py-6 rounded-full"
-        >
-          {t('landing.navigation.signIn')}
-        </Button>
-      </motion.div>
-
-      {referralCode && (
-        <motion.div
+      <div className="h-screen sticky top-0">
+        <InfiniteGallery3D />
+        
+        <motion.div 
+          className="absolute bottom-32 left-0 right-0 flex flex-col sm:flex-row gap-4 justify-center px-4 z-20"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-500/20 to-amber-500/20 border border-amber-400/30 rounded-lg p-4 max-w-lg z-20"
+          transition={{ duration: 0.6, delay: 0.5 }}
         >
-          <div className="flex items-center justify-center gap-2 text-amber-400 mb-2">
-            <Gift className="h-5 w-5" />
-            <span className="font-semibold">{t('landing.referralBanner.title')}</span>
-          </div>
-          <p className="text-sm text-blue-200/80 text-center">
-            {t('landing.referralBanner.description')}
-          </p>
+          <Button 
+            onClick={() => setLocation('/signup')}
+            data-testid="button-get-started-experimental"
+            size="lg"
+            className="bg-gradient-to-r from-blue-500 to-amber-500 hover:from-blue-600 hover:to-amber-600 text-white text-lg px-8 py-6 rounded-full shadow-lg shadow-blue-500/25"
+          >
+            {t('landing.hero.ctaStart', 'Start Free Trial')}
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+          <Button 
+            onClick={() => setLocation('/login')}
+            data-testid="button-signin-hero-experimental"
+            size="lg"
+            variant="outline"
+            className="border-white/30 text-white hover:bg-white/10 text-lg px-8 py-6 rounded-full"
+          >
+            {t('landing.navigation.signIn')}
+          </Button>
         </motion.div>
-      )}
+
+        {referralCode && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-500/20 to-amber-500/20 border border-amber-400/30 rounded-lg p-4 max-w-lg z-20"
+          >
+            <div className="flex items-center justify-center gap-2 text-amber-400 mb-2">
+              <Gift className="h-5 w-5" />
+              <span className="font-semibold">{t('landing.referralBanner.title')}</span>
+            </div>
+            <p className="text-sm text-blue-200/80 text-center">
+              {t('landing.referralBanner.description')}
+            </p>
+          </motion.div>
+        )}
+      </div>
+
+      <section className="min-h-screen py-20 bg-gradient-to-b from-slate-900 to-blue-950">
+        <div className="container mx-auto px-4">
+          <motion.h2
+            className="text-3xl sm:text-4xl font-bold text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            style={{ fontFamily: "'Montserrat', sans-serif" }}
+          >
+            <span className="bg-gradient-to-r from-blue-400 to-amber-400 bg-clip-text text-transparent">
+              {t('services.title', 'Our Services')}
+            </span>
+          </motion.h2>
+
+          <motion.div 
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            {[
+              { icon: ChartPie, title: t('services.bioAnalysis.title'), desc: t('services.bioAnalysis.description'), tokens: 50, color: 'blue' },
+              { icon: Trophy, title: t('services.rankHistory.title'), desc: t('services.rankHistory.description'), tokens: 70, color: 'amber' },
+              { icon: Scale, title: t('services.athleteComparison.title'), desc: t('services.athleteComparison.description'), tokens: 100, color: 'purple' },
+              { icon: Target, title: t('services.howToBeat.title'), desc: t('services.howToBeat.description'), tokens: 90, color: 'green' },
+            ].map((service, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <Card className="bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300 h-full group">
+                  <CardContent className="p-6 h-full flex flex-col">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="p-3 rounded-lg bg-blue-500/20">
+                        <service.icon className="text-blue-400" size={28} />
+                      </div>
+                      <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+                        {service.tokens} {t('units.tokens', { ns: 'common' })}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2 text-white group-hover:text-blue-300 transition-colors">
+                      {service.title}
+                    </h3>
+                    <p className="text-blue-200/60 text-sm flex-grow">
+                      {service.desc}
+                    </p>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="w-full mt-4 text-blue-300 hover:text-white hover:bg-white/10"
+                      data-testid={`button-service-${index}`}
+                    >
+                      <HelpCircle className="mr-2" size={14} />
+                      {t('actions.preview')}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          <motion.div
+            className="mt-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 }}
+          >
+            <Card className="bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-400/30 backdrop-blur-sm">
+              <CardContent className="p-8 text-center">
+                <motion.div
+                  className="flex justify-center mb-4"
+                  animate={{ y: [0, -5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <Video className="text-orange-400" size={48} />
+                </motion.div>
+                <h3 className="text-2xl font-semibold mb-3 text-white">
+                  {t('services.videoAnalysis.title', 'Video Analysis')}
+                </h3>
+                <p className="text-blue-200/70 mb-4 max-w-2xl mx-auto">
+                  {t('services.videoAnalysis.description')}
+                </p>
+                <div className="flex items-center justify-center gap-2">
+                  <span className="bg-orange-500 text-white text-sm px-3 py-1 rounded-full font-semibold">
+                    150 {t('units.tokens', { ns: 'common' })}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </section>
+
+      <footer className="py-8 border-t border-white/10 bg-slate-950">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-blue-200/50 text-sm">
+            &copy; {new Date().getFullYear()} Athlete360. All rights reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
