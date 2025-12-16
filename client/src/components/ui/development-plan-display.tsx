@@ -203,7 +203,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
   return (
     <div className="space-y-8" data-testid="development-plan-display">
       {/* Title with Goal Areas and Videos Count */}
-      <Card className="bg-gradient-to-br from-emerald-50 via-teal-50 to-white border-emerald-200 shadow-lg">
+      <Card className="bg-gradient-to-br from-emerald-50 via-blue-50 to-white border-emerald-200 shadow-lg">
         <CardHeader className="pb-4" dir={contentIsArabic ? 'rtl' : 'ltr'}>
           <div className={`flex items-center ${contentIsArabic ? 'flex-row-reverse justify-end' : 'justify-between'}`}>
             <div className={`space-y-2 ${contentIsArabic ? 'w-full' : ''}`}>
@@ -442,7 +442,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                     <div className={`flex items-center justify-between ${contentIsArabic ? 'flex-row-reverse' : 'flex-row'}`}>
                       <div className="flex-1" dir={contentIsArabic ? 'rtl' : 'ltr'}>
                         <h4 className={`font-semibold ${contentIsArabic ? 'text-lg' : 'text-base'} text-foreground flex items-center gap-2 ${contentIsArabic ? 'flex-row-reverse justify-end' : ''}`}>
-                          <Play className="h-4 w-4 text-teal-500" />
+                          <Play className="h-4 w-4 text-primary" />
                           {exercise.name}
                         </h4>
                         {exercise.targetArea && (
@@ -458,7 +458,7 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
                         <Button
                           size="sm"
                           onClick={() => window.open(exercise.videoUrl, '_blank')}
-                          className="bg-teal-500 hover:bg-teal-600 text-white flex-shrink-0"
+                          className="bg-primary hover:bg-blue-700 text-white flex-shrink-0"
                           data-testid={`video-button-${index}`}
                         >
                           <ExternalLink className="h-3 w-3" />
@@ -493,15 +493,15 @@ export function DevelopmentPlanDisplay({ plan, language, sport = 'training' }: D
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
             <div className="space-y-1">
-              <div className="text-2xl font-bold text-teal-600">{goalAnalysis.length}</div>
+              <div className="text-2xl font-bold text-primary">{goalAnalysis.length}</div>
               <div className={`${contentIsArabic ? 'text-base' : 'text-sm'} text-slate-600`}>{getPlanTranslation('goalAreas', language)}</div>
             </div>
             <div className="space-y-1">
-              <div className="text-2xl font-bold text-teal-600">{counts?.exercises || 0}</div>
+              <div className="text-2xl font-bold text-primary">{counts?.exercises || 0}</div>
               <div className={`${contentIsArabic ? 'text-base' : 'text-sm'} text-slate-600`}>{getPlanTranslation('totalExercises', language)}</div>
             </div>
             <div className="space-y-1">
-              <div className="text-2xl font-bold text-teal-600">{allExercisesWithVideos.length}</div>
+              <div className="text-2xl font-bold text-primary">{allExercisesWithVideos.length}</div>
               <div className={`${contentIsArabic ? 'text-base' : 'text-sm'} text-slate-600`}>{getPlanTranslation('videoTutorials', language)}</div>
             </div>
           </div>

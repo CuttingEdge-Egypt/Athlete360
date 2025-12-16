@@ -266,7 +266,7 @@ export default function Account() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Token Balance */}
-              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/10 to-teal-500/10 rounded-lg border border-primary/20">
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/10 to-blue-500/10 rounded-lg border border-primary/20">
                 <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
                   <Coins className="h-6 w-6 text-primary" />
                   <div>
@@ -330,7 +330,7 @@ export default function Account() {
                   <Button 
                     onClick={handleSaveProfile}
                     disabled={updateProfileMutation.isPending}
-                    className={`bg-primary hover:bg-teal-600 h-11 ${isArabic ? 'flex-row-reverse' : ''}`}
+                    className={`bg-primary hover:bg-blue-700 h-11 ${isArabic ? 'flex-row-reverse' : ''}`}
                     data-testid="button-save-profile"
                   >
                     <Save className={`h-4 w-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />

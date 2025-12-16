@@ -2982,11 +2982,11 @@ export default function Home() {
                             {/* Progress message with dynamic animation */}
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
                               <div className="flex space-x-1 flex-shrink-0">
-                                <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce delay-0"></div>
-                                <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce delay-150"></div>
-                                <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce delay-300"></div>
+                                <div className="w-2 h-2 bg-primary rounded-full animate-bounce delay-0"></div>
+                                <div className="w-2 h-2 bg-primary rounded-full animate-bounce delay-150"></div>
+                                <div className="w-2 h-2 bg-primary rounded-full animate-bounce delay-300"></div>
                               </div>
-                              <p className="text-sm sm:text-lg font-medium text-teal-700 text-center">
+                              <p className="text-sm sm:text-lg font-medium text-primary text-center">
                                 {nutritionJobProgressMessage || t('common:messages.generatingNutritionPlan', "Generating your personalized nutrition plan...")}
                               </p>
                             </div>
@@ -2996,8 +2996,8 @@ export default function Home() {
                               <div className={`flex justify-between items-center text-sm ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
                                 <span className="text-gray-600 font-medium">{t('common:messages.progress', 'Progress')}</span>
                                 <div className="flex items-center gap-2">
-                                  <div className="px-2 py-1 bg-teal-100 rounded-full">
-                                    <span className="text-teal-700 font-bold text-xs">
+                                  <div className="px-2 py-1 bg-blue-100 rounded-full">
+                                    <span className="text-primary font-bold text-xs">
                                       {i18n.language === 'ar' ? toArabicNumerals(nutritionProgress) : nutritionProgress}٪
                                     </span>
                                   </div>
@@ -3006,7 +3006,7 @@ export default function Home() {
                               <div className="relative w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
                                 <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-200"></div>
                                 <div 
-                                  className="bg-gradient-to-r from-teal-400 via-teal-500 to-blue-500 h-3 rounded-full transition-all duration-700 ease-out shadow-sm relative" 
+                                  className="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 h-3 rounded-full transition-all duration-700 ease-out shadow-sm relative" 
                                   style={{ width: `${nutritionProgress}%` }}
                                 >
                                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
@@ -3367,11 +3367,11 @@ export default function Home() {
                                 )}
                                 <div className={`flex items-center gap-3 flex-1 min-w-0 ${i18n.language === 'ar' ? 'justify-end flex-row-reverse' : ''}`}>
                                   <div className="relative flex-shrink-0">
-                                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-teal-300 border-t-teal-500"></div>
-                                    <div className="absolute inset-0 rounded-full h-6 w-6 bg-teal-100/50"></div>
+                                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-300 border-t-primary"></div>
+                                    <div className="absolute inset-0 rounded-full h-6 w-6 bg-blue-100/50"></div>
                                   </div>
                                   <div className={`min-w-0 ${i18n.language === 'ar' ? 'text-right' : ''}`}>
-                                    <p className={`text-teal-700 font-semibold text-sm sm:text-base truncate ${i18n.language === 'ar' ? 'sm:text-lg' : ''}`}>
+                                    <p className={`text-primary font-semibold text-sm sm:text-base truncate ${i18n.language === 'ar' ? 'sm:text-lg' : ''}`}>
                                       {developmentProgressMessage || t('common:messages.generatingDevelopmentPlan', 'Generating your development plan...')}
                                     </p>
                                     <p className={`text-gray-500 text-xs sm:text-sm ${i18n.language === 'ar' ? 'sm:text-base' : ''}`}>{t('common:messages.thisMayTakeFewMinutes', 'This may take a few minutes')}</p>
@@ -3411,8 +3411,8 @@ export default function Home() {
                                 <div className="flex justify-between items-center text-sm">
                                   <span className="text-gray-600 font-medium">{t('common:messages.progress', 'Progress')}</span>
                                   <div className="flex items-center gap-2">
-                                    <div className="px-2 py-1 bg-teal-100 rounded-full">
-                                      <span className="text-teal-700 font-bold text-xs">
+                                    <div className="px-2 py-1 bg-blue-100 rounded-full">
+                                      <span className="text-primary font-bold text-xs">
                                         {i18n.language === 'ar' ? toArabicNumerals(developmentProgress) : developmentProgress}%
                                       </span>
                                     </div>
@@ -3421,7 +3421,7 @@ export default function Home() {
                                 <div className="relative w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
                                   <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-200"></div>
                                   <div 
-                                    className="bg-gradient-to-r from-teal-400 via-teal-500 to-blue-500 h-3 rounded-full transition-all duration-700 ease-out shadow-sm relative" 
+                                    className="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 h-3 rounded-full transition-all duration-700 ease-out shadow-sm relative" 
                                     style={{ width: `${developmentProgress}%` }}
                                   >
                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>

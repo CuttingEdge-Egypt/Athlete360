@@ -209,7 +209,7 @@ export function ProfileDropdown({ customTrigger }: ProfileDropdownProps = {}) {
             <Button
               size="sm"
               onClick={shareReferralLink}
-              className="w-full bg-primary hover:bg-teal-600 text-white text-xs h-8"
+              className="w-full bg-primary hover:bg-blue-700 text-white text-xs h-8"
               data-testid="button-share-referral"
             >
               <ExternalLink className="mr-2 h-3 w-3" />

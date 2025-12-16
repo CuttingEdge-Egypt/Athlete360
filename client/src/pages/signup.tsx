@@ -152,7 +152,7 @@ export function SignupPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className={`flex items-center justify-center gap-3 mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center shadow-lg">
               <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
             <h1 className={`${isArabic ? 'text-3xl sm:text-4xl' : 'text-2xl sm:text-3xl'} font-bold text-slate-800`}>{t('header.title')}</h1>
@@ -177,7 +177,7 @@ export function SignupPage() {
         <Card className="bg-white border-0 shadow-xl shadow-slate-200/50 rounded-2xl overflow-hidden">
           <CardHeader className="px-6 sm:px-8 pt-8 pb-2">
             <CardTitle className={`${isArabic ? 'text-xl sm:text-2xl' : 'text-lg sm:text-xl'} font-semibold text-slate-800 flex items-center justify-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
-              <User className="h-5 w-5 text-teal-500" />
+              <User className="h-5 w-5 text-primary" />
               {t('card.title')}
             </CardTitle>
             <CardDescription className={`text-slate-400 text-center ${isArabic ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'} mt-1`}>
@@ -193,7 +193,7 @@ export function SignupPage() {
                   value={personalInfo.firstName}
                   onChange={(e) => setPersonalInfo(prev => ({ ...prev, firstName: e.target.value }))}
                   placeholder={t('form.firstNamePlaceholder')}
-                  className={`h-11 ${isArabic ? 'text-base' : 'text-sm'} bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-teal-400 focus:ring-teal-400/20 transition-all rounded-lg`}
+                  className={`h-11 ${isArabic ? 'text-base' : 'text-sm'} bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:ring-blue-500/20 transition-all rounded-lg`}
                   data-testid="input-first-name"
                 />
               </div>
@@ -204,7 +204,7 @@ export function SignupPage() {
                   value={personalInfo.lastName}
                   onChange={(e) => setPersonalInfo(prev => ({ ...prev, lastName: e.target.value }))}
                   placeholder={t('form.lastNamePlaceholder')}
-                  className={`h-11 ${isArabic ? 'text-base' : 'text-sm'} bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-teal-400 focus:ring-teal-400/20 transition-all rounded-lg`}
+                  className={`h-11 ${isArabic ? 'text-base' : 'text-sm'} bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:ring-blue-500/20 transition-all rounded-lg`}
                   data-testid="input-last-name"
                 />
               </div>
@@ -218,7 +218,7 @@ export function SignupPage() {
                 value={personalInfo.email}
                 onChange={(e) => setPersonalInfo(prev => ({ ...prev, email: e.target.value }))}
                 placeholder={t('form.emailPlaceholder')}
-                className={`h-11 ${isArabic ? 'text-base' : 'text-sm'} bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-teal-400 focus:ring-teal-400/20 transition-all rounded-lg`}
+                className={`h-11 ${isArabic ? 'text-base' : 'text-sm'} bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:ring-blue-500/20 transition-all rounded-lg`}
                 data-testid="input-email"
               />
             </div>
@@ -254,7 +254,7 @@ export function SignupPage() {
                   value={personalInfo.password}
                   onChange={(e) => setPersonalInfo(prev => ({ ...prev, password: e.target.value }))}
                   placeholder={t('form.passwordPlaceholder')}
-                  className={`h-11 ${isArabic ? 'text-base' : 'text-sm'} bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-teal-400 focus:ring-teal-400/20 transition-all rounded-lg`}
+                  className={`h-11 ${isArabic ? 'text-base' : 'text-sm'} bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:ring-blue-500/20 transition-all rounded-lg`}
                   data-testid="input-password"
                 />
               </div>
@@ -266,7 +266,7 @@ export function SignupPage() {
                   value={personalInfo.confirmPassword}
                   onChange={(e) => setPersonalInfo(prev => ({ ...prev, confirmPassword: e.target.value }))}
                   placeholder={t('form.confirmPasswordPlaceholder')}
-                  className={`h-11 ${isArabic ? 'text-base' : 'text-sm'} bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-teal-400 focus:ring-teal-400/20 transition-all rounded-lg`}
+                  className={`h-11 ${isArabic ? 'text-base' : 'text-sm'} bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:ring-blue-500/20 transition-all rounded-lg`}
                   data-testid="input-confirm-password"
                 />
               </div>
@@ -275,7 +275,7 @@ export function SignupPage() {
             <Button 
               onClick={handleSignup}
               disabled={isProcessing}
-              className={`w-full bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-medium h-12 rounded-xl shadow-lg shadow-teal-500/25 hover:shadow-teal-500/40 transition-all ${isArabic ? 'text-base flex-row-reverse' : 'text-sm'}`}
+              className={`w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white font-medium h-12 rounded-xl shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40 transition-all ${isArabic ? 'text-base flex-row-reverse' : 'text-sm'}`}
               data-testid="button-create-account"
             >
               {isProcessing ? t('form.creating') : t('form.createButton')}
@@ -291,7 +291,7 @@ export function SignupPage() {
             <Button 
               variant="link" 
               onClick={() => setLocation('/login')}
-              className="text-teal-600 hover:text-teal-700 p-0 h-auto font-medium"
+              className="text-primary hover:text-blue-700 p-0 h-auto font-medium"
               data-testid="link-login"
             >
               {t('footer.signIn')}

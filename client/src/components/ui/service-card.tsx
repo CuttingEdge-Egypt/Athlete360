@@ -426,7 +426,7 @@ export function ServiceCard({ service, athlete, onInsufficientTokens }: ServiceC
         <div className="mt-auto space-y-2">
           <Button 
             data-testid={`button-${service.id}`}
-            className="w-full bg-primary hover:bg-teal-500 text-white min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-lg hover:shadow-primary/30 transform hover:-translate-y-0.5 transition-all duration-300 ease-out"
+            className="w-full bg-primary hover:bg-blue-700 text-white min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-lg hover:shadow-primary/30 transform hover:-translate-y-0.5 transition-all duration-300 ease-out"
             disabled={analysisMutation.isPending || isProcessing || service.id === 'statistics'}
             onClick={(e) => {
               e.stopPropagation();

@@ -256,13 +256,13 @@ const formatMetricValue = (metric: AthleteStatistics['recent_season']['statistic
 const getMetricColor = (index: number) => {
   const colors = [
     "from-blue-500 to-purple-600",
-    "from-green-500 to-teal-600", 
+    "from-green-500 to-blue-600", 
     "from-orange-500 to-red-600",
     "from-purple-500 to-pink-600",
-    "from-teal-500 to-blue-600",
+    "from-blue-500 to-indigo-600",
     "from-red-500 to-orange-600",
     "from-indigo-500 to-purple-600",
-    "from-cyan-500 to-blue-600"
+    "from-blue-400 to-blue-600"
   ];
   return colors[index % colors.length];
 };
@@ -403,7 +403,7 @@ export function StatisticsDisplay({ statistics, language = "en" }: StatisticsDis
           </TabsTrigger>
           <TabsTrigger 
             value="alltime" 
-            className="text-gray-600 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-teal-600 data-[state=active]:text-white"
+            className="text-gray-600 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-blue-600 data-[state=active]:text-white"
             data-testid="tab-all-time"
           >
             <Trophy className="w-4 h-4 mr-2" />
@@ -444,7 +444,7 @@ export function StatisticsDisplay({ statistics, language = "en" }: StatisticsDis
 
         {/* All-Time Career Tab */}
         <TabsContent value="alltime" className="space-y-6 mt-6">
-          <div className="bg-gradient-to-r from-green-500/10 to-teal-600/10 rounded-lg p-4 border border-green-500/20">
+          <div className="bg-gradient-to-r from-green-500/10 to-blue-600/10 rounded-lg p-4 border border-green-500/20">
             <div className="flex items-center space-x-2 mb-4">
               <Trophy className="w-5 h-5 text-green-400" />
               <h3 className="text-lg font-semibold text-white">

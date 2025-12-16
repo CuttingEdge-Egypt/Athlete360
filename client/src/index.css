@@ -42,7 +42,7 @@
   font-size: 3rem;
   font-weight: bold;
   line-height: 1;
-  color: hsl(175, 70%, 40%);
+  color: hsl(210, 60%, 35%);
 }
 
 [dir="rtl"] .bio-first-letter::first-letter {
@@ -58,67 +58,70 @@
 }
 
 :root {
-  /* Light mode with Athlete360 teal/cyan branding */
-  --background: hsl(180, 15%, 97%);
-  --foreground: hsl(200, 25%, 20%);
-  --muted: hsl(180, 15%, 93%);
-  --muted-foreground: hsl(200, 15%, 45%);
+  /* Light mode with Athlete360 navy blue & gold branding */
+  --background: hsl(210, 15%, 97%);
+  --foreground: hsl(210, 50%, 20%);
+  --muted: hsl(210, 15%, 93%);
+  --muted-foreground: hsl(210, 15%, 45%);
   --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(200, 25%, 20%);
+  --popover-foreground: hsl(210, 50%, 20%);
   --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(200, 25%, 20%);
-  --border: hsl(180, 20%, 85%);
-  --input: hsl(180, 20%, 85%);
-  --primary: hsl(175, 70%, 40%);
+  --card-foreground: hsl(210, 50%, 20%);
+  --border: hsl(210, 20%, 85%);
+  --input: hsl(210, 20%, 85%);
+  --primary: hsl(210, 60%, 35%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(180, 30%, 92%);
-  --secondary-foreground: hsl(200, 25%, 25%);
-  --accent: hsl(175, 70%, 40%);
-  --accent-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(40, 45%, 55%);
+  --secondary-foreground: hsl(210, 50%, 15%);
+  --accent: hsl(40, 45%, 55%);
+  --accent-foreground: hsl(210, 50%, 15%);
   --destructive: hsl(0, 70%, 50%);
   --destructive-foreground: hsl(0, 0%, 100%);
-  --ring: hsl(175, 70%, 40%);
+  --ring: hsl(210, 60%, 35%);
   --radius: 0.75rem;
 
-  /* Custom Athlete360 colors - Light mode teal/cyan palette */
-  --athlete-primary: hsl(175, 70%, 40%);
-  --athlete-accent: hsl(175, 70%, 40%);
+  /* Custom Athlete360 colors - Navy blue & gold palette */
+  --athlete-primary: hsl(210, 60%, 35%);
+  --athlete-accent: hsl(40, 45%, 55%);
   --athlete-success: hsl(142, 71%, 45%);
   --athlete-warning: hsl(45, 93%, 47%);
   --athlete-danger: hsl(0, 70%, 50%);
   --athlete-purple: hsl(262, 83%, 58%);
-  --athlete-teal-dark: hsl(180, 55%, 30%);
-  --athlete-teal-medium: hsl(175, 60%, 40%);
-  --athlete-teal-light: hsl(175, 50%, 50%);
-  --athlete-gray-100: hsl(180, 15%, 96%);
-  --athlete-gray-200: hsl(180, 15%, 92%);
-  --athlete-gray-300: hsl(180, 12%, 85%);
-  --athlete-gray-400: hsl(200, 10%, 65%);
-  --athlete-gray-500: hsl(200, 12%, 50%);
-  --athlete-gray-600: hsl(200, 15%, 40%);
+  --athlete-blue-dark: hsl(210, 65%, 25%);
+  --athlete-blue-medium: hsl(210, 60%, 35%);
+  --athlete-blue-light: hsl(210, 55%, 45%);
+  --athlete-gold-dark: hsl(35, 50%, 45%);
+  --athlete-gold-medium: hsl(40, 45%, 55%);
+  --athlete-gold-light: hsl(45, 40%, 65%);
+  --athlete-gray-100: hsl(210, 15%, 96%);
+  --athlete-gray-200: hsl(210, 15%, 92%);
+  --athlete-gray-300: hsl(210, 12%, 85%);
+  --athlete-gray-400: hsl(210, 10%, 65%);
+  --athlete-gray-500: hsl(210, 12%, 50%);
+  --athlete-gray-600: hsl(210, 15%, 40%);
 }
 
 .dark {
-  /* Dark mode preserved for potential future use */
-  --background: hsl(200, 25%, 12%);
-  --foreground: hsl(180, 15%, 95%);
-  --muted: hsl(200, 20%, 16%);
-  --muted-foreground: hsl(180, 12%, 60%);
-  --popover: hsl(200, 28%, 10%);
-  --popover-foreground: hsl(180, 15%, 95%);
-  --card: hsl(200, 28%, 10%);
-  --card-foreground: hsl(180, 15%, 95%);
-  --border: hsl(200, 18%, 22%);
-  --input: hsl(200, 18%, 22%);
-  --primary: hsl(175, 70%, 45%);
-  --primary-foreground: hsl(200, 25%, 12%);
-  --secondary: hsl(200, 25%, 12%);
-  --secondary-foreground: hsl(180, 15%, 95%);
-  --accent: hsl(175, 70%, 45%);
-  --accent-foreground: hsl(200, 25%, 12%);
+  /* Dark mode with Athlete360 navy blue & gold branding */
+  --background: hsl(210, 30%, 12%);
+  --foreground: hsl(210, 15%, 95%);
+  --muted: hsl(210, 25%, 16%);
+  --muted-foreground: hsl(210, 12%, 60%);
+  --popover: hsl(210, 30%, 10%);
+  --popover-foreground: hsl(210, 15%, 95%);
+  --card: hsl(210, 30%, 10%);
+  --card-foreground: hsl(210, 15%, 95%);
+  --border: hsl(210, 20%, 22%);
+  --input: hsl(210, 20%, 22%);
+  --primary: hsl(210, 55%, 45%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(40, 50%, 50%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --accent: hsl(40, 50%, 50%);
+  --accent-foreground: hsl(0, 0%, 100%);
   --destructive: hsl(0, 63%, 31%);
-  --destructive-foreground: hsl(180, 15%, 95%);
-  --ring: hsl(200, 18%, 22%);
+  --destructive-foreground: hsl(210, 15%, 95%);
+  --ring: hsl(210, 55%, 45%);
   --radius: 0.75rem;
 }
 
@@ -188,7 +191,7 @@
 
 @layer utilities {
   .gradient-bg {
-    background: linear-gradient(135deg, hsl(180, 15%, 97%) 0%, hsl(180, 20%, 93%) 100%);
+    background: linear-gradient(135deg, hsl(210, 15%, 97%) 0%, hsl(210, 20%, 93%) 100%);
   }
   
   .service-card {
@@ -197,7 +200,7 @@
   
   .service-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(45, 175, 165, 0.2);
+    box-shadow: 0 20px 40px rgba(30, 75, 130, 0.2);
   }
   
   .token-pulse {
@@ -214,7 +217,11 @@
   }
 
   .text-athlete-accent {
-    color: hsl(175, 70%, 40%);
+    color: hsl(40, 45%, 55%);
+  }
+
+  .text-athlete-primary {
+    color: hsl(210, 60%, 35%);
   }
 
   .text-athlete-success {
@@ -230,7 +237,11 @@
   }
 
   .bg-athlete-accent {
-    background-color: hsl(175, 70%, 40%);
+    background-color: hsl(40, 45%, 55%);
+  }
+
+  .bg-athlete-primary {
+    background-color: hsl(210, 60%, 35%);
   }
 
   .bg-athlete-success {
@@ -243,36 +254,36 @@
 
   /* Light mode gray utilities */
   .bg-athlete-gray-100 {
-    background-color: hsl(180, 15%, 96%);
+    background-color: hsl(210, 15%, 96%);
   }
 
   .bg-athlete-gray-200 {
-    background-color: hsl(180, 15%, 92%);
+    background-color: hsl(210, 15%, 92%);
   }
 
   .bg-athlete-gray-300 {
-    background-color: hsl(180, 12%, 85%);
+    background-color: hsl(210, 12%, 85%);
   }
 
   .bg-athlete-gray-400 {
-    background-color: hsl(200, 10%, 65%);
+    background-color: hsl(210, 10%, 65%);
   }
 
   .bg-athlete-gray-500 {
-    background-color: hsl(200, 12%, 50%);
+    background-color: hsl(210, 12%, 50%);
   }
 
   .bg-athlete-gray-600 {
-    background-color: hsl(200, 15%, 40%);
+    background-color: hsl(210, 15%, 40%);
   }
 
   /* Legacy dark gray utilities - now mapped to light equivalents */
   .bg-athlete-gray-700 {
-    background-color: hsl(180, 15%, 92%);
+    background-color: hsl(210, 15%, 92%);
   }
 
   .bg-athlete-gray-800 {
-    background-color: hsl(180, 15%, 96%);
+    background-color: hsl(210, 15%, 96%);
   }
 
   .bg-athlete-gray-900 {
@@ -280,20 +291,37 @@
   }
 
   .border-athlete-accent {
-    border-color: hsl(175, 70%, 40%);
+    border-color: hsl(40, 45%, 55%);
+  }
+
+  .border-athlete-primary {
+    border-color: hsl(210, 60%, 35%);
   }
 
   .hover\:bg-athlete-accent:hover {
-    background-color: hsl(175, 70%, 40%);
+    background-color: hsl(40, 45%, 55%);
+  }
+
+  .hover\:bg-athlete-primary:hover {
+    background-color: hsl(210, 60%, 35%);
   }
 
   .hover\:border-athlete-accent:hover {
-    border-color: hsl(175, 70%, 40%);
+    border-color: hsl(40, 45%, 55%);
   }
 
-  /* Teal gradient for buttons and accents */
-  .bg-teal-gradient {
-    background: linear-gradient(135deg, hsl(175, 70%, 45%) 0%, hsl(180, 55%, 35%) 100%);
+  .hover\:border-athlete-primary:hover {
+    border-color: hsl(210, 60%, 35%);
+  }
+
+  /* Navy blue gradient for buttons and accents */
+  .bg-blue-gradient {
+    background: linear-gradient(135deg, hsl(210, 55%, 45%) 0%, hsl(210, 65%, 30%) 100%);
+  }
+
+  /* Gold gradient for secondary elements */
+  .bg-gold-gradient {
+    background: linear-gradient(135deg, hsl(45, 50%, 60%) 0%, hsl(35, 55%, 45%) 100%);
   }
 }
 

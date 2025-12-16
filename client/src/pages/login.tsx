@@ -173,7 +173,7 @@ export function LoginPage() {
               <Button 
                 type="submit"
                 disabled={isProcessing}
-                className={`w-full bg-primary hover:bg-teal-600 text-white font-medium h-12 text-base ${isArabic ? 'flex-row-reverse' : ''}`}
+                className={`w-full bg-primary hover:bg-blue-700 text-white font-medium h-12 text-base ${isArabic ? 'flex-row-reverse' : ''}`}
                 data-testid="button-login-submit"
               >
                 {isProcessing ? (
@@ -210,7 +210,7 @@ export function LoginPage() {
             <Button 
               variant="link" 
               onClick={() => setLocation('/signup')}
-              className="text-primary hover:text-teal-600 p-0 h-auto"
+              className="text-primary hover:text-blue-700 p-0 h-auto"
               data-testid="link-signup"
             >
               {t('login.signUpHere')}

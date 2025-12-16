@@ -190,7 +190,7 @@ export function Navigation() {
                     
                     <Button 
                       data-testid="mobile-button-payment-center"
-                      className="w-full bg-primary hover:bg-teal-600 text-white font-semibold justify-start h-11 shadow-lg"
+                      className="w-full bg-primary hover:bg-blue-700 text-white font-semibold justify-start h-11 shadow-lg"
                       onClick={handleBuyTokens}
                     >
                       <Plus className={isArabic ? 'ml-2' : 'mr-2'} size={18} />
