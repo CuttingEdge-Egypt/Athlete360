@@ -59,16 +59,16 @@
 
 :root {
   /* Light mode with Athlete360 navy blue & gold branding */
-  --background: hsl(210, 15%, 97%);
-  --foreground: hsl(210, 50%, 20%);
-  --muted: hsl(210, 15%, 93%);
-  --muted-foreground: hsl(210, 15%, 45%);
+  --background: hsl(180, 15%, 97%);
+  --foreground: hsl(200, 25%, 20%);
+  --muted: hsl(180, 15%, 93%);
+  --muted-foreground: hsl(200, 15%, 45%);
   --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(210, 50%, 20%);
+  --popover-foreground: hsl(200, 25%, 20%);
   --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(210, 50%, 20%);
-  --border: hsl(210, 20%, 85%);
-  --input: hsl(210, 20%, 85%);
+  --card-foreground: hsl(200, 25%, 20%);
+  --border: hsl(180, 20%, 85%);
+  --input: hsl(180, 20%, 85%);
   --primary: hsl(210, 60%, 35%);
   --primary-foreground: hsl(0, 0%, 100%);
   --secondary: hsl(40, 45%, 55%);
@@ -93,12 +93,12 @@
   --athlete-gold-dark: hsl(35, 50%, 45%);
   --athlete-gold-medium: hsl(40, 45%, 55%);
   --athlete-gold-light: hsl(45, 40%, 65%);
-  --athlete-gray-100: hsl(210, 15%, 96%);
-  --athlete-gray-200: hsl(210, 15%, 92%);
-  --athlete-gray-300: hsl(210, 12%, 85%);
-  --athlete-gray-400: hsl(210, 10%, 65%);
-  --athlete-gray-500: hsl(210, 12%, 50%);
-  --athlete-gray-600: hsl(210, 15%, 40%);
+  --athlete-gray-100: hsl(180, 15%, 96%);
+  --athlete-gray-200: hsl(180, 15%, 92%);
+  --athlete-gray-300: hsl(180, 12%, 85%);
+  --athlete-gray-400: hsl(200, 10%, 65%);
+  --athlete-gray-500: hsl(200, 12%, 50%);
+  --athlete-gray-600: hsl(200, 15%, 40%);
 }
 
 .dark {
@@ -191,7 +191,7 @@
 
 @layer utilities {
   .gradient-bg {
-    background: linear-gradient(135deg, hsl(210, 15%, 97%) 0%, hsl(210, 20%, 93%) 100%);
+    background: linear-gradient(135deg, hsl(180, 15%, 97%) 0%, hsl(180, 20%, 93%) 100%);
   }
   
   .service-card {
@@ -254,36 +254,36 @@
 
   /* Light mode gray utilities */
   .bg-athlete-gray-100 {
-    background-color: hsl(210, 15%, 96%);
+    background-color: hsl(180, 15%, 96%);
   }
 
   .bg-athlete-gray-200 {
-    background-color: hsl(210, 15%, 92%);
+    background-color: hsl(180, 15%, 92%);
   }
 
   .bg-athlete-gray-300 {
-    background-color: hsl(210, 12%, 85%);
+    background-color: hsl(180, 12%, 85%);
   }
 
   .bg-athlete-gray-400 {
-    background-color: hsl(210, 10%, 65%);
+    background-color: hsl(200, 10%, 65%);
   }
 
   .bg-athlete-gray-500 {
-    background-color: hsl(210, 12%, 50%);
+    background-color: hsl(200, 12%, 50%);
   }
 
   .bg-athlete-gray-600 {
-    background-color: hsl(210, 15%, 40%);
+    background-color: hsl(200, 15%, 40%);
   }
 
   /* Legacy dark gray utilities - now mapped to light equivalents */
   .bg-athlete-gray-700 {
-    background-color: hsl(210, 15%, 92%);
+    background-color: hsl(180, 15%, 92%);
   }
 
   .bg-athlete-gray-800 {
-    background-color: hsl(210, 15%, 96%);
+    background-color: hsl(180, 15%, 96%);
   }
 
   .bg-athlete-gray-900 {
