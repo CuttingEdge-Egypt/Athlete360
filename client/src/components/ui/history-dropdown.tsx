@@ -206,7 +206,7 @@ export function HistoryDropdown({ customTrigger }: HistoryDropdownProps = {}) {
               {historyItems.length > 0 && (
                 <Badge 
                   variant="secondary" 
-                  className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
+                  className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-amber-500 text-white"
                 >
                   {historyItems.length > 99 ? formatNumber('99+', isArabic) : formatNumber(historyItems.length, isArabic)}
                 </Badge>

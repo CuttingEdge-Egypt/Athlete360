@@ -2031,13 +2031,13 @@ export default function Home() {
                             setIsAthleteNewlyCreated(false);
                             setSearchName("");
                           }}
-                          className="w-full text-left px-4 py-2 hover:bg-accent text-foreground border-b border last:border-b-0"
+                          className="w-full text-left px-4 py-2 hover:bg-amber-500 text-foreground border-b border last:border-b-0 group"
                         >
-                          <div className="font-medium">
+                          <div className="font-medium group-hover:text-white">
                             {athlete.name}
                           </div>
                           {athlete.country && (
-                            <div className="text-sm text-muted-foreground">{athlete.country}</div>
+                            <div className="text-sm text-muted-foreground group-hover:text-blue-200">{athlete.country}</div>
                           )}
                         </button>
                       ))}
