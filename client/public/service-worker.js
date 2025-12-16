@@ -1,6 +1,5 @@
-const CACHE_NAME = 'athlete360-cache-v1';
-const urlsToCache = [
-  '/',
+const CACHE_NAME = 'athlete360-cache-v2';
+const STATIC_ASSETS = [
   '/favicon.png',
   '/manifest.json'
 ];
@@ -10,7 +9,7 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('Opened cache');
-        return cache.addAll(urlsToCache);
+        return cache.addAll(STATIC_ASSETS);
       })
   );
   self.skipWaiting();
@@ -33,26 +32,41 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        if (response) {
+  const url = new URL(event.request.url);
+  
+  if (event.request.method !== 'GET') {
+    return;
+  }
+  
+  if (url.pathname.startsWith('/api/')) {
+    return;
+  }
+  
+  if (url.pathname.endsWith('.js') || 
+      url.pathname.endsWith('.css') || 
+      url.pathname.endsWith('.html') ||
+      url.pathname === '/') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
           return response;
-        }
-        return fetch(event.request).then((response) => {
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-          return response;
-        });
-      })
-      .catch(() => {
-        return caches.match('/');
-      })
-  );
+        })
+        .catch(() => {
+          return caches.match(event.request);
+        })
+    );
+    return;
+  }
+  
+  if (STATIC_ASSETS.some(asset => url.pathname === asset)) {
+    event.respondWith(
+      caches.match(event.request)
+        .then((response) => {
+          return response || fetch(event.request);
+        })
+    );
+    return;
+  }
+  
+  event.respondWith(fetch(event.request));
 });
