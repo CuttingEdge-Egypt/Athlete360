@@ -1926,7 +1926,7 @@ export default function Home() {
                           variant="outline"
                           role="combobox"
                           aria-expanded={sportDropdownOpen}
-                          className="bg-white border text-foreground flex-1 justify-between hover:bg-accent"
+                          className="bg-white border text-foreground flex-1 justify-between hover:bg-primary hover:text-white"
                           data-testid="select-sport"
                         >
                           <span className="truncate">
