@@ -85,6 +85,10 @@ export default function Home() {
   const isArabic = i18n.language === 'ar';
   const [selectedSport, setSelectedSport] = useState<string>("");
   const [selectedCountry, setSelectedCountry] = useState<string>("all");
+  
+  // Check if a valid specific country is selected (not "all" or empty)
+  const isValidCountrySelected = selectedCountry && selectedCountry.trim() !== '' && selectedCountry.toLowerCase() !== 'all';
+  
   const [searchName, setSearchName] = useState<string>("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchProgress, setSearchProgress] = useState(0);
@@ -1403,17 +1407,14 @@ export default function Home() {
 
   // Handle creating athlete with AI
   const handleCreateAthleteWithAI = async (athleteName: string) => {
-    console.log('handleCreateAthleteWithAI called with:', { athleteName, selectedSport, selectedCountry });
-    
-    // Validate that a specific country is selected (not "All countries")
-    const isValidCountry = selectedCountry && selectedCountry.trim() !== '' && selectedCountry.toLowerCase() !== 'all';
+    console.log('handleCreateAthleteWithAI called with:', { athleteName, selectedSport, selectedCountry, isValidCountrySelected });
     
     if (!selectedSport || !athleteName.trim()) {
       console.log('Validation failed - missing sport or athlete name');
       return;
     }
     
-    if (!isValidCountry) {
+    if (!isValidCountrySelected) {
       console.log('Validation failed - no country selected. selectedCountry:', selectedCountry);
       toast({
         title: t('athleteSearch.countryRequired.title'),
@@ -2151,11 +2152,11 @@ export default function Home() {
                           <Button
                             data-testid="create-athlete-ai"
                             onClick={() => {
-                              console.log('AI Search button clicked, selectedCountry:', selectedCountry);
+                              console.log('AI Search button clicked, selectedCountry:', selectedCountry, 'isValidCountrySelected:', isValidCountrySelected);
                               handleCreateAthleteWithAI(searchName.trim());
                             }}
                             className="bg-gradient-to-r from-primary to-green-500 hover:from-primary/90 hover:to-green-500/90 text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                            disabled={!selectedSport || isSearching || !selectedCountry || selectedCountry.trim() === '' || selectedCountry.toLowerCase() === 'all'}
+                            disabled={!selectedSport || isSearching || !isValidCountrySelected}
                           >
                             <div className="flex items-center space-x-2">
                               <div className="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center">
