@@ -1403,7 +1403,7 @@ export default function Home() {
 
   // Handle creating athlete with AI
   const handleCreateAthleteWithAI = async (athleteName: string) => {
-    if (!selectedSport || !athleteName.trim() || !selectedCountry || selectedCountry === "all") return;
+    if (!selectedSport || !athleteName.trim() || !selectedCountry || selectedCountry.toLowerCase() === "all") return;
     
     setIsSearching(true);
     setSearchProgress(0);
@@ -1594,7 +1594,7 @@ export default function Home() {
 
   // Reset selected athlete when country changes
   const handleCountryChange = (country: string) => {
-    setSelectedCountry(country === "all" ? "" : country);
+    setSelectedCountry(country && country.toLowerCase() !== "all" ? country : "");
     setSelectedAthlete(null);
     setIsAthleteNewlyCreated(false);
   };
@@ -2134,7 +2134,7 @@ export default function Home() {
                             data-testid="create-athlete-ai"
                             onClick={() => handleCreateAthleteWithAI(searchName.trim())}
                             className="bg-gradient-to-r from-primary to-green-500 hover:from-primary/90 hover:to-green-500/90 text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                            disabled={!selectedSport || isSearching || !selectedCountry || selectedCountry === "all"}
+                            disabled={!selectedSport || isSearching || !selectedCountry || selectedCountry.toLowerCase() === "all"}
                           >
                             <div className="flex items-center space-x-2">
                               <div className="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center">
