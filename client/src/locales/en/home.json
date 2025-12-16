@@ -372,6 +372,10 @@
         "help": "Help us update our data on {name} so we get their most recent data",
         "noTokens": "(No token deduction)"
       }
+    },
+    "countryRequired": {
+      "title": "Country Required",
+      "description": "Please select a specific country before searching with AI. 'All Countries' is not a valid selection."
     }
   },
   "validation": {

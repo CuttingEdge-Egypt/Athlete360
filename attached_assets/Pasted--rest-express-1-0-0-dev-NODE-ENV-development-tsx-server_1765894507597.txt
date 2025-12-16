@@ -1,0 +1,99 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+2:12:21 PM [express] serving on port 5000
+🔄 JobWorker started - polling for jobs...
+Browserslist: browsers data (caniuse-lite) is 14 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+🔌 WebSocket client connected for ranking progress
+Database seeded successfully
+Database seeded successfully
+🔌 WebSocket client disconnected
+🔌 WebSocket client connected for ranking progress
+2:13:35 PM [express] GET /api/athletes/by-sport/905e4847-ee5f-40b7-8b1c-35393b1cee5a 200 in 201ms ::…
+Searching for athletes with name: "Wo", sportId: "905e4847-ee5f-40b7-8b1c-35393b1cee5a", country: ""
+Found 0 athletes matching search criteria
+2:13:37 PM [express] GET /api/athletes/search-by-name 200 in 72ms :: []
+Searching for athletes with name: "Woo", sportId: "905e4847-ee5f-40b7-8b1c-35393b1cee5a", country: ""
+Found 0 athletes matching search criteria
+2:13:37 PM [express] GET /api/athletes/search-by-name 200 in 71ms :: []
+Searching for athletes with name: "Wood", sportId: "905e4847-ee5f-40b7-8b1c-35393b1cee5a", country: ""
+Found 0 athletes matching search criteria
+2:13:37 PM [express] GET /api/athletes/search-by-name 200 in 68ms :: []
+Searching for athletes with name: "Woods", sportId: "905e4847-ee5f-40b7-8b1c-35393b1cee5a", country: ""
+Found 0 athletes matching search criteria
+2:13:37 PM [express] GET /api/athletes/search-by-name 200 in 73ms :: []
+[AUTH DEBUG] isAuthenticated check for /api/athletes/create-with-ai
+[AUTH DEBUG] req.isAuthenticated(): true
+[AUTH DEBUG] user exists: true
+[AUTH DEBUG] user.expires_at: 1766497975
+[AUTH DEBUG] Current time: 1765894421, Token expires: 1766497975
+[AUTH DEBUG] Token still valid, proceeding
+🚀 Starting parallel generation: personal info + image search for Woods...
+🔍 Searching for personal info for Woods using gemini-2.5-pro with web search...
+🖼️ Starting GPT-5 image search for Woods (Golf, Unknown)
+🔍 Raw GPT-5 response for Woods: Which golfer named “Woods” do you mean? Common possibilities:
+- Tiger Woods (USA)
+- Cheyenne Woods (USA)
+- Other (please provide first name or tour)
+
+Once you confirm, I’ll fetch a recent, clear headshot and return the JSON.
+Failed to parse GPT-5 image search response: SyntaxError: Unexpected token 'W', "Which golf"... is not valid JSON
+    at JSON.parse (<anonymous>)
+    at getAthleteImage (/home/runner/workspace/server/openaiService.ts:2841:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:633:35)
+    at async Promise.all (index 1)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:592:43)
+Raw response was: Which golfer named “Woods” do you mean? Common possibilities:
+- Tiger Woods (USA)
+- Cheyenne Woods (USA)
+- Other (please provide first name or tour)
+
+Once you confirm, I’ll fetch a recent, clear headshot and return the JSON.
+⚠️ No image found for Woods
+📋 Gemini response for Woods: ```json
+{
+  "age": "49",
+  "dateOfBirth": "1975-12-30",
+  "height": "6 ft 1 in (185 cm)",
+  "category": "N/A",
+  "position": "N/A",
+  "club": "N/A",
+  "educationalBackground": "Western High School, St...
+✅ Personal info generated for Woods
+🌐 Preparing Arabic name for Woods...
+🌐 Translating "Woods" (Golf, Unknown) to Arabic...
+✅ Translated "Woods" to "وودز"
+Successfully created athlete with image: Woods
+🏆 Starting async data fetch for Woods (Golf, individual sport, category: unknown)...
+🌐 BrowserUse: Fetching info for Woods (Unknown, Golf, unknown category)
+2:13:52 PM [express] POST /api/athletes/create-with-ai 200 in 10738ms :: {"id":"07640ccd-1081-4bed-b…
+✅ BrowserUse task created for Woods: d97efa2d-935d-418f-b5c6-060d8528a422
+🔗 Live preview: N/A
+⏳ Task status: running for Woods... (elapsed: 3s)
+2:13:58 PM [express] GET /api/athletes/07640ccd-1081-4bed-bc13-838f4f5c0576 200 in 175ms :: {"id":"0…
+⏳ Task status: running for Woods... (elapsed: 6s)
+⏳ Task status: running for Woods... (elapsed: 9s)
+⏳ Task status: running for Woods... (elapsed: 13s)
+⏳ Task status: running for Woods... (elapsed: 16s)
+⏳ Task status: running for Woods... (elapsed: 19s)
+⏳ Task status: running for Woods... (elapsed: 22s)
+⏳ Task status: running for Woods... (elapsed: 25s)
+⏳ Task status: running for Woods... (elapsed: 28s)
+⏳ Task status: running for Woods... (elapsed: 32s)
+⏳ Task status: running for Woods... (elapsed: 35s)
+⏳ Task status: running for Woods... (elapsed: 38s)
+⏳ Task status: running for Woods... (elapsed: 41s)
+⏳ Task status: running for Woods... (elapsed: 44s)
+⏳ Task status: running for Woods... (elapsed: 47s)
+⏳ Task status: running for Woods... (elapsed: 50s)
+⏳ Task status: running for Woods... (elapsed: 53s)
+⏳ Task status: running for Woods... (elapsed: 57s)
+⏳ Task status: running for Woods... (elapsed: 60s)
+⏳ Task status: running for Woods... (elapsed: 63s)
+⏳ Task status: running for Woods... (elapsed: 66s)
+⏳ Task status: running for Woods... (elapsed: 69s)
+⏳
