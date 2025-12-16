@@ -115,17 +115,11 @@ export async function setupAuth(app: Express) {
     })(req, res, next);
   });
 
-  app.get("/api/logout", (req, res) => {
-    req.logout(() => {
-      res.redirect(
-        client.buildEndSessionUrl(config, {
-          client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-        }).href
-      );
-    });
-  });
+  // Note: /api/logout is handled in routes.ts as a unified handler for both auth types
 }
+
+// Export client for unified logout handler (getOidcConfig is already exported above)
+export { client };
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;

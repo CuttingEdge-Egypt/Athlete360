@@ -4,7 +4,7 @@ import bodyParser from "body-parser";
 import path from "path";
 import fs from "fs";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated, client, getOidcConfig } from "./replitAuth";
 import { setupLocalAuth, isAuthenticatedUniversal } from "./localAuth";
 import { insertSportSchema, insertAthleteSchema, users } from "@shared/schema";
 import { db } from "./db";
@@ -354,6 +354,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware - setup both Replit OIDC and local auth
   await setupAuth(app);
   await setupLocalAuth(app);
+
+  // Unified logout handler for both auth types
+  app.get('/api/logout', async (req: any, res) => {
+    console.log('[LOGOUT] Unified logout handler triggered');
+    const user = req.user as any;
+    const isLocalUser = user?.access_token === 'local_auth_token';
+    
+    try {
+      // Call passport logout
+      await new Promise<void>((resolve, reject) => {
+        req.logout((err: any) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+      
+      // Destroy session
+      if (req.session) {
+        await new Promise<void>((resolve, reject) => {
+          req.session.destroy((err: any) => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
+      }
+      
+      // Determine redirect URL based on auth type
+      let redirectUrl = '/';
+      if (!isLocalUser && process.env.REPL_ID) {
+        try {
+          const config = await getOidcConfig();
+          redirectUrl = client.buildEndSessionUrl(config, {
+            client_id: process.env.REPL_ID,
+            post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+          }).href;
+        } catch (oidcError) {
+          console.error('[LOGOUT] Failed to build end session URL:', oidcError);
+          // Fall back to simple redirect
+        }
+      }
+      
+      console.log(`[LOGOUT] Success - redirecting to: ${redirectUrl.substring(0, 50)}...`);
+      res.json({ message: 'Logged out successfully', redirectUrl });
+    } catch (error) {
+      console.error('[LOGOUT] Error during logout:', error);
+      res.status(500).json({ message: 'Logout failed', redirectUrl: '/' });
+    }
+  });
 
   // Set up raw body parsing for webhook route only
   app.use('/api/payments/webhook',

@@ -366,23 +366,7 @@ export async function setupLocalAuth(app: Express) {
 
 
 
-  // Local logout route
-  app.get('/api/logout', (req, res) => {
-    console.log(`[LOCAL AUTH] Logout attempt`);
-    req.logout((err) => {
-      if (err) {
-        console.error('[LOCAL AUTH] Logout error:', err);
-        return res.status(500).json({ message: "Logout failed" });
-      }
-      req.session.destroy((destroyErr) => {
-        if (destroyErr) {
-          console.error('[LOCAL AUTH] Session destroy error:', destroyErr);
-          return res.status(500).json({ message: "Session cleanup failed" });
-        }
-        res.json({ message: "Logged out successfully" });
-      });
-    });
-  });
+  // Note: /api/logout is handled in routes.ts as a unified handler for both auth types
 }
 
 // Updated authentication middleware that supports both Replit and local auth

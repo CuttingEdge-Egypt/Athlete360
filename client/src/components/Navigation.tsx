@@ -33,15 +33,16 @@ export function Navigation() {
 
   const handleLogout = async () => {
     try {
-      await apiRequest('GET', '/api/logout', null);
+      const response = await apiRequest('GET', '/api/logout', null);
+      const data = await response.json();
       queryClient.clear();
-      setLocation('/');
-      setTimeout(() => {
-        window.location.reload();
-      }, 100);
+      // Use the redirectUrl from the server (handles both Replit and local auth)
+      window.location.href = data.redirectUrl || '/';
     } catch (error) {
       console.error('Logout error:', error);
-      window.location.href = "/api/logout";
+      // Fallback: just redirect to home
+      queryClient.clear();
+      window.location.href = '/';
     }
   };
 

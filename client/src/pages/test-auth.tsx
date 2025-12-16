@@ -226,16 +226,22 @@ export default function TestAuthPage() {
 
   const handleLogout = async () => {
     try {
-      await apiRequest('GET', '/api/logout');
+      const response = await apiRequest('GET', '/api/logout');
+      const data = await response.json();
       setUser(null);
       toast({
         title: "Logged Out",
         description: "You have been logged out successfully",
       });
+      // Redirect using the server-provided URL
+      if (data.redirectUrl && data.redirectUrl !== '/') {
+        window.location.href = data.redirectUrl;
+      }
     } catch (error) {
+      setUser(null);
       toast({
         title: "Logout Error",
-        description: "Failed to logout",
+        description: "Failed to logout properly",
         variant: "destructive"
       });
     }
