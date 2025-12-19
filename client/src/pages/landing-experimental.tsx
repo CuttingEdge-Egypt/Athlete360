@@ -374,7 +374,7 @@ export default function LandingExperimental() {
               <Button 
                 onClick={() => setLocation('/signup')}
                 data-testid="button-signup-experimental"
-                className="bg-gradient-to-r from-blue-500 to-amber-500 hover:from-blue-600 hover:to-amber-600 text-white text-xs sm:text-sm px-2 sm:px-4 h-11"
+                className="bg-[#2563eb] hover:bg-[#d4a017] text-white text-xs sm:text-sm px-2 sm:px-4 h-11 transition-colors duration-200"
               >
                 <UserPlus className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                 {t('landing.navigation.signUp')}
@@ -411,7 +411,7 @@ export default function LandingExperimental() {
             onClick={() => setLocation('/signup')}
             data-testid="button-get-started-experimental"
             size="lg"
-            className="bg-gradient-to-r from-blue-500 to-amber-500 hover:from-blue-600 hover:to-amber-600 text-white text-lg px-8 py-6 rounded-full shadow-lg shadow-blue-500/25"
+            className="bg-[#2563eb] hover:bg-[#d4a017] text-white text-lg px-8 py-6 rounded-full shadow-lg shadow-blue-500/25 transition-colors duration-200"
           >
             {t('landing.hero.ctaStart', 'Start Free Trial')}
             <ArrowRight className="ml-2 h-5 w-5" />
