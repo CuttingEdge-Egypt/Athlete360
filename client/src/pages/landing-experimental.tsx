@@ -50,15 +50,16 @@ function InfiniteGallery3D({ onLoopsComplete, isActive }: InfiniteGallery3DProps
   const animationRef = useRef<number>();
   const planesDataRef = useRef<PlaneData[]>([]);
   const [, forceUpdate] = useState({});
-  const loopCountRef = useRef(0);
-  const totalScrollRef = useRef(0);
+  const imagePassCountRef = useRef(0);
   const [loopsCompleted, setLoopsCompleted] = useState(false);
+  const loopsCompletedRef = useRef(false);
 
   const visibleCount = 8;
   const totalImages = galleryImages.length;
   const depthRange = DEFAULT_DEPTH_RANGE;
   const speed = 1.2;
-  const scrollPerLoop = depthRange * totalImages;
+  const imagesPerLoop = totalImages;
+  const requiredPasses = REQUIRED_LOOPS * imagesPerLoop;
 
   const fadeSettings = {
     fadeIn: { start: 0.05, end: 0.25 },
@@ -96,7 +97,7 @@ function InfiniteGallery3D({ onLoopsComplete, isActive }: InfiniteGallery3DProps
   }, [visibleCount, totalImages, spatialPositions, depthRange]);
 
   const handleWheel = useCallback((event: WheelEvent) => {
-    if (!isActive || loopsCompleted) return;
+    if (!isActive || loopsCompletedRef.current) return;
     
     event.preventDefault();
     event.stopPropagation();
@@ -105,39 +106,21 @@ function InfiniteGallery3D({ onLoopsComplete, isActive }: InfiniteGallery3DProps
     setScrollVelocity((prev) => prev + scrollAmount);
     setAutoPlay(false);
     lastInteraction.current = Date.now();
-    
-    totalScrollRef.current += Math.abs(scrollAmount);
-    const newLoopCount = Math.floor(totalScrollRef.current / scrollPerLoop);
-    
-    if (newLoopCount >= REQUIRED_LOOPS && !loopsCompleted) {
-      setLoopsCompleted(true);
-      onLoopsComplete();
-    }
-  }, [speed, isActive, loopsCompleted, scrollPerLoop, onLoopsComplete]);
+  }, [speed, isActive]);
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    if (!isActive || loopsCompleted) return;
+    if (!isActive || loopsCompletedRef.current) return;
     
     if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
-      const scrollAmount = 2 * speed;
-      setScrollVelocity((prev) => prev - scrollAmount);
+      setScrollVelocity((prev) => prev - 2 * speed);
       setAutoPlay(false);
       lastInteraction.current = Date.now();
-      totalScrollRef.current += scrollAmount;
     } else if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
-      const scrollAmount = 2 * speed;
-      setScrollVelocity((prev) => prev + scrollAmount);
+      setScrollVelocity((prev) => prev + 2 * speed);
       setAutoPlay(false);
       lastInteraction.current = Date.now();
-      totalScrollRef.current += scrollAmount;
     }
-    
-    const newLoopCount = Math.floor(totalScrollRef.current / scrollPerLoop);
-    if (newLoopCount >= REQUIRED_LOOPS && !loopsCompleted) {
-      setLoopsCompleted(true);
-      onLoopsComplete();
-    }
-  }, [speed, isActive, loopsCompleted, scrollPerLoop, onLoopsComplete]);
+  }, [speed, isActive]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -167,15 +150,8 @@ function InfiniteGallery3D({ onLoopsComplete, isActive }: InfiniteGallery3DProps
       const delta = (currentTime - lastTime) / 1000;
       lastTime = currentTime;
 
-      if (autoPlay && !loopsCompleted) {
+      if (autoPlay && !loopsCompletedRef.current) {
         setScrollVelocity((prev) => prev + 0.3 * delta);
-        totalScrollRef.current += 0.3 * delta;
-        
-        const newLoopCount = Math.floor(totalScrollRef.current / scrollPerLoop);
-        if (newLoopCount >= REQUIRED_LOOPS) {
-          setLoopsCompleted(true);
-          onLoopsComplete();
-        }
       }
 
       setScrollVelocity((prev) => {
@@ -198,15 +174,27 @@ function InfiniteGallery3D({ onLoopsComplete, isActive }: InfiniteGallery3DProps
 
           if (wrapsForward > 0 && imageAdvance > 0) {
             plane.imageIndex = (plane.imageIndex + wrapsForward * imageAdvance) % totalImages;
+            if (!loopsCompletedRef.current) {
+              imagePassCountRef.current += wrapsForward;
+            }
           }
 
           if (wrapsBackward > 0 && imageAdvance > 0) {
             const step = plane.imageIndex - wrapsBackward * imageAdvance;
             plane.imageIndex = ((step % totalImages) + totalImages) % totalImages;
+            if (!loopsCompletedRef.current) {
+              imagePassCountRef.current += wrapsBackward;
+            }
           }
 
           plane.z = ((newZ % depthRange) + depthRange) % depthRange;
         });
+
+        if (!loopsCompletedRef.current && imagePassCountRef.current >= requiredPasses) {
+          loopsCompletedRef.current = true;
+          setLoopsCompleted(true);
+          onLoopsComplete();
+        }
 
         return newVelocity;
       });
@@ -221,7 +209,7 @@ function InfiniteGallery3D({ onLoopsComplete, isActive }: InfiniteGallery3DProps
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [autoPlay, depthRange, totalImages, visibleCount, loopsCompleted, scrollPerLoop, onLoopsComplete]);
+  }, [autoPlay, depthRange, totalImages, visibleCount, requiredPasses, onLoopsComplete]);
 
   const getPlaneStyles = (plane: PlaneData) => {
     const normalizedPosition = plane.z / depthRange;
