@@ -58,7 +58,6 @@ export function PWAInstallPrompt() {
   const [deviceType, setDeviceType] = useState<DeviceType>('web');
   const [isStandalone, setIsStandalone] = useState(false);
   const [language, setLanguage] = useState<Language>('en');
-  const [previewMode, setPreviewMode] = useState<DeviceType | null>(null);
 
   const isDev = import.meta.env.DEV;
   const t = translations[language];
@@ -134,10 +133,9 @@ export function PWAInstallPrompt() {
     setLanguage(prev => prev === 'en' ? 'ar' : 'en');
   };
 
-  const activeMode = previewMode || deviceType;
-  const showIOSInstructions = activeMode === 'ios';
-  const showAndroidInstructions = activeMode === 'android';
-  const showWebInstructions = activeMode === 'web';
+  // Show iOS instructions only for iOS devices, Android instructions for all others
+  const showIOSInstructions = deviceType === 'ios';
+  const showAndroidInstructions = !showIOSInstructions;
 
   if (!showPrompt || isStandalone) return null;
 
@@ -158,7 +156,7 @@ export function PWAInstallPrompt() {
                 {t.title}
               </h3>
               <p className="text-gray-300 text-sm">
-                {showIOSInstructions ? t.iosDescription : showAndroidInstructions ? t.androidDescription : t.webDescription}
+                {showIOSInstructions ? t.iosDescription : t.androidDescription}
               </p>
             </div>
           </div>
@@ -186,46 +184,6 @@ export function PWAInstallPrompt() {
             {language === 'en' ? 'العربية' : 'English'}
           </Button>
 
-          {isDev && (
-            <div className="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-              <button
-                onClick={() => setPreviewMode('ios')}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 ${
-                  showIOSInstructions 
-                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' 
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                }`}
-                data-testid="button-preview-ios"
-              >
-                <Smartphone className="h-3.5 w-3.5" />
-                iOS
-              </button>
-              <button
-                onClick={() => setPreviewMode('android')}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 ${
-                  showAndroidInstructions 
-                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' 
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                }`}
-                data-testid="button-preview-android"
-              >
-                <Smartphone className="h-3.5 w-3.5" />
-                Android
-              </button>
-              <button
-                onClick={() => setPreviewMode('web')}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 ${
-                  showWebInstructions 
-                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' 
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                }`}
-                data-testid="button-preview-web"
-              >
-                <Globe className="h-3.5 w-3.5" />
-                Web
-              </button>
-            </div>
-          )}
         </div>
 
         {showIOSInstructions && (
@@ -327,48 +285,6 @@ export function PWAInstallPrompt() {
           </div>
         )}
 
-        {showWebInstructions && (
-          <div className="space-y-3" data-testid="web-instructions">
-            <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-              <div className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
-                1
-              </div>
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                {t.webStep1}
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
-              <div className="flex-shrink-0 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
-                2
-              </div>
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                {t.webStep2}
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
-              <div className="flex-shrink-0 w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
-                3
-              </div>
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                {t.webStep3}
-              </p>
-            </div>
-
-            <div className="mt-4">
-              <Button
-                onClick={handleDismiss}
-                variant="outline"
-                size="lg"
-                className="w-full"
-                data-testid="button-not-now"
-              >
-                {t.notNow}
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
