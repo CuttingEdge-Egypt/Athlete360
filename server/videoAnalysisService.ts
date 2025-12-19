@@ -24,6 +24,7 @@ const model = genai.getGenerativeModel({
 // Sport-specific configurations
 interface SportConfig {
   name: string;
+  primaryActions: string[];
   scoringEvents: string[];
   violationsEvents: string[];
   hasRounds: boolean;
@@ -38,6 +39,7 @@ interface SportConfig {
 const SPORT_CONFIGS: Record<string, SportConfig> = {
   'taekwondo': {
     name: 'Taekwondo',
+    primaryActions: ['roundhouse kick', 'side kick', 'back kick', 'spinning kick', 'punch'],
     scoringEvents: ['1-point kick', '2-point kick', '3-point kick', '5-point head kick'],
     violationsEvents: ['yellow card', 'warning', 'gam-jeom'],
     hasRounds: true,
@@ -50,6 +52,7 @@ const SPORT_CONFIGS: Record<string, SportConfig> = {
   },
   'boxing': {
     name: 'Boxing',
+    primaryActions: ['jab', 'cross', 'hook', 'uppercut', 'body shot'],
     scoringEvents: ['clean punch', 'power punch', 'combination'],
     violationsEvents: ['warning', 'point deduction', 'low blow', 'holding'],
     hasRounds: true,
@@ -62,6 +65,7 @@ const SPORT_CONFIGS: Record<string, SportConfig> = {
   },
   'soccer': {
     name: 'Soccer/Football',
+    primaryActions: ['shot', 'pass', 'dribble', 'tackle', 'header'],
     scoringEvents: ['goals', 'assists', 'key passes'],
     violationsEvents: ['yellow card', 'red card', 'foul'],
     hasRounds: false,
@@ -74,18 +78,20 @@ const SPORT_CONFIGS: Record<string, SportConfig> = {
   },
   'football': {
     name: 'Football',
-    scoringEvents: ['goals', 'assists', 'key passes'],
-    violationsEvents: ['yellow card', 'red card', 'foul'],
+    primaryActions: ['pass', 'rush', 'tackle', 'catch', 'block'],
+    scoringEvents: ['touchdown', 'field goal', 'safety'],
+    violationsEvents: ['penalty flag', 'personal foul', 'holding'],
     hasRounds: false,
     timeFormat: 'MM:SS',
     analysisTerms: {
-      action: 'shots',
-      violation: 'cards',
-      scoring: 'goals'
+      action: 'plays',
+      violation: 'penalties',
+      scoring: 'points'
     }
   },
   'basketball': {
     name: 'Basketball',
+    primaryActions: ['shot', 'pass', 'dribble', 'rebound', 'block'],
     scoringEvents: ['2-point shot', '3-point shot', 'free throw'],
     violationsEvents: ['personal foul', 'technical foul', 'flagrant foul'],
     hasRounds: false,
@@ -98,6 +104,7 @@ const SPORT_CONFIGS: Record<string, SportConfig> = {
   },
   'tennis': {
     name: 'Tennis',
+    primaryActions: ['serve', 'forehand', 'backhand', 'volley', 'smash'],
     scoringEvents: ['aces', 'winners', 'service winners'],
     violationsEvents: ['time violation', 'code violation', 'unsportsmanlike conduct'],
     hasRounds: false,
@@ -110,6 +117,7 @@ const SPORT_CONFIGS: Record<string, SportConfig> = {
   },
   'table_tennis': {
     name: 'Table Tennis',
+    primaryActions: ['serve', 'forehand', 'backhand', 'smash', 'block', 'loop'],
     scoringEvents: ['winners', 'service aces', 'smashes'],
     violationsEvents: ['service fault', 'time violation', 'unsportsmanlike conduct'],
     hasRounds: false,
@@ -122,6 +130,7 @@ const SPORT_CONFIGS: Record<string, SportConfig> = {
   },
   'tabletennis': {
     name: 'Table Tennis',
+    primaryActions: ['serve', 'forehand', 'backhand', 'smash', 'block', 'loop'],
     scoringEvents: ['winners', 'service aces', 'smashes'],
     violationsEvents: ['service fault', 'time violation', 'unsportsmanlike conduct'],
     hasRounds: false,
@@ -134,6 +143,7 @@ const SPORT_CONFIGS: Record<string, SportConfig> = {
   },
   'ping_pong': {
     name: 'Table Tennis',
+    primaryActions: ['serve', 'forehand', 'backhand', 'smash', 'block', 'loop'],
     scoringEvents: ['winners', 'service aces', 'smashes'],
     violationsEvents: ['service fault', 'time violation', 'unsportsmanlike conduct'],
     hasRounds: false,
@@ -146,9 +156,140 @@ const SPORT_CONFIGS: Record<string, SportConfig> = {
   },
   'martial_arts': {
     name: 'Martial Arts',
+    primaryActions: ['punch', 'kick', 'block', 'strike', 'combination'],
     scoringEvents: ['clean strike', 'power strike', 'combination'],
     violationsEvents: ['warning', 'penalty', 'disqualification'],
     hasRounds: true,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'strikes',
+      violation: 'penalties',
+      scoring: 'points'
+    }
+  },
+  'mma': {
+    name: 'MMA',
+    primaryActions: ['punch', 'kick', 'takedown', 'submission attempt', 'ground and pound'],
+    scoringEvents: ['knockdown', 'takedown', 'significant strike'],
+    violationsEvents: ['warning', 'point deduction', 'illegal strike'],
+    hasRounds: true,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'strikes',
+      violation: 'warnings',
+      scoring: 'points'
+    }
+  },
+  'kickboxing': {
+    name: 'Kickboxing',
+    primaryActions: ['jab', 'cross', 'roundhouse kick', 'front kick', 'knee strike'],
+    scoringEvents: ['clean punch', 'clean kick', 'knockdown'],
+    violationsEvents: ['warning', 'point deduction', 'clinching'],
+    hasRounds: true,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'strikes',
+      violation: 'warnings',
+      scoring: 'points'
+    }
+  },
+  'fencing': {
+    name: 'Fencing',
+    primaryActions: ['thrust', 'parry', 'riposte', 'lunge', 'fleche'],
+    scoringEvents: ['touch', 'riposte', 'attack'],
+    violationsEvents: ['yellow card', 'red card', 'black card'],
+    hasRounds: true,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'touches',
+      violation: 'cards',
+      scoring: 'points'
+    }
+  },
+  'volleyball': {
+    name: 'Volleyball',
+    primaryActions: ['serve', 'spike', 'block', 'dig', 'set'],
+    scoringEvents: ['kill', 'ace', 'block'],
+    violationsEvents: ['net violation', 'lift', 'double contact'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'attacks',
+      violation: 'violations',
+      scoring: 'points'
+    }
+  },
+  'hockey': {
+    name: 'Hockey',
+    primaryActions: ['shot', 'pass', 'check', 'save', 'deke'],
+    scoringEvents: ['goal', 'assist', 'save'],
+    violationsEvents: ['minor penalty', 'major penalty', 'misconduct'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'shots',
+      violation: 'penalties',
+      scoring: 'goals'
+    }
+  },
+  'badminton': {
+    name: 'Badminton',
+    primaryActions: ['serve', 'smash', 'drop shot', 'clear', 'drive'],
+    scoringEvents: ['smash', 'drop shot', 'clear'],
+    violationsEvents: ['service fault', 'delay of game', 'misconduct'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'shots',
+      violation: 'faults',
+      scoring: 'points'
+    }
+  },
+  'squash': {
+    name: 'Squash',
+    primaryActions: ['serve', 'drive', 'drop shot', 'boast', 'lob'],
+    scoringEvents: ['winner', 'kill shot', 'drop shot'],
+    violationsEvents: ['let', 'stroke', 'conduct warning'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'shots',
+      violation: 'violations',
+      scoring: 'points'
+    }
+  },
+  'wrestling': {
+    name: 'Wrestling',
+    primaryActions: ['takedown', 'reversal', 'escape', 'pin attempt', 'throw'],
+    scoringEvents: ['takedown', 'reversal', 'exposure'],
+    violationsEvents: ['passivity', 'caution', 'disqualification'],
+    hasRounds: true,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'moves',
+      violation: 'cautions',
+      scoring: 'points'
+    }
+  },
+  'judo': {
+    name: 'Judo',
+    primaryActions: ['throw', 'sweep', 'hold', 'armlock', 'choke'],
+    scoringEvents: ['ippon', 'waza-ari', 'yuko'],
+    violationsEvents: ['shido', 'hansoku-make', 'matte'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'throws',
+      violation: 'penalties',
+      scoring: 'points'
+    }
+  },
+  'karate': {
+    name: 'Karate',
+    primaryActions: ['punch', 'kick', 'strike', 'sweep', 'block'],
+    scoringEvents: ['yuko', 'waza-ari', 'ippon'],
+    violationsEvents: ['chukoku', 'keikoku', 'hansoku-chui'],
+    hasRounds: false,
     timeFormat: 'MM:SS',
     analysisTerms: {
       action: 'strikes',
@@ -196,6 +337,7 @@ export function getSportConfig(sport: string): SportConfig {
   console.log(`[SPORT_CONFIG] No match found for: ${sport}, creating generic config`);
   return {
     name: sport, // Use the actual sport name, not "Taekwondo"
+    primaryActions: ['action', 'move', 'play', 'shot', 'attack'],
     scoringEvents: ['score', 'point', 'goal'],
     violationsEvents: ['foul', 'penalty', 'violation'],
     hasRounds: false,

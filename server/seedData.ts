@@ -221,18 +221,32 @@ async function seedSeifEissaData(athleteId: string) {
 
 export async function seedDatabase() {
   try {
-    // Seed sports
+    // Seed sports - includes all sports with video analysis configurations
     const sports = [
       { name: "Football" },
       { name: "Soccer" },
       { name: "Basketball" },
       { name: "Tennis" },
+      { name: "Table Tennis" },
       { name: "Taekwondo" },
       { name: "Baseball" },
       { name: "Swimming" },
       { name: "Golf" },
       { name: "Boxing" },
-      { name: "Athletics" }
+      { name: "Athletics" },
+      { name: "Martial Arts" },
+      { name: "MMA" },
+      { name: "Kickboxing" },
+      { name: "Fencing" },
+      { name: "Volleyball" },
+      { name: "Hockey" },
+      { name: "Rugby" },
+      { name: "Cricket" },
+      { name: "Badminton" },
+      { name: "Squash" },
+      { name: "Wrestling" },
+      { name: "Judo" },
+      { name: "Karate" }
     ];
 
     const createdSports = [];
