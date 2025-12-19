@@ -1521,6 +1521,11 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                   entity2Score = currentStats.redScore.toString();
                 }
                 
+                // Check if we have valid score data - hide scoreboard if no events and scores are 0
+                // Even for Taekwondo, hide if no events and all scores are 0
+                const hasValidScores = scoreEvents.length > 0 || 
+                  (entity1Score !== '0' || entity2Score !== '0');
+                
                 // Get most recent scorer for each team (only for team sports)
                 let entity1Scorer = '';
                 let entity2Scorer = '';
@@ -1549,6 +1554,52 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                 const rightScore = entity2Score;
                 const rightScorer = entity2Scorer;
                 const rightColors = player2Colors;
+                
+                // If no valid scores, show a simplified header without score numbers
+                if (!hasValidScores) {
+                  return (
+                    <div className="bg-white border-b border-gray-200 px-3 sm:px-6 py-3 sm:py-4">
+                      <div className="flex items-center justify-between max-w-4xl mx-auto">
+                        {/* Left Player/Team */}
+                        <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                          {leftCountry && (
+                            <Flag 
+                              country={leftCountry} 
+                              className="w-6 h-4 sm:w-8 sm:h-6 rounded shadow-sm flex-shrink-0" 
+                            />
+                          )}
+                          <div className="flex-1 text-left min-w-0">
+                            <div className={`text-xs sm:text-lg font-bold truncate ${leftColors.textDark}`}>{leftName}</div>
+                            {leftCountry && !isTeamSport && (
+                              <div className="text-[10px] sm:text-xs text-gray-500 truncate">{leftCountry}</div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* VS indicator instead of score */}
+                        <div className="px-2 sm:px-6 flex-shrink-0">
+                          <div className="text-lg sm:text-2xl font-bold text-gray-400">vs</div>
+                        </div>
+                        
+                        {/* Right Player/Team */}
+                        <div className="flex items-center gap-2 sm:gap-3 flex-1 justify-end min-w-0">
+                          <div className="flex-1 text-right min-w-0">
+                            <div className={`text-xs sm:text-lg font-bold truncate ${rightColors.textDark}`}>{rightName}</div>
+                            {rightCountry && !isTeamSport && (
+                              <div className="text-[10px] sm:text-xs text-gray-500 truncate">{rightCountry}</div>
+                            )}
+                          </div>
+                          {rightCountry && (
+                            <Flag 
+                              country={rightCountry} 
+                              className="w-6 h-4 sm:w-8 sm:h-6 rounded shadow-sm flex-shrink-0" 
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
                 
                 return (
                   <div className="bg-white border-b border-gray-200 px-3 sm:px-6 py-3 sm:py-4">

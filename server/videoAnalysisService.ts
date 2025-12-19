@@ -1321,9 +1321,15 @@ Look for names on screen, scoreboards, or mentioned by commentators.`;
       // Generate score progression for both players together to ensure consistent color detection
       const bothPlayersScorePrompt = `Watch ${roundText} of this ${sportConfig.name} match. Track the score progression for BOTH players.
 
+🚨 HOW TO DETECT SCORING EVENTS:
+1. **SCOREBOARD**: Look for on-screen scoreboard graphics that show points. When the scoreboard number changes, a point was scored.
+2. **COMMENTATORS**: Listen carefully to commentators - they often announce when a point is scored (e.g., "Point to...", "That's a winner!", "Service winner!")
+3. **PLAYER CELEBRATIONS**: Watch for players celebrating, pumping fists, or showing excitement - this usually indicates they just scored.
+4. **CROWD REACTIONS**: Crowd cheering or applause often follows a scoring play.
+
 🚨 CRITICAL REQUIREMENTS:
-1. Track every point/score gained by each player
-2. In "current_score", show ONLY that player's score using the sport's native scoring system
+1. Track every point/score gained by each player using the detection methods above
+2. In "current_score", show ONLY that player's cumulative score using the sport's native scoring system
 3. Use the sport's official notation (e.g., tennis: "15", "30", "40" | basketball: "2", "5", "7" | table tennis: "1", "3", "5")
 4. All timestamps MUST be in MM:SS format
 5. "uniform_color" field: LOOK AT THE VIDEO and identify the ACTUAL color of each player's uniform/gear (red, blue, white, black, green, yellow, etc.)
@@ -1340,9 +1346,9 @@ MANDATORY JSON FORMAT:
       "events": [
         {
           "timestamp": "01:23",
-          "description": "Point scored",
+          "description": "Point scored - forehand winner",
           "points_scored": 1,
-          "current_score": "[PLAYER_1_SCORE_ONLY]"
+          "current_score": "[PLAYER_1_CUMULATIVE_SCORE]"
         }
       ]
     },
@@ -1354,9 +1360,9 @@ MANDATORY JSON FORMAT:
       "events": [
         {
           "timestamp": "02:45",
-          "description": "Point scored",
+          "description": "Point scored - ace serve",
           "points_scored": 1,
-          "current_score": "[PLAYER_2_SCORE_ONLY]"
+          "current_score": "[PLAYER_2_CUMULATIVE_SCORE]"
         }
       ]
     }
@@ -1366,7 +1372,8 @@ MANDATORY JSON FORMAT:
 ⚠️ CRITICAL INSTRUCTIONS:
 - "uniform_color" MUST be the actual color you see in the video (e.g., "red", "blue", "white", "black", "green", "yellow")
 - For combat sports like Taekwondo/Karate, players typically wear red or blue protective gear - identify which player wears which
-- current_score must contain ONLY that player's individual score, NOT a combined score`;
+- current_score must contain ONLY that player's individual cumulative score, NOT a combined score
+- Even if you cannot see the exact scoreboard, use celebrations and commentary to identify when points are scored`;
 
       // Generate both player scores in one call for consistency
       const bothPlayersResponse = await jsonModel.generateContent([videoFile, bothPlayersScorePrompt]);
