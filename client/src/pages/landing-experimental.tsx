@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useLocation } from 'wouter';
 import { useTranslation } from 'react-i18next';
-import { UserPlus, ChartPie, Trophy, Scale, Target, Gift, HelpCircle, Video, ArrowRight } from 'lucide-react';
+import { UserPlus, ChartPie, Trophy, Scale, Target, Gift, HelpCircle, Video, ArrowRight, ChevronDown } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import logoImage from '@assets/NewLogo_1765909713887.jpeg';
 
@@ -35,8 +35,14 @@ interface PlaneData {
 const DEFAULT_DEPTH_RANGE = 80;
 const MAX_HORIZONTAL_OFFSET = 16;
 const MAX_VERTICAL_OFFSET = 12;
+const REQUIRED_LOOPS = 2;
 
-function InfiniteGallery3D() {
+interface InfiniteGallery3DProps {
+  onLoopsComplete: () => void;
+  isActive: boolean;
+}
+
+function InfiniteGallery3D({ onLoopsComplete, isActive }: InfiniteGallery3DProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollVelocity, setScrollVelocity] = useState(0);
   const [autoPlay, setAutoPlay] = useState(true);
@@ -44,11 +50,15 @@ function InfiniteGallery3D() {
   const animationRef = useRef<number>();
   const planesDataRef = useRef<PlaneData[]>([]);
   const [, forceUpdate] = useState({});
+  const loopCountRef = useRef(0);
+  const totalScrollRef = useRef(0);
+  const [loopsCompleted, setLoopsCompleted] = useState(false);
 
   const visibleCount = 8;
   const totalImages = galleryImages.length;
   const depthRange = DEFAULT_DEPTH_RANGE;
   const speed = 1.2;
+  const scrollPerLoop = depthRange * totalImages;
 
   const fadeSettings = {
     fadeIn: { start: 0.05, end: 0.25 },
@@ -86,27 +96,52 @@ function InfiniteGallery3D() {
   }, [visibleCount, totalImages, spatialPositions, depthRange]);
 
   const handleWheel = useCallback((event: WheelEvent) => {
+    if (!isActive || loopsCompleted) return;
+    
     event.preventDefault();
-    setScrollVelocity((prev) => prev + event.deltaY * 0.01 * speed);
+    event.stopPropagation();
+    
+    const scrollAmount = event.deltaY * 0.01 * speed;
+    setScrollVelocity((prev) => prev + scrollAmount);
     setAutoPlay(false);
     lastInteraction.current = Date.now();
-  }, [speed]);
+    
+    totalScrollRef.current += Math.abs(scrollAmount);
+    const newLoopCount = Math.floor(totalScrollRef.current / scrollPerLoop);
+    
+    if (newLoopCount >= REQUIRED_LOOPS && !loopsCompleted) {
+      setLoopsCompleted(true);
+      onLoopsComplete();
+    }
+  }, [speed, isActive, loopsCompleted, scrollPerLoop, onLoopsComplete]);
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    if (!isActive || loopsCompleted) return;
+    
     if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
-      setScrollVelocity((prev) => prev - 2 * speed);
+      const scrollAmount = 2 * speed;
+      setScrollVelocity((prev) => prev - scrollAmount);
       setAutoPlay(false);
       lastInteraction.current = Date.now();
+      totalScrollRef.current += scrollAmount;
     } else if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
-      setScrollVelocity((prev) => prev + 2 * speed);
+      const scrollAmount = 2 * speed;
+      setScrollVelocity((prev) => prev + scrollAmount);
       setAutoPlay(false);
       lastInteraction.current = Date.now();
+      totalScrollRef.current += scrollAmount;
     }
-  }, [speed]);
+    
+    const newLoopCount = Math.floor(totalScrollRef.current / scrollPerLoop);
+    if (newLoopCount >= REQUIRED_LOOPS && !loopsCompleted) {
+      setLoopsCompleted(true);
+      onLoopsComplete();
+    }
+  }, [speed, isActive, loopsCompleted, scrollPerLoop, onLoopsComplete]);
 
   useEffect(() => {
     const container = containerRef.current;
-    if (container) {
+    if (container && isActive) {
       container.addEventListener('wheel', handleWheel, { passive: false });
       document.addEventListener('keydown', handleKeyDown);
       return () => {
@@ -114,7 +149,7 @@ function InfiniteGallery3D() {
         document.removeEventListener('keydown', handleKeyDown);
       };
     }
-  }, [handleWheel, handleKeyDown]);
+  }, [handleWheel, handleKeyDown, isActive]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -132,8 +167,15 @@ function InfiniteGallery3D() {
       const delta = (currentTime - lastTime) / 1000;
       lastTime = currentTime;
 
-      if (autoPlay) {
+      if (autoPlay && !loopsCompleted) {
         setScrollVelocity((prev) => prev + 0.3 * delta);
+        totalScrollRef.current += 0.3 * delta;
+        
+        const newLoopCount = Math.floor(totalScrollRef.current / scrollPerLoop);
+        if (newLoopCount >= REQUIRED_LOOPS) {
+          setLoopsCompleted(true);
+          onLoopsComplete();
+        }
       }
 
       setScrollVelocity((prev) => {
@@ -179,7 +221,7 @@ function InfiniteGallery3D() {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [autoPlay, depthRange, totalImages, visibleCount]);
+  }, [autoPlay, depthRange, totalImages, visibleCount, loopsCompleted, scrollPerLoop, onLoopsComplete]);
 
   const getPlaneStyles = (plane: PlaneData) => {
     const normalizedPosition = plane.z / depthRange;
@@ -223,7 +265,7 @@ function InfiniteGallery3D() {
   return (
     <div 
       ref={containerRef}
-      className="relative w-full h-screen overflow-hidden"
+      className="relative w-full h-full overflow-hidden"
       style={{ perspective: '1000px', perspectiveOrigin: 'center center' }}
     >
       <div 
@@ -266,18 +308,18 @@ function InfiniteGallery3D() {
         </h1>
       </div>
 
+      {loopsCompleted && (
+        <motion.div 
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <ChevronDown className="w-8 h-8 text-white/60 animate-bounce" />
+        </motion.div>
+      )}
     </div>
   );
-}
-
-function useMemo<T>(factory: () => T, deps: React.DependencyList): T {
-  const ref = useRef<{ value: T; deps: React.DependencyList } | null>(null);
-  
-  if (!ref.current || !deps.every((dep, i) => Object.is(dep, ref.current!.deps[i]))) {
-    ref.current = { value: factory(), deps };
-  }
-  
-  return ref.current.value;
 }
 
 export default function LandingExperimental() {
@@ -285,6 +327,19 @@ export default function LandingExperimental() {
   const { t } = useTranslation(['home', 'common']);
   const searchParams = new URLSearchParams(window.location.search);
   const referralCode = searchParams.get('ref');
+  const [galleryComplete, setGalleryComplete] = useState(false);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const servicesRef = useRef<HTMLElement>(null);
+
+  const handleLoopsComplete = useCallback(() => {
+    setGalleryComplete(true);
+  }, []);
+
+  useEffect(() => {
+    if (galleryComplete && servicesRef.current) {
+      servicesRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [galleryComplete]);
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 30 },
@@ -305,7 +360,7 @@ export default function LandingExperimental() {
   };
 
   return (
-    <div className="min-h-[200vh] bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white">
+    <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white">
       <motion.nav 
         initial="hidden"
         animate="visible"
@@ -355,8 +410,8 @@ export default function LandingExperimental() {
         </div>
       </motion.nav>
 
-      <div className="h-screen sticky top-0">
-        <InfiniteGallery3D />
+      <div ref={heroRef} className="h-screen relative">
+        <InfiniteGallery3D onLoopsComplete={handleLoopsComplete} isActive={!galleryComplete} />
         
         <motion.div 
           className="absolute bottom-32 left-0 right-0 flex flex-col sm:flex-row gap-4 justify-center px-4 z-20"
@@ -402,7 +457,7 @@ export default function LandingExperimental() {
         )}
       </div>
 
-      <section className="min-h-screen py-20 bg-gradient-to-b from-slate-900 to-blue-950">
+      <section ref={servicesRef} className="min-h-screen py-20 bg-gradient-to-b from-slate-900 to-blue-950">
         <div className="container mx-auto px-4">
           <motion.h2
             className="text-3xl sm:text-4xl font-bold text-center mb-12"
