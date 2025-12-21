@@ -322,7 +322,7 @@ function InfiniteGallery3D({ onLoopsComplete, isActive }: InfiniteGallery3DProps
 const featuresData = [
   {
     id: 'feature1',
-    name: 'Feature One',
+    name: 'Analytics',
     percentage: 20,
     color: '#1e4a8a',
     title: 'Feature One Title',
@@ -331,36 +331,36 @@ const featuresData = [
   },
   {
     id: 'feature2',
-    name: 'Feature Two',
+    name: 'Training',
     percentage: 20,
-    color: '#2563eb',
+    color: '#10b981',
     title: 'Feature Two Title',
     subtitle: 'Advanced analytics and insights',
     description: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.',
   },
   {
     id: 'feature3',
-    name: 'Feature Three',
+    name: 'Strategy',
     percentage: 20,
-    color: '#3b82f6',
+    color: '#f59e0b',
     title: 'Feature Three Title',
     subtitle: 'Real-time performance tracking',
     description: 'Sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque.',
   },
   {
     id: 'feature4',
-    name: 'Feature Four',
+    name: 'Nutrition',
     percentage: 20,
-    color: '#60a5fa',
+    color: '#ef4444',
     title: 'Feature Four Title',
     subtitle: 'Comprehensive athlete profiles',
     description: 'Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.',
   },
   {
     id: 'feature5',
-    name: 'Feature Five',
+    name: 'Recovery',
     percentage: 20,
-    color: '#93c5fd',
+    color: '#8b5cf6',
     title: 'Feature Five Title',
     subtitle: 'Strategic competition analysis',
     description: 'Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt.',
@@ -374,13 +374,13 @@ interface PieSliceProps {
   isSelected: boolean;
   onClick: () => void;
   label: string;
+  name: string;
+  cx: number;
+  cy: number;
+  radius: number;
 }
 
-function PieSlice({ startAngle, endAngle, color, isSelected, onClick, label }: PieSliceProps) {
-  const cx = 150;
-  const cy = 150;
-  const radius = 120;
-  
+function PieSlice({ startAngle, endAngle, color, isSelected, onClick, label, name, cx, cy, radius }: PieSliceProps) {
   const startRad = (startAngle - 90) * (Math.PI / 180);
   const endRad = (endAngle - 90) * (Math.PI / 180);
   
@@ -394,26 +394,50 @@ function PieSlice({ startAngle, endAngle, color, isSelected, onClick, label }: P
   const pathD = `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
   
   const midAngle = ((startAngle + endAngle) / 2 - 90) * (Math.PI / 180);
-  const translateX = isSelected ? Math.cos(midAngle) * 15 : 0;
-  const translateY = isSelected ? Math.sin(midAngle) * 15 : 0;
+  const translateX = isSelected ? Math.cos(midAngle) * 20 : 0;
+  const translateY = isSelected ? Math.sin(midAngle) * 20 : 0;
+  
+  const labelRadius = radius * 0.65;
+  const labelX = cx + labelRadius * Math.cos(midAngle);
+  const labelY = cy + labelRadius * Math.sin(midAngle);
   
   return (
-    <motion.path
-      d={pathD}
-      fill={color}
-      stroke="white"
-      strokeWidth="2"
-      onClick={onClick}
-      initial={false}
-      animate={{
-        transform: `translate(${translateX}px, ${translateY}px)`,
-        filter: isSelected ? 'brightness(1.1) drop-shadow(0 8px 16px rgba(0,0,0,0.3))' : 'brightness(1)',
-      }}
-      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-      className="cursor-pointer hover:brightness-110 transition-all"
-      style={{ transformOrigin: `${cx}px ${cy}px` }}
-      data-testid={`pie-slice-${label}`}
-    />
+    <g>
+      <motion.path
+        d={pathD}
+        fill={color}
+        stroke="white"
+        strokeWidth="3"
+        onClick={onClick}
+        initial={false}
+        animate={{
+          transform: `translate(${translateX}px, ${translateY}px)`,
+          filter: isSelected ? 'brightness(1.15) drop-shadow(0 10px 20px rgba(0,0,0,0.4))' : 'brightness(1)',
+        }}
+        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        className="cursor-pointer hover:brightness-110 transition-all"
+        style={{ transformOrigin: `${cx}px ${cy}px` }}
+        data-testid={`pie-slice-${label}`}
+      />
+      <motion.text
+        x={labelX}
+        y={labelY}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fill="white"
+        fontSize="14"
+        fontWeight="bold"
+        className="pointer-events-none select-none"
+        style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}
+        initial={false}
+        animate={{
+          transform: `translate(${translateX}px, ${translateY}px)`,
+        }}
+        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+      >
+        {name}
+      </motion.text>
+    </g>
   );
 }
 
@@ -459,22 +483,22 @@ function FeaturesSection() {
           >
             <motion.div
               animate={{
-                rotateX: 55,
-                rotateZ: selectedFeature ? -5 : 0,
+                rotateX: 15,
+                rotateZ: selectedFeature ? -3 : 0,
               }}
               transition={{ type: 'spring', stiffness: 200, damping: 25 }}
               style={{ transformStyle: 'preserve-3d' }}
             >
               <svg 
-                width="300" 
-                height="300" 
-                viewBox="0 0 300 300"
+                width="420" 
+                height="420" 
+                viewBox="0 0 420 420"
                 className="drop-shadow-2xl"
                 data-testid="features-pie-chart"
               >
                 <defs>
                   <filter id="shadow3d" x="-50%" y="-50%" width="200%" height="200%">
-                    <feDropShadow dx="0" dy="10" stdDeviation="8" floodOpacity="0.3"/>
+                    <feDropShadow dx="0" dy="15" stdDeviation="12" floodOpacity="0.25"/>
                   </filter>
                 </defs>
                 <g filter="url(#shadow3d)">
@@ -487,10 +511,14 @@ function FeaturesSection() {
                       isSelected={selectedFeature === slice.id}
                       onClick={() => setSelectedFeature(selectedFeature === slice.id ? null : slice.id)}
                       label={slice.id}
+                      name={slice.name}
+                      cx={210}
+                      cy={210}
+                      radius={180}
                     />
                   ))}
                 </g>
-                <circle cx="150" cy="150" r="40" fill="white" className="pointer-events-none" />
+                <circle cx="210" cy="210" r="50" fill="white" className="pointer-events-none" />
               </svg>
             </motion.div>
             
@@ -532,7 +560,8 @@ function FeaturesSection() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15 }}
-                  className="text-lg text-slate-600 mb-4 font-medium"
+                  className="text-lg mb-4 font-medium"
+                  style={{ color: selectedData.color }}
                   data-testid="feature-subtitle"
                 >
                   {selectedData.subtitle}
