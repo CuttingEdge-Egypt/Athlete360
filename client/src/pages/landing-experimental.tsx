@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { useLocation } from 'wouter';
 import { useTranslation } from 'react-i18next';
-import { UserPlus, ChartPie, Trophy, Scale, Target, Gift, HelpCircle, Video, ArrowRight, ChevronDown } from 'lucide-react';
+import { UserPlus, Gift, ArrowRight, ChevronDown } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import logoImage from '@assets/Png_new_logo_1766325613955.png';
 
@@ -318,6 +318,256 @@ function InfiniteGallery3D({ onLoopsComplete, isActive }: InfiniteGallery3DProps
   );
 }
 
+// Features data for the 3D pie chart
+const featuresData = [
+  {
+    id: 'feature1',
+    name: 'Feature One',
+    percentage: 20,
+    color: '#1e4a8a',
+    title: 'Feature One Title',
+    subtitle: 'Powerful capability for athletes',
+    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
+  },
+  {
+    id: 'feature2',
+    name: 'Feature Two',
+    percentage: 20,
+    color: '#2563eb',
+    title: 'Feature Two Title',
+    subtitle: 'Advanced analytics and insights',
+    description: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.',
+  },
+  {
+    id: 'feature3',
+    name: 'Feature Three',
+    percentage: 20,
+    color: '#3b82f6',
+    title: 'Feature Three Title',
+    subtitle: 'Real-time performance tracking',
+    description: 'Sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque.',
+  },
+  {
+    id: 'feature4',
+    name: 'Feature Four',
+    percentage: 20,
+    color: '#60a5fa',
+    title: 'Feature Four Title',
+    subtitle: 'Comprehensive athlete profiles',
+    description: 'Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.',
+  },
+  {
+    id: 'feature5',
+    name: 'Feature Five',
+    percentage: 20,
+    color: '#93c5fd',
+    title: 'Feature Five Title',
+    subtitle: 'Strategic competition analysis',
+    description: 'Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt.',
+  },
+];
+
+interface PieSliceProps {
+  startAngle: number;
+  endAngle: number;
+  color: string;
+  isSelected: boolean;
+  onClick: () => void;
+  label: string;
+}
+
+function PieSlice({ startAngle, endAngle, color, isSelected, onClick, label }: PieSliceProps) {
+  const cx = 150;
+  const cy = 150;
+  const radius = 120;
+  
+  const startRad = (startAngle - 90) * (Math.PI / 180);
+  const endRad = (endAngle - 90) * (Math.PI / 180);
+  
+  const x1 = cx + radius * Math.cos(startRad);
+  const y1 = cy + radius * Math.sin(startRad);
+  const x2 = cx + radius * Math.cos(endRad);
+  const y2 = cy + radius * Math.sin(endRad);
+  
+  const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0;
+  
+  const pathD = `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
+  
+  const midAngle = ((startAngle + endAngle) / 2 - 90) * (Math.PI / 180);
+  const translateX = isSelected ? Math.cos(midAngle) * 15 : 0;
+  const translateY = isSelected ? Math.sin(midAngle) * 15 : 0;
+  
+  return (
+    <motion.path
+      d={pathD}
+      fill={color}
+      stroke="white"
+      strokeWidth="2"
+      onClick={onClick}
+      initial={false}
+      animate={{
+        transform: `translate(${translateX}px, ${translateY}px)`,
+        filter: isSelected ? 'brightness(1.1) drop-shadow(0 8px 16px rgba(0,0,0,0.3))' : 'brightness(1)',
+      }}
+      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+      className="cursor-pointer hover:brightness-110 transition-all"
+      style={{ transformOrigin: `${cx}px ${cy}px` }}
+      data-testid={`pie-slice-${label}`}
+    />
+  );
+}
+
+function FeaturesSection() {
+  const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
+  
+  let currentAngle = 0;
+  const slices = featuresData.map((feature) => {
+    const startAngle = currentAngle;
+    const endAngle = currentAngle + (feature.percentage / 100) * 360;
+    currentAngle = endAngle;
+    return { ...feature, startAngle, endAngle };
+  });
+  
+  const selectedData = selectedFeature 
+    ? featuresData.find(f => f.id === selectedFeature) 
+    : null;
+
+  return (
+    <section className="min-h-screen py-20 bg-white">
+      <div className="container mx-auto px-4">
+        <motion.h2
+          className="text-3xl sm:text-4xl font-bold text-center mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          style={{ fontFamily: "'Montserrat', sans-serif" }}
+        >
+          <span className="text-[#1e4a8a]">Features</span>
+        </motion.h2>
+
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20">
+          <motion.div
+            className="relative"
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            animate={{
+              x: selectedFeature ? -50 : 0,
+            }}
+            transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+            style={{ perspective: '1000px' }}
+          >
+            <motion.div
+              animate={{
+                rotateX: 55,
+                rotateZ: selectedFeature ? -5 : 0,
+              }}
+              transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+              style={{ transformStyle: 'preserve-3d' }}
+            >
+              <svg 
+                width="300" 
+                height="300" 
+                viewBox="0 0 300 300"
+                className="drop-shadow-2xl"
+                data-testid="features-pie-chart"
+              >
+                <defs>
+                  <filter id="shadow3d" x="-50%" y="-50%" width="200%" height="200%">
+                    <feDropShadow dx="0" dy="10" stdDeviation="8" floodOpacity="0.3"/>
+                  </filter>
+                </defs>
+                <g filter="url(#shadow3d)">
+                  {slices.map((slice) => (
+                    <PieSlice
+                      key={slice.id}
+                      startAngle={slice.startAngle}
+                      endAngle={slice.endAngle}
+                      color={slice.color}
+                      isSelected={selectedFeature === slice.id}
+                      onClick={() => setSelectedFeature(selectedFeature === slice.id ? null : slice.id)}
+                      label={slice.id}
+                    />
+                  ))}
+                </g>
+                <circle cx="150" cy="150" r="40" fill="white" className="pointer-events-none" />
+              </svg>
+            </motion.div>
+            
+            <p className="text-center mt-6 text-slate-500 text-sm">
+              Click on a section to learn more
+            </p>
+          </motion.div>
+
+          <AnimatePresence mode="wait">
+            {selectedData && (
+              <motion.div
+                key={selectedData.id}
+                initial={{ opacity: 0, x: 50, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: 50, scale: 0.95 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                className="max-w-md lg:max-w-lg"
+                data-testid="feature-details"
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  <div 
+                    className="w-16 h-1 mb-4 rounded-full"
+                    style={{ backgroundColor: selectedData.color }}
+                  />
+                  <h3 
+                    className="text-2xl sm:text-3xl font-bold mb-2"
+                    style={{ color: selectedData.color, fontFamily: "'Montserrat', sans-serif" }}
+                    data-testid="feature-title"
+                  >
+                    {selectedData.title}
+                  </h3>
+                </motion.div>
+                
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="text-lg text-slate-600 mb-4 font-medium"
+                  data-testid="feature-subtitle"
+                >
+                  {selectedData.subtitle}
+                </motion.p>
+                
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-slate-500 leading-relaxed"
+                  data-testid="feature-description"
+                >
+                  {selectedData.description}
+                </motion.p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {!selectedFeature && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="max-w-md text-center lg:text-left"
+            >
+              <p className="text-slate-400 text-lg">
+                Select a feature from the chart to explore what Athlete360 can do for you.
+              </p>
+            </motion.div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function LandingExperimental() {
   const [, setLocation] = useLocation();
   const { t } = useTranslation(['home', 'common']);
@@ -325,15 +575,15 @@ export default function LandingExperimental() {
   const referralCode = searchParams.get('ref');
   const [galleryComplete, setGalleryComplete] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
-  const servicesRef = useRef<HTMLElement>(null);
+  const featuresRef = useRef<HTMLDivElement>(null);
 
   const handleLoopsComplete = useCallback(() => {
     setGalleryComplete(true);
   }, []);
 
   useEffect(() => {
-    if (galleryComplete && servicesRef.current) {
-      servicesRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (galleryComplete && featuresRef.current) {
+      featuresRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [galleryComplete]);
 
@@ -453,102 +703,9 @@ export default function LandingExperimental() {
         )}
       </div>
 
-      <section ref={servicesRef} className="min-h-screen py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <motion.h2
-            className="text-3xl sm:text-4xl font-bold text-center mb-12"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
-          >
-            <span className="bg-gradient-to-r from-blue-400 to-amber-400 bg-clip-text text-transparent">
-              {t('services.title', 'Our Services')}
-            </span>
-          </motion.h2>
-
-          <motion.div 
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-          >
-            {[
-              { icon: ChartPie, title: t('services.bioAnalysis.title'), desc: t('services.bioAnalysis.description'), tokens: 50, color: 'blue' },
-              { icon: Trophy, title: t('services.rankHistory.title'), desc: t('services.rankHistory.description'), tokens: 70, color: 'amber' },
-              { icon: Scale, title: t('services.athleteComparison.title'), desc: t('services.athleteComparison.description'), tokens: 100, color: 'purple' },
-              { icon: Target, title: t('services.howToBeat.title'), desc: t('services.howToBeat.description'), tokens: 90, color: 'green' },
-            ].map((service, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <Card className="bg-gray-50 border-gray-200 hover:bg-gray-100 transition-all duration-300 h-full group shadow-sm">
-                  <CardContent className="p-6 h-full flex flex-col">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="p-3 rounded-lg bg-blue-100">
-                        <service.icon className="text-blue-600" size={28} />
-                      </div>
-                      <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
-                        {service.tokens} {t('units.tokens', { ns: 'common' })}
-                      </span>
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2 text-slate-800 group-hover:text-blue-600 transition-colors">
-                      {service.title}
-                    </h3>
-                    <p className="text-slate-600 text-sm flex-grow">
-                      {service.desc}
-                    </p>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="w-full mt-4 text-blue-600 hover:text-blue-800 hover:bg-blue-50"
-                      data-testid={`button-service-${index}`}
-                    >
-                      <HelpCircle className="mr-2" size={14} />
-                      {t('actions.preview')}
-                    </Button>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          <motion.div
-            className="mt-12"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.4 }}
-          >
-            <Card className="bg-gradient-to-r from-orange-50 to-red-50 border-orange-200 shadow-sm">
-              <CardContent className="p-8 text-center">
-                <motion.div
-                  className="flex justify-center mb-4"
-                  animate={{ y: [0, -5, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  <Video className="text-orange-500" size={48} />
-                </motion.div>
-                <h3 className="text-2xl font-semibold mb-3 text-slate-800">
-                  {t('services.videoAnalysis.title', 'Video Analysis')}
-                </h3>
-                <p className="text-slate-600 mb-4 max-w-2xl mx-auto">
-                  {t('services.videoAnalysis.description')}
-                </p>
-                <div className="flex items-center justify-center gap-2">
-                  <span className="bg-orange-500 text-white text-sm px-3 py-1 rounded-full font-semibold">
-                    150 {t('units.tokens', { ns: 'common' })}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
-      </section>
+      <div ref={featuresRef}>
+        <FeaturesSection />
+      </div>
 
       <footer className="py-8 border-t border-gray-200 bg-gray-50">
         <div className="container mx-auto px-4 text-center">
