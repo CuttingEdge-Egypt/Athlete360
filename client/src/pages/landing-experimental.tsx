@@ -356,13 +356,13 @@ export default function LandingExperimental() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white">
+    <div className="bg-white text-slate-900">
       <motion.nav 
         initial="hidden"
         animate="visible"
         variants={fadeInDown}
         transition={{ duration: 0.5 }}
-        className="fixed top-0 w-full z-50 bg-slate-900/80 backdrop-blur-lg border-b border-white/10"
+        className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-lg border-b border-gray-200 shadow-sm"
       >
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex justify-between items-center">
           <motion.div 
@@ -393,7 +393,7 @@ export default function LandingExperimental() {
                 onClick={() => setLocation('/login')}
                 data-testid="button-login-experimental"
                 variant="outline"
-                className="border-white/30 text-white hover:bg-white/10 text-xs sm:text-sm px-2 sm:px-4 h-11"
+                className="border-gray-300 text-slate-700 hover:bg-gray-100 text-xs sm:text-sm px-2 sm:px-4 h-11"
               >
                 {t('landing.navigation.signIn')}
               </Button>
@@ -429,7 +429,7 @@ export default function LandingExperimental() {
             data-testid="button-signin-hero-experimental"
             size="lg"
             variant="outline"
-            className="border-white/30 text-white hover:bg-white/10 text-lg px-8 py-6 rounded-full"
+            className="border-gray-300 text-slate-700 hover:bg-gray-100 text-lg px-8 py-6 rounded-full"
           >
             {t('landing.navigation.signIn')}
           </Button>
@@ -453,7 +453,7 @@ export default function LandingExperimental() {
         )}
       </div>
 
-      <section ref={servicesRef} className="min-h-screen py-20 bg-gradient-to-b from-slate-900 to-blue-950">
+      <section ref={servicesRef} className="min-h-screen py-20 bg-white">
         <div className="container mx-auto px-4">
           <motion.h2
             className="text-3xl sm:text-4xl font-bold text-center mb-12"
@@ -486,26 +486,26 @@ export default function LandingExperimental() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                <Card className="bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300 h-full group">
+                <Card className="bg-gray-50 border-gray-200 hover:bg-gray-100 transition-all duration-300 h-full group shadow-sm">
                   <CardContent className="p-6 h-full flex flex-col">
                     <div className="flex justify-between items-start mb-4">
-                      <div className="p-3 rounded-lg bg-blue-500/20">
-                        <service.icon className="text-blue-400" size={28} />
+                      <div className="p-3 rounded-lg bg-blue-100">
+                        <service.icon className="text-blue-600" size={28} />
                       </div>
                       <span className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
                         {service.tokens} {t('units.tokens', { ns: 'common' })}
                       </span>
                     </div>
-                    <h3 className="text-lg font-semibold mb-2 text-white group-hover:text-blue-300 transition-colors">
+                    <h3 className="text-lg font-semibold mb-2 text-slate-800 group-hover:text-blue-600 transition-colors">
                       {service.title}
                     </h3>
-                    <p className="text-blue-200/60 text-sm flex-grow">
+                    <p className="text-slate-600 text-sm flex-grow">
                       {service.desc}
                     </p>
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="w-full mt-4 text-blue-300 hover:text-white hover:bg-white/10"
+                      className="w-full mt-4 text-blue-600 hover:text-blue-800 hover:bg-blue-50"
                       data-testid={`button-service-${index}`}
                     >
                       <HelpCircle className="mr-2" size={14} />
@@ -524,19 +524,19 @@ export default function LandingExperimental() {
             viewport={{ once: true }}
             transition={{ delay: 0.4 }}
           >
-            <Card className="bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-400/30 backdrop-blur-sm">
+            <Card className="bg-gradient-to-r from-orange-50 to-red-50 border-orange-200 shadow-sm">
               <CardContent className="p-8 text-center">
                 <motion.div
                   className="flex justify-center mb-4"
                   animate={{ y: [0, -5, 0] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <Video className="text-orange-400" size={48} />
+                  <Video className="text-orange-500" size={48} />
                 </motion.div>
-                <h3 className="text-2xl font-semibold mb-3 text-white">
+                <h3 className="text-2xl font-semibold mb-3 text-slate-800">
                   {t('services.videoAnalysis.title', 'Video Analysis')}
                 </h3>
-                <p className="text-blue-200/70 mb-4 max-w-2xl mx-auto">
+                <p className="text-slate-600 mb-4 max-w-2xl mx-auto">
                   {t('services.videoAnalysis.description')}
                 </p>
                 <div className="flex items-center justify-center gap-2">
@@ -550,9 +550,9 @@ export default function LandingExperimental() {
         </div>
       </section>
 
-      <footer className="py-8 border-t border-white/10 bg-slate-950">
+      <footer className="py-8 border-t border-gray-200 bg-gray-50">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-blue-200/50 text-sm">
+          <p className="text-slate-500 text-sm">
             &copy; {new Date().getFullYear()} Athlete360. All rights reserved.
           </p>
         </div>
