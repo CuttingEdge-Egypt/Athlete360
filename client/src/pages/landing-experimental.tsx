@@ -43,7 +43,7 @@ interface PlaneData {
 const DEFAULT_DEPTH_RANGE = 50;
 const MAX_HORIZONTAL_OFFSET = 14;
 const MAX_VERTICAL_OFFSET = 10;
-const REQUIRED_LOOPS = 5;
+const REQUIRED_LOOPS = 3;
 
 interface InfiniteGallery3DProps {
   onLoopsComplete: () => void;
@@ -159,7 +159,7 @@ function InfiniteGallery3D({ onLoopsComplete, isActive }: InfiniteGallery3DProps
       lastTime = currentTime;
 
       if (autoPlay) {
-        setScrollVelocity((prev) => prev + 0.3 * delta);
+        setScrollVelocity((prev) => prev + 0.5 * delta);
       }
 
       setScrollVelocity((prev) => {
