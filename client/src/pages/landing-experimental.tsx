@@ -382,7 +382,7 @@ export default function LandingExperimental() {
               <Button 
                 onClick={() => setLocation('/signup')}
                 data-testid="button-signup-experimental"
-                className="bg-[#2563eb] hover:bg-[#d4a017] text-white text-xs sm:text-sm px-2 sm:px-4 h-11 transition-colors duration-200"
+                className="bg-[#1e4a8a] hover:bg-[#d4a017] text-white text-xs sm:text-sm px-2 sm:px-4 h-11 transition-colors duration-200"
               >
                 <UserPlus className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                 {t('landing.navigation.signUp')}
@@ -393,7 +393,7 @@ export default function LandingExperimental() {
                 onClick={() => setLocation('/login')}
                 data-testid="button-login-experimental"
                 variant="outline"
-                className="border-gray-300 text-slate-700 hover:bg-gray-100 text-xs sm:text-sm px-2 sm:px-4 h-11"
+                className="border-[#1e4a8a] text-[#1e4a8a] bg-transparent hover:bg-[#1e4a8a] hover:text-white text-xs sm:text-sm px-2 sm:px-4 h-11 transition-colors duration-200"
               >
                 {t('landing.navigation.signIn')}
               </Button>
@@ -410,7 +410,7 @@ export default function LandingExperimental() {
         <InfiniteGallery3D onLoopsComplete={handleLoopsComplete} isActive={!galleryComplete} />
         
         <motion.div 
-          className="absolute bottom-32 left-0 right-0 flex flex-col sm:flex-row gap-4 justify-center px-4 z-20"
+          className="absolute bottom-24 left-0 right-0 flex flex-col sm:flex-row gap-4 justify-center px-4 z-20"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.5 }}
@@ -419,7 +419,7 @@ export default function LandingExperimental() {
             onClick={() => setLocation('/signup')}
             data-testid="button-get-started-experimental"
             size="lg"
-            className="bg-[#2563eb] hover:bg-[#d4a017] text-white text-lg px-8 py-6 rounded-full shadow-lg shadow-blue-500/25 transition-colors duration-200"
+            className="bg-[#1e4a8a] hover:bg-[#d4a017] text-white text-lg px-8 py-6 rounded-full shadow-lg shadow-blue-800/25 transition-colors duration-200"
           >
             {t('landing.hero.ctaStart', 'Start Free Trial')}
             <ArrowRight className="ml-2 h-5 w-5" />
@@ -429,7 +429,7 @@ export default function LandingExperimental() {
             data-testid="button-signin-hero-experimental"
             size="lg"
             variant="outline"
-            className="border-gray-300 text-slate-700 hover:bg-gray-100 text-lg px-8 py-6 rounded-full"
+            className="border-[#1e4a8a] text-[#1e4a8a] bg-transparent hover:bg-[#1e4a8a] hover:text-white text-lg px-8 py-6 rounded-full transition-colors duration-200"
           >
             {t('landing.navigation.signIn')}
           </Button>
