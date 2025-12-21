@@ -381,6 +381,8 @@ interface PieSliceProps {
 }
 
 function PieSlice({ startAngle, endAngle, color, isSelected, onClick, label, name, cx, cy, radius }: PieSliceProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  
   const startRad = (startAngle - 90) * (Math.PI / 180);
   const endRad = (endAngle - 90) * (Math.PI / 180);
   
@@ -394,15 +396,23 @@ function PieSlice({ startAngle, endAngle, color, isSelected, onClick, label, nam
   const pathD = `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
   
   const midAngle = ((startAngle + endAngle) / 2 - 90) * (Math.PI / 180);
-  const translateX = isSelected ? Math.cos(midAngle) * 20 : 0;
-  const translateY = isSelected ? Math.sin(midAngle) * 20 : 0;
+  const hoverOffset = isHovered && !isSelected ? 8 : 0;
+  const selectedOffset = isSelected ? 25 : 0;
+  const totalOffset = hoverOffset + selectedOffset;
+  const translateX = Math.cos(midAngle) * totalOffset;
+  const translateY = Math.sin(midAngle) * totalOffset;
   
   const labelRadius = radius * 0.65;
   const labelX = cx + labelRadius * Math.cos(midAngle);
   const labelY = cy + labelRadius * Math.sin(midAngle);
   
+  const scale = isSelected ? 1.05 : isHovered ? 1.02 : 1;
+  
   return (
-    <g>
+    <g
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <motion.path
         d={pathD}
         fill={color}
@@ -411,11 +421,22 @@ function PieSlice({ startAngle, endAngle, color, isSelected, onClick, label, nam
         onClick={onClick}
         initial={false}
         animate={{
-          transform: `translate(${translateX}px, ${translateY}px)`,
-          filter: isSelected ? 'brightness(1.15) drop-shadow(0 10px 20px rgba(0,0,0,0.4))' : 'brightness(1)',
+          x: translateX,
+          y: translateY,
+          scale: scale,
+          filter: isSelected 
+            ? 'brightness(1.2) drop-shadow(0 12px 24px rgba(0,0,0,0.5))' 
+            : isHovered 
+              ? 'brightness(1.1) drop-shadow(0 6px 12px rgba(0,0,0,0.3))'
+              : 'brightness(1) drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
         }}
-        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        className="cursor-pointer hover:brightness-110 transition-all"
+        transition={{ 
+          type: 'spring', 
+          stiffness: 400, 
+          damping: 20,
+          mass: 0.8
+        }}
+        className="cursor-pointer"
         style={{ transformOrigin: `${cx}px ${cy}px` }}
         data-testid={`pie-slice-${label}`}
       />
@@ -428,12 +449,19 @@ function PieSlice({ startAngle, endAngle, color, isSelected, onClick, label, nam
         fontSize="14"
         fontWeight="bold"
         className="pointer-events-none select-none"
-        style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}
+        style={{ textShadow: '0 2px 4px rgba(0,0,0,0.6)' }}
         initial={false}
         animate={{
-          transform: `translate(${translateX}px, ${translateY}px)`,
+          x: translateX,
+          y: translateY,
+          scale: scale,
         }}
-        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        transition={{ 
+          type: 'spring', 
+          stiffness: 400, 
+          damping: 20,
+          mass: 0.8
+        }}
       >
         {name}
       </motion.text>
@@ -466,7 +494,7 @@ function FeaturesSection() {
           viewport={{ once: true }}
           style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
-          <span className="text-[#1e4a8a]">Features</span>
+          <span className="text-[#1e4a8a]">The 360° Experience</span>
         </motion.h2>
 
         <div className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20">
@@ -478,7 +506,7 @@ function FeaturesSection() {
             animate={{
               x: selectedFeature ? -50 : 0,
             }}
-            transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 28, mass: 0.8 }}
             style={{ perspective: '1000px' }}
           >
             <motion.div
@@ -531,21 +559,34 @@ function FeaturesSection() {
             {selectedData && (
               <motion.div
                 key={selectedData.id}
-                initial={{ opacity: 0, x: 50, scale: 0.95 }}
+                initial={{ opacity: 0, x: 30, scale: 0.98 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: 50, scale: 0.95 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                exit={{ opacity: 0, x: -20, scale: 0.98 }}
+                transition={{ 
+                  type: 'spring', 
+                  stiffness: 500, 
+                  damping: 30,
+                  mass: 0.5
+                }}
                 className="max-w-md lg:max-w-lg"
                 data-testid="feature-details"
               >
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
+                  transition={{ 
+                    type: 'spring',
+                    stiffness: 500,
+                    damping: 30,
+                    delay: 0.05 
+                  }}
                 >
-                  <div 
-                    className="w-16 h-1 mb-4 rounded-full"
+                  <motion.div 
+                    className="w-16 h-1.5 mb-4 rounded-full"
                     style={{ backgroundColor: selectedData.color }}
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                   />
                   <h3 
                     className="text-2xl sm:text-3xl font-bold mb-2"
@@ -557,9 +598,14 @@ function FeaturesSection() {
                 </motion.div>
                 
                 <motion.p
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.15 }}
+                  transition={{ 
+                    type: 'spring',
+                    stiffness: 500,
+                    damping: 30,
+                    delay: 0.08 
+                  }}
                   className="text-lg mb-4 font-medium"
                   style={{ color: selectedData.color }}
                   data-testid="feature-subtitle"
@@ -568,9 +614,14 @@ function FeaturesSection() {
                 </motion.p>
                 
                 <motion.p
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
+                  transition={{ 
+                    type: 'spring',
+                    stiffness: 500,
+                    damping: 30,
+                    delay: 0.11 
+                  }}
                   className="text-slate-500 leading-relaxed"
                   data-testid="feature-description"
                 >
