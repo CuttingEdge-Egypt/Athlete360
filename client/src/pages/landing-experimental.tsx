@@ -488,7 +488,7 @@ function FeaturesSection() {
     <section className="min-h-screen py-20 bg-white">
       <div className="container mx-auto px-4">
         <motion.h2
-          className="text-3xl sm:text-4xl font-bold text-center mb-16"
+          className="text-3xl sm:text-4xl font-bold text-center mb-8"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -546,7 +546,6 @@ function FeaturesSection() {
                     />
                   ))}
                 </g>
-                <circle cx="210" cy="210" r="50" fill="white" className="pointer-events-none" />
               </svg>
             </motion.div>
             
