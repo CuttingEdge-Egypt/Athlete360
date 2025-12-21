@@ -40,9 +40,9 @@ interface PlaneData {
   y: number;
 }
 
-const DEFAULT_DEPTH_RANGE = 80;
-const MAX_HORIZONTAL_OFFSET = 16;
-const MAX_VERTICAL_OFFSET = 12;
+const DEFAULT_DEPTH_RANGE = 50;
+const MAX_HORIZONTAL_OFFSET = 14;
+const MAX_VERTICAL_OFFSET = 10;
 const REQUIRED_LOOPS = 5;
 
 interface InfiniteGallery3DProps {
@@ -62,8 +62,8 @@ function InfiniteGallery3D({ onLoopsComplete, isActive }: InfiniteGallery3DProps
   const [loopsCompleted, setLoopsCompleted] = useState(false);
   const loopsCompletedRef = useRef(false);
 
-  const visibleCount = 8;
   const totalImages = galleryImages.length;
+  const visibleCount = totalImages;
   const depthRange = DEFAULT_DEPTH_RANGE;
   const speed = 1.2;
   const imagesPerLoop = totalImages;
