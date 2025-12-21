@@ -6,7 +6,7 @@ import { useLocation } from 'wouter';
 import { useTranslation } from 'react-i18next';
 import { UserPlus, ChartPie, Trophy, Scale, Target, Gift, HelpCircle, Video, ArrowRight, ChevronDown } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
-import logoImage from '@assets/NewLogo_1765909713887.jpeg';
+import logoImage from '@assets/Png_new_logo_1766325613955.png';
 
 import squashImage from '@assets/1920471-2038466691_1765914070355.jpg';
 import taekwondoImage from '@assets/171020105248526_Amy+Truesdale_1765914077745.jpg';
