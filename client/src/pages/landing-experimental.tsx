@@ -297,8 +297,8 @@ function InfiniteGallery3D({ onLoopsComplete, isActive }: InfiniteGallery3DProps
 
       <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
         <h1 
-          className="text-5xl md:text-8xl font-bold tracking-tight mix-blend-exclusion text-white"
-          style={{ fontFamily: "'Montserrat', sans-serif" }}
+          className="text-5xl md:text-8xl font-bold tracking-tight mix-blend-exclusion"
+          style={{ fontFamily: "'Montserrat', sans-serif", color: '#1e4a8a' }}
         >
           Athlete360
         </h1>
