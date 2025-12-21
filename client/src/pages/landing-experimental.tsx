@@ -14,6 +14,10 @@ import fencingImage from '@assets/f36678a75ccddae385e7b563ceb7a774_1765914083516
 import swimmingImage from '@assets/freestyle-stroke-breathing-technique-myswimpro_1765914090436.jpeg';
 import tennisImage from '@assets/images_1765914095101.jpg';
 import wrestlingImage from '@assets/wrestling-singapore_1765914098964.jpg';
+import shootingImage from '@assets/Shooting_1766325301815.webp';
+import judoImage from '@assets/Judo_1766325307453.jpg';
+import tableTennisImage from '@assets/150413103127066_LON_0109_4685_1766325313141.jpg';
+import boxingImage from '@assets/Boxing_1766325318681.jpg';
 
 const galleryImages = [
   { src: squashImage, alt: 'Squash' },
@@ -22,6 +26,10 @@ const galleryImages = [
   { src: swimmingImage, alt: 'Swimming' },
   { src: tennisImage, alt: 'Tennis' },
   { src: wrestlingImage, alt: 'Wrestling' },
+  { src: shootingImage, alt: 'Shooting' },
+  { src: judoImage, alt: 'Judo' },
+  { src: tableTennisImage, alt: 'Table Tennis' },
+  { src: boxingImage, alt: 'Boxing' },
 ];
 
 interface PlaneData {
