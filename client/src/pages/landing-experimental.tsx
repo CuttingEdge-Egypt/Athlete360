@@ -158,7 +158,7 @@ function InfiniteGallery3D({ onLoopsComplete, isActive }: InfiniteGallery3DProps
       const delta = (currentTime - lastTime) / 1000;
       lastTime = currentTime;
 
-      if (autoPlay && !loopsCompletedRef.current) {
+      if (autoPlay) {
         setScrollVelocity((prev) => prev + 0.3 * delta);
       }
 
