@@ -804,7 +804,7 @@ function FoldedCard({ card, index, isRTL }: FoldedCardProps) {
           y,
           transformOrigin: "center top",
         }}
-        className="bg-white dark:bg-[#12243d] rounded-2xl shadow-xl border border-gray-100 dark:border-[#1e4a8a]/30 overflow-hidden h-full"
+        className="bg-white dark:bg-[#162d50] rounded-2xl shadow-xl border border-gray-100 dark:border-[#3b7dd8]/40 overflow-hidden h-full"
         data-testid={`card-${card.id}`}
       >
         <div 
@@ -849,7 +849,7 @@ function FoldedCard({ card, index, isRTL }: FoldedCardProps) {
                     style={{ color: card.color }}
                   />
                 </div>
-                <span className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">{point}</span>
+                <span className="text-slate-600 dark:text-slate-200 text-sm leading-relaxed">{point}</span>
               </motion.li>
             ))}
           </ul>
