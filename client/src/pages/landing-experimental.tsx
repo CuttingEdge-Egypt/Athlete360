@@ -401,8 +401,8 @@ function PieSlice({ startAngle, endAngle, color, isSelected, onClick, label, nam
   const pathD = `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
   
   const midAngle = ((startAngle + endAngle) / 2 - 90) * (Math.PI / 180);
-  const hoverOffset = isHovered && !isSelected ? 8 : 0;
-  const selectedOffset = isSelected ? 25 : 0;
+  const hoverOffset = isHovered && !isSelected ? 6 : 0;
+  const selectedOffset = isSelected ? 18 : 0;
   const totalOffset = hoverOffset + selectedOffset;
   const translateX = Math.cos(midAngle) * totalOffset;
   const translateY = Math.sin(midAngle) * totalOffset;
@@ -411,7 +411,7 @@ function PieSlice({ startAngle, endAngle, color, isSelected, onClick, label, nam
   const labelX = cx + labelRadius * Math.cos(midAngle);
   const labelY = cy + labelRadius * Math.sin(midAngle);
   
-  const scale = isSelected ? 1.05 : isHovered ? 1.02 : 1;
+  const scale = isSelected ? 1.02 : isHovered ? 1.01 : 1;
   
   return (
     <g
@@ -429,20 +429,19 @@ function PieSlice({ startAngle, endAngle, color, isSelected, onClick, label, nam
           x: translateX,
           y: translateY,
           scale: scale,
-          filter: isSelected 
-            ? 'brightness(1.2) drop-shadow(0 12px 24px rgba(0,0,0,0.5))' 
-            : isHovered 
-              ? 'brightness(1.1) drop-shadow(0 6px 12px rgba(0,0,0,0.3))'
-              : 'brightness(1) drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
+          opacity: isSelected ? 1 : isHovered ? 0.95 : 0.9,
         }}
         transition={{ 
           type: 'spring', 
-          stiffness: 400, 
-          damping: 20,
-          mass: 0.8
+          stiffness: 500, 
+          damping: 35,
+          mass: 0.6
         }}
         className="cursor-pointer"
-        style={{ transformOrigin: `${cx}px ${cy}px` }}
+        style={{ 
+          transformOrigin: `${cx}px ${cy}px`,
+          filter: isSelected ? 'brightness(1.1)' : 'brightness(1)',
+        }}
         data-testid={`pie-slice-${label}`}
       />
       <motion.text
@@ -454,7 +453,7 @@ function PieSlice({ startAngle, endAngle, color, isSelected, onClick, label, nam
         fontSize="14"
         fontWeight="bold"
         className="pointer-events-none select-none"
-        style={{ textShadow: '0 2px 4px rgba(0,0,0,0.6)' }}
+        style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}
         initial={false}
         animate={{
           x: translateX,
@@ -463,9 +462,9 @@ function PieSlice({ startAngle, endAngle, color, isSelected, onClick, label, nam
         }}
         transition={{ 
           type: 'spring', 
-          stiffness: 400, 
-          damping: 20,
-          mass: 0.8
+          stiffness: 500, 
+          damping: 35,
+          mass: 0.6
         }}
       >
         {name}
@@ -526,15 +525,10 @@ function FeaturesSection() {
                 width="420" 
                 height="420" 
                 viewBox="0 0 420 420"
-                className="drop-shadow-2xl"
+                className="drop-shadow-xl"
                 data-testid="features-pie-chart"
               >
-                <defs>
-                  <filter id="shadow3d" x="-50%" y="-50%" width="200%" height="200%">
-                    <feDropShadow dx="0" dy="15" stdDeviation="12" floodOpacity="0.25"/>
-                  </filter>
-                </defs>
-                <g filter="url(#shadow3d)">
+                <g>
                   {slices.map((slice) => (
                     <PieSlice
                       key={slice.id}
