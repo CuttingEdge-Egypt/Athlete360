@@ -633,7 +633,7 @@ function FeaturesSection() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.15 }}
+              transition={{ duration: 0.2, delay: 0.3 }}
               className="w-full max-w-md lg:max-w-lg text-center lg:text-left"
             >
               <p className="text-slate-400 text-lg">
