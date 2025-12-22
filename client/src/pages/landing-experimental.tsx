@@ -1198,11 +1198,11 @@ function Footer() {
   const [, setLocation] = useLocation();
   
   const footerLinks = {
-    product: [
-      { label: 'Athlete Profile', href: '/signup' },
-      { label: 'Video Analysis', href: '/signup' },
-      { label: 'Training Plans', href: '/signup' },
-      { label: 'Rank Calculator', href: '/signup' },
+    sections: [
+      { label: 'About Us', labelAr: 'من نحن', sectionId: 'ai-edge-section' },
+      { label: 'Features', labelAr: 'المميزات', sectionId: 'features-section' },
+      { label: 'AI Advantage', labelAr: 'ميزة الذكاء الاصطناعي', sectionId: 'comparison-section' },
+      { label: 'Testimonials', labelAr: 'آراء العملاء', sectionId: 'testimonials-section' },
     ],
     sports: [
       { label: 'Taekwondo', href: '/signup' },
@@ -1211,10 +1211,10 @@ function Footer() {
       { label: 'Judo', href: '/signup' },
     ],
     company: [
-      { label: 'About Us', href: '#' },
-      { label: 'Contact', href: '#' },
-      { label: 'Privacy Policy', href: '#' },
-      { label: 'Terms of Service', href: '#' },
+      { label: 'About Us', labelAr: 'من نحن' },
+      { label: 'Contact', labelAr: 'اتصل بنا' },
+      { label: 'Privacy Policy', labelAr: 'سياسة الخصوصية' },
+      { label: 'Terms of Service', labelAr: 'شروط الخدمة' },
     ],
   };
 
@@ -1233,8 +1233,8 @@ function Footer() {
             <img src={logoImage} alt="Athlete360" className="h-14 w-auto mb-4" />
             <p className="text-slate-600 dark:text-slate-300 mb-6 max-w-sm leading-relaxed">
               {isRTL 
-                ? 'منصة تحليلات رياضية مدعومة بالذكاء الاصطناعي لتحويل أداء الرياضيين والفرق.'
-                : 'AI-powered sports analytics platform transforming how athletes and teams train, compete, and succeed.'
+                ? 'يحول Athlete360 طريقة تحضير الرياضيين وتدريبهم ومنافستهم من خلال وضع التحليلات العالمية والتدريب بالذكاء الاصطناعي في أيديهم - بدءًا من دعم التايكوندو الشامل والتوسع إلى الرياضيين في جميع الرياضات.'
+                : 'Athlete360 transforms how athletes prepare, train, and compete by putting world-class analytics and AI coaching in their hands—starting with comprehensive Taekwondo support and expanding to athletes across all sports.'
               }
             </p>
             <div className="flex items-center gap-4">
@@ -1254,17 +1254,20 @@ function Footer() {
           
           <div>
             <h4 className="font-bold text-slate-800 dark:text-white mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-              {isRTL ? 'المنتج' : 'Product'}
+              {isRTL ? 'الأقسام' : 'Sections'}
             </h4>
             <ul className="space-y-3">
-              {footerLinks.product.map((link, index) => (
+              {footerLinks.sections.map((link, index) => (
                 <li key={index}>
                   <button 
-                    onClick={() => setLocation(link.href)}
+                    onClick={() => {
+                      const section = document.getElementById(link.sectionId);
+                      section?.scrollIntoView({ behavior: 'smooth' });
+                    }}
                     className="text-slate-600 dark:text-slate-300 hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors text-sm"
-                    data-testid={`footer-link-product-${index}`}
+                    data-testid={`footer-link-section-${index}`}
                   >
-                    {link.label}
+                    {isRTL ? link.labelAr : link.label}
                   </button>
                 </li>
               ))}
@@ -1297,13 +1300,12 @@ function Footer() {
             <ul className="space-y-3">
               {footerLinks.company.map((link, index) => (
                 <li key={index}>
-                  <a 
-                    href={link.href}
-                    className="text-slate-600 dark:text-slate-300 hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors text-sm"
+                  <span 
+                    className="text-slate-600 dark:text-slate-300 text-sm"
                     data-testid={`footer-link-company-${index}`}
                   >
-                    {link.label}
-                  </a>
+                    {isRTL ? link.labelAr : link.label}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -1494,17 +1496,21 @@ export default function LandingExperimental() {
         )}
       </div>
 
-      <div ref={aiEdgeRef}>
+      <div ref={aiEdgeRef} id="ai-edge-section">
         <AIEdgeSection />
       </div>
 
-      <div ref={featuresRef}>
+      <div ref={featuresRef} id="features-section">
         <FeaturesSection />
       </div>
 
-      <ComparisonSlider />
+      <div id="comparison-section">
+        <ComparisonSlider />
+      </div>
 
-      <TestimonialsSection />
+      <div id="testimonials-section">
+        <TestimonialsSection />
+      </div>
 
       <Footer />
     </div>
