@@ -633,7 +633,8 @@ function FeaturesSection() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="max-w-md text-center lg:text-left"
+              transition={{ duration: 0.15 }}
+              className="w-full max-w-md lg:max-w-lg text-center lg:text-left"
             >
               <p className="text-slate-400 text-lg">
                 Select a feature from the chart to explore what Athlete360 can do for you.
