@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { UserPlus, Gift, ArrowRight, ChevronDown, GripVertical, User, Video, Target, Utensils, TrendingUp, Trophy, Sparkles, Brain, Clock, FileText, Users, BarChart3, Clipboard, XCircle, CheckCircle, Zap, Globe, Shield, Cpu, Sun, Moon, Mail, MapPin, Phone, Twitter, Instagram, Youtube, Linkedin } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
+import { AnimatedTestimonials } from '@/components/ui/animated-testimonials';
 import logoImage from '@assets/Png_new_logo_1766325613955.png';
 
 // Theme context for dark/light mode
@@ -1079,6 +1080,90 @@ function ComparisonSlider() {
   );
 }
 
+// Testimonials data
+const testimonials = [
+  {
+    quote: "Athlete360 has completely transformed how I prepare for competitions. The AI-powered video analysis helped me identify weaknesses I never knew I had.",
+    quoteAr: "لقد غيّر Athlete360 تمامًا طريقة تحضيري للمنافسات. ساعدني تحليل الفيديو المدعوم بالذكاء الاصطناعي في تحديد نقاط الضعف التي لم أكن أعرفها.",
+    name: "Ahmed Hassan",
+    designation: "Professional Taekwondo Athlete",
+    designationAr: "رياضي تايكوندو محترف",
+    src: "https://images.unsplash.com/photo-1564415315949-7a0c4c73aab4?q=80&w=500&auto=format&fit=crop",
+  },
+  {
+    quote: "As a coach, having access to detailed opponent analysis and personalized training plans has given my team a significant competitive edge.",
+    quoteAr: "كمدرب، أتاح لي الوصول إلى تحليل مفصل للمنافسين وخطط تدريب مخصصة ميزة تنافسية كبيرة لفريقي.",
+    name: "Sarah Mitchell",
+    designation: "Head Coach at Elite Sports Academy",
+    designationAr: "المدربة الرئيسية في أكاديمية النخبة الرياضية",
+    src: "https://images.unsplash.com/photo-1573496799652-408c2ac9fe98?q=80&w=500&auto=format&fit=crop",
+  },
+  {
+    quote: "The nutrition guidance and development plans are incredibly detailed. It's like having a team of experts in my pocket at all times.",
+    quoteAr: "إرشادات التغذية وخطط التطوير مفصلة بشكل لا يصدق. إنه مثل وجود فريق من الخبراء في جيبي طوال الوقت.",
+    name: "Marcus Chen",
+    designation: "Olympic Boxing Hopeful",
+    designationAr: "مرشح أولمبي في الملاكمة",
+    src: "https://images.unsplash.com/photo-1566753323558-f4e0952af115?q=80&w=500&auto=format&fit=crop",
+  },
+  {
+    quote: "The rank calculator feature helped me understand exactly what I needed to do to climb the world rankings. Within 6 months, I moved up 15 positions.",
+    quoteAr: "ساعدتني ميزة حاسبة الترتيب في فهم ما أحتاج إلى فعله بالضبط للصعود في التصنيفات العالمية. خلال 6 أشهر، صعدت 15 مركزًا.",
+    name: "Yuki Tanaka",
+    designation: "World Ranked Judo Competitor",
+    designationAr: "منافسة جودو مصنفة عالميًا",
+    src: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=500&auto=format&fit=crop",
+  },
+  {
+    quote: "The bilingual support made it easy for our entire team to use. Both our English and Arabic speaking athletes find it intuitive and powerful.",
+    quoteAr: "سهّل الدعم ثنائي اللغة استخدامه لفريقنا بالكامل. يجد رياضيونا الناطقون بالإنجليزية والعربية أنه سهل الاستخدام وقوي.",
+    name: "Omar Al-Rashid",
+    designation: "Sports Director at National Federation",
+    designationAr: "مدير رياضي في الاتحاد الوطني",
+    src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=500&auto=format&fit=crop",
+  },
+];
+
+// Testimonials Section
+function TestimonialsSection() {
+  const isRTL = useIsRTL();
+  
+  return (
+    <section className="py-20 relative" data-testid="testimonials-section">
+      <div className="container mx-auto px-4 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-8"
+        >
+          <span className="inline-block px-4 py-1.5 bg-[#1e4a8a]/10 dark:bg-[#1e4a8a]/30 text-[#1e4a8a] dark:text-[#6ba3eb] rounded-full text-sm font-medium mb-4">
+            {isRTL ? 'قصص النجاح' : 'Success Stories'}
+          </span>
+          <h2 
+            className="text-3xl sm:text-4xl font-bold text-[#1e4a8a] dark:text-white mb-4"
+            style={{ fontFamily: "'Montserrat', sans-serif" }}
+          >
+            {isRTL ? 'ماذا يقول رياضيونا' : 'What Our Athletes Say'}
+          </h2>
+          <p className="text-slate-500 dark:text-slate-300 text-lg max-w-2xl mx-auto">
+            {isRTL 
+              ? 'اكتشف كيف يساعد Athlete360 الرياضيين والمدربين في تحقيق أهدافهم'
+              : 'Discover how Athlete360 is helping athletes and coaches achieve their goals'
+            }
+          </p>
+        </motion.div>
+
+        <AnimatedTestimonials 
+          testimonials={testimonials} 
+          autoplay={true}
+          isRTL={isRTL}
+        />
+      </div>
+    </section>
+  );
+}
+
 // Footer Component
 function Footer() {
   const { t } = useTranslation(['home', 'common']);
@@ -1382,6 +1467,8 @@ export default function LandingExperimental() {
       </div>
 
       <ComparisonSlider />
+
+      <TestimonialsSection />
 
       <Footer />
     </div>
