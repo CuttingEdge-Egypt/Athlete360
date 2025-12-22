@@ -750,24 +750,22 @@ function ComparisonSlider() {
             </div>
 
             <div
-              className="absolute left-0 top-0 z-20 h-full bg-gradient-to-br from-[#1e4a8a] to-[#2d5fa3] p-8 sm:p-12 flex flex-col justify-center overflow-hidden"
+              className="absolute left-0 top-0 z-20 h-full bg-gradient-to-br from-[#1e4a8a] to-[#2d5fa3] p-8 sm:p-12 flex flex-col justify-center items-center overflow-hidden"
               style={{
                 width: "100%",
                 clipPath: `inset(0 ${100 - inset}% 0 0)`,
               }}
             >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-                  <Sparkles className="h-6 w-6 text-white" />
+              <div className="flex flex-col items-center gap-2 mb-6">
+                <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center">
+                  <Sparkles className="h-7 w-7 text-white" />
                 </div>
-                <div>
-                  <h3 className="text-2xl sm:text-3xl font-bold text-white" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-                    With Athlete360
-                  </h3>
-                  <p className="text-blue-200 text-sm">AI-Powered Analytics</p>
-                </div>
+                <h3 className="text-2xl sm:text-3xl font-bold text-white text-center" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                  With Athlete360
+                </h3>
+                <p className="text-blue-200 text-sm">AI-Powered Analytics</p>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-4 w-full max-w-md">
                 {withAIFeatures.map((feature, index) => (
                   <motion.div
                     key={index}
@@ -788,19 +786,17 @@ function ComparisonSlider() {
               </div>
             </div>
 
-            <div className="absolute left-0 top-0 z-10 w-full h-full bg-gradient-to-br from-slate-700 to-slate-800 p-8 sm:p-12 flex flex-col justify-center">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
-                  <Clock className="h-6 w-6 text-slate-400" />
+            <div className="absolute left-0 top-0 z-10 w-full h-full bg-gradient-to-br from-slate-700 to-slate-800 p-8 sm:p-12 flex flex-col justify-center items-center">
+              <div className="flex flex-col items-center gap-2 mb-6">
+                <div className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center">
+                  <Clock className="h-7 w-7 text-slate-400" />
                 </div>
-                <div>
-                  <h3 className="text-2xl sm:text-3xl font-bold text-slate-300" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-                    Traditional Methods
-                  </h3>
-                  <p className="text-slate-500 text-sm">Manual Analysis</p>
-                </div>
+                <h3 className="text-2xl sm:text-3xl font-bold text-slate-300 text-center" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                  Traditional Methods
+                </h3>
+                <p className="text-slate-500 text-sm">Manual Analysis</p>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-4 w-full max-w-md">
                 {withoutAIFeatures.map((feature, index) => (
                   <motion.div
                     key={index}
