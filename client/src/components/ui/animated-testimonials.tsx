@@ -1,6 +1,6 @@
 import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
 
 type Testimonial = {
@@ -24,13 +24,27 @@ export const AnimatedTestimonials = ({
   isRTL?: boolean;
 }) => {
   const [active, setActive] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const resetTimer = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    if (autoplay) {
+      intervalRef.current = setInterval(() => {
+        setActive((prev) => (prev + 1) % testimonials.length);
+      }, 7000);
+    }
+  }, [autoplay, testimonials.length]);
 
   const handleNext = () => {
     setActive((prev) => (prev + 1) % testimonials.length);
+    resetTimer();
   };
 
   const handlePrev = () => {
     setActive((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+    resetTimer();
   };
 
   const isActive = (index: number) => {
@@ -39,10 +53,14 @@ export const AnimatedTestimonials = ({
 
   useEffect(() => {
     if (autoplay) {
-      const interval = setInterval(handleNext, 5000);
-      return () => clearInterval(interval);
+      intervalRef.current = setInterval(() => {
+        setActive((prev) => (prev + 1) % testimonials.length);
+      }, 7000);
+      return () => {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+      };
     }
-  }, [autoplay]);
+  }, [autoplay, testimonials.length]);
 
   const randomRotateY = () => {
     return Math.floor(Math.random() * 21) - 10;
