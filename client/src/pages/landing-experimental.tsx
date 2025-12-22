@@ -469,8 +469,8 @@ function PieSlice({ startAngle, endAngle, color, isSelected, onClick, label, nam
       <motion.path
         d={pathD}
         fill={color}
-        stroke="white"
-        strokeWidth="3"
+        stroke="transparent"
+        strokeWidth="0"
         onClick={onClick}
         initial={false}
         animate={{
@@ -707,6 +707,7 @@ const aiEdgeCards = [
     titleAr: 'من نحن',
     icon: Users,
     color: '#1e4a8a',
+    darkColor: '#dc2626',
     points: [
       'A comprehensive AI-powered sports analytics platform',
       'Built for athletes, coaches, and teams worldwide',
@@ -787,6 +788,17 @@ function FoldedCard({ card, index, isRTL }: FoldedCardProps) {
   const IconComponent = card.icon;
   const displayTitle = isRTL ? card.titleAr : card.title;
   const displayPoints = isRTL ? card.pointsAr : card.points;
+  
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  useEffect(() => {
+    const checkDark = () => setIsDarkMode(document.documentElement.classList.contains('dark'));
+    checkDark();
+    const observer = new MutationObserver(checkDark);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+  
+  const activeColor = isDarkMode && card.darkColor ? card.darkColor : card.color;
 
   return (
     <motion.div
@@ -810,17 +822,17 @@ function FoldedCard({ card, index, isRTL }: FoldedCardProps) {
       >
         <div 
           className="h-1.5 w-full"
-          style={{ backgroundColor: card.color }}
+          style={{ backgroundColor: activeColor }}
         />
         <div className="p-5">
           <div className="flex items-center gap-3 mb-4">
             <div 
               className="w-10 h-10 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: `${card.color}25` }}
+              style={{ backgroundColor: `${activeColor}25` }}
             >
               <IconComponent 
                 className="w-5 h-5" 
-                style={{ color: card.color }}
+                style={{ color: activeColor }}
               />
             </div>
             <h3 
@@ -843,11 +855,11 @@ function FoldedCard({ card, index, isRTL }: FoldedCardProps) {
               >
                 <div 
                   className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                  style={{ backgroundColor: `${card.color}25` }}
+                  style={{ backgroundColor: `${activeColor}25` }}
                 >
                   <CheckCircle 
                     className="w-3 h-3" 
-                    style={{ color: card.color }}
+                    style={{ color: activeColor }}
                   />
                 </div>
                 <span className={`text-slate-600 dark:text-slate-100 leading-relaxed ${isRTL ? 'text-base' : 'text-sm'}`}>{point}</span>
@@ -1141,10 +1153,10 @@ function TestimonialsSection() {
             {isRTL ? 'قصص النجاح' : 'Success Stories'}
           </span>
           <h2 
-            className="text-3xl sm:text-4xl font-bold text-[#1e4a8a] dark:text-white mb-4"
+            className="text-3xl sm:text-4xl font-bold text-[#1e4a8a] dark:text-white mb-2"
             style={{ fontFamily: "'Montserrat', sans-serif" }}
           >
-            {isRTL ? 'ماذا يقول رياضيونا' : 'What Our Athletes Say'}
+            {isRTL ? 'ماذا يقول عملاؤنا' : 'What Our Clients Say'}
           </h2>
           <p className="text-slate-500 dark:text-slate-300 text-lg max-w-2xl mx-auto">
             {isRTL 
@@ -1444,7 +1456,7 @@ export default function LandingExperimental() {
             data-testid="button-signin-hero-experimental"
             size="lg"
             variant="outline"
-            className="border-[#1e4a8a] text-[#1e4a8a] bg-transparent hover:bg-[#1e4a8a] hover:text-white text-lg px-8 py-6 rounded-full transition-colors duration-200"
+            className="border-[#d4a017] text-[#d4a017] bg-transparent hover:bg-[#d4a017] hover:text-white text-lg px-8 py-6 rounded-full transition-colors duration-200"
           >
             {t('landing.navigation.signIn')}
           </Button>
