@@ -729,28 +729,28 @@ function FoldedCard({ card, index }: FoldedCardProps) {
         data-testid={`card-${card.id}`}
       >
         <div 
-          className="h-2 w-full"
+          className="h-1.5 w-full"
           style={{ backgroundColor: card.color }}
         />
-        <div className="p-8">
-          <div className="flex items-center gap-4 mb-6">
+        <div className="p-5">
+          <div className="flex items-center gap-3 mb-4">
             <div 
-              className="w-14 h-14 rounded-xl flex items-center justify-center"
+              className="w-10 h-10 rounded-lg flex items-center justify-center"
               style={{ backgroundColor: `${card.color}15` }}
             >
               <IconComponent 
-                className="w-7 h-7" 
+                className="w-5 h-5" 
                 style={{ color: card.color }}
               />
             </div>
             <h3 
-              className="text-2xl font-bold text-slate-800"
+              className="text-xl font-bold text-slate-800"
               style={{ fontFamily: "'Montserrat', sans-serif" }}
             >
               {card.title}
             </h3>
           </div>
-          <ul className="space-y-4">
+          <ul className="space-y-2.5">
             {card.points.map((point, pointIndex) => (
               <motion.li
                 key={pointIndex}
@@ -758,19 +758,19 @@ function FoldedCard({ card, index }: FoldedCardProps) {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.1 + pointIndex * 0.08 }}
-                className="flex items-start gap-3"
+                className="flex items-start gap-2"
                 data-testid={`point-${card.id}-${pointIndex}`}
               >
                 <div 
-                  className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                  className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
                   style={{ backgroundColor: `${card.color}15` }}
                 >
                   <CheckCircle 
-                    className="w-4 h-4" 
+                    className="w-3 h-3" 
                     style={{ color: card.color }}
                   />
                 </div>
-                <span className="text-slate-600 leading-relaxed">{point}</span>
+                <span className="text-slate-600 text-sm leading-relaxed">{point}</span>
               </motion.li>
             ))}
           </ul>
@@ -782,29 +782,29 @@ function FoldedCard({ card, index }: FoldedCardProps) {
 
 function AIEdgeSection() {
   return (
-    <section className="py-24 bg-gradient-to-b from-slate-50 to-white overflow-hidden">
+    <section className="min-h-screen flex items-center py-12 bg-gradient-to-b from-slate-50 to-white overflow-hidden">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-8"
         >
-          <span className="inline-block px-4 py-1.5 bg-[#1e4a8a]/10 text-[#1e4a8a] rounded-full text-sm font-medium mb-4">
+          <span className="inline-block px-3 py-1 bg-[#1e4a8a]/10 text-[#1e4a8a] rounded-full text-sm font-medium mb-3">
             Discover Athlete360
           </span>
           <h2 
-            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#1e4a8a] mb-6"
+            className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1e4a8a] mb-3"
             style={{ fontFamily: "'Montserrat', sans-serif" }}
           >
             Your AI-Powered Edge in Athletic Performance
           </h2>
-          <p className="text-slate-500 text-lg max-w-3xl mx-auto leading-relaxed">
+          <p className="text-slate-500 text-base max-w-2xl mx-auto leading-relaxed">
             Athlete360 is a comprehensive sports analytics platform built to transform how athletes, coaches, and teams prepare and compete.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {aiEdgeCards.map((card, index) => (
             <FoldedCard key={card.id} card={card} index={index} />
           ))}
