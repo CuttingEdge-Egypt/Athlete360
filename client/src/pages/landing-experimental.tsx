@@ -996,6 +996,7 @@ export default function LandingExperimental() {
   const referralCode = searchParams.get('ref');
   const [galleryComplete, setGalleryComplete] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
+  const aiEdgeRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
 
   const handleLoopsComplete = useCallback(() => {
@@ -1003,8 +1004,8 @@ export default function LandingExperimental() {
   }, []);
 
   useEffect(() => {
-    if (galleryComplete && featuresRef.current) {
-      featuresRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (galleryComplete && aiEdgeRef.current) {
+      aiEdgeRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [galleryComplete]);
 
@@ -1124,7 +1125,9 @@ export default function LandingExperimental() {
         )}
       </div>
 
-      <AIEdgeSection />
+      <div ref={aiEdgeRef}>
+        <AIEdgeSection />
+      </div>
 
       <div ref={featuresRef}>
         <FeaturesSection />
