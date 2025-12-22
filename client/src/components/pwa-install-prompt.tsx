@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Download, Share, Globe, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useLocation } from 'wouter';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -53,6 +54,7 @@ type Language = 'en' | 'ar';
 type DeviceType = 'ios' | 'android' | 'web';
 
 export function PWAInstallPrompt() {
+  const [location] = useLocation();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [deviceType, setDeviceType] = useState<DeviceType>('web');
@@ -137,7 +139,8 @@ export function PWAInstallPrompt() {
   const showIOSInstructions = deviceType === 'ios';
   const showAndroidInstructions = !showIOSInstructions;
 
-  if (!showPrompt || isStandalone) return null;
+  // Hide install prompt on landing-new page and when not needed
+  if (!showPrompt || isStandalone || location === '/landing-new') return null;
 
   return (
     <div 
