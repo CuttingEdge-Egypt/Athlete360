@@ -3,10 +3,37 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { useTranslation } from 'react-i18next';
-import { UserPlus, Gift, ArrowRight, ChevronDown, GripVertical, User, Video, Target, Utensils, TrendingUp, Trophy, Sparkles, Brain, Clock, FileText, Users, BarChart3, Clipboard, XCircle, CheckCircle, Zap, Globe, Shield, Cpu } from 'lucide-react';
+import { UserPlus, Gift, ArrowRight, ChevronDown, GripVertical, User, Video, Target, Utensils, TrendingUp, Trophy, Sparkles, Brain, Clock, FileText, Users, BarChart3, Clipboard, XCircle, CheckCircle, Zap, Globe, Shield, Cpu, Sun, Moon, Mail, MapPin, Phone, Twitter, Instagram, Youtube, Linkedin } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import logoImage from '@assets/Png_new_logo_1766325613955.png';
+
+// Theme context for dark/light mode
+const useTheme = () => {
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('theme') === 'dark';
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDark]);
+
+  return { isDark, toggleTheme: () => setIsDark(!isDark) };
+};
+
+// RTL detection hook
+const useIsRTL = () => {
+  const { i18n } = useTranslation();
+  return i18n.language === 'ar';
+};
 
 import squashImage from '@assets/1920471-2038466691_1765914070355.jpg';
 import taekwondoImage from '@assets/171020105248526_Amy+Truesdale_1765914077745.jpg';
@@ -475,6 +502,7 @@ function PieSlice({ startAngle, endAngle, color, isSelected, onClick, label, nam
 
 function FeaturesSection() {
   const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
+  const isRTL = useIsRTL();
   
   let currentAngle = 0;
   const slices = featuresData.map((feature) => {
@@ -489,8 +517,14 @@ function FeaturesSection() {
     : null;
 
   return (
-    <section className="min-h-screen py-20 bg-white">
-      <div className="container mx-auto px-4">
+    <section className="min-h-screen py-20 bg-white dark:bg-[#0a1628] relative">
+      <div 
+        className="absolute inset-0 opacity-30 dark:opacity-20"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        }}
+      />
+      <div className="container mx-auto px-4 relative z-10">
         <motion.h2
           className="text-3xl sm:text-4xl font-bold text-center mb-8"
           initial={{ opacity: 0, y: 20 }}
@@ -498,7 +532,7 @@ function FeaturesSection() {
           viewport={{ once: true }}
           style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
-          <span className="text-[#1e4a8a]">The 360° Experience</span>
+          <span className="text-[#1e4a8a] dark:text-white">{isRTL ? 'تجربة 360°' : 'The 360° Experience'}</span>
         </motion.h2>
 
         <div className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20">
@@ -548,8 +582,8 @@ function FeaturesSection() {
               </svg>
             </motion.div>
             
-            <p className="text-center mt-6 text-slate-500 text-sm">
-              Click on a section to learn more
+            <p className="text-center mt-6 text-slate-500 dark:text-slate-400 text-sm">
+              {isRTL ? 'انقر على قسم لمعرفة المزيد' : 'Click on a section to learn more'}
             </p>
           </motion.div>
 
@@ -620,7 +654,7 @@ function FeaturesSection() {
                     damping: 30,
                     delay: 0.11 
                   }}
-                  className="text-slate-500 leading-relaxed"
+                  className="text-slate-500 dark:text-slate-300 leading-relaxed"
                   data-testid="feature-description"
                 >
                   {selectedData.description}
@@ -636,8 +670,11 @@ function FeaturesSection() {
               transition={{ duration: 0.2, delay: 0.3 }}
               className="w-full max-w-md lg:max-w-lg text-center lg:text-left"
             >
-              <p className="text-slate-400 text-lg">
-                Select a feature from the chart to explore what Athlete360 can do for you.
+              <p className="text-slate-400 dark:text-slate-500 text-lg">
+                {isRTL 
+                  ? 'اختر ميزة من الرسم البياني لاستكشاف ما يمكن أن يقدمه لك Athlete360.'
+                  : 'Select a feature from the chart to explore what Athlete360 can do for you.'
+                }
               </p>
             </motion.div>
           )}
@@ -725,7 +762,7 @@ function FoldedCard({ card, index }: FoldedCardProps) {
           y,
           transformOrigin: "center top",
         }}
-        className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden h-full"
+        className="bg-white dark:bg-[#12243d] rounded-2xl shadow-xl border border-gray-100 dark:border-[#1e4a8a]/30 overflow-hidden h-full"
         data-testid={`card-${card.id}`}
       >
         <div 
@@ -736,7 +773,7 @@ function FoldedCard({ card, index }: FoldedCardProps) {
           <div className="flex items-center gap-3 mb-4">
             <div 
               className="w-10 h-10 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: `${card.color}15` }}
+              style={{ backgroundColor: `${card.color}25` }}
             >
               <IconComponent 
                 className="w-5 h-5" 
@@ -744,7 +781,7 @@ function FoldedCard({ card, index }: FoldedCardProps) {
               />
             </div>
             <h3 
-              className="text-xl font-bold text-slate-800"
+              className="text-xl font-bold text-slate-800 dark:text-white"
               style={{ fontFamily: "'Montserrat', sans-serif" }}
             >
               {card.title}
@@ -763,14 +800,14 @@ function FoldedCard({ card, index }: FoldedCardProps) {
               >
                 <div 
                   className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                  style={{ backgroundColor: `${card.color}15` }}
+                  style={{ backgroundColor: `${card.color}25` }}
                 >
                   <CheckCircle 
                     className="w-3 h-3" 
                     style={{ color: card.color }}
                   />
                 </div>
-                <span className="text-slate-600 text-sm leading-relaxed">{point}</span>
+                <span className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">{point}</span>
               </motion.li>
             ))}
           </ul>
@@ -781,26 +818,36 @@ function FoldedCard({ card, index }: FoldedCardProps) {
 }
 
 function AIEdgeSection() {
+  const isRTL = useIsRTL();
   return (
-    <section className="min-h-screen flex items-center py-12 bg-gradient-to-b from-slate-50 to-white overflow-hidden">
-      <div className="container mx-auto px-4">
+    <section className="min-h-screen flex items-center py-12 bg-gradient-to-b from-slate-50 to-white dark:from-[#0f1f35] dark:to-[#0a1628] overflow-hidden relative">
+      <div 
+        className="absolute inset-0 opacity-30 dark:opacity-20"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        }}
+      />
+      <div className="container mx-auto px-4 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center mb-8"
         >
-          <span className="inline-block px-3 py-1 bg-[#1e4a8a]/10 text-[#1e4a8a] rounded-full text-sm font-medium mb-3">
-            Discover Athlete360
+          <span className="inline-block px-3 py-1 bg-[#1e4a8a]/10 dark:bg-[#1e4a8a]/30 text-[#1e4a8a] dark:text-[#6ba3eb] rounded-full text-sm font-medium mb-3">
+            {isRTL ? 'اكتشف Athlete360' : 'Discover Athlete360'}
           </span>
           <h2 
-            className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1e4a8a] mb-3"
+            className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1e4a8a] dark:text-white mb-3"
             style={{ fontFamily: "'Montserrat', sans-serif" }}
           >
-            Your AI-Powered Edge in Athletic Performance
+            {isRTL ? 'تفوقك المدعوم بالذكاء الاصطناعي في الأداء الرياضي' : 'Your AI-Powered Edge in Athletic Performance'}
           </h2>
-          <p className="text-slate-500 text-base max-w-2xl mx-auto leading-relaxed">
-            Athlete360 is a comprehensive sports analytics platform built to transform how athletes, coaches, and teams prepare and compete.
+          <p className="text-slate-500 dark:text-slate-300 text-base max-w-2xl mx-auto leading-relaxed">
+            {isRTL 
+              ? 'Athlete360 هي منصة تحليلات رياضية شاملة مصممة لتحويل طريقة تحضير ومنافسة الرياضيين والمدربين والفرق.'
+              : 'Athlete360 is a comprehensive sports analytics platform built to transform how athletes, coaches, and teams prepare and compete.'
+            }
           </p>
         </motion.div>
 
@@ -834,6 +881,7 @@ const withoutAIFeatures = [
 function ComparisonSlider() {
   const [inset, setInset] = useState<number>(50);
   const [onMouseDown, setOnMouseDown] = useState<boolean>(false);
+  const isRTL = useIsRTL();
 
   const onMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
     if (!onMouseDown) return;
@@ -852,25 +900,34 @@ function ComparisonSlider() {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-b from-white to-slate-50">
-      <div className="container mx-auto px-4">
+    <section className="py-20 bg-gradient-to-b from-white to-slate-50 dark:from-[#0f1f35] dark:to-[#0a1628] relative">
+      <div 
+        className="absolute inset-0 opacity-30 dark:opacity-20"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        }}
+      />
+      <div className="container mx-auto px-4 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <span className="inline-block px-4 py-1.5 bg-[#1e4a8a]/10 text-[#1e4a8a] rounded-full text-sm font-medium mb-4">
-            The AI Advantage
+          <span className="inline-block px-4 py-1.5 bg-[#1e4a8a]/10 dark:bg-[#1e4a8a]/30 text-[#1e4a8a] dark:text-[#6ba3eb] rounded-full text-sm font-medium mb-4">
+            {isRTL ? 'ميزة الذكاء الاصطناعي' : 'The AI Advantage'}
           </span>
           <h2 
-            className="text-3xl sm:text-4xl font-bold text-[#1e4a8a] mb-4"
+            className="text-3xl sm:text-4xl font-bold text-[#1e4a8a] dark:text-white mb-4"
             style={{ fontFamily: "'Montserrat', sans-serif" }}
           >
-            Sports Analytics: Then vs Now
+            {isRTL ? 'تحليلات الرياضة: الماضي مقابل الحاضر' : 'Sports Analytics: Then vs Now'}
           </h2>
-          <p className="text-slate-500 text-lg max-w-2xl mx-auto">
-            Drag the slider to see how AI transforms athletic performance analysis
+          <p className="text-slate-500 dark:text-slate-300 text-lg max-w-2xl mx-auto">
+            {isRTL 
+              ? 'اسحب شريط التمرير لترى كيف يحول الذكاء الاصطناعي تحليل الأداء الرياضي'
+              : 'Drag the slider to see how AI transforms athletic performance analysis'
+            }
           </p>
         </motion.div>
 
@@ -980,7 +1037,7 @@ function ComparisonSlider() {
             </div>
           </div>
 
-          <p className="text-center mt-6 text-slate-500 text-sm">
+          <p className="text-center mt-6 text-slate-500 dark:text-slate-400 text-sm">
             Drag the slider to compare AI-powered vs traditional sports analytics
           </p>
         </motion.div>
@@ -989,9 +1046,156 @@ function ComparisonSlider() {
   );
 }
 
+// Footer Component
+function Footer() {
+  const { t } = useTranslation(['home', 'common']);
+  const isRTL = useIsRTL();
+  const [, setLocation] = useLocation();
+  
+  const footerLinks = {
+    product: [
+      { label: 'Athlete Profile', href: '/signup' },
+      { label: 'Video Analysis', href: '/signup' },
+      { label: 'Training Plans', href: '/signup' },
+      { label: 'Rank Calculator', href: '/signup' },
+    ],
+    sports: [
+      { label: 'Taekwondo', href: '/signup' },
+      { label: 'Tennis', href: '/signup' },
+      { label: 'Boxing', href: '/signup' },
+      { label: 'Judo', href: '/signup' },
+    ],
+    company: [
+      { label: 'About Us', href: '#' },
+      { label: 'Contact', href: '#' },
+      { label: 'Privacy Policy', href: '#' },
+      { label: 'Terms of Service', href: '#' },
+    ],
+  };
+
+  const socialLinks = [
+    { icon: Twitter, href: '#', label: 'Twitter' },
+    { icon: Instagram, href: '#', label: 'Instagram' },
+    { icon: Youtube, href: '#', label: 'YouTube' },
+    { icon: Linkedin, href: '#', label: 'LinkedIn' },
+  ];
+
+  return (
+    <footer className="relative bg-slate-100 dark:bg-[#0f2847] border-t border-gray-200 dark:border-[#1e4a8a]/30" data-testid="footer-section">
+      <div 
+        className="absolute inset-0 opacity-30 dark:opacity-20"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        }}
+      />
+      <div className="container mx-auto px-4 py-16 relative z-10" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
+          <div className="lg:col-span-2">
+            <img src={logoImage} alt="Athlete360" className="h-14 w-auto mb-4" />
+            <p className="text-slate-600 dark:text-slate-300 mb-6 max-w-sm leading-relaxed">
+              {isRTL 
+                ? 'منصة تحليلات رياضية مدعومة بالذكاء الاصطناعي لتحويل أداء الرياضيين والفرق.'
+                : 'AI-powered sports analytics platform transforming how athletes and teams train, compete, and succeed.'
+              }
+            </p>
+            <div className="flex items-center gap-4">
+              {socialLinks.map((social, index) => (
+                <a
+                  key={index}
+                  href={social.href}
+                  aria-label={social.label}
+                  className="w-10 h-10 rounded-full bg-[#1e4a8a]/10 dark:bg-white/10 flex items-center justify-center text-[#1e4a8a] dark:text-white hover:bg-[#1e4a8a] hover:text-white dark:hover:bg-white dark:hover:text-[#1e4a8a] transition-colors"
+                  data-testid={`social-${social.label.toLowerCase()}`}
+                >
+                  <social.icon className="w-5 h-5" />
+                </a>
+              ))}
+            </div>
+          </div>
+          
+          <div>
+            <h4 className="font-bold text-slate-800 dark:text-white mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              {isRTL ? 'المنتج' : 'Product'}
+            </h4>
+            <ul className="space-y-3">
+              {footerLinks.product.map((link, index) => (
+                <li key={index}>
+                  <button 
+                    onClick={() => setLocation(link.href)}
+                    className="text-slate-600 dark:text-slate-300 hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors text-sm"
+                    data-testid={`footer-link-product-${index}`}
+                  >
+                    {link.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          <div>
+            <h4 className="font-bold text-slate-800 dark:text-white mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              {isRTL ? 'الرياضات' : 'Sports'}
+            </h4>
+            <ul className="space-y-3">
+              {footerLinks.sports.map((link, index) => (
+                <li key={index}>
+                  <button 
+                    onClick={() => setLocation(link.href)}
+                    className="text-slate-600 dark:text-slate-300 hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors text-sm"
+                    data-testid={`footer-link-sport-${index}`}
+                  >
+                    {link.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          <div>
+            <h4 className="font-bold text-slate-800 dark:text-white mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+              {isRTL ? 'الشركة' : 'Company'}
+            </h4>
+            <ul className="space-y-3">
+              {footerLinks.company.map((link, index) => (
+                <li key={index}>
+                  <a 
+                    href={link.href}
+                    className="text-slate-600 dark:text-slate-300 hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors text-sm"
+                    data-testid={`footer-link-company-${index}`}
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        
+        <div className="border-t border-gray-300 dark:border-[#1e4a8a]/30 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-slate-500 dark:text-slate-400 text-sm">
+              &copy; {new Date().getFullYear()} Athlete360. {isRTL ? 'جميع الحقوق محفوظة.' : 'All rights reserved.'}
+            </p>
+            <div className="flex items-center gap-6 text-sm">
+              <a href="#" className="text-slate-500 dark:text-slate-400 hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors">
+                {isRTL ? 'سياسة الخصوصية' : 'Privacy Policy'}
+              </a>
+              <a href="#" className="text-slate-500 dark:text-slate-400 hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors">
+                {isRTL ? 'شروط الخدمة' : 'Terms of Service'}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
 export default function LandingExperimental() {
   const [, setLocation] = useLocation();
   const { t } = useTranslation(['home', 'common']);
+  const { isDark, toggleTheme } = useTheme();
+  const isRTL = useIsRTL();
   const searchParams = new URLSearchParams(window.location.search);
   const referralCode = searchParams.get('ref');
   const [galleryComplete, setGalleryComplete] = useState(false);
@@ -1028,17 +1232,23 @@ export default function LandingExperimental() {
   };
 
   return (
-    <div className="bg-white text-slate-900">
+    <div className="relative bg-white dark:bg-[#0a1628] text-slate-900 dark:text-white transition-colors duration-300" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div 
+        className="fixed inset-0 opacity-[0.03] dark:opacity-[0.08] pointer-events-none z-0"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        }}
+      />
       <motion.nav 
         initial="hidden"
         animate="visible"
         variants={fadeInDown}
         transition={{ duration: 0.5 }}
-        className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-lg border-b border-gray-200 shadow-sm"
+        className="fixed top-0 w-full z-50 bg-white/90 dark:bg-[#0a1628]/90 backdrop-blur-lg border-b border-gray-200 dark:border-[#1e4a8a]/30 shadow-sm"
       >
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex justify-between items-center">
           <motion.div 
-            className="flex items-center space-x-2 flex-shrink-0"
+            className="flex items-center space-x-2 rtl:space-x-reverse flex-shrink-0"
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.2 }}
           >
@@ -1056,7 +1266,7 @@ export default function LandingExperimental() {
                 data-testid="button-signup-experimental"
                 className="bg-[#1e4a8a] hover:bg-[#d4a017] text-white text-xs sm:text-sm px-2 sm:px-4 h-11 transition-colors duration-200"
               >
-                <UserPlus className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                <UserPlus className="mr-1 sm:mr-2 rtl:mr-0 rtl:ml-1 sm:rtl:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                 {t('landing.navigation.signUp')}
               </Button>
             </motion.div>
@@ -1065,12 +1275,23 @@ export default function LandingExperimental() {
                 onClick={() => setLocation('/login')}
                 data-testid="button-login-experimental"
                 variant="outline"
-                className="border-[#1e4a8a] text-[#1e4a8a] bg-transparent hover:bg-[#1e4a8a] hover:text-white text-xs sm:text-sm px-2 sm:px-4 h-11 transition-colors duration-200"
+                className="border-[#1e4a8a] text-[#1e4a8a] dark:text-white dark:border-white/30 bg-transparent hover:bg-[#1e4a8a] hover:text-white dark:hover:bg-white dark:hover:text-[#1e4a8a] text-xs sm:text-sm px-2 sm:px-4 h-11 transition-colors duration-200"
               >
                 {t('landing.navigation.signIn')}
               </Button>
             </motion.div>
             
+            <motion.div variants={fadeInDown}>
+              <button
+                onClick={toggleTheme}
+                data-testid="theme-toggle"
+                className="w-11 h-11 rounded-lg bg-slate-100 dark:bg-white/10 flex items-center justify-center text-slate-600 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20 transition-colors"
+                aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+            </motion.div>
+
             <motion.div variants={fadeInDown}>
               <LanguageSwitcher />
             </motion.div>
@@ -1135,13 +1356,7 @@ export default function LandingExperimental() {
 
       <ComparisonSlider />
 
-      <footer className="py-8 border-t border-gray-200 bg-gray-50">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-slate-500 text-sm">
-            &copy; {new Date().getFullYear()} Athlete360. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
