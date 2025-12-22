@@ -350,52 +350,72 @@ const featuresData = [
   {
     id: 'feature1',
     name: 'Profile',
+    nameAr: 'الملف الشخصي',
     percentage: 20,
     color: '#1e4a8a',
     icon: User,
     title: 'Athlete 360° Profile',
+    titleAr: 'ملف الرياضي 360°',
     subtitle: 'Your complete performance overview',
+    subtitleAr: 'نظرة شاملة على أدائك',
     description: 'Get a comprehensive view of your athletic journey including rankings, achievements, historical data, and AI-generated strengths/weaknesses analysis. Track your progress from amateur to champion.',
+    descriptionAr: 'احصل على نظرة شاملة لرحلتك الرياضية بما في ذلك التصنيفات والإنجازات والبيانات التاريخية وتحليل نقاط القوة والضعف المولدة بالذكاء الاصطناعي. تتبع تقدمك من هاوٍ إلى بطل.',
   },
   {
     id: 'feature2',
     name: 'Video AI',
+    nameAr: 'تحليل الفيديو',
     percentage: 20,
     color: '#10b981',
     icon: Video,
     title: 'AI Video Analysis',
+    titleAr: 'تحليل الفيديو بالذكاء الاصطناعي',
     subtitle: 'Powered by Google Gemini 2.0 Flash',
+    subtitleAr: 'مدعوم بتقنية Google Gemini 2.0 Flash',
     description: 'Upload match footage and receive detailed AI-powered breakdowns of techniques, scoring patterns, tactical elements, and performance insights specific to your sport.',
+    descriptionAr: 'قم بتحميل لقطات المباراة واحصل على تحليلات مفصلة مدعومة بالذكاء الاصطناعي للتقنيات وأنماط التسجيل والعناصر التكتيكية ورؤى الأداء الخاصة برياضتك.',
   },
   {
     id: 'feature3',
     name: 'Strategy',
+    nameAr: 'الاستراتيجية',
     percentage: 20,
     color: '#f59e0b',
     icon: Target,
     title: 'Opponent Analysis',
+    titleAr: 'تحليل المنافس',
     subtitle: 'Know your competition inside out',
+    subtitleAr: 'اعرف منافسك من الداخل والخارج',
     description: 'Get strategic insights on opponents based on their fighting style, tendencies, and historical performance data. Prepare for every match with data-driven game plans.',
+    descriptionAr: 'احصل على رؤى استراتيجية حول المنافسين بناءً على أسلوب قتالهم وميولهم وبيانات أدائهم التاريخية. استعد لكل مباراة بخطط لعب مبنية على البيانات.',
   },
   {
     id: 'feature4',
     name: 'Nutrition',
+    nameAr: 'التغذية',
     percentage: 20,
     color: '#ef4444',
     icon: Utensils,
     title: 'Training & Nutrition',
+    titleAr: 'التدريب والتغذية',
     subtitle: 'Personalized plans powered by AI',
+    subtitleAr: 'خطط مخصصة مدعومة بالذكاء الاصطناعي',
     description: 'AI-generated personalized training programs and nutrition plans based on sports science, including TDEE calculations, macro optimization, and competition preparation schedules.',
+    descriptionAr: 'برامج تدريب وخطط تغذية مخصصة مولدة بالذكاء الاصطناعي مبنية على علوم الرياضة، بما في ذلك حسابات TDEE وتحسين الماكرو وجداول التحضير للمنافسات.',
   },
   {
     id: 'feature5',
     name: 'Rank Up',
+    nameAr: 'رفع الترتيب',
     percentage: 20,
     color: '#8b5cf6',
     icon: TrendingUp,
     title: 'Rank-Up Calculator',
+    titleAr: 'حاسبة رفع الترتيب',
     subtitle: 'Strategic guidance to advance',
+    subtitleAr: 'إرشادات استراتيجية للتقدم',
     description: 'Get clear, actionable steps on how to advance in world rankings with competition recommendations and strategic planning to reach your performance goals.',
+    descriptionAr: 'احصل على خطوات واضحة وقابلة للتنفيذ حول كيفية التقدم في التصنيفات العالمية مع توصيات المنافسات والتخطيط الاستراتيجي للوصول إلى أهداف أدائك.',
   },
 ];
 
@@ -526,7 +546,7 @@ function FeaturesSection() {
           viewport={{ once: true }}
           style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
-          <span className="text-[#1e4a8a] dark:text-white">{isRTL ? 'تجربة 360°' : 'The 360° Experience'}</span>
+          <span className="text-[#1e4a8a] dark:text-white">{isRTL ? 'التجربة 360°' : 'The 360° Experience'}</span>
         </motion.h2>
 
         <div className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20">
@@ -566,7 +586,7 @@ function FeaturesSection() {
                       isSelected={selectedFeature === slice.id}
                       onClick={() => setSelectedFeature(selectedFeature === slice.id ? null : slice.id)}
                       label={slice.id}
-                      name={slice.name}
+                      name={isRTL ? slice.nameAr : slice.name}
                       cx={210}
                       cy={210}
                       radius={180}
@@ -619,7 +639,7 @@ function FeaturesSection() {
                     style={{ color: selectedData.color, fontFamily: "'Montserrat', sans-serif" }}
                     data-testid="feature-title"
                   >
-                    {selectedData.title}
+                    {isRTL ? selectedData.titleAr : selectedData.title}
                   </h3>
                 </motion.div>
                 
@@ -636,7 +656,7 @@ function FeaturesSection() {
                   style={{ color: selectedData.color }}
                   data-testid="feature-subtitle"
                 >
-                  {selectedData.subtitle}
+                  {isRTL ? selectedData.subtitleAr : selectedData.subtitle}
                 </motion.p>
                 
                 <motion.p
@@ -651,7 +671,7 @@ function FeaturesSection() {
                   className="text-slate-500 dark:text-slate-300 leading-relaxed"
                   data-testid="feature-description"
                 >
-                  {selectedData.description}
+                  {isRTL ? selectedData.descriptionAr : selectedData.description}
                 </motion.p>
               </motion.div>
             )}
@@ -683,6 +703,7 @@ const aiEdgeCards = [
   {
     id: 'who-we-are',
     title: 'Who We Are',
+    titleAr: 'من نحن',
     icon: Users,
     color: '#1e4a8a',
     points: [
@@ -692,10 +713,18 @@ const aiEdgeCards = [
       'Trusted by athletes from amateur to elite level',
       'Multi-language support with English and Arabic',
     ],
+    pointsAr: [
+      'منصة تحليلات رياضية شاملة مدعومة بالذكاء الاصطناعي',
+      'مصممة للرياضيين والمدربين والفرق حول العالم',
+      'التايكوندو أولاً مع التوسع إلى أكثر من 10 رياضات قتالية ومضرب',
+      'موثوق من قبل الرياضيين من المستوى الهواة إلى النخبة',
+      'دعم متعدد اللغات مع الإنجليزية والعربية',
+    ],
   },
   {
     id: 'what-we-provide',
     title: 'What We Provide',
+    titleAr: 'ماذا نقدم',
     icon: Zap,
     color: '#10b981',
     points: [
@@ -705,10 +734,18 @@ const aiEdgeCards = [
       'Strategic opponent analysis and beat strategies',
       'Rank-Up Calculator for world ranking advancement',
     ],
+    pointsAr: [
+      'ملفات رياضي كاملة 360° مع رؤى مولدة بالذكاء الاصطناعي',
+      'تحليل فيديو مدعوم بالذكاء الاصطناعي مع تفصيل التقنيات',
+      'خطط تدريب وتغذية مخصصة',
+      'تحليل استراتيجي للمنافسين واستراتيجيات الفوز',
+      'حاسبة رفع الترتيب للتقدم في التصنيفات العالمية',
+    ],
   },
   {
     id: 'how-we-do-it',
     title: 'How We Do It',
+    titleAr: 'كيف نفعل ذلك',
     icon: Cpu,
     color: '#f59e0b',
     points: [
@@ -718,15 +755,23 @@ const aiEdgeCards = [
       'Secure, mobile-ready Progressive Web App',
       'Data-driven insights powered by cutting-edge AI',
     ],
+    pointsAr: [
+      'محرك ذكاء اصطناعي مزدوج: تقنية GPT-4o + Google Gemini',
+      'التكامل مع أنظمة التصنيف العالمية والمنافسات الحية',
+      'تحليلات متكيفة مع الرياضة عبر تخصصات متعددة',
+      'تطبيق ويب تقدمي آمن وجاهز للجوال',
+      'رؤى مبنية على البيانات مدعومة بأحدث تقنيات الذكاء الاصطناعي',
+    ],
   },
 ];
 
 interface FoldedCardProps {
   card: typeof aiEdgeCards[0];
   index: number;
+  isRTL: boolean;
 }
 
-function FoldedCard({ card, index }: FoldedCardProps) {
+function FoldedCard({ card, index, isRTL }: FoldedCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: cardRef,
@@ -739,6 +784,8 @@ function FoldedCard({ card, index }: FoldedCardProps) {
   const y = useTransform(scrollYProgress, [0, 1], [60, 0]);
 
   const IconComponent = card.icon;
+  const displayTitle = isRTL ? card.titleAr : card.title;
+  const displayPoints = isRTL ? card.pointsAr : card.points;
 
   return (
     <motion.div
@@ -747,6 +794,7 @@ function FoldedCard({ card, index }: FoldedCardProps) {
         perspective: "1200px",
       }}
       className="w-full"
+      dir={isRTL ? 'rtl' : 'ltr'}
     >
       <motion.div
         style={{
@@ -778,14 +826,14 @@ function FoldedCard({ card, index }: FoldedCardProps) {
               className="text-xl font-bold text-slate-800 dark:text-white"
               style={{ fontFamily: "'Montserrat', sans-serif" }}
             >
-              {card.title}
+              {displayTitle}
             </h3>
           </div>
           <ul className="space-y-2.5">
-            {card.points.map((point, pointIndex) => (
+            {displayPoints.map((point, pointIndex) => (
               <motion.li
                 key={pointIndex}
-                initial={{ opacity: 0, x: -10 }}
+                initial={{ opacity: 0, x: isRTL ? 10 : -10 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.1 + pointIndex * 0.08 }}
@@ -841,7 +889,7 @@ function AIEdgeSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {aiEdgeCards.map((card, index) => (
-            <FoldedCard key={card.id} card={card} index={index} />
+            <FoldedCard key={card.id} card={card} index={index} isRTL={isRTL} />
           ))}
         </div>
       </div>
@@ -851,19 +899,19 @@ function AIEdgeSection() {
 
 // AI vs Traditional comparison data
 const withAIFeatures = [
-  { icon: Brain, text: 'AI-powered video analysis in minutes' },
-  { icon: Sparkles, text: 'Personalized training plans' },
-  { icon: BarChart3, text: 'Real-time performance insights' },
-  { icon: Target, text: 'Data-driven opponent strategies' },
-  { icon: TrendingUp, text: 'Predictive ranking guidance' },
+  { icon: Brain, text: 'AI-powered video analysis in minutes', textAr: 'تحليل فيديو بالذكاء الاصطناعي في دقائق' },
+  { icon: Sparkles, text: 'Personalized training plans', textAr: 'خطط تدريب مخصصة' },
+  { icon: BarChart3, text: 'Real-time performance insights', textAr: 'رؤى أداء في الوقت الفعلي' },
+  { icon: Target, text: 'Data-driven opponent strategies', textAr: 'استراتيجيات منافس مبنية على البيانات' },
+  { icon: TrendingUp, text: 'Predictive ranking guidance', textAr: 'إرشادات تنبؤية للترتيب' },
 ];
 
 const withoutAIFeatures = [
-  { icon: Clock, text: 'Hours of manual video review' },
-  { icon: Clipboard, text: 'Generic training programs' },
-  { icon: FileText, text: 'Delayed performance feedback' },
-  { icon: Users, text: 'Subjective opponent assessment' },
-  { icon: Trophy, text: 'Uncertain path to improvement' },
+  { icon: Clock, text: 'Hours of manual video review', textAr: 'ساعات من مراجعة الفيديو اليدوية' },
+  { icon: Clipboard, text: 'Generic training programs', textAr: 'برامج تدريب عامة' },
+  { icon: FileText, text: 'Delayed performance feedback', textAr: 'تقييم أداء متأخر' },
+  { icon: Users, text: 'Subjective opponent assessment', textAr: 'تقييم شخصي للمنافس' },
+  { icon: Trophy, text: 'Uncertain path to improvement', textAr: 'مسار غير واضح للتحسن' },
 ];
 
 function ComparisonSlider() {
@@ -962,15 +1010,15 @@ function ComparisonSlider() {
                   <Sparkles className="h-7 w-7 text-white" />
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-bold text-white text-center" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-                  With Athlete360
+                  {isRTL ? 'مع Athlete360' : 'With Athlete360'}
                 </h3>
-                <p className="text-blue-200 text-sm">AI-Powered Analytics</p>
+                <p className="text-blue-200 text-sm">{isRTL ? 'تحليلات مدعومة بالذكاء الاصطناعي' : 'AI-Powered Analytics'}</p>
               </div>
               <div className="space-y-4 w-full max-w-md">
                 {withAIFeatures.map((feature, index) => (
                   <motion.div
                     key={index}
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
@@ -980,8 +1028,8 @@ function ComparisonSlider() {
                     <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
                       <feature.icon className="h-4 w-4 text-white" />
                     </div>
-                    <span className="text-white/90 text-sm sm:text-base">{feature.text}</span>
-                    <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0 ml-auto" />
+                    <span className="text-white/90 text-sm sm:text-base">{isRTL ? feature.textAr : feature.text}</span>
+                    <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0 ml-auto rtl:ml-0 rtl:mr-auto" />
                   </motion.div>
                 ))}
               </div>
@@ -993,15 +1041,15 @@ function ComparisonSlider() {
                   <Clock className="h-7 w-7 text-slate-400" />
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-bold text-slate-300 text-center" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-                  Traditional Methods
+                  {isRTL ? 'الطرق التقليدية' : 'Traditional Methods'}
                 </h3>
-                <p className="text-slate-500 text-sm">Manual Analysis</p>
+                <p className="text-slate-500 text-sm">{isRTL ? 'تحليل يدوي' : 'Manual Analysis'}</p>
               </div>
               <div className="space-y-4 w-full max-w-md">
                 {withoutAIFeatures.map((feature, index) => (
                   <motion.div
                     key={index}
-                    initial={{ opacity: 0, x: 20 }}
+                    initial={{ opacity: 0, x: isRTL ? -20 : 20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
@@ -1011,8 +1059,8 @@ function ComparisonSlider() {
                     <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
                       <feature.icon className="h-4 w-4 text-slate-400" />
                     </div>
-                    <span className="text-slate-400 text-sm sm:text-base">{feature.text}</span>
-                    <XCircle className="h-5 w-5 text-red-400/70 flex-shrink-0 ml-auto" />
+                    <span className="text-slate-400 text-sm sm:text-base">{isRTL ? feature.textAr : feature.text}</span>
+                    <XCircle className="h-5 w-5 text-red-400/70 flex-shrink-0 ml-auto rtl:ml-0 rtl:mr-auto" />
                   </motion.div>
                 ))}
               </div>
@@ -1020,7 +1068,10 @@ function ComparisonSlider() {
           </div>
 
           <p className="text-center mt-6 text-slate-500 dark:text-slate-400 text-sm">
-            Drag the slider to compare AI-powered vs traditional sports analytics
+            {isRTL 
+              ? 'اسحب شريط التمرير للمقارنة بين التحليلات المدعومة بالذكاء الاصطناعي والتقليدية'
+              : 'Drag the slider to compare AI-powered vs traditional sports analytics'
+            }
           </p>
         </motion.div>
       </div>
