@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { useTranslation } from 'react-i18next';
-import { UserPlus, Gift, ArrowRight, ChevronDown, GripVertical, User, Video, MessageSquare, Target, Utensils, TrendingUp, Trophy, Sparkles, Brain, Clock, FileText, Users, BarChart3, Clipboard, XCircle, CheckCircle } from 'lucide-react';
+import { UserPlus, Gift, ArrowRight, ChevronDown, GripVertical, User, Video, Target, Utensils, TrendingUp, Trophy, Sparkles, Brain, Clock, FileText, Users, BarChart3, Clipboard, XCircle, CheckCircle } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import logoImage from '@assets/Png_new_logo_1766325613955.png';
@@ -776,6 +776,7 @@ function ComparisonSlider() {
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
                     className="flex items-center gap-3"
+                    data-testid={`ai-feature-${index}`}
                   >
                     <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
                       <feature.icon className="h-4 w-4 text-white" />
@@ -808,6 +809,7 @@ function ComparisonSlider() {
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
                     className="flex items-center gap-3"
+                    data-testid={`traditional-feature-${index}`}
                   >
                     <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
                       <feature.icon className="h-4 w-4 text-slate-400" />
