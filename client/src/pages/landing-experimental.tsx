@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { useTranslation } from 'react-i18next';
-import { UserPlus, Gift, ArrowRight, ChevronDown } from 'lucide-react';
+import { UserPlus, Gift, ArrowRight, ChevronDown, GripVertical, User, Video, MessageSquare, Target, Utensils, TrendingUp, Trophy, Sparkles, Brain, Clock, FileText, Users, BarChart3, Clipboard, XCircle, CheckCircle } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import logoImage from '@assets/Png_new_logo_1766325613955.png';
@@ -318,52 +318,57 @@ function InfiniteGallery3D({ onLoopsComplete, isActive }: InfiniteGallery3DProps
   );
 }
 
-// Features data for the 3D pie chart
+// Features data for the 3D pie chart - based on Key Features & Value Propositions
 const featuresData = [
   {
     id: 'feature1',
-    name: 'Analytics',
+    name: 'Profile',
     percentage: 20,
     color: '#1e4a8a',
-    title: 'Feature One Title',
-    subtitle: 'Powerful capability for athletes',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
+    icon: User,
+    title: 'Athlete 360° Profile',
+    subtitle: 'Your complete performance overview',
+    description: 'Get a comprehensive view of your athletic journey including rankings, achievements, historical data, and AI-generated strengths/weaknesses analysis. Track your progress from amateur to champion.',
   },
   {
     id: 'feature2',
-    name: 'Training',
+    name: 'Video AI',
     percentage: 20,
     color: '#10b981',
-    title: 'Feature Two Title',
-    subtitle: 'Advanced analytics and insights',
-    description: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.',
+    icon: Video,
+    title: 'AI Video Analysis',
+    subtitle: 'Powered by Google Gemini 2.0 Flash',
+    description: 'Upload match footage and receive detailed AI-powered breakdowns of techniques, scoring patterns, tactical elements, and performance insights specific to your sport.',
   },
   {
     id: 'feature3',
     name: 'Strategy',
     percentage: 20,
     color: '#f59e0b',
-    title: 'Feature Three Title',
-    subtitle: 'Real-time performance tracking',
-    description: 'Sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque.',
+    icon: Target,
+    title: 'Opponent Analysis',
+    subtitle: 'Know your competition inside out',
+    description: 'Get strategic insights on opponents based on their fighting style, tendencies, and historical performance data. Prepare for every match with data-driven game plans.',
   },
   {
     id: 'feature4',
     name: 'Nutrition',
     percentage: 20,
     color: '#ef4444',
-    title: 'Feature Four Title',
-    subtitle: 'Comprehensive athlete profiles',
-    description: 'Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.',
+    icon: Utensils,
+    title: 'Training & Nutrition',
+    subtitle: 'Personalized plans powered by AI',
+    description: 'AI-generated personalized training programs and nutrition plans based on sports science, including TDEE calculations, macro optimization, and competition preparation schedules.',
   },
   {
     id: 'feature5',
-    name: 'Recovery',
+    name: 'Rank Up',
     percentage: 20,
     color: '#8b5cf6',
-    title: 'Feature Five Title',
-    subtitle: 'Strategic competition analysis',
-    description: 'Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt.',
+    icon: TrendingUp,
+    title: 'Rank-Up Calculator',
+    subtitle: 'Strategic guidance to advance',
+    description: 'Get clear, actionable steps on how to advance in world rankings with competition recommendations and strategic planning to reach your performance goals.',
   },
 ];
 
@@ -647,6 +652,183 @@ function FeaturesSection() {
   );
 }
 
+// AI vs Traditional comparison data
+const withAIFeatures = [
+  { icon: Brain, text: 'AI-powered video analysis in minutes' },
+  { icon: Sparkles, text: 'Personalized training plans' },
+  { icon: BarChart3, text: 'Real-time performance insights' },
+  { icon: Target, text: 'Data-driven opponent strategies' },
+  { icon: TrendingUp, text: 'Predictive ranking guidance' },
+];
+
+const withoutAIFeatures = [
+  { icon: Clock, text: 'Hours of manual video review' },
+  { icon: Clipboard, text: 'Generic training programs' },
+  { icon: FileText, text: 'Delayed performance feedback' },
+  { icon: Users, text: 'Subjective opponent assessment' },
+  { icon: Trophy, text: 'Uncertain path to improvement' },
+];
+
+function ComparisonSlider() {
+  const [inset, setInset] = useState<number>(50);
+  const [onMouseDown, setOnMouseDown] = useState<boolean>(false);
+
+  const onMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!onMouseDown) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    let x = 0;
+
+    if ("touches" in e && e.touches.length > 0) {
+      x = e.touches[0].clientX - rect.left;
+    } else if ("clientX" in e) {
+      x = e.clientX - rect.left;
+    }
+    
+    const percentage = Math.max(5, Math.min(95, (x / rect.width) * 100));
+    setInset(percentage);
+  };
+
+  return (
+    <section className="py-20 bg-gradient-to-b from-white to-slate-50">
+      <div className="container mx-auto px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <span className="inline-block px-4 py-1.5 bg-[#1e4a8a]/10 text-[#1e4a8a] rounded-full text-sm font-medium mb-4">
+            The AI Advantage
+          </span>
+          <h2 
+            className="text-3xl sm:text-4xl font-bold text-[#1e4a8a] mb-4"
+            style={{ fontFamily: "'Montserrat', sans-serif" }}
+          >
+            Sports Analytics: Then vs Now
+          </h2>
+          <p className="text-slate-500 text-lg max-w-2xl mx-auto">
+            Drag the slider to see how AI transforms athletic performance analysis
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="max-w-5xl mx-auto"
+        >
+          <div
+            className="relative w-full aspect-[16/9] overflow-hidden rounded-2xl shadow-2xl select-none cursor-ew-resize"
+            onMouseMove={onMouseMove}
+            onMouseUp={() => setOnMouseDown(false)}
+            onMouseLeave={() => setOnMouseDown(false)}
+            onTouchMove={onMouseMove}
+            onTouchEnd={() => setOnMouseDown(false)}
+            data-testid="comparison-slider"
+          >
+            <div
+              className="bg-slate-300 h-full w-1 absolute z-30 top-0 -ml-0.5 select-none"
+              style={{ left: inset + "%" }}
+            >
+              <button
+                className="bg-white border-2 border-[#1e4a8a] rounded-full hover:scale-110 transition-all w-12 h-12 select-none -translate-y-1/2 absolute top-1/2 -ml-6 z-40 cursor-ew-resize flex justify-center items-center shadow-lg"
+                onTouchStart={(e) => {
+                  setOnMouseDown(true);
+                  onMouseMove(e);
+                }}
+                onMouseDown={(e) => {
+                  setOnMouseDown(true);
+                  onMouseMove(e);
+                }}
+                onTouchEnd={() => setOnMouseDown(false)}
+                onMouseUp={() => setOnMouseDown(false)}
+                data-testid="comparison-slider-handle"
+              >
+                <GripVertical className="h-5 w-5 text-[#1e4a8a] select-none" />
+              </button>
+            </div>
+
+            <div
+              className="absolute left-0 top-0 z-20 h-full bg-gradient-to-br from-[#1e4a8a] to-[#2d5fa3] p-8 sm:p-12 flex flex-col justify-center overflow-hidden"
+              style={{
+                width: "100%",
+                clipPath: `inset(0 ${100 - inset}% 0 0)`,
+              }}
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                  <Sparkles className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-white" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                    With Athlete360
+                  </h3>
+                  <p className="text-blue-200 text-sm">AI-Powered Analytics</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                {withAIFeatures.map((feature, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                    className="flex items-center gap-3"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
+                      <feature.icon className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="text-white/90 text-sm sm:text-base">{feature.text}</span>
+                    <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0 ml-auto" />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            <div className="absolute left-0 top-0 z-10 w-full h-full bg-gradient-to-br from-slate-700 to-slate-800 p-8 sm:p-12 flex flex-col justify-center">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
+                  <Clock className="h-6 w-6 text-slate-400" />
+                </div>
+                <div>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-slate-300" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                    Traditional Methods
+                  </h3>
+                  <p className="text-slate-500 text-sm">Manual Analysis</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                {withoutAIFeatures.map((feature, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                    className="flex items-center gap-3"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                      <feature.icon className="h-4 w-4 text-slate-400" />
+                    </div>
+                    <span className="text-slate-400 text-sm sm:text-base">{feature.text}</span>
+                    <XCircle className="h-5 w-5 text-red-400/70 flex-shrink-0 ml-auto" />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <p className="text-center mt-6 text-slate-500 text-sm">
+            Drag the slider to compare AI-powered vs traditional sports analytics
+          </p>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
 export default function LandingExperimental() {
   const [, setLocation] = useLocation();
   const { t } = useTranslation(['home', 'common']);
@@ -785,6 +967,8 @@ export default function LandingExperimental() {
       <div ref={featuresRef}>
         <FeaturesSection />
       </div>
+
+      <ComparisonSlider />
 
       <footer className="py-8 border-t border-gray-200 bg-gray-50">
         <div className="container mx-auto px-4 text-center">
