@@ -1443,8 +1443,8 @@ export default function LandingExperimental() {
         
         <div className="absolute bottom-44 left-0 right-0 pointer-events-none flex items-center justify-center z-20 px-4">
           <h2 
-            className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight mix-blend-exclusion text-center"
-            style={{ color: '#d4a017' }}
+            className="text-base sm:text-lg md:text-xl font-medium tracking-tight mix-blend-exclusion text-center"
+            style={{ fontFamily: "'Inter', sans-serif", color: '#d4a017' }}
           >
             {isRTL ? 'تفوقك المدعوم بالذكاء الاصطناعي في الأداء الرياضي.' : 'Your AI-powered edge in athletic performance.'}
           </h2>
