@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { useTranslation } from 'react-i18next';
-import { UserPlus, Gift, ArrowRight, ChevronDown, GripVertical, User, Video, Target, Utensils, TrendingUp, Trophy, Sparkles, Brain, Clock, FileText, Users, BarChart3, Clipboard, XCircle, CheckCircle } from 'lucide-react';
+import { UserPlus, Gift, ArrowRight, ChevronDown, GripVertical, User, Video, Target, Utensils, TrendingUp, Trophy, Sparkles, Brain, Clock, FileText, Users, BarChart3, Clipboard, XCircle, CheckCircle, Zap, Globe, Shield, Cpu } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import logoImage from '@assets/Png_new_logo_1766325613955.png';
@@ -647,6 +647,173 @@ function FeaturesSection() {
   );
 }
 
+// AI Edge Section Data
+const aiEdgeCards = [
+  {
+    id: 'who-we-are',
+    title: 'Who We Are',
+    icon: Users,
+    color: '#1e4a8a',
+    points: [
+      'A comprehensive AI-powered sports analytics platform',
+      'Built for athletes, coaches, and teams worldwide',
+      'Taekwondo-first with expansion to 10+ combat & racquet sports',
+      'Trusted by athletes from amateur to elite level',
+      'Multi-language support with English and Arabic',
+    ],
+  },
+  {
+    id: 'what-we-provide',
+    title: 'What We Provide',
+    icon: Zap,
+    color: '#10b981',
+    points: [
+      'Complete 360° athlete profiles with AI-generated insights',
+      'AI-powered video analysis with technique breakdowns',
+      'Personalized training & nutrition plans',
+      'Strategic opponent analysis and beat strategies',
+      'Rank-Up Calculator for world ranking advancement',
+    ],
+  },
+  {
+    id: 'how-we-do-it',
+    title: 'How We Do It',
+    icon: Cpu,
+    color: '#f59e0b',
+    points: [
+      'Dual AI engine: GPT-4o + Google Gemini technology',
+      'Integration with world ranking systems & live competitions',
+      'Sport-adaptive analytics across multiple disciplines',
+      'Secure, mobile-ready Progressive Web App',
+      'Data-driven insights powered by cutting-edge AI',
+    ],
+  },
+];
+
+interface FoldedCardProps {
+  card: typeof aiEdgeCards[0];
+  index: number;
+}
+
+function FoldedCard({ card, index }: FoldedCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: cardRef,
+    offset: ["start end", "center center"],
+  });
+
+  const rotateX = useTransform(scrollYProgress, [0, 1], [45, 0]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.3, 0.8, 1]);
+  const scale = useTransform(scrollYProgress, [0, 1], [0.85, 1]);
+  const y = useTransform(scrollYProgress, [0, 1], [60, 0]);
+
+  const IconComponent = card.icon;
+
+  return (
+    <motion.div
+      ref={cardRef}
+      style={{
+        perspective: "1200px",
+      }}
+      className="w-full"
+    >
+      <motion.div
+        style={{
+          rotateX,
+          opacity,
+          scale,
+          y,
+          transformOrigin: "center top",
+        }}
+        className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden h-full"
+        data-testid={`card-${card.id}`}
+      >
+        <div 
+          className="h-2 w-full"
+          style={{ backgroundColor: card.color }}
+        />
+        <div className="p-8">
+          <div className="flex items-center gap-4 mb-6">
+            <div 
+              className="w-14 h-14 rounded-xl flex items-center justify-center"
+              style={{ backgroundColor: `${card.color}15` }}
+            >
+              <IconComponent 
+                className="w-7 h-7" 
+                style={{ color: card.color }}
+              />
+            </div>
+            <h3 
+              className="text-2xl font-bold text-slate-800"
+              style={{ fontFamily: "'Montserrat', sans-serif" }}
+            >
+              {card.title}
+            </h3>
+          </div>
+          <ul className="space-y-4">
+            {card.points.map((point, pointIndex) => (
+              <motion.li
+                key={pointIndex}
+                initial={{ opacity: 0, x: -10 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 + pointIndex * 0.08 }}
+                className="flex items-start gap-3"
+                data-testid={`point-${card.id}-${pointIndex}`}
+              >
+                <div 
+                  className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                  style={{ backgroundColor: `${card.color}15` }}
+                >
+                  <CheckCircle 
+                    className="w-4 h-4" 
+                    style={{ color: card.color }}
+                  />
+                </div>
+                <span className="text-slate-600 leading-relaxed">{point}</span>
+              </motion.li>
+            ))}
+          </ul>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function AIEdgeSection() {
+  return (
+    <section className="py-24 bg-gradient-to-b from-slate-50 to-white overflow-hidden">
+      <div className="container mx-auto px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <span className="inline-block px-4 py-1.5 bg-[#1e4a8a]/10 text-[#1e4a8a] rounded-full text-sm font-medium mb-4">
+            Discover Athlete360
+          </span>
+          <h2 
+            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#1e4a8a] mb-6"
+            style={{ fontFamily: "'Montserrat', sans-serif" }}
+          >
+            Your AI-Powered Edge in Athletic Performance
+          </h2>
+          <p className="text-slate-500 text-lg max-w-3xl mx-auto leading-relaxed">
+            Athlete360 is a comprehensive sports analytics platform built to transform how athletes, coaches, and teams prepare and compete.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {aiEdgeCards.map((card, index) => (
+            <FoldedCard key={card.id} card={card} index={index} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // AI vs Traditional comparison data
 const withAIFeatures = [
   { icon: Brain, text: 'AI-powered video analysis in minutes' },
@@ -956,6 +1123,8 @@ export default function LandingExperimental() {
           </motion.div>
         )}
       </div>
+
+      <AIEdgeSection />
 
       <div ref={featuresRef}>
         <FeaturesSection />
