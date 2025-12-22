@@ -354,6 +354,7 @@ const featuresData = [
     nameAr: 'الملف الشخصي',
     percentage: 20,
     color: '#1e4a8a',
+    darkColor: '#60a5fa',
     icon: User,
     title: 'Athlete 360° Profile',
     titleAr: 'ملف الرياضي 360°',
@@ -525,12 +526,22 @@ function FeaturesSection() {
   const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
   const isRTL = useIsRTL();
   
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  useEffect(() => {
+    const checkDark = () => setIsDarkMode(document.documentElement.classList.contains('dark'));
+    checkDark();
+    const observer = new MutationObserver(checkDark);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+  
   let currentAngle = 0;
   const slices = featuresData.map((feature) => {
     const startAngle = currentAngle;
     const endAngle = currentAngle + (feature.percentage / 100) * 360;
     currentAngle = endAngle;
-    return { ...feature, startAngle, endAngle };
+    const activeColor = isDarkMode && feature.darkColor ? feature.darkColor : feature.color;
+    return { ...feature, startAngle, endAngle, activeColor };
   });
   
   const selectedData = selectedFeature 
@@ -583,7 +594,7 @@ function FeaturesSection() {
                       key={slice.id}
                       startAngle={slice.startAngle}
                       endAngle={slice.endAngle}
-                      color={slice.color}
+                      color={slice.activeColor}
                       isSelected={selectedFeature === slice.id}
                       onClick={() => setSelectedFeature(selectedFeature === slice.id ? null : slice.id)}
                       label={slice.id}
@@ -707,7 +718,7 @@ const aiEdgeCards = [
     titleAr: 'من نحن',
     icon: Users,
     color: '#1e4a8a',
-    darkColor: '#dc2626',
+    darkColor: '#f87171',
     points: [
       'A comprehensive AI-powered sports analytics platform',
       'Built for athletes, coaches, and teams worldwide',
