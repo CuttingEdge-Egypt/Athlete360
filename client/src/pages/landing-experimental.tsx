@@ -354,7 +354,7 @@ const featuresData = [
     nameAr: 'الملف الشخصي',
     percentage: 20,
     color: '#1e4a8a',
-    darkColor: '#60a5fa',
+    darkColor: '#3b82f6',
     icon: User,
     title: 'Athlete 360° Profile',
     titleAr: 'ملف الرياضي 360°',
@@ -544,9 +544,13 @@ function FeaturesSection() {
     return { ...feature, startAngle, endAngle, activeColor };
   });
   
-  const selectedData = selectedFeature 
+  const selectedDataRaw = selectedFeature 
     ? featuresData.find(f => f.id === selectedFeature) 
     : null;
+  const selectedData = selectedDataRaw ? {
+    ...selectedDataRaw,
+    activeColor: isDarkMode && selectedDataRaw.darkColor ? selectedDataRaw.darkColor : selectedDataRaw.color
+  } : null;
 
   return (
     <section className="min-h-screen py-20 relative">
@@ -641,14 +645,14 @@ function FeaturesSection() {
                 >
                   <motion.div 
                     className="w-16 h-1.5 mb-4 rounded-full"
-                    style={{ backgroundColor: selectedData.color }}
+                    style={{ backgroundColor: selectedData.activeColor }}
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
                     transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                   />
                   <h3 
                     className="text-2xl sm:text-3xl font-bold mb-2"
-                    style={{ color: selectedData.color, fontFamily: "'Montserrat', sans-serif" }}
+                    style={{ color: selectedData.activeColor, fontFamily: "'Montserrat', sans-serif" }}
                     data-testid="feature-title"
                   >
                     {isRTL ? selectedData.titleAr : selectedData.title}
@@ -665,7 +669,7 @@ function FeaturesSection() {
                     delay: 0.08 
                   }}
                   className="text-lg mb-4 font-medium"
-                  style={{ color: selectedData.color }}
+                  style={{ color: selectedData.activeColor }}
                   data-testid="feature-subtitle"
                 >
                   {isRTL ? selectedData.subtitleAr : selectedData.subtitle}
@@ -1437,15 +1441,14 @@ export default function LandingExperimental() {
       <div ref={heroRef} className="h-screen relative">
         <InfiniteGallery3D onLoopsComplete={handleLoopsComplete} isActive={!galleryComplete} />
         
-        <motion.h2
-          className="absolute bottom-44 left-0 right-0 text-center text-xl sm:text-2xl md:text-3xl font-medium text-white z-20 px-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          style={{ fontFamily: "'Montserrat', sans-serif", textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}
-        >
-          {isRTL ? 'تفوقك المدعوم بالذكاء الاصطناعي في الأداء الرياضي.' : 'Your AI-powered edge in athletic performance.'}
-        </motion.h2>
+        <div className="absolute bottom-44 left-0 right-0 pointer-events-none flex items-center justify-center z-20 px-4">
+          <h2 
+            className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight mix-blend-exclusion text-center"
+            style={{ color: '#d4a017' }}
+          >
+            {isRTL ? 'تفوقك المدعوم بالذكاء الاصطناعي في الأداء الرياضي.' : 'Your AI-powered edge in athletic performance.'}
+          </h2>
+        </div>
 
         <motion.div 
           className="absolute bottom-24 left-0 right-0 flex flex-col sm:flex-row gap-4 justify-center px-4 z-20"
