@@ -1414,6 +1414,16 @@ export default function LandingExperimental() {
       <div ref={heroRef} className="h-screen relative">
         <InfiniteGallery3D onLoopsComplete={handleLoopsComplete} isActive={!galleryComplete} />
         
+        <motion.h2
+          className="absolute bottom-44 left-0 right-0 text-center text-xl sm:text-2xl md:text-3xl font-medium text-white z-20 px-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          style={{ fontFamily: "'Montserrat', sans-serif", textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}
+        >
+          {isRTL ? 'تفوقك المدعوم بالذكاء الاصطناعي في الأداء الرياضي.' : 'Your AI-powered edge in athletic performance.'}
+        </motion.h2>
+
         <motion.div 
           className="absolute bottom-24 left-0 right-0 flex flex-col sm:flex-row gap-4 justify-center px-4 z-20"
           initial={{ opacity: 0, y: 20 }}
