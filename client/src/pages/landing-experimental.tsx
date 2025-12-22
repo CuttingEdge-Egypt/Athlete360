@@ -749,14 +749,14 @@ const aiEdgeCards = [
     icon: Cpu,
     color: '#f59e0b',
     points: [
-      'Dual AI engine: GPT-4o + Google Gemini technology',
+      'With AI enhanced technology and various AI features we created',
       'Integration with world ranking systems & live competitions',
       'Sport-adaptive analytics across multiple disciplines',
       'Secure, mobile-ready Progressive Web App',
       'Data-driven insights powered by cutting-edge AI',
     ],
     pointsAr: [
-      'محرك ذكاء اصطناعي مزدوج: تقنية GPT-4o + Google Gemini',
+      'بتقنية الذكاء الاصطناعي المحسّنة وميزات الذكاء الاصطناعي المتنوعة التي أنشأناها',
       'التكامل مع أنظمة التصنيف العالمية والمنافسات الحية',
       'تحليلات متكيفة مع الرياضة عبر تخصصات متعددة',
       'تطبيق ويب تقدمي آمن وجاهز للجوال',
@@ -778,10 +778,10 @@ function FoldedCard({ card, index, isRTL }: FoldedCardProps) {
     offset: ["start end", "center center"],
   });
 
-  const rotateX = useTransform(scrollYProgress, [0, 1], [45, 0]);
+  const rotateX = useTransform(scrollYProgress, [0, 1], [-45, 0]);
   const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.3, 0.8, 1]);
   const scale = useTransform(scrollYProgress, [0, 1], [0.85, 1]);
-  const y = useTransform(scrollYProgress, [0, 1], [60, 0]);
+  const y = useTransform(scrollYProgress, [0, 1], [-60, 0]);
 
   const IconComponent = card.icon;
   const displayTitle = isRTL ? card.titleAr : card.title;
@@ -802,7 +802,7 @@ function FoldedCard({ card, index, isRTL }: FoldedCardProps) {
           opacity,
           scale,
           y,
-          transformOrigin: "center top",
+          transformOrigin: "center bottom",
         }}
         className="bg-white dark:bg-[#162d50] rounded-2xl shadow-xl border border-gray-100 dark:border-[#3b7dd8]/40 overflow-hidden h-full"
         data-testid={`card-${card.id}`}
@@ -849,7 +849,7 @@ function FoldedCard({ card, index, isRTL }: FoldedCardProps) {
                     style={{ color: card.color }}
                   />
                 </div>
-                <span className="text-slate-600 dark:text-slate-200 text-sm leading-relaxed">{point}</span>
+                <span className={`text-slate-600 dark:text-slate-100 leading-relaxed ${isRTL ? 'text-base' : 'text-sm'}`}>{point}</span>
               </motion.li>
             ))}
           </ul>
