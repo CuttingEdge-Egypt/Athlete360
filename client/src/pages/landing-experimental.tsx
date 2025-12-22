@@ -517,13 +517,7 @@ function FeaturesSection() {
     : null;
 
   return (
-    <section className="min-h-screen py-20 bg-white dark:bg-[#0a1628] relative">
-      <div 
-        className="absolute inset-0 opacity-30 dark:opacity-20"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-        }}
-      />
+    <section className="min-h-screen py-20 relative">
       <div className="container mx-auto px-4 relative z-10">
         <motion.h2
           className="text-3xl sm:text-4xl font-bold text-center mb-8"
@@ -820,13 +814,7 @@ function FoldedCard({ card, index }: FoldedCardProps) {
 function AIEdgeSection() {
   const isRTL = useIsRTL();
   return (
-    <section className="min-h-screen flex items-center py-12 bg-gradient-to-b from-slate-50 to-white dark:from-[#0f1f35] dark:to-[#0a1628] overflow-hidden relative">
-      <div 
-        className="absolute inset-0 opacity-30 dark:opacity-20"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-        }}
-      />
+    <section className="min-h-screen flex items-center py-12 overflow-hidden relative">
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -900,13 +888,7 @@ function ComparisonSlider() {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-b from-white to-slate-50 dark:from-[#0f1f35] dark:to-[#0a1628] relative">
-      <div 
-        className="absolute inset-0 opacity-30 dark:opacity-20"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-        }}
-      />
+    <section className="py-20 relative">
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -1081,13 +1063,7 @@ function Footer() {
   ];
 
   return (
-    <footer className="relative bg-slate-100 dark:bg-[#0f2847] border-t border-gray-200 dark:border-[#1e4a8a]/30" data-testid="footer-section">
-      <div 
-        className="absolute inset-0 opacity-30 dark:opacity-20"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-        }}
-      />
+    <footer className="relative border-t border-gray-200 dark:border-[#1e4a8a]/30" data-testid="footer-section">
       <div className="container mx-auto px-4 py-16 relative z-10" dir={isRTL ? 'rtl' : 'ltr'}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
           <div className="lg:col-span-2">
