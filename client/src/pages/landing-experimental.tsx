@@ -1371,7 +1371,7 @@ export default function LandingExperimental() {
   };
 
   return (
-    <div className="relative bg-white dark:bg-[#0a1628] text-slate-900 dark:text-white transition-colors duration-300" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="relative bg-white dark:bg-[#0a1628] text-slate-900 dark:text-white transition-colors duration-300" dir={isRTL ? 'rtl' : 'ltr'} style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
       <div 
         className="fixed inset-0 opacity-[0.03] dark:opacity-[0.08] pointer-events-none z-0"
         style={{
