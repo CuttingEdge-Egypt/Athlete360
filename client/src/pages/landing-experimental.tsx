@@ -71,7 +71,7 @@ interface PlaneData {
 const DEFAULT_DEPTH_RANGE = 50;
 const MAX_HORIZONTAL_OFFSET = 14;
 const MAX_VERTICAL_OFFSET = 10;
-const REQUIRED_LOOPS = 3;
+const REQUIRED_LOOPS = 2;
 
 interface InfiniteGallery3DProps {
   onLoopsComplete: () => void;
