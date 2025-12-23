@@ -579,17 +579,16 @@ function FeaturesSection() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             animate={{
-              x: selectedFeature ? -50 : 0,
+              x: selectedFeature ? -30 : 0,
             }}
-            transition={{ type: 'spring', stiffness: 400, damping: 28, mass: 0.8 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
             style={{ perspective: '1000px' }}
           >
             <motion.div
               animate={{
                 rotateX: 15,
-                rotateZ: selectedFeature ? -3 : 0,
               }}
-              transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
               style={{ transformStyle: 'preserve-3d' }}
             >
               <svg 
@@ -624,38 +623,21 @@ function FeaturesSection() {
             </p>
           </motion.div>
 
-          <AnimatePresence mode="wait">
-            {selectedData && (
-              <motion.div
-                key={selectedData.id}
-                initial={{ opacity: 0, x: 30, scale: 0.98 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: -20, scale: 0.98 }}
-                transition={{ 
-                  type: 'spring', 
-                  stiffness: 500, 
-                  damping: 30,
-                  mass: 0.5
-                }}
-                className="max-w-md lg:max-w-lg"
-                data-testid="feature-details"
-              >
+          <div className="w-full max-w-md lg:max-w-lg min-h-[200px] flex items-start">
+            <AnimatePresence mode="wait">
+              {selectedData ? (
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
+                  key={selectedData.id}
+                  initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
-                    type: 'spring',
-                    stiffness: 500,
-                    damping: 30,
-                    delay: 0.05 
-                  }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                  className="w-full"
+                  data-testid="feature-details"
                 >
-                  <motion.div 
+                  <div 
                     className="w-16 h-1.5 mb-4 rounded-full"
                     style={{ backgroundColor: selectedData.activeColor }}
-                    initial={{ scaleX: 0 }}
-                    animate={{ scaleX: 1 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                   />
                   <h3 
                     className="text-2xl sm:text-3xl font-bold mb-2"
@@ -664,66 +646,41 @@ function FeaturesSection() {
                   >
                     {isRTL ? selectedData.titleAr : selectedData.title}
                   </h3>
+                  
+                  <p
+                    className="text-lg mb-4 font-medium"
+                    style={{ color: selectedData.activeColor }}
+                    data-testid="feature-subtitle"
+                  >
+                    {isRTL ? selectedData.subtitleAr : selectedData.subtitle}
+                  </p>
+                  
+                  <p
+                    className="text-slate-500 dark:text-slate-300 leading-relaxed"
+                    data-testid="feature-description"
+                  >
+                    {isRTL ? selectedData.descriptionAr : selectedData.description}
+                  </p>
                 </motion.div>
-                
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
+              ) : (
+                <motion.div
+                  key="default-text"
+                  initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
-                    type: 'spring',
-                    stiffness: 500,
-                    damping: 30,
-                    delay: 0.08 
-                  }}
-                  className="text-lg mb-4 font-medium"
-                  style={{ color: selectedData.activeColor }}
-                  data-testid="feature-subtitle"
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                  className="w-full text-center lg:text-left"
                 >
-                  {isRTL ? selectedData.subtitleAr : selectedData.subtitle}
-                </motion.p>
-                
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
-                    type: 'spring',
-                    stiffness: 500,
-                    damping: 30,
-                    delay: 0.11 
-                  }}
-                  className="text-slate-500 dark:text-slate-300 leading-relaxed"
-                  data-testid="feature-description"
-                >
-                  {isRTL ? selectedData.descriptionAr : selectedData.description}
-                </motion.p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <AnimatePresence mode="wait">
-            {!selectedFeature && (
-              <motion.div
-                key="default-text"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ 
-                  type: 'spring', 
-                  stiffness: 500, 
-                  damping: 30,
-                  mass: 0.5
-                }}
-                className="w-full max-w-md lg:max-w-lg text-center lg:text-left"
-              >
-                <p className="text-slate-400 dark:text-slate-500 text-lg">
-                  {isRTL 
-                    ? 'اختر ميزة من الرسم البياني لاستكشاف ما يمكن أن يقدمه لك Athlete360.'
-                    : 'Select a feature from the chart to explore what Athlete360 can do for you.'
-                  }
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  <p className="text-slate-400 dark:text-slate-500 text-lg">
+                    {isRTL 
+                      ? 'اختر ميزة من الرسم البياني لاستكشاف ما يمكن أن يقدمه لك Athlete360.'
+                      : 'Select a feature from the chart to explore what Athlete360 can do for you.'
+                    }
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </section>
