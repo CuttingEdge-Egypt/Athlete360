@@ -542,7 +542,7 @@ function PieSlice({ startAngle, endAngle, color, isSelected, onClick, onHover, l
 }
 
 function FeaturesSection() {
-  const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
+  const [selectedFeature, setSelectedFeature] = useState<string | null>('feature1');
   const isRTL = useIsRTL();
   
   const [isMobile, setIsMobile] = useState(false);
@@ -580,23 +580,23 @@ function FeaturesSection() {
   } : null;
 
   return (
-    <section className="min-h-screen py-20 relative">
-      <div className="container mx-auto px-4 relative z-10">
+    <section className="min-h-screen py-20 xl:py-28 relative">
+      <div className="container mx-auto px-4 xl:px-8 relative z-10">
         <motion.div
-          className="text-center mb-8"
+          className="text-center mb-8 xl:mb-12"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
           <h2 
-            className="text-3xl sm:text-4xl font-bold"
+            className="text-3xl sm:text-4xl xl:text-5xl font-bold"
             style={{ fontFamily: "'Montserrat', sans-serif" }}
           >
             <span className="text-[#1e4a8a] dark:text-white">{isRTL ? 'التجربة 360°' : 'The 360° Experience'}</span>
           </h2>
         </motion.div>
 
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-20">
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-20 xl:gap-28">
           <motion.div
             className="relative flex justify-center w-full lg:w-auto"
             initial={{ opacity: 0, scale: 0.8 }}
@@ -619,7 +619,7 @@ function FeaturesSection() {
                 width={isMobile ? 300 : 420}
                 height={isMobile ? 300 : 420}
                 viewBox="0 0 420 420"
-                className="drop-shadow-xl"
+                className="drop-shadow-xl xl:scale-110 2xl:scale-125 origin-center"
                 data-testid="features-pie-chart"
               >
                 <g>
@@ -874,21 +874,21 @@ function FoldedCard({ card, index, isRTL }: FoldedCardProps) {
 function AIEdgeSection() {
   const isRTL = useIsRTL();
   return (
-    <section className="min-h-screen flex items-center py-12 overflow-hidden relative">
-      <div className="container mx-auto px-4 relative z-10">
+    <section className="min-h-screen flex items-center py-12 xl:py-20 overflow-hidden relative">
+      <div className="container mx-auto px-4 xl:px-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-8"
+          className="text-center mb-8 xl:mb-12"
         >
           <h2 
-            className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1e4a8a] dark:text-white mb-3"
+            className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-[#1e4a8a] dark:text-white mb-3"
             style={{ fontFamily: "'Montserrat', sans-serif" }}
           >
             {isRTL ? 'تفوقك المدعوم بالذكاء الاصطناعي في الأداء الرياضي' : 'Your AI-Powered Edge in Athletic Performance'}
           </h2>
-          <p className="text-slate-500 dark:text-slate-300 text-base max-w-2xl mx-auto leading-relaxed">
+          <p className="text-slate-500 dark:text-slate-300 text-base xl:text-lg max-w-2xl xl:max-w-3xl mx-auto leading-relaxed">
             {isRTL 
               ? 'Athlete360 هي منصة تحليلات رياضية شاملة مصممة لتحويل طريقة تحضير ومنافسة الرياضيين والمدربين والفرق.'
               : 'Athlete360 is a comprehensive sports analytics platform built to transform how athletes, coaches, and teams prepare and compete.'
@@ -896,7 +896,7 @@ function AIEdgeSection() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 xl:gap-8 max-w-6xl xl:max-w-7xl mx-auto">
           {aiEdgeCards.map((card, index) => (
             <FoldedCard key={card.id} card={card} index={index} isRTL={isRTL} />
           ))}
@@ -992,8 +992,8 @@ function ComparisonSlider() {
   };
 
   return (
-    <section className="py-20 relative">
-      <div className="container mx-auto px-4 relative z-10">
+    <section className="py-20 xl:py-28 relative">
+      <div className="container mx-auto px-4 xl:px-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -1001,7 +1001,7 @@ function ComparisonSlider() {
           className="text-center mb-12"
         >
           <h2 
-            className="text-3xl sm:text-4xl font-bold text-[#1e4a8a] dark:text-white mb-4"
+            className="text-3xl sm:text-4xl xl:text-5xl font-bold text-[#1e4a8a] dark:text-white mb-4"
             style={{ fontFamily: "'Montserrat', sans-serif" }}
           >
             {isRTL ? 'تحليلات الرياضة: الماضي مقابل الحاضر' : 'Sports Analytics: Then vs Now'}
@@ -1012,15 +1012,28 @@ function ComparisonSlider() {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="max-w-5xl mx-auto"
+          className="max-w-5xl xl:max-w-6xl 2xl:max-w-7xl mx-auto"
         >
           <div
-            className={`relative w-full overflow-hidden rounded-2xl shadow-2xl select-none ${isMobile ? 'aspect-[9/16] max-h-[70vh] cursor-ns-resize' : 'aspect-[16/9] cursor-ew-resize'}`}
+            className={`relative w-full overflow-hidden rounded-2xl xl:rounded-3xl shadow-2xl select-none ${isMobile ? 'aspect-[9/16] max-h-[70vh] cursor-ns-resize' : 'aspect-[16/9] cursor-ew-resize'}`}
             onMouseMove={onMouseMove}
             onMouseUp={() => setOnMouseDown(false)}
             onMouseLeave={() => setOnMouseDown(false)}
             onTouchMove={onMouseMove}
             onTouchEnd={() => setOnMouseDown(false)}
+            onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+              setAutoAnimate(false);
+              const rect = e.currentTarget.getBoundingClientRect();
+              if (isMobile) {
+                const y = e.clientY - rect.top;
+                const percentage = Math.max(5, Math.min(95, (y / rect.height) * 100));
+                setInset(percentage);
+              } else {
+                const x = e.clientX - rect.left;
+                const percentage = Math.max(5, Math.min(95, (x / rect.width) * 100));
+                setInset(percentage);
+              }
+            }}
             data-testid="comparison-slider"
           >
             {/* Slider handle - horizontal line on mobile, vertical on desktop */}
@@ -1031,13 +1044,16 @@ function ComparisonSlider() {
               <button
                 className={`bg-white border-2 border-[#1e4a8a] rounded-full hover:scale-110 transition-all w-12 h-12 select-none absolute z-40 flex justify-center items-center shadow-lg ${isMobile ? '-translate-x-1/2 left-1/2 -mt-6 cursor-ns-resize' : '-translate-y-1/2 top-1/2 -ml-6 cursor-ew-resize'}`}
                 onTouchStart={(e) => {
+                  e.stopPropagation();
                   setOnMouseDown(true);
                   onMouseMove(e);
                 }}
                 onMouseDown={(e) => {
+                  e.stopPropagation();
                   setOnMouseDown(true);
                   onMouseMove(e);
                 }}
+                onClick={(e) => e.stopPropagation()}
                 onTouchEnd={() => setOnMouseDown(false)}
                 onMouseUp={() => setOnMouseDown(false)}
                 data-testid="comparison-slider-handle"
@@ -1180,8 +1196,8 @@ function TestimonialsSection() {
   const isRTL = useIsRTL();
   
   return (
-    <section className="py-20 relative" data-testid="testimonials-section">
-      <div className="container mx-auto px-4 relative z-10">
+    <section className="py-20 xl:py-28 relative" data-testid="testimonials-section">
+      <div className="container mx-auto px-4 xl:px-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -1189,12 +1205,12 @@ function TestimonialsSection() {
           className="text-center mb-8"
         >
           <h2 
-            className="text-3xl sm:text-4xl font-bold text-[#1e4a8a] dark:text-white mb-2"
+            className="text-3xl sm:text-4xl xl:text-5xl font-bold text-[#1e4a8a] dark:text-white mb-2"
             style={{ fontFamily: "'Montserrat', sans-serif" }}
           >
             {isRTL ? 'ماذا يقول عملاؤنا' : 'What Our Clients Say'}
           </h2>
-          <p className="text-slate-500 dark:text-slate-300 text-lg max-w-2xl mx-auto">
+          <p className="text-slate-500 dark:text-slate-300 text-lg xl:text-xl max-w-2xl xl:max-w-3xl mx-auto">
             {isRTL 
               ? 'اكتشف كيف يساعد Athlete360 الرياضيين والمدربين في تحقيق أهدافهم'
               : 'Discover how Athlete360 is helping athletes and coaches achieve their goals'
@@ -1226,23 +1242,23 @@ function Footer() {
 
   return (
     <footer className="relative bg-gradient-to-b from-transparent to-slate-100 dark:to-[#0d1d33]" data-testid="footer-section">
-      <div className="container mx-auto px-4 py-20 relative z-10" dir={isRTL ? 'rtl' : 'ltr'}>
-        <div className="max-w-4xl mx-auto text-center mb-16">
+      <div className="container mx-auto px-4 xl:px-8 py-20 xl:py-28 relative z-10" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="max-w-4xl xl:max-w-5xl mx-auto text-center mb-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-white flex items-center justify-center shadow-lg overflow-hidden">
+            <div className="w-32 h-32 xl:w-40 xl:h-40 mx-auto mb-6 rounded-full bg-white flex items-center justify-center shadow-lg overflow-hidden">
               <img src={footerLogo} alt="Athlete360" className="h-full w-full object-cover" />
             </div>
             <h3 
-              className="text-2xl sm:text-3xl font-bold text-[#1e4a8a] dark:text-white mb-4"
+              className="text-2xl sm:text-3xl xl:text-4xl font-bold text-[#1e4a8a] dark:text-white mb-4"
               style={{ fontFamily: "'Montserrat', sans-serif" }}
             >
               {isRTL ? 'ابدأ رحلتك الرياضية اليوم' : 'Start Your Athletic Journey Today'}
             </h3>
-            <p className="text-slate-600 dark:text-slate-300 text-lg mb-8 max-w-2xl mx-auto">
+            <p className="text-slate-600 dark:text-slate-300 text-lg xl:text-xl mb-8 max-w-2xl xl:max-w-3xl mx-auto">
               {isRTL 
                 ? 'انضم إلى آلاف الرياضيين الذين يستخدمون الذكاء الاصطناعي لتحسين أدائهم'
                 : 'Join thousands of athletes using AI to elevate their performance'
@@ -1381,7 +1397,7 @@ export default function LandingExperimental() {
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.2 }}
           >
-            <img src={logoImage} alt="Athlete360" className="h-12 sm:h-14 w-auto" />
+            <img src={footerLogo} alt="Athlete360" className="h-14 sm:h-16 lg:h-[72px] xl:h-20 w-auto rounded-xl" />
           </motion.div>
           <motion.div 
             className="flex items-center gap-1.5 sm:gap-3"
@@ -1433,9 +1449,9 @@ export default function LandingExperimental() {
           <InfiniteGallery3D onLoopsComplete={handleLoopsComplete} isActive={!galleryComplete} />
         </div>
         
-        <div className="absolute bottom-8 left-0 right-0 flex flex-col items-center justify-center z-20 px-4">
+        <div className="absolute bottom-8 xl:bottom-12 left-0 right-0 flex flex-col items-center justify-center z-20 px-4 xl:px-8">
           <h1 
-            className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-center mb-3"
+            className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight text-center mb-3"
             style={{ fontFamily: "'Montserrat', sans-serif", color: '#d4a017' }}
           >
             Athlete360
