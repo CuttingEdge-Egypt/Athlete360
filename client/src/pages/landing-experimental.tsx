@@ -890,10 +890,37 @@ const withoutAIFeatures = [
 function ComparisonSlider() {
   const [inset, setInset] = useState<number>(50);
   const [onMouseDown, setOnMouseDown] = useState<boolean>(false);
+  const [autoAnimate, setAutoAnimate] = useState<boolean>(true);
   const isRTL = useIsRTL();
+  const animationRef = useRef<number>();
+
+  useEffect(() => {
+    if (!autoAnimate) return;
+    
+    let startTime: number;
+    const duration = 4000;
+    
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = (elapsed % duration) / duration;
+      const newInset = 30 + Math.sin(progress * Math.PI * 2) * 20;
+      setInset(newInset);
+      animationRef.current = requestAnimationFrame(animate);
+    };
+    
+    animationRef.current = requestAnimationFrame(animate);
+    
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [autoAnimate]);
 
   const onMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
     if (!onMouseDown) return;
+    setAutoAnimate(false);
 
     const rect = e.currentTarget.getBoundingClientRect();
     let x = 0;
@@ -921,13 +948,7 @@ function ComparisonSlider() {
             className="text-3xl sm:text-4xl font-bold text-[#1e4a8a] dark:text-white mb-4"
             style={{ fontFamily: "'Montserrat', sans-serif" }}
           >
-            <motion.span
-              animate={{ x: [0, 15, 0, -15, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="inline-block"
-            >
-              {isRTL ? 'تحليلات الرياضة: الماضي مقابل الحاضر' : 'Sports Analytics: Then vs Now'}
-            </motion.span>
+            {isRTL ? 'تحليلات الرياضة: الماضي مقابل الحاضر' : 'Sports Analytics: Then vs Now'}
           </h2>
         </motion.div>
 
@@ -1343,46 +1364,45 @@ export default function LandingExperimental() {
           <InfiniteGallery3D onLoopsComplete={handleLoopsComplete} isActive={!galleryComplete} />
         </div>
         
-        <div className="absolute bottom-52 left-0 right-0 flex flex-col items-center justify-center z-20 px-4">
+        <div className="absolute bottom-36 left-0 right-0 flex flex-col items-center justify-center z-20 px-4">
           <h1 
-            className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-center mb-4"
+            className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-center mb-3"
             style={{ fontFamily: "'Montserrat', sans-serif", color: '#d4a017' }}
           >
             Athlete360
           </h1>
           <h2 
-            className="text-base sm:text-lg md:text-xl font-medium tracking-tight text-center"
+            className="text-base sm:text-lg md:text-xl font-medium tracking-tight text-center mb-6"
             style={{ fontFamily: "'Inter', sans-serif", color: '#6ba3eb' }}
           >
             {isRTL ? 'تفوقك المدعوم بالذكاء الاصطناعي في الأداء الرياضي.' : 'Your AI-powered edge in athletic performance.'}
           </h2>
+          <motion.div 
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+          >
+            <Button 
+              onClick={() => setLocation('/signup')}
+              data-testid="button-get-started-experimental"
+              size="lg"
+              className="bg-[#1e4a8a] hover:bg-[#d4a017] text-white text-lg px-8 py-6 rounded-full shadow-lg shadow-blue-800/25 transition-colors duration-200"
+            >
+              {t('landing.hero.ctaStart', 'Start Free Trial')}
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+            <Button 
+              onClick={() => setLocation('/login')}
+              data-testid="button-signin-hero-experimental"
+              size="lg"
+              variant="outline"
+              className="border-[#d4a017] text-[#d4a017] bg-transparent hover:bg-[#d4a017] hover:text-white text-lg px-8 py-6 rounded-full transition-colors duration-200"
+            >
+              {t('landing.navigation.signIn')}
+            </Button>
+          </motion.div>
         </div>
-
-        <motion.div 
-          className="absolute bottom-24 left-0 right-0 flex flex-col sm:flex-row gap-4 justify-center px-4 z-20"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-        >
-          <Button 
-            onClick={() => setLocation('/signup')}
-            data-testid="button-get-started-experimental"
-            size="lg"
-            className="bg-[#1e4a8a] hover:bg-[#d4a017] text-white text-lg px-8 py-6 rounded-full shadow-lg shadow-blue-800/25 transition-colors duration-200"
-          >
-            {t('landing.hero.ctaStart', 'Start Free Trial')}
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-          <Button 
-            onClick={() => setLocation('/login')}
-            data-testid="button-signin-hero-experimental"
-            size="lg"
-            variant="outline"
-            className="border-[#d4a017] text-[#d4a017] bg-transparent hover:bg-[#d4a017] hover:text-white text-lg px-8 py-6 rounded-full transition-colors duration-200"
-          >
-            {t('landing.navigation.signIn')}
-          </Button>
-        </motion.div>
 
         {referralCode && (
           <motion.div
