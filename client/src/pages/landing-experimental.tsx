@@ -1163,8 +1163,8 @@ function Footer() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <div className="w-28 h-28 mx-auto mb-6 rounded-full bg-white flex items-center justify-center shadow-lg">
-              <img src={logoImage} alt="Athlete360" className="h-20 w-auto" />
+            <div className="w-40 h-40 mx-auto mb-6 rounded-full bg-white flex items-center justify-center shadow-lg p-4">
+              <img src={logoImage} alt="Athlete360" className="h-auto w-full object-contain" />
             </div>
             <h3 
               className="text-2xl sm:text-3xl font-bold text-[#1e4a8a] dark:text-white mb-4"
