@@ -376,7 +376,7 @@ const featuresData = [
     color: '#1e4a8a',
     darkColor: '#3b82f6',
     icon: User,
-    title: 'Athlete 360° Profile',
+    title: 'Analytics360',
     titleAr: 'ملف الرياضي 360°',
     subtitle: 'Your complete performance overview',
     subtitleAr: 'نظرة شاملة على أدائك',
