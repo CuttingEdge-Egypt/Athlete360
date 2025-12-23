@@ -792,13 +792,13 @@ function FoldedCard({ card, index, isRTL }: FoldedCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: cardRef,
-    offset: ["start end", "center center"],
+    offset: ["start end", "end start"],
   });
 
-  const rotateX = useTransform(scrollYProgress, [0, 1], [-45, 0]);
-  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.3, 0.8, 1]);
-  const scale = useTransform(scrollYProgress, [0, 1], [0.85, 1]);
-  const y = useTransform(scrollYProgress, [0, 1], [-60, 0]);
+  const rotateX = useTransform(scrollYProgress, [0, 0.35, 0.5, 0.65, 1], [-35, -10, 0, 0, 0]);
+  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.5, 1], [0.3, 0.9, 1, 1]);
+  const scale = useTransform(scrollYProgress, [0, 0.4, 0.5, 1], [0.85, 0.98, 1, 1]);
+  const y = useTransform(scrollYProgress, [0, 0.4, 0.5, 1], [-40, -10, 0, 0]);
 
   const IconComponent = card.icon;
   const displayTitle = isRTL ? card.titleAr : card.title;
