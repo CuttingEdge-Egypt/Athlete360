@@ -618,21 +618,21 @@ function FeaturesSection() {
                   className="w-full"
                   data-testid="feature-details"
                 >
-                  <div className="flex items-center gap-3 mb-4">
+                  <div className="flex items-center gap-4 mb-4">
                     <div 
-                      className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                       style={{ backgroundColor: `${selectedData.activeColor}20` }}
                     >
                       <selectedData.icon className="w-6 h-6" style={{ color: selectedData.activeColor }} />
                     </div>
+                    <h3 
+                      className="text-2xl sm:text-3xl font-bold"
+                      style={{ color: selectedData.activeColor, fontFamily: "'Montserrat', sans-serif" }}
+                      data-testid="feature-title"
+                    >
+                      {isRTL ? selectedData.titleAr : selectedData.title}
+                    </h3>
                   </div>
-                  <h3 
-                    className="text-2xl sm:text-3xl font-bold mb-2"
-                    style={{ color: selectedData.activeColor, fontFamily: "'Montserrat', sans-serif" }}
-                    data-testid="feature-title"
-                  >
-                    {isRTL ? selectedData.titleAr : selectedData.title}
-                  </h3>
                   
                   <p
                     className="text-lg mb-4 font-medium"
