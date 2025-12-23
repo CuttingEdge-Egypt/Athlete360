@@ -427,8 +427,6 @@ interface PieSliceProps {
 }
 
 function PieSlice({ startAngle, endAngle, color, isSelected, onClick, label, name, cx, cy, radius }: PieSliceProps) {
-  const [isHovered, setIsHovered] = useState(false);
-  
   const startRad = (startAngle - 90) * (Math.PI / 180);
   const endRad = (endAngle - 90) * (Math.PI / 180);
   
@@ -442,22 +440,21 @@ function PieSlice({ startAngle, endAngle, color, isSelected, onClick, label, nam
   const pathD = `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
   
   const midAngle = ((startAngle + endAngle) / 2 - 90) * (Math.PI / 180);
-  const hoverOffset = isHovered && !isSelected ? 6 : 0;
   const selectedOffset = isSelected ? 18 : 0;
-  const totalOffset = hoverOffset + selectedOffset;
-  const translateX = Math.cos(midAngle) * totalOffset;
-  const translateY = Math.sin(midAngle) * totalOffset;
+  const translateX = Math.cos(midAngle) * selectedOffset;
+  const translateY = Math.sin(midAngle) * selectedOffset;
   
   const labelRadius = radius * 0.65;
   const labelX = cx + labelRadius * Math.cos(midAngle);
   const labelY = cy + labelRadius * Math.sin(midAngle);
   
-  const scale = isSelected ? 1.02 : isHovered ? 1.01 : 1;
+  const scale = isSelected ? 1.02 : 1;
   
   return (
     <g
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => onClick()}
+      onMouseLeave={() => {}}
+      style={{ cursor: 'pointer' }}
     >
       <motion.path
         d={pathD}
@@ -470,7 +467,7 @@ function PieSlice({ startAngle, endAngle, color, isSelected, onClick, label, nam
           x: translateX,
           y: translateY,
           scale: scale,
-          opacity: isSelected ? 1 : isHovered ? 0.95 : 0.9,
+          opacity: isSelected ? 1 : 0.9,
         }}
         transition={{ 
           type: 'spring', 
@@ -595,7 +592,7 @@ function FeaturesSection() {
                       endAngle={slice.endAngle}
                       color={slice.activeColor}
                       isSelected={selectedFeature === slice.id}
-                      onClick={() => setSelectedFeature(selectedFeature === slice.id ? null : slice.id)}
+                      onClick={() => setSelectedFeature(slice.id)}
                       label={slice.id}
                       name={isRTL ? slice.nameAr : slice.name}
                       cx={210}
@@ -611,7 +608,7 @@ function FeaturesSection() {
 
           <div className="w-full max-w-md lg:max-w-lg min-h-[200px] flex items-start">
             <AnimatePresence mode="wait">
-              {selectedData ? (
+              {selectedData && (
                 <motion.div
                   key={selectedData.id}
                   initial={{ opacity: 0, y: 15 }}
@@ -621,10 +618,18 @@ function FeaturesSection() {
                   className="w-full"
                   data-testid="feature-details"
                 >
-                  <div 
-                    className="w-16 h-1.5 mb-4 rounded-full"
-                    style={{ backgroundColor: selectedData.activeColor }}
-                  />
+                  <div className="flex items-center gap-3 mb-4">
+                    <div 
+                      className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      style={{ backgroundColor: `${selectedData.activeColor}20` }}
+                    >
+                      <selectedData.icon className="w-6 h-6" style={{ color: selectedData.activeColor }} />
+                    </div>
+                    <div 
+                      className="h-1.5 flex-1 max-w-16 rounded-full"
+                      style={{ backgroundColor: selectedData.activeColor }}
+                    />
+                  </div>
                   <h3 
                     className="text-2xl sm:text-3xl font-bold mb-2"
                     style={{ color: selectedData.activeColor, fontFamily: "'Montserrat', sans-serif" }}
@@ -646,22 +651,6 @@ function FeaturesSection() {
                     data-testid="feature-description"
                   >
                     {isRTL ? selectedData.descriptionAr : selectedData.description}
-                  </p>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="default-text"
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.25, ease: "easeOut" }}
-                  className="w-full text-center lg:text-left"
-                >
-                  <p className="text-slate-400 dark:text-slate-500 text-lg">
-                    {isRTL 
-                      ? 'اختر ميزة من الرسم البياني لاستكشاف ما يمكن أن يقدمه لك Athlete360.'
-                      : 'Select a feature from the chart to explore what Athlete360 can do for you.'
-                    }
                   </p>
                 </motion.div>
               )}
@@ -1137,30 +1126,8 @@ function TestimonialsSection() {
 
 // Footer Component
 function Footer() {
-  const { t } = useTranslation(['home', 'common']);
   const isRTL = useIsRTL();
   const [, setLocation] = useLocation();
-  
-  const footerLinks = {
-    sections: [
-      { label: 'About Us', labelAr: 'من نحن', sectionId: 'ai-edge-section' },
-      { label: 'Features', labelAr: 'المميزات', sectionId: 'features-section' },
-      { label: 'AI Advantage', labelAr: 'ميزة الذكاء الاصطناعي', sectionId: 'comparison-section' },
-      { label: 'Testimonials', labelAr: 'آراء العملاء', sectionId: 'testimonials-section' },
-    ],
-    sports: [
-      { label: 'Taekwondo', href: '/signup' },
-      { label: 'Tennis', href: '/signup' },
-      { label: 'Boxing', href: '/signup' },
-      { label: 'Judo', href: '/signup' },
-    ],
-    company: [
-      { label: 'About Us', labelAr: 'من نحن' },
-      { label: 'Contact', labelAr: 'اتصل بنا' },
-      { label: 'Privacy Policy', labelAr: 'سياسة الخصوصية' },
-      { label: 'Terms of Service', labelAr: 'شروط الخدمة' },
-    ],
-  };
 
   const socialLinks = [
     { icon: Twitter, href: '#', label: 'Twitter' },
@@ -1170,105 +1137,92 @@ function Footer() {
   ];
 
   return (
-    <footer className="relative border-t border-gray-200 dark:border-[#1e4a8a]/30" data-testid="footer-section">
-      <div className="container mx-auto px-4 py-16 relative z-10" dir={isRTL ? 'rtl' : 'ltr'}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
-          <div className="lg:col-span-2">
-            <img src={logoImage} alt="Athlete360" className="h-14 w-auto mb-4" />
-            <p className="text-slate-600 dark:text-slate-300 mb-6 max-w-sm leading-relaxed">
+    <footer className="relative bg-gradient-to-b from-transparent to-slate-100 dark:to-[#0d1d33]" data-testid="footer-section">
+      <div className="container mx-auto px-4 py-20 relative z-10" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="max-w-4xl mx-auto text-center mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <img src={logoImage} alt="Athlete360" className="h-16 w-auto mx-auto mb-6" />
+            <h3 
+              className="text-2xl sm:text-3xl font-bold text-[#1e4a8a] dark:text-white mb-4"
+              style={{ fontFamily: "'Montserrat', sans-serif" }}
+            >
+              {isRTL ? 'ابدأ رحلتك الرياضية اليوم' : 'Start Your Athletic Journey Today'}
+            </h3>
+            <p className="text-slate-600 dark:text-slate-300 text-lg mb-8 max-w-2xl mx-auto">
               {isRTL 
-                ? 'يحول Athlete360 طريقة تحضير الرياضيين وتدريبهم ومنافستهم من خلال وضع التحليلات العالمية والتدريب بالذكاء الاصطناعي في أيديهم - بدءًا من دعم التايكوندو الشامل والتوسع إلى الرياضيين في جميع الرياضات.'
-                : 'Athlete360 transforms how athletes prepare, train, and compete by putting world-class analytics and AI coaching in their hands—starting with comprehensive Taekwondo support and expanding to athletes across all sports.'
+                ? 'انضم إلى آلاف الرياضيين الذين يستخدمون الذكاء الاصطناعي لتحسين أدائهم'
+                : 'Join thousands of athletes using AI to elevate their performance'
               }
             </p>
-            <div className="flex items-center gap-4">
-              {socialLinks.map((social, index) => (
-                <a
-                  key={index}
-                  href={social.href}
-                  aria-label={social.label}
-                  className="w-10 h-10 rounded-full bg-[#1e4a8a]/10 dark:bg-white/10 flex items-center justify-center text-[#1e4a8a] dark:text-white hover:bg-[#1e4a8a] hover:text-white dark:hover:bg-white dark:hover:text-[#1e4a8a] transition-colors"
-                  data-testid={`social-${social.label.toLowerCase()}`}
-                >
-                  <social.icon className="w-5 h-5" />
-                </a>
-              ))}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                onClick={() => setLocation('/signup')}
+                className="bg-[#1e4a8a] hover:bg-[#d4a017] text-white px-8 py-3 rounded-full transition-colors"
+                data-testid="footer-cta-signup"
+              >
+                {isRTL ? 'ابدأ مجانًا' : 'Get Started Free'}
+                <ArrowRight className="ml-2 rtl:ml-0 rtl:mr-2 h-4 w-4" />
+              </Button>
             </div>
-          </div>
-          
-          <div>
-            <h4 className="font-bold text-slate-800 dark:text-white mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-              {isRTL ? 'الأقسام' : 'Sections'}
-            </h4>
-            <ul className="space-y-3">
-              {footerLinks.sections.map((link, index) => (
-                <li key={index}>
-                  <button 
-                    onClick={() => {
-                      const section = document.getElementById(link.sectionId);
-                      section?.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                    className="text-slate-600 dark:text-slate-300 hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors text-sm"
-                    data-testid={`footer-link-section-${index}`}
-                  >
-                    {isRTL ? link.labelAr : link.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="font-bold text-slate-800 dark:text-white mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-              {isRTL ? 'الرياضات' : 'Sports'}
-            </h4>
-            <ul className="space-y-3">
-              {footerLinks.sports.map((link, index) => (
-                <li key={index}>
-                  <button 
-                    onClick={() => setLocation(link.href)}
-                    className="text-slate-600 dark:text-slate-300 hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors text-sm"
-                    data-testid={`footer-link-sport-${index}`}
-                  >
-                    {link.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="font-bold text-slate-800 dark:text-white mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-              {isRTL ? 'الشركة' : 'Company'}
-            </h4>
-            <ul className="space-y-3">
-              {footerLinks.company.map((link, index) => (
-                <li key={index}>
-                  <span 
-                    className="text-slate-600 dark:text-slate-300 text-sm"
-                    data-testid={`footer-link-company-${index}`}
-                  >
-                    {isRTL ? link.labelAr : link.label}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          </motion.div>
         </div>
         
-        <div className="border-t border-gray-300 dark:border-[#1e4a8a]/30 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-slate-500 dark:text-slate-400 text-sm">
-              &copy; {new Date().getFullYear()} Athlete360. {isRTL ? 'جميع الحقوق محفوظة.' : 'All rights reserved.'}
-            </p>
-            <div className="flex items-center gap-6 text-sm">
-              <a href="#" className="text-slate-500 dark:text-slate-400 hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors">
-                {isRTL ? 'سياسة الخصوصية' : 'Privacy Policy'}
-              </a>
-              <a href="#" className="text-slate-500 dark:text-slate-400 hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors">
-                {isRTL ? 'شروط الخدمة' : 'Terms of Service'}
-              </a>
-            </div>
+        <div className="flex flex-wrap justify-center gap-8 mb-12">
+          <button 
+            onClick={() => document.getElementById('ai-edge-section')?.scrollIntoView({ behavior: 'smooth' })}
+            className="text-slate-600 dark:text-slate-300 hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors text-sm font-medium"
+          >
+            {isRTL ? 'من نحن' : 'About'}
+          </button>
+          <button 
+            onClick={() => document.getElementById('features-section')?.scrollIntoView({ behavior: 'smooth' })}
+            className="text-slate-600 dark:text-slate-300 hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors text-sm font-medium"
+          >
+            {isRTL ? 'المميزات' : 'Features'}
+          </button>
+          <button 
+            onClick={() => document.getElementById('comparison-section')?.scrollIntoView({ behavior: 'smooth' })}
+            className="text-slate-600 dark:text-slate-300 hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors text-sm font-medium"
+          >
+            {isRTL ? 'ميزة الذكاء الاصطناعي' : 'AI Advantage'}
+          </button>
+          <button 
+            onClick={() => document.getElementById('testimonials-section')?.scrollIntoView({ behavior: 'smooth' })}
+            className="text-slate-600 dark:text-slate-300 hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors text-sm font-medium"
+          >
+            {isRTL ? 'آراء العملاء' : 'Testimonials'}
+          </button>
+        </div>
+        
+        <div className="flex justify-center gap-4 mb-10">
+          {socialLinks.map((social, index) => (
+            <a
+              key={index}
+              href={social.href}
+              aria-label={social.label}
+              className="w-11 h-11 rounded-full bg-[#1e4a8a]/10 dark:bg-white/10 flex items-center justify-center text-[#1e4a8a] dark:text-white hover:bg-[#1e4a8a] hover:text-white dark:hover:bg-[#d4a017] transition-all hover:scale-110"
+              data-testid={`social-${social.label.toLowerCase()}`}
+            >
+              <social.icon className="w-5 h-5" />
+            </a>
+          ))}
+        </div>
+        
+        <div className="border-t border-slate-200 dark:border-[#1e4a8a]/30 pt-8">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+            <p>&copy; {new Date().getFullYear()} Athlete360</p>
+            <span className="hidden sm:inline">•</span>
+            <a href="#" className="hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors">
+              {isRTL ? 'سياسة الخصوصية' : 'Privacy'}
+            </a>
+            <span className="hidden sm:inline">•</span>
+            <a href="#" className="hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors">
+              {isRTL ? 'الشروط' : 'Terms'}
+            </a>
           </div>
         </div>
       </div>
@@ -1384,13 +1338,21 @@ export default function LandingExperimental() {
         </div>
       </motion.nav>
 
-      <div ref={heroRef} className="h-screen relative">
-        <InfiniteGallery3D onLoopsComplete={handleLoopsComplete} isActive={!galleryComplete} />
+      <div ref={heroRef} className="h-screen relative flex flex-col">
+        <div className="flex-1 relative" style={{ height: '55%' }}>
+          <InfiniteGallery3D onLoopsComplete={handleLoopsComplete} isActive={!galleryComplete} />
+        </div>
         
-        <div className="absolute bottom-44 left-0 right-0 pointer-events-none flex items-center justify-center z-20 px-4">
+        <div className="absolute bottom-52 left-0 right-0 flex flex-col items-center justify-center z-20 px-4">
+          <h1 
+            className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-center mb-4"
+            style={{ fontFamily: "'Montserrat', sans-serif", color: '#d4a017' }}
+          >
+            Athlete360
+          </h1>
           <h2 
-            className="text-base sm:text-lg md:text-xl font-medium tracking-tight mix-blend-exclusion text-center"
-            style={{ fontFamily: "'Inter', sans-serif", color: '#d4a017' }}
+            className="text-base sm:text-lg md:text-xl font-medium tracking-tight text-center"
+            style={{ fontFamily: "'Inter', sans-serif", color: '#6ba3eb' }}
           >
             {isRTL ? 'تفوقك المدعوم بالذكاء الاصطناعي في الأداء الرياضي.' : 'Your AI-powered edge in athletic performance.'}
           </h2>
