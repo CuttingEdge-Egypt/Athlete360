@@ -9,6 +9,7 @@ import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { AnimatedTestimonials } from '@/components/ui/animated-testimonials';
 import logoImage from '@assets/Png_new_logo_1766325613955.png';
 import logoAppIcon from '@assets/Athlete360LogoAppIcon_1765824701090.png';
+import footerLogo from '@assets/NewLogo_1766512419006.jpeg';
 
 // Theme context for dark/light mode
 const useTheme = () => {
@@ -1163,8 +1164,8 @@ function Footer() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <div className="w-40 h-40 mx-auto mb-6 rounded-full bg-white flex items-center justify-center shadow-lg p-4">
-              <img src={logoImage} alt="Athlete360" className="h-auto w-full object-contain" />
+            <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-white flex items-center justify-center shadow-lg overflow-hidden">
+              <img src={footerLogo} alt="Athlete360" className="h-full w-full object-cover" />
             </div>
             <h3 
               className="text-2xl sm:text-3xl font-bold text-[#1e4a8a] dark:text-white mb-4"
