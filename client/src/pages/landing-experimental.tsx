@@ -1163,7 +1163,9 @@ function Footer() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <img src={logoAppIcon} alt="Athlete360" className="h-24 w-24 mx-auto mb-6 rounded-full object-cover shadow-lg" />
+            <div className="w-28 h-28 mx-auto mb-6 rounded-full bg-white flex items-center justify-center shadow-lg">
+              <img src={logoImage} alt="Athlete360" className="h-20 w-auto" />
+            </div>
             <h3 
               className="text-2xl sm:text-3xl font-bold text-[#1e4a8a] dark:text-white mb-4"
               style={{ fontFamily: "'Montserrat', sans-serif" }}
