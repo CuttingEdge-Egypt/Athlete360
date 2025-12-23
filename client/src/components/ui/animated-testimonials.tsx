@@ -25,6 +25,14 @@ export const AnimatedTestimonials = ({
 }) => {
   const [active, setActive] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const resetTimer = useCallback(() => {
     if (intervalRef.current) {
@@ -70,9 +78,14 @@ export const AnimatedTestimonials = ({
   const displayQuote = isRTL && currentTestimonial.quoteAr ? currentTestimonial.quoteAr : currentTestimonial.quote;
   const displayDesignation = isRTL && currentTestimonial.designationAr ? currentTestimonial.designationAr : currentTestimonial.designation;
 
+  const handleSelectTestimonial = (index: number) => {
+    setActive(index);
+    resetTimer();
+  };
+
   return (
     <div className={cn("max-w-sm md:max-w-4xl mx-auto px-4 md:px-8 lg:px-12 py-20", className)} dir={isRTL ? 'rtl' : 'ltr'}>
-      <div className="relative grid grid-cols-1 md:grid-cols-2 gap-20">
+      <div className="relative grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20">
         <div>
           <div className="relative h-80 w-full">
             <AnimatePresence>
@@ -117,6 +130,31 @@ export const AnimatedTestimonials = ({
               ))}
             </AnimatePresence>
           </div>
+          
+          {/* Mobile profile picture navigation */}
+          {isMobile && (
+            <div className="flex justify-center gap-3 mt-6">
+              {testimonials.map((testimonial, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSelectTestimonial(index)}
+                  className={cn(
+                    "w-12 h-12 rounded-full overflow-hidden border-2 transition-all duration-300",
+                    isActive(index) 
+                      ? "border-[#1e4a8a] dark:border-[#d4a017] scale-110 shadow-lg" 
+                      : "border-transparent opacity-60 hover:opacity-100"
+                  )}
+                  data-testid={`testimonial-avatar-${index}`}
+                >
+                  <img
+                    src={testimonial.src}
+                    alt={testimonial.name}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <div className="flex justify-between flex-col py-4">
           <motion.div
@@ -170,7 +208,8 @@ export const AnimatedTestimonials = ({
               ))}
             </motion.p>
           </motion.div>
-          <div className={`flex gap-4 pt-12 md:pt-0 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          {/* Desktop arrow navigation - hidden on mobile */}
+          <div className={`hidden md:flex gap-4 pt-12 md:pt-0 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <button
               onClick={handlePrev}
               className="h-7 w-7 rounded-full bg-slate-200 dark:bg-white/10 flex items-center justify-center group/button"

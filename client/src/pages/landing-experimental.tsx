@@ -134,6 +134,8 @@ function InfiniteGallery3D({ onLoopsComplete, isActive }: InfiniteGallery3DProps
     }));
   }, [visibleCount, totalImages, spatialPositions, depthRange]);
 
+  const touchStartY = useRef<number>(0);
+
   const handleWheel = useCallback((event: WheelEvent) => {
     if (!isActive || loopsCompletedRef.current) return;
     
@@ -141,6 +143,25 @@ function InfiniteGallery3D({ onLoopsComplete, isActive }: InfiniteGallery3DProps
     event.stopPropagation();
     
     const scrollAmount = event.deltaY * 0.01 * speed;
+    setScrollVelocity((prev) => prev + scrollAmount);
+    setAutoPlay(false);
+    lastInteraction.current = Date.now();
+  }, [speed, isActive]);
+
+  const handleTouchStart = useCallback((event: TouchEvent) => {
+    if (!isActive || loopsCompletedRef.current) return;
+    touchStartY.current = event.touches[0].clientY;
+  }, [isActive]);
+
+  const handleTouchMove = useCallback((event: TouchEvent) => {
+    if (!isActive || loopsCompletedRef.current) return;
+    
+    event.preventDefault();
+    const touchY = event.touches[0].clientY;
+    const deltaY = touchStartY.current - touchY;
+    touchStartY.current = touchY;
+    
+    const scrollAmount = deltaY * 0.02 * speed;
     setScrollVelocity((prev) => prev + scrollAmount);
     setAutoPlay(false);
     lastInteraction.current = Date.now();
@@ -164,13 +185,17 @@ function InfiniteGallery3D({ onLoopsComplete, isActive }: InfiniteGallery3DProps
     const container = containerRef.current;
     if (container && isActive) {
       container.addEventListener('wheel', handleWheel, { passive: false });
+      container.addEventListener('touchstart', handleTouchStart, { passive: true });
+      container.addEventListener('touchmove', handleTouchMove, { passive: false });
       document.addEventListener('keydown', handleKeyDown);
       return () => {
         container.removeEventListener('wheel', handleWheel);
+        container.removeEventListener('touchstart', handleTouchStart);
+        container.removeEventListener('touchmove', handleTouchMove);
         document.removeEventListener('keydown', handleKeyDown);
       };
     }
-  }, [handleWheel, handleKeyDown, isActive]);
+  }, [handleWheel, handleKeyDown, handleTouchStart, handleTouchMove, isActive]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -421,14 +446,16 @@ interface PieSliceProps {
   color: string;
   isSelected: boolean;
   onClick: () => void;
+  onHover: () => void;
   label: string;
   name: string;
   cx: number;
   cy: number;
   radius: number;
+  isMobile: boolean;
 }
 
-function PieSlice({ startAngle, endAngle, color, isSelected, onClick, label, name, cx, cy, radius }: PieSliceProps) {
+function PieSlice({ startAngle, endAngle, color, isSelected, onClick, onHover, label, name, cx, cy, radius, isMobile }: PieSliceProps) {
   const startRad = (startAngle - 90) * (Math.PI / 180);
   const endRad = (endAngle - 90) * (Math.PI / 180);
   
@@ -454,8 +481,9 @@ function PieSlice({ startAngle, endAngle, color, isSelected, onClick, label, nam
   
   return (
     <g
-      onMouseEnter={() => onClick()}
+      onMouseEnter={() => !isMobile && onHover()}
       onMouseLeave={() => {}}
+      onClick={onClick}
       style={{ cursor: 'pointer' }}
     >
       <motion.path
@@ -517,6 +545,14 @@ function FeaturesSection() {
   const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
   const isRTL = useIsRTL();
   
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
   const [isDarkMode, setIsDarkMode] = useState(false);
   useEffect(() => {
     const checkDark = () => setIsDarkMode(document.documentElement.classList.contains('dark'));
@@ -560,14 +596,14 @@ function FeaturesSection() {
           </h2>
         </motion.div>
 
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20">
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-20">
           <motion.div
-            className="relative"
+            className="relative flex justify-center w-full lg:w-auto"
             initial={{ opacity: 0, scale: 0.8 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             animate={{
-              x: selectedFeature ? -30 : 0,
+              x: !isMobile && selectedFeature ? -30 : 0,
             }}
             transition={{ duration: 0.3, ease: "easeOut" }}
             style={{ perspective: '1000px' }}
@@ -580,8 +616,8 @@ function FeaturesSection() {
               style={{ transformStyle: 'preserve-3d' }}
             >
               <svg 
-                width="420" 
-                height="420" 
+                width={isMobile ? 300 : 420}
+                height={isMobile ? 300 : 420}
                 viewBox="0 0 420 420"
                 className="drop-shadow-xl"
                 data-testid="features-pie-chart"
@@ -594,12 +630,14 @@ function FeaturesSection() {
                       endAngle={slice.endAngle}
                       color={slice.activeColor}
                       isSelected={selectedFeature === slice.id}
-                      onClick={() => setSelectedFeature(slice.id)}
+                      onClick={() => setSelectedFeature(selectedFeature === slice.id ? null : slice.id)}
+                      onHover={() => setSelectedFeature(slice.id)}
                       label={slice.id}
                       name={isRTL ? slice.nameAr : slice.name}
                       cx={210}
                       cy={210}
                       radius={180}
+                      isMobile={isMobile}
                     />
                   ))}
                 </g>
@@ -891,6 +929,14 @@ function ComparisonSlider() {
   const [autoAnimate, setAutoAnimate] = useState<boolean>(true);
   const isRTL = useIsRTL();
   const animationRef = useRef<number>();
+  
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     if (!autoAnimate) return;
@@ -921,16 +967,28 @@ function ComparisonSlider() {
     setAutoAnimate(false);
 
     const rect = e.currentTarget.getBoundingClientRect();
-    let x = 0;
-
-    if ("touches" in e && e.touches.length > 0) {
-      x = e.touches[0].clientX - rect.left;
-    } else if ("clientX" in e) {
-      x = e.clientX - rect.left;
-    }
     
-    const percentage = Math.max(5, Math.min(95, (x / rect.width) * 100));
-    setInset(percentage);
+    if (isMobile) {
+      // Vertical movement for mobile
+      let y = 0;
+      if ("touches" in e && e.touches.length > 0) {
+        y = e.touches[0].clientY - rect.top;
+      } else if ("clientY" in e) {
+        y = e.clientY - rect.top;
+      }
+      const percentage = Math.max(5, Math.min(95, (y / rect.height) * 100));
+      setInset(percentage);
+    } else {
+      // Horizontal movement for desktop
+      let x = 0;
+      if ("touches" in e && e.touches.length > 0) {
+        x = e.touches[0].clientX - rect.left;
+      } else if ("clientX" in e) {
+        x = e.clientX - rect.left;
+      }
+      const percentage = Math.max(5, Math.min(95, (x / rect.width) * 100));
+      setInset(percentage);
+    }
   };
 
   return (
@@ -957,7 +1015,7 @@ function ComparisonSlider() {
           className="max-w-5xl mx-auto"
         >
           <div
-            className="relative w-full aspect-[16/9] overflow-hidden rounded-2xl shadow-2xl select-none cursor-ew-resize"
+            className={`relative w-full overflow-hidden rounded-2xl shadow-2xl select-none ${isMobile ? 'aspect-[9/16] max-h-[70vh] cursor-ns-resize' : 'aspect-[16/9] cursor-ew-resize'}`}
             onMouseMove={onMouseMove}
             onMouseUp={() => setOnMouseDown(false)}
             onMouseLeave={() => setOnMouseDown(false)}
@@ -965,12 +1023,13 @@ function ComparisonSlider() {
             onTouchEnd={() => setOnMouseDown(false)}
             data-testid="comparison-slider"
           >
+            {/* Slider handle - horizontal line on mobile, vertical on desktop */}
             <div
-              className="bg-slate-300 h-full w-1 absolute z-30 top-0 -ml-0.5 select-none"
-              style={{ left: inset + "%" }}
+              className={`bg-slate-300 absolute z-30 select-none ${isMobile ? 'w-full h-1 left-0 -mt-0.5' : 'h-full w-1 top-0 -ml-0.5'}`}
+              style={isMobile ? { top: inset + "%" } : { left: inset + "%" }}
             >
               <button
-                className="bg-white border-2 border-[#1e4a8a] rounded-full hover:scale-110 transition-all w-12 h-12 select-none -translate-y-1/2 absolute top-1/2 -ml-6 z-40 cursor-ew-resize flex justify-center items-center shadow-lg"
+                className={`bg-white border-2 border-[#1e4a8a] rounded-full hover:scale-110 transition-all w-12 h-12 select-none absolute z-40 flex justify-center items-center shadow-lg ${isMobile ? '-translate-x-1/2 left-1/2 -mt-6 cursor-ns-resize' : '-translate-y-1/2 top-1/2 -ml-6 cursor-ew-resize'}`}
                 onTouchStart={(e) => {
                   setOnMouseDown(true);
                   onMouseMove(e);
@@ -983,15 +1042,17 @@ function ComparisonSlider() {
                 onMouseUp={() => setOnMouseDown(false)}
                 data-testid="comparison-slider-handle"
               >
-                <GripVertical className="h-5 w-5 text-[#1e4a8a] select-none" />
+                <GripVertical className={`h-5 w-5 text-[#1e4a8a] select-none ${isMobile ? 'rotate-90' : ''}`} />
               </button>
             </div>
 
+            {/* AI Side - clips from top on mobile, from left on desktop */}
             <div
-              className="absolute left-0 top-0 z-20 h-full bg-gradient-to-br from-[#1e4a8a] to-[#2d5fa3] p-8 sm:p-12 flex flex-col justify-center items-center overflow-hidden"
+              className="absolute left-0 top-0 z-20 h-full w-full bg-gradient-to-br from-[#1e4a8a] to-[#2d5fa3] p-6 sm:p-12 flex flex-col justify-center items-center overflow-hidden"
               style={{
-                width: "100%",
-                clipPath: `inset(0 ${100 - inset}% 0 0)`,
+                clipPath: isMobile 
+                  ? `inset(0 0 ${100 - inset}% 0)` 
+                  : `inset(0 ${100 - inset}% 0 0)`,
               }}
             >
               <div className="flex flex-col items-center gap-2 mb-6">
@@ -1024,7 +1085,15 @@ function ComparisonSlider() {
               </div>
             </div>
 
-            <div className="absolute left-0 top-0 z-10 w-full h-full bg-gradient-to-br from-slate-700 to-slate-800 p-8 sm:p-12 flex flex-col justify-center items-center">
+            {/* Traditional Side - clips from bottom on mobile, full width on desktop (revealed when AI side is clipped) */}
+            <div 
+              className="absolute left-0 top-0 z-10 w-full h-full bg-gradient-to-br from-slate-700 to-slate-800 p-6 sm:p-12 flex flex-col justify-center items-center"
+              style={{
+                clipPath: isMobile 
+                  ? `inset(${inset}% 0 0 0)` 
+                  : 'none',
+              }}
+            >
               <div className="flex flex-col items-center gap-2 mb-6">
                 <div className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center">
                   <Clock className="h-7 w-7 text-slate-400" />
