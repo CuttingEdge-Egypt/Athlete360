@@ -15,7 +15,8 @@ import footerLogo from '@assets/NewLogo_1766512419006.jpeg';
 const useTheme = () => {
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('theme') === 'dark';
+      const saved = localStorage.getItem('theme');
+      if (saved) return saved === 'dark';
     }
     return false;
   });
@@ -1430,7 +1431,7 @@ export default function LandingExperimental() {
               <button
                 onClick={toggleTheme}
                 data-testid="theme-toggle"
-                className="w-11 h-11 rounded-lg bg-slate-100 dark:bg-white/10 flex items-center justify-center text-slate-600 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20 transition-colors"
+                className="w-11 h-11 rounded-lg bg-slate-100 dark:bg-white/10 flex items-center justify-center text-slate-600 dark:text-white hover:bg-[#d4a017] hover:text-white transition-colors"
                 aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
