@@ -8,6 +8,7 @@ import { AnimatePresence } from 'framer-motion';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { AnimatedTestimonials } from '@/components/ui/animated-testimonials';
 import logoImage from '@assets/Png_new_logo_1766325613955.png';
+import logoAppIcon from '@assets/Athlete360LogoAppIcon_1765824701090.png';
 
 // Theme context for dark/light mode
 const useTheme = () => {
@@ -1162,7 +1163,7 @@ function Footer() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <img src={logoImage} alt="Athlete360" className="h-16 w-auto mx-auto mb-6" />
+            <img src={logoAppIcon} alt="Athlete360" className="h-24 w-24 mx-auto mb-6 rounded-full object-cover shadow-lg" />
             <h3 
               className="text-2xl sm:text-3xl font-bold text-[#1e4a8a] dark:text-white mb-4"
               style={{ fontFamily: "'Montserrat', sans-serif" }}
