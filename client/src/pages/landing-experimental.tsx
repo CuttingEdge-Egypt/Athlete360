@@ -370,7 +370,7 @@ function InfiniteGallery3D({ onLoopsComplete, isActive }: InfiniteGallery3DProps
 const featuresData = [
   {
     id: 'feature1',
-    name: 'Profile',
+    name: 'Analytics360',
     nameAr: 'الملف الشخصي',
     percentage: 20,
     color: '#1e4a8a',
@@ -1431,7 +1431,7 @@ export default function LandingExperimental() {
               <button
                 onClick={toggleTheme}
                 data-testid="theme-toggle"
-                className="w-11 h-11 rounded-lg bg-slate-100 dark:bg-white/10 flex items-center justify-center text-slate-600 dark:text-white hover:bg-[#d4a017] hover:text-white transition-colors"
+                className="w-11 h-11 rounded-lg bg-slate-100 dark:bg-white/10 flex items-center justify-center text-slate-600 dark:text-white hover:bg-[#d4a017] dark:hover:bg-[#d4a017] hover:text-white transition-colors"
                 aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
