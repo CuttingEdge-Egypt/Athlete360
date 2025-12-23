@@ -365,7 +365,7 @@ const featuresData = [
   },
   {
     id: 'feature2',
-    name: 'Video AI',
+    name: 'Video Analysis',
     nameAr: 'تحليل الفيديو',
     percentage: 20,
     color: '#10b981',
