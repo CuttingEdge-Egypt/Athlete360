@@ -71,7 +71,7 @@ interface PlaneData {
 const DEFAULT_DEPTH_RANGE = 50;
 const MAX_HORIZONTAL_OFFSET = 14;
 const MAX_VERTICAL_OFFSET = 10;
-const REQUIRED_LOOPS = 2;
+const REQUIRED_LOOPS = 1;
 
 interface InfiniteGallery3DProps {
   onLoopsComplete: () => void;
@@ -393,8 +393,8 @@ const featuresData = [
   },
   {
     id: 'feature4',
-    name: 'Nutrition',
-    nameAr: 'التغذية',
+    name: 'Training & Nutrition',
+    nameAr: 'التدريب والتغذية',
     percentage: 20,
     color: '#ef4444',
     icon: Utensils,
@@ -407,8 +407,8 @@ const featuresData = [
   },
   {
     id: 'feature5',
-    name: 'Rank Up',
-    nameAr: 'رفع الترتيب',
+    name: 'Rank Up Calculator',
+    nameAr: 'حاسبة رفع الترتيب',
     percentage: 20,
     color: '#8b5cf6',
     icon: TrendingUp,
@@ -555,15 +555,22 @@ function FeaturesSection() {
   return (
     <section className="min-h-screen py-20 relative">
       <div className="container mx-auto px-4 relative z-10">
-        <motion.h2
-          className="text-3xl sm:text-4xl font-bold text-center mb-8"
+        <motion.div
+          className="text-center mb-8"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
-          <span className="text-[#1e4a8a] dark:text-white">{isRTL ? 'التجربة 360°' : 'The 360° Experience'}</span>
-        </motion.h2>
+          <span className="inline-block px-3 py-1 bg-[#1e4a8a]/10 dark:bg-[#1e4a8a]/30 text-[#1e4a8a] dark:text-[#6ba3eb] rounded-full text-sm font-medium mb-3">
+            {isRTL ? 'تجربة 360°' : '360° Experience'}
+          </span>
+          <h2 
+            className="text-3xl sm:text-4xl font-bold"
+            style={{ fontFamily: "'Montserrat', sans-serif" }}
+          >
+            <span className="text-[#1e4a8a] dark:text-white">{isRTL ? 'التجربة 360°' : 'The 360° Experience'}</span>
+          </h2>
+        </motion.div>
 
         <div className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20">
           <motion.div
@@ -693,21 +700,30 @@ function FeaturesSection() {
             )}
           </AnimatePresence>
 
-          {!selectedFeature && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2, delay: 0.3 }}
-              className="w-full max-w-md lg:max-w-lg text-center lg:text-left"
-            >
-              <p className="text-slate-400 dark:text-slate-500 text-lg">
-                {isRTL 
-                  ? 'اختر ميزة من الرسم البياني لاستكشاف ما يمكن أن يقدمه لك Athlete360.'
-                  : 'Select a feature from the chart to explore what Athlete360 can do for you.'
-                }
-              </p>
-            </motion.div>
-          )}
+          <AnimatePresence mode="wait">
+            {!selectedFeature && (
+              <motion.div
+                key="default-text"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ 
+                  type: 'spring', 
+                  stiffness: 500, 
+                  damping: 30,
+                  mass: 0.5
+                }}
+                className="w-full max-w-md lg:max-w-lg text-center lg:text-left"
+              >
+                <p className="text-slate-400 dark:text-slate-500 text-lg">
+                  {isRTL 
+                    ? 'اختر ميزة من الرسم البياني لاستكشاف ما يمكن أن يقدمه لك Athlete360.'
+                    : 'Select a feature from the chart to explore what Athlete360 can do for you.'
+                  }
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </section>
@@ -1165,7 +1181,7 @@ function TestimonialsSection() {
           className="text-center mb-8"
         >
           <span className="inline-block px-4 py-1.5 bg-[#1e4a8a]/10 dark:bg-[#1e4a8a]/30 text-[#1e4a8a] dark:text-[#6ba3eb] rounded-full text-sm font-medium mb-4">
-            {isRTL ? 'قصص النجاح' : 'Success Stories'}
+            {isRTL ? 'آراء العملاء' : 'Testimonials'}
           </span>
           <h2 
             className="text-3xl sm:text-4xl font-bold text-[#1e4a8a] dark:text-white mb-2"
