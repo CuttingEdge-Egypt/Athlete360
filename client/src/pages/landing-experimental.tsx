@@ -323,14 +323,6 @@ function InfiniteGallery3D({ onLoopsComplete, isActive }: InfiniteGallery3DProps
         })}
       </div>
 
-      <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-        <h1 
-          className="text-5xl md:text-8xl font-bold tracking-tight mix-blend-exclusion"
-          style={{ fontFamily: "'Montserrat', sans-serif", color: '#1e4a8a' }}
-        >
-          Athlete360
-        </h1>
-      </div>
 
       {loopsCompleted && (
         <motion.div 
@@ -561,9 +553,6 @@ function FeaturesSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <span className="inline-block px-3 py-1 bg-[#1e4a8a]/10 dark:bg-[#1e4a8a]/30 text-[#1e4a8a] dark:text-[#6ba3eb] rounded-full text-sm font-medium mb-3">
-            {isRTL ? 'تجربة 360°' : '360° Experience'}
-          </span>
           <h2 
             className="text-3xl sm:text-4xl font-bold"
             style={{ fontFamily: "'Montserrat', sans-serif" }}
@@ -618,9 +607,6 @@ function FeaturesSection() {
               </svg>
             </motion.div>
             
-            <p className="text-center mt-6 text-slate-500 dark:text-slate-400 text-sm">
-              {isRTL ? 'انقر على قسم لمعرفة المزيد' : 'Click on a section to learn more'}
-            </p>
           </motion.div>
 
           <div className="w-full max-w-md lg:max-w-lg min-h-[200px] flex items-start">
@@ -871,9 +857,6 @@ function AIEdgeSection() {
           viewport={{ once: true }}
           className="text-center mb-8"
         >
-          <span className="inline-block px-3 py-1 bg-[#1e4a8a]/10 dark:bg-[#1e4a8a]/30 text-[#1e4a8a] dark:text-[#6ba3eb] rounded-full text-sm font-medium mb-3">
-            {isRTL ? 'اكتشف Athlete360' : 'Discover Athlete360'}
-          </span>
           <h2 
             className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1e4a8a] dark:text-white mb-3"
             style={{ fontFamily: "'Montserrat', sans-serif" }}
@@ -945,21 +928,18 @@ function ComparisonSlider() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <span className="inline-block px-4 py-1.5 bg-[#1e4a8a]/10 dark:bg-[#1e4a8a]/30 text-[#1e4a8a] dark:text-[#6ba3eb] rounded-full text-sm font-medium mb-4">
-            {isRTL ? 'ميزة الذكاء الاصطناعي' : 'The AI Advantage'}
-          </span>
           <h2 
             className="text-3xl sm:text-4xl font-bold text-[#1e4a8a] dark:text-white mb-4"
             style={{ fontFamily: "'Montserrat', sans-serif" }}
           >
-            {isRTL ? 'تحليلات الرياضة: الماضي مقابل الحاضر' : 'Sports Analytics: Then vs Now'}
+            <motion.span
+              animate={{ x: [0, 15, 0, -15, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="inline-block"
+            >
+              {isRTL ? 'تحليلات الرياضة: الماضي مقابل الحاضر' : 'Sports Analytics: Then vs Now'}
+            </motion.span>
           </h2>
-          <p className="text-slate-500 dark:text-slate-300 text-lg max-w-2xl mx-auto">
-            {isRTL 
-              ? 'اسحب شريط التمرير لترى كيف يحول الذكاء الاصطناعي تحليل الأداء الرياضي'
-              : 'Drag the slider to see how AI transforms athletic performance analysis'
-            }
-          </p>
         </motion.div>
 
         <motion.div
@@ -1068,12 +1048,6 @@ function ComparisonSlider() {
             </div>
           </div>
 
-          <p className="text-center mt-6 text-slate-500 dark:text-slate-400 text-sm">
-            {isRTL 
-              ? 'اسحب شريط التمرير للمقارنة بين التحليلات المدعومة بالذكاء الاصطناعي والتقليدية'
-              : 'Drag the slider to compare AI-powered vs traditional sports analytics'
-            }
-          </p>
         </motion.div>
       </div>
     </section>
@@ -1137,9 +1111,6 @@ function TestimonialsSection() {
           viewport={{ once: true }}
           className="text-center mb-8"
         >
-          <span className="inline-block px-4 py-1.5 bg-[#1e4a8a]/10 dark:bg-[#1e4a8a]/30 text-[#1e4a8a] dark:text-[#6ba3eb] rounded-full text-sm font-medium mb-4">
-            {isRTL ? 'آراء العملاء' : 'Testimonials'}
-          </span>
           <h2 
             className="text-3xl sm:text-4xl font-bold text-[#1e4a8a] dark:text-white mb-2"
             style={{ fontFamily: "'Montserrat', sans-serif" }}
