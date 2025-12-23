@@ -625,10 +625,6 @@ function FeaturesSection() {
                     >
                       <selectedData.icon className="w-6 h-6" style={{ color: selectedData.activeColor }} />
                     </div>
-                    <div 
-                      className="h-1.5 flex-1 max-w-16 rounded-full"
-                      style={{ backgroundColor: selectedData.activeColor }}
-                    />
                   </div>
                   <h3 
                     className="text-2xl sm:text-3xl font-bold mb-2"
@@ -904,7 +900,7 @@ function ComparisonSlider() {
       if (!startTime) startTime = timestamp;
       const elapsed = timestamp - startTime;
       const progress = (elapsed % duration) / duration;
-      const newInset = 30 + Math.sin(progress * Math.PI * 2) * 20;
+      const newInset = 50 + Math.sin(progress * Math.PI * 2) * 40;
       setInset(newInset);
       animationRef.current = requestAnimationFrame(animate);
     };
