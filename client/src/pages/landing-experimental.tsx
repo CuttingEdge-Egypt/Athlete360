@@ -898,7 +898,7 @@ function ComparisonSlider() {
     if (!autoAnimate) return;
     
     let startTime: number;
-    const duration = 4000;
+    const duration = 8000;
     
     const animate = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
@@ -1364,7 +1364,7 @@ export default function LandingExperimental() {
           <InfiniteGallery3D onLoopsComplete={handleLoopsComplete} isActive={!galleryComplete} />
         </div>
         
-        <div className="absolute bottom-36 left-0 right-0 flex flex-col items-center justify-center z-20 px-4">
+        <div className="absolute bottom-8 left-0 right-0 flex flex-col items-center justify-center z-20 px-4">
           <h1 
             className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-center mb-3"
             style={{ fontFamily: "'Montserrat', sans-serif", color: '#d4a017' }}
