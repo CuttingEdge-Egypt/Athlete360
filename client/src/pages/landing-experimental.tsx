@@ -11,23 +11,28 @@ import logoImage from '@assets/Png_new_logo_1766325613955.png';
 import logoAppIcon from '@assets/Athlete360LogoAppIcon_1765824701090.png';
 import footerLogo from '@assets/NewLogo_1766512419006.jpeg';
 
-// Theme context for dark/light mode
+// Theme context for dark/light mode - scoped to landing page only
 const useTheme = () => {
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('theme');
+      const saved = localStorage.getItem('landing-theme');
       if (saved) return saved === 'dark';
     }
     return false;
   });
 
   useEffect(() => {
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    localStorage.setItem('landing-theme', isDark ? 'dark' : 'light');
     if (isDark) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
+    
+    // Cleanup: remove dark class when leaving landing page
+    return () => {
+      document.documentElement.classList.remove('dark');
+    };
   }, [isDark]);
 
   return { isDark, toggleTheme: () => setIsDark(!isDark) };
