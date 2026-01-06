@@ -3,7 +3,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { useTranslation } from 'react-i18next';
-import { UserPlus, Gift, ArrowRight, ChevronDown, GripVertical, User, Video, Target, Utensils, TrendingUp, Trophy, Sparkles, Brain, Clock, FileText, Users, BarChart3, Clipboard, XCircle, CheckCircle, Zap, Globe, Shield, Cpu, Sun, Moon, Mail, MapPin, Phone, Twitter, Instagram, Youtube, Linkedin } from 'lucide-react';
+import { UserPlus, Gift, ArrowRight, ChevronDown, GripVertical, User, Video, Target, Utensils, TrendingUp, Trophy, Sparkles, Brain, Clock, FileText, Users, BarChart3, Clipboard, XCircle, CheckCircle, Zap, Globe, Shield, Cpu, Sun, Moon } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { AnimatedTestimonials } from '@/components/ui/animated-testimonials';
@@ -1239,12 +1239,6 @@ function Footer() {
   const isRTL = useIsRTL();
   const [, setLocation] = useLocation();
 
-  const socialLinks = [
-    { icon: Twitter, href: '#', label: 'Twitter' },
-    { icon: Instagram, href: '#', label: 'Instagram' },
-    { icon: Youtube, href: '#', label: 'YouTube' },
-    { icon: Linkedin, href: '#', label: 'LinkedIn' },
-  ];
 
   return (
     <footer className="relative bg-gradient-to-b from-transparent to-slate-100 dark:to-[#0d1d33]" data-testid="footer-section">
@@ -1283,45 +1277,31 @@ function Footer() {
           </motion.div>
         </div>
         
-        <div className="flex flex-wrap justify-center gap-8 mb-12">
+        <div className="flex flex-wrap justify-center gap-4 mb-12">
           <button 
             onClick={() => document.getElementById('ai-edge-section')?.scrollIntoView({ behavior: 'smooth' })}
-            className="text-slate-600 dark:text-slate-300 hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors text-sm font-medium"
+            className="text-slate-600 dark:text-slate-300 hover:text-white hover:bg-[#1e4a8a] dark:hover:bg-[#d4a017] transition-all text-sm font-medium px-4 py-2 rounded-lg"
           >
             {isRTL ? 'من نحن' : 'About'}
           </button>
           <button 
             onClick={() => document.getElementById('features-section')?.scrollIntoView({ behavior: 'smooth' })}
-            className="text-slate-600 dark:text-slate-300 hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors text-sm font-medium"
+            className="text-slate-600 dark:text-slate-300 hover:text-white hover:bg-[#1e4a8a] dark:hover:bg-[#d4a017] transition-all text-sm font-medium px-4 py-2 rounded-lg"
           >
             {isRTL ? 'المميزات' : 'Features'}
           </button>
           <button 
             onClick={() => document.getElementById('comparison-section')?.scrollIntoView({ behavior: 'smooth' })}
-            className="text-slate-600 dark:text-slate-300 hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors text-sm font-medium"
+            className="text-slate-600 dark:text-slate-300 hover:text-white hover:bg-[#1e4a8a] dark:hover:bg-[#d4a017] transition-all text-sm font-medium px-4 py-2 rounded-lg"
           >
             {isRTL ? 'ميزة الذكاء الاصطناعي' : 'AI Advantage'}
           </button>
           <button 
             onClick={() => document.getElementById('testimonials-section')?.scrollIntoView({ behavior: 'smooth' })}
-            className="text-slate-600 dark:text-slate-300 hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors text-sm font-medium"
+            className="text-slate-600 dark:text-slate-300 hover:text-white hover:bg-[#1e4a8a] dark:hover:bg-[#d4a017] transition-all text-sm font-medium px-4 py-2 rounded-lg"
           >
             {isRTL ? 'آراء العملاء' : 'Testimonials'}
           </button>
-        </div>
-        
-        <div className="flex justify-center gap-4 mb-10">
-          {socialLinks.map((social, index) => (
-            <a
-              key={index}
-              href={social.href}
-              aria-label={social.label}
-              className="w-11 h-11 rounded-full bg-[#1e4a8a]/10 dark:bg-white/10 flex items-center justify-center text-[#1e4a8a] dark:text-white hover:bg-[#1e4a8a] hover:text-white dark:hover:bg-[#d4a017] transition-all hover:scale-110"
-              data-testid={`social-${social.label.toLowerCase()}`}
-            >
-              <social.icon className="w-5 h-5" />
-            </a>
-          ))}
         </div>
         
         <div className="border-t border-slate-200 dark:border-[#1e4a8a]/30 pt-8">
