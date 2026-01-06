@@ -42,7 +42,7 @@ function Router() {
         <Route path="/test-auth" component={TestAuthPage} />
         <Route path="/signup" component={SignupPage} />
         <Route path="/login" component={LoginPage} />
-        <Route path="/landing-new" component={LandingExperimental} />
+        <Route path="/landing-old" component={Landing} />
         
         {isLoading ? (
           <Route path="/" component={() => (
@@ -54,7 +54,7 @@ function Router() {
             </div>
           )} />
         ) : !isAuthenticated ? (
-          <Route path="/" component={Landing} />
+          <Route path="/" component={LandingExperimental} />
         ) : (
           <AuthenticatedLayout>
             <Route path="/" component={Home} />
