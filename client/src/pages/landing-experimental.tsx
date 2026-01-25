@@ -1438,7 +1438,7 @@ export default function LandingExperimental() {
             className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight text-center mb-3"
             style={{ fontFamily: "'Montserrat', sans-serif" }}
           >
-            <span className="text-[#1e4a8a] dark:text-white">Athlete</span>
+            <span className="text-black dark:text-white">Athlete</span>
             <span className="text-[#ef3340]">360°</span>
           </h1>
           <h2 
