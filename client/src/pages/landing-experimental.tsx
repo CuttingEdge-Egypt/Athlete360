@@ -1441,8 +1441,8 @@ export default function LandingExperimental() {
             Athlete360
           </h1>
           <h2 
-            className="text-base sm:text-lg md:text-xl font-medium tracking-tight text-center mb-6"
-            style={{ fontFamily: "'Inter', sans-serif", color: '#6ba3eb' }}
+            className="text-base sm:text-lg md:text-xl font-medium tracking-tight text-center mb-6 text-slate-500 dark:text-white"
+            style={{ fontFamily: "'Inter', sans-serif" }}
           >
             {isRTL ? 'تفوقك المدعوم بالذكاء الاصطناعي في الأداء الرياضي.' : 'Your AI-powered edge in athletic performance.'}
           </h2>
