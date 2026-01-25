@@ -1247,8 +1247,8 @@ function Footer({ isDark }: { isDark: boolean }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <div className="w-32 h-32 xl:w-40 xl:h-40 mx-auto mb-6 rounded-2xl bg-white dark:bg-transparent flex items-center justify-center shadow-lg overflow-hidden">
-              <img src={isDark ? logoDark : logoLight} alt="Athlete360" className="h-full w-full object-contain p-2" />
+            <div className="w-32 h-32 xl:w-40 xl:h-40 mx-auto mb-6 rounded-full bg-white dark:bg-transparent flex items-center justify-center shadow-lg overflow-hidden">
+              <img src={isDark ? logoDark : logoLight} alt="Athlete360" className="h-full w-full object-contain p-2 rounded-full" />
             </div>
             <h3 
               className="text-2xl sm:text-3xl xl:text-4xl font-bold text-[#1e4a8a] dark:text-white mb-4"
@@ -1265,7 +1265,7 @@ function Footer({ isDark }: { isDark: boolean }) {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 onClick={() => setLocation('/signup')}
-                className="bg-[#1e4a8a] hover:bg-[#d4a017] text-white px-8 py-3 rounded-full transition-colors"
+                className="bg-[#1e4a8a] hover:bg-[#ef3340] text-white px-8 py-3 rounded-full transition-colors"
                 data-testid="footer-cta-signup"
               >
                 {isRTL ? 'ابدأ مجانًا' : 'Get Started Free'}
@@ -1278,25 +1278,25 @@ function Footer({ isDark }: { isDark: boolean }) {
         <div className="flex flex-wrap justify-center gap-4 mb-12">
           <button 
             onClick={() => document.getElementById('ai-edge-section')?.scrollIntoView({ behavior: 'smooth' })}
-            className="text-slate-600 dark:text-slate-300 hover:text-white hover:bg-[#1e4a8a] dark:hover:bg-[#d4a017] transition-all text-sm font-medium px-4 py-2 rounded-lg"
+            className="text-slate-600 dark:text-slate-300 hover:text-white hover:bg-[#1e4a8a] dark:hover:bg-[#ef3340] transition-all text-sm font-medium px-4 py-2 rounded-lg"
           >
             {isRTL ? 'من نحن' : 'About'}
           </button>
           <button 
             onClick={() => document.getElementById('features-section')?.scrollIntoView({ behavior: 'smooth' })}
-            className="text-slate-600 dark:text-slate-300 hover:text-white hover:bg-[#1e4a8a] dark:hover:bg-[#d4a017] transition-all text-sm font-medium px-4 py-2 rounded-lg"
+            className="text-slate-600 dark:text-slate-300 hover:text-white hover:bg-[#1e4a8a] dark:hover:bg-[#ef3340] transition-all text-sm font-medium px-4 py-2 rounded-lg"
           >
             {isRTL ? 'المميزات' : 'Features'}
           </button>
           <button 
             onClick={() => document.getElementById('comparison-section')?.scrollIntoView({ behavior: 'smooth' })}
-            className="text-slate-600 dark:text-slate-300 hover:text-white hover:bg-[#1e4a8a] dark:hover:bg-[#d4a017] transition-all text-sm font-medium px-4 py-2 rounded-lg"
+            className="text-slate-600 dark:text-slate-300 hover:text-white hover:bg-[#1e4a8a] dark:hover:bg-[#ef3340] transition-all text-sm font-medium px-4 py-2 rounded-lg"
           >
             {isRTL ? 'ميزة الذكاء الاصطناعي' : 'AI Advantage'}
           </button>
           <button 
             onClick={() => document.getElementById('testimonials-section')?.scrollIntoView({ behavior: 'smooth' })}
-            className="text-slate-600 dark:text-slate-300 hover:text-white hover:bg-[#1e4a8a] dark:hover:bg-[#d4a017] transition-all text-sm font-medium px-4 py-2 rounded-lg"
+            className="text-slate-600 dark:text-slate-300 hover:text-white hover:bg-[#1e4a8a] dark:hover:bg-[#ef3340] transition-all text-sm font-medium px-4 py-2 rounded-lg"
           >
             {isRTL ? 'آراء العملاء' : 'Testimonials'}
           </button>
@@ -1306,11 +1306,11 @@ function Footer({ isDark }: { isDark: boolean }) {
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
             <p>&copy; {new Date().getFullYear()} Athlete360</p>
             <span className="hidden sm:inline">•</span>
-            <a href="#" className="hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors">
+            <a href="#" className="hover:text-[#1e4a8a] dark:hover:text-[#ef3340] transition-colors">
               {isRTL ? 'سياسة الخصوصية' : 'Privacy'}
             </a>
             <span className="hidden sm:inline">•</span>
-            <a href="#" className="hover:text-[#1e4a8a] dark:hover:text-[#d4a017] transition-colors">
+            <a href="#" className="hover:text-[#1e4a8a] dark:hover:text-[#ef3340] transition-colors">
               {isRTL ? 'الشروط' : 'Terms'}
             </a>
           </div>
@@ -1393,7 +1393,7 @@ export default function LandingExperimental() {
               <Button 
                 onClick={() => setLocation('/signup')}
                 data-testid="button-signup-experimental"
-                className="bg-[#1e4a8a] hover:bg-[#d4a017] text-white text-xs sm:text-sm px-2 sm:px-4 h-11 transition-colors duration-200"
+                className="bg-[#1e4a8a] hover:bg-[#ef3340] text-white text-xs sm:text-sm px-2 sm:px-4 h-11 transition-colors duration-200"
               >
                 <UserPlus className="mr-1 sm:mr-2 rtl:mr-0 rtl:ml-1 sm:rtl:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                 {t('landing.navigation.signUp')}
@@ -1414,7 +1414,7 @@ export default function LandingExperimental() {
               <button
                 onClick={toggleTheme}
                 data-testid="theme-toggle"
-                className="w-11 h-11 rounded-lg bg-slate-100 dark:bg-white/10 flex items-center justify-center text-slate-600 dark:text-white hover:bg-[#d4a017] dark:hover:bg-[#d4a017] hover:text-white transition-colors"
+                className="w-11 h-11 rounded-lg bg-slate-100 dark:bg-white/10 flex items-center justify-center text-slate-600 dark:text-white hover:bg-[#ef3340] dark:hover:bg-[#ef3340] hover:text-white transition-colors"
                 aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -1436,7 +1436,7 @@ export default function LandingExperimental() {
         <div className="absolute bottom-8 xl:bottom-12 left-0 right-0 flex flex-col items-center justify-center z-20 px-4 xl:px-8">
           <h1 
             className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight text-center mb-3"
-            style={{ fontFamily: "'Montserrat', sans-serif", color: '#d4a017' }}
+            style={{ fontFamily: "'Montserrat', sans-serif", color: '#ef3340' }}
           >
             Athlete360
           </h1>
@@ -1456,7 +1456,7 @@ export default function LandingExperimental() {
               onClick={() => setLocation('/signup')}
               data-testid="button-get-started-experimental"
               size="lg"
-              className="bg-[#1e4a8a] hover:bg-[#d4a017] text-white text-lg px-8 py-6 rounded-full shadow-lg shadow-blue-800/25 transition-colors duration-200"
+              className="bg-[#1e4a8a] hover:bg-[#ef3340] text-white text-lg px-8 py-6 rounded-full shadow-lg shadow-blue-800/25 transition-colors duration-200"
             >
               {t('landing.hero.ctaStart', 'Start Free Trial')}
               <ArrowRight className="ml-2 h-5 w-5" />
@@ -1466,7 +1466,7 @@ export default function LandingExperimental() {
               data-testid="button-signin-hero-experimental"
               size="lg"
               variant="outline"
-              className="border-[#d4a017] text-[#d4a017] bg-transparent hover:bg-[#d4a017] hover:text-white text-lg px-8 py-6 rounded-full transition-colors duration-200"
+              className="border-[#ef3340] text-[#ef3340] bg-transparent hover:bg-[#ef3340] hover:text-white text-lg px-8 py-6 rounded-full transition-colors duration-200"
             >
               {t('landing.navigation.signIn')}
             </Button>

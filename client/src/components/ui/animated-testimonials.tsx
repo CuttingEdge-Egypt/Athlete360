@@ -141,7 +141,7 @@ export const AnimatedTestimonials = ({
                   className={cn(
                     "w-12 h-12 rounded-full overflow-hidden border-2 transition-all duration-300",
                     isActive(index) 
-                      ? "border-[#1e4a8a] dark:border-[#d4a017] scale-110 shadow-lg" 
+                      ? "border-[#1e4a8a] dark:border-[#ef3340] scale-110 shadow-lg" 
                       : "border-transparent opacity-60 hover:opacity-100"
                   )}
                   data-testid={`testimonial-avatar-${index}`}

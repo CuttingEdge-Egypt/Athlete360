@@ -190,7 +190,7 @@ export default function Landing() {
               <Button 
                 onClick={() => setLocation('/signup')}
                 data-testid="button-signup"
-                className="bg-[#2563eb] hover:bg-[#d4a017] text-white text-xs sm:text-sm px-2 sm:px-4 h-11 transition-colors duration-200"
+                className="bg-[#2563eb] hover:bg-[#ef3340] text-white text-xs sm:text-sm px-2 sm:px-4 h-11 transition-colors duration-200"
               >
                 <UserPlus className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                 {t('landing.navigation.signUp')}
@@ -268,7 +268,7 @@ export default function Landing() {
                 <Button 
                   onClick={() => setLocation('/signup')}
                   data-testid="button-hero-signup"
-                  className="bg-[#2563eb] hover:bg-[#d4a017] text-white px-6 sm:px-8 h-12 sm:h-14 text-base sm:text-lg font-semibold w-full sm:w-auto shadow-lg hover:shadow-xl transition-colors duration-200"
+                  className="bg-[#2563eb] hover:bg-[#ef3340] text-white px-6 sm:px-8 h-12 sm:h-14 text-base sm:text-lg font-semibold w-full sm:w-auto shadow-lg hover:shadow-xl transition-colors duration-200"
                 >
                   <UserPlus className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                   {t('landing.hero.ctaStart')}
@@ -603,7 +603,7 @@ export default function Landing() {
                       <Button 
                         onClick={() => setLocation('/signup')}
                         data-testid="button-start-free-trial"
-                        className="w-full bg-[#2563eb] hover:bg-[#d4a017] py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-colors duration-200"
+                        className="w-full bg-[#2563eb] hover:bg-[#ef3340] py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-colors duration-200"
                       >
                         <UserPlus className="mr-2" size={20} />
                         {t('landing.hero.ctaStart')}
