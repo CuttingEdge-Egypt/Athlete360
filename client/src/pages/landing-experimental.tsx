@@ -1467,7 +1467,7 @@ export default function LandingExperimental() {
               data-testid="button-signin-hero-experimental"
               size="lg"
               variant="outline"
-              className="border-[#ef3340] text-[#ef3340] dark:border-white dark:text-white bg-transparent hover:bg-[#ef3340] hover:text-white dark:hover:bg-white dark:hover:text-[#1e4a8a] text-lg px-8 py-6 rounded-full transition-colors duration-200"
+              className="border-[#ef3340] text-[#ef3340] dark:border-white dark:text-white bg-transparent hover:bg-[#ef3340] hover:text-white dark:hover:bg-[#ef3340] dark:hover:text-white text-lg px-8 py-6 rounded-full transition-colors duration-200"
             >
               {t('landing.navigation.signIn')}
             </Button>
