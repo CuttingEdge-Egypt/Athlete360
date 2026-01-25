@@ -1438,8 +1438,8 @@ export default function LandingExperimental() {
             className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight text-center mb-3"
             style={{ fontFamily: "'Montserrat', sans-serif" }}
           >
-            <span className="text-[#ef3340] dark:text-white">Athlete</span>
-            <span className="text-[#ef3340]">360</span>
+            <span className="text-[#1e4a8a] dark:text-white">Athlete</span>
+            <span className="text-[#ef3340]">360°</span>
           </h1>
           <h2 
             className="text-base sm:text-lg md:text-xl font-medium tracking-tight text-center mb-6 text-slate-500 dark:text-white"
@@ -1467,7 +1467,7 @@ export default function LandingExperimental() {
               data-testid="button-signin-hero-experimental"
               size="lg"
               variant="outline"
-              className="border-[#ef3340] text-[#ef3340] dark:border-white dark:text-white bg-transparent hover:bg-[#ef3340] hover:text-white dark:hover:bg-[#ef3340] dark:hover:text-white text-lg px-8 py-6 rounded-full transition-colors duration-200"
+              className="border-[#ef3340] text-[#ef3340] dark:border-white dark:text-white bg-transparent hover:bg-[#ef3340] hover:text-white hover:border-[#ef3340] dark:hover:bg-[#ef3340] dark:hover:text-white dark:hover:border-[#ef3340] text-lg px-8 py-6 rounded-full transition-colors duration-200"
             >
               {t('landing.navigation.signIn')}
             </Button>
