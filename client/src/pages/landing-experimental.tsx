@@ -1247,8 +1247,8 @@ function Footer({ isDark }: { isDark: boolean }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <div className="w-32 h-32 xl:w-40 xl:h-40 mx-auto mb-6 rounded-full bg-white dark:bg-transparent flex items-center justify-center shadow-lg overflow-hidden">
-              <img src={isDark ? logoDark : logoLight} alt="Athlete360" className="h-full w-full object-contain p-2 rounded-full" />
+            <div className="w-40 h-40 xl:w-48 xl:h-48 mx-auto mb-6 rounded-full bg-white dark:bg-slate-800/50 flex items-center justify-center shadow-lg overflow-hidden">
+              <img src={isDark ? logoDark : logoLight} alt="Athlete360" className="h-[85%] w-[85%] object-contain rounded-full" />
             </div>
             <h3 
               className="text-2xl sm:text-3xl xl:text-4xl font-bold text-[#1e4a8a] dark:text-white mb-4"
