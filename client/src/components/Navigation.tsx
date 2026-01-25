@@ -8,7 +8,7 @@ import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Clock, Coins, Plus, LogOut, User as UserIcon, Video, Menu, Globe } from "lucide-react";
 import { Link } from "wouter";
-import logoImage from "@assets/Png_new_logo_1766325613955.png";
+import logoImage from "@assets/Athlete360_logo-1_1769372516063.png";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";

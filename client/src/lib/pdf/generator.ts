@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import athleteLogoUrl from '@assets/Athlete360Logo-removebg-preview_1764432432230.png';
+import athleteLogoUrl from '@assets/Athlete360_logo-1_1769372516063.png';
 import { 
   processArabicText, 
   sanitizeArabicText, 

@@ -9,7 +9,7 @@ import { AnalysisPopup } from "@/components/ui/analysis-popup";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/useLanguage";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
-import logoImage from "@assets/Png_new_logo_1766325613955.png";
+import logoImage from "@assets/Athlete360_logo-1_1769372516063.png";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 
 function TiltCard({ children, className = "" }: { children: ReactNode; className?: string }) {

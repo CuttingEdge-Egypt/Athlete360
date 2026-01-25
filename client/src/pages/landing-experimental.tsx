@@ -7,9 +7,8 @@ import { UserPlus, Gift, ArrowRight, ChevronDown, GripVertical, User, Video, Tar
 import { AnimatePresence } from 'framer-motion';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { AnimatedTestimonials } from '@/components/ui/animated-testimonials';
-import logoImage from '@assets/Png_new_logo_1766325613955.png';
-import logoAppIcon from '@assets/Athlete360LogoAppIcon_1765824701090.png';
-import footerLogo from '@assets/NewLogo_1766512419006.jpeg';
+import logoLight from '@assets/Athlete360_logo-1_1769372516063.png';
+import logoDark from '@assets/Athlete360_logo-2_1769372520963.png';
 
 // Theme context for dark/light mode - scoped to landing page only
 const useTheme = () => {
@@ -1235,10 +1234,9 @@ function TestimonialsSection() {
 }
 
 // Footer Component
-function Footer() {
+function Footer({ isDark }: { isDark: boolean }) {
   const isRTL = useIsRTL();
   const [, setLocation] = useLocation();
-
 
   return (
     <footer className="relative bg-gradient-to-b from-transparent to-slate-100 dark:to-[#0d1d33]" data-testid="footer-section">
@@ -1249,8 +1247,8 @@ function Footer() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <div className="w-32 h-32 xl:w-40 xl:h-40 mx-auto mb-6 rounded-full bg-white flex items-center justify-center shadow-lg overflow-hidden">
-              <img src={footerLogo} alt="Athlete360" className="h-full w-full object-cover" />
+            <div className="w-32 h-32 xl:w-40 xl:h-40 mx-auto mb-6 rounded-2xl bg-white dark:bg-transparent flex items-center justify-center shadow-lg overflow-hidden">
+              <img src={isDark ? logoDark : logoLight} alt="Athlete360" className="h-full w-full object-contain p-2" />
             </div>
             <h3 
               className="text-2xl sm:text-3xl xl:text-4xl font-bold text-[#1e4a8a] dark:text-white mb-4"
@@ -1383,7 +1381,7 @@ export default function LandingExperimental() {
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.2 }}
           >
-            <img src={footerLogo} alt="Athlete360" className="h-14 sm:h-16 lg:h-[72px] xl:h-20 w-auto rounded-xl" />
+            <img src={isDark ? logoDark : logoLight} alt="Athlete360" className="h-14 sm:h-16 lg:h-[72px] xl:h-20 w-auto rounded-xl" />
           </motion.div>
           <motion.div 
             className="flex items-center gap-1.5 sm:gap-3"
@@ -1509,7 +1507,7 @@ export default function LandingExperimental() {
         <TestimonialsSection />
       </div>
 
-      <Footer />
+      <Footer isDark={isDark} />
     </div>
   );
 }
