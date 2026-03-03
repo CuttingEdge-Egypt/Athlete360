@@ -2,6 +2,10 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GoogleAIFileManager } from '@google/generative-ai/server';
 import fs from 'fs';
 import path from 'path';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
+
+const execFileAsync = promisify(execFile);
 
 const GEMINI_API_KEY = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
 
@@ -748,19 +752,70 @@ function cleanJsonResponse(responseText: string): string {
   return '{"players": []}';
 }
 
+// Compress video to 480p if it is too large for Gemini's token limit.
+// Gemini samples at 1 fps and charges ~258 tokens per frame at 1 MP.
+// At 480p (~0.41 MP) each frame uses ~106 tokens, keeping an 82-min
+// video well under the 1,048,576 token ceiling.
+const MAX_VIDEO_SIZE_BYTES = 200 * 1024 * 1024; // 200 MB threshold
+
+async function compressVideoIfNeeded(videoFilePath: string): Promise<{ filePath: string; compressed: boolean }> {
+  const stats = fs.statSync(videoFilePath);
+  if (stats.size <= MAX_VIDEO_SIZE_BYTES) {
+    return { filePath: videoFilePath, compressed: false };
+  }
+
+  console.log(`[VIDEO_COMPRESS] File is ${Math.round(stats.size / 1024 / 1024)} MB — compressing to 480p for Gemini token limit...`);
+  const dir = path.dirname(videoFilePath);
+  const ext = path.extname(videoFilePath);
+  const base = path.basename(videoFilePath, ext);
+  const compressedPath = path.join(dir, `${base}_compressed${ext}`);
+
+  try {
+    await execFileAsync('ffmpeg', [
+      '-i', videoFilePath,
+      '-vf', 'scale=854:480:force_original_aspect_ratio=decrease,pad=854:480:(ow-iw)/2:(oh-ih)/2',
+      '-c:v', 'libx264',
+      '-crf', '28',
+      '-preset', 'fast',
+      '-c:a', 'aac',
+      '-b:a', '96k',
+      '-movflags', '+faststart',
+      '-y',
+      compressedPath
+    ], { maxBuffer: 1024 * 1024 });
+    const compressedStats = fs.statSync(compressedPath);
+    console.log(`[VIDEO_COMPRESS] Compressed to ${Math.round(compressedStats.size / 1024 / 1024)} MB at ${compressedPath}`);
+    return { filePath: compressedPath, compressed: true };
+  } catch (err) {
+    console.error('[VIDEO_COMPRESS] ffmpeg compression failed, uploading original:', err);
+    return { filePath: videoFilePath, compressed: false };
+  }
+}
+
 // Upload video file to Gemini using Files API to avoid memory issues
 async function uploadFileToGemini(videoFilePath: string) {
   console.log(`[UPLOAD_TO_GEMINI] Starting file upload: ${videoFilePath}`);
-  
+
+  let fileToUpload = videoFilePath;
+  let tempCompressedPath: string | null = null;
+
   try {
     const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
     if (!apiKey) {
       throw new Error('GOOGLE_API_KEY or GEMINI_API_KEY environment variable is required');
     }
+
+    // Compress if the file is too large to fit within Gemini's token limit
+    const { filePath: compressedPath, compressed } = await compressVideoIfNeeded(videoFilePath);
+    if (compressed) {
+      fileToUpload = compressedPath;
+      tempCompressedPath = compressedPath;
+    }
+
     const fileManager = new GoogleAIFileManager(apiKey);
     
     // Upload the file
-    const uploadResponse = await fileManager.uploadFile(videoFilePath, {
+    const uploadResponse = await fileManager.uploadFile(fileToUpload, {
       mimeType: 'video/mp4',
       displayName: `video_analysis_${Date.now()}`,
     });
@@ -785,6 +840,14 @@ async function uploadFileToGemini(videoFilePath: string) {
   } catch (error) {
     console.error(`[UPLOAD_TO_GEMINI] Upload failed:`, error);
     throw error;
+  } finally {
+    // Clean up the temporary compressed file if one was created
+    if (tempCompressedPath) {
+      try {
+        fs.unlinkSync(tempCompressedPath);
+        console.log(`[UPLOAD_TO_GEMINI] Cleaned up compressed temp file: ${tempCompressedPath}`);
+      } catch (_) {}
+    }
   }
 }
 
