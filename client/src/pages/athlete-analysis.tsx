@@ -30,7 +30,7 @@ const isIndividualSport = (sportName: string): boolean => {
     // Racket sports
     'tennis', 'badminton', 'table tennis', 'ping pong', 'squash', 'racquetball',
     // Precision sports
-    'archery', 'shooting', 'darts', 'billiards', 'snooker',
+    'archery', 'shooting', 'air pistol', 'air rifle', 'darts', 'billiards', 'snooker',
     // Individual ball sports
     'golf', 'bowling',
     // Aquatic sports

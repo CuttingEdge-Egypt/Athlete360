@@ -300,6 +300,45 @@ const SPORT_CONFIGS: Record<string, SportConfig> = {
       violation: 'penalties',
       scoring: 'points'
     }
+  },
+  'air pistol': {
+    name: 'Air Pistol',
+    primaryActions: ['aim', 'fire', 'shoot', 'reload', 'stance'],
+    scoringEvents: ['10-ring shot', 'inner-10 (X)', '9-ring shot', 'qualifying shot', 'final shot'],
+    violationsEvents: ['rule infraction', 'time violation', 'equipment violation'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'shots',
+      violation: 'infractions',
+      scoring: 'points'
+    }
+  },
+  'air_pistol': {
+    name: 'Air Pistol',
+    primaryActions: ['aim', 'fire', 'shoot', 'reload', 'stance'],
+    scoringEvents: ['10-ring shot', 'inner-10 (X)', '9-ring shot', 'qualifying shot', 'final shot'],
+    violationsEvents: ['rule infraction', 'time violation', 'equipment violation'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'shots',
+      violation: 'infractions',
+      scoring: 'points'
+    }
+  },
+  'airpistol': {
+    name: 'Air Pistol',
+    primaryActions: ['aim', 'fire', 'shoot', 'reload', 'stance'],
+    scoringEvents: ['10-ring shot', 'inner-10 (X)', '9-ring shot', 'qualifying shot', 'final shot'],
+    violationsEvents: ['rule infraction', 'time violation', 'equipment violation'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'shots',
+      violation: 'infractions',
+      scoring: 'points'
+    }
   }
 };
 

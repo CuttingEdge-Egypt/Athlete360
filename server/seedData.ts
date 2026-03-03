@@ -246,7 +246,8 @@ export async function seedDatabase() {
       { name: "Squash" },
       { name: "Wrestling" },
       { name: "Judo" },
-      { name: "Karate" }
+      { name: "Karate" },
+      { name: "Air Pistol" }
     ];
 
     const createdSports = [];
