@@ -170,6 +170,22 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
   // Get sport-specific config
   const sportConfig = SPORT_DISPLAY_CONFIGS[sport] || SPORT_DISPLAY_CONFIGS['taekwondo'];
 
+  // Individual/race sport detection (mirrors backend logic)
+  const INDIVIDUAL_RACE_SPORTS_PLAYER = [
+    'swimming', 'triathlon', 'athletics', 'track_and_field', 'track and field',
+    'javelin', 'javelin_throw', 'javelin throw',
+    'discus', 'discus_throw', 'discus throw',
+    'air_pistol', 'airpistol', 'air pistol'
+  ];
+  const FIELD_SPORTS_PLAYER = [
+    'javelin', 'javelin_throw', 'javelin throw',
+    'discus', 'discus_throw', 'discus throw',
+    'air_pistol', 'airpistol', 'air pistol'
+  ];
+  const sportNorm = sport.toLowerCase().trim();
+  const isRaceSport = INDIVIDUAL_RACE_SPORTS_PLAYER.some(s => s === sportNorm || sportNorm.includes(s) || s.includes(sportNorm));
+  const isFieldSportPlayer = FIELD_SPORTS_PLAYER.some(s => s === sportNorm || sportNorm.includes(s) || s.includes(sportNorm));
+
   // Shared parsing function for analysis data (handles markdown, JSON, and wrapper formats)
   const parseAnalysisData = (jsonString: string) => {
     try {
@@ -1435,8 +1451,8 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
       {/* Main Video Layout with Side Stats - Responsive */}
       {/* Mobile: Video first, then metrics below. Desktop: Video center with metrics on sides */}
       <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:gap-6">
-        {/* Left Side Stats - Uses Player 1 colors from scoreboard */}
-        <div className="order-2 lg:order-1 lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-2 lg:gap-4 lg:space-y-0">
+        {/* Left Side Stats - Uses Player 1 colors from scoreboard (hidden for race/individual sports) */}
+        {!isRaceSport && <div className="order-2 lg:order-1 lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-2 lg:gap-4 lg:space-y-0">
 
           {/* Dynamic Metrics or Traditional Kicks/Warnings */}
           {isTaekwondo ? (
@@ -1579,14 +1595,30 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
               })}
             </>
           )}
-        </div>
+        </div>}
 
         {/* Video Player - Center on Desktop, First on Mobile */}
-        <div className="order-1 lg:order-2 lg:col-span-8 w-full">
+        <div className={`order-1 lg:order-2 ${isRaceSport ? 'lg:col-span-12' : 'lg:col-span-8'} w-full`}>
           <Card className="bg-slate-50 border-slate-200">
             <CardContent className="p-0">
               {/* Unified Score Display Above Video - Works for all sports */}
               {(() => {
+                // For individual/race sports: show a simple event banner instead of VS scoreboard
+                if (isRaceSport) {
+                  return (
+                    <div className="bg-gradient-to-r from-slate-800 to-slate-700 px-4 py-3 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-yellow-400 text-lg">🏆</span>
+                        <span className="text-white font-semibold text-sm sm:text-base">{sport}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-slate-300 text-xs sm:text-sm">
+                        <span>🎬</span>
+                        <span>Live Event Analysis</span>
+                      </div>
+                    </div>
+                  );
+                }
+
                 // Determine current scores based on format
                 let entity1Score = '0';
                 let entity2Score = '0';
@@ -1889,8 +1921,8 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
           </Card>
         </div>
 
-        {/* Right Side Stats - Uses Player 2 colors from scoreboard */}
-        <div className="order-3 lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-2 lg:gap-4 lg:space-y-0">
+        {/* Right Side Stats - Uses Player 2 colors from scoreboard (hidden for race/individual sports) */}
+        {!isRaceSport && <div className="order-3 lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-2 lg:gap-4 lg:space-y-0">
 
           {/* Dynamic Metrics or Traditional Kicks/Warnings */}
           {isTaekwondo ? (
@@ -2033,7 +2065,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
               })}
             </>
           )}
-        </div>
+        </div>}
       </div>
 
       {/* Match Analysis - Bottom */}
