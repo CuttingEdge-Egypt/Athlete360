@@ -102,6 +102,24 @@ const SPORT_DISPLAY_CONFIGS: Record<string, { action: string; violation: string;
     primaryAction: 'throws',
     secondaryAction: 'spins'
   },
+  'discus throw': {
+    action: 'Throws',
+    violation: 'Fouls',
+    primaryAction: 'throws',
+    secondaryAction: 'spins'
+  },
+  'javelin throw': {
+    action: 'Throws',
+    violation: 'Fouls',
+    primaryAction: 'throws',
+    secondaryAction: 'approaches'
+  },
+  'track and field': {
+    action: 'Strides',
+    violation: 'Violations',
+    primaryAction: 'strides',
+    secondaryAction: 'splits'
+  },
   'air_pistol': {
     action: 'Shots',
     violation: 'Infractions',
@@ -109,6 +127,12 @@ const SPORT_DISPLAY_CONFIGS: Record<string, { action: string; violation: string;
     secondaryAction: 'series'
   },
   'airpistol': {
+    action: 'Shots',
+    violation: 'Infractions',
+    primaryAction: 'shots',
+    secondaryAction: 'series'
+  },
+  'air pistol': {
     action: 'Shots',
     violation: 'Infractions',
     primaryAction: 'shots',

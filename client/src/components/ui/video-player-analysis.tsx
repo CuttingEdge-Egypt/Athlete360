@@ -129,6 +129,24 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
       actionArabic: 'إجمالي الرميات',
       violationArabic: 'المخالفات'
     },
+    'discus throw': {
+      action: 'TOTAL THROWS',
+      violation: 'FOULS',
+      actionArabic: 'إجمالي الرميات',
+      violationArabic: 'المخالفات'
+    },
+    'javelin throw': {
+      action: 'TOTAL THROWS',
+      violation: 'FOULS',
+      actionArabic: 'إجمالي الرميات',
+      violationArabic: 'المخالفات'
+    },
+    'track and field': {
+      action: 'TOTAL STRIDES',
+      violation: 'VIOLATIONS',
+      actionArabic: 'إجمالي الخطوات',
+      violationArabic: 'المخالفات'
+    },
     'air_pistol': {
       action: 'TOTAL SHOTS',
       violation: 'INFRACTIONS',
@@ -136,6 +154,12 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
       violationArabic: 'المخالفات'
     },
     'airpistol': {
+      action: 'TOTAL SHOTS',
+      violation: 'INFRACTIONS',
+      actionArabic: 'إجمالي الطلقات',
+      violationArabic: 'المخالفات'
+    },
+    'air pistol': {
       action: 'TOTAL SHOTS',
       violation: 'INFRACTIONS',
       actionArabic: 'إجمالي الطلقات',

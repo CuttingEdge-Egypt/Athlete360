@@ -247,7 +247,11 @@ export async function seedDatabase() {
       { name: "Wrestling" },
       { name: "Judo" },
       { name: "Karate" },
-      { name: "Air Pistol" }
+      { name: "Air Pistol" },
+      { name: "Javelin Throw" },
+      { name: "Discus Throw" },
+      { name: "Triathlon" },
+      { name: "Track and Field" }
     ];
 
     const createdSports = [];
