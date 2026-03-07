@@ -405,9 +405,34 @@ const generateClipAnalysisPDF = (pdf: jsPDF, analysisData: any, startY: number, 
   return currentY;
 };
 
+const INDIVIDUAL_RACE_SPORTS_PDF = [
+  'swimming', 'triathlon', 'athletics', 'track_and_field', 'track and field',
+  'javelin', 'javelin_throw', 'javelin throw',
+  'discus', 'discus_throw', 'discus throw',
+  'air_pistol', 'airpistol', 'air pistol'
+];
+
+const FIELD_SPORTS_PDF = [
+  'javelin', 'javelin_throw', 'javelin throw',
+  'discus', 'discus_throw', 'discus throw',
+  'air_pistol', 'airpistol', 'air pistol'
+];
+
+function checkIsIndividualRaceSportPDF(sport: string): boolean {
+  const normalized = sport.toLowerCase().trim();
+  return INDIVIDUAL_RACE_SPORTS_PDF.some(s => s === normalized || normalized.includes(s) || s.includes(normalized));
+}
+
+function checkIsFieldSportPDF(sport: string): boolean {
+  const normalized = sport.toLowerCase().trim();
+  return FIELD_SPORTS_PDF.some(s => s === normalized || normalized.includes(s) || s.includes(normalized));
+}
+
 const generateMatchAnalysisPDF = (pdf: jsPDF, analysisData: any, startY: number, sport: string, locale: string): number => {
   let currentY = startY;
   const isTaekwondo = sport?.toLowerCase() === 'taekwondo';
+  const isRaceSport = checkIsIndividualRaceSportPDF(sport);
+  const isFieldSport = checkIsFieldSportPDF(sport);
   
   const parseJsonData = (data: any) => {
     if (!data) return null;
@@ -429,37 +454,87 @@ const generateMatchAnalysisPDF = (pdf: jsPDF, analysisData: any, startY: number,
   const yellowCardData = parseJsonData(analysisData.yellow_card_analysis);
   const kickData = parseJsonData(analysisData.kick_count_analysis);
   
-  currentY = addSectionHeader(pdf, 'Match Summary', currentY, 50);
+  currentY = addSectionHeader(pdf, isRaceSport ? 'Competition Summary' : 'Match Summary', currentY, 50);
   
   const { margin } = pdfTheme.spacing;
-  const boxWidth = 50;
-  const boxHeight = 25;
-  const startX = margin + 20;
-  const spacing = 10;
   
-  let blueScore = 0;
-  let redScore = 0;
-  
-  if (scoreData?.final_score) {
-    blueScore = scoreData.final_score.blue || scoreData.final_score.Blue || 0;
-    redScore = scoreData.final_score.red || scoreData.final_score.Red || 0;
-  } else if (scoreData?.total_score) {
-    blueScore = scoreData.total_score.blue || scoreData.total_score.Blue || 0;
-    redScore = scoreData.total_score.red || scoreData.total_score.Red || 0;
+  if (isRaceSport) {
+    // For individual/race sports: show Final Standings table
+    const leaderboardData = parseJsonData(analysisData.leaderboard_analysis);
+    if (leaderboardData?.snapshots?.length > 0) {
+      const lastSnapshot = leaderboardData.snapshots[leaderboardData.snapshots.length - 1];
+      const standings = lastSnapshot?.standings || [];
+
+      if (standings.length > 0) {
+        const medals = ['🥇 1st', '🥈 2nd', '🥉 3rd'];
+        const tableData = standings.slice(0, 3).map((athlete: any, idx: number) => {
+          const row = [
+            medals[idx] || `${idx + 1}th`,
+            athlete.name || `Athlete ${idx + 1}`,
+            athlete.country || '—',
+            `${athlete.metric_label || 'Result'}: ${athlete.metric_value || '—'}`
+          ];
+          if (isFieldSport) {
+            row.push(athlete.attempts_completed !== undefined
+              ? `${athlete.attempts_completed}/${athlete.max_attempts || 3}`
+              : '—');
+          }
+          return row;
+        });
+
+        const head = isFieldSport
+          ? [['Position', 'Athlete', 'Country', 'Best Result', 'Attempts']]
+          : [['Position', 'Athlete', 'Country', 'Result']];
+
+        pdf.autoTable({
+          startY: currentY,
+          head,
+          body: tableData,
+          theme: 'striped',
+          headStyles: {
+            fillColor: hexToRgb(pdfTheme.colors.headerBg),
+            textColor: [255, 255, 255]
+          },
+          styles: { fontSize: 9 },
+          margin: { left: margin + 5, right: margin + 5 },
+        });
+        currentY = pdf.lastAutoTable.finalY + 15;
+      }
+    } else {
+      currentY = addText(pdf, 'Leaderboard data not available', currentY, { indent: 10, locale });
+      currentY += 10;
+    }
+  } else {
+    // For combat/team sports: show Blue vs Red score boxes
+    const boxWidth = 50;
+    const boxHeight = 25;
+    const startX = margin + 20;
+    const spacing = 10;
+    
+    let blueScore = 0;
+    let redScore = 0;
+    
+    if (scoreData?.final_score) {
+      blueScore = scoreData.final_score.blue || scoreData.final_score.Blue || 0;
+      redScore = scoreData.final_score.red || scoreData.final_score.Red || 0;
+    } else if (scoreData?.total_score) {
+      blueScore = scoreData.total_score.blue || scoreData.total_score.Blue || 0;
+      redScore = scoreData.total_score.red || scoreData.total_score.Red || 0;
+    }
+    
+    addScoreBox(pdf, 'Blue Player', blueScore, pdfTheme.colors.bluePlayer, startX, currentY, boxWidth, boxHeight);
+    
+    setTextFont(pdf, 'en', 'bold');
+    pdf.setFontSize(pdfTheme.fonts.sizes.header);
+    pdf.setTextColor(pdfTheme.colors.text);
+    const vsText = 'VS';
+    const vsWidth = pdf.getTextWidth(vsText);
+    pdf.text(vsText, startX + boxWidth + (spacing - vsWidth) / 2 + 5, currentY + 15);
+    
+    addScoreBox(pdf, 'Red Player', redScore, pdfTheme.colors.redPlayer, startX + boxWidth + spacing + 10, currentY, boxWidth, boxHeight);
+    
+    currentY += boxHeight + 15;
   }
-  
-  addScoreBox(pdf, 'Blue Player', blueScore, pdfTheme.colors.bluePlayer, startX, currentY, boxWidth, boxHeight);
-  
-  setTextFont(pdf, 'en', 'bold');
-  pdf.setFontSize(pdfTheme.fonts.sizes.header);
-  pdf.setTextColor(pdfTheme.colors.text);
-  const vsText = 'VS';
-  const vsWidth = pdf.getTextWidth(vsText);
-  pdf.text(vsText, startX + boxWidth + (spacing - vsWidth) / 2 + 5, currentY + 15);
-  
-  addScoreBox(pdf, 'Red Player', redScore, pdfTheme.colors.redPlayer, startX + boxWidth + spacing + 10, currentY, boxWidth, boxHeight);
-  
-  currentY += boxHeight + 15;
   
   if (isTaekwondo) {
     let blueCards = 0;

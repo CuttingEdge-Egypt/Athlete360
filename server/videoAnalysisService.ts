@@ -339,8 +339,176 @@ const SPORT_CONFIGS: Record<string, SportConfig> = {
       violation: 'infractions',
       scoring: 'points'
     }
+  },
+  'swimming': {
+    name: 'Swimming',
+    primaryActions: ['stroke', 'turn', 'dive', 'kick', 'pull'],
+    scoringEvents: ['lap split', 'finish time', 'personal best'],
+    violationsEvents: ['false start', 'disqualification', 'lane violation'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'strokes',
+      violation: 'violations',
+      scoring: 'times'
+    }
+  },
+  'triathlon': {
+    name: 'Triathlon',
+    primaryActions: ['swim stroke', 'cycle', 'run stride', 'transition'],
+    scoringEvents: ['swim split', 'bike split', 'run split', 'finish time'],
+    violationsEvents: ['drafting', 'false start', 'equipment violation'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'segments',
+      violation: 'violations',
+      scoring: 'times'
+    }
+  },
+  'athletics': {
+    name: 'Athletics',
+    primaryActions: ['stride', 'sprint', 'jump', 'throw', 'hurdle'],
+    scoringEvents: ['split time', 'finish time', 'personal best'],
+    violationsEvents: ['false start', 'lane violation', 'foul'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'strides',
+      violation: 'violations',
+      scoring: 'times'
+    }
+  },
+  'track_and_field': {
+    name: 'Track & Field',
+    primaryActions: ['stride', 'sprint', 'jump', 'throw', 'hurdle'],
+    scoringEvents: ['split time', 'finish time', 'distance'],
+    violationsEvents: ['false start', 'lane violation', 'foul'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'strides',
+      violation: 'violations',
+      scoring: 'times'
+    }
+  },
+  'track and field': {
+    name: 'Track & Field',
+    primaryActions: ['stride', 'sprint', 'jump', 'throw', 'hurdle'],
+    scoringEvents: ['split time', 'finish time', 'distance'],
+    violationsEvents: ['false start', 'lane violation', 'foul'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'strides',
+      violation: 'violations',
+      scoring: 'times'
+    }
+  },
+  'javelin': {
+    name: 'Javelin Throw',
+    primaryActions: ['approach run', 'release', 'grip', 'follow-through'],
+    scoringEvents: ['valid throw distance', 'personal best', 'competition record'],
+    violationsEvents: ['foul throw', 'line violation', 'invalid release'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'throws',
+      violation: 'fouls',
+      scoring: 'distance'
+    }
+  },
+  'javelin throw': {
+    name: 'Javelin Throw',
+    primaryActions: ['approach run', 'release', 'grip', 'follow-through'],
+    scoringEvents: ['valid throw distance', 'personal best', 'competition record'],
+    violationsEvents: ['foul throw', 'line violation', 'invalid release'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'throws',
+      violation: 'fouls',
+      scoring: 'distance'
+    }
+  },
+  'javelin_throw': {
+    name: 'Javelin Throw',
+    primaryActions: ['approach run', 'release', 'grip', 'follow-through'],
+    scoringEvents: ['valid throw distance', 'personal best', 'competition record'],
+    violationsEvents: ['foul throw', 'line violation', 'invalid release'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'throws',
+      violation: 'fouls',
+      scoring: 'distance'
+    }
+  },
+  'discus': {
+    name: 'Discus Throw',
+    primaryActions: ['spin', 'release', 'grip', 'follow-through'],
+    scoringEvents: ['valid throw distance', 'personal best', 'competition record'],
+    violationsEvents: ['foul throw', 'circle violation', 'invalid release'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'throws',
+      violation: 'fouls',
+      scoring: 'distance'
+    }
+  },
+  'discus throw': {
+    name: 'Discus Throw',
+    primaryActions: ['spin', 'release', 'grip', 'follow-through'],
+    scoringEvents: ['valid throw distance', 'personal best', 'competition record'],
+    violationsEvents: ['foul throw', 'circle violation', 'invalid release'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'throws',
+      violation: 'fouls',
+      scoring: 'distance'
+    }
+  },
+  'discus_throw': {
+    name: 'Discus Throw',
+    primaryActions: ['spin', 'release', 'grip', 'follow-through'],
+    scoringEvents: ['valid throw distance', 'personal best', 'competition record'],
+    violationsEvents: ['foul throw', 'circle violation', 'invalid release'],
+    hasRounds: false,
+    timeFormat: 'MM:SS',
+    analysisTerms: {
+      action: 'throws',
+      violation: 'fouls',
+      scoring: 'distance'
+    }
   }
 };
+
+// Individual race/field sport classification
+export const INDIVIDUAL_RACE_SPORTS = [
+  'swimming', 'triathlon', 'athletics', 'track_and_field', 'track and field',
+  'javelin', 'javelin_throw', 'javelin throw',
+  'discus', 'discus_throw', 'discus throw',
+  'air_pistol', 'airpistol', 'air pistol'
+];
+
+// Field sports that use attempt-based scoring (throws, shots)
+export const FIELD_SPORTS = [
+  'javelin', 'javelin_throw', 'javelin throw',
+  'discus', 'discus_throw', 'discus throw',
+  'air_pistol', 'airpistol', 'air pistol'
+];
+
+export function isIndividualRaceSport(sport: string): boolean {
+  const normalized = sport.toLowerCase().trim();
+  return INDIVIDUAL_RACE_SPORTS.some(s => s === normalized || normalized.includes(s) || s.includes(normalized));
+}
+
+export function isFieldSport(sport: string): boolean {
+  const normalized = sport.toLowerCase().trim();
+  return FIELD_SPORTS.some(s => s === normalized || normalized.includes(s) || s.includes(normalized));
+}
 
 // Get sport configuration or create a generic one
 export function getSportConfig(sport: string): SportConfig {
@@ -1506,6 +1674,171 @@ MANDATORY JSON FORMAT:
   }
 }
 
+// Generate leaderboard analysis for individual/race sports
+async function generateLeaderboardAnalysis(
+  uploadedFile: any,
+  sport: string,
+  language: string = 'english'
+): Promise<string> {
+  console.log(`[LEADERBOARD] Generating leaderboard analysis for ${sport}`);
+
+  const videoFile = {
+    fileData: {
+      mimeType: uploadedFile.mimeType,
+      fileUri: uploadedFile.uri
+    }
+  };
+
+  const sportConfig = getSportConfig(sport);
+  const isField = isFieldSport(sport);
+  const languageInstruction = language.toLowerCase() === 'arabic'
+    ? 'ALL text fields (name, country, metric_label, description) MUST be in Arabic.'
+    : 'ALL text fields must be in English.';
+
+  const fieldPrompt = `You are analyzing a ${sportConfig.name} competition video. Identify ALL visible competitors and track the TOP 3 by best result as the competition progresses.
+
+${languageInstruction}
+
+This is a FIELD/PRECISION sport where athletes take multiple attempts (throws/shots). For each attempt visible in the video:
+- Record when each athlete takes their attempt (timestamp)
+- Record the result of that attempt (distance in metres, or score out of 10.9 for air pistol)
+- Track which attempt number it is (1st, 2nd, 3rd, etc.)
+- Update the standings after each attempt
+
+CRITICAL RULES:
+- Track the TOP 3 athletes by their BEST result so far
+- For throwing events: best = longest valid distance (foul/invalid = no distance)
+- For air pistol: best = highest cumulative score
+- "attempts_completed" = number of attempts the athlete has taken so far (not just valid ones)
+- "max_attempts" = total attempts allowed (typically 3 for qualifying, 6 for finals - infer from context)
+- All timestamps MUST be in MM:SS format
+
+MANDATORY JSON FORMAT:
+{
+  "sport_category": "field",
+  "snapshots": [
+    {
+      "timestamp": "MM:SS",
+      "description": "Brief description of what changed (e.g., 'Athlete A throws 82.45m on attempt 2')",
+      "standings": [
+        {
+          "position": 1,
+          "name": "Full Athlete Name",
+          "country": "3-letter country code or null",
+          "metric_label": "Distance",
+          "metric_value": "82.45m",
+          "attempts_completed": 2,
+          "max_attempts": 3
+        },
+        {
+          "position": 2,
+          "name": "Full Athlete Name",
+          "country": "3-letter country code or null",
+          "metric_label": "Distance",
+          "metric_value": "80.10m",
+          "attempts_completed": 1,
+          "max_attempts": 3
+        },
+        {
+          "position": 3,
+          "name": "Full Athlete Name",
+          "country": "3-letter country code or null",
+          "metric_label": "Distance",
+          "metric_value": "78.90m",
+          "attempts_completed": 3,
+          "max_attempts": 3
+        }
+      ]
+    }
+  ]
+}
+
+For Air Pistol: use metric_label "Score" and metric_value like "285.4" (cumulative total).
+For Javelin/Discus: use metric_label "Distance" and metric_value like "82.45m".
+If standings do not change between attempts, still add a snapshot at each attempt timestamp.
+If you cannot identify athlete names, use visible descriptors (jersey color, lane number, country flag).
+ALWAYS return valid JSON even if limited information is available.`;
+
+  const racePrompt = `You are analyzing a ${sportConfig.name} competition video. Identify ALL visible competitors and track the TOP 3 by current position/time as the race progresses.
+
+${languageInstruction}
+
+This is a RACE sport. Track position changes throughout the race and record a snapshot every time the TOP 3 standings change.
+
+For Swimming: metric_label = "Time", metric_value = elapsed time like "00:58.3" (MM:SS.ms if visible)
+For Triathlon: metric_label = "Segment", metric_value = current leg + time like "Bike: 45:20"
+For Athletics/Track: metric_label = "Time", metric_value = split time or elapsed time like "10.82s"
+
+CRITICAL RULES:
+- Track the TOP 3 competitors by their current position in the race
+- Add a snapshot every time position changes among the top 3
+- Add snapshots at key moments: start, halfway, final lap/stretch, finish
+- All timestamps MUST be in MM:SS format (video timestamp, not race time)
+- "country" field: use 3-letter country code (e.g., "EGY", "USA", "KEN") or null
+
+MANDATORY JSON FORMAT:
+{
+  "sport_category": "race",
+  "snapshots": [
+    {
+      "timestamp": "MM:SS",
+      "description": "Brief description (e.g., 'Athlete A takes the lead at the turn')",
+      "standings": [
+        {
+          "position": 1,
+          "name": "Full Athlete Name",
+          "country": "EGY",
+          "metric_label": "Time",
+          "metric_value": "00:58.3"
+        },
+        {
+          "position": 2,
+          "name": "Full Athlete Name",
+          "country": "USA",
+          "metric_label": "Time",
+          "metric_value": "00:59.1"
+        },
+        {
+          "position": 3,
+          "name": "Full Athlete Name",
+          "country": "KEN",
+          "metric_label": "Time",
+          "metric_value": "01:00.4"
+        }
+      ]
+    }
+  ]
+}
+
+If you cannot identify athlete names, use lane numbers (e.g., "Lane 3") or visible descriptors.
+Include at least 3-5 snapshots even if positions don't change much.
+ALWAYS return valid JSON even if limited information is available.`;
+
+  const prompt = isField ? fieldPrompt : racePrompt;
+
+  try {
+    const jsonModel = genai.getGenerativeModel({
+      model: "gemini-2.5-pro",
+      generationConfig: {
+        temperature: 0,
+        maxOutputTokens: 65536,
+        responseMimeType: "application/json",
+      }
+    });
+
+    const response = await jsonModel.generateContent([videoFile, prompt]);
+    const rawResponse = response.response.text();
+    console.log(`[LEADERBOARD] Raw response length: ${rawResponse.length} chars`);
+    return cleanJsonResponse(rawResponse);
+  } catch (error) {
+    console.error(`[LEADERBOARD] Error generating leaderboard:`, error);
+    return JSON.stringify({
+      sport_category: isField ? 'field' : 'race',
+      snapshots: []
+    });
+  }
+}
+
 // Process video with Gemini using Files API (memory-efficient approach)
 export async function processVideoGemini(videoFilePath: string, roundToAnalyze: number | 'no-rounds', sport: string = 'taekwondo', language: string = 'english') {
   console.log(`[PROCESS_VIDEO_GEMINI] Starting video analysis for round ${roundToAnalyze}`);
@@ -1653,17 +1986,28 @@ Look for team names on jerseys, scoreboards, or court/field markings. If team na
         }
       }
       
+      // Determine if this is an individual/race sport
+      const isRaceSport = isIndividualRaceSport(sport);
+      
       // Step 3: Ask Gemini what to count (EXCLUDING Score - we have our own)
       const metricsPromise = askGeminiWhatToCount(uploadedFile, sport, roundText, language);
       
-      // Step 4: Generate Score, Match Analysis, and get metrics data in parallel
-      console.log(`[PROCESS_VIDEO_GEMINI] Starting parallel: Score + Match + asking Gemini what to count...`);
+      // Step 4: Generate Score, Match Analysis, leaderboard (if race sport), and get metrics data in parallel
+      console.log(`[PROCESS_VIDEO_GEMINI] Starting parallel: Score + Match + asking Gemini what to count${isRaceSport ? ' + Leaderboard' : ''}...`);
       
-      const [metricsData, responseScore, responseMatch] = await Promise.all([
+      const parallelPromises: Promise<any>[] = [
         metricsPromise,
         jsonModel.generateContent([videoFileRef, scorePrompt]),
         textModel.generateContent([videoFileRef, promptMatch])
-      ]);
+      ];
+      
+      if (isRaceSport) {
+        parallelPromises.push(generateLeaderboardAnalysis(uploadedFile, sport, language));
+      }
+      
+      const parallelResults = await Promise.all(parallelPromises);
+      const [metricsData, responseScore, responseMatch] = parallelResults;
+      const leaderboardAnalysis = isRaceSport ? parallelResults[3] : null;
       
       console.log(`[PROCESS_VIDEO_GEMINI] Gemini suggested ${metricsData.metrics?.length || 0} dynamic metrics`);
       
@@ -1756,7 +2100,8 @@ Look for team names on jerseys, scoreboards, or court/field markings. If team na
         null, // No punch analysis for non-taekwondo
         null, // No kick count for non-taekwondo
         null, // No yellow cards for non-taekwondo
-        dynamicMetrics // Dynamic metrics (Winners, Errors, etc.)
+        dynamicMetrics, // Dynamic metrics (Winners, Errors, etc.)
+        leaderboardAnalysis // Leaderboard for individual/race sports (null for others)
       ];
     }
 
@@ -2011,6 +2356,7 @@ Be detailed and specific in your observations and recommendations.`;
 
     let responseMatch, responseScore, responsePunch, responseKickNo, responseYellowCards, responseAdvice;
     let dynamicMetrics: any[] = [];
+    let leaderboardAnalysis: string | null = null;
 
     if (isTaekwondo) {
       // For Taekwondo: Use existing flow with kicks and warnings
@@ -2113,14 +2459,19 @@ Look for team names on jerseys, scoreboards, or court/field markings. If team na
         }
       }
       
+      // Detect individual/race sport
+      const isRaceSport = isIndividualRaceSport(sport);
+      
       // Step 2: Ask Gemini what to count (EXCLUDING Score - we have our own)
       const metricsPromise = askGeminiWhatToCount(uploadedFile, sport, roundText, language);
       
       // Step 3: Generate SEPARATE Scores (2 generations), Match Analysis, Advice, and get metrics data in parallel
-      console.log(`[ANALYZE_COMPREHENSIVE] Starting parallel: Separate Score generations + Match + Advice + asking Gemini what to count...`);
+      console.log(`[ANALYZE_COMPREHENSIVE] Starting parallel: Separate Score generations + Match + Advice + asking Gemini what to count${isRaceSport ? ' + Leaderboard' : ''}...`);
       
       // Use the new separate score generation function
-      const scoreGenerationPromise = generateSeparateScores(uploadedFile, sport, roundToAnalyze, teamIdentification);
+      const scoreGenerationPromise = isRaceSport
+        ? Promise.resolve({ scores: [], type: 'individual' })
+        : generateSeparateScores(uploadedFile, sport, roundToAnalyze, teamIdentification);
       
       const model2 = genai.getGenerativeModel({
         model: "gemini-2.5-pro",
@@ -2213,6 +2564,16 @@ Look for team names on jerseys, scoreboards, or court/field markings. If team na
       responsePunch = null;
       responseKickNo = null;
       responseYellowCards = null;
+      
+      // Step 3b: Generate leaderboard for individual/race sports
+      if (isRaceSport) {
+        try {
+          leaderboardAnalysis = await generateLeaderboardAnalysis(uploadedFile, sport, language);
+          console.log(`[ANALYZE_COMPREHENSIVE] Leaderboard analysis complete`);
+        } catch (err) {
+          console.error(`[ANALYZE_COMPREHENSIVE] Leaderboard generation failed:`, err);
+        }
+      }
       
       // Step 4: Generate all dynamic metrics in BATCHES to avoid overload
       let metricResults: string[] = [];
@@ -2332,7 +2693,8 @@ Look for team names on jerseys, scoreboards, or court/field markings. If team na
       kick_count_analysis: responseKickNo,
       yellow_card_analysis: responseYellowCards,
       advice_analysis: responseAdvice,
-      dynamic_metrics: dynamicMetrics.length > 0 ? dynamicMetrics : undefined, // NEW: Dynamic metrics for non-taekwondo sports
+      dynamic_metrics: dynamicMetrics.length > 0 ? dynamicMetrics : undefined,
+      leaderboard_analysis: leaderboardAnalysis || undefined,
       sport: sport,
       isTaekwondo: isTaekwondo,
       roundAnalyzed: roundToAnalyze,

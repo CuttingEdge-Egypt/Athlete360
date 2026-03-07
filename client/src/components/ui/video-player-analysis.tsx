@@ -44,7 +44,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
   };
 
   // Sport-specific display configurations
-  const SPORT_DISPLAY_CONFIGS = {
+  const SPORT_DISPLAY_CONFIGS: Record<string, { action: string; violation: string; actionArabic: string; violationArabic: string }> = {
     'taekwondo': { 
       action: 'TOTAL KICKS', 
       violation: 'WARNINGS',
@@ -80,11 +80,71 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
       violation: 'PENALTIES',
       actionArabic: 'إجمالي الضربات',
       violationArabic: 'العقوبات'
+    },
+    'swimming': {
+      action: 'TOTAL STROKES',
+      violation: 'VIOLATIONS',
+      actionArabic: 'إجمالي الضربات',
+      violationArabic: 'المخالفات'
+    },
+    'triathlon': {
+      action: 'SEGMENTS',
+      violation: 'VIOLATIONS',
+      actionArabic: 'المقاطع',
+      violationArabic: 'المخالفات'
+    },
+    'athletics': {
+      action: 'TOTAL STRIDES',
+      violation: 'VIOLATIONS',
+      actionArabic: 'إجمالي الخطوات',
+      violationArabic: 'المخالفات'
+    },
+    'track_and_field': {
+      action: 'TOTAL STRIDES',
+      violation: 'VIOLATIONS',
+      actionArabic: 'إجمالي الخطوات',
+      violationArabic: 'المخالفات'
+    },
+    'javelin': {
+      action: 'TOTAL THROWS',
+      violation: 'FOULS',
+      actionArabic: 'إجمالي الرميات',
+      violationArabic: 'المخالفات'
+    },
+    'javelin_throw': {
+      action: 'TOTAL THROWS',
+      violation: 'FOULS',
+      actionArabic: 'إجمالي الرميات',
+      violationArabic: 'المخالفات'
+    },
+    'discus': {
+      action: 'TOTAL THROWS',
+      violation: 'FOULS',
+      actionArabic: 'إجمالي الرميات',
+      violationArabic: 'المخالفات'
+    },
+    'discus_throw': {
+      action: 'TOTAL THROWS',
+      violation: 'FOULS',
+      actionArabic: 'إجمالي الرميات',
+      violationArabic: 'المخالفات'
+    },
+    'air_pistol': {
+      action: 'TOTAL SHOTS',
+      violation: 'INFRACTIONS',
+      actionArabic: 'إجمالي الطلقات',
+      violationArabic: 'المخالفات'
+    },
+    'airpistol': {
+      action: 'TOTAL SHOTS',
+      violation: 'INFRACTIONS',
+      actionArabic: 'إجمالي الطلقات',
+      violationArabic: 'المخالفات'
     }
-  } as const;
+  };
 
   // Get sport-specific config
-  const sportConfig = SPORT_DISPLAY_CONFIGS[sport as keyof typeof SPORT_DISPLAY_CONFIGS] || SPORT_DISPLAY_CONFIGS.taekwondo;
+  const sportConfig = SPORT_DISPLAY_CONFIGS[sport] || SPORT_DISPLAY_CONFIGS['taekwondo'];
 
   // Shared parsing function for analysis data (handles markdown, JSON, and wrapper formats)
   const parseAnalysisData = (jsonString: string) => {

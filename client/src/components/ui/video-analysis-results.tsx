@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Clock, Target, AlertTriangle, Calendar, Users, Brain, MessageSquare, User, FileDown, Loader2 } from "lucide-react";
+import { Trophy, Clock, Target, AlertTriangle, Calendar, Users, Brain, MessageSquare, User, FileDown, Loader2, Medal, Timer, Flag } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useToast } from "@/hooks/use-toast";
@@ -17,7 +17,7 @@ interface VideoAnalysisResultsProps {
 }
 
 // Sport configuration mapping for results display
-const SPORT_DISPLAY_CONFIGS = {
+const SPORT_DISPLAY_CONFIGS: Record<string, { action: string; violation: string; primaryAction: string; secondaryAction: string }> = {
   'taekwondo': { 
     action: 'Kicks', 
     violation: 'Yellow Cards', 
@@ -53,8 +53,99 @@ const SPORT_DISPLAY_CONFIGS = {
     violation: 'Penalties', 
     primaryAction: 'strikes',
     secondaryAction: 'blocks'
+  },
+  'swimming': {
+    action: 'Strokes',
+    violation: 'Violations',
+    primaryAction: 'strokes',
+    secondaryAction: 'turns'
+  },
+  'triathlon': {
+    action: 'Segments',
+    violation: 'Violations',
+    primaryAction: 'segments',
+    secondaryAction: 'transitions'
+  },
+  'athletics': {
+    action: 'Strides',
+    violation: 'Violations',
+    primaryAction: 'strides',
+    secondaryAction: 'splits'
+  },
+  'track_and_field': {
+    action: 'Strides',
+    violation: 'Violations',
+    primaryAction: 'strides',
+    secondaryAction: 'splits'
+  },
+  'javelin': {
+    action: 'Throws',
+    violation: 'Fouls',
+    primaryAction: 'throws',
+    secondaryAction: 'approaches'
+  },
+  'javelin_throw': {
+    action: 'Throws',
+    violation: 'Fouls',
+    primaryAction: 'throws',
+    secondaryAction: 'approaches'
+  },
+  'discus': {
+    action: 'Throws',
+    violation: 'Fouls',
+    primaryAction: 'throws',
+    secondaryAction: 'spins'
+  },
+  'discus_throw': {
+    action: 'Throws',
+    violation: 'Fouls',
+    primaryAction: 'throws',
+    secondaryAction: 'spins'
+  },
+  'air_pistol': {
+    action: 'Shots',
+    violation: 'Infractions',
+    primaryAction: 'shots',
+    secondaryAction: 'series'
+  },
+  'airpistol': {
+    action: 'Shots',
+    violation: 'Infractions',
+    primaryAction: 'shots',
+    secondaryAction: 'series'
   }
-} as const;
+};
+
+// Individual/race sports classification (mirrors backend)
+const INDIVIDUAL_RACE_SPORTS = [
+  'swimming', 'triathlon', 'athletics', 'track_and_field', 'track and field',
+  'javelin', 'javelin_throw', 'javelin throw',
+  'discus', 'discus_throw', 'discus throw',
+  'air_pistol', 'airpistol', 'air pistol'
+];
+
+const FIELD_SPORTS = [
+  'javelin', 'javelin_throw', 'javelin throw',
+  'discus', 'discus_throw', 'discus throw',
+  'air_pistol', 'airpistol', 'air pistol'
+];
+
+function checkIsIndividualRaceSport(sport: string): boolean {
+  const normalized = sport.toLowerCase().trim();
+  return INDIVIDUAL_RACE_SPORTS.some(s => s === normalized || normalized.includes(s) || s.includes(normalized));
+}
+
+function checkIsFieldSport(sport: string): boolean {
+  const normalized = sport.toLowerCase().trim();
+  return FIELD_SPORTS.some(s => s === normalized || normalized.includes(s) || s.includes(normalized));
+}
+
+// Medal styling for top 3 positions
+const MEDAL_STYLES = [
+  { bg: 'bg-yellow-50', border: 'border-yellow-300', text: 'text-yellow-700', badge: 'bg-yellow-500', label: '🥇' },
+  { bg: 'bg-gray-50', border: 'border-gray-300', text: 'text-gray-600', badge: 'bg-gray-400', label: '🥈' },
+  { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700', badge: 'bg-orange-400', label: '🥉' },
+];
 
 interface ScoreEvent {
   timestamp: number;
@@ -319,10 +410,14 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
   }
   
   // Get sport-specific display configuration for match analysis
-  const sportConfig = SPORT_DISPLAY_CONFIGS[sport as keyof typeof SPORT_DISPLAY_CONFIGS] || SPORT_DISPLAY_CONFIGS.taekwondo;
+  const sportConfig = SPORT_DISPLAY_CONFIGS[sport] || SPORT_DISPLAY_CONFIGS['taekwondo'];
   
   // Check if this is a Taekwondo match (to show kicks/yellow cards)
   const isTaekwondo = sport?.toLowerCase() === 'taekwondo';
+  
+  // Check if this is an individual/race sport
+  const isRaceSport = checkIsIndividualRaceSport(sport);
+  const isFieldSport = checkIsFieldSport(sport);
 
   // Function to render markdown-style formatted text
   const renderFormattedText = (text: string) => {
@@ -752,6 +847,42 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Parse leaderboard analysis for individual/race sports
+  const parseLeaderboardData = () => {
+    if (!analysisData?.leaderboard_analysis) return null;
+    try {
+      const raw = analysisData.leaderboard_analysis;
+      const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (!data?.snapshots || !Array.isArray(data.snapshots) || data.snapshots.length === 0) return null;
+      return data;
+    } catch {
+      return null;
+    }
+  };
+
+  const leaderboardData = isRaceSport ? parseLeaderboardData() : null;
+
+  // Get the active leaderboard snapshot based on current video timestamp
+  const getActiveSnapshot = (leaderboard: any) => {
+    if (!leaderboard?.snapshots?.length) return null;
+    if (selectedTimestamp === null) return leaderboard.snapshots[leaderboard.snapshots.length - 1];
+    
+    const parseTimestamp = (ts: string): number => {
+      if (!ts) return 0;
+      const [min, sec] = ts.split(':').map(Number);
+      return (min || 0) * 60 + (sec || 0);
+    };
+
+    let active = leaderboard.snapshots[0];
+    for (const snap of leaderboard.snapshots) {
+      const snapSec = parseTimestamp(snap.timestamp);
+      if (snapSec <= selectedTimestamp) {
+        active = snap;
+      }
+    }
+    return active;
+  };
+
   // Show error state if parsing failed
   if (hasError) {
     return (
@@ -821,6 +952,143 @@ export function VideoAnalysisResults({ analysisData, sport = 'taekwondo' }: Vide
           </div>
         </CardContent>
       </Card>
+
+      {/* Live Leaderboard - Only show for individual/race sports with leaderboard data */}
+      {isRaceSport && leaderboardData && (() => {
+        const activeSnap = getActiveSnapshot(leaderboardData);
+        const standings = activeSnap?.standings || [];
+        const parseTimestamp = (ts: string): number => {
+          if (!ts) return 0;
+          const [min, sec] = ts.split(':').map(Number);
+          return (min || 0) * 60 + (sec || 0);
+        };
+
+        return (
+          <Card className="bg-white border border-gray-200 shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-primary">
+                <Medal className="h-5 w-5" />
+                Live Leaderboard
+                {selectedTimestamp !== null && (
+                  <Badge variant="outline" className="ml-2 text-xs">
+                    <Timer className="h-3 w-3 mr-1" />
+                    at {formatTime(selectedTimestamp)}
+                  </Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {/* Top 3 Athlete Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                {standings.slice(0, 3).map((athlete: any, idx: number) => {
+                  const style = MEDAL_STYLES[idx] || MEDAL_STYLES[2];
+                  const attemptsCompleted = athlete.attempts_completed ?? null;
+                  const maxAttempts = athlete.max_attempts ?? 3;
+
+                  return (
+                    <div
+                      key={idx}
+                      className={`rounded-lg border-2 p-4 ${style.bg} ${style.border}`}
+                    >
+                      {/* Position medal + name row */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-2xl">{style.label}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className={`font-bold text-sm truncate ${style.text}`}>
+                            {athlete.name || `Athlete ${idx + 1}`}
+                          </p>
+                          {athlete.country && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Flag className="h-3 w-3" />
+                              {athlete.country}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Metric value */}
+                      <div className={`text-center py-2 px-3 rounded-md bg-white border ${style.border} mb-3`}>
+                        <p className="text-xs text-muted-foreground">{athlete.metric_label || 'Result'}</p>
+                        <p className={`text-lg font-bold ${style.text}`}>{athlete.metric_value || '—'}</p>
+                      </div>
+
+                      {/* Attempt circles (field sports only) */}
+                      {isFieldSport && attemptsCompleted !== null && (
+                        <div className="flex items-center justify-center gap-1.5">
+                          {Array.from({ length: maxAttempts }).map((_, circleIdx) => (
+                            <div
+                              key={circleIdx}
+                              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-colors ${
+                                circleIdx < attemptsCompleted
+                                  ? 'bg-green-500 border-green-600 text-white'
+                                  : 'bg-white border-gray-300 text-gray-400'
+                              }`}
+                            >
+                              {circleIdx + 1}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Placeholder cards if fewer than 3 athletes tracked */}
+                {standings.length < 3 && Array.from({ length: 3 - standings.length }).map((_, idx) => {
+                  const style = MEDAL_STYLES[standings.length + idx] || MEDAL_STYLES[2];
+                  return (
+                    <div key={`placeholder-${idx}`} className={`rounded-lg border-2 p-4 ${style.bg} ${style.border} opacity-40`}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-2xl">{style.label}</span>
+                        <p className="text-sm text-muted-foreground">Not yet determined</p>
+                      </div>
+                      <div className={`text-center py-2 px-3 rounded-md bg-white border ${style.border}`}>
+                        <p className="text-lg font-bold text-gray-400">—</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Snapshot timeline */}
+              {leaderboardData.snapshots.length > 1 && (
+                <div>
+                  <h4 className="text-sm font-semibold text-muted-foreground mb-2">Position Changes Timeline</h4>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {leaderboardData.snapshots.map((snap: any, snapIdx: number) => {
+                      const snapSec = parseTimestamp(snap.timestamp);
+                      const isActive = activeSnap === snap;
+                      return (
+                        <div
+                          key={snapIdx}
+                          className={`flex items-center gap-3 p-2 rounded-lg border cursor-pointer hover:opacity-80 transition-colors ${
+                            isActive
+                              ? 'bg-primary/10 border-primary/30'
+                              : 'bg-gray-50 border-gray-200'
+                          }`}
+                          onClick={() => setSelectedTimestamp(snapSec)}
+                        >
+                          <Badge variant="outline" className="text-xs shrink-0">
+                            {snap.timestamp}
+                          </Badge>
+                          <span className="text-sm text-foreground flex-1">
+                            {snap.description || `Standings at ${snap.timestamp}`}
+                          </span>
+                          {snap.standings?.[0] && (
+                            <Badge variant="secondary" className="text-xs shrink-0 bg-yellow-100 text-yellow-800">
+                              🥇 {snap.standings[0].name?.split(' ').slice(-1)[0] || snap.standings[0].name}
+                            </Badge>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       {/* Score Summary - Only show for Taekwondo */}
       {isTaekwondo && (
