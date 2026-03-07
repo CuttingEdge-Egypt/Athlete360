@@ -415,7 +415,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
             videoFile={uploadedFile}
             analysisData={analysisResult}
             language={language}
-            sport={sport}
+            sport={currentSport?.name || sport}
           />
         )}
       </div>
