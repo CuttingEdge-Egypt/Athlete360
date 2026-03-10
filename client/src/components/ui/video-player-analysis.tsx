@@ -37,6 +37,7 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [videoUrl, setVideoUrl] = useState<string>("");
+  const [activeMetricTab, setActiveMetricTab] = useState<string>('');
   
   // Helper function to detect Arabic text
   const isArabicText = (text: string): boolean => {
@@ -1257,7 +1258,33 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
     return snap;
   })();
   const currentLeader = activeLeaderboardSnap?.standings?.[0] || null;
-  
+
+  // Build ordered athlete list for race sport sidebars (leaderboard order first)
+  const raceAthleteList = (() => {
+    const seen = new Map<string, any>();
+    const lastSnap = leaderboardData?.snapshots?.slice(-1)[0];
+    const baseSnap = lastSnap || activeLeaderboardSnap;
+    baseSnap?.standings?.forEach((s: any) => { if (s.name) seen.set(s.name, s); });
+    normalizedDynamicMetrics.forEach((m: any) => m.players?.forEach((p: any) => { if (p.name && !seen.has(p.name)) seen.set(p.name, { name: p.name, country: p.country }); }));
+    return Array.from(seen.values()).slice(0, 5);
+  })();
+  const activeTab = activeMetricTab || raceAthleteList[0]?.name || '';
+
+  // Helper: get per-athlete metric value at current video time
+  const getAthleteMetricValueLive = (athleteName: string, metric: any): number | string => {
+    const player = metric.players?.find((p: any) => p.name === athleteName);
+    if (!player) return '—';
+    if (metric.isScoreMetric) {
+      const eventsNow = player.events.filter((e: any) => e.timestamp <= currentTime);
+      const latest = eventsNow[eventsNow.length - 1];
+      return latest?.currentScore ?? (eventsNow.length > 0 ? eventsNow.length : '—');
+    }
+    const eventsNow = player.events.filter((e: any) => e.timestamp <= currentTime);
+    const liveVal = eventsNow.reduce((s: number, e: any) => s + (e.value || 1), 0);
+    if (liveVal > 0) return liveVal;
+    return typeof player.total === 'number' && player.total > 0 ? player.total : '—';
+  };
+
   // Function to aggregate metrics by team
   const getTeamMetrics = (metric: any) => {
     if (!hasTeamMetrics || !metric.players) {
@@ -1476,6 +1503,89 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
       {/* Main Video Layout with Side Stats - Responsive */}
       {/* Mobile: Video first, then metrics below. Desktop: Video center with metrics on sides */}
       <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:gap-6">
+        {/* Race sports: LEFT LEADERBOARD SIDEBAR */}
+        {isRaceSport && (
+          <div className="order-2 lg:order-1 lg:col-span-3 flex flex-col gap-3">
+            <div className="bg-slate-900 rounded-2xl overflow-hidden border border-slate-700/50">
+              {/* Leaderboard header */}
+              <div className="flex items-center justify-between px-3 py-2.5 border-b border-slate-700/60">
+                <div className="flex items-center gap-1.5">
+                  <Trophy className="h-3.5 w-3.5 text-yellow-400" />
+                  <span className="text-white text-xs font-bold tracking-wide">Leaderboard</span>
+                </div>
+                {activeLeaderboardSnap && (
+                  <div className="flex items-center gap-1 text-slate-400 text-[10px]">
+                    <Timer className="h-3 w-3" />
+                    <span className="font-mono">{activeLeaderboardSnap.timestamp}</span>
+                  </div>
+                )}
+              </div>
+              {/* Standings list */}
+              {leaderboardData?.snapshots?.length > 0 ? (
+                <div className="p-2 space-y-2">
+                  {(['🥇', '🥈', '🥉'] as const).map((medal, idx) => {
+                    const athlete = activeLeaderboardSnap?.standings?.[idx];
+                    const rankBg = ['bg-yellow-400/10 border-yellow-400/25', 'bg-slate-600/15 border-slate-500/25', 'bg-amber-700/10 border-amber-600/20'][idx];
+                    const valueColor = ['text-yellow-300', 'text-slate-300', 'text-amber-300'][idx];
+                    return (
+                      <div key={idx} className={`rounded-xl border p-3 ${rankBg}`}>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-base leading-none">{medal}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white font-bold text-xs leading-tight truncate">{athlete?.name || '—'}</p>
+                            {athlete?.country && <p className="text-slate-500 text-[10px] mt-0.5">{athlete.country}</p>}
+                          </div>
+                        </div>
+                        {athlete && (
+                          <div className="flex items-center justify-between gap-2">
+                            <div>
+                              <p className="text-[9px] text-slate-500 leading-none mb-0.5">{athlete.metric_label || 'Result'}</p>
+                              <p className={`text-sm font-mono font-bold leading-none ${valueColor}`}>{athlete.metric_value || '—'}</p>
+                            </div>
+                            {isFieldSportPlayer && (athlete.attempts_completed ?? null) !== null && (
+                              <div className="flex gap-0.5 flex-wrap justify-end max-w-[80px]">
+                                {Array.from({ length: athlete.max_attempts || 3 }).map((_: any, ci: number) => (
+                                  <div key={ci} className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold ${ci < (athlete.attempts_completed || 0) ? 'bg-green-500 text-white' : 'bg-slate-700 text-slate-500'}`}>
+                                    {ci + 1}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-slate-600 text-xs gap-2">
+                  <Medal className="h-6 w-6 opacity-40" />
+                  <span>Leaderboard loading…</span>
+                </div>
+              )}
+              {/* Snapshot timeline */}
+              {leaderboardData?.snapshots?.length > 1 && (
+                <div className="border-t border-slate-700/50 px-2 pt-2 pb-2 space-y-1 max-h-44 overflow-y-auto">
+                  <p className="text-[9px] font-semibold text-slate-500 uppercase px-1 mb-1.5">Position Changes</p>
+                  {leaderboardData.snapshots.map((snap: any, si: number) => {
+                    const isActive = activeLeaderboardSnap === snap;
+                    return (
+                      <button
+                        key={si}
+                        onClick={() => { if (videoRef.current) videoRef.current.currentTime = leaderboardParseTS(snap.timestamp); }}
+                        className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left text-[10px] border transition-colors ${isActive ? 'bg-blue-500/20 border-blue-400/40 text-blue-300' : 'bg-slate-700/25 border-slate-600/25 text-slate-400 hover:bg-slate-700/50'}`}
+                      >
+                        <span className="font-mono shrink-0">{snap.timestamp}</span>
+                        {snap.standings?.[0] && <span className="truncate text-yellow-400/70">🥇 {snap.standings[0].name?.split(' ').slice(-1)[0]}</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Left Side Stats - Uses Player 1 colors from scoreboard (hidden for race/individual sports) */}
         {!isRaceSport && <div className="order-2 lg:order-1 lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-2 lg:gap-4 lg:space-y-0">
 
@@ -1623,89 +1733,32 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
         </div>}
 
         {/* Video Player - Center on Desktop, First on Mobile */}
-        <div className={`order-1 lg:order-2 ${isRaceSport ? 'lg:col-span-12' : 'lg:col-span-8'} w-full`}>
+        <div className={`order-1 lg:order-2 ${isRaceSport ? 'lg:col-span-6' : 'lg:col-span-8'} w-full`}>
           <Card className="bg-slate-50 border-slate-200">
             <CardContent className="p-0">
               {/* Unified Score Display Above Video - Works for all sports */}
               {(() => {
                 // For individual/race sports: show a simple event banner instead of VS scoreboard
                 if (isRaceSport) {
-                  const podiumStyles = [
-                    { card: 'bg-yellow-400/12 border-yellow-400/50', name: 'text-yellow-200', value: 'text-yellow-300', country: 'text-yellow-500/70', medal: '🥇', glow: 'shadow-yellow-400/20' },
-                    { card: 'bg-slate-400/10 border-slate-400/30', name: 'text-slate-200', value: 'text-slate-300', country: 'text-slate-500', medal: '🥈', glow: '' },
-                    { card: 'bg-amber-600/10 border-amber-600/30', name: 'text-amber-200', value: 'text-amber-300', country: 'text-amber-600/60', medal: '🥉', glow: '' },
-                  ];
-                  const standings = activeLeaderboardSnap?.standings || [];
                   return (
-                    <div className="bg-gradient-to-b from-slate-900 to-slate-800 overflow-hidden">
-                      {/* Sport title bar */}
-                      <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-slate-700/60">
-                        <div className="flex items-center gap-2">
-                          <Trophy className="h-4 w-4 text-yellow-400" />
-                          <span className="text-white font-bold text-sm tracking-wide">{sport}</span>
-                        </div>
-                        {activeLeaderboardSnap ? (
-                          <div className="flex items-center gap-1.5 bg-slate-700/50 rounded-full px-2.5 py-1">
-                            <Timer className="h-3 w-3 text-slate-400" />
-                            <span className="text-slate-300 text-xs font-mono">{activeLeaderboardSnap.timestamp}</span>
-                          </div>
-                        ) : (
-                          <span className="text-slate-500 text-xs">Live Event Analysis</span>
-                        )}
+                    <div className="bg-gradient-to-r from-slate-800 to-slate-700 px-4 py-2.5 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Trophy className="h-4 w-4 text-yellow-400" />
+                        <span className="text-white font-bold text-sm tracking-wide">{sport}</span>
                       </div>
-                      {/* Podium row */}
-                      {leaderboardData?.snapshots?.length > 0 ? (
-                        <div className="grid grid-cols-3 gap-2 p-3">
-                          {podiumStyles.map((s, idx) => {
-                            const athlete = standings[idx];
-                            return (
-                              <div key={idx} className={`rounded-xl border p-2.5 sm:p-3 text-center shadow-lg ${s.card} ${s.glow}`}>
-                                <div className="text-lg sm:text-xl mb-1">{s.medal}</div>
-                                {athlete ? (
-                                  <>
-                                    <p className={`font-bold text-[11px] sm:text-sm leading-tight truncate ${s.name}`}>{athlete.name}</p>
-                                    {athlete.country && <p className={`text-[9px] sm:text-[10px] mt-0.5 ${s.country}`}>{athlete.country}</p>}
-                                    <p className={`font-mono font-bold text-sm sm:text-base mt-1.5 ${s.value}`}>{athlete.metric_value || '—'}</p>
-                                    {athlete.metric_label && <p className="text-slate-500 text-[9px] mt-0.5">{athlete.metric_label}</p>}
-                                    {isFieldSportPlayer && (athlete.attempts_completed ?? null) !== null && (
-                                      <div className="flex justify-center gap-1 mt-2">
-                                        {Array.from({ length: athlete.max_attempts || 3 }).map((_: any, ci: number) => (
-                                          <div key={ci} className={`w-4 h-4 rounded-full border flex items-center justify-center text-[8px] font-bold ${ci < (athlete.attempts_completed || 0) ? 'bg-green-500 border-green-400 text-white' : 'bg-slate-700 border-slate-600 text-slate-400'}`}>
-                                            {ci + 1}
-                                          </div>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </>
-                                ) : (
-                                  <p className="text-slate-600 text-xs mt-2">—</p>
-                                )}
-                              </div>
-                            );
-                          })}
+                      {currentLeader ? (
+                        <div className="flex items-center gap-1.5 bg-yellow-400/15 border border-yellow-400/30 rounded-full px-2.5 py-1 min-w-0">
+                          <span className="text-yellow-400 text-xs">🥇</span>
+                          <span className="text-yellow-200 text-xs font-semibold truncate max-w-[100px]">{currentLeader.name?.split(' ').slice(-1)[0]}</span>
+                          {currentLeader.metric_value && <span className="text-yellow-300 text-xs font-mono shrink-0">{currentLeader.metric_value}</span>}
                         </div>
                       ) : (
-                        <div className="flex items-center justify-center gap-2 py-4 text-slate-500 text-xs">
-                          <Medal className="h-4 w-4" />
-                          <span>Leaderboard loading...</span>
-                        </div>
+                        <span className="text-slate-400 text-xs">Live Event Analysis</span>
                       )}
-                      {/* Snapshot timeline strip */}
-                      {leaderboardData?.snapshots?.length > 1 && (
-                        <div className="flex gap-1.5 overflow-x-auto px-3 pb-3 scrollbar-hide">
-                          {leaderboardData.snapshots.map((snap: any, si: number) => {
-                            const isActive = activeLeaderboardSnap === snap;
-                            return (
-                              <button
-                                key={si}
-                                onClick={() => { if (videoRef.current) videoRef.current.currentTime = leaderboardParseTS(snap.timestamp); }}
-                                className={`shrink-0 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] border transition-colors ${isActive ? 'bg-blue-500/20 border-blue-400/50 text-blue-300' : 'bg-slate-700/40 border-slate-600/40 text-slate-400 hover:bg-slate-700/70'}`}
-                              >
-                                <span className="font-mono">{snap.timestamp}</span>
-                                {snap.standings?.[0] && <span className="font-semibold">🥇 {snap.standings[0].name?.split(' ').slice(-1)[0]}</span>}
-                              </button>
-                            );
-                          })}
+                      {activeLeaderboardSnap && (
+                        <div className="shrink-0 flex items-center gap-1 bg-slate-700/60 rounded-full px-2 py-1">
+                          <Timer className="h-3 w-3 text-slate-400" />
+                          <span className="text-slate-300 text-xs font-mono">{activeLeaderboardSnap.timestamp}</span>
                         </div>
                       )}
                     </div>
@@ -2159,103 +2212,104 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
             </>
           )}
         </div>}
-      </div>
 
-      {/* Race/Individual Sport: Per-Athlete Metric Boxes */}
-      {isRaceSport && normalizedDynamicMetrics.length > 0 && (() => {
-        // Build ordered athlete list: leaderboard order first, then any extras from dynamic_metrics
-        const allStandings = (() => {
-          const seen = new Map<string, any>();
-          // Use last snapshot for most complete standings
-          const lastSnap = leaderboardData?.snapshots?.slice(-1)[0];
-          const baseSnap = lastSnap || activeLeaderboardSnap;
-          baseSnap?.standings?.forEach((s: any) => { if (s.name) seen.set(s.name, s); });
-          normalizedDynamicMetrics.forEach((m: any) => m.players?.forEach((p: any) => { if (p.name && !seen.has(p.name)) seen.set(p.name, { name: p.name, country: p.country }); }));
-          return Array.from(seen.values()).slice(0, 5);
-        })();
-
-        const athleteColors = [
-          { border: 'border-yellow-200', bg: 'bg-yellow-50', header: 'bg-yellow-100/60', name: 'text-yellow-800', country: 'text-yellow-600/70', medal: '🥇', metricTitle: 'text-yellow-700', metricValue: 'text-yellow-900', boxBg: 'rgba(253,230,138,0.25)', boxBorder: 'rgba(202,138,4,0.3)' },
-          { border: 'border-slate-200', bg: 'bg-slate-50', header: 'bg-slate-100/60', name: 'text-slate-800', country: 'text-slate-500', medal: '🥈', metricTitle: 'text-slate-600', metricValue: 'text-slate-900', boxBg: 'rgba(226,232,240,0.4)', boxBorder: 'rgba(148,163,184,0.4)' },
-          { border: 'border-orange-200', bg: 'bg-orange-50', header: 'bg-orange-100/60', name: 'text-orange-800', country: 'text-orange-600/70', medal: '🥉', metricTitle: 'text-orange-700', metricValue: 'text-orange-900', boxBg: 'rgba(254,215,170,0.3)', boxBorder: 'rgba(194,65,12,0.25)' },
-          { border: 'border-blue-200', bg: 'bg-blue-50', header: 'bg-blue-100/60', name: 'text-blue-800', country: 'text-blue-500', medal: '4️⃣', metricTitle: 'text-blue-700', metricValue: 'text-blue-900', boxBg: 'rgba(191,219,254,0.3)', boxBorder: 'rgba(59,130,246,0.3)' },
-          { border: 'border-purple-200', bg: 'bg-purple-50', header: 'bg-purple-100/60', name: 'text-purple-800', country: 'text-purple-500', medal: '5️⃣', metricTitle: 'text-purple-700', metricValue: 'text-purple-900', boxBg: 'rgba(233,213,255,0.3)', boxBorder: 'rgba(126,34,206,0.25)' },
-        ];
-
-        const getAthleteMetricValue = (athleteName: string, metric: any): number | string => {
-          const player = metric.players?.find((p: any) => p.name === athleteName);
-          if (!player) return '—';
-          if (metric.isScoreMetric) {
-            const eventsNow = player.events.filter((e: any) => e.timestamp <= currentTime);
-            const latest = eventsNow[eventsNow.length - 1];
-            return latest?.currentScore ?? (eventsNow.length > 0 ? eventsNow.length : '—');
-          }
-          const eventsNow = player.events.filter((e: any) => e.timestamp <= currentTime);
-          const liveVal = eventsNow.reduce((s: number, e: any) => s + (e.value || 1), 0);
-          if (liveVal > 0) return liveVal;
-          // Fall back to total if nothing at current timestamp
-          return typeof player.total === 'number' && player.total > 0 ? player.total : '—';
-        };
-
-        if (allStandings.length === 0) return null;
-
-        return (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 mb-1">
-              <Target className="h-4 w-4 text-blue-500" />
-              <h3 className="text-sm font-semibold text-gray-700">Athlete Performance Metrics</h3>
-              <span className="text-xs text-gray-400 ml-auto flex items-center gap-1"><Timer className="h-3 w-3" /> Live at video time</span>
-            </div>
-            {allStandings.map((standing: any, ai: number) => {
-              const c = athleteColors[ai] || athleteColors[athleteColors.length - 1];
-              const liveStanding = activeLeaderboardSnap?.standings?.find((s: any) => s.name === standing.name);
-              return (
-                <div key={ai} className={`rounded-2xl border-2 overflow-hidden ${c.border} ${c.bg}`}>
-                  {/* Athlete header */}
-                  <div className={`flex items-center gap-3 px-4 py-3 ${c.header} border-b ${c.border}`}>
-                    <span className="text-xl">{c.medal}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className={`font-bold text-sm truncate ${c.name}`}>{standing.name}</p>
-                      {standing.country && <p className={`text-[10px] ${c.country}`}>{standing.country}</p>}
-                    </div>
-                    {(liveStanding?.metric_value || standing.metric_value) && (
-                      <div className="text-right">
-                        <p className={`font-mono font-bold text-base ${c.metricValue}`}>{liveStanding?.metric_value || standing.metric_value}</p>
-                        <p className={`text-[10px] ${c.country}`}>{liveStanding?.metric_label || standing.metric_label || 'Best'}</p>
-                      </div>
-                    )}
-                  </div>
-                  {/* Metric sub-boxes */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 p-3">
-                    {normalizedDynamicMetrics.map((metric: any, mi: number) => {
-                      const val = getAthleteMetricValue(standing.name, metric);
+        {/* Race sports: RIGHT TABBED METRICS SIDEBAR */}
+        {isRaceSport && (
+          <div className="order-3 lg:col-span-3 flex flex-col">
+            <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden h-full flex flex-col">
+              {/* Tab bar */}
+              {raceAthleteList.length > 0 ? (
+                <>
+                  <div className="flex overflow-x-auto border-b border-gray-200 bg-gray-50/50">
+                    {raceAthleteList.map((a: any, ni: number) => {
+                      const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+                      const isActive = activeTab === a.name;
                       return (
-                        <div
-                          key={mi}
-                          className="rounded-[14px] text-center overflow-hidden relative"
-                          style={{
-                            background: c.boxBg,
-                            border: `1.5px solid ${c.boxBorder}`,
-                            backdropFilter: 'blur(8px)',
-                            WebkitBackdropFilter: 'blur(8px)',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.6)',
-                          }}
+                        <button
+                          key={ni}
+                          onClick={() => setActiveMetricTab(a.name)}
+                          className={`shrink-0 flex flex-col items-center gap-0.5 px-3 py-2.5 border-b-2 text-[10px] font-semibold transition-colors ${isActive ? 'border-blue-500 text-blue-600 bg-white' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
                         >
-                          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/70 to-transparent" />
-                          <div className="p-2 sm:p-3">
-                            <p className={`font-semibold text-[10px] sm:text-xs truncate mb-1 ${c.metricTitle}`}>{metric.title}</p>
-                            <p className={`text-xl sm:text-2xl font-bold ${c.metricValue}`}>{val}</p>
-                          </div>
-                        </div>
+                          <span>{medals[ni]}</span>
+                          <span className="max-w-[52px] truncate">{a.name?.split(' ').slice(-1)[0]}</span>
+                        </button>
                       );
                     })}
                   </div>
+                  {/* Active athlete info */}
+                  {(() => {
+                    const athlete = raceAthleteList.find((a: any) => a.name === activeTab) || raceAthleteList[0];
+                    if (!athlete) return null;
+                    const liveStanding = activeLeaderboardSnap?.standings?.find((s: any) => s.name === athlete.name);
+                    const medalIdx = raceAthleteList.findIndex((a: any) => a.name === athlete.name);
+                    const medalColors = [
+                      { bg: 'bg-yellow-50', border: 'border-yellow-200', name: 'text-yellow-800', value: 'text-yellow-700' },
+                      { bg: 'bg-slate-50', border: 'border-slate-200', name: 'text-slate-700', value: 'text-slate-700' },
+                      { bg: 'bg-orange-50', border: 'border-orange-100', name: 'text-orange-800', value: 'text-orange-700' },
+                      { bg: 'bg-blue-50', border: 'border-blue-100', name: 'text-blue-800', value: 'text-blue-700' },
+                      { bg: 'bg-purple-50', border: 'border-purple-100', name: 'text-purple-800', value: 'text-purple-700' },
+                    ];
+                    const c = medalColors[medalIdx] || medalColors[0];
+                    return (
+                      <div className="flex-1 overflow-y-auto">
+                        {/* Athlete summary row */}
+                        <div className={`flex items-center justify-between px-3 py-2 border-b ${c.border} ${c.bg}`}>
+                          <div>
+                            <p className={`font-bold text-xs ${c.name}`}>{athlete.name}</p>
+                            {athlete.country && <p className="text-gray-400 text-[10px]">{athlete.country}</p>}
+                          </div>
+                          {(liveStanding?.metric_value || athlete.metric_value) && (
+                            <div className="text-right">
+                              <p className={`font-mono font-bold text-sm ${c.value}`}>{liveStanding?.metric_value || athlete.metric_value}</p>
+                              <p className="text-gray-400 text-[9px]">{liveStanding?.metric_label || 'Best'}</p>
+                            </div>
+                          )}
+                        </div>
+                        {/* Metric boxes grid */}
+                        {normalizedDynamicMetrics.length > 0 ? (
+                          <div className="p-2 grid grid-cols-2 gap-2">
+                            {normalizedDynamicMetrics.map((metric: any, mi: number) => {
+                              const val = getAthleteMetricValueLive(athlete.name, metric);
+                              return (
+                                <div
+                                  key={mi}
+                                  className="rounded-[14px] text-center relative overflow-hidden"
+                                  style={{
+                                    background: 'rgba(255,255,255,0.9)',
+                                    border: '1.5px solid rgba(226,232,240,0.8)',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)',
+                                  }}
+                                >
+                                  <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+                                  <div className="p-2">
+                                    <p className={`font-semibold text-[10px] truncate mb-1 ${c.name}`}>{metric.title}</p>
+                                    <p className={`text-xl font-bold ${c.value}`}>{val}</p>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center py-10 text-gray-400 text-xs gap-2">
+                            <Target className="h-6 w-6 opacity-30" />
+                            <span>No metrics available</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-10 text-gray-400 text-xs gap-2">
+                  <Target className="h-6 w-6 opacity-30" />
+                  <span>Metrics loading…</span>
                 </div>
-              );
-            })}
+              )}
+            </div>
           </div>
-        );
-      })()}
+        )}
+      </div>
+
 
 
       {/* Match Analysis - Bottom */}

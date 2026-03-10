@@ -1095,19 +1095,69 @@ async function askGeminiWhatToCount(uploadedFile: any, sport: string, roundText:
     ? 'CRITICAL: ALL metric titles and descriptions MUST be written in Arabic language.'
     : 'CRITICAL: ALL metric titles and descriptions MUST be written in English language.';
 
-  const prompt = `You are analyzing a ${sportConfig.name} match video for a video analysis web application. Your task is to identify USEFUL metrics that users will want to track and analyze.
+  // Check if this is an individual/race sport that needs expert coaching analysis
+  const isRaceSportMetrics = isIndividualRaceSport(sport);
+
+  const expertCoachContext = isRaceSportMetrics ? `
+You are a WORLD-CLASS EXPERT COACH analyzing this ${sportConfig.name} video. You have decades of experience coaching elite athletes and can spot technical details that casual observers completely miss.
+
+For ${sportConfig.name}, you will identify metrics that go far beyond simple counting. Think like the best coach in the world:
+- Technical execution quality (body mechanics, form breakdowns, micro-adjustments)
+- Tactical decisions and their outcomes (approach angles, timing, strategy choices)
+- Physical performance indicators (speed, power, endurance markers visible in the video)
+- Mental/behavioral signals (composure under pressure, routine consistency, recovery time)
+- Competitive patterns (how each athlete responds to rivals' performances, pressure moments)
+- Rule-specific elements (fouls, no-throws, technique violations, equipment checks)
+- Recovery and preparation behaviors between attempts/segments
+- Environmental adaptations (wind, crowd, conditions affecting performance)
+
+For FIELD SPORTS (Discus, Javelin, Shot Put, etc.):
+- Release angle and trajectory arc quality per throw
+- Rotational speed and balance in the throwing circle
+- Foot fault risks (toe board proximity, circle boundaries)
+- Valid vs foul throws with distances
+- Body alignment at point of release
+- Follow-through and reverse-step quality
+- Wind conditions and their effect on flight path
+- Time between official attempts (preparation ritual efficiency)
+- Mental reset behavior after foul throws
+
+For AIR PISTOL/SHOOTING:
+- Shot grouping consistency (tight vs scattered)
+- Trigger pull timing (hesitation, rush, smooth)
+- Body stability indicators (sway, breath control)
+- Series score progression (10-shot series momentum)
+- Recovery between shots after near-misses or poor shots
+
+For SWIMMING:
+- Stroke rate and cycle consistency
+- Tumble turn efficiency (distance off wall, breakout timing)
+- Breathing pattern (every 2nd vs 3rd stroke)
+- Underwater dolphin kick count per turn
+- Finishing technique (touch placement, last stroke)
+
+For ATHLETICS/TRACK:
+- Stride frequency and length changes across race segments
+- Position-making moves (when and where athlete makes decisive moves)
+- Pacing strategy (even splits, negative split, positive split)
+- Physical fatigue indicators (form breakdown in final stretch)` : '';
+
+  const prompt = `You are analyzing a ${sportConfig.name} ${isRaceSportMetrics ? 'competition' : 'match'} video for a video analysis web application.${expertCoachContext}
 
 ${languageInstruction}
 
-Based on the video, identify distinct, countable metrics that are clearly visible and provide real analytical value. You can suggest MORE than 5 metrics if they are valuable and useful (no upper limit). For ${sportConfig.name}, focus on:
-1. Specific types of actions that coaches and analysts care about
-2. Rule violations, penalties, or infractions if visible
-3. Any other clearly identifiable, actionable metrics that provide performance insights
+Based on the video, identify distinct, countable/trackable metrics that are clearly visible and provide real analytical value. ${isRaceSportMetrics ? 'You MUST identify 5-8 expert coaching metrics' : 'You can suggest 3-6 metrics'}. For ${sportConfig.name}, focus on:
+1. Technical execution elements that coaches care about most
+2. Performance indicators with timestamps (EVERY event must have a precise MM:SS timestamp)
+3. Comparative metrics that differentiate elite from average performance
+4. Rule violations, penalties, or infractions if visible
+5. Behavioral and preparation patterns between competitive moments
 
 IMPORTANT: 
 - DO NOT include "Score" or "Point Scoring" as a metric - we already have a dedicated scoring system for that
 - Focus on USEFUL metrics that provide real value for performance analysis
 - Prioritize metrics that are both visible AND meaningful for coaching/training purposes
+- EVERY event timestamp MUST link directly to the video highlight at that moment
 
 ${isTeamSport ? `CRITICAL TEAM SPORTS INSTRUCTIONS:
 - You MUST identify which team each player belongs to (e.g., "Lakers", "Warriors", "Team A", "Team B")
@@ -1185,8 +1235,10 @@ ${isTeamSport ? `- TEAM SPORTS: Each prompt MUST include the 'team' field for ev
 - Prompts must instruct to return {\"players\": []} when no events are detected
 - Focus on metrics that are CLEARLY VISIBLE in the video - avoid complex judgment calls
 - Do NOT include metrics that require off-ball tracking or are hard to see
-- Return 3-5 metrics maximum
-- The "total" field should sum up all event values for that player`;
+- ${isRaceSportMetrics ? 'Return 5-8 expert coaching metrics (more is better for individual sports analysis)' : 'Return 3-6 metrics'}
+- The "total" field should sum up all event values for that player
+- CRITICAL FOR TIMESTAMPS: Every event timestamp must correspond exactly to when the action is visible in the video. These timestamps are used to create video highlights that users can jump to. A user clicking on a metric event at "03:45" expects the video to show that exact action at that moment. Be precise.
+- For individual/race sports: include descriptive event descriptions that explain WHAT makes this moment technically significant from a coaching perspective (not just "throw attempt" but "aggressive 410° rotation with early unwinding, slight foot fault risk")`;
 
   try {
     const jsonModel = genai.getGenerativeModel({
@@ -1695,15 +1747,24 @@ async function generateLeaderboardAnalysis(
     ? 'ALL text fields (name, country, metric_label, description) MUST be in Arabic.'
     : 'ALL text fields must be in English.';
 
-  const fieldPrompt = `You are analyzing a ${sportConfig.name} competition video. Identify ALL visible competitors and track the TOP 3 by best result as the competition progresses.
+  const fieldPrompt = `You are a WORLD-CLASS EXPERT COACH and sports analyst watching a ${sportConfig.name} competition video. You have decades of experience at the elite level and can identify technical details, competitive dynamics, and performance patterns that most observers miss.
 
 ${languageInstruction}
 
-This is a FIELD/PRECISION sport where athletes take multiple attempts (throws/shots). For each attempt visible in the video:
-- Record when each athlete takes their attempt (timestamp)
-- Record the result of that attempt (distance in metres, or score out of 10.9 for air pistol)
-- Track which attempt number it is (1st, 2nd, 3rd, etc.)
-- Update the standings after each attempt
+This is a FIELD/PRECISION sport where athletes take multiple attempts (throws/shots). For EACH attempt you observe:
+- Record the EXACT video timestamp when the athlete begins their approach/pre-throw routine
+- Record the result (distance in metres for throws, score for shooting)
+- Identify any technical observations: foot fault risks, rotation quality, release angle, balance
+- Note the competitive context: Is this a personal best attempt? Response to a rival's throw? Final-attempt desperation?
+- Track which attempt number it is and how it affects standings
+
+EXPERT ANALYSIS REQUIREMENTS:
+- Your "description" fields MUST provide expert coaching insights, not just factual reports
+  - BAD: "Athlete throws 66.59m"
+  - GOOD: "Ståhl unleashes 66.59m on attempt 1 — powerful 1.5 rotation with excellent hip separation, but slight left-foot step-out at release. Immediately takes lead"
+- Capture the COMPETITIVE DRAMA: position changes, pressure moments, comeback attempts
+- Note athlete reactions and body language after each throw (confidence, frustration, composure)
+- For air pistol: comment on shot grouping consistency, visible steadiness, series momentum
 
 CRITICAL RULES:
 - Track the TOP 3 athletes by their BEST result so far
@@ -1711,7 +1772,8 @@ CRITICAL RULES:
 - For air pistol: best = highest cumulative score
 - "attempts_completed" = number of attempts the athlete has taken so far (not just valid ones)
 - "max_attempts" = total attempts allowed (typically 3 for qualifying, 6 for finals - infer from context)
-- All timestamps MUST be in MM:SS format
+- All timestamps MUST be in MM:SS format (video timestamp, not competition time)
+- Add a snapshot at EVERY attempt, not just when standings change
 
 MANDATORY JSON FORMAT:
 {
@@ -1759,20 +1821,29 @@ If standings do not change between attempts, still add a snapshot at each attemp
 If you cannot identify athlete names, use visible descriptors (jersey color, lane number, country flag).
 ALWAYS return valid JSON even if limited information is available.`;
 
-  const racePrompt = `You are analyzing a ${sportConfig.name} competition video. Identify ALL visible competitors and track the TOP 3 by current position/time as the race progresses.
+  const racePrompt = `You are a WORLD-CLASS EXPERT COACH and race analyst watching a ${sportConfig.name} competition video. You have decades of elite coaching experience and can read the race at a level that goes far beyond position tracking.
 
 ${languageInstruction}
 
-This is a RACE sport. Track position changes throughout the race and record a snapshot every time the TOP 3 standings change.
+This is a RACE sport. Beyond tracking positions, your analysis must capture the TACTICAL and TECHNICAL story of this race.
 
-For Swimming: metric_label = "Time", metric_value = elapsed time like "00:58.3" (MM:SS.ms if visible)
+For Swimming: metric_label = "Time", metric_value = split time like "00:58.3"
 For Triathlon: metric_label = "Segment", metric_value = current leg + time like "Bike: 45:20"
-For Athletics/Track: metric_label = "Time", metric_value = split time or elapsed time like "10.82s"
+For Athletics/Track: metric_label = "Time", metric_value = split/elapsed time like "10.82s"
+
+EXPERT ANALYSIS REQUIREMENTS:
+- Your "description" fields MUST tell the EXPERT story of each moment:
+  - BAD: "Athlete A takes the lead"
+  - GOOD: "Kipchoge surges at 1200m mark with a devastating 58-second lap, breaking the field — physically relaxed stride but visibly pushing cadence, competitors now strung out and struggling with 400m to go"
+- Capture tactical moves: surges, drafting, pacing strategy execution
+- Note physical fatigue signs: form breakdown, heavy breathing visible, shoulder drop
+- Identify decisive moments: when the race was really won or lost
+- Note pack dynamics: breaking points, isolation moments, sprint triggers
 
 CRITICAL RULES:
 - Track the TOP 3 competitors by their current position in the race
 - Add a snapshot every time position changes among the top 3
-- Add snapshots at key moments: start, halfway, final lap/stretch, finish
+- ALWAYS add snapshots at: race start, first key tactical move, halfway, final stretch, finish
 - All timestamps MUST be in MM:SS format (video timestamp, not race time)
 - "country" field: use 3-letter country code (e.g., "EGY", "USA", "KEN") or null
 
