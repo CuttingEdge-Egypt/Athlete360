@@ -182,7 +182,6 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
   const FIELD_SPORTS_PLAYER = [
     'javelin', 'javelin_throw', 'javelin throw',
     'discus', 'discus_throw', 'discus throw',
-    'air_pistol', 'airpistol', 'air pistol'
   ];
   const sportNorm = sport.toLowerCase().trim();
   const isRaceSport = INDIVIDUAL_RACE_SPORTS_PLAYER.some(s => s === sportNorm || sportNorm.includes(s) || s.includes(sportNorm));
@@ -1259,20 +1258,58 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
   })();
   const currentLeader = activeLeaderboardSnap?.standings?.[0] || null;
 
-  // Build ordered athlete list for race sport sidebars (leaderboard order first)
+  // Build athlete list: METRICS are the source of truth for individual names.
+  // Leaderboard provides team/country context to enrich each athlete's display.
   const raceAthleteList = (() => {
-    const seen = new Map<string, any>();
     const lastSnap = leaderboardData?.snapshots?.slice(-1)[0];
     const baseSnap = lastSnap || activeLeaderboardSnap;
-    baseSnap?.standings?.forEach((s: any) => { if (s.name) seen.set(s.name, s); });
-    normalizedDynamicMetrics.forEach((m: any) => m.players?.forEach((p: any) => { if (p.name && !seen.has(p.name)) seen.set(p.name, { name: p.name, country: p.country }); }));
-    return Array.from(seen.values()).slice(0, 5);
+
+    // Collect all individual athletes from metrics
+    const metricPlayers = new Map<string, any>();
+    normalizedDynamicMetrics.forEach((m: any) =>
+      m.players?.forEach((p: any) => {
+        if (p.name && !metricPlayers.has(p.name)) {
+          metricPlayers.set(p.name, { name: p.name, country: p.country });
+        }
+      })
+    );
+
+    // Try to enrich each metric player with leaderboard metric_value/label
+    // by matching country (3-letter code) or partial name
+    const enriched = Array.from(metricPlayers.values()).map((a: any) => {
+      const lbEntry = baseSnap?.standings?.find((s: any) => {
+        if (!s.name) return false;
+        const sN = s.name.toLowerCase();
+        const aN = (a.name || '').toLowerCase();
+        const sC = (s.country || '').toLowerCase();
+        const aC = (a.country || '').toLowerCase();
+        return sN === aN ||
+          (aC && sC && aC === sC) ||
+          sN.includes(aN.split(' ')[0]) ||
+          aN.includes(sN.split(' ')[0]);
+      });
+      return { ...a, ...(lbEntry ? { metric_value: lbEntry.metric_value, metric_label: lbEntry.metric_label, position: lbEntry.position } : {}) };
+    });
+
+    // If no metric players found, fall back to leaderboard
+    if (enriched.length === 0) {
+      return (baseSnap?.standings || []).map((s: any) => s).slice(0, 6);
+    }
+
+    // Sort by position if available, else keep original order
+    enriched.sort((a: any, b: any) => (a.position ?? 99) - (b.position ?? 99));
+    return enriched.slice(0, 8);
   })();
   const activeTab = activeMetricTab || raceAthleteList[0]?.name || '';
 
-  // Helper: get per-athlete metric value at current video time
+  // Helper: get per-athlete metric value at current video time.
+  // Uses fuzzy name matching so leaderboard team names can still find individual metric data.
   const getAthleteMetricValueLive = (athleteName: string, metric: any): number | string => {
-    const player = metric.players?.find((p: any) => p.name === athleteName);
+    const aN = athleteName.toLowerCase();
+    const player = metric.players?.find((p: any) => {
+      const pN = (p.name || '').toLowerCase();
+      return pN === aN || pN.includes(aN.split(' ')[0]) || aN.includes(pN.split(' ')[0]);
+    });
     if (!player) return '—';
     if (metric.isScoreMetric) {
       const eventsNow = player.events.filter((e: any) => e.timestamp <= currentTime);
@@ -2233,97 +2270,118 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
         {/* Race sports: RIGHT TABBED METRICS SIDEBAR */}
         {isRaceSport && (
           <div className="order-3 lg:col-span-3 flex flex-col">
-            <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden h-full flex flex-col">
-              {/* Tab bar */}
-              {raceAthleteList.length > 0 ? (
-                <>
-                  <div className="flex overflow-x-auto border-b border-gray-200 bg-gray-50/50">
-                    {raceAthleteList.map((a: any, ni: number) => {
-                      const isActive = activeTab === a.name;
-                      const medalEmoji = ni === 0 ? '🥇' : ni === 1 ? '🥈' : ni === 2 ? '🥉' : null;
-                      return (
-                        <button
-                          key={ni}
-                          onClick={() => setActiveMetricTab(a.name)}
-                          className={`shrink-0 flex flex-col items-center gap-0.5 px-3 py-2.5 border-b-2 text-[10px] font-semibold transition-colors ${isActive ? 'border-blue-500 text-blue-600 bg-white' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
-                        >
-                          {medalEmoji ? (
-                            <span className="text-base leading-none">{medalEmoji}</span>
-                          ) : (
-                            <span className="w-5 h-5 rounded-full bg-gray-200 text-gray-600 text-[10px] font-bold flex items-center justify-center">{ni + 1}</span>
-                          )}
-                          <span className="max-w-[52px] truncate">{a.name?.split(' ').slice(-1)[0]}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {/* Active athlete info */}
-                  {(() => {
-                    const athlete = raceAthleteList.find((a: any) => a.name === activeTab) || raceAthleteList[0];
-                    if (!athlete) return null;
-                    const liveStanding = activeLeaderboardSnap?.standings?.find((s: any) => s.name === athlete.name);
-                    const medalIdx = raceAthleteList.findIndex((a: any) => a.name === athlete.name);
-                    const medalColors = [
-                      { bg: 'bg-yellow-50', border: 'border-yellow-200', name: 'text-yellow-800', value: 'text-yellow-700' },
-                      { bg: 'bg-slate-50', border: 'border-slate-200', name: 'text-slate-700', value: 'text-slate-700' },
-                      { bg: 'bg-orange-50', border: 'border-orange-100', name: 'text-orange-800', value: 'text-orange-700' },
-                      { bg: 'bg-blue-50', border: 'border-blue-100', name: 'text-blue-800', value: 'text-blue-700' },
-                      { bg: 'bg-purple-50', border: 'border-purple-100', name: 'text-purple-800', value: 'text-purple-700' },
-                    ];
-                    const c = medalColors[medalIdx] || medalColors[0];
-                    return (
-                      <div className="flex-1 overflow-y-auto">
-                        {/* Athlete summary row */}
-                        <div className={`flex items-center justify-between px-3 py-2 border-b ${c.border} ${c.bg}`}>
-                          <div>
-                            <p className={`font-bold text-xs ${c.name}`}>{athlete.name}</p>
-                            {athlete.country && <p className="text-gray-400 text-[10px]">{athlete.country}</p>}
-                          </div>
-                          {(liveStanding?.metric_value || athlete.metric_value) && (
-                            <div className="text-right">
-                              <p className={`font-mono font-bold text-sm ${c.value}`}>{liveStanding?.metric_value || athlete.metric_value}</p>
-                              <p className="text-gray-400 text-[9px]">{liveStanding?.metric_label || 'Best'}</p>
-                            </div>
-                          )}
-                        </div>
-                        {/* Metric boxes grid */}
-                        {normalizedDynamicMetrics.length > 0 ? (
-                          <div className="p-2 grid grid-cols-2 gap-2">
-                            {normalizedDynamicMetrics.map((metric: any, mi: number) => {
-                              const val = getAthleteMetricValueLive(athlete.name, metric);
-                              return (
-                                <div
-                                  key={mi}
-                                  className="rounded-[14px] text-center relative overflow-hidden"
-                                  style={{
-                                    background: 'rgba(255,255,255,0.9)',
-                                    border: '1.5px solid rgba(226,232,240,0.8)',
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)',
-                                  }}
-                                >
-                                  <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent" />
-                                  <div className="p-2.5">
-                                    <p className={`font-semibold text-[10px] leading-tight mb-1.5 ${c.name}`}>{metric.title}</p>
-                                    <p className={`text-xl font-bold ${c.value}`}>{val}</p>
-                                  </div>
+            <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden flex flex-col" style={{ minHeight: 0 }}>
+              {raceAthleteList.length > 0 ? (() => {
+                const accentColors = [
+                  { dot: 'bg-yellow-400', border: 'border-b-yellow-400', activeBg: 'bg-yellow-50', headerBg: 'bg-gradient-to-r from-yellow-50 to-white', headerBorder: 'border-yellow-100', nameColor: 'text-gray-900', valColor: 'text-yellow-700', boxAccent: 'border-l-yellow-400' },
+                  { dot: 'bg-gray-400', border: 'border-b-gray-400', activeBg: 'bg-gray-50', headerBg: 'bg-gradient-to-r from-gray-50 to-white', headerBorder: 'border-gray-100', nameColor: 'text-gray-900', valColor: 'text-gray-600', boxAccent: 'border-l-gray-400' },
+                  { dot: 'bg-orange-400', border: 'border-b-orange-400', activeBg: 'bg-orange-50', headerBg: 'bg-gradient-to-r from-orange-50 to-white', headerBorder: 'border-orange-100', nameColor: 'text-gray-900', valColor: 'text-orange-700', boxAccent: 'border-l-orange-400' },
+                  { dot: 'bg-blue-400', border: 'border-b-blue-400', activeBg: 'bg-blue-50', headerBg: 'bg-gradient-to-r from-blue-50 to-white', headerBorder: 'border-blue-100', nameColor: 'text-gray-900', valColor: 'text-blue-700', boxAccent: 'border-l-blue-400' },
+                  { dot: 'bg-purple-400', border: 'border-b-purple-400', activeBg: 'bg-purple-50', headerBg: 'bg-gradient-to-r from-purple-50 to-white', headerBorder: 'border-purple-100', nameColor: 'text-gray-900', valColor: 'text-purple-700', boxAccent: 'border-l-purple-400' },
+                  { dot: 'bg-emerald-400', border: 'border-b-emerald-400', activeBg: 'bg-emerald-50', headerBg: 'bg-gradient-to-r from-emerald-50 to-white', headerBorder: 'border-emerald-100', nameColor: 'text-gray-900', valColor: 'text-emerald-700', boxAccent: 'border-l-emerald-400' },
+                  { dot: 'bg-rose-400', border: 'border-b-rose-400', activeBg: 'bg-rose-50', headerBg: 'bg-gradient-to-r from-rose-50 to-white', headerBorder: 'border-rose-100', nameColor: 'text-gray-900', valColor: 'text-rose-700', boxAccent: 'border-l-rose-400' },
+                  { dot: 'bg-cyan-400', border: 'border-b-cyan-400', activeBg: 'bg-cyan-50', headerBg: 'bg-gradient-to-r from-cyan-50 to-white', headerBorder: 'border-cyan-100', nameColor: 'text-gray-900', valColor: 'text-cyan-700', boxAccent: 'border-l-cyan-400' },
+                ];
+                const activeAthlete = raceAthleteList.find((a: any) => a.name === activeTab) || raceAthleteList[0];
+                const activeIdx = raceAthleteList.findIndex((a: any) => a.name === activeAthlete?.name);
+                const c = accentColors[activeIdx] || accentColors[0];
+                return (
+                  <>
+                    {/* Tab bar — colored dot + surname */}
+                    <div className="flex overflow-x-auto border-b border-gray-200 bg-gray-50 shrink-0">
+                      {raceAthleteList.map((a: any, ni: number) => {
+                        const isActive = activeTab === a.name || (!activeTab && ni === 0);
+                        const cc = accentColors[ni] || accentColors[0];
+                        const surname = a.name?.split(' ').slice(-1)[0] || a.name;
+                        return (
+                          <button
+                            key={ni}
+                            onClick={() => setActiveMetricTab(a.name)}
+                            className={`shrink-0 flex items-center gap-1.5 px-3 py-2.5 border-b-2 text-[11px] font-semibold transition-all ${isActive ? `${cc.border} ${cc.activeBg} text-gray-800` : 'border-transparent text-gray-400 hover:text-gray-600 hover:bg-white'}`}
+                          >
+                            <span className={`w-2 h-2 rounded-full shrink-0 ${cc.dot}`} />
+                            <span className="truncate max-w-[50px]">{surname}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Active athlete panel */}
+                    <div className="flex-1 overflow-y-auto">
+                      {activeAthlete && (() => {
+                        const liveStanding = activeLeaderboardSnap?.standings?.find((s: any) => {
+                          const sN = (s.name || '').toLowerCase();
+                          const aN = (activeAthlete.name || '').toLowerCase();
+                          return sN === aN || (activeAthlete.country && s.country && s.country.toLowerCase() === activeAthlete.country.toLowerCase());
+                        });
+                        const bestVal = liveStanding?.metric_value || activeAthlete.metric_value;
+                        const bestLabel = liveStanding?.metric_label || activeAthlete.metric_label || 'Best';
+                        return (
+                          <>
+                            {/* Athlete header */}
+                            <div className={`px-4 py-3 border-b ${c.headerBorder} ${c.headerBg}`}>
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="min-w-0">
+                                  <p className={`font-bold text-sm leading-tight ${c.nameColor}`}>{activeAthlete.name}</p>
+                                  {activeAthlete.country && (
+                                    <p className="text-gray-400 text-[11px] mt-0.5 font-medium tracking-wide">{activeAthlete.country}</p>
+                                  )}
                                 </div>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center py-10 text-gray-400 text-xs gap-2">
-                            <Target className="h-6 w-6 opacity-30" />
-                            <span>No metrics available</span>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-                </>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-10 text-gray-400 text-xs gap-2">
-                  <Target className="h-6 w-6 opacity-30" />
-                  <span>Metrics loading…</span>
+                                {bestVal && (
+                                  <div className="text-right shrink-0">
+                                    <p className={`font-mono font-bold text-base leading-none ${c.valColor}`}>{bestVal}</p>
+                                    <p className="text-gray-400 text-[10px] mt-0.5">{bestLabel}</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Metric list */}
+                            {normalizedDynamicMetrics.length > 0 ? (
+                              <div className="p-3 space-y-2">
+                                {normalizedDynamicMetrics.map((metric: any, mi: number) => {
+                                  const val = getAthleteMetricValueLive(activeAthlete.name, metric);
+                                  const player = metric.players?.find((p: any) => {
+                                    const pN = (p.name || '').toLowerCase();
+                                    const aN = (activeAthlete.name || '').toLowerCase();
+                                    return pN === aN || pN.includes(aN.split(' ')[0]) || aN.includes(pN.split(' ')[0]);
+                                  });
+                                  const total = player?.total ?? '—';
+                                  const hasData = val !== '—' || (total !== '—' && total > 0);
+                                  return (
+                                    <div
+                                      key={mi}
+                                      className={`flex items-center gap-3 rounded-xl border border-gray-100 border-l-4 ${c.boxAccent} px-3 py-2.5 bg-white hover:bg-gray-50 transition-colors`}
+                                    >
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-[11px] font-medium text-gray-600 leading-snug">{metric.title}</p>
+                                      </div>
+                                      <div className="text-right shrink-0">
+                                        <p className={`text-lg font-bold leading-none ${hasData ? c.valColor : 'text-gray-300'}`}>{val}</p>
+                                        {total !== '—' && total !== val && (
+                                          <p className="text-[9px] text-gray-400 mt-0.5">total: {total}</p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center justify-center py-10 text-gray-300 gap-2">
+                                <Target className="h-6 w-6" />
+                                <span className="text-xs">No metrics available</span>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </>
+                );
+              })() : (
+                <div className="flex flex-col items-center justify-center py-10 text-gray-300 gap-2">
+                  <Target className="h-6 w-6" />
+                  <span className="text-xs">Metrics loading…</span>
                 </div>
               )}
             </div>
