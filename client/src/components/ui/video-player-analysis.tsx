@@ -1233,6 +1233,30 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
   const hasTeamMetrics = normalizedDynamicMetrics.some((metric: any) => 
     metric.players.some((player: any) => player.team !== undefined)
   );
+
+  // Parse leaderboard data once (shared by top bar + panels)
+  const parseLeaderboardData = () => {
+    const raw = analysisData?.leaderboard_analysis;
+    if (!raw) return null;
+    try {
+      return typeof raw === 'string' ? JSON.parse(raw) : raw;
+    } catch { return null; }
+  };
+  const leaderboardData = parseLeaderboardData();
+  const leaderboardParseTS = (ts: string): number => {
+    if (!ts) return 0;
+    const parts = String(ts).split(':').map(Number);
+    return parts.length === 2 ? (parts[0] || 0) * 60 + (parts[1] || 0) : 0;
+  };
+  const activeLeaderboardSnap = (() => {
+    if (!leaderboardData?.snapshots?.length) return null;
+    let snap = leaderboardData.snapshots[0];
+    for (const s of leaderboardData.snapshots) {
+      if (leaderboardParseTS(s.timestamp) <= currentTime) snap = s;
+    }
+    return snap;
+  })();
+  const currentLeader = activeLeaderboardSnap?.standings?.[0] || null;
   
   // Function to aggregate metrics by team
   const getTeamMetrics = (metric: any) => {
@@ -1607,15 +1631,37 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
                 // For individual/race sports: show a simple event banner instead of VS scoreboard
                 if (isRaceSport) {
                   return (
-                    <div className="bg-gradient-to-r from-slate-800 to-slate-700 px-4 py-3 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-yellow-400 text-lg">🏆</span>
+                    <div className="bg-gradient-to-r from-slate-800 to-slate-700 px-4 py-2.5 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-yellow-400 text-base">🏆</span>
                         <span className="text-white font-semibold text-sm sm:text-base">{sport}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-slate-300 text-xs sm:text-sm">
-                        <span>🎬</span>
-                        <span>Live Event Analysis</span>
-                      </div>
+                      {currentLeader ? (
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="hidden sm:flex items-center gap-1.5 bg-yellow-400/20 border border-yellow-400/40 rounded-full px-3 py-1">
+                            <span className="text-yellow-300 text-xs font-bold">🥇 LEADING</span>
+                            <span className="text-white text-xs font-semibold truncate max-w-[120px]">{currentLeader.name}</span>
+                            {currentLeader.metric_value && (
+                              <span className="text-yellow-200 text-xs font-mono">{currentLeader.metric_value}</span>
+                            )}
+                          </div>
+                          <div className="flex sm:hidden items-center gap-1 text-yellow-300 text-xs font-semibold">
+                            <span>🥇</span>
+                            <span className="truncate max-w-[80px]">{currentLeader.name?.split(' ').slice(-1)[0]}</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 text-slate-400 text-xs">
+                          <span>🎬</span>
+                          <span>Live Event Analysis</span>
+                        </div>
+                      )}
+                      {leaderboardData?.snapshots?.length > 0 && (
+                        <div className="shrink-0 text-slate-400 text-xs hidden sm:flex items-center gap-1">
+                          <Timer className="h-3 w-3" />
+                          <span>{activeLeaderboardSnap?.timestamp || '00:00'}</span>
+                        </div>
+                      )}
                     </div>
                   );
                 }
@@ -2070,178 +2116,159 @@ export function VideoPlayerAnalysis({ videoFile, analysisData, language = 'engli
       </div>
 
       {/* Race/Individual Sport: Live Leaderboard + Dynamic Metrics panels */}
-      {isRaceSport && (() => {
-        // Parse leaderboard data
-        const leaderboardRaw = analysisData?.leaderboard_analysis;
-        let leaderboard: any = null;
-        try {
-          leaderboard = typeof leaderboardRaw === 'string' ? JSON.parse(leaderboardRaw) : leaderboardRaw;
-        } catch {}
-
-        // Timestamp parser (MM:SS → seconds)
-        const parseTS = (ts: string): number => {
-          if (!ts) return 0;
-          const [m, s] = ts.split(':').map(Number);
-          return (m || 0) * 60 + (s || 0);
-        };
-
-        // Medal styles
-        const MEDALS = [
-          { bg: 'bg-yellow-50', border: 'border-yellow-300', text: 'text-yellow-700', label: '🥇' },
-          { bg: 'bg-gray-50', border: 'border-gray-300', text: 'text-gray-600', label: '🥈' },
-          { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700', label: '🥉' },
-        ];
-
-        // Find active snapshot at currentTime
-        const activeSnap = (() => {
-          if (!leaderboard?.snapshots?.length) return null;
-          let snap = leaderboard.snapshots[0];
-          for (const s of leaderboard.snapshots) {
-            if (parseTS(s.timestamp) <= currentTime) snap = s;
-          }
-          return snap;
-        })();
-
-        const standings = activeSnap?.standings || [];
-
-        return (
-          <div className="space-y-4">
-            {/* Leaderboard Panel */}
-            {leaderboard?.snapshots?.length > 0 && (
-              <Card className="bg-white border border-gray-200 shadow-sm">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-gray-900 text-base">
-                    <Medal className="h-5 w-5 text-yellow-500" />
-                    Live Leaderboard
-                    <Badge variant="outline" className="ml-auto text-xs">
-                      <Timer className="h-3 w-3 mr-1" />
-                      {activeSnap?.timestamp || '00:00'}
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {/* Top 3 cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-                    {standings.slice(0, 3).map((athlete: any, idx: number) => {
-                      const m = MEDALS[idx] || MEDALS[2];
-                      const done = athlete.attempts_completed ?? null;
-                      const max = athlete.max_attempts ?? 3;
-                      return (
-                        <div key={idx} className={`rounded-lg border-2 p-3 ${m.bg} ${m.border}`}>
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xl">{m.label}</span>
-                            <div className="flex-1 min-w-0">
-                              <p className={`font-bold text-sm truncate ${m.text}`}>{athlete.name || `Athlete ${idx + 1}`}</p>
-                              {athlete.country && (
-                                <p className="text-xs text-gray-500 flex items-center gap-1">
-                                  <FlagIcon className="h-3 w-3" />
-                                  {athlete.country}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          <div className={`text-center py-1.5 px-2 rounded bg-white border ${m.border} mb-2`}>
-                            <p className="text-[10px] text-gray-500">{athlete.metric_label || 'Result'}</p>
-                            <p className={`text-base font-bold ${m.text}`}>{athlete.metric_value || '—'}</p>
-                          </div>
-                          {/* Attempt circles for field sports */}
-                          {isFieldSportPlayer && done !== null && (
-                            <div className="flex justify-center gap-1">
-                              {Array.from({ length: max }).map((_, ci) => (
-                                <div key={ci} className={`w-5 h-5 rounded-full border-2 flex items-center justify-center text-[9px] font-bold ${ci < done ? 'bg-green-500 border-green-600 text-white' : 'bg-white border-gray-300 text-gray-400'}`}>
-                                  {ci + 1}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                    {/* Placeholder cards if fewer than 3 */}
-                    {standings.length < 3 && Array.from({ length: 3 - standings.length }).map((_, idx) => {
-                      const m = MEDALS[standings.length + idx] || MEDALS[2];
-                      return (
-                        <div key={`ph-${idx}`} className={`rounded-lg border-2 p-3 ${m.bg} ${m.border} opacity-40`}>
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xl">{m.label}</span>
-                            <p className="text-sm text-gray-400">Not yet determined</p>
-                          </div>
-                          <div className={`text-center py-1.5 px-2 rounded bg-white border ${m.border}`}>
-                            <p className="text-base font-bold text-gray-400">—</p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Snapshot timeline */}
-                  {leaderboard.snapshots.length > 1 && (
-                    <div>
-                      <p className="text-xs font-semibold text-gray-500 mb-2">Position Changes Timeline</p>
-                      <div className="space-y-1 max-h-40 overflow-y-auto">
-                        {leaderboard.snapshots.map((snap: any, si: number) => {
-                          const snapSec = parseTS(snap.timestamp);
-                          const isActive = activeSnap === snap;
+      {isRaceSport && (
+        <div className="space-y-4">
+          {/* Leaderboard Panel */}
+          <Card className="bg-white border border-gray-200 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-gray-900 text-base">
+                <Medal className="h-5 w-5 text-yellow-500" />
+                Live Leaderboard
+                {activeLeaderboardSnap && (
+                  <Badge variant="outline" className="ml-auto text-xs">
+                    <Timer className="h-3 w-3 mr-1" />
+                    {activeLeaderboardSnap.timestamp}
+                  </Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {leaderboardData?.snapshots?.length > 0 ? (() => {
+                const MEDALS = [
+                  { bg: 'bg-yellow-50', border: 'border-yellow-300', text: 'text-yellow-700', label: '🥇' },
+                  { bg: 'bg-gray-50', border: 'border-gray-300', text: 'text-gray-600', label: '🥈' },
+                  { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700', label: '🥉' },
+                ];
+                const standings = activeLeaderboardSnap?.standings || [];
+                return (
+                  <>
+                    {/* Top 3 athlete cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                      {[0, 1, 2].map((idx) => {
+                        const athlete = standings[idx];
+                        const m = MEDALS[idx];
+                        if (!athlete) {
                           return (
-                            <div
-                              key={si}
-                              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg border cursor-pointer hover:opacity-80 transition-colors ${isActive ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}
-                              onClick={() => { if (videoRef.current) videoRef.current.currentTime = snapSec; }}
-                            >
-                              <Badge variant="outline" className="text-[10px] shrink-0 px-1">{snap.timestamp}</Badge>
-                              <span className="text-xs text-gray-700 flex-1 line-clamp-1">{snap.description || `Standings at ${snap.timestamp}`}</span>
-                              {snap.standings?.[0] && (
-                                <span className="text-[10px] text-yellow-700 shrink-0">🥇 {snap.standings[0].name?.split(' ').slice(-1)[0]}</span>
-                              )}
+                            <div key={idx} className={`rounded-lg border-2 p-3 ${m.bg} ${m.border} opacity-35`}>
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-xl">{m.label}</span>
+                                <p className="text-xs text-gray-400">Not yet determined</p>
+                              </div>
+                              <div className={`text-center py-1.5 px-2 rounded bg-white border ${m.border}`}>
+                                <p className="text-base font-bold text-gray-300">—</p>
+                              </div>
                             </div>
                           );
-                        })}
-                      </div>
+                        }
+                        const done = athlete.attempts_completed ?? null;
+                        const max = athlete.max_attempts ?? 3;
+                        return (
+                          <div key={idx} className={`rounded-lg border-2 p-3 ${m.bg} ${m.border}`}>
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-xl">{m.label}</span>
+                              <div className="flex-1 min-w-0">
+                                <p className={`font-bold text-sm truncate ${m.text}`}>{athlete.name || `Athlete ${idx + 1}`}</p>
+                                {athlete.country && (
+                                  <p className="text-xs text-gray-500 flex items-center gap-1">
+                                    <FlagIcon className="h-3 w-3" />
+                                    {athlete.country}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className={`text-center py-1.5 px-2 rounded bg-white border ${m.border} mb-2`}>
+                              <p className="text-[10px] text-gray-500">{athlete.metric_label || 'Result'}</p>
+                              <p className={`text-base font-bold ${m.text}`}>{athlete.metric_value || '—'}</p>
+                            </div>
+                            {isFieldSportPlayer && done !== null && (
+                              <div className="flex justify-center gap-1">
+                                {Array.from({ length: max }).map((_, ci) => (
+                                  <div key={ci} className={`w-5 h-5 rounded-full border-2 flex items-center justify-center text-[9px] font-bold ${ci < done ? 'bg-green-500 border-green-600 text-white' : 'bg-white border-gray-300 text-gray-400'}`}>
+                                    {ci + 1}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Dynamic Metrics in horizontal grid */}
-            {normalizedDynamicMetrics.length > 0 && (
-              <Card className="bg-white border border-gray-200 shadow-sm">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-gray-900 text-base">
-                    <Target className="h-5 w-5 text-blue-500" />
-                    Event Metrics
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {normalizedDynamicMetrics.map((metric: any, mi: number) => {
-                      const playerValues = getCurrentDynamicMetricValues(metric);
-                      // Show top performer up to current time
-                      const topPlayer = playerValues
-                        .map((p: any) => ({ ...p, live: p.events ? p.events.filter((e: any) => parseTS(e.timestamp) <= currentTime).length : p.value }))
-                        .sort((a: any, b: any) => b.live - a.live)[0];
-                      const total = topPlayer?.live ?? 0;
-                      return (
-                        <div key={mi} className="rounded-lg bg-gray-50 border border-gray-200 p-3 text-center">
-                          <p className="text-xs font-semibold text-gray-600 truncate mb-1">{metric.title}</p>
-                          {topPlayer && total > 0 ? (
-                            <>
-                              <p className="text-xl font-bold text-blue-600">{total}</p>
-                              <p className="text-[10px] text-gray-500 truncate">{topPlayer.name}</p>
-                            </>
-                          ) : (
-                            <p className="text-xl font-bold text-gray-300">—</p>
-                          )}
+                    {/* Snapshot timeline */}
+                    {leaderboardData.snapshots.length > 1 && (
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 mb-2">Position Changes Timeline</p>
+                        <div className="space-y-1 max-h-40 overflow-y-auto">
+                          {leaderboardData.snapshots.map((snap: any, si: number) => {
+                            const snapSec = leaderboardParseTS(snap.timestamp);
+                            const isActive = activeLeaderboardSnap === snap;
+                            return (
+                              <div
+                                key={si}
+                                className={`flex items-center gap-2 px-2 py-1.5 rounded-lg border cursor-pointer hover:opacity-80 transition-colors ${isActive ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}
+                                onClick={() => { if (videoRef.current) videoRef.current.currentTime = snapSec; }}
+                              >
+                                <Badge variant="outline" className="text-[10px] shrink-0 px-1">{snap.timestamp}</Badge>
+                                <span className="text-xs text-gray-700 flex-1 line-clamp-1">{snap.description || `Standings at ${snap.timestamp}`}</span>
+                                {snap.standings?.[0] && (
+                                  <span className="text-[10px] text-yellow-700 shrink-0">🥇 {snap.standings[0].name?.split(' ').slice(-1)[0]}</span>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        );
-      })()}
+                      </div>
+                    )}
+                  </>
+                );
+              })() : (
+                <div className="text-center py-6 text-gray-400">
+                  <Medal className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                  <p className="text-sm">Leaderboard will appear once analysis is available</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Dynamic Metrics in horizontal grid */}
+          {normalizedDynamicMetrics.length > 0 && (
+            <Card className="bg-white border border-gray-200 shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-gray-900 text-base">
+                  <Target className="h-5 w-5 text-blue-500" />
+                  Event Metrics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {normalizedDynamicMetrics.map((metric: any, mi: number) => {
+                    const playerValues = getCurrentDynamicMetricValues(metric);
+                    // Use total for the best athlete across all time; fall back to live value at currentTime
+                    const topByTotal = [...(metric.players || [])]
+                      .sort((a: any, b: any) => (Number(b.total) || 0) - (Number(a.total) || 0))[0];
+                    const topByLive = [...playerValues]
+                      .sort((a: any, b: any) => (Number(b.value) || 0) - (Number(a.value) || 0))[0];
+                    const displayPlayer = topByLive?.value > 0 ? topByLive : topByTotal;
+                    const displayValue = topByLive?.value > 0 ? topByLive.value : (topByTotal?.total ?? null);
+                    return (
+                      <div key={mi} className="rounded-lg bg-gray-50 border border-gray-200 p-3 text-center">
+                        <p className="text-xs font-semibold text-gray-600 truncate mb-1">{metric.title}</p>
+                        {displayPlayer && displayValue !== null && displayValue !== 0 ? (
+                          <>
+                            <p className="text-xl font-bold text-blue-600">{displayValue}</p>
+                            <p className="text-[10px] text-gray-500 truncate">{displayPlayer.name}</p>
+                          </>
+                        ) : (
+                          <p className="text-xl font-bold text-gray-300">—</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
 
       {/* Match Analysis - Bottom */}
       <Card className="bg-slate-50 border-slate-200">
