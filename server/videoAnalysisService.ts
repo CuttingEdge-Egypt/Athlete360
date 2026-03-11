@@ -1603,6 +1603,7 @@ Look for names on screen, scoreboards, or mentioned by commentators.`;
         generationConfig: {
           temperature: 0,
           responseMimeType: "application/json",
+          maxOutputTokens: 65536,
         }
       });
       
@@ -2491,6 +2492,7 @@ Look for team names on jerseys, scoreboards, or court/field markings. If team na
             generationConfig: {
               temperature: 0,
               responseMimeType: "application/json",
+              maxOutputTokens: 65536,
             }
           });
           const teamResponse = await model.generateContent([videoFile, teamIdPrompt]);
@@ -2519,6 +2521,7 @@ Look for team names on jerseys, scoreboards, or court/field markings. If team na
         model: "gemini-2.5-pro",
         generationConfig: {
           temperature: 0.3,
+          maxOutputTokens: 65536,
         }
       });
       
