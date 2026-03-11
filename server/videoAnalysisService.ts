@@ -1103,44 +1103,15 @@ You are a WORLD-CLASS EXPERT COACH analyzing this ${sportConfig.name} video. You
 
 For ${sportConfig.name}, you will identify metrics that go far beyond simple counting. Think like the best coach in the world:
 - Technical execution quality (body mechanics, form breakdowns, micro-adjustments)
-- Tactical decisions and their outcomes (approach angles, timing, strategy choices)
 - Physical performance indicators (speed, power, endurance markers visible in the video)
-- Mental/behavioral signals (composure under pressure, routine consistency, recovery time)
-- Competitive patterns (how each athlete responds to rivals' performances, pressure moments)
 - Rule-specific elements (fouls, no-throws, technique violations, equipment checks)
-- Recovery and preparation behaviors between attempts/segments
-- Environmental adaptations (wind, crowd, conditions affecting performance)
-
-For FIELD SPORTS (Discus, Javelin, Shot Put, etc.):
-- Release angle and trajectory arc quality per throw
-- Rotational speed and balance in the throwing circle
-- Foot fault risks (toe board proximity, circle boundaries)
-- Valid vs foul throws with distances
-- Body alignment at point of release
-- Follow-through and reverse-step quality
-- Wind conditions and their effect on flight path
-- Time between official attempts (preparation ritual efficiency)
-- Mental reset behavior after foul throws
+- Stats that can be noticed and COUNTED from the video (The aim is to help us gather stats easier)
 
 For AIR PISTOL/SHOOTING:
 - Shot grouping consistency (tight vs scattered)
 - Trigger pull timing (hesitation, rush, smooth)
 - Body stability indicators (sway, breath control)
-- Series score progression (10-shot series momentum)
-- Recovery between shots after near-misses or poor shots
-
-For SWIMMING:
-- Stroke rate and cycle consistency
-- Tumble turn efficiency (distance off wall, breakout timing)
-- Breathing pattern (every 2nd vs 3rd stroke)
-- Underwater dolphin kick count per turn
-- Finishing technique (touch placement, last stroke)
-
-For ATHLETICS/TRACK:
-- Stride frequency and length changes across race segments
-- Position-making moves (when and where athlete makes decisive moves)
-- Pacing strategy (even splits, negative split, positive split)
-- Physical fatigue indicators (form breakdown in final stretch)` : '';
+- Series score progression (10-shot series momentum)` : '';
 
   const prompt = `You are analyzing a ${sportConfig.name} ${isRaceSportMetrics ? 'competition' : 'match'} video for a video analysis web application.${expertCoachContext}
 
