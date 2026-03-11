@@ -260,6 +260,7 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
 
     // Create an AbortController for manual timeout control
     let timeoutId: NodeJS.Timeout | null = null;
+    let isTimeoutAbort = false;
 
     try {
       // Update queue status
@@ -270,13 +271,14 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
       // Update loading message for processing phase
       setLoadingMessage(t('progressMessages.match.processing'))
       
-      // Set up timeout control
+      // Set up timeout control — 15 minutes to handle long analyses
       abortControllerRef.current = new AbortController();
       timeoutId = setTimeout(() => {
         if (abortControllerRef.current) {
+          isTimeoutAbort = true;
           abortControllerRef.current.abort();
         }
-      }, 600000); // 10 minutes
+      }, 900000); // 15 minutes
       
       const response = await fetch('/api/analysis/video', {
         method: 'POST',
@@ -326,16 +328,25 @@ export function VideoAnalysisUpload({ onClose }: VideoAnalysisUploadProps) {
     } catch (error) {
       console.error('Video analysis error:', error);
       
-      // Check if the error is due to user cancellation
+      // Check if the error is due to user cancellation or a timeout
       if (error instanceof Error && error.name === 'AbortError') {
-        toast({
-          title: t('toast.analysisCancelled') || 'Analysis Cancelled',
-          description: t('toast.analysisCancelledDesc') || 'Video analysis was cancelled by user.',
-        });
-        
-        // Update queue status on cancellation
-        if (queueId && (window as any).generationQueue) {
-          (window as any).generationQueue.update(queueId, { status: 'error', error: 'Cancelled by user' });
+        if (isTimeoutAbort) {
+          toast({
+            title: 'Analysis Timed Out',
+            description: 'The video took too long to process. Try a shorter clip or re-upload and try again.',
+            variant: 'destructive',
+          });
+          if (queueId && (window as any).generationQueue) {
+            (window as any).generationQueue.update(queueId, { status: 'error', error: 'Request timed out' });
+          }
+        } else {
+          toast({
+            title: t('toast.analysisCancelled') || 'Analysis Cancelled',
+            description: t('toast.analysisCancelledDesc') || 'Video analysis was cancelled.',
+          });
+          if (queueId && (window as any).generationQueue) {
+            (window as any).generationQueue.update(queueId, { status: 'error', error: 'Cancelled by user' });
+          }
         }
       } else {
         toast({

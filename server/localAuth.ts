@@ -34,31 +34,32 @@ export async function setupLocalAuth(app: Express) {
     },
     async (email, password, done) => {
       try {
-        console.log(`[LOCAL AUTH] Attempting login for email: ${email}`);
+        const normalizedEmail = email.toLowerCase().trim();
+        console.log(`[LOCAL AUTH] Attempting login for email: ${normalizedEmail}`);
         
-        const user = await storage.getUserByEmail(email);
+        const user = await storage.getUserByEmail(normalizedEmail);
         if (!user) {
-          console.log(`[LOCAL AUTH] User not found: ${email}`);
+          console.log(`[LOCAL AUTH] User not found: ${normalizedEmail}`);
           return done(null, false, { message: 'Invalid email or password' });
         }
 
         if (user.authProvider !== 'local') {
-          console.log(`[LOCAL AUTH] User ${email} uses ${user.authProvider} auth, not local`);
+          console.log(`[LOCAL AUTH] User ${normalizedEmail} uses ${user.authProvider} auth, not local`);
           return done(null, false, { message: 'Please use your original login method' });
         }
 
         if (!user.passwordHash) {
-          console.log(`[LOCAL AUTH] User ${email} has no password hash`);
+          console.log(`[LOCAL AUTH] User ${normalizedEmail} has no password hash`);
           return done(null, false, { message: 'Invalid email or password' });
         }
 
         const isValidPassword = await bcrypt.compare(password, user.passwordHash);
         if (!isValidPassword) {
-          console.log(`[LOCAL AUTH] Invalid password for user: ${email}`);
+          console.log(`[LOCAL AUTH] Invalid password for user: ${normalizedEmail}`);
           return done(null, false, { message: 'Invalid email or password' });
         }
 
-        console.log(`[LOCAL AUTH] Successful login for user: ${email}`);
+        console.log(`[LOCAL AUTH] Successful login for user: ${normalizedEmail}`);
         
         // Create user session object compatible with existing code
         const sessionUser = {
@@ -108,7 +109,8 @@ export async function setupLocalAuth(app: Express) {
         });
       }
 
-      const { email, password, firstName, lastName, referralCode, cardLast4, cardBrand, cardToken, paymobCustomerId, expiryMonth, expiryYear, cvv, cardholderName } = validation.data;
+      const { password, firstName, lastName, referralCode, cardLast4, cardBrand, cardToken, paymobCustomerId, expiryMonth, expiryYear, cvv, cardholderName } = validation.data;
+      const email = validation.data.email.toLowerCase().trim();
 
       // Additional validation for expiry date
       const currentYear = new Date().getFullYear();
@@ -233,7 +235,8 @@ export async function setupLocalAuth(app: Express) {
         });
       }
 
-      const { email, password, firstName, lastName, referralCode } = validation.data;
+      const { password, firstName, lastName, referralCode } = validation.data;
+      const email = validation.data.email.toLowerCase().trim();
 
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(email);
@@ -321,6 +324,7 @@ export async function setupLocalAuth(app: Express) {
 
   // Local login route
   app.post('/api/auth/login', (req, res, next) => {
+    if (req.body.email) req.body.email = req.body.email.toLowerCase().trim();
     console.log(`[LOCAL AUTH] Login attempt for:`, req.body.email);
     
     const validation = loginSchema.safeParse(req.body);
